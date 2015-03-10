@@ -8,3 +8,6 @@ class Player():
 
     def __eq__(self, other):
         return self.id == other.id
+
+    def has_id(self, id):
+        return self.id == id

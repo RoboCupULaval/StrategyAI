@@ -19,3 +19,6 @@ class Strategy(object):
 
     def _send_command(self, command):
         self.commands.append(command)
+
+    def _get_ball(self):
+        return self.field.ball

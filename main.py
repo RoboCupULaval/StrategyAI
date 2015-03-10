@@ -50,6 +50,31 @@ def create_game():
     return game
 
 
+def update_game_state(game, engine):
+    referee_commands = engine.grab_referee_commands()
+    if referee_commands:
+        referee_command = referee_commands[0]
+        game.update_game_state(referee_command)
+
+
+def update_players_and_ball(game, engine):
+    vision_frames = engine.grab_vision_frames()
+    if vision_frames:
+        vision_frame = vision_frames[0]
+        game.update_players_and_ball(vision_frame)
+
+
+def update_strategies(game):
+    game.update_strategies()
+
+
+def send_robot_commands(game, engine):
+    commands = game.get_commands()
+    for command in commands:
+        robot_command = command.to_robot_command()
+        engine.send_robot_command(robot_command)
+
+
 if __name__ == '__main__':
     import rule
 
@@ -58,17 +83,10 @@ if __name__ == '__main__':
 
     game = create_game()
 
-    for i in range(0, 1000):  # TODO: Replace with `infinite` loop that will stop only when the game is over
-        vision_frames = engine.grab_vision_frames()
-        referee_commands = engine.grab_referee_commands()
-
-        #TODO: Update game state and referee state from the vision_frames and the referee_commands
-
-        game.update_strategies()
-
-        commands = game.get_commands()
-        for command in commands:
-            robot_command = command.to_robot_command()
-            engine.send_robot_command(robot_command)
+    while True:  # TODO: Replace with a loop that will stop when the game is over
+        update_game_state(game, engine)
+        update_players_and_ball(game, engine)
+        update_strategies(game)
+        send_robot_commands(game, engine)
 
     engine.stop()
