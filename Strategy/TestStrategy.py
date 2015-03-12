@@ -4,6 +4,7 @@ import math
 from Command import Command
 from Strategy.Strategy import Strategy
 from Util.Position import Position
+from Util.Pose import Pose
 import time
 
 
@@ -15,8 +16,8 @@ class TestStrategy(Strategy):
         self._send_command(Command.MoveTo(self.team.players[0], Position(100, 0, 0)))
 
     def on_halt(self):
-        self._send_command(Command.MoveTo(self.team.players[0], Position(200, 0, 0)))
+        self._send_command(Command.SetSpeed(self.team.players[0], Pose(Position(1, 1), 1)))
 
     def on_stop(self):
-        self._send_command(Command.MoveTo(self.team.players[0], Position(300, 0, 0)))
+        self._send_command(Command.Stop(self.team.players[0]))
 
