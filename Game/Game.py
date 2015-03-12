@@ -16,8 +16,18 @@ class Game():
         self.yellow_team_strategy = yellow_team_strategy
 
     def update_strategies(self):
-        self.blue_team_strategy.update()
-        self.yellow_team_strategy.update()
+        state = self.referee.command.name
+        if state == "HALT":
+            self.blue_team_strategy.on_halt()
+            self.yellow_team_strategy.on_halt()
+
+        elif state == "NORMAL_START":
+            self.blue_team_strategy.on_start()
+            self.yellow_team_strategy.on_start()
+
+        elif state == "STOP":
+            self.blue_team_strategy.on_stop()
+            self.yellow_team_strategy.on_stop()
 
     def get_commands(self):
         blue_team_commands = self._get_blue_team_commands()

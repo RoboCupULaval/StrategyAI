@@ -14,7 +14,15 @@ class Strategy(object):
         self.commands = []
 
     @abstractmethod
-    def update(self):
+    def on_start(self):
+        pass
+
+    @abstractmethod
+    def on_halt(self):
+        pass
+
+    @abstractmethod
+    def on_stop(self):
         pass
 
     def _send_command(self, command):

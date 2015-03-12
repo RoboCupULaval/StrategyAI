@@ -9,7 +9,7 @@ class BestStrategy(Strategy):
     def __init__(self, field, referee, team, opponent_team):
         super().__init__(field, referee, team, opponent_team)
 
-    def update(self):
+    def on_start(self):
         for player in self.team.players:
             x = 1000 - player.pose.position.x
             y = 1000 - player.pose.position.y
@@ -20,3 +20,9 @@ class BestStrategy(Strategy):
             position = Position(move_x, move_y)
 
             self._send_command(Command.MoveTo(player, position))
+
+    def on_halt(self):
+        pass
+
+    def on_stop(self):
+        pass

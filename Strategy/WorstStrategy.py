@@ -7,5 +7,12 @@ class WorstStrategy(Strategy):
     def __init__(self, field, referee, team, opponent_team):
         super().__init__(field, referee, team, opponent_team)
 
-    def update(self):
-        self._send_command(Command.MoveTo(self.team.players[0], Position(500, 100, 0)))
+
+    def on_start(self):
+        pass
+
+    def on_halt(self):
+        pass
+
+    def on_stop(self):
+        pass
