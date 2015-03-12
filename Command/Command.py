@@ -7,8 +7,8 @@ from Util.constant import PLAYER_PER_TEAM
 class _Command(object):
     def __init__(self, player):
         self.player = player
-        self.dribble = False
-        self.dribble_speed = 0
+        self.dribble = True
+        self.dribble_speed = 10
         self.kick = False
         self.kick_speed = 0
         self.is_speed_command = False
@@ -73,14 +73,7 @@ class Kick(_Command):
         super().__init__(player)
         self.kick = True
         self.kick_speed = kick_speed
-        self.pose = player.pose
-
-
-class Dribble(_Command):
-    def __init__(self, player, enable=True, dribble_speed=4):
-        super().__init__(player)
-        self.dribble = enable
-        self.dribble_speed = dribble_speed
+        self.is_speed_command = True
         self.pose = player.pose
 
 
