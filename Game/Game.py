@@ -3,6 +3,7 @@ import math
 from Game import Referee
 from Util.Pose import Pose
 from Util.Position import Position
+from Util.constant import PLAYER_PER_TEAM
 
 
 class Game():
@@ -77,7 +78,10 @@ class Game():
 
     def _update_players_of_team(self, players, team):
         for player in players:
-            player_id = player.robot_id
+            if team.is_team_yellow:
+                player_id = player.robot_id + PLAYER_PER_TEAM
+            else:
+                player_id = player.robot_id
             player_position = Position(player.pose.coord.x, player.pose.coord.y, player.pose.coord.z)
             player_orientation = (player.pose.orientation * 180) / math.pi
             player_pose = Pose(player_position, player_orientation)

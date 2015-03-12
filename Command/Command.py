@@ -1,9 +1,7 @@
 import rule
 
 from Util.Pose import Pose
-
-
-PLAYER_PER_TEAM = 6
+from Util.constant import PLAYER_PER_TEAM
 
 
 class _Command(object):

@@ -3,3 +3,6 @@ class Position():
         self.x = x
         self.y = y
         self.z = z
+
+    def __str__(self):
+        return "x= " + str(self.x) + ", y= " + str(self.y) + ", z= " + str(self.z)
