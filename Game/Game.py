@@ -53,9 +53,8 @@ class Game():
     @staticmethod
     def _remove_commands_from_opponent_team(commands, opponent_team):
         final_commands = []
-        for i in range(len(commands)):
-            command = commands[i]
-            if not opponent_team.has_player(command.player):
+        for command in commands:
+            if command.team != opponent_team:
                 final_commands.append(command)
         return final_commands
 
@@ -88,11 +87,7 @@ class Game():
 
     def _update_players_of_team(self, players, team):
         for player in players:
-            if team.is_team_yellow:
-                player_id = player.robot_id + PLAYER_PER_TEAM
-            else:
-                player_id = player.robot_id
             player_position = Position(player.pose.coord.x, player.pose.coord.y, player.pose.coord.z)
             player_orientation = (player.pose.orientation * 180) / math.pi
             player_pose = Pose(player_position, player_orientation)
-            team.move_and_rotate_player(player_id, player_pose)
+            team.move_and_rotate_player(player.robot_id, player_pose)

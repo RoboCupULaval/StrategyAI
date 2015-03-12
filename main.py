@@ -4,6 +4,7 @@ from Game.Game import Game
 from Game.Player import Player
 from Game.Referee import Referee
 from Game.Team import Team
+from Util.constant import PLAYER_PER_TEAM
 from Strategy.BestStrategy import BestStrategy
 from Strategy.WorstStrategy import WorstStrategy
 from Strategy.TestStrategy import TestStrategy
@@ -12,12 +13,11 @@ from Strategy.TestStrategy import TestStrategy
 def create_teams():
     blue_players = []
     yellow_players = []
-    for i in range(12):
-        player = Player(i)
-        if i < 6:
-            blue_players.append(player)
-        else:
-            yellow_players.append(player)
+    for i in range(PLAYER_PER_TEAM):
+        bPlayer = Player(i)
+        yPlayer = Player(i)
+        blue_players.append(bPlayer)
+        yellow_players.append(yPlayer)
     blue_team = Team(blue_players, False)
     yellow_team = Team(yellow_players, True)
     return blue_team, yellow_team
@@ -43,8 +43,8 @@ def create_game():
     blue_team, yellow_team = create_teams()
     field = create_field()
     referee = create_referee()
-    blue_team_strategy = WorstStrategy(field, referee, blue_team, yellow_team)
-    yellow_team_strategy = TestStrategy(field, referee, yellow_team, blue_team)
+    blue_team_strategy = TestStrategy(field, referee, blue_team, yellow_team)
+    yellow_team_strategy = WorstStrategy(field, referee, yellow_team, blue_team)
 
     game = Game(field, referee, blue_team, yellow_team, blue_team_strategy, yellow_team_strategy)
 

@@ -7,21 +7,37 @@ from Util.Position import Position
 from Util.Pose import Pose
 import time
 
-test = 0
+
 class TestStrategy(Strategy):
     def __init__(self, field, referee, team, opponent_team):
         super().__init__(field, referee, team, opponent_team)
 
     def on_start(self):
-        self._send_command(Command.MoveTo(self.team.players[0], Position(100, 0, 0)))
+        """
+        A way to send a command to your robots
+        """
+        for player in self.team.players:
+            command = Command.Rotate(player, self.team, 90)
+            self._send_command(command)
 
     def on_halt(self):
-        global test
-        if test < 2:
-            command = Command.SetSpeed(self.team.players[0], Pose(Position(0.5, 0.5), 0))
-            self._send_command(command)
-            test += 1
+        """
+        A way to instantiate pose and positions : dont forget to import Util!
+        """
+        aPose = Pose(Position(10, 20), 90)  # define a pose with x = 10, y = 20, z = 0, theta = 90
+        aPosition = Position(10, 20, 30)  # define a position with x = 10, y = 20, z = 30
+
 
     def on_stop(self):
-        self._send_command(Command.Stop(self.team.players[0]))
+        """
+        A way to retrieve player positions and ball.
+        """
+        aPlayer = self.team.players[0]
+        aPlayerFromTheOtherTeam = self.opponent_team.players[0]
+        print("Player pose : ", aPlayer.pose)
+        print("Player id : ", aPlayer.id)
+        print("Player2 pose : ", aPlayerFromTheOtherTeam.pose)
+        print("Player2 id : ", aPlayerFromTheOtherTeam.id)
+        theBall = self.field.ball
+        print("Ball Position : ", theBall.position)
 
