@@ -5,33 +5,44 @@ To create a strategy you may derive a class from Strategy and implement the func
 You can check the class in Strategy.
 
 To execute your strategy, you may change create_game() in main.py
+```python
 yellow_team_strategy = YourStrategyName(field, referee, yellow_team, blue_team)
-You can play your strategie against your own of course.
+```
+Beware, the positions on the terrain are different depending on the side you play!
 
 ##API
 The types of command objects are in Command folder. You can instantiate a command and call self._send_command(command)
 in your strategy class. Commands need a robot and your team as parameter.
 Note that robot dribble by default
 
-Command.SetSpeed(player, team, pose)
+Command.<b>SetSpeed</b>(player, team, pose)
 pose contain x, y and theta speed in m/s. The robot will move with this speed
-ex : Command.SetSpeed(player, team, Pose(Position(1, 1), 1)) => x, y and theta speed = 1
+```python
+Command.SetSpeed(player, team, Pose(Position(1, 1), 1))  #x, y and theta speed = 1
+```
 
-Command.MoveTo(player, team, position)
+Command.<b>MoveTo</b>(player, team, position)
 position contain a cartesian coord of the map, the robot will move there
-ex : Command.MoveTo(player, team, Position(0, 0)) => deplace the robot to 0,0 on the field
+```python
+Command.MoveTo(player, team, Position(0, 0))  #deplace the robot to 0,0 on the field
+```
 
-Command.Rotate(player, team, orientation)
+Command.<b>Rotate</b>(player, team, orientation)
 orientation contain an angle in degree for its orientation
-ex : Command.Rotate(player, team, 90) => rotate to 90 degree in global coord system
-
-Command.MoveToAndRotate(player, team, pose)
+```python
+Command.Rotate(player, team, 90)  #rotate to 90 degree in global coord system
+```
+Command.<b>MoveToAndRotate</b>(player, team, pose)
 pose contain a position and an orientation so the robot set as position
-ex : Command.MoveToAndRotate(player, team, Pose(Position(0, 0), 0))) => set the position to 0, 0 coord and orientation to 0 degree
+```python
+Command.MoveToAndRotate(player, team, Pose(Position(0, 0), 0))) #set the position to 0, 0 coord and orientation to 0
+```
 
-Command.Kick(player, team, kick_speed=5)
+Command.<b>Kick</b>(player, team, kick_speed=5)
 use the kicker
-ex : Command.Kick(player, team, kick_speed=7) kick at 7m/s
+```python
+Command.Kick(player, team, kick_speed=7) #kick at 7m/s
+```
 
-Command.Stop(player, team)
+Command.<b>Stop</b>(player, team)
 simply stop the robot
