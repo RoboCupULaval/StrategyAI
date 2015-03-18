@@ -1,6 +1,17 @@
 #PythonFramework
 A Python framework to develop all the required tools to ease the development of a strategy using the Rule library
 
+
+##Installations
+You first need to install RuleSSL library on your machine. Follow the instructions :
+https://github.com/RoboCupULaval/RuleSSL
+
+Then install the python wrapper:
+https://github.com/RoboCupULaval/RulPython
+
+
+##Usage
+
 To create a strategy you may derive a class from Strategy and implement the functions.
 You can check the class in Strategy.
 
