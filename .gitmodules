@@ -1,0 +1,3 @@
+[submodule "PythonFramework"]
+	path = PythonFramework
+	url = git@github.com:RoboCupULaval/PythonFramework.git
