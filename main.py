@@ -44,9 +44,9 @@ def create_game():
     field = create_field()
     referee = create_referee()
     blue_team_strategy = TestStrategy(field, referee, blue_team, yellow_team)
-    yellow_team_strategy = WorstStrategy(field, referee, yellow_team, blue_team)
+    # yellow_team_strategy = WorstStrategy(field, referee, yellow_team, blue_team)
 
-    game = Game(field, referee, blue_team, yellow_team, blue_team_strategy, yellow_team_strategy)
+    game = Game(field, referee, blue_team, yellow_team, blue_team_strategy)
 
     return game
 
