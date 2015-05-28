@@ -80,6 +80,14 @@ if __name__ == '__main__':
     import rule
 
     engine = rule.Rule()
+
+    visionPlugin = rule.VisionPlugin("224.5.23.2", 10020, "VisionPlugin");
+    refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin");
+    navigatorPlugin = rule.UDPNavigatorPlugin(20011, "127.0.0.1", "UDPNavigatorPlugin");
+    engine.install_plugin(visionPlugin)
+    engine.install_plugin(refereePlugin)
+    engine.install_plugin(navigatorPlugin)
+
     engine.start()
 
     game = create_game()
