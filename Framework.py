@@ -8,7 +8,7 @@ from Util.constant import PLAYER_PER_TEAM
 from Strategy.BestStrategy import BestStrategy
 from Strategy.WorstStrategy import WorstStrategy
 from Strategy.TestStrategy import TestStrategy
-
+import rule
 
 def create_teams():
     blue_players = []
@@ -39,11 +39,11 @@ def create_referee():
     return referee
 
 
-def create_game():
+def create_game(strategy):
     blue_team, yellow_team = create_teams()
     field = create_field()
     referee = create_referee()
-    blue_team_strategy = TestStrategy(field, referee, blue_team, yellow_team)
+    blue_team_strategy = strategy(field, referee, blue_team, yellow_team)
     # yellow_team_strategy = WorstStrategy(field, referee, yellow_team, blue_team)
 
     game = Game(field, referee, blue_team, yellow_team, blue_team_strategy)
@@ -76,8 +76,7 @@ def send_robot_commands(game, engine):
         engine.send_robot_command(robot_command)
 
 
-if __name__ == '__main__':
-    import rule
+def start_game(strategy):
 
     engine = rule.Rule()
 
