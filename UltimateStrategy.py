@@ -1,9 +1,10 @@
 from PythonFramework.Strategy.Strategy import Strategy
+
 from UltimateStrat.Executor.CoachExecutor import CoachExecutor
 from UltimateStrat.Executor.PlayExecutor import PlayExecutor
 from UltimateStrat.Executor.TacticExecutor import TacticExecutor
 from UltimateStrat.Executor.SkillExecutor import SkillExecutor
-from UltimateStrat.Data.InfoManager import InfoManager
+from UltimateStrat.InfoManager import InfoManager
 
 __author__ = 'jbecirovski'
 

@@ -3,6 +3,7 @@ from unittest import TestCase
 __author__ = 'jbecirovski'
 
 
+# TODO implement InfoManager unittest
 class TestInfoManager(TestCase):
   def test_getCurrentPlay(self):
     self.fail()
