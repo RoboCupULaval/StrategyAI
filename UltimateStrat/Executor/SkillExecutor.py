@@ -32,7 +32,7 @@ class SkillExecutor(Executor):
             skill = self.skill_book[current_skill]
 
             # 5 - generate next pose
-            next_pose = skill.act(current_target, current_goal)
+            next_pose = skill().act(self.info_manager.getPlayerPose(id_player), current_target, current_goal)
 
             # 6 - set next pose
             self.info_manager.setPlayerNextPose(id_player, next_pose)

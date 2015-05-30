@@ -25,7 +25,7 @@ class TacticExecutor(Executor):
             tactic = self.tactic_book[current_tactic]
 
             # 3 - select skill, target, goal from tactic object
-            action = tactic.apply(self.info_manager, id_player)
+            action = tactic().apply(self.info_manager, id_player)
 
             # 4 - set skill, target, goal
             self.info_manager.setPlayerSkillTargetGoal(id_player, action)

@@ -13,11 +13,11 @@ class TacticBase:
         self.name = name
 
     @abstractmethod
-    def apply(self, info_manager, bot_id):
+    def apply(self, info_manager, id_player):
         """
         Apply to specific bot for a tactical behavior and set next skill.
-        :param bot_id: InfoManager object
-        :param bot_id: int
+        :param info_manager: InfoManager object
+        :param id_player: int
         :return: dict like ['skill': str, 'target': Position, 'goal': Position]
 
         """

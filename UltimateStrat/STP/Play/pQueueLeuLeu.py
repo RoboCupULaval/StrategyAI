@@ -9,11 +9,11 @@ class pQueueLeuLeu(PlayBase):
     """
     def __init__(self):
         PlayBase.__init__(self, self.__class__.__name__)
-        self.sequence = [['tFollowBall', 'tFollowPrevFriend', 'tFollowPrevFriend',
-                          'tFollowPrevFriend', 'tFollowPrevFriend', 'tFollowPrevFriend']]
 
     def getTactics(self, index=None):
+        sequence = [['tFollowBall', 'tFollowPrevFriend', 'tFollowPrevFriend',
+                          'tFollowPrevFriend', 'tFollowPrevFriend', 'tFollowPrevFriend']]
         if index is None:
-            return self.sequence
+            return sequence[0]
         else:
-            return self.sequence[index]
+            return sequence[index]

@@ -14,12 +14,13 @@ class SkillBase:
         self.name = name
 
     @abstractmethod
-    def act(self, target, goal):
+    def act(self, pose_player, pose_target, pose_goal):
         """
         Active skill and set next specific robot position
-        :param target: Position
-        :param target: Position
-        :return: Position
+        :param pose_player: Pose
+        :param pose_target: Pose
+        :param pose_goal: Pose
+        :return: Pose
         """
         pass
 
