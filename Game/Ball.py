@@ -1,4 +1,4 @@
-from Util.Position import Position
+from ..Util.Position import Position
 
 
 class Ball():

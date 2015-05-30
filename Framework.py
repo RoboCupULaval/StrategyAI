@@ -1,14 +1,11 @@
-from Game.Ball import Ball
-from Game.Field import Field
-from Game.Game import Game
-from Game.Player import Player
-from Game.Referee import Referee
-from Game.Team import Team
-from Util.constant import PLAYER_PER_TEAM
-from Strategy.BestStrategy import BestStrategy
-from Strategy.WorstStrategy import WorstStrategy
-from Strategy.TestStrategy import TestStrategy
-import rule
+from .Game.Ball import Ball
+from .Game.Field import Field
+from .Game.Game import Game
+from .Game.Player import Player
+from .Game.Referee import Referee
+from .Game.Team import Team
+from .Util.constant import PLAYER_PER_TEAM
+from . import rule
 
 def create_teams():
     blue_players = []
@@ -89,7 +86,7 @@ def start_game(strategy):
 
     engine.start()
 
-    game = create_game()
+    game = create_game(strategy)
 
     while True:  # TODO: Replace with a loop that will stop when the game is over
         update_game_state(game, engine)

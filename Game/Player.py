@@ -1,4 +1,4 @@
-from Util.Pose import Pose
+from ..Util.Pose import Pose
 
 
 class Player():

@@ -1,9 +1,9 @@
 import math
 
-from Game import Referee
-from Util.Pose import Pose
-from Util.Position import Position
-from Util.constant import PLAYER_PER_TEAM
+from . import Referee
+from ..Util.Pose import Pose
+from ..Util.Position import Position
+from ..Util.constant import PLAYER_PER_TEAM
 
 
 class Game():
