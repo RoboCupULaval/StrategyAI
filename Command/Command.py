@@ -17,7 +17,7 @@ class _Command(object):
 
     def to_robot_command(self):
         robot_command = rule.RobotCommand()
-        robot_command.is_team_yellow = self.team
+        robot_command.is_team_yellow = self.team.is_team_yellow
         robot_command.dribble = self.dribble
         robot_command.dribble_speed = self.dribble_speed
         robot_command.kick = self.kick
