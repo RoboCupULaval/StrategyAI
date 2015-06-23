@@ -23,18 +23,6 @@ class Router(object):
         self.registered_function[function.__name__] = function
         return function
 
-    """ +++ BLACKBOARD +++ """
-
-    """ +++ INTELLIGENCE MODULE +++ """
-    # State machine
-    # TODO implement getNextState
-    def getNextState(self):
-        return 'debug'
-
-    # TODO implement getNextPlay
-    def getNextPlay(self, state):
-        return 'pQueueLeuLeu'
-
 sys.modules[__name__] = Router()
 sys.modules["Router"] = sys.modules[__name__]
 
