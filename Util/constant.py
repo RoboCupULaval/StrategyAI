@@ -1,3 +1,9 @@
-__author__ = 'mathieu'
+__author__ = 'jbecirovski'
 
 PLAYER_PER_TEAM = 6
+KICK_MAX_SPD = 8.0
+# Field
+FIELD_X_TOP = 3000
+FIELD_X_BOTTOM = -3000
+FIELD_Y_LEFT = -4500
+FIELD_Y_RIGHT = 4500

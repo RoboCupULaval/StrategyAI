@@ -1,7 +1,11 @@
 from .. import rule
 import math
-from ..Util.Pose import Pose
-from ..Util.constant import PLAYER_PER_TEAM
+from ..Util.Pose import Pose, Position
+from ..Game.Player import Player
+from ..Game.Team import Team
+from ..Util.area import *
+from ..Util.geometry import *
+from ..Util.constant import *
 
 
 class _Command(object):
@@ -33,34 +37,80 @@ class _Command(object):
 
 class SetSpeed(_Command):
     def __init__(self, player, team, pose):
+        # Parameters Assertion
+        assert(isinstance(player, Player))
+        assert(isinstance(team, Team))
+        assert(isinstance(pose, Pose))
+
         super().__init__(player, team)
         self.is_speed_command = True
         pose.orientation = pose.orientation * 180 / math.pi
-        self.pose = pose
+        if m.sqrt(pose.position.x ** 2 + pose.position.y ** 2) <= KICK_MAX_SPD :
+            self.pose = pose
+        else:
+            agl = m.radians(theta(pose.position.x, pose.position.y))
+            dst = KICK_MAX_SPD
+            x = dst * m.cos(agl)
+            y = dst * m.sin(agl)
+            self.pose = Pose(Position(x, y), convertAngle180(pose.orientation))
 
 
 class MoveTo(_Command):
     def __init__(self, player, team, position):
+        # Parameters Assertion
+        assert(isinstance(player, Player))
+        assert(isinstance(team, Team))
+        assert(isinstance(position, Position))
+
         super().__init__(player, team)
-        self.pose.position = position
-        self.pose.orientation = player.pose.orientation
+        self.pose.position = stayInsideSquare(position,
+                                              FIELD_X_TOP,
+                                              FIELD_X_BOTTOM,
+                                              FIELD_Y_LEFT,
+                                              FIELD_Y_RIGHT)
+        self.pose.orientation = convertAngle180(player.pose.orientation)
 
 
 class Rotate(_Command):
     def __init__(self, player, team, orientation):
+        # Parameters Assertion
+        assert(isinstance(player, Player))
+        assert(isinstance(team, Team))
+        assert(isinstance(orientation, (int, float)))
+
         super().__init__(player, team)
-        self.pose.orientation = orientation
-        self.pose.position = player.pose.position
+        self.pose.orientation = convertAngle180(orientation)
+        self.pose.position = stayInsideSquare(player.pose.position,
+                                              FIELD_X_TOP,
+                                              FIELD_X_BOTTOM,
+                                              FIELD_Y_LEFT,
+                                              FIELD_Y_RIGHT)
 
 
 class MoveToAndRotate(_Command):
     def __init__(self, player, team, pose):
+        # Parameters Assertion
+        assert(isinstance(player, Player))
+        assert(isinstance(team, Team))
+        assert(isinstance(pose, Pose))
+
         super().__init__(player, team)
-        self.pose = pose
+        self.pose = Pose(stayInsideSquare(pose.position,
+                                          FIELD_X_TOP,
+                                          FIELD_X_BOTTOM,
+                                          FIELD_Y_LEFT,
+                                          FIELD_Y_RIGHT),
+                         convertAngle180(pose.orientation))
 
 
 class Kick(_Command):
     def __init__(self, player, team, kick_speed=5):
+        # Parameters Assertion
+        assert(isinstance(player, Player))
+        assert(isinstance(team, Team))
+        assert(isinstance(kick_speed, (int, float)))
+        assert(0 <= kick_speed <= 8)
+
         super().__init__(player, team)
         self.kick = True
         self.kick_speed = kick_speed
@@ -70,6 +120,10 @@ class Kick(_Command):
 
 class Stop(_Command):
     def __init__(self, player, team):
+        # Parameters Assertion
+        assert(isinstance(player, Player))
+        assert(isinstance(team, Team))
+
         super().__init__(player, team)
         self.is_speed_command = True
         self.pose = Pose()
