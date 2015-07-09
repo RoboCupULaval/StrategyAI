@@ -21,7 +21,7 @@ class _Command(object):
 
     def to_robot_command(self):
         robot_command = rule.RobotCommand()
-        robot_command.is_team_yellow = self.team
+        robot_command.is_team_yellow = self.team.is_team_yellow
         robot_command.dribble = self.dribble
         robot_command.dribble_speed = self.dribble_speed
         robot_command.kick = self.kick
@@ -64,10 +64,10 @@ class MoveTo(_Command):
 
         super().__init__(player, team)
         self.pose.position = stayInsideSquare(position,
-                                              FIELD_X_TOP,
-                                              FIELD_X_BOTTOM,
-                                              FIELD_Y_LEFT,
-                                              FIELD_Y_RIGHT)
+                                              FIELD_Y_TOP,
+                                              FIELD_Y_BOTTOM,
+                                              FIELD_X_LEFT,
+                                              FIELD_X_RIGHT)
         self.pose.orientation = convertAngle180(player.pose.orientation)
 
 
@@ -81,10 +81,10 @@ class Rotate(_Command):
         super().__init__(player, team)
         self.pose.orientation = convertAngle180(orientation)
         self.pose.position = stayInsideSquare(player.pose.position,
-                                              FIELD_X_TOP,
-                                              FIELD_X_BOTTOM,
-                                              FIELD_Y_LEFT,
-                                              FIELD_Y_RIGHT)
+                                              FIELD_Y_TOP,
+                                              FIELD_Y_BOTTOM,
+                                              FIELD_X_LEFT,
+                                              FIELD_X_RIGHT)
 
 
 class MoveToAndRotate(_Command):
@@ -95,12 +95,12 @@ class MoveToAndRotate(_Command):
         assert(isinstance(pose, Pose))
 
         super().__init__(player, team)
-        self.pose = Pose(stayInsideSquare(pose.position,
-                                          FIELD_X_TOP,
-                                          FIELD_X_BOTTOM,
-                                          FIELD_Y_LEFT,
-                                          FIELD_Y_RIGHT),
-                         convertAngle180(pose.orientation))
+        position = stayInsideSquare(pose.position,
+                                    FIELD_Y_TOP,
+                                    FIELD_Y_BOTTOM,
+                                    FIELD_X_LEFT,
+                                    FIELD_X_RIGHT)
+        self.pose = Pose(position, convertAngle180(pose.orientation))
 
 
 class Kick(_Command):
