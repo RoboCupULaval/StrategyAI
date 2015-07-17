@@ -35,24 +35,24 @@ class _Command(object):
         return robot_command
 
 
-class SetSpeed(_Command):
-    def __init__(self, player, team, pose):
-        # Parameters Assertion
-        assert(isinstance(player, Player))
-        assert(isinstance(team, Team))
-        assert(isinstance(pose, Pose))
-
-        super().__init__(player, team)
-        self.is_speed_command = True
-        pose.orientation = pose.orientation * 180 / math.pi
-        if m.sqrt(pose.position.x ** 2 + pose.position.y ** 2) <= KICK_MAX_SPD :
-            self.pose = pose
-        else:
-            agl = m.radians(theta(pose.position.x, pose.position.y))
-            dst = KICK_MAX_SPD
-            x = dst * m.cos(agl)
-            y = dst * m.sin(agl)
-            self.pose = Pose(Position(x, y), convertAngle180(pose.orientation))
+# class SetSpeed(_Command):
+#     def __init__(self, player, team, pose):
+#         # Parameters Assertion
+#         assert(isinstance(player, Player))
+#         assert(isinstance(team, Team))
+#         assert(isinstance(pose, Pose))
+#
+#         super().__init__(player, team)
+#         self.is_speed_command = True
+#         pose.orientation = pose.orientation * 180 / math.pi
+#         if m.sqrt(pose.position.x ** 2 + pose.position.y ** 2) <= KICK_MAX_SPD :
+#             self.pose = pose
+#         else:
+#             agl = m.radians(theta(pose.position.x, pose.position.y))
+#             dst = KICK_MAX_SPD
+#             x = dst * m.cos(agl)
+#             y = dst * m.sin(agl)
+#             self.pose = Pose(Position(x, y), convertAngle180(pose.orientation))
 
 
 class MoveTo(_Command):
@@ -68,7 +68,7 @@ class MoveTo(_Command):
                                               FIELD_Y_BOTTOM,
                                               FIELD_X_LEFT,
                                               FIELD_X_RIGHT)
-        self.pose.orientation = convertAngle180(player.pose.orientation)
+        self.pose.orientation = cvt_angle_180(player.pose.orientation)
 
 
 class Rotate(_Command):
@@ -79,7 +79,7 @@ class Rotate(_Command):
         assert(isinstance(orientation, (int, float)))
 
         super().__init__(player, team)
-        self.pose.orientation = convertAngle180(orientation)
+        self.pose.orientation = cvt_angle_180(orientation)
         self.pose.position = stayInsideSquare(player.pose.position,
                                               FIELD_Y_TOP,
                                               FIELD_Y_BOTTOM,
@@ -100,7 +100,7 @@ class MoveToAndRotate(_Command):
                                     FIELD_Y_BOTTOM,
                                     FIELD_X_LEFT,
                                     FIELD_X_RIGHT)
-        self.pose = Pose(position, convertAngle180(pose.orientation))
+        self.pose = Pose(position, cvt_angle_180(pose.orientation))
 
 
 class Kick(_Command):

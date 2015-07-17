@@ -29,7 +29,7 @@ def isInsideCircle(position, center, radius):
     assert(isinstance(radius, (int, float)))
     assert(radius >= 0)
 
-    if distance(position, center) < radius:
+    if get_distance(position, center) < radius:
         return True
     else:
         return False
@@ -74,9 +74,9 @@ def stayInsideCircle(position, center, radius):
     if isInsideCircle(position, center, radius):
         return Position(position.x, position.y)
     else:
-        pos_angle = m.radians(angle(center, position))
-        pos_x = radius * m.cos(pos_angle)
-        pos_y = radius * m.sin(pos_angle)
+        pos_angle = m.radians(get_angle(center, position))
+        pos_x = radius * m.cos(pos_angle) + center.x
+        pos_y = radius * m.sin(pos_angle) + center.y
         return Position(pos_x, pos_y)
 
 
@@ -113,9 +113,9 @@ def stayOutsideCircle(position, center, radius):
     if isOutsideCircle(position, center, radius):
         return Position(position.x, position.y)
     else:
-        pos_angle = m.radians(angle(center, position))
-        pos_x = radius * m.cos(pos_angle)
-        pos_y = radius * m.sin(pos_angle)
+        pos_angle = m.radians(get_angle(center, position))
+        pos_x = radius * m.cos(pos_angle) + center.x
+        pos_y = radius * m.sin(pos_angle) + center.y
         return Position(pos_x, pos_y)
 
 def isInsideGoalArea(position, is_yellow):
@@ -150,8 +150,8 @@ def stayInsideGoalArea(position, is_yellow):
         else:
             circle_top = FIELD_GOAL_YELLOW_TOP_CIRCLE if is_yellow else FIELD_GOAL_BLUE_TOP_CIRCLE
             circle_bot = FIELD_GOAL_YELLOW_BOTTOM_CIRCLE if is_yellow else FIELD_GOAL_BLUE_BOTTOM_CIRCLE
-            dst_top = distance(circle_top, position)
-            dst_bot = distance(circle_bot, position)
+            dst_top = get_distance(circle_top, position)
+            dst_bot = get_distance(circle_bot, position)
 
             if dst_top >= dst_bot:
                 return stayInsideCircle(position, circle_top, FIELD_GOAL_RADIUS)
