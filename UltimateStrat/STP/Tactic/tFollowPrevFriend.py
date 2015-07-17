@@ -1,5 +1,5 @@
 from UltimateStrat.STP.Tactic.TacticBase import TacticBase
-from Util.geometry import *
+from PythonFramework.Util.geometry import *
 
 __author__ = 'jbecirovski'
 
@@ -11,7 +11,7 @@ class tFollowPrevFriend(TacticBase):
     def apply(self, info_manager, id_player):
         player_position = info_manager.getPrevPlayerPosition(id_player)
         bot_position = info_manager.getPlayerPosition(id_player)
-        dst_ball_bot = distance(player_position, bot_position)
+        dst_ball_bot = get_distance(player_position, bot_position)
         if dst_ball_bot > 500:
             return {'skill': 'sFollowTarget', 'target': player_position, 'goal': bot_position}
         else:

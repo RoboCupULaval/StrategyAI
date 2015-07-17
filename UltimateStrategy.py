@@ -5,12 +5,13 @@ from UltimateStrat.Executor.PlayExecutor import PlayExecutor
 from UltimateStrat.Executor.TacticExecutor import TacticExecutor
 from UltimateStrat.Executor.SkillExecutor import SkillExecutor
 import UltimateStrat.Router as Router
+from PythonFramework.Util.Pose import Pose
 import sys, time
 
 __author__ = 'jbecirovski'
 
 class UltimateStrategy(Strategy):
-    def __init__(self, field, referee, team, opponent_team, is_team_yellow=False):
+    def __init__(self, field, referee, team, opponent_team, is_team_yellow=True):
         Strategy.__init__(self, field, referee, team, opponent_team)
 
         # Create InfoManager
@@ -34,8 +35,11 @@ class UltimateStrategy(Strategy):
         self.ex_skill.exec()
 
         # send command
-        for i in range(6):
-            self._send_command(Command.MoveToAndRotate(self.team.players[i], self.team, Router.getPlayerNextPose(i)))
+        # for i in range(6):
+        #     self._send_command(Command.MoveToAndRotate(self.team.players[i], self.team, Router.getPlayerNextPose(i)))
+
+        self._send_command(Command.MoveToAndRotate(self.team.players[0], self.team, Router.getPlayerNextPose(0)))
+
 
     def on_halt(self):
         self.on_start()
