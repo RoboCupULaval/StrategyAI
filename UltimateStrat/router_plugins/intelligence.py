@@ -11,4 +11,4 @@ def getNextState():
 # TODO implement getNextPlay
 @Router.register_function
 def getNextPlay(state):
-    return 'pDefense'
+    return Router.getCurrentPlay()

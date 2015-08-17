@@ -13,6 +13,6 @@ class tFollowPrevFriend(TacticBase):
         bot_position = info_manager.getPlayerPosition(id_player)
         dst_ball_bot = get_distance(player_position, bot_position)
         if dst_ball_bot > 500:
-            return {'skill': 'sFollowTarget', 'target': player_position, 'goal': bot_position}
+            return {'skill': 'sGoToTarget', 'target': player_position, 'goal': bot_position}
         else:
-            return {'skill': 'sFollowTarget', 'target': bot_position, 'goal': bot_position}
+            return {'skill': 'sGoToTarget', 'target': bot_position, 'goal': bot_position}

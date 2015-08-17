@@ -1,3 +1,4 @@
+import sys
 from PythonFramework.Strategy.Strategy import Strategy
 from PythonFramework.Command import Command
 from UltimateStrat.Executor.CoachExecutor import CoachExecutor
@@ -5,6 +6,8 @@ from UltimateStrat.Executor.PlayExecutor import PlayExecutor
 from UltimateStrat.Executor.TacticExecutor import TacticExecutor
 from UltimateStrat.Executor.SkillExecutor import SkillExecutor
 import UltimateStrat.Router as Router
+from threading import *
+from Application import *
 from PythonFramework.Util.Pose import Pose
 import sys, time
 
@@ -24,6 +27,19 @@ class UltimateStrategy(Strategy):
         self.ex_tactic = TacticExecutor(Router)
         self.ex_skill = SkillExecutor(Router)
 
+        # Create GUI
+        Thread(target=self.create_gui).start()
+        self.quit = False
+
+    def create_gui(self):
+        gui_mode = True
+        if gui_mode:
+            root = tk.Tk()
+            root
+            app = Application(Router, master=root)
+            app.mainloop()
+            root.destroy()
+        self.quit = True
 
     def on_start(self):
 
@@ -37,8 +53,17 @@ class UltimateStrategy(Strategy):
         # send command
         # for i in range(6):
         #     self._send_command(Command.MoveToAndRotate(self.team.players[i], self.team, Router.getPlayerNextPose(i)))
+        bot_id = 0
 
-        self._send_command(Command.MoveToAndRotate(self.team.players[0], self.team, Router.getPlayerNextPose(0)))
+        if Router.getPlayerNextPose(bot_id) == Router.getPlayerPose(bot_id):
+            command = Command.Stop(self.team.players[bot_id])
+        else:
+            command = Command.MoveToAndRotate(self.team.players[bot_id], Router.getPlayerNextPose(bot_id))
+
+        self._send_command(command)
+
+        if self.quit:
+            exit()
 
 
     def on_halt(self):
