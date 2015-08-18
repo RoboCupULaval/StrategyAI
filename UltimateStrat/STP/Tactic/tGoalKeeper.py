@@ -13,4 +13,4 @@ class tGoalKeeper(TacticBase):
 
     def apply(self, info_manager, id_player):
         p_ball = info_manager.getBallPosition()
-        return {'skill': 'sGoBehindTargetGoal_GK', 'target': p_ball, 'goal': Position(3000, 0)}
+        return {'skill': 'sGoBehindTargetGoal_GK', 'target': p_ball, 'goal': Position(-4500, 0)}

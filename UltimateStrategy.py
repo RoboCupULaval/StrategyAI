@@ -53,12 +53,12 @@ class UltimateStrategy(Strategy):
         # send command
         # for i in range(6):
         #     self._send_command(Command.MoveToAndRotate(self.team.players[i], self.team, Router.getPlayerNextPose(i)))
-        bot_id = 0
+        bot_id = 4
 
         if Router.getPlayerNextPose(bot_id) == Router.getPlayerPose(bot_id):
             command = Command.Stop(self.team.players[bot_id])
         else:
-            command = Command.MoveToAndRotate(self.team.players[bot_id], Router.getPlayerNextPose(bot_id))
+            command = Command.MoveTo(self.team.players[bot_id], Router.getPlayerNextPose(bot_id).position)
 
         self._send_command(command)
 

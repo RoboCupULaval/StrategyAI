@@ -16,6 +16,6 @@ class sGoBehindTargetGoal_GK(SkillBase):
         dst_target_player = get_distance(pst_goal, pst_target)
         new_pos = Pose(pst_target, get_angle(pst_goal, pst_target))
         new_pos.position = stayInsideCircle(new_pos.position, pst_goal, dst_target_player / 2)
-        new_pos.position = stayInsideCircle(new_pos.position, pst_goal, 350)
-        new_pos.position = stayInsideSquare(new_pos.position, 300, -300, 2500, 2920)
+        # new_pos.position = stayInsideCircle(new_pos.position, pst_goal, 350)
+        # new_pos.position = stayInsideSquare(new_pos.position, 300, -300, 2500, 2920)
         return new_pos
