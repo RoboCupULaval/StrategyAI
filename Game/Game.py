@@ -61,20 +61,20 @@ class Game():
         self._update_players(vision_frame)
 
     def _update_ball(self, vision_frame):
-        ball_position = Position(vision_frame.balls[0].position.x, vision_frame.balls[0].position.y,
-                                 vision_frame.balls[0].position.z)
+        ball_position = Position(vision_frame.detection.balls[0].x, vision_frame.detection.balls[0].y,
+                                 vision_frame.detection.balls[0].z)
         self.field.move_ball(ball_position)
 
     def _update_players(self, vision_frame):
-        blue_team = vision_frame.teams[0]
-        yellow_team = vision_frame.teams[1]
+        blue_team = vision_frame.detection.robots_blue
+        yellow_team = vision_frame.detection.robots_yellow
 
-        self._update_players_of_team(blue_team.robots, self.blue_team)
-        self._update_players_of_team(yellow_team.robots, self.yellow_team)
+        self._update_players_of_team(blue_team, self.blue_team)
+        self._update_players_of_team(yellow_team, self.yellow_team)
 
     def _update_players_of_team(self, players, team):
         for player in players:
-            player_position = Position(player.pose.coord.x, player.pose.coord.y, player.pose.coord.z)
-            player_orientation = (player.pose.orientation * 180) / math.pi
+            player_position = Position(player.x, player.y, player.height)
+            player_orientation = (player.orientation * 180) / math.pi
             player_pose = Pose(player_position, player_orientation)
             team.move_and_rotate_player(player.robot_id, player_pose)
