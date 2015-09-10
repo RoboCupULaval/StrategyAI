@@ -13,6 +13,7 @@ from .Util.Pose import Pose
 from .Util.Position import Position
 from .Util.constant import PLAYER_PER_TEAM
 from .Communication.vision import Vision
+from .Communication.udp_command_sender import UDPCommandSender
 from . import rule
 import math
 import time
@@ -125,14 +126,15 @@ def start_game(strategy):
 
     engine = rule.Rule()
 
-    visionPlugin = rule.VisionPlugin("224.5.23.22", 10022, "VisionPlugin");
-    refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin");
-    navigatorPlugin = rule.UDPNavigatorPlugin(20011, "127.0.0.1", "UDPNavigatorPlugin");
+    visionPlugin = rule.VisionPlugin("224.5.23.22", 10022, "VisionPlugin")
+    refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin")
+    navigatorPlugin = rule.UDPNavigatorPlugin(20011, "127.0.0.1", "UDPNavigatorPlugin")
     engine.install_plugin(visionPlugin)
     engine.install_plugin(refereePlugin)
     engine.install_plugin(navigatorPlugin)
 
     vision = Vision()
+    command_sender = UDPCommandSender("127.0.0.1", 20011)
 
     engine.start()
 

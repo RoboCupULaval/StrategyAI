@@ -7,7 +7,15 @@ import threading
 from . import messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
 from collections import deque
 
-class ThreadedUDPServer(ThreadingMixIn, UDPServer): pass
+class ThreadedUDPServer(ThreadingMixIn, UDPServer):
+
+    def __init__(self, host, port, handler=None):
+        super(ThreadedUDPServer, self).__init__(('', port), handler)
+        self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                struct.pack("=4sl", socket.inet_aton(host), socket.INADDR_ANY))
+        server_thread = threading.Thread(target=self.serve_forever)
+        server_thread.daemon = True
+        server_thread.start()
 
 def getUDPHandler(packet_list):
     class ThreadedUDPRequestHandler(BaseRequestHandler):
@@ -23,14 +31,8 @@ def getUDPHandler(packet_list):
 class Vision(object):
 
     def __init__(self, host = "224.5.23.2", port = 10020):
-
         self.packet_list = deque(maxlen=100)
-        self.server = ThreadedUDPServer(('', port), getUDPHandler(self.packet_list))
-        self.server.socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
-                struct.pack("=4sl", socket.inet_aton(host), socket.INADDR_ANY))
-        server_thread = threading.Thread(target=self.server.serve_forever)
-        server_thread.daemon = True
-        server_thread.start()
+        self.server = ThreadedUDPServer(host, port, getUDPHandler(self.packet_list))
 
     def pop_frames(self):
         new_list = list(self.packet_list)
