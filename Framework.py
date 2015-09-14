@@ -36,7 +36,7 @@ def convertPositionToSpeed(player, x, y, theta):
     direction_x = x - current_x
     direction_y = y - current_y
     norm = math.hypot(direction_x, direction_y)
-    speed = 1000 if norm >= 50 else 0
+    speed = 0.3 if norm >= 50 else 0
     if norm:
         direction_x /= norm
         direction_y /= norm
@@ -107,7 +107,7 @@ def update_strategies(game):
     game.update_strategies()
 
 
-def send_robot_commands(game, engine, vision):
+def send_robot_commands(game, vision, command_sender):
     vision_frame = vision.get_latest_frame()
     if vision_frame:
         commands = game.get_commands()
@@ -119,24 +119,16 @@ def send_robot_commands(game, engine, vision):
             command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
             robot_command = command.to_robot_command()
 
-            engine.send_robot_command(robot_command)
+            #engine.send_robot_command(robot_command)
+            command_sender.send_command(command)
 
 
 def start_game(strategy):
 
-    engine = rule.Rule()
-
-    visionPlugin = rule.VisionPlugin("224.5.23.22", 10022, "VisionPlugin")
-    refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin")
-    navigatorPlugin = rule.UDPNavigatorPlugin(20011, "127.0.0.1", "UDPNavigatorPlugin")
-    engine.install_plugin(visionPlugin)
-    engine.install_plugin(refereePlugin)
-    engine.install_plugin(navigatorPlugin)
+    #refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin")
 
     vision = Vision()
     command_sender = UDPCommandSender("127.0.0.1", 20011)
-
-    engine.start()
 
     game = create_game(strategy)
 
@@ -145,14 +137,13 @@ def start_game(strategy):
     last_time = time.time()
 
     while True:  # TODO: Replace with a loop that will stop when the game is over
-        update_game_state(game, engine)
+        #update_game_state(game, engine)
         update_players_and_ball(game, vision)
         update_strategies(game)
-        send_robot_commands(game, engine, vision)
-        time.sleep(0.01)
+        send_robot_commands(game, vision, command_sender)
+        #time.sleep(0.01)
         new_time = time.time()
         times.append(new_time - last_time)
         print(len(times) / sum(times))
         last_time = new_time
 
-    engine.stop()
