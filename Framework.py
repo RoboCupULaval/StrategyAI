@@ -14,7 +14,6 @@ from .Util.Position import Position
 from .Util.constant import PLAYER_PER_TEAM
 from .Communication.vision import Vision
 from .Communication.udp_command_sender import UDPCommandSender
-from . import rule
 import math
 import time
 from collections import deque
