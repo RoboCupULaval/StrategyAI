@@ -18,21 +18,6 @@ class _Command(object):
         self.pose = Pose()
         self.team = team
 
-    def to_robot_command(self):
-        robot_command = rule.RobotCommand()
-        robot_command.is_team_yellow = self.team.is_team_yellow
-        robot_command.dribble = self.dribble
-        robot_command.dribble_speed = self.dribble_speed
-        robot_command.kick = self.kick
-        robot_command.kick_speed = self.kick_speed
-        robot_command.robot_id = self.player.id
-        robot_command.stop = self.is_speed_command
-        robot_command.pose.coord.x = self.pose.position.x
-        robot_command.pose.coord.y = self.pose.position.y
-        robot_command.pose.orientation = self.pose.orientation * math.pi / 180
-
-        return robot_command
-
 
 # class SetSpeed(_Command):
 #     def __init__(self, player, team, pose):
