@@ -1,4 +1,3 @@
-from .. import rule
 import math
 from ..Util.Pose import Pose, Position
 from ..Game.Player import Player
