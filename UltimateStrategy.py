@@ -1,5 +1,5 @@
-from PythonFramework.Strategy.Strategy import Strategy
-from PythonFramework.Command import Command
+from RuleSSL_Python.Strategy.Strategy import Strategy
+from RuleSSL_Python.Command import Command
 from UltimateStrat.Executor.CoachExecutor import CoachExecutor
 from UltimateStrat.Executor.PlayExecutor import PlayExecutor
 from UltimateStrat.Executor.TacticExecutor import TacticExecutor

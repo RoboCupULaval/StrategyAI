@@ -1,3 +1,4 @@
-[submodule "PythonFramework"]
-	path = PythonFramework
-	url = git@github.com:RoboCupULaval/PythonFramework.git
+
+[submodule "RuleSSL_Python"]
+	path = RuleSSL_Python
+	url = https://github.com/RoboCupULaval/RuleSSL_Python
