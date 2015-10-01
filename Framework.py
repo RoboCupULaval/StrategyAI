@@ -1,7 +1,7 @@
 import sys
 import os.path
 path, file = os.path.split(os.path.realpath(__file__))
-print (os.path.join(path, "Communication"))
+#print (os.path.join(path, "Communication"))
 sys.path.append(os.path.join(path, "Communication"))
 from .Game.Ball import Ball
 from .Game.Field import Field
@@ -35,7 +35,7 @@ def convertPositionToSpeed(player, x, y, theta):
     direction_x = x - current_x
     direction_y = y - current_y
     norm = math.hypot(direction_x, direction_y)
-    speed = 0.3 if norm >= 50 else 0
+    speed = 1 if norm >= 50 else 0
     if norm:
         direction_x /= norm
         direction_y /= norm
@@ -140,6 +140,6 @@ def start_game(strategy):
         #time.sleep(0.01)
         new_time = time.time()
         times.append(new_time - last_time)
-        print(len(times) / sum(times))
+        #print(len(times) / sum(times))
         last_time = new_time
 
