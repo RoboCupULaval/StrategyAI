@@ -1,4 +1,4 @@
 
-[submodule "RuleSSL_Python"]
-	path = RuleSSL_Python
-	url = https://github.com/RoboCupULaval/RuleSSL_Python
+[submodule "RULEngine"]
+	path = RULEngine
+	url = https://github.com/RoboCupULaval/RULEngine

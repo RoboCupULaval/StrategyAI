@@ -1,5 +1,5 @@
 from UltimateStrat.STP.Skill.SkillBase import SkillBase
-from RuleSSL_Python.Util.Pose import Pose
+from RULEngine.Util.Pose import Pose
 
 __author__ = 'jbecirovski'
 
