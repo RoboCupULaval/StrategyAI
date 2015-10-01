@@ -111,14 +111,11 @@ def send_robot_commands(game, vision, command_sender):
     if vision_frame:
         commands = game.get_commands()
         for command in commands:
-            robot_command = command.to_robot_command()
             robot = vision_frame.detection.robots_blue[command.player.id]
             fake_player = Player(0)
             fake_player.pose = Pose(Position(robot.x, robot.y), math.degrees(robot.orientation))
             command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
-            robot_command = command.to_robot_command()
 
-            #engine.send_robot_command(robot_command)
             command_sender.send_command(command)
 
 
