@@ -17,6 +17,8 @@ from .Communication.udp_command_sender import UDPCommandSender
 import math
 import time
 from collections import deque
+from PyQt4 import QtGui, QtCore
+from .Gui.VSSL import FieldDisplay
 
 
 def convertPositionToSpeed(player, x, y, theta):
@@ -118,28 +120,42 @@ def send_robot_commands(game, vision, command_sender):
 
             command_sender.send_command(command)
 
+class MainLoop(QtCore.QThread):
+    updateField = QtCore.pyqtSignal()
+
+    def __init__(self, strategy):
+        super(MainLoop, self).__init__()
+
+        #refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin")
+
+        self.vision = Vision()
+        self.command_sender = UDPCommandSender("127.0.0.1", 20011)
+
+        self.game = create_game(strategy)
+
+        self.times = deque(maxlen=10)
+
+        self.last_time = time.time()
+
+    def run(self):
+        while True:  # TODO: Replace with a loop that will stop when the game is over
+            #update_game_state(game, engine)
+            update_players_and_ball(self.game, self.vision)
+            update_strategies(self.game)
+            send_robot_commands(self.game, self.vision, self.command_sender)
+            #time.sleep(0.01)
+            new_time = time.time()
+            self.times.append(new_time - self.last_time)
+            #print(len(times) / sum(times))
+            self.last_time = new_time
+
+            self.updateField.emit()
+
 
 def start_game(strategy):
 
     #refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin")
 
-    vision = Vision()
-    command_sender = UDPCommandSender("127.0.0.1", 20011)
-
-    game = create_game(strategy)
-
-    times = deque(maxlen=10)
-
-    last_time = time.time()
-
-    while True:  # TODO: Replace with a loop that will stop when the game is over
-        #update_game_state(game, engine)
-        update_players_and_ball(game, vision)
-        update_strategies(game)
-        send_robot_commands(game, vision, command_sender)
-        #time.sleep(0.01)
-        new_time = time.time()
-        times.append(new_time - last_time)
-        #print(len(times) / sum(times))
-        last_time = new_time
-
+    app = QtGui.QApplication(sys.argv)
+    ex = FieldDisplay(MainLoop, strategy)
+    sys.exit(app.exec_())
