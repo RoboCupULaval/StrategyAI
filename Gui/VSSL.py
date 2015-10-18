@@ -52,7 +52,7 @@ class FieldDisplay(QtGui.QWidget):
         return value / self.ratio
 
     def initUI(self):
-        self.setGeometry(200, 200, 1280, 720)
+        self.setGeometry(200, 200, 1011, 720)
 
         self.setRatio((6000 + self.fieldOffsetY * 2) / 720)
 
