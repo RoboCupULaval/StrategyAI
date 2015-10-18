@@ -18,7 +18,7 @@ class MainLoop(QtCore.QThread):
 class FieldDisplay(QtGui.QWidget):
     #TODO: Make the gui be based on the current window size.
 
-    def __init__(self, game_thread, game, vision):
+    def __init__(self, game_thread, game, vision, command_sender):
         super(FieldDisplay, self).__init__()
 
         self._thread = MainLoop(game_thread)
@@ -26,6 +26,7 @@ class FieldDisplay(QtGui.QWidget):
 
         self.game = game
         self.vision = vision
+        self.command_sender = command_sender
 
         self.ratio = 1.0
         self.fieldOffsetX = 700
@@ -75,7 +76,7 @@ class FieldDisplay(QtGui.QWidget):
         pass
 
     def moveBall(self, x, y, vx, vy):
-        packet = self._thread.command_sender.get_new_packet()
+        packet = self.command_sender.get_new_packet()
 
         packet.replacement.ball.x = x
         packet.replacement.ball.y = y
@@ -83,7 +84,7 @@ class FieldDisplay(QtGui.QWidget):
         packet.replacement.ball.vy = vy
 
         print ("Moving ball! {}, {}".format(packet.replacement.ball.x, packet.replacement.ball.y))
-        self._thread.command_sender.send_packet(packet)
+        self.command_sender.send_packet(packet)
 
     def mousePressEvent(self, e):
         self.moveBall(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, 0)
@@ -187,7 +188,6 @@ class FieldDisplay(QtGui.QWidget):
             qp.drawPoint(x, y)
 
     def refresh(self):
-        print("djkl")
         self.update()
 
     def slopeFromAngle(self, angle):

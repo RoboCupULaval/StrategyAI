@@ -149,8 +149,10 @@ def start_game(strategy, gui=False):
     if gui:
         if not qt_installed:
             sys.exit("PyQt4 is not installed")
+
+        main_loop()
         app = QtGui.QApplication(sys.argv)
-        FieldDisplay(main_loop, game, vision)
+        ex = FieldDisplay(main_loop, game, vision, command_sender)
         sys.exit(app.exec_())
     else:
         while True:  # TODO: Replace with a loop that will stop when the game is over
