@@ -1,17 +1,31 @@
 import sys, math
 from PyQt4 import QtGui, QtCore
 
+class MainLoop(QtCore.QThread):
+    updateField = QtCore.pyqtSignal()
+
+    def __init__(self, target):
+        super(MainLoop, self).__init__()
+        self.target = target
+
+    def run(self):
+        run_loop = self.target
+        emit_signal = self.updateField.emit
+        while True:  # TODO: Replace with a loop that will stop when the game is over
+            run_loop()
+            emit_signal()
+
 class FieldDisplay(QtGui.QWidget):
     #TODO: Make the gui be based on the current window size.
 
-    def __init__(self, MainLoop, strategy):
+    def __init__(self, game_thread, game, vision):
         super(FieldDisplay, self).__init__()
-        
-        self._thread = MainLoop(strategy)
+
+        self._thread = MainLoop(game_thread)
         self._thread.updateField.connect(self.refresh)
 
-        self.game = self._thread.game
-        self.vision = self._thread.vision
+        self.game = game
+        self.vision = vision
 
         self.ratio = 1.0
         self.fieldOffsetX = 700
@@ -36,7 +50,7 @@ class FieldDisplay(QtGui.QWidget):
     def atRatio(self, value):
         return value / self.ratio
 
-    def initUI(self):      
+    def initUI(self):
         self.setGeometry(200, 200, 1280, 720)
 
         self.setRatio((6000 + self.fieldOffsetY * 2) / 720)
@@ -85,6 +99,7 @@ class FieldDisplay(QtGui.QWidget):
         qp.end()
 
     def drawField(self, qp):
+
 
         pen = QtGui.QPen(QtGui.QColor(0, 0, 0), 3, QtCore.Qt.SolidLine)
 
@@ -165,13 +180,14 @@ class FieldDisplay(QtGui.QWidget):
     def drawPoints(self, qp):
         qp.setPen(QtCore.Qt.red)
         size = self.size()
-        
+
         for i in range(1000):
             x = random.randint(1, size.width()-1)
             y = random.randint(1, size.height()-1)
             qp.drawPoint(x, y)
 
     def refresh(self):
+        print("djkl")
         self.update()
 
     def slopeFromAngle(self, angle):
