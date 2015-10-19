@@ -112,7 +112,7 @@ class FieldDisplay(QtGui.QWidget):
         print ("Moving a Robot! {}, {}".format(robot.x, robot.y))
         self.command_sender.send_packet(packet)
 
-    def mousePressEvent(self, e):
+    def moveEvent(self, e):
         if e.buttons() & QtCore.Qt.LeftButton:
             self.moveBall(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, 0)
         if e.buttons() & QtCore.Qt.RightButton:
@@ -143,36 +143,11 @@ class FieldDisplay(QtGui.QWidget):
 
                 self.moveRobot(self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].x / 1000, self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].y / 1000, angle, self.selectedBlue - 1, False)
 
+    def mousePressEvent(self, e):
+        self.moveEvent(e)
+
     def mouseMoveEvent(self, e):
-        if e.buttons() & QtCore.Qt.LeftButton:
-            self.moveBall(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, 0)
-        if e.buttons() & QtCore.Qt.RightButton:
-            if self.selectedYellow != 0:
-                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, self.selectedYellow - 1, True)
-            elif self.selectedBlue != 0:
-                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, self.selectedBlue - 1, False)
-        if e.buttons() & QtCore.Qt.MiddleButton:
-            print ("Middle")
-            if self.selectedYellow != 0:
-                x1 = self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].x / 1000
-                y1 = self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].y / 1000
-                x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
-                y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
-
-                angle = self.getAngle(x1, y1, x2, y2)
-                print ("Angle: {}".format(angle))
-
-                self.moveRobot(x1, y1, angle, self.selectedYellow - 1, True)
-            elif self.selectedBlue != 0:
-                x1 = self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].x / 1000
-                y1 = self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].y / 1000
-                x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
-                y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
-
-                angle = self.getAngle(x1, y1, x2, y2)
-                print ("Angle: {}".format(angle))
-                
-                self.moveRobot(x1, y1, angle, self.selectedBlue - 1, False)
+        self.moveEvent(e)
 
     def keyPressEvent(self, e):
         print ("Key:")
