@@ -58,7 +58,16 @@ class FieldDisplay(QtGui.QWidget):
 
         self.ratioHeight = self.fieldHeight / self.ratio
         self.setWindowTitle('SSL Visualizer')
+
+        self.redPen = QtGui.QPen(QtGui.QColor(255, 0, 0), 3, QtCore.Qt.SolidLine)
+        self.whitePen = QtGui.QPen(QtGui.QColor(255, 255, 255), 3, QtCore.Qt.SolidLine)
+        self.blackPen = QtGui.QPen(QtGui.QColor(0, 0, 0), 3, QtCore.Qt.SolidLine)
+        self.grayPenFat = QtGui.QPen(QtGui.QColor(50, 50, 50, 200), 10, QtCore.Qt.SolidLine)
+        self.grayPenFat.setCapStyle(QtCore.Qt.RoundCap)
+        self.transPen = QtGui.QPen(QtGui.QColor(0, 0, 0, 0), 3, QtCore.Qt.SolidLine)
+
         self.show()
+
 
     def closeEvent(self, e):
         global playAll
@@ -100,16 +109,7 @@ class FieldDisplay(QtGui.QWidget):
         qp.end()
 
     def drawField(self, qp):
-
-        redPen = QtGui.QPen(QtGui.QColor(255, 0, 0), 3, QtCore.Qt.SolidLine)
-        whitePen = QtGui.QPen(QtGui.QColor(255, 255, 255), 3, QtCore.Qt.SolidLine)
-        blackPen = QtGui.QPen(QtGui.QColor(0, 0, 0), 3, QtCore.Qt.SolidLine)
-        grayPenFat = QtGui.QPen(QtGui.QColor(50, 50, 50, 200), 10, QtCore.Qt.SolidLine)
-        grayPenFat.setCapStyle(QtCore.Qt.RoundCap)
-        transPen = QtGui.QPen(QtGui.QColor(0, 0, 0, 0), 3, QtCore.Qt.SolidLine)
-
-
-        qp.setPen(blackPen)
+        qp.setPen(self.blackPen)
 
         qp.setFont(QtGui.QFont('SansSerif', 20))
 
@@ -119,12 +119,12 @@ class FieldDisplay(QtGui.QWidget):
         qp.setBrush(QtGui.QColor(0, 155, 0, 150))
         qp.drawRect(0, 0, self.ratioWidth + self.fieldOffsetX * 2 / self.ratio, self.ratioHeight + self.fieldOffsetY * 2 / self.ratio)
         qp.setBrush(QtGui.QColor(0, 155, 0, 200))
-        qp.setPen(transPen)
+        qp.setPen(self.transPen)
         qp.drawRect(self.ratioFieldOffsetX - self.atRatio(250), self.ratioFieldOffsetY - self.atRatio(250), self.ratioWidth + self.atRatio(500), self.ratioHeight + self.atRatio(500))
-        qp.setPen(whitePen)
+        qp.setPen(self.whitePen)
         qp.drawRect(self.ratioFieldOffsetX, self.ratioFieldOffsetY, self.ratioWidth, self.ratioHeight)
 
-        qp.setPen(whitePen)
+        qp.setPen(self.whitePen)
         qp.drawLine(self.ratioFieldOffsetX + self.ratioWidth / 2, self.ratioFieldOffsetY, self.ratioFieldOffsetX + self.ratioWidth / 2, self.ratioFieldOffsetY + self.ratioHeight)
         qp.drawLine(self.ratioFieldOffsetX, self.ratioFieldOffsetY + self.ratioHeight / 2, self.ratioFieldOffsetX + self.ratioWidth, self.ratioFieldOffsetY + self.ratioHeight / 2)
         qp.setBrush(QtGui.QColor(255, 255, 255, 0))
@@ -141,7 +141,7 @@ class FieldDisplay(QtGui.QWidget):
         qp.drawLine(self.ratioFieldOffsetX + self.ratioWidth - circleSize * 2, self.ratioFieldOffsetY + self.ratioHeight / 2 - self.atRatio(250), self.ratioFieldOffsetX + self.ratioWidth - circleSize * 2, self.ratioFieldOffsetY + self.ratioHeight / 2 + self.atRatio(250))
 
         goalSize = 1000
-        qp.setPen(redPen)
+        qp.setPen(self.redPen)
         qp.drawLine(self.ratioFieldOffsetX - self.atRatio(180), self.ratioFieldOffsetY - self.atRatio(goalSize / 2) + self.ratioHeight / 2, self.ratioFieldOffsetX - self.atRatio(180), self.ratioFieldOffsetY + self.atRatio(goalSize / 2) + self.ratioHeight / 2)
         qp.drawLine(self.ratioFieldOffsetX - self.atRatio(180), self.ratioFieldOffsetY - self.atRatio(goalSize / 2) + self.ratioHeight / 2, self.ratioFieldOffsetX, self.ratioFieldOffsetY - self.atRatio(goalSize / 2) + self.ratioHeight / 2)
         qp.drawLine(self.ratioFieldOffsetX - self.atRatio(180), self.ratioFieldOffsetY + self.atRatio(goalSize / 2) + self.ratioHeight / 2, self.ratioFieldOffsetX, self.ratioFieldOffsetY + self.atRatio(goalSize / 2) + self.ratioHeight / 2)
@@ -150,67 +150,62 @@ class FieldDisplay(QtGui.QWidget):
         qp.drawLine(self.ratioFieldOffsetX + self.atRatio(180) + self.ratioWidth, self.ratioFieldOffsetY - self.atRatio(goalSize / 2) + self.ratioHeight / 2, self.ratioFieldOffsetX + self.ratioWidth, self.ratioFieldOffsetY - self.atRatio(goalSize / 2) + self.ratioHeight / 2)
         qp.drawLine(self.ratioFieldOffsetX + self.atRatio(180) + self.ratioWidth, self.ratioFieldOffsetY + self.atRatio(goalSize / 2) + self.ratioHeight / 2, self.ratioFieldOffsetX + self.ratioWidth, self.ratioFieldOffsetY + self.atRatio(goalSize / 2) + self.ratioHeight / 2)
 
-        qp.setPen(blackPen)
+        qp.setPen(self.blackPen)
 
         robotSize = 180 / self.ratio
         index = 0
         for i in self.vision.get_latest_frame().detection.robots_yellow:
-            qp.setPen(blackPen)
-            centerX = self.atRatio(i.x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
-            centerY = self.atRatio(-i.y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
-            qp.setBrush(QtGui.QColor(255, 255, 0, 0))
-            qp.drawEllipse(centerX - robotSize, centerY - robotSize, robotSize * 2, robotSize * 2)
-            qp.setBrush(QtGui.QColor(255, 255, 0, 200))
-            qp.drawEllipse(centerX - robotSize / 2, centerY - robotSize / 2, robotSize, robotSize)
 
-            qp.setBrush(QtGui.QColor(0, 0, 0, 100))
-            qp.drawRect(centerX, centerY, 15, -20)
+            self.drawRobot(qp, 255, 255, 0, i, index, robotSize)
 
-            qp.setPen(redPen)
-            qp.drawText(QtCore.QPointF(centerX, centerY), "{}".format(index))
             index += 1
-
-            qp.setPen(grayPenFat)
-            x2, y2 = self.followAngle(-i.orientation, centerX, centerY, robotSize * 2)
-            qp.drawLine(centerX, centerY, x2, y2)
-
-            qp.setPen(whitePen)
-            x2, y2 = self.followAngle(-i.orientation, centerX, centerY, robotSize * 2)
-            qp.drawLine(centerX, centerY, x2, y2)
 
         index = 0
         for i in self.vision.get_latest_frame().detection.robots_blue:
-            qp.setPen(blackPen)
-            centerX = self.atRatio(i.x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
-            centerY = self.atRatio(-i.y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
-            qp.setBrush(QtGui.QColor(0, 0, 255, 0))
-            qp.drawEllipse(centerX - robotSize, centerY - robotSize, robotSize * 2, robotSize * 2)
-            qp.setBrush(QtGui.QColor(0, 0, 255, 200))
-            qp.drawEllipse(centerX - robotSize / 2, centerY - robotSize / 2, robotSize, robotSize)
 
-            qp.setBrush(QtGui.QColor(0, 0, 0, 100))
-            qp.drawRect(centerX, centerY, 15, -20)
+            self.drawRobot(qp, 0, 0, 255, i, index, robotSize)
 
-            qp.setPen(redPen)
-            qp.drawText(QtCore.QPointF(centerX, centerY), "{}".format(index))
-            qp.setPen(blackPen)
             index += 1
 
-            qp.setPen(grayPenFat)
-            x2, y2 = self.followAngle(-i.orientation, centerX, centerY, robotSize * 2)
-            qp.drawLine(centerX, centerY, x2, y2)
-
-            qp.setPen(whitePen)
-            x2, y2 = self.followAngle(-i.orientation, centerX, centerY, robotSize * 2)
-            qp.drawLine(centerX, centerY, x2, y2)
-
-        qp.setPen(blackPen)
+        qp.setPen(self.blackPen)
         qp.setBrush(QtGui.QColor(255, 69, 0, 200))
         ballSize = 10
         ballX = self.atRatio(self.vision.get_latest_frame().detection.balls[0].x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
         ballY = self.atRatio(-self.vision.get_latest_frame().detection.balls[0].y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
         #print ("Ball x: {} and y: {}".format(ballX, ballY))
         qp.drawEllipse(ballX - (ballSize / 2), ballY - (ballSize / 2), ballSize, ballSize)
+
+    def drawRobot(self, qp, r, g, b, robot, index, robotSize):
+        qp.setPen(self.blackPen)
+        centerX = self.atRatio(robot.x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
+        centerY = self.atRatio(-robot.y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
+        qp.setBrush(QtGui.QColor(r, g, b, 70))
+        qp.drawEllipse(centerX - robotSize, centerY - robotSize, robotSize * 2, robotSize * 2)
+        qp.setBrush(QtGui.QColor(r, g, b, 200))
+        qp.drawEllipse(centerX - robotSize / 2, centerY - robotSize / 2, robotSize, robotSize)
+
+
+        indexLabel = "{}".format(index)
+        fm = QtGui.QFontMetrics(QtGui.QFont('SansSerif', 20))
+        labelWidth = fm.width(indexLabel)
+        labelHeight = fm.height() - 11 #Hard coded for this font.
+        labelX = centerX - labelWidth / 2
+        labelY = centerY + labelHeight / 2
+
+        qp.setBrush(QtGui.QColor(0, 0, 0, 150))
+        qp.drawRect(labelX, labelY, labelWidth, -labelHeight)
+
+        qp.setPen(self.whitePen)
+        qp.drawText(QtCore.QPointF(labelX, labelY), indexLabel)
+        index += 1
+
+        x1, y1 = self.followAngle(-robot.orientation, centerX, centerY, robotSize)
+        x2, y2 = self.followAngle(-robot.orientation, centerX, centerY, robotSize * 2)
+        #qp.setPen(self.grayPenFat)
+        #qp.drawLine(x1, y1, x2, y2)
+
+        qp.setPen(self.blackPen)
+        qp.drawLine(x1, y1, x2, y2)
 
 
 
