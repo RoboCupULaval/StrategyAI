@@ -28,6 +28,11 @@ class FieldDisplay(QtGui.QWidget):
         self.vision = vision
         self.command_sender = command_sender
 
+        #0 means no selection.
+        #Range: 0 to 6.
+        self.selectedBlue = 0
+        self.selectedYellow = 0
+
         self.ratio = 1.0
         self.fieldOffsetX = 700
         self.fieldOffsetY = 700
@@ -68,7 +73,6 @@ class FieldDisplay(QtGui.QWidget):
 
         self.show()
 
-
     def closeEvent(self, e):
         global playAll
         playAll = False
@@ -95,11 +99,136 @@ class FieldDisplay(QtGui.QWidget):
         print ("Moving ball! {}, {}".format(packet.replacement.ball.x, packet.replacement.ball.y))
         self.command_sender.send_packet(packet)
 
+    def moveRobot(self, x, y, angle, i, team):
+        packet = self.command_sender.get_new_packet()
+
+        robot = packet.replacement.robots.add()
+        robot.x = x
+        robot.y = y
+        robot.dir = angle
+        robot.id = i
+        robot.yellowteam = team
+
+        print ("Moving a Robot! {}, {}".format(robot.x, robot.y))
+        self.command_sender.send_packet(packet)
+
     def mousePressEvent(self, e):
-        self.moveBall(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, 0)
+        if e.buttons() & QtCore.Qt.LeftButton:
+            self.moveBall(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, 0)
+        if e.buttons() & QtCore.Qt.RightButton:
+            if self.selectedYellow != 0:
+                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, self.selectedYellow - 1, True)
+            elif self.selectedBlue != 0:
+                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, self.selectedBlue - 1, False)
+        if e.buttons() & QtCore.Qt.MiddleButton:
+            print ("Middle")
+            if self.selectedYellow != 0:
+                x1 = self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].x / 1000
+                y1 = self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].y / 1000
+                x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
+                y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
+
+                angle = self.getAngle(x1, y1, x2, y2)
+                print ("Angle: {}".format(angle))
+
+                self.moveRobot(self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].x / 1000, self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].y / 1000, angle, self.selectedYellow - 1, True)
+            elif self.selectedBlue != 0:
+                x1 = self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].x / 1000
+                y1 = self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].y / 1000
+                x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
+                y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
+
+                angle = self.getAngle(x1, y1, x2, y2)
+                print ("Angle: {}".format(angle))
+
+                self.moveRobot(self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].x / 1000, self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].y / 1000, angle, self.selectedBlue - 1, False)
 
     def mouseMoveEvent(self, e):
-        self.moveBall(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, 0)
+        if e.buttons() & QtCore.Qt.LeftButton:
+            self.moveBall(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, 0)
+        if e.buttons() & QtCore.Qt.RightButton:
+            if self.selectedYellow != 0:
+                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, self.selectedYellow - 1, True)
+            elif self.selectedBlue != 0:
+                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, self.selectedBlue - 1, False)
+        if e.buttons() & QtCore.Qt.MiddleButton:
+            print ("Middle")
+            if self.selectedYellow != 0:
+                x1 = self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].x / 1000
+                y1 = self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].y / 1000
+                x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
+                y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
+
+                angle = self.getAngle(x1, y1, x2, y2)
+                print ("Angle: {}".format(angle))
+
+                self.moveRobot(x1, y1, angle, self.selectedYellow - 1, True)
+            elif self.selectedBlue != 0:
+                x1 = self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].x / 1000
+                y1 = self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].y / 1000
+                x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
+                y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
+
+                angle = self.getAngle(x1, y1, x2, y2)
+                print ("Angle: {}".format(angle))
+                
+                self.moveRobot(x1, y1, angle, self.selectedBlue - 1, False)
+
+    def keyPressEvent(self, e):
+        print ("Key:")
+        if e.key() == QtCore.Qt.Key_1:
+            self.selectedYellow = 1
+            self.selectedBlue = 0
+            print ("#1")
+        elif e.key() == QtCore.Qt.Key_2:
+            self.selectedYellow = 2
+            self.selectedBlue = 0
+            print ("#2")
+        elif e.key() == QtCore.Qt.Key_3:
+            self.selectedYellow = 3
+            self.selectedBlue = 0
+            print ("#3")
+        elif e.key() == QtCore.Qt.Key_4:
+            self.selectedYellow = 4
+            self.selectedBlue = 0
+            print ("#4")
+        elif e.key() == QtCore.Qt.Key_5:
+            self.selectedYellow = 5
+            self.selectedBlue = 0
+            print ("#5")
+        elif e.key() == QtCore.Qt.Key_6:
+            self.selectedYellow = 6
+            self.selectedBlue = 0
+            print ("#6")
+        elif e.key() == QtCore.Qt.Key_Q:
+            self.selectedBlue = 1
+            self.selectedYellow = 0
+            print ("#1 Blue")
+        elif e.key() == QtCore.Qt.Key_W:
+            self.selectedBlue = 2
+            self.selectedYellow = 0
+            print ("#2 Blue")
+        elif e.key() == QtCore.Qt.Key_E:
+            self.selectedBlue = 3
+            self.selectedYellow = 0
+            print ("#3 Blue")
+        elif e.key() == QtCore.Qt.Key_R:
+            self.selectedBlue = 4
+            self.selectedYellow = 0
+            print ("#4 Blue")
+        elif e.key() == QtCore.Qt.Key_T:
+            self.selectedBlue = 5
+            self.selectedYellow = 0
+            print ("#5 Blue")
+        elif e.key() == QtCore.Qt.Key_Y:
+            self.selectedBlue = 6
+            self.selectedYellow = 0
+            print ("#6 Blue")
+        else:
+            self.selectedYellow = 0
+            self.selectedBlue = 0
+            print ("Cleat selected bot")
+        pass
 
     def paintEvent(self, e):
         qp = QtGui.QPainter()
@@ -114,8 +243,8 @@ class FieldDisplay(QtGui.QWidget):
 
         robotSize = self.atRatio(180)
 
-        self.drawRobotTeam(qp, self.vision.get_latest_frame().detection.robots_yellow, 255, 255, 0, robotSize)
-        self.drawRobotTeam(qp, self.vision.get_latest_frame().detection.robots_blue, 0, 0, 255, robotSize)
+        self.drawRobotTeam(qp, self.vision.get_latest_frame().detection.robots_yellow, 255, 255, 0, robotSize, False if self.selectedYellow == 0 else True, self.selectedYellow)
+        self.drawRobotTeam(qp, self.vision.get_latest_frame().detection.robots_blue, 0, 0, 255, robotSize, False if self.selectedBlue == 0 else True, self.selectedBlue)
 
         self.drawBall(qp, self.vision.get_latest_frame().detection.balls[0])
 
@@ -165,18 +294,25 @@ class FieldDisplay(QtGui.QWidget):
         #print ("Ball x: {} and y: {}".format(ballX, ballY))
         qp.drawEllipse(ballX - (ballSize / 2), ballY - (ballSize / 2), ballSize, ballSize)
 
-    def drawRobotTeam(self, qp, team, r, g, b, robotSize):
-        index = 0
+    def drawRobotTeam(self, qp, team, r, g, b, robotSize, teamSelected, selectedIndex):
+        index = 1
         for i in team:
-            self.drawRobot(qp, r, g, b, i, index, robotSize)
+            if not teamSelected:
+                self.drawRobot(qp, r, g, b, i, index, robotSize)
+            else:
+                self.drawRobot(qp, r, g, b, i, index, robotSize, True if selectedIndex == (index) else False)
             index += 1
 
-    def drawRobot(self, qp, r, g, b, robot, index, robotSize):
-        qp.setPen(self.blackPen)
+    def drawRobot(self, qp, r, g, b, robot, index, robotSize, selected = False):
         centerX = self.atRatio(robot.x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
         centerY = self.atRatio(-robot.y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
+        if selected:
+            qp.setPen(self.whitePen)
+        else:
+            qp.setPen(self.blackPen)
         qp.setBrush(QtGui.QColor(r, g, b, 70))
         qp.drawEllipse(centerX - robotSize, centerY - robotSize, robotSize * 2, robotSize * 2)
+        qp.setPen(self.blackPen)
         qp.setBrush(QtGui.QColor(r, g, b, 200))
         qp.drawEllipse(centerX - robotSize / 2, centerY - robotSize / 2, robotSize, robotSize)
 
@@ -213,6 +349,15 @@ class FieldDisplay(QtGui.QWidget):
 
     def refresh(self):
         self.update()
+
+    def getAngle(self, x1, y1, x2, y2):
+        if x1 == x2:
+            if y1 < y2:
+                return 271
+            else:
+                return 89
+
+        return math.atan2(-(y2 - y1), -(x2 - x1)) / math.pi * 180 + 180
 
     def slopeFromAngle(self, angle):
         if angle == math.pi + math.pi / 2:
