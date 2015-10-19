@@ -104,18 +104,23 @@ class FieldDisplay(QtGui.QWidget):
     def paintEvent(self, e):
         qp = QtGui.QPainter()
         qp.begin(self)
-
+        qp.setFont(QtGui.QFont('SansSerif', 20))
         self.drawField(qp)
         qp.end()
 
     def drawField(self, qp):
+        self.drawGrass(qp)
+        self.drawFieldLines(qp)
+
+        robotSize = self.atRatio(180)
+
+        self.drawRobotTeam(qp, self.vision.get_latest_frame().detection.robots_yellow, 255, 255, 0, robotSize)
+        self.drawRobotTeam(qp, self.vision.get_latest_frame().detection.robots_blue, 0, 0, 255, robotSize)
+
+        self.drawBall(qp, self.vision.get_latest_frame().detection.balls[0])
+
+    def drawGrass(self, qp):
         qp.setPen(self.blackPen)
-
-        qp.setFont(QtGui.QFont('SansSerif', 20))
-
-        color = QtGui.QColor(0, 0, 0)
-        color.setNamedColor('#d4d4d4')
-
         qp.setBrush(QtGui.QColor(0, 155, 0, 150))
         qp.drawRect(0, 0, self.ratioWidth + self.fieldOffsetX * 2 / self.ratio, self.ratioHeight + self.fieldOffsetY * 2 / self.ratio)
         qp.setBrush(QtGui.QColor(0, 155, 0, 200))
@@ -124,6 +129,7 @@ class FieldDisplay(QtGui.QWidget):
         qp.setPen(self.whitePen)
         qp.drawRect(self.ratioFieldOffsetX, self.ratioFieldOffsetY, self.ratioWidth, self.ratioHeight)
 
+    def drawFieldLines(self, qp):
         qp.setPen(self.whitePen)
         qp.drawLine(self.ratioFieldOffsetX + self.ratioWidth / 2, self.ratioFieldOffsetY, self.ratioFieldOffsetX + self.ratioWidth / 2, self.ratioFieldOffsetY + self.ratioHeight)
         qp.drawLine(self.ratioFieldOffsetX, self.ratioFieldOffsetY + self.ratioHeight / 2, self.ratioFieldOffsetX + self.ratioWidth, self.ratioFieldOffsetY + self.ratioHeight / 2)
@@ -150,30 +156,20 @@ class FieldDisplay(QtGui.QWidget):
         qp.drawLine(self.ratioFieldOffsetX + self.atRatio(180) + self.ratioWidth, self.ratioFieldOffsetY - self.atRatio(goalSize / 2) + self.ratioHeight / 2, self.ratioFieldOffsetX + self.ratioWidth, self.ratioFieldOffsetY - self.atRatio(goalSize / 2) + self.ratioHeight / 2)
         qp.drawLine(self.ratioFieldOffsetX + self.atRatio(180) + self.ratioWidth, self.ratioFieldOffsetY + self.atRatio(goalSize / 2) + self.ratioHeight / 2, self.ratioFieldOffsetX + self.ratioWidth, self.ratioFieldOffsetY + self.atRatio(goalSize / 2) + self.ratioHeight / 2)
 
-        qp.setPen(self.blackPen)
-
-        robotSize = 180 / self.ratio
-        index = 0
-        for i in self.vision.get_latest_frame().detection.robots_yellow:
-
-            self.drawRobot(qp, 255, 255, 0, i, index, robotSize)
-
-            index += 1
-
-        index = 0
-        for i in self.vision.get_latest_frame().detection.robots_blue:
-
-            self.drawRobot(qp, 0, 0, 255, i, index, robotSize)
-
-            index += 1
-
+    def drawBall(self, qp, ball):
         qp.setPen(self.blackPen)
         qp.setBrush(QtGui.QColor(255, 69, 0, 200))
         ballSize = 10
-        ballX = self.atRatio(self.vision.get_latest_frame().detection.balls[0].x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
-        ballY = self.atRatio(-self.vision.get_latest_frame().detection.balls[0].y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
+        ballX = self.atRatio(ball.x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
+        ballY = self.atRatio(-ball.y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
         #print ("Ball x: {} and y: {}".format(ballX, ballY))
         qp.drawEllipse(ballX - (ballSize / 2), ballY - (ballSize / 2), ballSize, ballSize)
+
+    def drawRobotTeam(self, qp, team, r, g, b, robotSize):
+        index = 0
+        for i in team:
+            self.drawRobot(qp, r, g, b, i, index, robotSize)
+            index += 1
 
     def drawRobot(self, qp, r, g, b, robot, index, robotSize):
         qp.setPen(self.blackPen)
@@ -183,7 +179,6 @@ class FieldDisplay(QtGui.QWidget):
         qp.drawEllipse(centerX - robotSize, centerY - robotSize, robotSize * 2, robotSize * 2)
         qp.setBrush(QtGui.QColor(r, g, b, 200))
         qp.drawEllipse(centerX - robotSize / 2, centerY - robotSize / 2, robotSize, robotSize)
-
 
         indexLabel = "{}".format(index)
         fm = QtGui.QFontMetrics(QtGui.QFont('SansSerif', 20))
@@ -206,8 +201,6 @@ class FieldDisplay(QtGui.QWidget):
 
         qp.setPen(self.blackPen)
         qp.drawLine(x1, y1, x2, y2)
-
-
 
     def drawPoints(self, qp):
         qp.setPen(QtCore.Qt.red)
