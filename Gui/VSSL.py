@@ -133,8 +133,8 @@ class FieldDisplay(QtGui.QWidget):
 
                 self.moveRobot(self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].x / 1000, self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].y / 1000, angle, self.selectedYellow - 1, True)
             elif self.selectedBlue != 0:
-                x1 = self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].x / 1000
-                y1 = self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].y / 1000
+                x1 = self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].x / 1000
+                y1 = self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].y / 1000
                 x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
                 y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
 
