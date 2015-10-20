@@ -113,13 +113,17 @@ class FieldDisplay(QtGui.QWidget):
         self.command_sender.send_packet(packet)
 
     def moveEvent(self, e):
+
+        if not hasattr(e, 'buttons'):
+            return
+
         if e.buttons() & QtCore.Qt.LeftButton:
             self.moveBall(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, 0)
         if e.buttons() & QtCore.Qt.RightButton:
             if self.selectedYellow != 0:
-                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, self.selectedYellow - 1, True)
+                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].orientation * 180 / math.pi, self.selectedYellow - 1, True)
             elif self.selectedBlue != 0:
-                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, self.selectedBlue - 1, False)
+                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].orientation * 180 / math.pi, self.selectedBlue - 1, False)
         if e.buttons() & QtCore.Qt.MiddleButton:
             print ("Middle")
             if self.selectedYellow != 0:
