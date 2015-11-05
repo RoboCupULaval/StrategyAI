@@ -1,0 +1,12 @@
+task :default => :getPythonFramework
+
+task :getPythonFramework do 
+  unless File.directory?("PythonFramework")
+    sh "git clone https://github.com/RoboCupULaval/RULEngine.git PythonFramework"
+    sh "git -C PythonFramework checkout dev"
+  end
+end
+
+task :upframework do
+  sh "git -C PythonFramework pull origin"
+end
