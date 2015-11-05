@@ -18,14 +18,13 @@ class MainLoop(QtCore.QThread):
 class FieldDisplay(QtGui.QWidget):
     #TODO: Make the gui be based on the current window size.
 
-    def __init__(self, game_thread, game, vision, command_sender):
+    def __init__(self, game_thread, game, command_sender):
         super(FieldDisplay, self).__init__()
 
         self._thread = MainLoop(game_thread)
         self._thread.updateField.connect(self.refresh)
 
         self.game = game
-        self.vision = vision
         self.command_sender = command_sender
 
         #0 means no selection.
@@ -121,31 +120,33 @@ class FieldDisplay(QtGui.QWidget):
             self.moveBall(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, 0)
         if e.buttons() & QtCore.Qt.RightButton:
             if self.selectedYellow != 0:
-                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].orientation * 180 / math.pi, self.selectedYellow - 1, True)
+                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, self.game.yellow_team.players[self.selectedYellow - 1].pose.orientation, self.selectedYellow - 1, True)
             elif self.selectedBlue != 0:
-                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].orientation * 180 / math.pi, self.selectedBlue - 1, False)
+                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, self.game.blue_team.players[self.selectedBlue - 1].pose.orientation, self.selectedBlue - 1, False)
         if e.buttons() & QtCore.Qt.MiddleButton:
             print ("Middle")
             if self.selectedYellow != 0:
-                x1 = self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].x / 1000
-                y1 = self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].y / 1000
+                position = self.game.yellow_team.players[self.selectedYellow-1].pose.position
+                x1 = position.x / 1000
+                y1 = position.y / 1000
                 x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
                 y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
 
                 angle = self.getAngle(x1, y1, x2, y2)
                 print ("Angle: {}".format(angle))
 
-                self.moveRobot(self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].x / 1000, self.vision.get_latest_frame().detection.robots_yellow[self.selectedYellow - 1].y / 1000, angle, self.selectedYellow - 1, True)
+                self.moveRobot(position.x / 1000, position.y / 1000, angle, self.selectedYellow - 1, True)
             elif self.selectedBlue != 0:
-                x1 = self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].x / 1000
-                y1 = self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].y / 1000
+                position = self.game.blue_team.players[self.selectedBlue-1].pose.position
+                x1 = position.x / 1000
+                y1 = position.y / 1000
                 x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
                 y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
 
                 angle = self.getAngle(x1, y1, x2, y2)
                 print ("Angle: {}".format(angle))
 
-                self.moveRobot(self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].x / 1000, self.vision.get_latest_frame().detection.robots_blue[self.selectedBlue - 1].y / 1000, angle, self.selectedBlue - 1, False)
+                self.moveRobot(position.x / 1000, position.y / 1000, angle, self.selectedBlue - 1, False)
 
     def mousePressEvent(self, e):
         self.moveEvent(e)
@@ -222,10 +223,10 @@ class FieldDisplay(QtGui.QWidget):
 
         robotSize = self.atRatio(180)
 
-        self.drawRobotTeam(qp, self.vision.get_latest_frame().detection.robots_yellow, 255, 255, 0, robotSize, False if self.selectedYellow == 0 else True, self.selectedYellow)
-        self.drawRobotTeam(qp, self.vision.get_latest_frame().detection.robots_blue, 0, 0, 255, robotSize, False if self.selectedBlue == 0 else True, self.selectedBlue)
+        self.drawRobotTeam(qp, self.game.yellow_team, 255, 255, 0, robotSize, False if self.selectedYellow == 0 else True, self.selectedYellow)
+        self.drawRobotTeam(qp, self.game.blue_team, 0, 0, 255, robotSize, False if self.selectedBlue == 0 else True, self.selectedBlue)
 
-        self.drawBall(qp, self.vision.get_latest_frame().detection.balls[0])
+        self.drawBall(qp, self.game.field.ball)
 
     def drawGrass(self, qp):
         qp.setPen(self.blackPen)
@@ -268,14 +269,14 @@ class FieldDisplay(QtGui.QWidget):
         qp.setPen(self.blackPen)
         qp.setBrush(QtGui.QColor(255, 69, 0, 200))
         ballSize = 10
-        ballX = self.atRatio(ball.x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
-        ballY = self.atRatio(-ball.y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
+        ballX = self.atRatio(ball.position.x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
+        ballY = self.atRatio(-ball.position.y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
         #print ("Ball x: {} and y: {}".format(ballX, ballY))
         qp.drawEllipse(ballX - (ballSize / 2), ballY - (ballSize / 2), ballSize, ballSize)
 
     def drawRobotTeam(self, qp, team, r, g, b, robotSize, teamSelected, selectedIndex):
         index = 1
-        for i in team:
+        for i in team.players:
             if not teamSelected:
                 self.drawRobot(qp, r, g, b, i, index, robotSize)
             else:
@@ -283,8 +284,8 @@ class FieldDisplay(QtGui.QWidget):
             index += 1
 
     def drawRobot(self, qp, r, g, b, robot, index, robotSize, selected = False):
-        centerX = self.atRatio(robot.x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
-        centerY = self.atRatio(-robot.y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
+        centerX = self.atRatio(robot.pose.position.x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
+        centerY = self.atRatio(-robot.pose.position.y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
         if selected:
             qp.setPen(self.whitePen)
         else:
@@ -309,8 +310,13 @@ class FieldDisplay(QtGui.QWidget):
         qp.drawText(QtCore.QPointF(labelX, labelY), indexLabel)
         index += 1
 
-        x1, y1 = self.followAngle(-robot.orientation, centerX, centerY, robotSize)
-        x2, y2 = self.followAngle(-robot.orientation, centerX, centerY, robotSize * 2)
+        cos_Angle = math.cos(math.radians(-robot.pose.orientation))
+        sin_Angle = math.sin(math.radians(-robot.pose.orientation))
+
+        x1 = robotSize * cos_Angle + centerX
+        y1 = robotSize * sin_Angle + centerY
+        x2 = robotSize*2 * cos_Angle + centerX
+        y2 = robotSize*2 * sin_Angle + centerY
         #qp.setPen(self.grayPenFat)
         #qp.drawLine(x1, y1, x2, y2)
 
@@ -337,33 +343,3 @@ class FieldDisplay(QtGui.QWidget):
                 return 89
 
         return math.atan2(-(y2 - y1), -(x2 - x1)) / math.pi * 180 + 180
-
-    def slopeFromAngle(self, angle):
-        if angle == math.pi + math.pi / 2:
-            angle += 0.01
-        elif angle == math.pi / 2:
-            angle -= 0.01
-
-        return math.tan(angle - math.pi)
-
-    def pointsOnLine(self, slope, x, y, distance):
-        b = y - slope * x
-        r = math.sqrt(1 + slope * slope)
-
-        newX1 = (x + (distance / r))
-        newY1 = (y + ((distance * slope) / r))
-
-        newX2 = (x + ((-distance) / r))
-        newY2 = (y + (((-distance) * slope) / r))
-
-        return ((newX1, newY1), (newX2, newY2))
-
-    def followAngle(self, angle, x, y, distance):
-        slope = self.slopeFromAngle(angle)
-        coord1, coord2 = self.pointsOnLine(slope, x, y, distance)
-
-        side = (angle - math.pi / 2) % (math.pi * 2)
-        if (side < math.pi):
-            return coord2
-        else:
-            return coord1
