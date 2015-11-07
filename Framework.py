@@ -14,6 +14,7 @@ from .Util.Position import Position
 from .Util.constant import PLAYER_PER_TEAM
 from .Communication.vision import Vision
 from .Communication.udp_command_sender import UDPCommandSender
+from .Communication.serial_command_sender import SerialCommandSender
 import math
 import time
 from collections import deque
@@ -122,13 +123,16 @@ def send_robot_commands(game, vision, command_sender):
 running_thread = None
 thread_terminate = threading.Event()
 
-def start_game(strategy, async=False):
+def start_game(strategy, async=False, serial=False):
     global running_thread
     #refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin")
 
     if not running_thread:
         vision = Vision()
-        command_sender = UDPCommandSender("127.0.0.1", 20011)
+        if serial:
+            command_sender = SerialCommandSender()
+        else:
+            command_sender = UDPCommandSender("127.0.0.1", 20011)
     else:
         stop_game()
 
