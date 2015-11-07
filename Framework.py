@@ -113,12 +113,16 @@ def send_robot_commands(game, vision, command_sender):
     if vision_frame:
         commands = game.get_commands()
         for command in commands:
-            robot = vision_frame.detection.robots_blue[command.player.id]
-            fake_player = Player(0)
-            fake_player.pose = Pose(Position(robot.x, robot.y), math.degrees(robot.orientation))
-            command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
+            try:
+                robot = [robot for robot in vision_frame.detection.robots_blue if robot.robot_id == command.player.id][0]
+                fake_player = Player(0)
+                fake_player.pose = Pose(Position(robot.x, robot.y), math.degrees(robot.orientation))
+                command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
 
-            command_sender.send_command(command)
+                command_sender.send_command(command)
+                print("Yay")
+            except IndexError:
+                print("Robot %s not found in vision" % (command.player.id))
 
 running_thread = None
 thread_terminate = threading.Event()
@@ -128,7 +132,7 @@ def start_game(strategy, async=False, serial=False):
     #refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin")
 
     if not running_thread:
-        vision = Vision()
+        vision = Vision(port=10005)
         if serial:
             command_sender = SerialCommandSender()
         else:
