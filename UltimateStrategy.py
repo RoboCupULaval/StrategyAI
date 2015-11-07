@@ -8,7 +8,7 @@ from UltimateStrat.Executor.SkillExecutor import SkillExecutor
 import UltimateStrat.Router as Router
 from threading import *
 from Application import *
-from PythonFramework.Util.Pose import Pose
+from PythonFramework.Util.Pose import Pose, Position
 import sys, time
 
 __author__ = 'jbecirovski'
@@ -26,7 +26,7 @@ class UltimateStrategy(Strategy):
         self.ex_play = PlayExecutor(Router)
         self.ex_tactic = TacticExecutor(Router)
         self.ex_skill = SkillExecutor(Router)
-
+        #self.p_ball = self.field.ball.position
         # Create GUI
         Thread(target=self.create_gui).start()
         self.quit = False
@@ -42,7 +42,8 @@ class UltimateStrategy(Strategy):
         self.quit = True
 
     def on_start(self):
-
+        #if not self.field.ball.position == Position():
+        #    self.p_ball = self.field.ball.position
         Router.update()
         # Main Strategy sequence
         self.ex_coach.exec()
@@ -58,7 +59,14 @@ class UltimateStrategy(Strategy):
         if Router.getPlayerNextPose(bot_id) == Router.getPlayerPose(bot_id):
             command = Command.Stop(self.team.players[bot_id])
         else:
-            command = Command.MoveTo(self.team.players[bot_id], Router.getPlayerNextPose(bot_id).position)
+            #if Router.getPlayerNextPose(bot_id).position == Position():
+            #    Router.setPlayerNextPose(bot_id, Pose(self.p_ball, 0))
+            test = Router.getPlayerPose(bot_id).position
+            ball = Router.getBallPosition()
+            print('BALL: x:{} y:{}'.format(ball.x, ball.y))
+            print('ROBOT: x:{} y:{}'.format(test.x, test.y))
+            temp = Router.getPlayerNextPose(bot_id).position
+            command = Command.MoveTo(self.team.players[bot_id], Position(temp.x, temp.y))
 
         self._send_command(command)
 
