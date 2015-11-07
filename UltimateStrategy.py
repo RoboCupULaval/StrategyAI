@@ -8,7 +8,7 @@ from UltimateStrat.Executor.SkillExecutor import SkillExecutor
 import UltimateStrat.Router as Router
 from threading import *
 from Application import *
-from PythonFramework.Util.Pose import Pose, Position
+from RULEngine.Util.Pose import Pose, Position
 import sys, time
 
 __author__ = 'jbecirovski'
@@ -66,7 +66,7 @@ class UltimateStrategy(Strategy):
             print('BALL: x:{} y:{}'.format(ball.x, ball.y))
             print('ROBOT: x:{} y:{}'.format(test.x, test.y))
             temp = Router.getPlayerNextPose(bot_id).position
-            command = Command.MoveTo(self.team.players[bot_id], Position(temp.x, temp.y))
+            command = Command.MoveTo(self.team.players[bot_id], self.team, Position(temp.x, temp.y))
 
         self._send_command(command)
 

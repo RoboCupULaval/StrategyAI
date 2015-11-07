@@ -1,7 +1,7 @@
 import tkinter as tk
 import time
 
-from PythonFramework.Framework import start_game
+from RULEngine.Framework import start_game
 from UltimateStrat.STP.Play.PlayBase import PlayBase
 import UltimateStrat.Router as Router
 

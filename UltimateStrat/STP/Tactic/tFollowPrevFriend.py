@@ -1,5 +1,5 @@
 from UltimateStrat.STP.Tactic.TacticBase import TacticBase
-from PythonFramework.Util.geometry import *
+from RULEngine.Util.geometry import *
 
 __author__ = 'jbecirovski'
 

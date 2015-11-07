@@ -1,7 +1,7 @@
 import math as m
 from UltimateStrat.STP.Skill.SkillBase import SkillBase
-from PythonFramework.Util.Pose import Pose, Position
-from PythonFramework.Util.area import *
+from RULEngine.Util.Pose import Pose, Position
+from RULEngine.Util.area import *
 __author__ = 'jbecirovski'
 
 
