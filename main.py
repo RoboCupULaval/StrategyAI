@@ -1,6 +1,6 @@
 #import sys
 #sys.path.append(".")
-from PythonFramework.Framework import start_game
+from RULEngine.Framework import start_game
 from UltimateStrategy import UltimateStrategy
 
 __author__ = 'jbecirovski'
