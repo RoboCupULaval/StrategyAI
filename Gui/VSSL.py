@@ -27,6 +27,7 @@ class FieldDisplay(QtGui.QWidget):
         self.game = game
         self.command_sender = command_sender
 
+        self.debugMode = True
         #0 means no selection.
         #Range: 0 to 6.
         self.selectedBlue = 0
@@ -112,41 +113,41 @@ class FieldDisplay(QtGui.QWidget):
         self.command_sender.send_packet(packet)
 
     def moveEvent(self, e):
+        if self.debugMode:
+            if not hasattr(e, 'buttons'):
+                return
 
-        if not hasattr(e, 'buttons'):
-            return
+            if e.buttons() & QtCore.Qt.LeftButton:
+                self.moveBall(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, 0)
+            if e.buttons() & QtCore.Qt.RightButton:
+                if self.selectedYellow != 0:
+                    self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, self.game.yellow_team.players[self.selectedYellow - 1].pose.orientation, self.selectedYellow - 1, True)
+                elif self.selectedBlue != 0:
+                    self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, self.game.blue_team.players[self.selectedBlue - 1].pose.orientation, self.selectedBlue - 1, False)
+            if e.buttons() & QtCore.Qt.MiddleButton:
+                print ("Middle")
+                if self.selectedYellow != 0:
+                    position = self.game.yellow_team.players[self.selectedYellow-1].pose.position
+                    x1 = position.x / 1000
+                    y1 = position.y / 1000
+                    x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
+                    y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
 
-        if e.buttons() & QtCore.Qt.LeftButton:
-            self.moveBall(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, 0, 0)
-        if e.buttons() & QtCore.Qt.RightButton:
-            if self.selectedYellow != 0:
-                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, self.game.yellow_team.players[self.selectedYellow - 1].pose.orientation, self.selectedYellow - 1, True)
-            elif self.selectedBlue != 0:
-                self.moveRobot(e.x() * self.ratio / 1000 - 10400 / 1000 / 2, -e.y() * self.ratio / 1000 + 7400 / 1000 / 2, self.game.blue_team.players[self.selectedBlue - 1].pose.orientation, self.selectedBlue - 1, False)
-        if e.buttons() & QtCore.Qt.MiddleButton:
-            print ("Middle")
-            if self.selectedYellow != 0:
-                position = self.game.yellow_team.players[self.selectedYellow-1].pose.position
-                x1 = position.x / 1000
-                y1 = position.y / 1000
-                x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
-                y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
+                    angle = self.getAngle(x1, y1, x2, y2)
+                    print ("Angle: {}".format(angle))
 
-                angle = self.getAngle(x1, y1, x2, y2)
-                print ("Angle: {}".format(angle))
+                    self.moveRobot(position.x / 1000, position.y / 1000, angle, self.selectedYellow - 1, True)
+                elif self.selectedBlue != 0:
+                    position = self.game.blue_team.players[self.selectedBlue-1].pose.position
+                    x1 = position.x / 1000
+                    y1 = position.y / 1000
+                    x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
+                    y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
 
-                self.moveRobot(position.x / 1000, position.y / 1000, angle, self.selectedYellow - 1, True)
-            elif self.selectedBlue != 0:
-                position = self.game.blue_team.players[self.selectedBlue-1].pose.position
-                x1 = position.x / 1000
-                y1 = position.y / 1000
-                x2 = e.x() * self.ratio / 1000 - 10400 / 1000 / 2
-                y2 = -e.y() * self.ratio / 1000 + 7400 / 1000 / 2
+                    angle = self.getAngle(x1, y1, x2, y2)
+                    print ("Angle: {}".format(angle))
 
-                angle = self.getAngle(x1, y1, x2, y2)
-                print ("Angle: {}".format(angle))
-
-                self.moveRobot(position.x / 1000, position.y / 1000, angle, self.selectedBlue - 1, False)
+                    self.moveRobot(position.x / 1000, position.y / 1000, angle, self.selectedBlue - 1, False)
 
     def mousePressEvent(self, e):
         self.moveEvent(e)
@@ -156,30 +157,33 @@ class FieldDisplay(QtGui.QWidget):
 
     def keyPressEvent(self, e):
         print ("Key:")
-        if e.key() == QtCore.Qt.Key_1:
+        if e.key() == QtCore.Qt.Key_D:
+            self.debugMode = not self.debugMode
+            print ("DebugMode: {}".format(self.debugMode))
+        elif e.key() == QtCore.Qt.Key_1:
             self.selectedYellow = 1
             self.selectedBlue = 0
-            print ("#1")
+            print ("#1 Yellow")
         elif e.key() == QtCore.Qt.Key_2:
             self.selectedYellow = 2
             self.selectedBlue = 0
-            print ("#2")
+            print ("#2 Yellow")
         elif e.key() == QtCore.Qt.Key_3:
             self.selectedYellow = 3
             self.selectedBlue = 0
-            print ("#3")
+            print ("#3 Yellow")
         elif e.key() == QtCore.Qt.Key_4:
             self.selectedYellow = 4
             self.selectedBlue = 0
-            print ("#4")
+            print ("#4 Yellow")
         elif e.key() == QtCore.Qt.Key_5:
             self.selectedYellow = 5
             self.selectedBlue = 0
-            print ("#5")
+            print ("#5 Yellow")
         elif e.key() == QtCore.Qt.Key_6:
             self.selectedYellow = 6
             self.selectedBlue = 0
-            print ("#6")
+            print ("#6 Yellow")
         elif e.key() == QtCore.Qt.Key_Q:
             self.selectedBlue = 1
             self.selectedYellow = 0
@@ -227,6 +231,8 @@ class FieldDisplay(QtGui.QWidget):
         self.drawRobotTeam(qp, self.game.blue_team, 0, 0, 255, robotSize, False if self.selectedBlue == 0 else True, self.selectedBlue)
 
         self.drawBall(qp, self.game.field.ball)
+
+        self.drawArrow(qp, 0, 0, 200, 200)
 
     def drawGrass(self, qp):
         qp.setPen(self.blackPen)
@@ -331,6 +337,26 @@ class FieldDisplay(QtGui.QWidget):
             x = random.randint(1, size.width()-1)
             y = random.randint(1, size.height()-1)
             qp.drawPoint(x, y)
+
+    def drawArrow(self, qp, x1, y1, x2, y2):
+        qp.setPen(self.redPen)
+        qp.drawLine(x1, y1, x2, y2)
+
+        cosAngleTop = math.cos(math.radians(self.getAngle(x2, y2, x1, y1) + 45))
+        sinAngleTop = math.sin(math.radians(self.getAngle(x2, y2, x1, y1) + 45))
+
+        cosAngleBottom = math.cos(math.radians(self.getAngle(x2, y2, x1, y1) - 45))
+        sinAngleBottom = math.sin(math.radians(self.getAngle(x2, y2, x1, y1) - 45))
+
+        x3 = 20 * cosAngleTop + x2
+        y3 = 20 * sinAngleTop + y2
+
+        x4 = 20 * cosAngleBottom + x2
+        y4 = 20 * sinAngleBottom + y2
+
+        qp.drawLine(x2, y2, x3, y3)
+        qp.drawLine(x2, y2, x4, y4)
+
 
     def refresh(self):
         self.update()

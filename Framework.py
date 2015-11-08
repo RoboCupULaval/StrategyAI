@@ -152,7 +152,7 @@ def start_game(strategy, gui=False):
 
         main_loop()
         app = QtGui.QApplication(sys.argv)
-        ex = FieldDisplay(main_loop, game, vision, command_sender)
+        ex = FieldDisplay(main_loop, game, command_sender)
         sys.exit(app.exec_())
     else:
         while True:  # TODO: Replace with a loop that will stop when the game is over
