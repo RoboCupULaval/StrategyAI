@@ -233,7 +233,10 @@ class FieldDisplay(QtGui.QWidget):
         self.drawBall(qp, self.game.field.ball)
 
     def drawGrass(self, qp):
-        qp.setPen(self.blackPen)
+        if self.debugMode:
+            qp.setPen(self.blackPen)
+        else:
+            qp.setPen(self.whitePen)
         qp.setBrush(QtGui.QColor(0, 155, 0, 150))
         qp.drawRect(0, 0, self.ratioWidth + self.fieldOffsetX * 2 / self.ratio, self.ratioHeight + self.fieldOffsetY * 2 / self.ratio)
         qp.setBrush(QtGui.QColor(0, 155, 0, 200))
