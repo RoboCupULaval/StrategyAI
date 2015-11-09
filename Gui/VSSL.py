@@ -64,7 +64,7 @@ class FieldDisplay(QtGui.QWidget):
         self.ratioHeight = self.fieldHeight / self.ratio
         self.setWindowTitle('SSL Visualizer')
 
-        self.redPen = QtGui.QPen(QtGui.QColor(255, 0, 0), 3, QtCore.Qt.SolidLine)
+        self.redPen = QtGui.QPen(QtGui.QColor("red"), 3, QtCore.Qt.SolidLine)
         self.whitePen = QtGui.QPen(QtGui.QColor(255, 255, 255), 3, QtCore.Qt.SolidLine)
         self.blackPen = QtGui.QPen(QtGui.QColor(0, 0, 0), 3, QtCore.Qt.SolidLine)
         self.grayPenFat = QtGui.QPen(QtGui.QColor(50, 50, 50, 200), 10, QtCore.Qt.SolidLine)
@@ -290,9 +290,14 @@ class FieldDisplay(QtGui.QWidget):
                 self.drawRobot(qp, r, g, b, i, index, robotSize, True if selectedIndex == (index) else False)
             index += 1
 
+    def getRobotPosition(self, robot):
+        x = self.atRatio(robot.pose.position.x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
+        y = self.atRatio(-robot.pose.position.y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
+
+        return (x,y)
+
     def drawRobot(self, qp, r, g, b, robot, index, robotSize, selected = False):
-        centerX = self.atRatio(robot.pose.position.x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
-        centerY = self.atRatio(-robot.pose.position.y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
+        centerX, centerY = self.getRobotPosition(robot)
         if selected:
             qp.setPen(self.whitePen)
         else:
@@ -317,18 +322,11 @@ class FieldDisplay(QtGui.QWidget):
         qp.drawText(QtCore.QPointF(labelX, labelY), indexLabel)
         index += 1
 
-        cos_Angle = math.cos(math.radians(-robot.pose.orientation))
-        sin_Angle = math.sin(math.radians(-robot.pose.orientation))
-
-        x1 = robotSize * cos_Angle + centerX
-        y1 = robotSize * sin_Angle + centerY
-        x2 = robotSize*2 * cos_Angle + centerX
-        y2 = robotSize*2 * sin_Angle + centerY
+        qp.setPen(self.blackPen)
+        self.drawArrowFromRobot(qp, robot, robotSize, -robot.pose.orientation)
         #qp.setPen(self.grayPenFat)
         #qp.drawLine(x1, y1, x2, y2)
 
-        qp.setPen(self.blackPen)
-        qp.drawLine(x1, y1, x2, y2)
 
     def drawPoints(self, qp):
         qp.setPen(QtCore.Qt.red)
@@ -339,24 +337,57 @@ class FieldDisplay(QtGui.QWidget):
             y = random.randint(1, size.height()-1)
             qp.drawPoint(x, y)
 
-    def drawArrow(self, qp, x1, y1, x2, y2):
+    def drawArrow(self, qp, magnitude, angle, centerX=0, centerY=0):
         qp.setPen(self.redPen)
-        qp.drawLine(x1, y1, x2, y2)
 
-        cosAngleTop = math.cos(math.radians(self.getAngle(x2, y2, x1, y1) + 45))
-        sinAngleTop = math.sin(math.radians(self.getAngle(x2, y2, x1, y1) + 45))
+        self.drawLine(qp, magnitude, angle, centerX, centerY)
 
-        cosAngleBottom = math.cos(math.radians(self.getAngle(x2, y2, x1, y1) - 45))
-        sinAngleBottom = math.sin(math.radians(self.getAngle(x2, y2, x1, y1) - 45))
+        cosAngleTop = -math.cos(math.radians(angle + 45))
+        sinAngleTop = -math.sin(math.radians(angle + 45))
 
-        x3 = 20 * cosAngleTop + x2
-        y3 = 20 * sinAngleTop + y2
+        cosAngleBottom = -math.cos(math.radians(angle - 45))
+        sinAngleBottom = -math.sin(math.radians(angle - 45))
 
-        x4 = 20 * cosAngleBottom + x2
-        y4 = 20 * sinAngleBottom + y2
+        pointX, pointY = self.getPointFromVec(magnitude, angle, centerX, centerY)
 
-        qp.drawLine(x2, y2, x3, y3)
-        qp.drawLine(x2, y2, x4, y4)
+        lx = 10 * cosAngleTop + pointX
+        ly = 10 * sinAngleTop + pointY
+
+        rx = 10 * cosAngleBottom + pointX
+        ry = 10 * sinAngleBottom + pointY
+
+        qp.drawLine(pointX, pointY, lx, ly)
+        qp.drawLine(pointX, pointY, rx, ry)
+
+    def drawLine(self, qp, magnitude, angle, centerX, centerY):
+
+        x, y = self.getPointFromVec(magnitude, angle, centerX, centerY)
+
+        qp.drawLine(centerX, centerY, x, y)
+
+    def drawLineFromRobot(self, qp, robot, magnitude, angle):
+
+        robotSize = self.atRatio(180)
+        robotX, robotY = self.getRobotPosition(robot)
+        centerX, centerY = self.getPointFromVec(robotSize, angle, robotX, robotY)
+
+        self.drawLine(qp, magnitude, angle, centerX, centerY)
+
+    def drawArrowFromRobot(self, qp, robot, magnitude, angle):
+
+        robotSize = self.atRatio(180)
+        robotX, robotY = self.getRobotPosition(robot)
+        centerX, centerY = self.getPointFromVec(robotSize, angle, robotX, robotY)
+        self.drawArrow(qp, magnitude, angle, centerX, centerY)
+
+    def getPointFromVec(self, magnitude, angle, centerX=0, centerY=0):
+
+        cos_Angle = math.cos(math.radians(angle))
+        sin_Angle = math.sin(math.radians(angle))
+        x = magnitude * cos_Angle + centerX
+        y = magnitude * sin_Angle + centerY
+
+        return (x, y)
 
 
     def refresh(self):
