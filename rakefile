@@ -1,6 +1,8 @@
 task :default => :getPythonFramework
 
-task :getPythonFramework do 
+TEST_LIST = Rake::FileList["**/*Test.py"]
+
+task :getPythonFramework do
   unless File.directory?("PythonFramework")
     sh "git clone https://github.com/RoboCupULaval/RULEngine.git PythonFramework"
     sh "git -C PythonFramework checkout dev"
@@ -9,4 +11,8 @@ end
 
 task :upframework do
   sh "git -C PythonFramework pull origin"
+end
+
+task :unit do
+  sh "nosetests --rednose #{TEST_LIST}"
 end

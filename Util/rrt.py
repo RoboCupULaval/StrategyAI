@@ -1,15 +1,21 @@
 __author__ = 'agingrasc'
 
-class RRT:
+from types import isinstance
+
+class Tree:
     """
     Implemente un arbre a branche multiple pour supporter le pathfinder RRT
     """
-    def __init__(self, root):
+    def __init__(self, data):
         self.root = None
-        self.data = root
+        if isinstance(data, tuple):
+            self.data = data
+        else
+            raise TypeError
         self.childs = [] #sub RRT
 
     def find_nearest(self, path):
+        return None
 
     def __eq__(self, obj):
         x1, y1 = self.data
