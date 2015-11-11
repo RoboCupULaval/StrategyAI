@@ -120,16 +120,27 @@ def send_robot_commands(game, vision, command_sender):
     vision_frame = vision.get_latest_frame()
     if vision_frame:
         commands = game.get_commands()
+        try:
+            debugDisplay.arrowlist = []
+        except:
+            pass
         for command in commands:
             robot = vision_frame.detection.robots_blue[command.player.id]
             fake_player = Player(0)
             fake_player.pose = Pose(Position(robot.x, robot.y), math.degrees(robot.orientation))
             command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
 
+            try:
+                mag = math.sqrt(command.pose.position.x**2 + command.pose.position.y**2) * 50
+                angle = math.degrees(math.atan2(command.pose.position.y, command.pose.position.x))
+                if mag > 0.001:
+                    debugDisplay.drawArrowHack(mag, angle, robot.x, robot.y)
+            except:
+                pass
             command_sender.send_command(command)
 
 def start_game(strategy, gui=False):
-
+    global debugDisplay
     #refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin")
     vision = Vision()
     command_sender = UDPCommandSender("127.0.0.1", 20011)
@@ -150,9 +161,9 @@ def start_game(strategy, gui=False):
         if not qt_installed:
             sys.exit("PyQt4 is not installed")
 
-        main_loop()
+        #main_loop()
         app = QtGui.QApplication(sys.argv)
-        ex = FieldDisplay(main_loop, game, command_sender)
+        debugDisplay = FieldDisplay(main_loop, game, command_sender)
         sys.exit(app.exec_())
     else:
         while True:  # TODO: Replace with a loop that will stop when the game is over

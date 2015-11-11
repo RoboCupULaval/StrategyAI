@@ -40,6 +40,8 @@ class FieldDisplay(QtGui.QWidget):
         self.fieldWidth = 9000;
         self.fieldHeight = 6000;
 
+        self.arrowlist = []
+
         self._thread.start()
 
         self.initUI()
@@ -230,6 +232,15 @@ class FieldDisplay(QtGui.QWidget):
         self.drawRobotTeam(qp, self.game.yellow_team, 255, 255, 0, robotSize, False if self.selectedYellow == 0 else True, self.selectedYellow)
         self.drawRobotTeam(qp, self.game.blue_team, 0, 0, 255, robotSize, False if self.selectedBlue == 0 else True, self.selectedBlue)
 
+        for arrow in self.arrowlist:
+            #self.drawArrow(qp, *arrow)
+            magnitude, angle, centerX, centerY = arrow
+            centerX, centerY = self.convertCoordinates(centerX, centerY)
+            angle = -angle
+            self.drawArrow(qp, magnitude, angle, centerX, centerY)
+
+        self.arrowlist = []
+
         self.drawBall(qp, self.game.field.ball)
 
     def drawGrass(self, qp):
@@ -291,10 +302,14 @@ class FieldDisplay(QtGui.QWidget):
             index += 1
 
     def getRobotPosition(self, robot):
-        x = self.atRatio(robot.pose.position.x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
-        y = self.atRatio(-robot.pose.position.y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
 
-        return (x,y)
+        return self.convertCoordinates(robot.pose.position.x, robot.pose.position.y)
+
+    def convertCoordinates(self, x, y):
+        x = self.atRatio(x) + (self.ratioFieldOffsetX + self.ratioWidth / 2)
+        y = self.atRatio(-y) + (self.ratioFieldOffsetY + self.ratioHeight / 2)
+
+        return (x, y)
 
     def drawRobot(self, qp, r, g, b, robot, index, robotSize, selected = False):
         centerX, centerY = self.getRobotPosition(robot)
@@ -336,6 +351,9 @@ class FieldDisplay(QtGui.QWidget):
             x = random.randint(1, size.width()-1)
             y = random.randint(1, size.height()-1)
             qp.drawPoint(x, y)
+
+    def drawArrowHack(self, *args):
+        self.arrowlist.append(args)
 
     def drawArrow(self, qp, magnitude, angle, centerX=0, centerY=0):
         qp.setPen(self.redPen)
