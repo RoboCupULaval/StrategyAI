@@ -125,19 +125,22 @@ def send_robot_commands(game, vision, command_sender):
         except:
             pass
         for command in commands:
-            robot = vision_frame.detection.robots_blue[command.player.id]
-            fake_player = Player(0)
-            fake_player.pose = Pose(Position(robot.x, robot.y), math.degrees(robot.orientation))
-            command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
-
             try:
-                mag = math.sqrt(command.pose.position.x**2 + command.pose.position.y**2) * 50
-                angle = math.degrees(math.atan2(command.pose.position.y, command.pose.position.x) + robot.orientation)
-                if mag > 0.001:
-                    debugDisplay.drawArrowHack(mag, angle, robot.x, robot.y)
-            except:
-                pass
-            command_sender.send_command(command)
+                robot = vision_frame.detection.robots_blue[command.player.id]
+                fake_player = Player(0)
+                fake_player.pose = Pose(Position(robot.x, robot.y), math.degrees(robot.orientation))
+                command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
+
+                try:
+                    mag = math.sqrt(command.pose.position.x**2 + command.pose.position.y**2) * 50
+                    angle = math.degrees(math.atan2(command.pose.position.y, command.pose.position.x) + robot.orientation)
+                    if mag > 0.001:
+                        debugDisplay.drawArrowHack(mag, angle, robot.x, robot.y)
+                except:
+                    pass
+                command_sender.send_command(command)
+            except IndexError:
+                pass #Robot est pas activé
 
 def start_game(strategy, gui=False):
     global debugDisplay
