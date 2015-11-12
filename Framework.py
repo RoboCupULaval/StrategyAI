@@ -20,6 +20,17 @@ import time
 from collections import deque
 import threading
 
+#Gui imports are optional
+try:
+    from PyQt4 import QtGui, QtCore
+    qt_installed = True
+except ImportError:
+    qt_installed = False
+
+if qt_installed:
+    from .Gui.VSSL import FieldDisplay
+
+dead_zone = 800
 
 def convertPositionToSpeed(player, x, y, theta):
     current_theta = player.pose.orientation
@@ -37,7 +48,7 @@ def convertPositionToSpeed(player, x, y, theta):
     direction_x = x - current_x
     direction_y = y - current_y
     norm = math.hypot(direction_x, direction_y)
-    speed = 1 if norm >= 50 else 0
+    speed = 1 if norm >= dead_zone else 0
     if norm:
         direction_x /= norm
         direction_y /= norm
@@ -112,57 +123,65 @@ def send_robot_commands(game, vision, command_sender):
     vision_frame = vision.get_latest_frame()
     if vision_frame:
         commands = game.get_commands()
+        try:
+            debugDisplay.arrowlist = []
+        except:
+            pass
         for command in commands:
             try:
-                robot = [robot for robot in vision_frame.detection.robots_blue if robot.robot_id == command.player.id][0]
+                robot = [robot for robot in vision_frame.detection.robots_blue if robot.robot_id == command.player.id and command.player.id == 4][0]
                 fake_player = Player(0)
                 fake_player.pose = Pose(Position(robot.x, robot.y), math.degrees(robot.orientation))
                 command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
 
+
+                try:
+                    mag = math.sqrt(command.pose.position.x**2 + command.pose.position.y**2) * 50
+                    angle = math.degrees(math.atan2(command.pose.position.y, command.pose.position.x) + robot.orientation)
+                    if mag > 0.001:
+                        debugDisplay.drawArrowHack(mag, angle, robot.x, robot.y)
+                except:
+                    pass
                 command_sender.send_command(command)
-                print("Yay")
             except IndexError:
                 print("Robot %s not found in vision" % (command.player.id))
 
-running_thread = None
-thread_terminate = threading.Event()
-
-def start_game(strategy, async=False, serial=False):
-    global running_thread
+def start_game(strategy, gui=False, serial=False):
+    global debugDisplay
     #refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin")
-
-    if not running_thread:
-        vision = Vision(port=10005)
-        if serial:
-            command_sender = SerialCommandSender()
-        else:
-            command_sender = UDPCommandSender("127.0.0.1", 20011)
+    vision = Vision(port=10005)
+    if serial:
+        command_sender = SerialCommandSender()
     else:
-        stop_game()
+        command_sender = UDPCommandSender("127.0.0.1", 20011)
 
     game = create_game(strategy)
-
-    running_thread = threading.Thread(target=game_thread, args=(vision, command_sender, game))
-    running_thread.start()
-
-    if not async:
-        running_thread.join()
-
-def game_thread(vision, command_sender, game):
 
     times = deque(maxlen=10)
     last_time = time.time()
 
-    while not thread_terminate.is_set():  # TODO: Replace with a loop that will stop when the game is over
+    def main_loop():
         #update_game_state(game, engine)
         update_players_and_ball(game, vision)
         update_strategies(game)
         send_robot_commands(game, vision, command_sender)
-        #time.sleep(0.01)
-        new_time = time.time()
-        times.append(new_time - last_time)
-        print(len(times) / sum(times))
-        last_time = new_time
+
+    if gui:
+        if not qt_installed:
+            sys.exit("PyQt4 is not installed")
+
+        #main_loop()
+        app = QtGui.QApplication(sys.argv)
+        debugDisplay = FieldDisplay(main_loop, game, command_sender)
+        sys.exit(app.exec_())
+    else:
+        while True:  # TODO: Replace with a loop that will stop when the game is over
+            main_loop()
+            #time.sleep(0.01)
+            new_time = time.time()
+            times.append(new_time - last_time)
+            print(len(times) / sum(times))
+            last_time = new_time
 
 def stop_game():
 
