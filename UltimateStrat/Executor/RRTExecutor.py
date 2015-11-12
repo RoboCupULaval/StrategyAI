@@ -1,6 +1,8 @@
 from UltimateStrat.Executor.Executor import Executor
 from PythonFramework.Util.constant import *
+from StrategyIA.Util.rrt import Tree
 import random
+import math
 
 __author__ = 'agingrasc'
 
@@ -21,7 +23,6 @@ class RRTExecutor:
         for i in range(info_manager.getCountPlayer()):
             gen_rrt(i)
 
-
     """ Prend un joueur et genere son rrt pour trouver un chemin """
     def gen_rrt(i):
         # 1 - Position?
@@ -31,9 +32,16 @@ class RRTExecutor:
 
         # 3 - Generation
         # rrt doit etre implemente
-        lrrt = Rrt(pos)
+        lrrt = Tree(pos)
         latest = (-9999, -9999)
         rand_gen = random.random();
         while(not near(target, latest)):
             rand_pos = rand_gen.randint(FIELD_X_LEFT, FIELD_X_RIGHT), rand_gen.randint(FIELD_Y_BOTTOM, FIELD_Y_TOP)
-            nearest = lrrt.nearest(rand_pos)
+            nearest = lrrt.find_nearest(rand_pos)
+
+    def is_near(target, latest):
+
+    def norm(pos1, pos2):
+        x1, y1 = pos1
+        x2, y2 = pos2
+        return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
