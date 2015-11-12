@@ -1,12 +1,12 @@
-from UltimateStrat.Executor.Executor import Executor
+from UltimateStrat.STP.Skill.SkillBase import SkillBase
 from PythonFramework.Util.constant import *
-from PythonFramework.Util.Position import Position
+from PythonFramework.Util.Pose import Position, Pose
 import math
 
 ROBOT_RADIUS = 90
 BALL_RADIUS = 21
 
-class PFAxisExecutor(Executor):
+class sPathAxis(SkillBase):
     """
     PFAxisExecutor (PathFinder Axis) est une sequence de requetes permettant
     de fournir le pathfinder pour un seul robot qui cherche a se positionner
@@ -16,29 +16,31 @@ class PFAxisExecutor(Executor):
     3 - Ou est la balle?
     4 - Quel chemin doit-il emprunter pour avoir le dribbler sur la balle?
     """
-    def __init__(self, info_manager):
-        Executor.__init__(self, info_manager)
+    def __init__(self):
+        SkillBase.__init__(self, self.__class__.__name__)
         self.pose = Position(0, 0)
         self.orientation = 0
         self.target = Position(-99999, -99999)
         self.paths = None
 
-    def exec(self):
+    def act(self, pose_player, pst_target, pst_goal):
         # 1 Ou est le robot
-        self.pose = self.info_manager.getPlayerPosition(0)
+        self.pose = pose_player.position
 
         # 2 Quelle est l'orientation
-        self.orientation = self.info_manager.getPlayerPose(0)
+        self.orientation = self.orientation
         self.orientation = math.radians(self.orientation)
-        self.orientation -= math.pi
 
         # 3 Position de la target
-        self.target = self.info_manager.getPlayerTarget(0)
+        self.target = pst_target
 
         # 4 Chemin a emprunter
         self.path()
+        return self.paths
 
     def path(self):
+        angle = self.orientation
+
         # Position relative aux abscisses
         x_axis = self.ball_on_axis()
         x_k = math.floor((self.target.x + BALL_RADIUS - (ROBOT_RADIUS + self.pose.x))/math.cos(self.orientation))
@@ -57,22 +59,34 @@ class PFAxisExecutor(Executor):
             if self.pose.y == self.target.y:
                 if x_k > 0:
                     delta = min(self.target.x - self.pose.x - ROBOT_RADIUS - BALL_RADIUS, ROBOT_RADIUS)
-                    self.paths = Position(self.pose.x + delta, self.pose.y)
+                    deltax = delta*math.cos(angle)
+                    deltay = delta*math.sin(angle)
+                    self.paths = Position(self.pose.x + deltax, self.pose.y + deltay)
                 else:
                     delta = -ROBOT_RADIUS if self.pose.y >= 0 else ROBOT_RADIUS
-                    self.paths = Position(self.pose.x, self.pose.y + delta)
+                    deltax = delta*math.sin(angle)
+                    deltay = delta*math.cos(angle)
+                    self.paths = Position(self.pose.x + deltax, self.pose.y + deltay)
             else:
                 delta = self.target.y - self.pose.y
+                deltax = delta*math.sin(angle)
+                deltay = delta*math.cos(angle)
                 self.paths = Position(self.pose.x, self.pose.y + delta)
         elif not x_axis and y_axis:
             delta = -ROBOT_RADIUS if self.pose.x >= 0 else ROBOT_RADIUS
-            self.paths = Position(self.pose.x + delta, self.pose.y)
+            deltax = delta * math.cos(angle)
+            deltay = delta * math.sin(angle)
+            self.paths = Position(self.pose.x + deltax, self.pose.y + deltay)
         elif not x_axis and not y_axis:
             if x_k > 0:
                 delta = ROBOT_RADIUS if self.target.y - self.pose.y >= 0 else -ROBOT_RADIUS
-                self.paths = Position(self.pose.x, self.pose.y + delta)
+                deltax = delta*math.sin(angle)
+                deltay = delta*math.cos(angle)
+                self.paths = Position(self.pose.x + deltax, self.pose.y + deltay)
             else:
                 delta = ROBOT_RADIUS
+                deltax = delta*math.cos(angle)
+                deltay = delta*math.sin(angle)
                 self.paths = Position(self.pose.x - delta, self.pose.y)
         else:
             self.paths = self.pose

@@ -1,9 +1,9 @@
-from UltimateStrat.Executor.PFAxisExecutor import *
-from PythonFramework.Util.Position import Position
+from UltimateStrat.STP.Skill.sPathAxis import *
+from PythonFramework.Util.Pose import Position
 import math
 
 def test_ball_on_axis():
-    mock = PFAxisExecutor(None)
+    mock = sPathAxis()
     mock.pose = Position(0, 0)
     mock.orientation = 0
     y = True
@@ -27,7 +27,7 @@ def test_ball_on_axis():
     assert mock.ball_on_axis(y) is False
 
 def test_union():
-    mock = PFAxisExecutor(None)
+    mock = sPathAxis()
     r1 = range(1,2)
     r2 = range(1,5)
     assert mock.union(r1, r2) is True
@@ -35,7 +35,7 @@ def test_union():
     assert mock.union(r2, r3) is False
 
 def test_path_TT():
-    mock = PFAxisExecutor(None)
+    mock = sPathAxis()
     mock.pose = Position(0,0)
     mock.orientation = 0
 
@@ -45,7 +45,7 @@ def test_path_TT():
     assert mock.paths == Position(0,0)
 
 def test_path_TF():
-    mock = PFAxisExecutor(None)
+    mock = sPathAxis()
     mock.pose = Position(0,0)
     mock.orientation = 0
 
@@ -53,6 +53,13 @@ def test_path_TF():
     mock.target = Position(500, 0)
     mock.path()
     assert mock.paths == Position(90, 0)
+
+    mock.orientation = math.pi/4
+    mock.path()
+    assert not mock.paths == Position(90, 0)
+    assert Position(math.floor(mock.paths.x), math.floor(mock.paths.y)) == Position(63, 63)
+
+    mock.orientation = 0
 
     # ROBOT_RADIUS * + BALL_RADIUS
     mock.target = Position(112, 0)
@@ -62,6 +69,7 @@ def test_path_TF():
     # Devant la balle, mais meme y
     mock.target = Position(-150, 0)
     mock.path()
+    print(mock.paths)
     assert mock.paths == Position(0, -90)
 
     # Devant la balle, meme y, en negatif
@@ -71,7 +79,7 @@ def test_path_TF():
     assert mock.paths == Position(-10, 80)
 
 def test_path_FT():
-    mock = PFAxisExecutor(None)
+    mock = sPathAxis()
     mock.pose = Position(0,0)
     mock.orientation = 0
 
@@ -86,7 +94,7 @@ def test_path_FT():
     assert mock.paths == Position(-90, 0)
 
 def test_path_FF():
-    mock = PFAxisExecutor(None)
+    mock = sPathAxis()
     mock.pose = Position(0,0)
     mock.orientation = 0
 
