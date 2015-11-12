@@ -23,6 +23,15 @@ def test_find_nearest():
     a.add((49, 51))
     assert a.find_nearest(path) == (49, 51)
 
+def test_find():
+    a = Tree((24, 75));
+    assert a == a.find((24, 75))
+    b = (13, 42)
+    a.add(b)
+    c = Tree(b)
+    assert c == a.find(b)
+    assert a.find((99, 99)) is None
+
 def test_get_all_nodes():
     a = Tree((24, 75))
     b = ((1, 2))
