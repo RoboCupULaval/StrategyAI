@@ -132,7 +132,7 @@ def send_robot_commands(game, vision, command_sender):
 
             try:
                 mag = math.sqrt(command.pose.position.x**2 + command.pose.position.y**2) * 50
-                angle = math.degrees(math.atan2(command.pose.position.y, command.pose.position.x))
+                angle = math.degrees(math.atan2(command.pose.position.y, command.pose.position.x) + robot.orientation)
                 if mag > 0.001:
                     debugDisplay.drawArrowHack(mag, angle, robot.x, robot.y)
             except:
