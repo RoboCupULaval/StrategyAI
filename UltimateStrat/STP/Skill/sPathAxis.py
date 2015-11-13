@@ -6,6 +6,7 @@ import math
 
 ROBOT_RADIUS = 90
 BALL_RADIUS = 21
+DEAD_ZONE = 850 
 
 class sPathAxis(SkillBase):
     """
@@ -80,7 +81,7 @@ class sPathAxis(SkillBase):
             y_axis = t_axis
         angle_s = angle + math.pi/2
 
-        dead_delta = 850
+        dead_delta = DEAD_ZONE
         deadx = int(drib.x) in range(x - dead_delta, x + dead_delta + 1)
         deady = int(drib.y) in range(y - dead_delta, y + dead_delta + 1)
 
@@ -91,6 +92,7 @@ class sPathAxis(SkillBase):
         print("Drib position: " + str(drib))
         print("Dead in x: " + str(deadx))
         print("Dead in y: " + str(deady))
+        print("Position du robot: " + str(self.pose))
 
         if self.on_ball() or (x_axis and y_axis):
             self.paths = self.pose
