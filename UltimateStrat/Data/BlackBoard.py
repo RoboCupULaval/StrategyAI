@@ -14,7 +14,7 @@ class BlackBoard:
         d_team = {}
         d_op_team = {}
         d_ball = {'position': self.field.ball.position}
-        d_game = dict(zip(('play', 'state', 'sequence'), (None, None, None)))
+        d_game = dict(zip(('play', 'state', 'sequence'), ('pHalt', None, None)))
 
         for player in self.team.players:
             t_player_data = (player.pose, player.pose.position,

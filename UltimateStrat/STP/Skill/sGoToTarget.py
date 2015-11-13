@@ -4,9 +4,9 @@ from RULEngine.Util.Pose import Pose
 __author__ = 'jbecirovski'
 
 
-class sFollowTarget(SkillBase):
+class sGoToTarget(SkillBase):
     """
-    sFollowTarget generate next pose which is target pose
+    sGoToTarget generate next pose which is target pose
     """
     def __init__(self):
         SkillBase.__init__(self, self.__class__.__name__)
