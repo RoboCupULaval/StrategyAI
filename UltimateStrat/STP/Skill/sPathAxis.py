@@ -1,6 +1,7 @@
 from UltimateStrat.STP.Skill.SkillBase import SkillBase
 from RULEngine.Util.constant import *
 from RULEngine.Util.Pose import Position, Pose
+from math import *
 import math
 
 ROBOT_RADIUS = 90
@@ -28,8 +29,8 @@ class sPathAxis(SkillBase):
         self.pose = pose_player.position
 
         # 2 Quelle est l'orientation
-        #self.orientation = self.orientation
-        #self.orientation = math.radians(self.orientation)
+        self.orientation = self.orientation
+        self.orientation = math.radians(self.orientation)
 
         # 3 Position de la target
         self.target = pst_target
@@ -40,109 +41,88 @@ class sPathAxis(SkillBase):
         return Pose(ret, 0)
 
     def path(self):
+        x = int(self.pose.x)
+        tx = int(self.target.x)
+        y = int(self.pose.y)
+        ty = int(self.target.y)
+        radius = int(ROBOT_RADIUS + BALL_RADIUS)
         angle = self.orientation
+        angle_s = self.orientation + math.pi/2
 
-        # Position relative aux abscisses
-        x_axis = self.ball_on_axis()
-        x_k = math.floor((self.target.x + BALL_RADIUS - (ROBOT_RADIUS + self.pose.x))/math.cos(self.orientation))
+        c = cos(angle)
+        s = sin(angle)
 
-        # Position relative aux ordonnees
-        y_axis = self.ball_on_axis(True)
-        y_k = math.floor((self.target.y + BALL_RADIUS - ROBOT_RADIUS - self.pose.y)/math.sin(self.orientation + math.pi/2))
+        kx = self.kx(self.pose, self.target, angle)
+        ky = self.ky(self.pose, self.target, angle)
 
-        # debug
-        # print(x_axis)
-        # print(y_axis)
-        # print('\n')
+        #x_axis = self.union(rx, ry)
 
-        # Calcul du prochain point
-        if x_axis and not y_axis:
-            if self.pose.y == self.target.y:
-                if x_k > 0:
-                    delta = min(self.target.x - self.pose.x - ROBOT_RADIUS - BALL_RADIUS, ROBOT_RADIUS)
-                    deltax = delta*math.cos(angle)
-                    deltay = delta*math.sin(angle)
-                    self.paths = Position(self.pose.x + deltax, self.pose.y + deltay)
-                else:
-                    delta = -ROBOT_RADIUS if self.pose.y >= 0 else ROBOT_RADIUS
-                    deltax = delta*math.sin(angle)
-                    deltay = delta*math.cos(angle)
-                    self.paths = Position(self.pose.x + deltax, self.pose.y + deltay)
-            else:
-                delta = self.target.y - self.pose.y
-                deltax = delta*math.sin(angle)
-                deltay = delta*math.cos(angle)
-                self.paths = Position(self.pose.x, self.pose.y + delta)
-        elif not x_axis and y_axis:
-            delta = -ROBOT_RADIUS if self.pose.x >= 0 else ROBOT_RADIUS
-            deltax = delta * math.cos(angle)
-            deltay = delta * math.sin(angle)
-            self.paths = Position(self.pose.x + deltax, self.pose.y + deltay)
-        elif not x_axis and not y_axis:
-            if x_k > 0:
-                delta = ROBOT_RADIUS if self.target.y - self.pose.y >= 0 else -ROBOT_RADIUS
-                deltax = delta*math.sin(angle)
-                deltay = delta*math.cos(angle)
-                self.paths = Position(self.pose.x + deltax, self.pose.y + deltay)
-            else:
-                delta = ROBOT_RADIUS
-                deltax = delta*math.cos(angle)
-                deltay = delta*math.sin(angle)
-                self.paths = Position(self.pose.x - delta, self.pose.y)
-        else:
-            self.paths = self.pose
+        c = cos(angle_s)
+        s = sin(angle_s)
+        rx = range(int((tx - x)/c - radius/c), int((tx - x)/c + radius/c + 1))
+        ry = range(int((ty - y)/s - radius/s), int((ty - y)/s + radius/s + 1))
 
+        y_axis = self.union(rx, ry)
+
+        drib_posx = int(radius * math.cos(angle + math.pi) + tx)
+        drib_posy = int(radius * math.sin(angle + math.pi) + ty)
+
+        if x_axis and y_axis:
+            self.paths(self.pose)
+        elif not x_axis:
+            # on bouge en "x axis" selon le robot
+            k = self.kx(self.pose, self.target, angle)
+            deltax = k*cos(angle)
+            deltay = k*sin(angle)
+            self.paths(x + deltax, y + deltay)
+
+        self.paths = Position(drib_posx, drib_posy)
         return None
 
     def union(self, r1, r2):
+        ret = False
         for i in r1:
             if i in r2:
-                return True
+                ret = True
+        return ret
 
-        return False
+    def kx(self, pos1, pos2, angle):
+        """ Retourne k pour le mouvement pour """
+        x = pos1.x
+        tx = pos2.x
 
-    def ball_on_axis(self, y_axis=False):
+        if angle < 0:
+            angle = angle + math.pi
+        angle = angle % (math.pi*2)
+        ret = 0
+        if not (angle == math.pi/2 or angle == (2*math.pi/3)):
+            ret = int((tx - x)/cos(angle))
 
-        angle = self.orientation
-        max = 0
-        min = 0
-        pos = 0
-        target_pos = 0
-        targets_pos = 0
-        radius = int(ROBOT_RADIUS)
-        f = math.cos
-        if not y_axis:
-            max = FIELD_X_RIGHT
-            min = FIELD_X_LEFT
-            pos = self.pose.x
-            s_pos = self.pose.y
-            target_pos = self.target.x
-            targets_pos = self.target.y
-            f = math.cos
-            fs = math.sin
-        else:
-            angle += math.pi/2
-            max = FIELD_Y_TOP
-            min = FIELD_Y_BOTTOM
-            pos = self.pose.y
-            s_pos = self.pose.x
-            target_pos = self.target.y
-            targets_pos = self.target.x
-            f = math.sin
-            fs = math.cos
+        return ret
 
-        k_max = math.ceil((max - pos)/f(angle)) + 1
-        k_min = math.floor((min - pos)/f(angle))
+    def ky(self, pos1, pos2, angle):
+        y = pos1.y
+        ty = pos2.y
 
-        for i in range(k_min, k_max):
-            # temporary position
-            t_pos = math.floor(i*f(angle) + pos)
-            if t_pos == target_pos:
-                # temporary secondary position
-                ts_pos = math.floor(i*fs(angle) + s_pos)
-                r_pos = range(int(ts_pos) - radius, int(ts_pos) + radius + 1)
-                r_target = range (int(targets_pos) - BALL_RADIUS, int(targets_pos) + BALL_RADIUS + 1)
-                if self.union(r_pos, r_target):
-                    return True
+        if angle < 0:
+            angle = abs(angle) + math.pi
+        angle = angle % (math.pi*2)
+        ret = 0
 
-        return False
+        if not (angle == 0 or angle == math.pi):
+            ret = int((ty - y)/sin(angle))
+
+        return ret
+
+    def radf(self, f, r, angle):
+        if angle < 0:
+            angle += math.pi
+        angle = angle % (math.pi*2)
+
+        ret = 0
+        if f == math.sin and not (angle == 0 or angle == math.pi):
+            ret = r / f(angle)
+        elif f == math.cos and not (angle == math.pi/2 or angle == 2*math.pi/3):
+            ret = r / f(angle)
+
+        return ret
