@@ -3,30 +3,8 @@ from RULEngine.Util.Pose import Position
 import math
 from nose.tools import *
 
-@nottest
-def test_ball_on_axis():
-    mock = sPathAxis()
-    mock.pose = Position(0, 0)
-    mock.orientation = 0
-    y = True
-
-    mock.target = Position(50, 50)
-    assert mock.ball_on_axis() is True
-    assert mock.ball_on_axis(y) is True
-
-    mock.target = Position(-50, 50)
-    assert mock.ball_on_axis() is True
-    assert mock.ball_on_axis(y) is True
-
-    mock.target = Position(50, 500)
-    assert mock.ball_on_axis() is False
-    assert mock.ball_on_axis(y) is True
-
-    mock.target = Position(50, -50)
-    assert mock.ball_on_axis(y) is True
-
-    mock.target = Position(600, 50)
-    assert mock.ball_on_axis(y) is False
+RADIUS = 111
+DEAD_DELTA = 850
 
 def test_union():
     mock = sPathAxis()
@@ -103,7 +81,6 @@ def test_radf():
     a = mock.radf(f, r, angle)
     assert a == 5
 
-@nottest
 def test_path_TT():
     mock = sPathAxis()
     mock.pose = Position(0,0)
@@ -114,42 +91,30 @@ def test_path_TT():
     mock.path()
     assert mock.paths == Position(0,0)
 
-@nottest
 def test_path_TF():
     mock = sPathAxis()
     mock.pose = Position(0,0)
     mock.orientation = 0
 
     # derriere la balle, mais loin
-    mock.target = Position(500, 0)
-    mock.path()
-    assert mock.paths == Position(90, 0)
-
-    mock.orientation = math.pi/4
-    mock.path()
-    #assert not mock.paths == Position(90, 0)
-    #assert Position(math.floor(mock.paths.x), math.floor(mock.paths.y)) == Position(63, 63)
-
-    mock.orientation = 0
-
-    # ROBOT_RADIUS * + BALL_RADIUS
-    mock.target = Position(112, 0)
-    mock.path()
-    assert mock.paths == Position(1, 0)
-
-    # Devant la balle, mais meme y
-    mock.target = Position(-150, 0)
+    mock.target = Position(RADIUS+DEAD_DELTA+1, 0)
     mock.path()
     print(mock.paths)
-    assert mock.paths == Position(0, -90)
+    assert mock.paths == Position(DEAD_DELTA+1, 0)
+
+    # Devant la balle, mais meme y
+    mock.target = Position(-RADIUS-DEAD_DELTA-1, 0)
+    mock.path()
+    print(mock.paths)
+    assert mock.paths == Position(0, -222)
 
     # Devant la balle, meme y, en negatif
     mock.pose = Position(-10, -10)
     mock.target = Position(-200, -10)
     mock.path()
-    assert mock.paths == Position(-10, 80)
+    print(mock.paths)
+    assert mock.paths == Position(-10, -10)
 
-@nottest
 def test_path_FT():
     mock = sPathAxis()
     mock.pose = Position(0,0)
@@ -157,39 +122,26 @@ def test_path_FT():
 
     # y_axis True
     mock.pose = Position(0, 0)
-    mock.target = Position(0, -200)
+    mock.target = Position(250, RADIUS+DEAD_DELTA+1)
     mock.path()
-    assert mock.paths == Position(-90, 0)
-
-    mock.taget = Position(0, 200)
+    print(mock.paths)
+    assert mock.paths == Position(0, RADIUS+DEAD_DELTA+1)
+    t = 0 - RADIUS - DEAD_DELTA - 1
+    mock.target = Position(250, t)
     mock.path()
-    assert mock.paths == Position(-90, 0)
+    print(mock.paths)
+    assert mock.paths == Position(0, -RADIUS-DEAD_DELTA-1)
 
-@nottest
 def test_path_FF():
     mock = sPathAxis()
     mock.pose = Position(0,0)
     mock.orientation = 0
 
-    # on est derriere la balle
-    mock.target = Position(200, 200)
+    mock.target = Position(1000, 1000)
     mock.path()
-    assert mock.paths == Position(0, 90)
-
-    mock.target = Position(200, 70)
+    a = mock.paths
+    assert a == Position(889, 0)
+    mock.pose = mock.paths
     mock.path()
-    assert mock.paths == Position(0, 70)
-
-    mock.target = Position(200, -200)
-    mock.path()
-    assert mock.paths == Position(0, -90)
-
-    mock.target = Position(200, -70)
-    mock.path()
-    assert mock.paths == Position(0, -70)
-
-    # on est devant la balle
-    mock.target = Position(-200, -200)
-    mock.path()
-    print(mock.paths)
-    assert mock.paths == Position(-90, 0)
+    a = mock.paths
+    assert a == Position(889, 1000)
