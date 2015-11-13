@@ -10,7 +10,7 @@ class pPathAxis(PlayBase):
         PlayBase.__init__(self, self.__class__.__name__)
 
     def getTactics(self, index=None):
-        sequence = [['tPathAxis' for x in range(6)]]
+        sequence = [['tPathAxis'] + ['tFollowPrevFriend' for x in range(5)]]
         if index is None:
             return sequence[0]
         else:

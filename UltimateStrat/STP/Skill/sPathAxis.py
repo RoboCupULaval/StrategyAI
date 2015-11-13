@@ -36,7 +36,9 @@ class sPathAxis(SkillBase):
 
         # 4 Chemin a emprunter
         self.path()
-        return self.paths
+        ret = self.paths
+        #ret = Position(ret.x/1000, ret.y/1000)
+        return Pose(ret, self.orientation)
 
     def path(self):
         angle = self.orientation
@@ -50,9 +52,9 @@ class sPathAxis(SkillBase):
         y_k = math.floor((self.target.y + BALL_RADIUS - ROBOT_RADIUS - self.pose.y)/math.sin(self.orientation + math.pi/2))
 
         # debug
-        print(x_axis)
-        print(y_axis)
-        print('\n')
+        # print(x_axis)
+        # print(y_axis)
+        # print('\n')
 
         # Calcul du prochain point
         if x_axis and not y_axis:
