@@ -28,8 +28,8 @@ class sPathAxis(SkillBase):
         self.pose = pose_player.position
 
         # 2 Quelle est l'orientation
-        self.orientation = self.orientation
-        self.orientation = math.radians(self.orientation)
+        #self.orientation = self.orientation
+        #self.orientation = math.radians(self.orientation)
 
         # 3 Position de la target
         self.target = pst_target
@@ -37,8 +37,7 @@ class sPathAxis(SkillBase):
         # 4 Chemin a emprunter
         self.path()
         ret = self.paths
-        #ret = Position(ret.x/1000, ret.y/1000)
-        return Pose(ret, self.orientation)
+        return Pose(ret, 0)
 
     def path(self):
         angle = self.orientation

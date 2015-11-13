@@ -93,4 +93,4 @@ class InfoManager:
 
     # TODO implement getNextPlay
     def getNextPlay(self, state):
-        return 'pQueueLeuLeu'
+        return 'pPathAxis'

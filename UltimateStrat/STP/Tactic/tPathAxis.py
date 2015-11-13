@@ -1,5 +1,5 @@
 from UltimateStrat.STP.Tactic.TacticBase import TacticBase
-from PythonFramework.Util.Position import Position
+from RULEngine.Util.Position import Position
 
 class tPathAxis(TacticBase):
     """
