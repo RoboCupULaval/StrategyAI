@@ -1,5 +1,5 @@
 from UltimateStrat.STP.Skill.SkillBase import SkillBase
-from PythonFramework.Util.Pose import Pose
+from RULEngine.Util.Pose import Pose
 
 __author__ = 'jbecirovski'
 

@@ -1,5 +1,5 @@
-from PythonFramework.Strategy.Strategy import Strategy
-from PythonFramework.Command import Command
+from RULEngine.Strategy.Strategy import Strategy
+from RULEngine.Command import Command
 from UltimateStrat.Executor.CoachExecutor import CoachExecutor
 from UltimateStrat.Executor.PlayExecutor import PlayExecutor
 from UltimateStrat.Executor.TacticExecutor import TacticExecutor
