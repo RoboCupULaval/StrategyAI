@@ -14,8 +14,8 @@ end
 
 desc "Met a jour le depot du moteur"
 task :upframework do
-  sh "git -C PythonFramework fetch origin"
-  sh "git -C PythonFramework checkout 2ffdccd"
+  sh "git -C RULEngine fetch origin"
+  sh "git -C RULEngine checkout dev"
 end
 
 desc "Execute les tests unitaires."
