@@ -2,19 +2,23 @@ task :default => :framework
 
 TEST_LIST = Rake::FileList["**/*Test.py"]
 
-task :framework => [:getPythonFramework, :upframework]
+desc "Acquiert et met a jour le moteur."
+task :framework => [:getRULEngine, :upframework]
 
-task :getPythonFramework do
-  unless File.directory?("PythonFramework")
-    sh "git clone https://github.com/RoboCupULaval/RULEngine.git PythonFramework"
+desc "Clone le depot RULEngine"
+task :getRULEngine do
+  unless File.directory?("RULEngine")
+    sh "git clone https://github.com/RoboCupULaval/RULEngine.git"
   end
 end
 
+desc "Met a jour le depot du moteur"
 task :upframework do
   sh "git -C PythonFramework fetch origin"
   sh "git -C PythonFramework checkout 2ffdccd"
 end
 
+desc "Execute les tests unitaires."
 task :unit do
   sh "nosetests --rednose #{TEST_LIST}"
 end
