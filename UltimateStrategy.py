@@ -63,9 +63,10 @@ class UltimateStrategy(Strategy):
             #    Router.setPlayerNextPose(bot_id, Pose(self.p_ball, 0))
             test = Router.getPlayerPose(bot_id).position
             ball = Router.getBallPosition()
-            print('BALL: x:{} y:{}'.format(ball.x, ball.y))
-            print('ROBOT: x:{} y:{}'.format(test.x, test.y))
+            #print('BALL: x:{} y:{}'.format(ball.x, ball.y))
+            #print('ROBOT: x:{} y:{}'.format(test.x, test.y))
             temp = Router.getPlayerNextPose(bot_id).position
+            #print(temp.x, temp.y)
             command = Command.MoveTo(self.team.players[bot_id], self.team, Position(temp.x, temp.y))
 
         self._send_command(command)
