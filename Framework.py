@@ -83,10 +83,12 @@ class Framework(object):
         blue_team, yellow_team = self.create_teams()
         self.create_field()
         self.referee = self.create_referee()
-        self.blue_team_strategy = strategy(self.field, self.referee, blue_team, yellow_team)
-        # yellow_team_strategy = WorstStrategy(field, referee, yellow_team, blue_team)
+        if (self.is_yellow):
+            self.strategy = strategy(self.field, self.referee, yellow_team, blue_team, True)
+        else:
+            self.strategy = strategy(self.field, self.referee, blue_team, yellow_team)
 
-        self.game = Game(self.field, self.referee, blue_team, yellow_team, self.blue_team_strategy)
+        self.game = Game(self.field, self.referee, blue_team, yellow_team, self.strategy)
 
         return self.game
 
@@ -113,16 +115,23 @@ class Framework(object):
         if vision_frame:
             commands = self.game.get_commands()
             for command in commands:
-                robot = vision_frame.detection.robots_blue[command.player.id]
+                if command.team.is_team_yellow:
+                    robot = vision_frame.detection.robots_yellow[command.player.id]
+                else:
+                    robot = vision_frame.detection.robots_blue[command.player.id]
+
+                print(command.team.is_team_yellow)
+
                 fake_player = Player(0)
                 fake_player.pose = Pose(Position(robot.x, robot.y), math.degrees(robot.orientation))
                 command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
 
                 self.command_sender.send_command(command)
 
-    def __init__(self):
+    def __init__(self, is_team_yellow=False):
         self.running_thread = None
         self.thread_terminate = threading.Event()
+        self.is_yellow = is_team_yellow
 
     def start_game(self, strategy, async=False):
         #refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin")

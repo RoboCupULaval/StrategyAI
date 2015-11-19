@@ -26,7 +26,7 @@ class Game():
             self.blue_team_strategy.on_stop()
 
     def get_commands(self):
-        blue_team_commands = self._get_blue_team_commands()
+        blue_team_commands = [command for command in self._get_blue_team_commands()] #Copy
 
         self.blue_team_strategy.commands.clear()
 
@@ -34,7 +34,7 @@ class Game():
 
     def _get_blue_team_commands(self):
         blue_team_commands = self.blue_team_strategy.commands
-        blue_team_commands = self._remove_commands_from_opponent_team(blue_team_commands, self.yellow_team)
+        #blue_team_commands = self._remove_commands_from_opponent_team(blue_team_commands, self.yellow_team)
         return blue_team_commands
 
     @staticmethod
