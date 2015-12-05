@@ -17,32 +17,26 @@ def get_distance(position_1, position_2):
 
 def get_angle(main_position, other):
     """
-    Angle between position1 and position2 between 0 and 360 degrees
+    Angle between position1 and position2 between -pi and pi
     :param main_position: Position of reference
     :param other: Position of object
-    :return: int angle between two positions
+    :return: float angle between two positions in radians
     """
     assert isinstance(main_position, Position), "TypeError main_position"
     assert isinstance(other, Position), "TypeError other"
 
     position_x = float(other.x - main_position.x)
     position_y = float(other.y - main_position.y)
-    if position_x == 0:
-        if position_y > 0:
-            return 90
-        else:
-            return 270
-    else:
-        final_angle = cvt_angle_360(m.atan2(position_y, position_x) * 180 / m.pi)
-        return int(final_angle)
+    return m.atan2(position_y, position_x)
 
 def cvt_angle_360(orientation):
     """
-    Convert angle with 0 to 360 degrees
-    :param orientation: float angle
+    Convert radians angle to 0-360 degrees
+    :param orientation: float angle in radians
     :return: int angle with 0 to 360 range.
     """
     assert isinstance(orientation, (int, float)), "TypeError orientation"
+    orientation = m.degrees(orientation)
 
     if orientation < 0:
         while True:
@@ -60,7 +54,8 @@ def cvt_angle_360(orientation):
 
 def cvt_angle_180(orientation):
     """
-    :param orientation: float angle
+    Convert radians angle to -180-180 degrees (same as m.degrees())
+    :param orientation: float angle in radians
     :return: int angle with 180 to -179 range.
     """
     assert isinstance(orientation, (int, float)), "TypeError orientation"
@@ -72,29 +67,33 @@ def cvt_angle_180(orientation):
         return orientation+360
     else:
         return int(orientation)
-
+"""
 def get_theta(x, y):
+
+    Note : this function is now useless as it does the same as m.atan2(y,x)
+
+    :param x:
+    :param y:
+    :return: int angle with 0 to 360 range.
+
     assert(isinstance(x, (int, float)))
     assert(isinstance(y, (int, float)))
 
     if x == 0:
         if y > 0:
-            return 270
-        else:
             return 90
+        else:
+            return 270
     else:
         angleReturned = int(m.degrees(m.atan(y/x)))
         if x > 0:
             if y > 0:
-                return int(180+angleReturned)
+                return angleReturned
             else:
-                return int(180+angleReturned)
+                return 360+angleReturned
         else:
-            if y > 0:
-                return int(360+angleReturned)
-            else:
-                return int(m.fabs(angleReturned))
-
+            return 180+angleReturned
+"""
 def get_nearest(ref_position, list_of_position, number=1):
     dict_position_distance = {}
     for bot_position in list_of_position:
