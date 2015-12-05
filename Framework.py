@@ -29,8 +29,13 @@ def convertPositionToSpeed(player, x, y, theta):
     elif theta_direction <= -math.pi:
         theta_direction += 2*math.pi
 
-    theta_speed = 2 if abs(theta_direction) > 0.2 else 0.4
-    new_theta = theta_speed if theta_direction > 0 else -theta_speed
+    if (theta_direction == 0):
+        theta_speed = 0
+    elif (abs(theta_direction) > 0.2):
+        theta_speed = 2
+    elif(abs(theta_direction) <= 0.2 and abs(theta_direction) > 0):
+        theta_speed = 0.4
+    new_theta = theta_speed if theta_direction >= 0 else -theta_speed
 
     direction_x = x - current_x
     direction_y = y - current_y
@@ -40,8 +45,8 @@ def convertPositionToSpeed(player, x, y, theta):
         direction_x /= norm
         direction_y /= norm
     angle = math.atan2(direction_y, direction_x)
-    cosangle = math.cos(math.radians(-current_theta))
-    sinangle = math.sin(math.radians(-current_theta))
+    cosangle = math.cos(-current_theta)
+    sinangle = math.sin(-current_theta)
     new_x = (direction_x * cosangle - direction_y * sinangle) * speed
     new_y = (direction_y * cosangle + direction_x * sinangle) * speed
 
@@ -120,10 +125,10 @@ class Framework(object):
                 else:
                     robot = vision_frame.detection.robots_blue[command.player.id]
 
-                print(command.team.is_team_yellow)
+                #print(command.team.is_team_yellow)
 
                 fake_player = Player(0)
-                fake_player.pose = Pose(Position(robot.x, robot.y), math.degrees(robot.orientation))
+                fake_player.pose = Pose(Position(robot.x, robot.y), robot.orientation)
                 command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
 
                 self.command_sender.send_command(command)
@@ -163,7 +168,7 @@ class Framework(object):
             #time.sleep(0.01)
             new_time = time.time()
             times.append(new_time - last_time)
-            print(len(times) / sum(times))
+            #print(len(times) / sum(times))
             last_time = new_time
 
     def stop_game(self):
