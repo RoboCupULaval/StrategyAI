@@ -24,7 +24,7 @@ class UDPCommandSender(CommandSender):
         grSimCommand.veltangent = command.pose.position.x
         grSimCommand.velnormal = command.pose.position.y
         grSimCommand.velangular = command.pose.orientation
-        grSimCommand.spinner = command.kick
+        grSimCommand.spinner = True
         grSimCommand.kickspeedx = command.kick_speed
         grSimCommand.kickspeedz = 0
 
