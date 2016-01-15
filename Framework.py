@@ -160,6 +160,10 @@ class Framework(object):
         times = deque(maxlen=10)
         last_time = time.time()
 
+        #Wait for first frame
+        while not self.vision.get_latest_frame():
+            time.sleep(0.01)
+
         while not self.thread_terminate.is_set():  # TODO: Replace with a loop that will stop when the game is over
             #update_game_state(game, engine)
             self.update_players_and_ball()
