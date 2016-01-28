@@ -1,5 +1,5 @@
 from ..Util.Position import Position
-from Game.Player import Player
+from ..Game.Player import Player
 import math as m
 import numpy as np
 from . import area  #this is a circular import
