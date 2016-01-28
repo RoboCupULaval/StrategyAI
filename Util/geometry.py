@@ -1,5 +1,8 @@
 from ..Util.Position import Position
+from Game.Player import Player
 import math as m
+import numpy as np
+from . import area  #this is a circular import
 
 __author__ = 'jbecirovski'
 
@@ -109,3 +112,39 @@ def get_nearest(ref_position, list_of_position, number=1):
             list_sorted.append(dict_position_distance[bot_dst])
         else:
             return list_sorted
+
+def intercept(player, target1, target2, threshold = 0):
+    #TODO : test this function
+    """
+    :param player: the current robot
+    :param target1: the position of the ball
+    :param target2: the position of the object to cover
+    :param treshold: the minimum distance between player and target2
+    :return: the nearest position from the current robot on the line between target1 and target2
+    this position must be between target1 and target2
+    """
+    assert(isinstance(player, Player))
+    assert(isinstance(target1, Position))
+    assert(isinstance(target2, Position))
+    assert(isinstance(threshold, (int, float)))
+
+    #linear algebra for finding closest point on the line
+    position = player.pose.position
+    d1 = target1.x - target2.x
+    d2 = target1.y - target2.y
+    c1 = d2*target1.x - d1*target1.y
+    c2 = d1*position.x + d2*position.y
+    a = np.array([[d2, -1*d1], [d1, d2]])
+    b = np.array([c1, c2])
+    try:
+        X = np.linalg.solve(a,b)
+        destination = Position(X[0], X[1])
+        if (get_distance(target1, destination) >= get_distance(target1, target2)):      #if target2 between target1 and destination
+            norme = m.hypot(d1,d2)
+            destination = Position(300*d1/norme + target2.x, 300*d2/norme + target2.y)  #go 300 unit in front of target2 on the line
+        elif (get_distance(target2, destination) >= get_distance(target1, target2)):    #if target1 between target2 and destination
+            norme = m.hypot(d1,d2)
+            destination = Position(-300*d1/norme + target1.x, -300*d2/norme + target1.y)#go 300 unit in front of target1 on the line
+        return area.stayOutsideCircle(destination, target2, threshold)
+    except np.linalg.linalg.LinAlgError:
+        return position         #return the robot's current position

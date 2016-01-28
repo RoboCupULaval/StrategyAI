@@ -1,5 +1,5 @@
 from ..Util.Position import Position
-from ..Util.geometry import *
+from ..Util.geometry import * #this is a circular import
 import math as m
 from ..Util.constant import *
 
