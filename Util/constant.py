@@ -1,6 +1,7 @@
 __author__ = 'jbecirovski'
 from ..Util.Position import Position
 
+ROBOT_RADIUS = 90
 PLAYER_PER_TEAM = 6
 KICK_MAX_SPD = 8.0
 # Field Parameters
