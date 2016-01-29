@@ -23,8 +23,8 @@ class UDPCommandSender(CommandSender):
         grSimCommand.wheelsspeed = False
         grSimCommand.veltangent = command.pose.position.x
         grSimCommand.velnormal = command.pose.position.y
-        grSimCommand.velangular = command.pose.orientation * math.pi / 180
-        grSimCommand.spinner = command.kick
+        grSimCommand.velangular = command.pose.orientation
+        grSimCommand.spinner = True
         grSimCommand.kickspeedx = command.kick_speed
         grSimCommand.kickspeedz = 0
 
