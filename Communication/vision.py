@@ -9,10 +9,13 @@ from collections import deque
 
 class ThreadedUDPServer(ThreadingMixIn, UDPServer):
 
+    allow_reuse_address = True
+
     def __init__(self, host, port, handler=None):
         super(ThreadedUDPServer, self).__init__(('', port), handler)
         self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                 struct.pack("=4sl", socket.inet_aton(host), socket.INADDR_ANY))
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_thread = threading.Thread(target=self.serve_forever)
         server_thread.daemon = True
         server_thread.start()
