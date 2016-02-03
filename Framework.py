@@ -125,11 +125,10 @@ class Framework(object):
                 else:
                     robot = vision_frame.detection.robots_blue[command.player.id]
 
-                #print(command.team.is_team_yellow)
-
-                fake_player = Player(0)
-                fake_player.pose = Pose(Position(robot.x, robot.y), robot.orientation)
-                command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
+                if not command.is_speed_command:
+                    fake_player = Player(0)
+                    fake_player.pose = Pose(Position(robot.x, robot.y), robot.orientation)
+                    command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
 
                 self.command_sender.send_command(command)
 
