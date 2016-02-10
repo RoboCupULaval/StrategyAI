@@ -1,5 +1,6 @@
 from UltimateStrat.STP.Skill.SkillBase import SkillBase
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.geometry import *
 
 __author__ = 'jbecirovski'
 
@@ -12,4 +13,5 @@ class sFollowTarget(SkillBase):
         SkillBase.__init__(self, self.__class__.__name__)
 
     def act(self, pose_player, pose_target, pose_goal):
-        return Pose(pose_target, pose_player.orientation)
+        angle = get_angle(pose_player.position, pose_target)
+        return Pose(pose_target, angle)
