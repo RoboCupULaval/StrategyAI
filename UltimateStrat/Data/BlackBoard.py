@@ -1,3 +1,5 @@
+from time import time
+
 __author__ = 'jbecirovski'
 
 
@@ -10,7 +12,7 @@ class BlackBoard:
         self.opponent_team = opponent_team
 
         t_player_key = ('pose', 'position', 'orientation', 'kick', 'skill', 'tactic', 'next_pose', 'target',
-                        'goal')
+                        'goal', 'speed', 'retro_pose')
         d_team = {}
         d_op_team = {}
         d_ball = {'position': self.field.ball.position}
@@ -18,7 +20,7 @@ class BlackBoard:
 
         for player in self.team.players:
             t_player_data = (player.pose, player.pose.position,
-                             player.pose.orientation, 0, None, None, None, None, None)
+                             player.pose.orientation, 0, None, None, None, None, None, None, [])
             d_team[str(player.id)] = dict(zip(t_player_key, t_player_data))
         d_team['is_yellow'] = self.team.is_team_yellow
         d_team['count'] = len(self.team.players)
@@ -42,6 +44,9 @@ class BlackBoard:
             self.bb['friend'][str(i)]['pose'] = self.team.players[i].pose
             self.bb['friend'][str(i)]['position'] = self.team.players[i].pose.position
             self.bb['friend'][str(i)]['orientation'] = self.team.players[i].pose.orientation
+            self.bb['friend'][str(i)]['retro_pose'].append((time(), self.team.players[i].pose))
+            if len(self.bb['friend'][str(i)]['retro_pose']) > 10:
+                self.bb['friend'][str(i)]['retro_pose'].pop(0)
 
             self.bb['enemy'][str(i)]['pose'] = self.opponent_team.players[i].pose
             self.bb['enemy'][str(i)]['position'] = self.opponent_team.players[i].pose.position
