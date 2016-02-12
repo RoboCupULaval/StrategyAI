@@ -43,9 +43,11 @@ class Position(object):
     # *** OPERATORS ***
     def __add__(self, other):
         """ Return self + other """
-        assert(isinstance(other, (Position, int, float))), 'other should be Position or int or float.'
-        new_array = self._array + (other._array if isinstance(other, Position) else other)
-        return Position(float(new_array[0]), float(new_array[1]))
+        if not isinstance(other, (Position, int, float)):
+            return NotImplemented
+        else:
+            new_array = self._array + (other._array if isinstance(other, Position) else other)
+            return Position(float(new_array[0]), float(new_array[1]))
 
     def __sub__(self, other):
         """ Return self - other """
