@@ -1,10 +1,11 @@
 #import sys
 #sys.path.append(".")
-from RULEngine.Framework import start_game
+from RULEngine.Framework import Framework
 from UltimateStrategy import UltimateStrategy
 
 __author__ = 'jbecirovski'
 
 if __name__ == '__main__':
-    start_game(UltimateStrategy, serial=True, gui=True)
+    Framework().start_game(UltimateStrategy) #, serial=False, gui=True)
+
 

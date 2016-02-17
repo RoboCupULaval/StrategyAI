@@ -1,15 +1,20 @@
-import sys
+import sys, time
+from threading import *
+
 from RULEngine.Strategy.Strategy import Strategy
 from RULEngine.Command import Command
+from RULEngine.Util.Pose import Pose, Position
+from RULEngine.Util.geometry import *
+from RULEngine.Util.Pose import Pose, Position
+from RULEngine.Util.geometry import *
+
 from UltimateStrat.Executor.CoachExecutor import CoachExecutor
 from UltimateStrat.Executor.PlayExecutor import PlayExecutor
 from UltimateStrat.Executor.TacticExecutor import TacticExecutor
 from UltimateStrat.Executor.SkillExecutor import SkillExecutor
 import UltimateStrat.Router as Router
-from threading import *
+
 from Application import *
-from RULEngine.Util.Pose import Pose, Position
-import sys, time
 
 __author__ = 'jbecirovski'
 
@@ -26,10 +31,14 @@ class UltimateStrategy(Strategy):
         self.ex_play = PlayExecutor(Router)
         self.ex_tactic = TacticExecutor(Router)
         self.ex_skill = SkillExecutor(Router)
-        #self.p_ball = self.field.ball.position
+
         # Create GUI
         Thread(target=self.create_gui).start()
         self.quit = False
+
+        # Time lock
+        self.kicker_time = time.time()
+        self.kicker_time_max = 1000
 
     def create_gui(self):
         gui_mode = True
@@ -51,25 +60,38 @@ class UltimateStrategy(Strategy):
         self.ex_tactic.exec()
         self.ex_skill.exec()
 
-        # send command
-        # for i in range(6):
-        #     self._send_command(Command.MoveToAndRotate(self.team.players[i], self.team, Router.getPlayerNextPose(i)))
-        bot_id = 4
+        # ::COMMAND SENDER::
+        list_autorised_bot = [4]
 
-        if Router.getPlayerNextPose(bot_id) == Router.getPlayerPose(bot_id):
-            command = Command.Stop(self.team.players[bot_id])
-        else:
-            #if Router.getPlayerNextPose(bot_id).position == Position():
-            #    Router.setPlayerNextPose(bot_id, Pose(self.p_ball, 0))
-            test = Router.getPlayerPose(bot_id).position
-            ball = Router.getBallPosition()
-            #print('BALL: x:{} y:{}'.format(ball.x, ball.y))
-            #print('ROBOT: x:{} y:{}'.format(test.x, test.y))
-            temp = Router.getPlayerNextPose(bot_id).position
-            #print(temp.x, temp.y)
-            command = Command.MoveTo(self.team.players[bot_id], self.team, Position(temp.x, temp.y))
+        for i in list_autorised_bot:
+            next_action = Router.getPlayerNextPose(i)
+            if isinstance(next_action, Pose):
 
-        self._send_command(command)
+                # Move Manager :: if next action is Pose
+                if Router.getPlayerPose(i) == next_action:
+                    self._send_command(Command.Stop(self.team.players[i], self.team))
+                else:
+                    self._send_command(Command.MoveToAndRotate(self.team.players[i], self.team, next_action))
+            elif isinstance(next_action, int):
+
+                # Kick Manager :: if next action is int
+                if not 0 < next_action <= 8:
+                    next_action = 5
+
+                if get_milliseconds(time.time()) > get_milliseconds(self.kicker_time) + self.kicker_time_max:
+                    if get_distance(Router.getPlayerPosition(i), Router.getBallPosition()) < 150:
+                        self._send_command(Command.Kick(self.team.players[i], self.team, next_action))
+            else:
+
+                # Path Manager :: if next action is list of Pose
+                if get_distance(Router.getPlayerPosition(i), next_action[0].position) < 180:
+                    next_pose = next_action.pop(0)
+                    if len(next_action) == 0:
+                        next_action = next_pose
+                    Router.setPlayerNextPose(i, next_action)
+                    self._send_command(Command.MoveToAndRotate(self.team.players[i], self.team, next_pose))
+                else:
+                    self._send_command(Command.MoveToAndRotate(self.team.players[i], self.team, next_action[0]))
 
         if self.quit:
             exit()
