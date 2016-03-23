@@ -13,6 +13,7 @@ from .Util.Pose import Pose
 from .Util.Position import Position
 from .Util.constant import PLAYER_PER_TEAM
 from .Communication.vision import Vision
+from .Communication.referee import RefereeServer
 from .Communication.udp_command_sender import UDPCommandSender
 import math
 import time
@@ -67,27 +68,11 @@ class Framework(object):
         yellow_team = Team(yellow_players, True)
         return blue_team, yellow_team
 
-
-    def create_ball(self):
-        ball = Ball()
-        return ball
-
-
-    def create_field(self):
-        ball = self.create_ball()
-        self.field = Field(ball)
-        return self.field
-
-
-    def create_referee(self):
-        self.referee = Referee()
-        return self.referee
-
-
     def create_game(self, strategy):
         blue_team, yellow_team = self.create_teams()
-        self.create_field()
-        self.referee = self.create_referee()
+        self.ball = Ball()
+        self.field = Field(self.ball)
+        self.referee = Referee()
         if (self.is_yellow):
             self.strategy = strategy(self.field, self.referee, yellow_team, blue_team, True)
         else:
@@ -99,11 +84,11 @@ class Framework(object):
 
 
     def update_game_state(self):
-        referee_commands = self.engine.grab_referee_commands()
-        if referee_commands:
-            referee_command = referee_commands[0]
-            self.game.update_game_state(referee_command)
-
+        pass
+        #referee_command = self.referee.get_latest_frame()
+        #if referee_command:
+        #    pass
+            #self.game.update_game_state(referee_command)
 
     def update_players_and_ball(self):
         vision_frame = self.vision.get_latest_frame()
@@ -142,6 +127,7 @@ class Framework(object):
 
         if not self.running_thread:
             self.vision = Vision()
+            self.referee = RefereeServer()
             self.command_sender = UDPCommandSender("127.0.0.1", 20011)
         else:
             self.stop_game()
@@ -164,7 +150,7 @@ class Framework(object):
             time.sleep(0.01)
 
         while not self.thread_terminate.is_set():  # TODO: Replace with a loop that will stop when the game is over
-            #update_game_state(game, engine)
+            self.update_game_state()
             self.update_players_and_ball()
             self.update_strategies()
             self.send_robot_commands()
