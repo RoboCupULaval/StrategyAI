@@ -1,7 +1,6 @@
 import sys
 import os.path
 path, file = os.path.split(os.path.realpath(__file__))
-print (os.path.join(path, "Communication"))
 sys.path.append(os.path.join(path, "Communication"))
 from .Game.Ball import Ball
 from .Game.Field import Field
@@ -15,6 +14,7 @@ from .Util.constant import PLAYER_PER_TEAM
 from .Communication.vision import Vision
 from .Communication.referee import RefereeServer
 from .Communication.udp_command_sender import UDPCommandSender
+from .Command.Command import Stop
 import math
 import time
 from collections import deque
@@ -165,9 +165,16 @@ class Framework(object):
         self.thread_terminate.set()
         self.running_thread.join()
         self.thread_terminate.clear()
-
-
-
-
+        try:
+            if self.is_yellow:
+                team = self.game.yellow_team
+            else:
+                team = self.game.blue_team
+            for player in team.players:
+                command = Stop(player, team)
+                self.command_sender.send_command(command)
+        except:
+            raise
+            print("Could not stop players")
 
 
