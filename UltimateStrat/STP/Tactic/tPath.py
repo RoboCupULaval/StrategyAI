@@ -1,5 +1,6 @@
 from UltimateStrat.STP.Tactic.TacticBase import TacticBase
 from RULEngine.Util.geometry import *
+from RULEngine.Util.Pose import Pose, Position
 
 __author__ = 'jbecirovski'
 
@@ -14,7 +15,7 @@ class tPath(TacticBase):
         bot_pst = info_manager.getPlayerPosition(id_player)
         dst = get_distance(ball_pst, bot_pst)
         
-        if dst > DEAD_ZONE:
-            return {'skill': 'sPath', 'target': ball_pst, 'goal': ball_pst}
+        if isinstance(info_manager.getPlayerNextPose(id_player), Pose):
+            return {'skill': 'sGeneratePath', 'target': ball_pst, 'goal': ball_pst}
         else:
-            return {'skill': 'sNull', 'target': ball_pst, 'goal': ball_pst}
+            return {'skill': 'sWait', 'target': ball_pst, 'goal': ball_pst}

@@ -15,7 +15,7 @@ def getNextPlay(state):
     return Router.getCurrentPlay()
 
 @Router.register_function
-def getBallSpeed():
+def getSpeedBall():
     return getDictSpeed(Router.black_board['ball']['retro_pose'])
 
 @Router.register_function

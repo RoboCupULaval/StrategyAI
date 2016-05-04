@@ -36,4 +36,5 @@ class SkillExecutor(Executor):
             next_pose = skill().act(current_pose, current_target, current_goal)
 
             # 6 - set next pose
-            self.info_manager.setPlayerNextPose(id_player, next_pose)
+            if next_pose is not None:
+                self.info_manager.setPlayerNextPose(id_player, next_pose)

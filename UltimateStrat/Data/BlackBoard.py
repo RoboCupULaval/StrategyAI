@@ -2,6 +2,7 @@ __author__ = 'jbecirovski'
 
 import math
 from time import time
+from RULEngine.Util.Position import Position
 
 class BlackBoard:
     # TODO Make BlackBoard documentation
@@ -38,7 +39,8 @@ class BlackBoard:
 
     def update(self):
         self.bb['ball']['position'] = self.field.ball.position
-        self.bb['ball']['retro_pose'].append((time(), self.field.ball.position))
+        if not self.field.ball.position == Position():
+            self.bb['ball']['retro_pose'].append((time(), self.field.ball.position))
         if len(self.bb['ball']['retro_pose']) > 10:
                 self.bb['ball']['retro_pose'].pop(0)
 

@@ -1,4 +1,5 @@
 from RULEngine.Util.geometry import *
+from Util.geometry import *
 from RULEngine.Util.Pose import Pose
 
 __author__ = 'jbecirovski'
@@ -15,9 +16,7 @@ def getDictSpeed(list_pose, debug=False):
 
     '''
     assert isinstance(list_pose, list), 'getDictSpeed : Input should be list of Pose'
-    for pose in list_pose:
-        assert isinstance(pose, Pose), 'getDictSpeed : Input List should be composed only by Pose'
-
+    
     if not len(list_pose) == 10:
         speed = 0
         normal = (0, 0)
