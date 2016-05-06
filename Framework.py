@@ -90,15 +90,21 @@ class Framework(object):
         #    pass
             #self.game.update_game_state(referee_command)
 
+    last_time = 0
+    last_frame = 0
     def update_players_and_ball(self):
         vision_frame = self.vision.get_latest_frame()
-        if vision_frame:
-            self.game.update_players_and_ball(vision_frame)
+        if vision_frame and vision_frame.detection.frame_number != self.last_frame:
+            self.last_frame = vision_frame.detection.frame_number
+            this_time = vision_frame.detection.t_capture
+            time_delta = this_time - self.last_time
+            self.last_time = this_time
+            print("frame: %i, time: %d, delta: %d, FPS: %d" % (vision_frame.detection.frame_number, this_time, time_delta, 1/time_delta))
+            self.game.update(vision_frame, time_delta)
 
 
     def update_strategies(self):
         self.game.update_strategies()
-
 
     def send_robot_commands(self):
         vision_frame = self.vision.get_latest_frame()

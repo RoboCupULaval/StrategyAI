@@ -13,6 +13,7 @@ class Game():
         self.blue_team = blue_team
         self.yellow_team = yellow_team
         self.blue_team_strategy = blue_team_strategy
+        self.delta = None
 
     def update_strategies(self):
         state = self.referee.command.name
@@ -56,23 +57,24 @@ class Game():
 
         # TODO: Correctly update the referee with the data from the referee_command
 
-    def update_players_and_ball(self, vision_frame):
-        self._update_ball(vision_frame)
-        self._update_players(vision_frame)
+    def update(self, vision_frame, delta):
+        self.delta = delta
+        self._update_ball(vision_frame, delta)
+        self._update_players(vision_frame, delta)
 
-    def _update_ball(self, vision_frame):
+    def _update_ball(self, vision_frame, delta):
         ball_position = Position(vision_frame.detection.balls[0].x, vision_frame.detection.balls[0].y,
                                  vision_frame.detection.balls[0].z)
-        self.field.move_ball(ball_position)
+        self.field.move_ball(ball_position, delta)
 
-    def _update_players(self, vision_frame):
+    def _update_players(self, vision_frame, delta):
         blue_team = vision_frame.detection.robots_blue
         yellow_team = vision_frame.detection.robots_yellow
 
-        self._update_players_of_team(blue_team, self.blue_team)
-        self._update_players_of_team(yellow_team, self.yellow_team)
+        self._update_players_of_team(blue_team, self.blue_team, delta)
+        self._update_players_of_team(yellow_team, self.yellow_team, delta)
 
-    def _update_players_of_team(self, players, team):
+    def _update_players_of_team(self, players, team, delta):
         for player in players:
             player_position = Position(player.x, player.y, player.height)
             player_pose = Pose(player_position, player.orientation)
