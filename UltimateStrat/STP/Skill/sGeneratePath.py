@@ -14,8 +14,8 @@ class sGeneratePath(SkillBase):
     def act(self, pose_player, pose_target, pose_goal):
         bot_angle = pose_player.orientation
         return [Pose(Position(0, 0), bot_angle),
-                Pose(Position(0, -1000), bot_angle),
-                Pose(Position(-1000, -1000), bot_angle),
-                Pose(Position(-1000, 0), bot_angle),
+                Pose(Position(0, 3000), bot_angle),
+                Pose(Position(3000, 3000), bot_angle),
+                Pose(Position(3000, 0), bot_angle),
                 Pose(Position(0, 0), bot_angle)
                 ]

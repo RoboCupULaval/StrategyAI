@@ -1,3 +1,5 @@
+from time import time
+
 __author__ = 'jbecirovski'
 
 import math
@@ -16,7 +18,7 @@ class BlackBoard:
         d_team = {}
         d_op_team = {}
         d_ball = {'position': self.field.ball.position, 'retro_pose': []}
-        d_game = dict(zip(('play', 'state', 'sequence'), ('pHalt', None, None)))
+        d_game = dict(zip(('play', 'state', 'sequence'), (None, None, None)))
 
         for player in self.team.players:
             t_player_data = (player.pose, player.pose.position,
@@ -39,28 +41,20 @@ class BlackBoard:
 
     def update(self):
         self.bb['ball']['position'] = self.field.ball.position
-        if not self.field.ball.position == Position():
-            self.bb['ball']['retro_pose'].append((time(), self.field.ball.position))
+        self.bb['ball']['retro_pose'].append((time(), self.field.ball.position))
         if len(self.bb['ball']['retro_pose']) > 10:
                 self.bb['ball']['retro_pose'].pop(0)
 
-        if self.team.is_team_yellow:
-            friend = 'enemy'
-            enemy = 'friend'
-        else:
-            friend = 'friend'
-            enemy = 'enemy'
-
         for i in range(6):
-            self.bb[friend][str(i)]['pose'] = self.team.players[i].pose
-            self.bb[friend][str(i)]['position'] = self.team.players[i].pose.position
-            self.bb[friend][str(i)]['orientation'] = self.team.players[i].pose.orientation
-            self.bb[friend][str(i)]['retro_pose'].append((time(), self.team.players[i].pose))
-            if len(self.bb[friend][str(i)]['retro_pose']) > 10:
-                self.bb[friend][str(i)]['retro_pose'].pop(0)
+            self.bb['friend'][str(i)]['pose'] = self.team.players[i].pose
+            self.bb['friend'][str(i)]['position'] = self.team.players[i].pose.position
+            self.bb['friend'][str(i)]['orientation'] = self.team.players[i].pose.orientation
+            self.bb['friend'][str(i)]['retro_pose'].append((time(), self.team.players[i].pose))
+            if len(self.bb['friend'][str(i)]['retro_pose']) > 10:
+                self.bb['friend'][str(i)]['retro_pose'].pop(0)
 
-            self.bb[enemy][str(i)]['pose'] = self.opponent_team.players[i].pose
-            self.bb[enemy][str(i)]['position'] = self.opponent_team.players[i].pose.position
-            self.bb[enemy][str(i)]['orientation'] = self.opponent_team.players[i].pose.orientation
-            if len(self.bb[enemy][str(i)]['retro_pose']) > 10:
-                self.bb[enemy][str(i)]['retro_pose'].pop(0)
+            self.bb['enemy'][str(i)]['pose'] = self.opponent_team.players[i].pose
+            self.bb['enemy'][str(i)]['position'] = self.opponent_team.players[i].pose.position
+            self.bb['enemy'][str(i)]['orientation'] = self.opponent_team.players[i].pose.orientation
+            if len(self.bb['enemy'][str(i)]['retro_pose']) > 10:
+                self.bb['enemy'][str(i)]['retro_pose'].pop(0)

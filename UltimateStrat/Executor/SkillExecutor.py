@@ -37,4 +37,4 @@ class SkillExecutor(Executor):
 
             # 6 - set next pose
             if next_pose is not None:
-                self.info_manager.setPlayerNextPose(id_player, next_pose)
+                self.info_manager.setPlayerNextAction(id_player, next_pose)
