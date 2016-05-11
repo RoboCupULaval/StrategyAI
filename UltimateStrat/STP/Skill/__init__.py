@@ -15,5 +15,3 @@ import UltimateStrat.STP.Skill.sKickLow
 import UltimateStrat.STP.Skill.sStop
 import UltimateStrat.STP.Skill.sWait
 import UltimateStrat.STP.Skill.sGeneratePath
-import UltimateStrat.STP.Skill.sFaceTarget
-import UltimateStrat.STP.Skill.sGoThroughPath
