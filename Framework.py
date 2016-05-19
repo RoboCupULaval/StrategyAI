@@ -149,7 +149,7 @@ def send_robot_commands(game, vision, command_sender):
 def start_game(strategy, gui=False, serial=False):
     global debugDisplay
     #refereePlugin = rule.RefereePlugin("224.5.23.1", 10003, "RefereePlugin")
-    vision = Vision(port=10005)
+    vision = Vision(port=10002)
     if serial:
         command_sender = SerialCommandSender()
     else:

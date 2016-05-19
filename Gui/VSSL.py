@@ -323,19 +323,19 @@ class FieldDisplay(QtGui.QWidget):
         qp.setBrush(QtGui.QColor(r, g, b, 200))
         qp.drawEllipse(centerX - robotSize / 2, centerY - robotSize / 2, robotSize, robotSize)
 
-        indexLabel = "{}".format(index)
-        fm = QtGui.QFontMetrics(QtGui.QFont('SansSerif', 20))
-        labelWidth = fm.width(indexLabel)
-        labelHeight = fm.height() - 11 #Hard coded for this font.
-        labelX = centerX - labelWidth / 2
-        labelY = centerY + labelHeight / 2
+        #indexLabel = "{}".format(index)
+        #fm = QtGui.QFontMetrics(QtGui.QFont('SansSerif', 20))
+        #labelWidth = fm.width(indexLabel)
+        #labelHeight = fm.height() - 11 #Hard coded for this font.
+        #labelX = centerX - labelWidth / 2
+        #labelY = centerY + labelHeight / 2
 
-        qp.setBrush(QtGui.QColor(0, 0, 0, 150))
-        qp.drawRect(labelX, labelY, labelWidth, -labelHeight)
+        #qp.setBrush(QtGui.QColor(0, 0, 0, 150))
+        #qp.drawRect(labelX, labelY, labelWidth, -labelHeight)
 
-        qp.setPen(self.whitePen)
-        qp.drawText(QtCore.QPointF(labelX, labelY), indexLabel)
-        index += 1
+        #qp.setPen(self.whitePen)
+        #qp.drawText(QtCore.QPointF(labelX, labelY), indexLabel)
+        #index += 1
 
         qp.setPen(self.blackPen)
         self.drawArrowFromRobot(qp, robot, robotSize, -robot.pose.orientation)

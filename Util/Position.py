@@ -76,4 +76,4 @@ class Position(object):
 
     def __str__(self):
         """ Return str(self) """
-        return "(x={}, y={}, z={})".format(self._array[0], self._array[1], self.z)
+        return "(x={}, y={}, z={})".format(self.x, self.y, self.z)

@@ -12,3 +12,5 @@ class Pose(object):
 
     def __str__(self):
         return '[{}, theta={}]'.format(self.position, self.orientation)
+    def __repr__(self):
+        return self.__str__()   
