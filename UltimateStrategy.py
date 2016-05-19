@@ -1,78 +1,71 @@
-import sys
+from time import time
+
 from RULEngine.Strategy.Strategy import Strategy
 from RULEngine.Command import Command
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.geometry import *
+
 from UltimateStrat.Executor.CoachExecutor import CoachExecutor
 from UltimateStrat.Executor.PlayExecutor import PlayExecutor
 from UltimateStrat.Executor.TacticExecutor import TacticExecutor
 from UltimateStrat.Executor.SkillExecutor import SkillExecutor
+from Util.VectorRegulator import Regulator
 import UltimateStrat.Router as Router
-from threading import *
+
 from Application import *
-from RULEngine.Util.Pose import Pose, Position
-import sys, time
+from UltimateStrat.InfoManager import InfoManager
 
 __author__ = 'jbecirovski'
 
 class UltimateStrategy(Strategy):
-    def __init__(self, field, referee, team, opponent_team, is_team_yellow=True):
+    def __init__(self, field, referee, team, opponent_team, is_team_yellow=False):
         Strategy.__init__(self, field, referee, team, opponent_team)
 
         # Create InfoManager
         self.team.is_team_yellow = is_team_yellow
         Router.initialize(field, team, opponent_team)
+        self.regulator = [Regulator() for x in range(6)]
 
         # Create Executors
         self.ex_coach = CoachExecutor(Router)
         self.ex_play = PlayExecutor(Router)
         self.ex_tactic = TacticExecutor(Router)
         self.ex_skill = SkillExecutor(Router)
-        #self.p_ball = self.field.ball.position
-        # Create GUI
-        Thread(target=self.create_gui).start()
-        self.quit = False
-
-    def create_gui(self):
-        gui_mode = True
-        if gui_mode:
-            root = tk.Tk()
-            root
-            app = Application(Router, master=root)
-            app.mainloop()
-            root.destroy()
-        self.quit = True
 
     def on_start(self):
-        #if not self.field.ball.position == Position():
-        #    self.p_ball = self.field.ball.position
-        Router.update()
+        self.info_manager.update()
         # Main Strategy sequence
         self.ex_coach.exec()
         self.ex_play.exec()
         self.ex_tactic.exec()
         self.ex_skill.exec()
 
-        # send command
-        # for i in range(6):
-        #     self._send_command(Command.MoveToAndRotate(self.team.players[i], self.team, Router.getPlayerNextPose(i)))
-        bot_id = 4
+        # ::COMMAND SENDER::
+        for i in range(6):
+            next_action = self.info_manager.getPlayerNextAction(i)
+            if isinstance(next_action, Pose):
 
-        if Router.getPlayerNextPose(bot_id) == Router.getPlayerPose(bot_id):
-            command = Command.Stop(self.team.players[bot_id])
-        else:
-            #if Router.getPlayerNextPose(bot_id).position == Position():
-            #    Router.setPlayerNextPose(bot_id, Pose(self.p_ball, 0))
-            test = Router.getPlayerPose(bot_id).position
-            ball = Router.getBallPosition()
-            print('BALL: x:{} y:{}'.format(ball.x, ball.y))
-            print('ROBOT: x:{} y:{}'.format(test.x, test.y))
-            temp = Router.getPlayerNextPose(bot_id).position
-            command = Command.MoveTo(self.team.players[bot_id], self.team, Position(temp.x, temp.y))
+                # Move Manager :: if next action is Pose
+                self._send_command(Command.MoveToAndRotate(self.team.players[i], self.team, next_action))
+            elif isinstance(next_action, int):
 
-        self._send_command(command)
+                # Kick Manager :: if next action is int
+                if not 0 < next_action <= 8:
+                    next_action = 5
+                self._send_command(Command.Kick(self.team.players[i], self.team, next_action))
+                if get_distance(self.info_manager.getPlayerPosition(i), self.info_manager.getBallPosition()) > 150:
+                    self.info_manager.setPlayerNextAction(i, self.info_manager.getPlayerPosition(i))
+            else:
 
-        if self.quit:
-            exit()
-
+                # Path Manager :: if next action is list of Pose
+                if get_distance(self.info_manager.getPlayerPosition(i), next_action[0].position) < 180:
+                    next_pose = next_action.pop(0)
+                    if len(next_action) == 0:
+                        next_action = next_pose
+                    self.info_manager.setPlayerNextAction(i, next_action)
+                    self._send_command(Command.MoveToAndRotate(self.team.players[i], self.team, next_pose))
+                else:
+                    self._send_command(Command.MoveToAndRotate(self.team.players[i], self.team, next_action[0]))
 
     def on_halt(self):
         self.on_start()

@@ -59,3 +59,6 @@ def setPlayerTactic(i, tactic):
 def setPlayerNextPose(i, next_pose):
     Router.black_board['friend'][str(i)]['next_pose'] = next_pose
 
+@Router.register_function
+def getSpeed(i):
+    return Router.black_board['friend'][str(i)]['speed']
