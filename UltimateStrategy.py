@@ -9,10 +9,6 @@ from UltimateStrat.Executor.CoachExecutor import CoachExecutor
 from UltimateStrat.Executor.PlayExecutor import PlayExecutor
 from UltimateStrat.Executor.TacticExecutor import TacticExecutor
 from UltimateStrat.Executor.SkillExecutor import SkillExecutor
-from Util.VectorRegulator import Regulator
-import UltimateStrat.Router as Router
-
-from Application import *
 from UltimateStrat.InfoManager import InfoManager
 
 __author__ = 'jbecirovski'
@@ -23,14 +19,13 @@ class UltimateStrategy(Strategy):
 
         # Create InfoManager
         self.team.is_team_yellow = is_team_yellow
-        Router.initialize(field, team, opponent_team)
-        self.regulator = [Regulator() for x in range(6)]
+        self.info_manager = InfoManager(field, team, opponent_team)
 
         # Create Executors
-        self.ex_coach = CoachExecutor(Router)
-        self.ex_play = PlayExecutor(Router)
-        self.ex_tactic = TacticExecutor(Router)
-        self.ex_skill = SkillExecutor(Router)
+        self.ex_coach = CoachExecutor(self.info_manager)
+        self.ex_play = PlayExecutor(self.info_manager)
+        self.ex_tactic = TacticExecutor(self.info_manager)
+        self.ex_skill = SkillExecutor(self.info_manager)
 
     def on_start(self):
         self.info_manager.update()
