@@ -163,7 +163,7 @@ class Framework(object):
             #time.sleep(0.01)
             new_time = time.time()
             times.append(new_time - last_time)
-            #print(len(times) / sum(times))
+            print(len(times) / sum(times))
             last_time = new_time
 
     def stop_game(self):

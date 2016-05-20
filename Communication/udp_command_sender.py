@@ -14,6 +14,12 @@ class UDPCommandSender(CommandSender):
         self.connection_info = (host, port)
         self.server.connect(self.connection_info)
 
+    def get_new_packet(self):
+        return grSim_Packet.grSim_Packet()
+
+    def send_packet(self, packet):
+        self.server.send(packet.SerializeToString())
+
     def send_command(self, command):
         packet = grSim_Packet.grSim_Packet()
         #grSimCommand = grSim_Robot_Command()
