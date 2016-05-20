@@ -10,6 +10,7 @@ class UDPCommandSender(CommandSender):
 
     def __init__(self, host, port):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.connection_info = (host, port)
         self.server.connect(self.connection_info)
 
@@ -29,8 +30,8 @@ class UDPCommandSender(CommandSender):
         grSimCommand.wheelsspeed = False
         grSimCommand.veltangent = command.pose.position.x
         grSimCommand.velnormal = command.pose.position.y
-        grSimCommand.velangular = command.pose.orientation * math.pi / 180
-        grSimCommand.spinner = command.kick
+        grSimCommand.velangular = command.pose.orientation
+        grSimCommand.spinner = True
         grSimCommand.kickspeedx = command.kick_speed
         grSimCommand.kickspeedz = 0
 

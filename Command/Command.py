@@ -52,7 +52,7 @@ class MoveTo(_Command):
                                               FIELD_Y_BOTTOM,
                                               FIELD_X_LEFT,
                                               FIELD_X_RIGHT)
-        self.pose.orientation = cvt_angle_180(player.pose.orientation)
+        self.pose.orientation = player.pose.orientation
 
 
 class Rotate(_Command):
@@ -63,7 +63,7 @@ class Rotate(_Command):
         assert(isinstance(orientation, (int, float)))
 
         super().__init__(player, team)
-        self.pose.orientation = cvt_angle_180(orientation)
+        self.pose.orientation = orientation
         self.pose.position = stayInsideSquare(player.pose.position,
                                               FIELD_Y_TOP,
                                               FIELD_Y_BOTTOM,
@@ -84,7 +84,7 @@ class MoveToAndRotate(_Command):
                                     FIELD_Y_BOTTOM,
                                     FIELD_X_LEFT,
                                     FIELD_X_RIGHT)
-        self.pose = Pose(position, cvt_angle_180(pose.orientation))
+        self.pose = Pose(position, pose.orientation)
 
 
 class Kick(_Command):

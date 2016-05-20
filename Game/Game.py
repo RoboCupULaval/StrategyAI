@@ -26,7 +26,7 @@ class Game():
             self.blue_team_strategy.on_stop()
 
     def get_commands(self):
-        blue_team_commands = self._get_blue_team_commands()
+        blue_team_commands = [command for command in self._get_blue_team_commands()] #Copy
 
         self.blue_team_strategy.commands.clear()
 
@@ -34,7 +34,7 @@ class Game():
 
     def _get_blue_team_commands(self):
         blue_team_commands = self.blue_team_strategy.commands
-        blue_team_commands = self._remove_commands_from_opponent_team(blue_team_commands, self.yellow_team)
+        #blue_team_commands = self._remove_commands_from_opponent_team(blue_team_commands, self.yellow_team)
         return blue_team_commands
 
     @staticmethod
@@ -78,6 +78,5 @@ class Game():
     def _update_players_of_team(self, players, team):
         for player in players:
             player_position = Position(player.x, player.y, player.height)
-            player_orientation = (player.orientation * 180) / math.pi
-            player_pose = Pose(player_position, player_orientation)
+            player_pose = Pose(player_position, player.orientation)
             team.move_and_rotate_player(player.robot_id, player_pose)
