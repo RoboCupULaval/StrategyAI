@@ -1,3 +1,4 @@
+# TODO: renommer PathfinderExecutor et rendre générique pour cette fonction
 from UltimateStrat.Executor.Executor import Executor
 from PythonFramework.Util.constant import *
 from StrategyIA.Util.rrt import Tree
