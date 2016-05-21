@@ -1,6 +1,10 @@
 #RULEngine
 Toute contribution au code est sous [la licence libre MIT](https://opensource.org/licenses/mit-license.php).
 
+### Information générale
+Ce dépôt regroupe les différentes commandes et requêtes qui peuvent être envoyés aux robots.
+L'intelligence artificielle élaboré dans le dépôt [StrategyIA](https://github.com/RoboCupULaval/StrategyIA) est basée sur les fonctions de RULEngine.
+
 ### Comment cloner le dépot
 Cloner le dépôt avec les commandes:
 ```
