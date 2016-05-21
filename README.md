@@ -16,5 +16,5 @@ Le dépôt StrategyIA fonctionne avec les forks et les pull requests.
 * Une fois qu'une feature/issue est résolue, faire un pull-request.
 
 ### Standard de code
-Pour que le code soit considéré comme valide, celui-ci doit respecter le santdard de code :shipit: à ajouter :shipit:.
+Pour que le code soit considéré comme valide, celui-ci doit respecter le santdard de code *PEP-8*.
 **Un code non standardisé est considéré comme non-fonctionnel, et se verra refuser le pull request.**
