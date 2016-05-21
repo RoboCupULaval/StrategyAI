@@ -30,18 +30,27 @@ class _Command(object):
             may have changed in the process.
         """
         if not self.is_speed_command:
-            self.pose = self._convertPositionToSpeed(self.player, self.pose)
+            self.pose = self._convertPositionToSpeed(self.player.pose,
+                                                     self.pose)
 
         return self
 
-    def _convertPositionToSpeed(self, player, next_pose):
+    def _convertPositionToSpeed(self, current_pose, next_pose):
+        """
+            Converts an absolute position to a
+            speed command relative to the player.
+
+            :param current_pose: the current position of a player.
+            :param next_pose: the absolute position the robot should go to.
+            :returns: A Pose object with speed vectors.
+        """
         #TODO: Cleanup
         x = next_pose.position.x
         y = next_pose.position.y
         theta = next_pose.orientation
-        current_theta = player.pose.orientation
-        current_x = player.pose.position.x
-        current_y = player.pose.position.y
+        current_theta = current_pose.orientation
+        current_x = current_pose.position.x
+        current_y = current_pose.position.y
         theta_direction = theta - current_theta
         if theta_direction >= math.pi:
             theta_direction -= 2 * math.pi
@@ -63,7 +72,6 @@ class _Command(object):
         if norm:
             direction_x /= norm
             direction_y /= norm
-        angle = math.atan2(direction_y, direction_x)
         cosangle = math.cos(-current_theta)
         sinangle = math.sin(-current_theta)
         new_x = (direction_x * cosangle - direction_y * sinangle) * speed
