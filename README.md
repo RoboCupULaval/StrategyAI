@@ -1,13 +1,14 @@
 #RULEngine
 Toute contribution au code est sous [la licence libre MIT](https://opensource.org/licenses/mit-license.php).
 
-##Installations
-You first need to install RuleSSL library on your machine. Follow the instructions :
-https://github.com/RoboCupULaval/RuleSSL
-
-Then install the python wrapper:
-https://github.com/RoboCupULaval/RulPython
-
+### Comment cloner le dépot
+Cloner le dépôt avec les commandes:
+```
+git clone https://github.com/RoboCupULaval/RULEngine.git
+git checkout dev
+git submodule init
+git submodule update
+```
 
 ##Usage
 
