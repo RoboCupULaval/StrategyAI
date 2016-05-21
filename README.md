@@ -2,6 +2,12 @@
 
 Toute contribution au code est sous la licence libre MIT. Une description plus détaillée de la licence se trouve [ici](https://opensource.org/licenses/mit-license.php)
 
+### Information général
+Ce dépôt regroupe les différents outils utilisés pour élaborer l'intelligence artificielle de Robocup ULaval.
+UltimateStratedy.py est un exemple d'implémentation de l'intelligence artificielle.
+
+L'implémentation de l'intelligence artificielle est basée sur la STP, dont le papier de recherche se retrouve [dans le dépôt Admin de l'équipe IA](https://github.com/RoboCupULaval/Admin/blob/master/documentation/white_paper_stp.pdf).
+
 ### Comment cloner le dépot
 1. « Forker » le dépôt StrategyIA, s'assurer que l'on est bien sur la branche `dev`.
 2. Cloner le dépôt, créer une branche et aller sur celle-ci avec les commandes:
