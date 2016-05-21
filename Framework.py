@@ -20,40 +20,6 @@ import time
 from collections import deque
 import threading
 
-def convertPositionToSpeed(player, x, y, theta):
-    current_theta = player.pose.orientation
-    current_x = player.pose.position.x
-    current_y = player.pose.position.y
-    theta_direction = theta - current_theta
-    if theta_direction >= math.pi:
-        theta_direction -= 2 * math.pi
-    elif theta_direction <= -math.pi:
-        theta_direction += 2*math.pi
-
-    if (theta_direction == 0):
-        theta_speed = 0
-    elif (abs(theta_direction) > 0.2):
-        theta_speed = 2
-    elif(abs(theta_direction) <= 0.2 and abs(theta_direction) > 0):
-        theta_speed = 0.4
-    new_theta = theta_speed if theta_direction >= 0 else -theta_speed
-
-    direction_x = x - current_x
-    direction_y = y - current_y
-    norm = math.hypot(direction_x, direction_y)
-    speed = 1 if norm >= 50 else 0
-    if norm:
-        direction_x /= norm
-        direction_y /= norm
-    angle = math.atan2(direction_y, direction_x)
-    cosangle = math.cos(-current_theta)
-    sinangle = math.sin(-current_theta)
-    new_x = (direction_x * cosangle - direction_y * sinangle) * speed
-    new_y = (direction_y * cosangle + direction_x * sinangle) * speed
-
-    return new_x, new_y, new_theta
-
-
 class Framework(object):
 
     def create_teams(self):
@@ -107,21 +73,10 @@ class Framework(object):
         self.game.update_strategies()
 
     def send_robot_commands(self):
-        vision_frame = self.vision.get_latest_frame()
-        if vision_frame:
+        if self.vision.get_latest_frame():
             commands = self.game.get_commands()
             for command in commands:
-                if command.team.is_team_yellow:
-                    robot = vision_frame.detection.robots_yellow[command.player.id]
-                else:
-                    robot = vision_frame.detection.robots_blue[command.player.id]
-
-                # TODO: CLEAN this
-                if not command.is_speed_command:
-                    fake_player = Player(0)
-                    fake_player.pose = Pose(Position(robot.x, robot.y), robot.orientation)
-                    command.pose.position.x, command.pose.position.y, command.pose.orientation = convertPositionToSpeed(fake_player, command.pose.position.x, command.pose.position.y, command.pose.orientation)
-
+                command = command.toSpeedCommand()
                 self.command_sender.send_command(command)
 
     def __init__(self, is_team_yellow=False):

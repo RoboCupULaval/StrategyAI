@@ -18,6 +18,59 @@ class _Command(object):
         self.pose = Pose()
         self.team = team
 
+    def toSpeedCommand(self):
+        """
+            If is_speed_command is false,
+            converts the command to a speed commmand.
+
+            If is_speed_command is true,
+            returns the command.
+
+            Always returns self, meaning the command
+            may have changed in the process.
+        """
+        if not self.is_speed_command:
+            self.pose = self._convertPositionToSpeed(self.player, self.pose)
+
+        return self
+
+    def _convertPositionToSpeed(self, player, next_pose):
+        #TODO: Cleanup
+        x = next_pose.position.x
+        y = next_pose.position.y
+        theta = next_pose.orientation
+        current_theta = player.pose.orientation
+        current_x = player.pose.position.x
+        current_y = player.pose.position.y
+        theta_direction = theta - current_theta
+        if theta_direction >= math.pi:
+            theta_direction -= 2 * math.pi
+        elif theta_direction <= -math.pi:
+            theta_direction += 2*math.pi
+
+        if (theta_direction == 0):
+            theta_speed = 0
+        elif (abs(theta_direction) > 0.2):
+            theta_speed = 2
+        elif(abs(theta_direction) <= 0.2 and abs(theta_direction) > 0):
+            theta_speed = 0.4
+        new_theta = theta_speed if theta_direction >= 0 else -theta_speed
+
+        direction_x = x - current_x
+        direction_y = y - current_y
+        norm = math.hypot(direction_x, direction_y)
+        speed = 1 if norm >= 50 else 0
+        if norm:
+            direction_x /= norm
+            direction_y /= norm
+        angle = math.atan2(direction_y, direction_x)
+        cosangle = math.cos(-current_theta)
+        sinangle = math.sin(-current_theta)
+        new_x = (direction_x * cosangle - direction_y * sinangle) * speed
+        new_y = (direction_y * cosangle + direction_x * sinangle) * speed
+
+        return Pose(Position(new_x, new_y), new_theta)
+
 
 # class SetSpeed(_Command):
 #     def __init__(self, player, team, pose):
