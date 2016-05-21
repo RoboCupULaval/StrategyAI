@@ -2,7 +2,7 @@
 
 Toute contribution au code est sous la licence libre MIT. Une description plus détaillée de la licence se trouve [ici](https://opensource.org/licenses/mit-license.php)
 
-### Information général
+### Information générale
 Ce dépôt regroupe les différents outils utilisés pour élaborer l'intelligence artificielle de Robocup ULaval.
 UltimateStratedy.py est un exemple d'implémentation de l'intelligence artificielle.
 
