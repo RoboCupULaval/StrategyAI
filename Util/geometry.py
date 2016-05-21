@@ -3,7 +3,7 @@ from math import *
 from RULEngine.Util import Position
 from RULEngine.Util.Position import Position
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 def distance(position, other):

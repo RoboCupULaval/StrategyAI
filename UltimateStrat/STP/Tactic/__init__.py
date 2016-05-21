@@ -1,4 +1,4 @@
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 import UltimateStrat.STP.Tactic.tFollowBall
 import UltimateStrat.STP.Tactic.tFollowPrevFriend

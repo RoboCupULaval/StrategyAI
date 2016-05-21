@@ -1,7 +1,7 @@
 from UltimateStrat.Data.BlackBoard import BlackBoard
 import sys
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class Router(object):

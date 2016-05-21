@@ -2,7 +2,7 @@ from UltimateStrat.STP.Skill.SkillBase import SkillBase
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import *
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class sFollowTarget(SkillBase):

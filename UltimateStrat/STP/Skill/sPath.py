@@ -7,7 +7,7 @@ LEN_VECTOR = 850
 DST_SAFE = 650
 AGL_FRONT = 0.90
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class sPath(SkillBase):

@@ -1,7 +1,7 @@
 from UltimateStrat.STP.Tactic.TacticBase import TacticBase
 from RULEngine.Util.geometry import *
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class tFollowPrevFriend(TacticBase):

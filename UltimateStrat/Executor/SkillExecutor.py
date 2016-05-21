@@ -1,6 +1,6 @@
 from UltimateStrat.Executor.Executor import Executor
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class SkillExecutor(Executor):

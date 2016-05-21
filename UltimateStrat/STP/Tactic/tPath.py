@@ -2,7 +2,7 @@ from UltimateStrat.STP.Tactic.TacticBase import TacticBase
 from RULEngine.Util.geometry import *
 from RULEngine.Util.Pose import Pose, Position
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 DEAD_ZONE = 300
 

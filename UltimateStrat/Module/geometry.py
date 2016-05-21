@@ -2,7 +2,7 @@ from RULEngine.Util.geometry import *
 from Util.geometry import *
 from RULEngine.Util.Pose import Pose
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 def getDictSpeed(list_pose, debug=False):

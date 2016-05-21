@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class TestExecutor(TestCase):

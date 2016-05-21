@@ -1,6 +1,6 @@
 from UltimateStrat.STP.Play.PlayBase import PlayBase
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class pDefense(PlayBase):

@@ -2,7 +2,7 @@ from RULEngine.Util.Pose import Pose,Position
 from UltimateStrat.STP.Tactic.TacticBase import TacticBase
 from Util.geometry import *
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class tTestBench(TacticBase):

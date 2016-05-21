@@ -1,6 +1,6 @@
 from time import time
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 import math
 from time import time

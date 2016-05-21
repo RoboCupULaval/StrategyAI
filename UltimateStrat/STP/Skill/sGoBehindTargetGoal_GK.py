@@ -2,7 +2,7 @@ import math as m
 from UltimateStrat.STP.Skill.SkillBase import SkillBase
 from RULEngine.Util.Pose import Pose, Position
 from RULEngine.Util.area import *
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class sGoBehindTargetGoal_GK(SkillBase):

@@ -11,7 +11,7 @@ from UltimateStrat.Executor.TacticExecutor import TacticExecutor
 from UltimateStrat.Executor.SkillExecutor import SkillExecutor
 from UltimateStrat.InfoManager import InfoManager
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 class UltimateStrategy(Strategy):
     def __init__(self, field, referee, team, opponent_team, is_team_yellow=False):

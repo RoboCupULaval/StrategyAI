@@ -6,7 +6,7 @@ from UltimateStrat.STP.Play.PlayBase import PlayBase
 import UltimateStrat.Router as Router
 
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 def test(name):
     print('test', name)

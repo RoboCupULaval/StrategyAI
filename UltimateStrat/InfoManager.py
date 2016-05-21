@@ -4,7 +4,7 @@ from RULEngine.Util.Pose import Pose, Position
 from RULEngine.Util.geometry import *
 from Util.geometry import *
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class InfoManager:

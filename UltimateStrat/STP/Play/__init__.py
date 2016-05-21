@@ -1,4 +1,4 @@
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 import UltimateStrat.STP.Play.pDemoGoalKeeper
 import UltimateStrat.STP.Play.pDemoFollowBall

@@ -1,1 +1,1 @@
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'

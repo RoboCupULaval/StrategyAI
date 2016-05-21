@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 class PlayBase:
     """

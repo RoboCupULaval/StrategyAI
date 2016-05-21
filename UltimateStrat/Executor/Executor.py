@@ -3,7 +3,7 @@ from UltimateStrat.STP.Skill.SkillBase import SkillBase
 from UltimateStrat.STP.Tactic.TacticBase import TacticBase
 from UltimateStrat.STP.Play.PlayBase import PlayBase
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class Executor:

@@ -1,7 +1,7 @@
 from UltimateStrat.STP.Skill.SkillBase import SkillBase
 from RULEngine.Util.Pose import Pose, Position
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class sStop(SkillBase):

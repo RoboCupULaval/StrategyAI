@@ -1,6 +1,6 @@
 from UltimateStrat.STP.Skill.SkillBase import SkillBase
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 class sKickHigh(SkillBase):
