@@ -47,6 +47,7 @@ class Game():
         return final_commands
 
     def update_game_state(self, referee_command):
+        # TODO: Réviser code, ça semble louche
         blue_team = referee_command.teams[0]
         self.blue_team.score = blue_team.goalie_count
         yellow_team = referee_command.teams[0]

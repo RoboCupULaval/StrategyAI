@@ -116,6 +116,7 @@ class Framework(object):
                 else:
                     robot = vision_frame.detection.robots_blue[command.player.id]
 
+                # TODO: CLEAN this
                 if not command.is_speed_command:
                     fake_player = Player(0)
                     fake_player.pose = Pose(Position(robot.x, robot.y), robot.orientation)
@@ -154,6 +155,7 @@ class Framework(object):
         #Wait for first frame
         while not self.vision.get_latest_frame():
             time.sleep(0.01)
+            print("En attente d'une image de la vision.")
 
         while not self.thread_terminate.is_set():  # TODO: Replace with a loop that will stop when the game is over
             self.update_game_state()

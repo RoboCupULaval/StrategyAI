@@ -15,7 +15,7 @@ class Pose(object):
         elif self.orientation <= -m.pi:
             self.orientation += 2*m.pi
 
-    def __repr__(self):
+    def __str__(self):
         return '[{}, theta={}]'.format(self.position, self.orientation)
     def __repr__(self):
         return self.__str__()   
