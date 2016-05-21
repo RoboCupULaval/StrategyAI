@@ -1,11 +1,14 @@
 # StrategyIA
+
+Toute contribution au code est sous la licence libre MIT. Une description plus détaillée de la licence se trouve [ici](https://opensource.org/licenses/mit-license.php)
+
 ### Comment cloner le dépot
 1. « Forker » le dépôt StrategyIA, s'assurer que l'on est bien sur la branche `dev`.
 2. Cloner le dépôt, créer une branche et aller sur celle-ci avec les commandes:
 ```
 git clone https://github.com/nom_de_votre_identifiant/StrategyIA.git
 git checkout dev
-git branch 
+git branch nom_du_issue_sur_lequel_je_travail/sous_section_si_issue_trop_vague
 git checkout nom_du_issue_sur_lequel_je_travail/sous_section_si_issue_trop_vague
 ```
 
@@ -17,4 +20,4 @@ Le dépôt StrategyIA fonctionne avec les forks et les pull requests.
 
 ### Standard de code
 Pour que le code soit considéré comme valide, celui-ci doit respecter le santdard de code *PEP-8*.
-**Un code non standardisé est considéré comme non-fonctionnel, et se verra refuser le pull request.**
+#####**Un code non standardisé est considéré comme non-fonctionnel, et se verra refuser le pull request.**
