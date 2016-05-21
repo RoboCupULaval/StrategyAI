@@ -1,6 +1,5 @@
-#PythonFramework
-A Python framework to develop all the required tools to ease the development of a strategy using the Rule library
-
+#RULEngine
+Toute contribution au code est sous [la licence libre MIT](https://opensource.org/licenses/mit-license.php).
 
 ##Installations
 You first need to install RuleSSL library on your machine. Follow the instructions :
