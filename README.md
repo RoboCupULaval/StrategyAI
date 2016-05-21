@@ -1,12 +1,12 @@
 # StrategyIA
 
-Toute contribution au code est sous la licence libre MIT. Une description plus détaillée de la licence se trouve [ici](https://opensource.org/licenses/mit-license.php)
+Toute contribution au code est sous [la licence libre MIT](https://opensource.org/licenses/mit-license.php).
 
 ### Information générale
 Ce dépôt regroupe les différents outils utilisés pour élaborer l'intelligence artificielle de Robocup ULaval.
 UltimateStratedy.py est un exemple d'implémentation de l'intelligence artificielle.
 
-L'implémentation de l'intelligence artificielle est basée sur la STP, dont le papier de recherche se retrouve [dans le dépôt Admin de l'équipe IA](https://github.com/RoboCupULaval/Admin/blob/master/documentation/white_paper_stp.pdf).
+L'implémentation de l'intelligence artificielle est basée sur la STA, dont le papier de recherche se retrouve [dans le dépôt Admin de l'équipe IA](https://github.com/RoboCupULaval/Admin/blob/master/documentation/white_paper_stp.pdf).
 
 ### Comment cloner le dépot
 1. « Forker » le dépôt StrategyIA, s'assurer que l'on est bien sur la branche `dev`.
@@ -25,5 +25,6 @@ Le dépôt StrategyIA fonctionne avec les forks et les pull requests.
 * Une fois qu'une feature/issue est résolue, faire un pull-request.
 
 ### Standard de code
-Pour que le code soit considéré comme valide, celui-ci doit respecter le santdard de code *PEP-8*.
+Pour que le code soit considéré comme valide, celui-ci doit respecter le standard de code [PEP-8](https://www.python.org/dev/peps/pep-0008/).
+De plus, le code doit avoir les tests unitaires associés ainsi que les docstring pour respecter le standard de code [PEP-257](https://www.python.org/dev/peps/pep-0257/).
 #####**Un code non standardisé est considéré comme non-fonctionnel, et se verra refuser le pull request.**
