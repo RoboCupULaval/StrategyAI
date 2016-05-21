@@ -10,8 +10,8 @@ git submodule init
 git submodule update
 ```
 
-## Guide d'utilisation
+### Guide d'utilisation
 Le guide d'utilisation de RULEngine se trouve sur le [wiki](https://github.com/RoboCupULaval/RULEngine/wiki).
 
-## Modification de RULEngine et workflow git
+### Modification de RULEngine et workflow git
 Si une modification du code est nécessaire, veuillez vous référer au [readme.md du dépôt StrategyIA](https://github.com/RoboCupULaval/StrategyIA/blob/dev/README.md) pour avoir l'information sur le workflow git ainsi que le standard de code utilisé.
