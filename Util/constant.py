@@ -1,4 +1,4 @@
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 from ..Util.Position import Position
 
 ROBOT_RADIUS = 90

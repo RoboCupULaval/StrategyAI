@@ -3,7 +3,7 @@ from ..Util.geometry import * #this is a circular import
 import math as m
 from ..Util.constant import *
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 # Question
 def isInsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):

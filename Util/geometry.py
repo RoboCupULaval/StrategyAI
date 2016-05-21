@@ -4,7 +4,7 @@ import math as m
 import numpy as np
 from ..Util import area  #this is a circular import
 
-__author__ = 'jbecirovski'
+__author__ = 'RoboCupULaval'
 
 
 def get_distance(position_1, position_2):
