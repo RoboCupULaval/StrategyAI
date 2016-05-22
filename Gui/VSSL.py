@@ -1,3 +1,4 @@
+Under MIT License, see LICENSE.txt
 import sys, math
 from PyQt4 import QtGui, QtCore
 

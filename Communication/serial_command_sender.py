@@ -1,3 +1,4 @@
+Under MIT License, see LICENSE.txt
 #!/usr/bin/python
 from .command_sender import CommandSender
 from .serial_protocol import serial_protocol
