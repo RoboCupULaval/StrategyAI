@@ -1,3 +1,4 @@
+Under MIT License, see LICENSE.txt
 # TODO: renommer PathfinderExecutor et rendre générique pour cette fonction
 from UltimateStrat.Executor.Executor import Executor
 from PythonFramework.Util.constant import *

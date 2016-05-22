@@ -1,3 +1,4 @@
+Under MIT License, see LICENSE.txt
 from UltimateStrat.STP.Skill.SkillBase import SkillBase
 from RULEngine.Util.Pose import Pose
 import copy

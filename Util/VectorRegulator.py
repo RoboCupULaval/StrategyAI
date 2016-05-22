@@ -1,3 +1,4 @@
+Under MIT License, see LICENSE.txt
 from time import time, sleep
 import math as m
 from RULEngine.Util.Pose import Pose, Position

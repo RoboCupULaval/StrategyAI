@@ -1,3 +1,4 @@
+Under MIT License, see LICENSE.txt
 from RULEngine.Framework import Framework
 from UltimateStrategy import UltimateStrategy
 

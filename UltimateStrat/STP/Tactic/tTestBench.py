@@ -1,3 +1,4 @@
+Under MIT License, see LICENSE.txt
 from RULEngine.Util.Pose import Pose,Position
 from UltimateStrat.STP.Tactic.TacticBase import TacticBase
 from Util.geometry import *

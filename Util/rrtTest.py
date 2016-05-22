@@ -1,3 +1,4 @@
+Under MIT License, see LICENSE.txt
 from nose.tools import *
 from StrategyIA.Util.rrt import *
 

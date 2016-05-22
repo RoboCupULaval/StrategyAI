@@ -1,3 +1,4 @@
+Under MIT License, see LICENSE.txt
 __author__ = 'RoboCupULaval'
 
 import UltimateStrat.STP.Play.pDemoGoalKeeper

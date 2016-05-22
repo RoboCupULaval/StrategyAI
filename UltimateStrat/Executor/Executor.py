@@ -1,3 +1,4 @@
+Under MIT License, see LICENSE.txt
 from abc import abstractmethod
 from UltimateStrat.STP.Skill.SkillBase import SkillBase
 from UltimateStrat.STP.Tactic.TacticBase import TacticBase

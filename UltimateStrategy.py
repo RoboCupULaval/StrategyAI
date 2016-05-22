@@ -1,3 +1,4 @@
+Under MIT License, see LICENSE.txt
 from time import time
 
 from RULEngine.Strategy.Strategy import Strategy
