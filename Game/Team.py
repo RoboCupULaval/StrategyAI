@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 class Team():
     def __init__(self, players, is_team_yellow):
         self.players = players

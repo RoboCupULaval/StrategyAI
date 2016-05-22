@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 import math
 from ..Util.Pose import Pose, Position
 from ..Game.Player import Player

@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 from ..Util.Position import Position
 from ..Util.geometry import * #this is a circular import
 import math as m

@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 import unittest
 import math as m
 import RULEngine.Util.Vector

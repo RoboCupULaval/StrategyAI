@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 class Referee():
     def __init__(self):
         self.command = Command()

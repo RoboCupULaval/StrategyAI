@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 import sys
 import os.path
 path, file = os.path.split(os.path.realpath(__file__))
