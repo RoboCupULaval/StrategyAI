@@ -1,3 +1,5 @@
+[![Build Status](https://drone.io/github.com/RoboCupULaval/RULEngine/status.png)](https://drone.io/github.com/RoboCupULaval/RULEngine/latest)
+
 #RULEngine
 Toute contribution au code est sous [la licence libre MIT](https://opensource.org/licenses/mit-license.php).
 
