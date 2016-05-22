@@ -1,3 +1,5 @@
+[![Build Status](https://drone.io/github.com/RoboCupULaval/StrategyIA/status.png)](https://drone.io/github.com/RoboCupULaval/StrategyIA/latest)
+
 # StrategyIA
 
 Toute contribution au code est sous [la licence libre MIT](https://opensource.org/licenses/mit-license.php).
