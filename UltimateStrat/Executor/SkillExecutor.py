@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 from UltimateStrat.Executor.Executor import Executor
 
 __author__ = 'RoboCupULaval'

@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 from UltimateStrat.STP.Play.PlayBase import PlayBase
 
 __author__ = 'agingrasc'

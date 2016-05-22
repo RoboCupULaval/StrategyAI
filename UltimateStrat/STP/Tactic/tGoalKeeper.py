@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 from RULEngine.Util.constant import *
 from UltimateStrat.STP.Tactic.TacticBase import TacticBase
 from RULEngine.Util.geometry import *

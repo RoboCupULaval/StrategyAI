@@ -1,9 +1,9 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 from unittest import TestCase
 
 __author__ = 'RoboCupULaval'
 
 
-class TestTacticExecutor(TestCase):
+class TestCoachExecutor(TestCase):
   def test_exec(self):
     self.fail()

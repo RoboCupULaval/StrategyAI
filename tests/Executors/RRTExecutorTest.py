@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 from nose.tools import *
 from StrategyIA.UltimateStrat.Executor.RRTExecutor import *
 

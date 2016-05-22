@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 from abc import abstractmethod
 
 __author__ = 'RoboCupULaval'

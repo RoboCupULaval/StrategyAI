@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 from time import time
 
 __author__ = 'RoboCupULaval'

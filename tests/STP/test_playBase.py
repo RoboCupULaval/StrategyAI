@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 from unittest import TestCase
 from UltimateStrat.STP.Play.PlayBase import PlayBase
 

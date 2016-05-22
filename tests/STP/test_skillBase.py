@@ -1,11 +1,11 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 from unittest import TestCase
 
 __author__ = 'RoboCupULaval'
 
 
-class TestTacticBase(TestCase):
-  def test_apply(self):
+class TestSkillBase(TestCase):
+  def test_act(self):
     self.fail()
 
   def test_getBook(self):

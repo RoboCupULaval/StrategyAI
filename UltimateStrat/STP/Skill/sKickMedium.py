@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 from UltimateStrat.STP.Skill.SkillBase import SkillBase
 
 __author__ = 'jama'

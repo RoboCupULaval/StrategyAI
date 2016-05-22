@@ -1,4 +1,4 @@
-Under MIT License, see LICENSE.txt
+#Under MIT License, see LICENSE.txt
 from UltimateStrat.STP.Skill.sPathAxis import *
 from RULEngine.Util.Pose import Position
 import math
