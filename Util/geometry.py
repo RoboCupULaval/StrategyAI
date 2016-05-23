@@ -71,33 +71,7 @@ def cvt_angle_180(orientation):
         return orientation+360
     else:
         return int(orientation)
-"""
-def get_theta(x, y):
 
-    Note : this function is now useless as it does the same as m.atan2(y,x)
-
-    :param x:
-    :param y:
-    :return: int angle with 0 to 360 range.
-
-    assert(isinstance(x, (int, float)))
-    assert(isinstance(y, (int, float)))
-
-    if x == 0:
-        if y > 0:
-            return 90
-        else:
-            return 270
-    else:
-        angleReturned = int(m.degrees(m.atan(y/x)))
-        if x > 0:
-            if y > 0:
-                return angleReturned
-            else:
-                return 360+angleReturned
-        else:
-            return 180+angleReturned
-"""
 def get_nearest(ref_position, list_of_position, number=1):
     dict_position_distance = {}
     for bot_position in list_of_position:
