@@ -1,10 +1,11 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
 from ..Util.Position import Position
-from ..Util.geometry import * #this is a circular import
+from ..Util.geometry import *
 import math as m
 from ..Util.constant import *
 
 __author__ = 'RoboCupULaval'
+
 
 # Question
 def isInsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
@@ -23,6 +24,7 @@ def isInsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
         return False
     return True
 
+
 def isInsideCircle(position, center, radius):
     # Parameters assertions
     assert(isinstance(position, Position))
@@ -35,11 +37,13 @@ def isInsideCircle(position, center, radius):
     else:
         return False
 
+
 def isOutsideSquare(position, X_TOP, X_BOTTOM, Y_LEFT, Y_RIGHT):
     return not isInsideSquare(position, X_TOP, X_BOTTOM, Y_LEFT, Y_RIGHT)
 
 def isOutsideCircle(position, center, radius):
     return not isInsideCircle(position, center, radius)
+
 
 # Reform
 def stayInsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
@@ -109,6 +113,7 @@ def stayOutsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
 
         return Position(pos_x, pos_y)
 
+
 def stayOutsideCircle(position, center, radius):
     # Parameters assertions
     if isOutsideCircle(position, center, radius):
@@ -118,6 +123,7 @@ def stayOutsideCircle(position, center, radius):
         pos_x = radius * m.cos(pos_angle) + center.x
         pos_y = radius * m.sin(pos_angle) + center.y
         return Position(pos_x, pos_y)
+
 
 def isInsideGoalArea(position, is_yellow):
     assert(isinstance(position, Position))
@@ -135,8 +141,10 @@ def isInsideGoalArea(position, is_yellow):
     else:
         return False
 
+
 def isOutsideGoalArea(position, is_yellow):
     return not isInsideGoalArea(position, is_yellow)
+
 
 def stayInsideGoalArea(position, is_yellow):
     # TODO Not tested: stayInsideGoalArea
@@ -158,6 +166,7 @@ def stayInsideGoalArea(position, is_yellow):
                 return stayInsideCircle(position, circle_top, FIELD_GOAL_RADIUS)
             else:
                 return stayInsideCircle(position, circle_bot, FIELD_GOAL_RADIUS)
+
 
 def stayOutsideGoalArea(position, is_yellow):
     # TODO Not tested: stayOutsideGoalArea
