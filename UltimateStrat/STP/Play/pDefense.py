@@ -1,7 +1,10 @@
-#Under MIT License, see LICENSE.txt
+##Under MIT License, see LICENSE.txt
 from UltimateStrat.STP.Play.PlayBase import PlayBase
 
 __author__ = 'RoboCupULaval'
+
+SEQUENCE_DEFENSE = ['tGoalKeeper', 'tGoalKeeper', 'tGoalKeeper',
+                    'tGoalKeeper', 'tGoalKeeper', 'tGoalKeeper']
 
 
 class pDefense(PlayBase):
@@ -11,10 +14,10 @@ class pDefense(PlayBase):
     """
     def __init__(self):
         PlayBase.__init__(self, self.__class__.__name__)
+        self._sequence = [SEQUENCE_DEFENSE]
 
     def getTactics(self, index=None):
-        sequence = [['tGoalKeeper' for x in range(6)]]
         if index is None:
-            return sequence[0]
+            return self._sequence[0]
         else:
-            return sequence[index]
+            return self._sequence[index]
