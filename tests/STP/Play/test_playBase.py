@@ -1,11 +1,11 @@
 #Under MIT License, see LICENSE.txt
-from unittest import TestCase
+import unittest
 from UltimateStrat.STP.Play.PlayBase import PlayBase
 
 __author__ = 'RoboCupULaval'
 
 
-class TestPlayBase(TestCase):
+class TestPlayBase(unittest.TestCase):
   def setUp(self):
     self.play_book = PlayBase()
 
@@ -14,3 +14,7 @@ class TestPlayBase(TestCase):
 
   def test_getBook(self):
     self.assertIsInstance(self.play_book.getBook(), dict)
+
+
+if __name__ == '__main__':
+  unittest.main()
