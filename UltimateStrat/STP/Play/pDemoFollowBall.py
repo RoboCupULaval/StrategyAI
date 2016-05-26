@@ -3,6 +3,8 @@ from UltimateStrat.STP.Play.PlayBase import PlayBase
 
 __author__ = 'RoboCupULaval'
 
+SEQUENCE_DEMO_FOLLOW_BALL = ['tFollowBall', 'tFollowBall', 'tFollowBall',
+                             'tFollowBall', 'tFollowBall', 'tFollowBall']
 
 class pDemoFollowBall(PlayBase):
     """
@@ -11,10 +13,10 @@ class pDemoFollowBall(PlayBase):
     """
     def __init__(self):
         PlayBase.__init__(self, self.__class__.__name__)
+        self._sequence = [SEQUENCE_DEMO_FOLLOW_BALL]
 
     def getTactics(self, index=None):
-        sequence = [['tFollowBall' for x in range(6)]]
         if index is None:
-            return sequence[0]
+            return self._sequence[0]
         else:
-            return sequence[index]
+            return self._sequence[index]

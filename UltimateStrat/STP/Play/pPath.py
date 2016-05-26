@@ -3,6 +3,8 @@ from UltimateStrat.STP.Play.PlayBase import PlayBase
 
 __author__ = 'RoboCupULaval'
 
+SEQUENCE_PATH = ['tNull', 'tNull', 'tNull',
+                 'tNull', 'tPath', 'tNull']
 
 class pPath(PlayBase):
     """
@@ -11,11 +13,10 @@ class pPath(PlayBase):
     """
     def __init__(self):
         PlayBase.__init__(self, self.__class__.__name__)
+        self._sequence = [SEQUENCE_PATH]
 
     def getTactics(self, index=None):
-        sequence = [['tNull' for x in range(6)]]
-        sequence[0][4] = 'tPath' 
         if index is None:
-            return sequence[0]
+            return self._sequence[0]
         else:
-            return sequence[index]
+            return self._sequence[index]

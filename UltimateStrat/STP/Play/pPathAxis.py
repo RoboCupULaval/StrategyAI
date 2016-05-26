@@ -1,7 +1,10 @@
 #Under MIT License, see LICENSE.txt
 from UltimateStrat.STP.Play.PlayBase import PlayBase
 
-__author__ = 'agingrasc'
+__author__ = 'RoboCupULaval'
+
+SEQUENCE_PATH_AXIS = ['tNull', 'tNull', 'tNull',
+                      'tNull', 'tPathAxis', 'tNull']
 
 class pPathAxis(PlayBase):
     """
@@ -9,11 +12,10 @@ class pPathAxis(PlayBase):
     """
     def __init__(self):
         PlayBase.__init__(self, self.__class__.__name__)
+        self._sequence = [SEQUENCE_PATH_AXIS]
 
     def getTactics(self, index=None):
-        sequence = [['tNull' for x in range(6)]]
-        sequence[0][4] = 'tPathAxis' 
         if index is None:
-            return sequence[0]
+            return self._sequence[0]
         else:
-            return sequence[index]
+            return self._sequence[index]
