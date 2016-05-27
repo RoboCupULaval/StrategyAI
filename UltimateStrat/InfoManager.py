@@ -1,16 +1,19 @@
-#Under MIT License, see LICENSE.txt
-import math as m
+# Under MIT License, see LICENSE.txt
+""" Ce module expose un tableau blanc qui centralise l'information de l'IA.
+Plusieurs méhtodes facilitent l'accès aux informations pertinentes pour le cadre
+STA.
+"""
 from UltimateStrat.Data.BlackBoard import BlackBoard
-from RULEngine.Util.Pose import Pose, Position
-from RULEngine.Util.geometry import *
-from Util.geometry import *
+from RULEngine.Util.geometry import * # TODO: remove wildcard
+#from Util.geometry import *
 
 __author__ = 'RoboCupULaval'
 
 
 class InfoManager:
     """
-    InfoManager is a simple question answerer and setter.
+    InfoManager fait le lien entre le Blackboard qui contient l'information sur la partie
+    et le reste de l'application. Il est majoritairement composé de getters et setters
     """
     def __init__(self, field, team, op_team):
         self.black_board = BlackBoard(field, team, op_team)
@@ -21,87 +24,91 @@ class InfoManager:
     """ +++ BLACKBOARD +++ """
     # About Game
     # ---Getter
-    def getCurrentPlay(self):
+    def get_current_play(self):
         return self.black_board['game']['play']
 
-    def getCurrentPlaySequence(self):
+    def get_current_play_sequence(self):
         return self.black_board['game']['sequence']
 
     # ---Setter
-    def setPlay(self, play):
+    def set_play(self, play):
+        # ToDo : Enforce that play is a subclass of Play()
         self.black_board['game']['play'] = play
 
     # Special stuff
-    def initPlaySequence(self):
+    def init_play_sequence(self):
         self.black_board['game']['sequence'] = 0
 
-    def incPlaySequence(self):
+    def inc_play_sequence(self):
         self.black_board['game']['sequence'] += 1
 
-    def getPrevPlayerPosition(self, i):
+    def get_prev_player_position(self, i):
         return self.black_board['friend'][str(i - 1)]['position']
 
     # About Friend player
     # ---Getter
-    def getPlayerTarget(self, i):
+    def get_player_target(self, i):
         return self.black_board['friend'][str(i)]['target']
 
-    def getPlayerGoal(self, i):
+    def get_player_goal(self, i):
         return self.black_board['friend'][str(i)]['goal']
 
-    def getPlayerSkill(self, i):
+    def get_player_skill(self, i):
         return self.black_board['friend'][str(i)]['skill']
 
-    def getPlayerTactic(self, i):
+    def get_player_tactic(self, i):
         return self.black_board['friend'][str(i)]['tactic']
 
-    def getPlayerPosition(self, i):
+    def get_player_position(self, i):
         return self.black_board['friend'][str(i)]['position']
 
-    def getPlayerPose(self, i):
+    def get_player_pose(self, i):
         return self.black_board['friend'][str(i)]['pose']
 
-    def getPlayerOrientation(self, i):
+    def get_player_orientation(self, i):
         return self.black_board['friend'][str(i)]['orientation']
 
-    def getPlayerKickState(self, i):
+    def get_player_kick_state(self, i):
         return self.black_board['friend'][str(i)]['kick']
 
-    def getCountPlayer(self):
+    def get_count_player(self):
         return self.black_board['friend']['count']
 
-    def getPlayerNextAction(self, i):
+    def get_player_next_action(self, i):
         return self.black_board['friend'][str(i)]['next_pose']
 
     # ---Setter
-    def setPlayerSkillTargetGoal(self, i, action):
+    def set_player_skill_target_goal(self, i, action):
+        # ToDo : Enforce valid types for each attribute
         self.black_board['friend'][str(i)]['skill'] = action['skill']
         self.black_board['friend'][str(i)]['target'] = action['target']
         self.black_board['friend'][str(i)]['goal'] = action['goal']
 
-    def setPlayerTactic(self, i, tactic):
+    def set_player_tactic(self, i, tactic):
+        # ToDo : Enforce valid type
         self.black_board['friend'][str(i)]['tactic'] = tactic
 
-    def setPlayerNextAction(self, i, next_action):
+    def set_player_next_action(self, i, next_action):
+        # ToDo : Enforce valid type
         self.black_board['friend'][str(i)]['next_pose'] = next_action
 
     # About Ball
     # ---Getter
-    def getBallPosition(self):
+    def get_ball_position(self):
         return self.black_board['ball']['position']
 
     """ +++ INTELLIGENCE MODULE +++ """
     # State machine
     # TODO implement getNextState
-    def getNextState(self):
+    def get_next_state(self):
         return 'debug'
 
     # TODO implement getNextPlay
-    def getNextPlay(self, state):
-        #return 'pQueueLeuLeu'
+    def get_next_play(self, state):
+        #  return 'pQueueLeuLeu'
         return 'pTestBench'
 
-    def getSpeed(self, i):
+    def get_speed(self, i):
         list_pose = self.black_board['friend'][str(i)]['retro_pose']
 
         if not len(list_pose) == 10:
@@ -123,7 +130,9 @@ class InfoManager:
 
             # print('SPEED:{0:.4f} | NORMAL:{1} | VECTOR:{2}'.format(speed, normal, vector))
             return {'speed': speed, 'normal': normal, 'vector': vector}
-    def getSpeedBall(self):
+
+    @property
+    def get_ball_speed(self):
         list_pose = self.black_board['ball']['retro_pose']
 
         if not len(list_pose) == 10:
