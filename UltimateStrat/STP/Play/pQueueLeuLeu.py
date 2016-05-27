@@ -3,6 +3,8 @@ from UltimateStrat.STP.Play.PlayBase import PlayBase
 
 __author__ = 'RoboCupULaval'
 
+SEQUENCE_QUEUELEULEU = ['tFollowBall', 'tFollowPrevFriend', 'tFollowPrevFriend',
+                        'tFollowPrevFriend', 'tFollowPrevFriend', 'tFollowPrevFriend']
 
 class pQueueLeuLeu(PlayBase):
     """
@@ -10,11 +12,10 @@ class pQueueLeuLeu(PlayBase):
     """
     def __init__(self):
         PlayBase.__init__(self, self.__class__.__name__)
+        self._sequence = [SEQUENCE_QUEUELEULEU]
 
     def getTactics(self, index=None):
-        sequence = [['tFollowBall', 'tFollowPrevFriend', 'tFollowPrevFriend',
-                          'tFollowPrevFriend', 'tFollowPrevFriend', 'tFollowPrevFriend']]
         if index is None:
-            return sequence[0]
+            return self._sequence[0]
         else:
-            return sequence[index]
+            return self._sequence[index]

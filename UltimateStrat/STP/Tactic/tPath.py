@@ -16,7 +16,7 @@ class tPath(TacticBase):
         bot_pst = info_manager.getPlayerPosition(id_player)
         dst = get_distance(ball_pst, bot_pst)
         
-        if isinstance(info_manager.getPlayerNextPose(id_player), Pose):
+        if isinstance(info_manager.getPlayerNextAction(id_player), Pose):
             return {'skill': 'sGeneratePath', 'target': ball_pst, 'goal': ball_pst}
         else:
             return {'skill': 'sWait', 'target': ball_pst, 'goal': ball_pst}
