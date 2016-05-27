@@ -1,16 +1,13 @@
 # Under MIT License, see LICENSE.txt
+""" TODO: Integrer dans InfoManager """
+from time import time
+
 __author__ = 'RoboCupULaval'
 
-from time import time
-import math
-from RULEngine.Util.Position import Position
 
 
 class BlackBoard:
     """
-    Blackboard consists of four dictionaries that contain information on the ball, friendly team,
-    opponent team and on the game itself.
-
     Blackboard est un objet regroupant 4 dictionnaires. Ceux-ci contiennent de l'information
     sur l'état de la balle, de la partie, de l'équipe alliée et de l'équipe adverse.
 
@@ -35,9 +32,8 @@ class BlackBoard:
      target : ???, goal : ???, speed : float, retro_pose : Liste des 10 précédents
                                                             tuples (time(), Util.Pose()}
 
-
-
     """
+
     def __init__(self, field, team, opponent_team):
         """
         Initialise le BlackBoard avec le terrain et les deux équipes. La majorité des valeurs des
@@ -92,7 +88,7 @@ class BlackBoard:
         self.bb['ball']['position'] = self.field.ball.position
         self.bb['ball']['retro_pose'].append((time(), self.field.ball.position))
         if len(self.bb['ball']['retro_pose']) > 10:
-                self.bb['ball']['retro_pose'].pop(0)
+            self.bb['ball']['retro_pose'].pop(0)
 
         for i in range(6):
             self.bb['friend'][str(i)]['pose'] = self.team.players[i].pose
@@ -105,6 +101,6 @@ class BlackBoard:
             self.bb['enemy'][str(i)]['pose'] = self.opponent_team.players[i].pose
             self.bb['enemy'][str(i)]['position'] = self.opponent_team.players[i].pose.position
             self.bb['enemy'][str(i)]['orientation'] = self.opponent_team.players[i].pose.orientation
-            self.bb['ennemy'][str(i)]['retro_pose'].append((time(), self.opponent_team.players[i].pose))
+            self.bb['enemy'][str(i)]['retro_pose'].append((time(), self.opponent_team.players[i].pose))
             if len(self.bb['enemy'][str(i)]['retro_pose']) > 10:
                 self.bb['enemy'][str(i)]['retro_pose'].pop(0)

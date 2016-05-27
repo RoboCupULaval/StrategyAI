@@ -1,9 +1,11 @@
 # Under MIT License, see LICENSE.txt
-# import math as m
+""" Ce module expose un tableau blanc qui centralise l'information de l'IA.
+Plusieurs méhtodes facilitent l'accès aux informations pertinentes pour le cadre
+STA.
+"""
 from UltimateStrat.Data.BlackBoard import BlackBoard
-# from RULEngine.Util.Pose import Pose, Position
-from RULEngine.Util.geometry import *
-from Util.geometry import *
+from RULEngine.Util.geometry import * # TODO: remove wildcard
+#from Util.geometry import *
 
 __author__ = 'RoboCupULaval'
 
