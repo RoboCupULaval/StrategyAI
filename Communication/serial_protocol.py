@@ -1,3 +1,4 @@
+#Under MIT License, see LICENSE.txt
 #!/usr/bin/python
 import struct
 
