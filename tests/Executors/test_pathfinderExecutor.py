@@ -1,10 +1,8 @@
 #Under MIT License, see LICENSE.txt
-# TODO : Modifier le nom des exceptions dans les tests
-# TODO : Ajouter et modifier les tests quand implementee
+# TODO Faire des tests quand le pathfinder sera implemente
 from unittest import TestCase
 
-from UltimateStrat.InfoManager import InfoManager
-from UltimateStrat.Executor.SkillExecutor import SkillExecutor
+from UltimateStrat.Executor.PathfinderExecutor import *
 
 
 from RULEngine.Game.Field import Field
@@ -16,8 +14,8 @@ from RULEngine.Util.Pose import Pose, Position
 __author__ = 'RoboCupULaval'
 
 
-class TestSkillExecutor(TestCase):
-    """Tests de la classe SkillExecutor"""
+class TestPathfinderExecutor(TestCase):
+    """Tests de la classe PathfinderExecutor"""
 
     def setUp(self):
         self.current_skill = None
@@ -40,19 +38,6 @@ class TestSkillExecutor(TestCase):
     def test_execSkillnNull(self):
         """Test la fonction exec si current_Skill == None"""
         self.assertRaises(Exception,self.current_skill,None)
-
-    def test_execTargetNull(self):
-        """Test la fonction exec si current_Skill == None"""
-        self.assertRaises(Exception,self.current_target,None)
-
-    def test_execGoalNull(self):
-        """Test la fonction exec si current_Skill == None"""
-        self.assertRaises(Exception,self.current_goal,None)
-
-
-
-
-
 
 
 
