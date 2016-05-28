@@ -22,11 +22,14 @@ class SerialCommandSender(CommandSender):
     #Can only send speed commands for now.
     #Can only send translation commands for now.
     def send_command(self, command):
+        if command.player.id != 4: return
         if time.time() - self.last_time > 0.020:
             x = command.pose.position.x
             y = command.pose.position.y
+            print(command.pose.position)
             x, y = x, -y
             
             sercommand = bytearray(protocol.createSpeedCommand(x, y, 0, 0))
+            print(sercommand)
             self.serial.write(sercommand)
             self.last_time = time.time()
