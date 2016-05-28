@@ -1,3 +1,4 @@
+#Under MIT License, see LICENSE.txt
 
 
 class Position(object):

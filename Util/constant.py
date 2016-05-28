@@ -1,3 +1,4 @@
+#Under MIT License, see LICENSE.txt
 __author__ = 'RoboCupULaval'
 from ..Util.Position import Position
 

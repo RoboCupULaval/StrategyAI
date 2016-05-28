@@ -1,3 +1,4 @@
+#Under MIT License, see LICENSE.txt
 from abc import abstractmethod
 from abc import ABCMeta
 
