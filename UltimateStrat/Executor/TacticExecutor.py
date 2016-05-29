@@ -7,15 +7,22 @@ __author__ = 'RoboCupULaval'
 class TacticExecutor(Executor):
     """
     TacticExecutor is a sequence of request that select skill for each players
-    1 - what's player tactic ?
-    2 - get specific tactic from tactic book
-    3 - select skill, target, goal from tactic object
-    4 - set skill, target, goal
     """
     def __init__(self, info_manager):
+        """
+
+        Args:
+            info_manager: Requires access to the blackbox through the infomanager.
+
+        Returns:
+
+        """
         Executor.__init__(self, info_manager)
 
     def exec(self):
+        """
+        For each robots, get its tactic, confirm that it exist in the tacticbook, calcul/apply what the skill should be
+        """
         # Execution for each players
         for id_player in range(self.info_manager.getCountPlayer()):
 

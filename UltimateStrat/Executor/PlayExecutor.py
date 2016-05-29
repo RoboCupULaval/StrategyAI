@@ -7,15 +7,19 @@ __author__ = 'RoboCupULaval'
 class PlayExecutor(Executor):
     """
     PlayExecutor is a sequence of request that select tactics for each players
-    1 - what's current play ?
-    2 - what's current play sequence ?
-    3 - get specific play sequence from play book
-    4 - set tactics for each players
     """
     def __init__(self, info_manager):
+        """
+
+        Args:
+            info_manager: Requires access to the blackbox through the infomanager.
+        """
         Executor.__init__(self, info_manager)
 
     def exec(self):
+        """
+        Get the current play, confirm it exist in playbook set tactic for each robot
+        """
         # 1 - what's current play
         current_play = self.info_manager.getCurrentPlay()
 
