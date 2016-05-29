@@ -1,4 +1,5 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
+""" Module pour tester PlayExecutor """
 from unittest import TestCase
 
 from RULEngine.Game.Field import Field
@@ -17,11 +18,7 @@ from UltimateStrat.InfoManager import InfoManager
 __author__ = 'RoboCupULaval'
 
 class TestPlayExecutor(TestCase):
-    """
-    This text unit is using static fonction that should be changed in the future,
-    please change acordingly. It require at the moment a play inside the playbook named pHalt where
-    every tactic is tNull for each robot.
-    """
+    """ Unit test pour PlayExecutor """
 
     def setUp(self):
 
@@ -36,16 +33,17 @@ class TestPlayExecutor(TestCase):
 
         self.op_team = Team([Player(bot_id) for bot_id in range(6)], False)
         for player in self.op_team.players:
-            self.op_team.players[player.id].position = Position(-100 * player.id - 100, -100 * player.id - 100)
+            player.position = Position(-100 * player.id - 100, -100 * player.id - 100)
+            #self.op_team.players[player.id].position = Position(-100 * player.id - 100, -100 * player.id - 100)
 
         self.field = Field(Ball())
-        self.field.ball.position(Position(1000, 0))
+        self.field.ball._position = Position(1000, 0)
         self.info = InfoManager(self.field, self.team, self.op_team)
         self.info.update()
 
         #simulate the CoachExecutor
-        self.info.setPlay('pHalt')
-        self.info.initPlaySequence()
+        self.info.set_play('pHalt')
+        self.info.init_play_sequence()
 
     def test_construction(self):
         self.assertNotEqual(self.playbook, None)
@@ -57,19 +55,20 @@ class TestPlayExecutor(TestCase):
 
 
     def test_exec(self):
-        #Couldn't find a way to simulate a play inside the play book
+        # TODO: Trouver un moyen de simuler un Play dans un PlayBook
         current_play = 'pHalt'
 
-        current_sequence = self.info.getCurrentPlaySequence()
+        current_sequence = self.info.get_current_play_sequence()
         self.assertIsNotNone(current_sequence)
-        self.assertTrue(current_sequence in range(self.info.getCountPlayer()))
+        self.assertTrue(current_sequence in range(self.info.get_count_player()))
 
         #If this line work then the play is in the playbook
-        play = self.playbook[current_play]
+        play = self.playbook.getBook()[current_play]
         self.assertTrue(play == pHalt)
+        play = play()
 
         #tNull is the tactic for every robot in the play pHalt
-        for i, tactic in enumerate(play.getTactics(current_sequence)):
-            self.info.setPlayerTactic(i, tactic)
-            self.assertIs(self.info.getPlayerTactic(i), 'tNull')
+        for i, tactic in enumerate(play.getTactics()):
+            self.info.set_player_tactic(i, tactic)
+            self.assertIs(self.info.get_player_tactic(i), 'tNull')
 

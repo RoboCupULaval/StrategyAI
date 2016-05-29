@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 """ Ce module expose un tableau blanc qui centralise l'information de l'IA.
-Plusieurs méhtodes facilitent l'accès aux informations pertinentes pour le cadre
-STA.
+    Plusieurs méhtodes facilitent l'accès aux informations pertinentes pour le
+    cadre STA.
 """
 from UltimateStrat.Data.BlackBoard import BlackBoard
 from RULEngine.Util.geometry import * # TODO: remove wildcard
@@ -11,17 +11,18 @@ __author__ = 'RoboCupULaval'
 
 
 class InfoManager:
-    """
-    InfoManager fait le lien entre le Blackboard qui contient l'information sur la partie
-    et le reste de l'application. Il est majoritairement composé de getters et setters
+    """ InfoManager fait le lien entre le Blackboard qui contient l'information
+        sur la partie et le reste de l'application. Il est majoritairement
+        composé de getters et setters
     """
     def __init__(self, field, team, op_team):
         self.black_board = BlackBoard(field, team, op_team)
 
     def update(self):
+        """ Interface public pour update de BlackBoard. """
         self.black_board.update()
 
-    """ +++ BLACKBOARD +++ """
+    # +++ BLACKBOARD +++
     # About Game
     # ---Getter
     def get_current_play(self):
