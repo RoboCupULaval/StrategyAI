@@ -9,5 +9,5 @@ class tStop(TacticBase):
         TacticBase.__init__(self, self.__class__.__name__)
 
     def apply(self, info_manager, id_player):
-        bot_position = info_manager.getPlayerPosition(id_player)
+        bot_position = info_manager.get_player_position(id_player)
         return {'skill': 'sStop', 'target': bot_position, 'goal': bot_position}

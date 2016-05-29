@@ -44,7 +44,8 @@ class InfoManager:
         self.black_board['game']['sequence'] += 1
 
     def get_prev_player_position(self, i):
-        return self.black_board['friend'][str(i - 1)]['position']
+        idx = (i - 1) % 6
+        return self.black_board['friend'][str(idx)]['position']
 
     # About Friend player
     # ---Getter

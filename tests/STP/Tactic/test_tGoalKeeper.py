@@ -40,7 +40,7 @@ class TestTacticGoalKeeper(TestCase):
 
     def test_return(self):
         result = self.tactic.apply(self.info, 0)
-        ball_pst = self.info.getBallPosition()
+        ball_pst = self.info.get_ball_position()
 
         self.assertIsNotNone(result)
         self.assertIsInstance(result, dict)
