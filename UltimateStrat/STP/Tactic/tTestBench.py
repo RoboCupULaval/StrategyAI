@@ -11,9 +11,9 @@ class tTestBench(TacticBase):
         TacticBase.__init__(self, self.__class__.__name__)
 
     def apply(self, info_manager, id_player):
-        bot_pst = info_manager.getPlayerPosition(id_player)
-        ball_pst = info_manager.getBallPosition()
-        action = info_manager.getPlayerNextAction(id_player)
+        bot_pst = info_manager.get_player_position(id_player)
+        ball_pst = info_manager.get_ball_position()
+        action = info_manager.get_player_next_action(id_player)
 
         ### PATH and KICK :: TestBench ###
         if distance(Position(), ball_pst) < 300:

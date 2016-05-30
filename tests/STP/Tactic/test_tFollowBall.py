@@ -40,8 +40,8 @@ class TestTacticFollowBall(TestCase):
 
     def test_if_ball_is_far(self):
         result = self.tactic.apply(self.info, 0)
-        bot_pst = self.info.getPlayerPosition(0)
-        ball_pst = self.info.getBallPosition()
+        bot_pst = self.info.get_player_position(0)
+        ball_pst = self.info.get_ball_position()
 
         self.assertIsNotNone(result)
         self.assertIsInstance(result, dict)
@@ -52,7 +52,7 @@ class TestTacticFollowBall(TestCase):
         self.info.black_board.bb['ball']['position'] = Position(50, 50)
 
         result = self.tactic.apply(self.info, 0)
-        bot_pst = self.info.getPlayerPosition(0)
+        bot_pst = self.info.get_player_position(0)
 
         self.assertIsNotNone(result)
         self.assertIsInstance(result, dict)

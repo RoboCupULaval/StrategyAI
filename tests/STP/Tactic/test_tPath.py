@@ -41,7 +41,7 @@ class TestTacticStop(TestCase):
     def test_if_next_action_is_pose(self):
         self.info.black_board.bb['friend']['0']['next_pose'] = Pose(Position(2000, 0), 0)
         result = self.tactic.apply(self.info, 0)
-        ball_pst = self.info.getBallPosition()
+        ball_pst = self.info.get_ball_position()
 
         self.assertIsNotNone(result)
         self.assertIsInstance(result, dict)
@@ -50,7 +50,7 @@ class TestTacticStop(TestCase):
     def test_if_next_action_is_list_of_pose(self):
         self.info.black_board.bb['friend']['0']['next_pose'] = [Pose(Position(2000, 0), 0), Pose(Position(0, 2000), 0)]
         result = self.tactic.apply(self.info, 0)
-        ball_pst = self.info.getBallPosition()
+        ball_pst = self.info.get_ball_position()
 
         self.assertIsNotNone(result)
         self.assertIsInstance(result, dict)

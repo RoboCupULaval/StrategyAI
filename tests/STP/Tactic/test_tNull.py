@@ -40,7 +40,7 @@ class TestTacticNull(TestCase):
 
     def test_return(self):
         result = self.tactic.apply(self.info, 0)
-        bot_pst = self.info.getPlayerPosition(0)
+        bot_pst = self.info.get_player_position(0)
 
         self.assertIsNotNone(result)
         self.assertIsInstance(result, dict)

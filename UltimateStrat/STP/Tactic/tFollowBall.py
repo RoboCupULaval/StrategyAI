@@ -10,8 +10,8 @@ class tFollowBall(TacticBase):
         TacticBase.__init__(self, self.__class__.__name__)
 
     def apply(self, info_manager, id_player):
-        ball_position = info_manager.getBallPosition()
-        bot_position = info_manager.getPlayerPosition(id_player)
+        ball_position = info_manager.get_ball_position()
+        bot_position = info_manager.get_player_position(id_player)
         #print("follow:" + str(bot_position))
         #print(info_manager.black_board['friend'][str(id_player)].keys())
         dst_ball_bot = get_distance(ball_position, bot_position)

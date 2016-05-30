@@ -1,13 +1,13 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
+""" Module contenant la classe abstraite PlayBase """
 from abc import abstractmethod
 
 __author__ = 'RoboCupULaval'
 
 class PlayBase:
-    """
-    Play contain:
-    + Contain Sequence of Tactics for each bots
-    + Play book - Regroup all plays in dictionary {'Play.__name__':Play object}
+    """ Un Play contients:
+        + Une séquence de Tactic pour chaque robot.
+        + Le PlayBook -> un dictionnaire {PlayName: Play object}
     """
     @abstractmethod
     def __init__(self, name='pBook'):
@@ -15,9 +15,10 @@ class PlayBase:
 
     @abstractmethod
     def getTactics(self, index=None):
-        """
-        :return: list like [[TacticR0, TacticR1, ... , TacticR5],
-                            [...                               ]]
+        """ Retourne la Tactic.
+
+            :param index: L'index du robot, par défaut None.
+            :return: list [TacticR0, TacticR1, ... , TacticR5]
         """
         pass
 
@@ -29,7 +30,9 @@ class PlayBase:
         return self.getBook()[item]
 
     def getBook(self):
+        """ Retourne le PlayBook
+
+            :return: dict {'Play.__name__' = Play}
         """
-        :return: dict like {'Play.__name__' = Play}
-        """
-        return dict(zip([cls.__name__ for cls in self.__class__.__subclasses__()], self.__class__.__subclasses__()))
+        return dict(zip([cls.__name__ for cls in self.__class__.__subclasses__()],
+                        self.__class__.__subclasses__()))

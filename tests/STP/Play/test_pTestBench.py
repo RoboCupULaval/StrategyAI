@@ -1,19 +1,19 @@
-#Under MIT License, see LICENSE.txt
-import unittest
-from UltimateStrat.STP.Play.pTestBench import *
+# Under MIT License, see LICENSE.txt
+""" Module de test de pTestBench """
+from nose.tools import assert_equal, assert_raises
+from UltimateStrat.STP.Play.pTestBench import pTestBench, SEQUENCE_TEST_BENCH
 
-class testPTestBench(unittest.TestCase):
-  def setUp(self):
-    self.pTestBench = pTestBench()
+class TestTestBench:
+    """ Class test pTestBench """
+    @classmethod
+    def setup(cls):
+        cls.pTestBench = pTestBench()
 
-  def test_getTactics_with_no_args(self):
-    self.assertEqual(SEQUENCE_TEST_BENCH, self.pTestBench.getTactics())
+    def test_getTactics_with_no_args(self):
+        assert_equal(SEQUENCE_TEST_BENCH, self.pTestBench.getTactics())
 
-  def test_getTactics_with_index(self):
-      self.assertEqual(SEQUENCE_TEST_BENCH, self.pTestBench.getTactics(0))
+    def test_getTactics_with_index(self):
+        assert_equal(SEQUENCE_TEST_BENCH[0], self.pTestBench.getTactics(0))
 
-  def test_get_Tactics_with_invalid_index(self):
-      self.assertRaises(IndexError, self.pTestBench.getTactics, 6)
-
-if __name__ == '__main__':
-  unittest.main()
+    def test_get_Tactics_with_invalid_index(self):
+        assert_raises(IndexError, self.pTestBench.getTactics, 6)
