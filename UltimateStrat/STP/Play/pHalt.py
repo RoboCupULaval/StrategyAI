@@ -1,4 +1,5 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
+""" Module contenant la stratégie pHalt. """
 from UltimateStrat.STP.Play.PlayBase import PlayBase
 
 __author__ = 'RoboCupULaval'
@@ -8,16 +9,15 @@ SEQUENCE_HALT = ['tNull', 'tNull', 'tNull',
 
 
 class pHalt(PlayBase):
-    """
-    Default mode:
-     + All bots stop their current action.
+    """ Cette stratégie applique la Tactic tHalt à tous les robots.
+        Ils s'arrêtent complètement.
     """
     def __init__(self):
         PlayBase.__init__(self, self.__class__.__name__)
-        self._sequence = [SEQUENCE_HALT]
+        self._sequence = SEQUENCE_HALT
 
     def getTactics(self, index=None):
         if index is None:
-            return self._sequence[0]
+            return self._sequence
         else:
             return self._sequence[index]
