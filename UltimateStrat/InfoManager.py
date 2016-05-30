@@ -81,17 +81,17 @@ class InfoManager:
 
     # ---Setter
     def set_player_skill_target_goal(self, i, action):
-        # ToDo : Enforce valid types for each attribute
+        # TODO: Enforce valid types for each attribute
         self.black_board['friend'][str(i)]['skill'] = action['skill']
         self.black_board['friend'][str(i)]['target'] = action['target']
         self.black_board['friend'][str(i)]['goal'] = action['goal']
 
     def set_player_tactic(self, i, tactic):
-        # ToDo : Enforce valid type
+        # TODO: Enforce valid type
         self.black_board['friend'][str(i)]['tactic'] = tactic
 
     def set_player_next_action(self, i, next_action):
-        # ToDo : Enforce valid type
+        # TODO: Enforce valid type
         self.black_board['friend'][str(i)]['next_pose'] = next_action
 
     # About Ball

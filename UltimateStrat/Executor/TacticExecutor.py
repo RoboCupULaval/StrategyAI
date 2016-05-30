@@ -22,10 +22,10 @@ class TacticExecutor(Executor):
     def exec(self):
         """ Obtient la Tactic de chaque robot et calcul la Skill à assigner."""
         # Execution for each players
-        for id_player in range(self.info_manager.getCountPlayer()):
+        for id_player in range(self.info_manager.get_count_player()):
 
             # 1 - what's player tactic ?
-            current_tactic = self.info_manager.getPlayerTactic(id_player)
+            current_tactic = self.info_manager.get_player_tactic(id_player)
 
             # 2 - get specific tactic from tactic book
             tactic = self.tactic_book[current_tactic]
@@ -34,4 +34,4 @@ class TacticExecutor(Executor):
             action = tactic().apply(self.info_manager, id_player)
 
             # 4 - set skill, target, goal
-            self.info_manager.setPlayerSkillTargetGoal(id_player, action)
+            self.info_manager.set_player_skill_target_goal(id_player, action)

@@ -23,15 +23,15 @@ class PlayExecutor(Executor):
             appropriée à chaque robot.
         """
         # 1 - what's current play
-        current_play = self.info_manager.getCurrentPlay()
+        current_play = self.info_manager.get_current_play()
 
         # 2 - what's current play sequence ?
-        current_seq = self.info_manager.getCurrentPlaySequence()
+        current_seq = self.info_manager.get_current_play_sequence()
 
         # 3 - get specific play sequence from play book
         play = self.play_book[current_play]
+        play = play()
 
         # 4 - set tactics (str) for each players on black board
-        for i, tactic in enumerate(play.getTactics(current_seq)):
-            self.info_manager.setPlayerTactic(i, tactic)
-
+        for i, tactic in enumerate(play.getTactics()):
+            self.info_manager.set_player_tactic(i, tactic)

@@ -11,10 +11,10 @@ class pTestBench(PlayBase):
     """
     def __init__(self):
         PlayBase.__init__(self, self.__class__.__name__)
-        self._sequence = [SEQUENCE_TEST_BENCH]
+        self._sequence = SEQUENCE_TEST_BENCH
 
     def getTactics(self, index=None):
         if index is None:
-            return self._sequence[0]
+            return self._sequence
         else:
             return self._sequence[index]
