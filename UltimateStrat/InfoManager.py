@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 """ Ce module expose un tableau blanc qui centralise l'information de l'IA.
-Plusieurs méhtodes facilitent l'accès aux informations pertinentes pour le cadre
-STA.
+    Plusieurs méhtodes facilitent l'accès aux informations pertinentes pour le
+    cadre STA.
 """
 from UltimateStrat.Data.BlackBoard import BlackBoard
 from RULEngine.Util.geometry import * # TODO: remove wildcard
@@ -11,17 +11,18 @@ __author__ = 'RoboCupULaval'
 
 
 class InfoManager:
-    """
-    InfoManager fait le lien entre le Blackboard qui contient l'information sur la partie
-    et le reste de l'application. Il est majoritairement composé de getters et setters
+    """ InfoManager fait le lien entre le Blackboard qui contient l'information
+        sur la partie et le reste de l'application. Il est majoritairement
+        composé de getters et setters
     """
     def __init__(self, field, team, op_team):
         self.black_board = BlackBoard(field, team, op_team)
 
     def update(self):
+        """ Interface public pour update de BlackBoard. """
         self.black_board.update()
 
-    """ +++ BLACKBOARD +++ """
+    # +++ BLACKBOARD +++
     # About Game
     # ---Getter
     def get_current_play(self):
@@ -43,7 +44,8 @@ class InfoManager:
         self.black_board['game']['sequence'] += 1
 
     def get_prev_player_position(self, i):
-        return self.black_board['friend'][str(i - 1)]['position']
+        idx = (i - 1) % 6
+        return self.black_board['friend'][str(idx)]['position']
 
     # About Friend player
     # ---Getter
@@ -79,17 +81,17 @@ class InfoManager:
 
     # ---Setter
     def set_player_skill_target_goal(self, i, action):
-        # ToDo : Enforce valid types for each attribute
+        # TODO: Enforce valid types for each attribute
         self.black_board['friend'][str(i)]['skill'] = action['skill']
         self.black_board['friend'][str(i)]['target'] = action['target']
         self.black_board['friend'][str(i)]['goal'] = action['goal']
 
     def set_player_tactic(self, i, tactic):
-        # ToDo : Enforce valid type
+        # TODO: Enforce valid type
         self.black_board['friend'][str(i)]['tactic'] = tactic
 
     def set_player_next_action(self, i, next_action):
-        # ToDo : Enforce valid type
+        # TODO: Enforce valid type
         self.black_board['friend'][str(i)]['next_pose'] = next_action
 
     # About Ball

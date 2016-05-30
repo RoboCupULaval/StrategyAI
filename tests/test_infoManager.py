@@ -173,12 +173,15 @@ class TestInfoManager(unittest.TestCase):
         # ToDo : function actually returns hard coded-value
         self.assertEqual(self.info_manager.get_next_play(1), 'pTestBench')
 
+    def test_get_prev_player_position_index_zero(self):
+        try:
+            self.info_manager.get_prev_player_position(0)
+        except KeyError:
+            self.fail("La méthode peut calculer un index négatif.")
 
-    # def test_get_speed(self):
-    #     self.fail()
-    #
-    # def test_get_speed_ball(self):
-    #    self.fail()
+        self.assertEqual(self.info_manager.get_prev_player_position(0),
+                         self.info_manager.get_player_position(5))
+
 
 if __name__ == '__main__':
     unittest.main()
