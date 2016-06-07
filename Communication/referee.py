@@ -2,7 +2,7 @@
 #!/usr/bin/python
 
 from .udp_server import PBPacketReceiver
-from . import referee_pb2 as ssl_referee
+from .protobuf import referee_pb2 as ssl_referee
 
 
 class RefereeServer(PBPacketReceiver):

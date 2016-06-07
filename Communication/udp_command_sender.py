@@ -2,8 +2,8 @@
 #!/usr/bin/python
 from .command_sender import CommandSender
 import socket
-from . import grSim_Packet_pb2 as grSim_Packet
-from .grSim_Commands_pb2 import grSim_Robot_Command
+from .protobuf import grSim_Packet_pb2 as grSim_Packet
+from .protobuf.grSim_Commands_pb2 import grSim_Robot_Command
 import math
 
 

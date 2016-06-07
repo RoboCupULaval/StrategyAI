@@ -2,7 +2,7 @@
 #!/usr/bin/python
 
 from .udp_server import PBPacketReceiver
-from . import messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
+from .protobuf import messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
 
 
 class Vision(PBPacketReceiver):
