@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 from unittest import TestCase
-from UltimateStrat.STP.Skill.sWait import sWait
+from ai.STP.Skill.sWait import sWait
 
 __author__ = 'RoboCupULaval'
 

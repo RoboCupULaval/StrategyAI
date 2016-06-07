@@ -1,6 +1,6 @@
 #Under MIT License, see LICENSE.txt
 import unittest
-from UltimateStrat.STP.Play.pDemoFollowBall import *
+from ai.STP.Play.pDemoFollowBall import *
 
 
 class testPPathAxis(unittest.TestCase):
