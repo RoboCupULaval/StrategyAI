@@ -9,12 +9,12 @@ from RULEngine.Game.Team import Team
 from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Position
 
-from UltimateStrat.STP.Play.PlayBase import PlayBase
-from UltimateStrat.STP.Tactic.tNull import tNull
-from UltimateStrat.STP.Tactic.TacticBase import TacticBase
-from UltimateStrat.STP.Skill.SkillBase import SkillBase
+from AI.STP.Play.PlayBase import PlayBase
+from AI.STP.Tactic.tNull import tNull
+from AI.STP.Tactic.TacticBase import TacticBase
+from AI.STP.Skill.SkillBase import SkillBase
 
-from UltimateStrat.InfoManager import InfoManager
+from AI.InfoManager import InfoManager
 
 
 __author__ = 'RoboCupULaval'

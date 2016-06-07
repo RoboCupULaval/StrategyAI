@@ -1,6 +1,6 @@
 #Under MIT License, see LICENSE.txt
 import unittest
-from UltimateStrat.STP.Play.pDefense import *
+from AI.STP.Play.pDefense import *
 
 
 class testPPathAxis(unittest.TestCase):

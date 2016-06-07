@@ -2,7 +2,7 @@
 # TODO Faire des tests quand le pathfinder sera implemente
 from unittest import TestCase
 
-from UltimateStrat.Executor.PathfinderExecutor import *
+from AI.Executor.PathfinderExecutor import *
 
 
 from RULEngine.Game.Field import Field
