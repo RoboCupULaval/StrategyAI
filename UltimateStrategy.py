@@ -6,11 +6,11 @@ from RULEngine.Command import Command
 from RULEngine.Util.Pose import Pose
 import RULEngine.Util.geometry as geometry
 
-from AI.Executor.CoachExecutor import CoachExecutor
-from AI.Executor.PlayExecutor import PlayExecutor
-from AI.Executor.TacticExecutor import TacticExecutor
-from AI.Executor.SkillExecutor import SkillExecutor
-from AI.InfoManager import InfoManager
+from ai.Executor.CoachExecutor import CoachExecutor
+from ai.Executor.PlayExecutor import PlayExecutor
+from ai.Executor.TacticExecutor import TacticExecutor
+from ai.Executor.SkillExecutor import SkillExecutor
+from ai.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 

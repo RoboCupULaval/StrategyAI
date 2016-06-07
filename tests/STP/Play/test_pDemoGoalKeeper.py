@@ -1,7 +1,7 @@
 #Under MIT License, see LICENSE.txt
 import unittest
-from AI.STP.Play.pDemoGoalKeeper import *
-from AI.STP.Play.pDemoGoalKeeper import pDemoGoalKeeper
+from ai.STP.Play.pDemoGoalKeeper import *
+from ai.STP.Play.pDemoGoalKeeper import pDemoGoalKeeper
 
 
 class testPPathAxis(unittest.TestCase):
