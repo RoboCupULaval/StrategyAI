@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 import unittest
-from AI.InfoManager import InfoManager
+from ai.InfoManager import InfoManager
 from RULEngine.Game import Ball, Field, Team, Player
 from RULEngine.Util.Position import Position
 

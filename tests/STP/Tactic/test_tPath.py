@@ -7,8 +7,8 @@ from RULEngine.Game.Team import Team
 from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose, Position
 
-from AI.STP.Tactic.tPath import tPath
-from AI.InfoManager import InfoManager
+from ai.STP.Tactic.tPath import tPath
+from ai.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 

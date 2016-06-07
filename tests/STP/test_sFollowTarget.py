@@ -2,7 +2,7 @@
 """ Module de test pour Action GoToTarget """
 from nose.tools import assert_equal
 
-from AI.STP.Skill.sFollowTarget import sFollowTarget
+from ai.STP.Skill.sFollowTarget import sFollowTarget
 from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose

@@ -1,6 +1,6 @@
 #Under MIT License, see LICENSE.txt
 import unittest
-from AI.STP.Play.pPath import *
+from ai.STP.Play.pPath import *
 
 class testPPathAxis(unittest.TestCase):
   def setUp(self):
