@@ -1,13 +1,9 @@
 #Under MIT License, see LICENSE.txt
-from collections import namedtuple
 
 from . import Referee
 from ..Util.Pose import Pose
 from ..Util.Position import Position
 from ..Util.constant import PLAYER_PER_TEAM
-
-GameState = namedtuple('GameState', ['field', 'referee', 'friends',
-                                     'enemies', 'debug'])
 
 class Game():
     def __init__(self, field, referee, blue_team, yellow_team, strategy):
@@ -25,48 +21,6 @@ class Game():
             self.enemies = yellow_team
 
         self.delta = None
-
-    def update_strategies(self):
-
-        game_state = self.get_game_state()
-
-        state = self.referee.command.name
-        if state == "HALT":
-            self.strategy.on_halt(game_state)
-
-        elif state == "NORMAL_START":
-            self.strategy.on_start(game_state)
-
-        elif state == "STOP":
-            self.strategy.on_stop(game_state)
-
-    def get_game_state(self):
-
-        return GameState(field=self.field,
-                         referee=self.referee,
-                         friends=self.friends,
-                         enemies=self.enemies,
-                         debug={})
-
-    def get_commands(self):
-        blue_team_commands = [command for command in self._get_blue_team_commands()] #Copy
-
-        self.strategy.commands.clear()
-
-        return blue_team_commands
-
-    def _get_blue_team_commands(self):
-        blue_team_commands = self.strategy.commands
-        #blue_team_commands = self._remove_commands_from_opponent_team(blue_team_commands, self.yellow_team)
-        return blue_team_commands
-
-    @staticmethod
-    def _remove_commands_from_opponent_team(commands, opponent_team):
-        final_commands = []
-        for command in commands:
-            if command.team != opponent_team:
-                final_commands.append(command)
-        return final_commands
 
     def update_game_state(self, referee_command):
         # TODO: Réviser code, ça semble louche

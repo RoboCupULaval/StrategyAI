@@ -16,8 +16,11 @@ from .Communication.udp_command_sender import UDPCommandSender
 from .Command.Command import Stop
 import math
 import time
-from collections import deque
+from collections import deque, namedtuple
 import threading
+
+GameState = namedtuple('GameState', ['field', 'referee', 'friends',
+                                     'enemies', 'debug'])
 
 class Framework(object):
 
@@ -69,14 +72,41 @@ class Framework(object):
 
 
     def update_strategies(self):
-        self.game.update_strategies()
+
+        game_state = self.get_game_state()
+
+        state = self.referee.command.name
+        if state == "HALT":
+            self.strategy.on_halt(game_state)
+
+        elif state == "NORMAL_START":
+            self.strategy.on_start(game_state)
+
+        elif state == "STOP":
+            self.strategy.on_stop(game_state)
+
+    def get_game_state(self):
+
+        game = self.game
+        return GameState(field=game.field,
+                         referee=game.referee,
+                         friends=game.friends,
+                         enemies=game.enemies,
+                         debug={})
 
     def send_robot_commands(self):
         if self.vision.get_latest_frame():
-            commands = self.game.get_commands()
+            commands = self.get_commands()
             for command in commands:
                 command = command.toSpeedCommand()
                 self.command_sender.send_command(command)
+
+    def get_commands(self):
+        commands = [command for command in self.strategy.commands] #Copy
+
+        self.strategy.commands.clear()
+
+        return commands
 
     def __init__(self, is_team_yellow=False):
         self.running_thread = None
