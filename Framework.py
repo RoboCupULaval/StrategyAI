@@ -1,12 +1,8 @@
 #Under MIT License, see LICENSE.txt
 import sys
 import os.path
-from .Game.Ball import Ball
-from .Game.Field import Field
 from .Game.Game import Game
-from .Game.Player import Player
 from .Game.Referee import Referee
-from .Game.Team import Team
 from .Util.Pose import Pose
 from .Util.Position import Position
 from .Util.constant import PLAYER_PER_TEAM
@@ -24,29 +20,13 @@ GameState = namedtuple('GameState', ['field', 'referee', 'friends',
 
 class Framework(object):
 
-    def create_teams(self):
-        blue_players = []
-        yellow_players = []
-        for i in range(PLAYER_PER_TEAM):
-            bPlayer = Player(i)
-            yPlayer = Player(i)
-            blue_players.append(bPlayer)
-            yellow_players.append(yPlayer)
-        blue_team = Team(blue_players, False)
-        yellow_team = Team(yellow_players, True)
-        return blue_team, yellow_team
-
     def create_game(self, strategy):
-        blue_team, yellow_team = self.create_teams()
-        self.ball = Ball()
-        self.field = Field(self.ball)
+
         self.referee = Referee()
 
         self.strategy = strategy(self.is_yellow)
 
-        self.game = Game(self.field, self.referee,
-                         blue_team, yellow_team,
-                         self.strategy)
+        self.game = Game(self.referee, self.is_yellow)
 
         return self.game
 

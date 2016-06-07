@@ -4,16 +4,21 @@ from . import Referee
 from ..Util.Pose import Pose
 from ..Util.Position import Position
 from ..Util.constant import PLAYER_PER_TEAM
+from .Player import Player
+from .Team import Team
+from .Ball import Ball
+from .Field import Field
 
 class Game():
-    def __init__(self, field, referee, blue_team, yellow_team, strategy):
-        self.field = field
+    def __init__(self, referee, is_team_yellow):
+        self.ball = Ball()
+        self.field = Field(self.ball)
         self.referee = referee
+        blue_team, yellow_team = self.create_teams()
         self.blue_team = blue_team
         self.yellow_team = yellow_team
-        self.strategy = strategy
 
-        if strategy.is_team_yellow:
+        if is_team_yellow:
             self.friends = yellow_team
             self.enemies = blue_team
         else:
@@ -21,6 +26,18 @@ class Game():
             self.enemies = yellow_team
 
         self.delta = None
+
+    def create_teams(self):
+        blue_players = []
+        yellow_players = []
+        for i in range(PLAYER_PER_TEAM):
+            bPlayer = Player(i)
+            yPlayer = Player(i)
+            blue_players.append(bPlayer)
+            yellow_players.append(yPlayer)
+        blue_team = Team(blue_players, False)
+        yellow_team = Team(yellow_players, True)
+        return blue_team, yellow_team
 
     def update_game_state(self, referee_command):
         # TODO: Réviser code, ça semble louche
