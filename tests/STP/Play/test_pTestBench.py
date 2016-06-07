@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 """ Module de test de pTestBench """
 from nose.tools import assert_equal, assert_raises
-from UltimateStrat.STP.Play.pTestBench import pTestBench, SEQUENCE_TEST_BENCH
+from AI.STP.Play.pTestBench import pTestBench, SEQUENCE_TEST_BENCH
 
 class TestTestBench:
     """ Class test pTestBench """

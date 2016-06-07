@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 from unittest import TestCase
-from UltimateStrat.STP.Skill.sFollowTarget import sFollowTarget
+from AI.STP.Skill.sFollowTarget import sFollowTarget
 from RULEngine.Util.Pose import Pose, Position
 from RULEngine.Util.geometry import get_angle
 

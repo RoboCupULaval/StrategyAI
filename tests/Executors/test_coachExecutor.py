@@ -1,8 +1,8 @@
 # Under MIT License, see LICENSE.txt
 """ Module de test pour CoachExecutor, nosetests style """
 from nose.tools import assert_equal
-from UltimateStrat.InfoManager import InfoManager
-from UltimateStrat.Executor.CoachExecutor import CoachExecutor
+from AI.InfoManager import InfoManager
+from AI.Executor.CoachExecutor import CoachExecutor
 from RULEngine.Game import Ball, Field, Player, Team
 
 __author__ = 'RoboCupULaval'

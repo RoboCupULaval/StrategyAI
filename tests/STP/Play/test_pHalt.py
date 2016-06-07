@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 """ Module test pHalt """
 import unittest
-from UltimateStrat.STP.Play.pHalt import pHalt, SEQUENCE_HALT
+from AI.STP.Play.pHalt import pHalt, SEQUENCE_HALT
 
 class testPPathAxis(unittest.TestCase):
     """ Class test pHalt """

@@ -1,6 +1,6 @@
 #Under MIT License, see LICENSE.txt
 import unittest
-from UltimateStrat.STP.Play.pQueueLeuLeu import *
+from AI.STP.Play.pQueueLeuLeu import *
 
 class TestPQueueLeuLeu(unittest.TestCase):
   def setUp(self):
