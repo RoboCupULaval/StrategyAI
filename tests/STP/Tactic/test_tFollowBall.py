@@ -7,8 +7,8 @@ from RULEngine.Game.Team import Team
 from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose, Position
 
-from UltimateStrat.STP.Tactic.tFollowBall import tFollowBall
-from UltimateStrat.InfoManager import InfoManager
+from ai.STP.Tactic.tFollowBall import tFollowBall
+from ai.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 

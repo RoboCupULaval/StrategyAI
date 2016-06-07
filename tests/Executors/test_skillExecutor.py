@@ -3,8 +3,8 @@
 # TODO : Ajouter et modifier les tests quand implementee
 from unittest import TestCase
 
-from UltimateStrat.InfoManager import InfoManager
-from UltimateStrat.Executor.SkillExecutor import SkillExecutor
+from ai.InfoManager import InfoManager
+from ai.Executor.SkillExecutor import SkillExecutor
 
 
 from RULEngine.Game.Field import Field
