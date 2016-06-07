@@ -1,8 +1,6 @@
 #Under MIT License, see LICENSE.txt
 import sys
 import os.path
-path, file = os.path.split(os.path.realpath(__file__))
-sys.path.append(os.path.join(path, "Communication"))
 from .Game.Ball import Ball
 from .Game.Field import Field
 from .Game.Game import Game
@@ -40,12 +38,12 @@ class Framework(object):
         self.ball = Ball()
         self.field = Field(self.ball)
         self.referee = Referee()
-        if (self.is_yellow):
-            self.strategy = strategy(self.field, self.referee, yellow_team, blue_team, True)
-        else:
-            self.strategy = strategy(self.field, self.referee, blue_team, yellow_team)
 
-        self.game = Game(self.field, self.referee, blue_team, yellow_team, self.strategy)
+        self.strategy = strategy(self.is_yellow)
+
+        self.game = Game(self.field, self.referee,
+                         blue_team, yellow_team,
+                         self.strategy)
 
         return self.game
 

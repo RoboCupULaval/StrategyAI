@@ -1,41 +1,62 @@
 #Under MIT License, see LICENSE.txt
-import math
+from collections import namedtuple
 
 from . import Referee
 from ..Util.Pose import Pose
 from ..Util.Position import Position
 from ..Util.constant import PLAYER_PER_TEAM
 
+GameState = namedtuple('GameState', ['field', 'referee', 'friends',
+                                     'enemies', 'debug'])
 
 class Game():
-    def __init__(self, field, referee, blue_team, yellow_team, blue_team_strategy):
+    def __init__(self, field, referee, blue_team, yellow_team, strategy):
         self.field = field
         self.referee = referee
         self.blue_team = blue_team
         self.yellow_team = yellow_team
-        self.blue_team_strategy = blue_team_strategy
+        self.strategy = strategy
+
+        if strategy.is_team_yellow:
+            self.friends = yellow_team
+            self.enemies = blue_team
+        else:
+            self.friends = blue_team
+            self.enemies = yellow_team
+
         self.delta = None
 
     def update_strategies(self):
+
+        game_state = self.get_game_state()
+
         state = self.referee.command.name
         if state == "HALT":
-            self.blue_team_strategy.on_halt()
+            self.strategy.on_halt(game_state)
 
         elif state == "NORMAL_START":
-            self.blue_team_strategy.on_start()
+            self.strategy.on_start(game_state)
 
         elif state == "STOP":
-            self.blue_team_strategy.on_stop()
+            self.strategy.on_stop(game_state)
+
+    def get_game_state(self):
+
+        return GameState(field=self.field,
+                         referee=self.referee,
+                         friends=self.friends,
+                         enemies=self.enemies,
+                         debug={})
 
     def get_commands(self):
         blue_team_commands = [command for command in self._get_blue_team_commands()] #Copy
 
-        self.blue_team_strategy.commands.clear()
+        self.strategy.commands.clear()
 
         return blue_team_commands
 
     def _get_blue_team_commands(self):
-        blue_team_commands = self.blue_team_strategy.commands
+        blue_team_commands = self.strategy.commands
         #blue_team_commands = self._remove_commands_from_opponent_team(blue_team_commands, self.yellow_team)
         return blue_team_commands
 
