@@ -3,8 +3,6 @@
 from . import Referee
 from ..Util.Pose import Pose
 from ..Util.Position import Position
-from ..Util.constant import PLAYER_PER_TEAM
-from .Player import Player
 from .Team import Team
 from .Ball import Ball
 from .Field import Field
@@ -26,15 +24,9 @@ class Game():
         self.delta = None
 
     def create_teams(self):
-        blue_players = []
-        yellow_players = []
-        for i in range(PLAYER_PER_TEAM):
-            bPlayer = Player(i)
-            yPlayer = Player(i)
-            blue_players.append(bPlayer)
-            yellow_players.append(yPlayer)
-        blue_team = Team(blue_players, False)
-        yellow_team = Team(yellow_players, True)
+        blue_team = Team(is_team_yellow=False)
+        yellow_team = Team(is_team_yellow=True)
+
         return blue_team, yellow_team
 
     def update_game_state(self, referee_command):
