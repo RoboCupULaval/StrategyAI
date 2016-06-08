@@ -29,7 +29,7 @@ class InfluenceMap(object):
         assert(0 < effectradius)
 
         # todo see how to better implement a graphic representation!
-        # this option is not useful anymore
+        # this option is not useful anymore...
         # numpy.set_printoptions(threshold=10000)
         # GOD NO!
         try:
@@ -43,7 +43,7 @@ class InfluenceMap(object):
         self._effectradius = effectradius
         self._borderstrength = -strengthpeak * 0.03 # TODO change this variable for something not magic!
         self._addedpoint = [] # TODO find a better name for this variable please.
-        self._board = [] # this is the board that change
+        self._board = [] # this is the board that change depending on the point received
         self._starterboard = [] # this is the board that stay the same after the border are applied.
 
         number_of_rows_and_columns = self.calculate_rows_and_columns()
@@ -91,6 +91,7 @@ class InfluenceMap(object):
         print(self._numberofrows, "  ", self._numberofcolumns, "  -  ", self._addedpoint)
 
     def determine_influence_radius(self):
+        # todo this method
         pass
 
     def initialize_borders(self):
@@ -99,6 +100,7 @@ class InfluenceMap(object):
         """
         self.put_boarders()
         self.propagate_borders()
+        self.put_goals()
         self._board = numpy.copy(self._starterboard)
 
     def put_boarders(self):
@@ -114,25 +116,28 @@ class InfluenceMap(object):
         """
         Propagate the borders on the starterboard.
         """
+        #keep the effectradius low while making the border speed up greatly the initialization and you don't need
+        #so much border.
+        temporary_effectradius = int(ceil(ROBOT_RADIUS / self._resolution)) + 1
 
         # Top border
         for border in range(self._numberofcolumns):
             # only for the rows affected by the change.
-            for x in range(1, self._effectradius):
+            for x in range(1, temporary_effectradius):
 
-                if border - self._effectradius - 1 < 1:
+                if border - temporary_effectradius - 1 < 1:
                     columnmin = 1
                 else:
-                    columnmin = border - self._effectradius - 1
+                    columnmin = border - temporary_effectradius - 1
 
-                if border + self._effectradius + 1 > self._numberofcolumns:
-                    columnmax = self._numberofcolumns
+                if border + temporary_effectradius + 1 > self._numberofcolumns:
+                    columnmax = self._numberofcolumns - 1
                 else:
-                    columnmax = border + self._effectradius + 1
+                    columnmax = border + temporary_effectradius + 1
                 # for every columns affected
                 for y in range(columnmin, columnmax):
-                    if not (y == 0 or y == self._numberofcolumns) and\
-                           ((x - 0)**2 + (y - border)**2) <= self._effectradius**2:
+                    if ((x - 0)**2 + (y - border)**2) <= temporary_effectradius**2:
+
 
                         decay = int((self._borderstrength * (self._strengthdecay **
                                      self.distance(0, border, x, y))))
@@ -141,71 +146,70 @@ class InfluenceMap(object):
         # bottom border
         for border in range(self._numberofcolumns):
 
-            for x in range(self._numberofrows - 2, self._numberofrows - self._effectradius, -1):
+            for x in range(self._numberofrows - 2, self._numberofrows - temporary_effectradius - 1, -1):
 
-                if border - self._effectradius - 1 < 1:
+                if border - temporary_effectradius - 1 < 1:
                     columnmin = 1
                 else:
-                    columnmin = border - self._effectradius - 1
+                    columnmin = border - temporary_effectradius - 1
 
-                if border + self._effectradius + 1 > self._numberofcolumns:
-                    columnmax = self._numberofcolumns
+                if border + temporary_effectradius + 1 > self._numberofcolumns:
+                    columnmax = self._numberofcolumns - 1
                 else:
-                    columnmax = border + self._effectradius + 1
+                    columnmax = border + temporary_effectradius + 1
 
                 for y in range(columnmin, columnmax):
-                    if not (y == 0 or y == self._numberofcolumns) and \
-                           ((x - self._numberofrows-1)**2 + (y - border)**2) <= self._effectradius**2:
-
+                    if ((self._numberofrows - 1 - x)**2 + (y - border)**2) <= temporary_effectradius**2:
                         decay = int((self._borderstrength * (self._strengthdecay **
                                                         self.distance(self._numberofrows - 1, border, x, y))))
+                        self._starterboard[x, y] += decay
+        # right border
+        for border in range(self._numberofrows):
+
+            for y in range(self._numberofcolumns - 2, self._numberofcolumns - temporary_effectradius - 1, -1):
+
+                if border - temporary_effectradius - 1 < 1:
+                    rowmin = 1
+                else:
+                    rowmin = border - temporary_effectradius - 1
+
+                if border + temporary_effectradius + 1 > self._numberofrows:
+                    rowmax = self._numberofrows - 1
+                else:
+                    rowmax = border + temporary_effectradius + 1
+
+                for x in range(rowmin, rowmax):
+                    if ((border - x)**2 + (self._numberofcolumns - y - 1)**2) <= temporary_effectradius**2:
+
+                        decay = int((self._borderstrength * (self._strengthdecay ** \
+                                                             self.distance(border, self._numberofcolumns-1, x, y))))
                         self._starterboard[x, y] += decay
 
         # left border
         for border in range(self._numberofrows):
 
-            for y in range(1, self._effectradius):
+            for y in range(1, temporary_effectradius):
 
-                if border - self._effectradius - 1 < 1:
+                if border - temporary_effectradius - 1 < 1:
                     rowmin = 1
                 else:
-                    rowmin = border - self._effectradius - 1
+                    rowmin = border - temporary_effectradius - 1
 
-                if border + self._effectradius + 1 > self._numberofrows:
-                    rowmax = self._numberofrows
+                if border + temporary_effectradius + 1 > self._numberofrows:
+                    rowmax = self._numberofrows - 1
                 else:
-                    rowmax = border + self._effectradius + 1
+                    rowmax = border + temporary_effectradius + 1
 
                 for x in range(rowmin, rowmax):
-                    if not (x == 0 or x == self._numberofrows) and\
-                           ((x - border)**2 + (y - 0)**2) <= self._effectradius**2:
+                    if ((x - border)**2 + (y - 0)**2) <= temporary_effectradius**2:
 
                         decay = int((self._borderstrength * (self._strengthdecay ** \
-                                                                        self.distance(border, 0, x, y))))
+                                                             self.distance(border, 0, x, y))))
                         self._starterboard[x, y] += decay
 
-        # right border
-        for border in range(self._numberofrows):
 
-            for y in range(self._numberofcolumns - 2, self._numberofcolumns - self._effectradius, -1):
-
-                if border - self._effectradius - 1 < 1:
-                    rowmin = 1
-                else:
-                    rowmin = border - self._effectradius - 1
-
-                if border + self._effectradius + 1 > self._numberofrows:
-                    rowmax = self._numberofrows
-                else:
-                    rowmax = border + self._effectradius + 1
-
-                for x in range(rowmin, rowmax):
-                    if not (x == 0 or x == self._numberofrows) and \
-                           ((x - border)**2 + (y - self._numberofcolumns - 1)**2) <= self._effectradius**2:
-
-                        decay = int((self._borderstrength * (self._strengthdecay ** \
-                                    self.distance(border, self._numberofcolumns - 1, x, y))))
-                        self._starterboard[x, y] += decay
+    def put_goals(self):
+        pass
 
     def add_point(self, row, column, strength=0):
         """
@@ -272,6 +276,15 @@ class InfluenceMap(object):
                     self._board[x, y] += decay
 
     def add_square_and_propagate(self, top, bottom, left, right, strength):
+        """
+        Add a point to the board and apply its influence on it.
+        Args:
+            top: top side of the square
+            bottom: bottom side of the square
+            left: left side of the square
+            right: right side of the square
+            strength: The strength of the point
+        """
         assert(isinstance(top, int))
         assert(isinstance(bottom, int))
         assert(isinstance(left, int))
@@ -289,7 +302,18 @@ class InfluenceMap(object):
             for y in range(left, right):
                 self.add_point_and_propagate_influence(x, y, strength)
 
-    def find_closest_point_of_strength_around(self, row, column, strengthrequired):
+    def find_closest_point_of_strength_around(self, row, column, strengthrequired, over=True):
+        """
+
+        Args:
+            row: center row of the point you want to search around.
+            column: center column of the point you want to search around.
+            strengthrequired: the strength to compare to.
+            over: (bool) if true find a strenght over or equal the strengthrequired. Else find lower or equal.
+
+        Returns: A list of tuple (row, column) of the case(s) that meet the critera of strength . Empty if none found.
+
+        """
         assert(isinstance(row, int))
         assert(isinstance(column, int))
         assert(isinstance(strengthrequired, int))
@@ -335,8 +359,12 @@ class InfluenceMap(object):
                     if x in rowinsidesquare and y in columninsidesquare:
                         continue
 
-                    if self._board[x, y] >= strengthrequired:
-                        result.append((x, y))
+                    if over:
+                        if self._board[x, y] >= strengthrequired:
+                            result.append((x, y))
+                    else:
+                        if self._board[x, y] <= strengthrequired:
+                            result.append((x, y))
 
             counter += 1
             rowinsidesquare = range(row-counter+1, row+counter)
@@ -348,6 +376,18 @@ class InfluenceMap(object):
         return result
 
     def find_points_of_strength_in_square(self, centerx, centery, radius, strength, over=True):
+        """
+
+        Args:
+            centerx: row of the point in the center of the square
+            centery: column of the point in the center of the square
+            radius: half the length of a side of the square to search inside of.
+            strength: the strength to compare to.
+            over: (bool) True: search for over or equal the strength. False; search for lower or equal the strength.
+
+        Returns: A list of tuple (row, column) of the case(s) that meet the critera of strength . Empty if none found.
+
+        """
         assert(isinstance(centerx, int))
         assert(isinstance(centery, int))
         assert(isinstance(radius, int))
@@ -394,10 +434,16 @@ class InfluenceMap(object):
         return result
 
     def clear_point_on_board(self):
+        # todo add a point checking maybe?
         self._board = numpy.copy(self._starterboard)
         self._addedpoint.clear()
 
+    def update(self):
+        self.clear_point_on_board()
+
+
     def transform_field_to_board_position(self, position):
+        # TODO see if that holds up
         assert(isinstance(position, Position))
         assert(position.x <= FIELD_X_RIGHT + 100)
         assert(position.x >= FIELD_X_LEFT - 100)
@@ -413,6 +459,7 @@ class InfluenceMap(object):
         return (xpos, ypos)
 
     def transform_board_to_field_position(self, row, column):
+        # TODO see if that holds up
         assert(isinstance(row, int))
         assert(isinstance(column, int))
         assert(0 <= row <= self._numberofrows - 2)
