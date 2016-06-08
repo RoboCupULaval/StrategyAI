@@ -3,7 +3,10 @@
     Plusieurs méhtodes facilitent l'accès aux informations pertinentes pour le
     cadre STA.
 """
-from RULEngine.Util.geometry import * # TODO: remove wildcard
+from RULEngine.Util.geometry import get_distance, get_angle
+from .Util.geometry import get_milliseconds
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
 from time import time
 
 __author__ = 'RoboCupULaval'
@@ -16,7 +19,7 @@ class InfoManager:
     l'intelligence artificielle doivent consulter pour connaître
     l'état de la partie.
     """
-    def __init__(self, field, team, op_team):
+    def __init__(self):
         """
         L'infomanager s'initialise avec quatre dictionnaires;
         la partie, la balle, l'équipe alliée et l'équipe adverse.
@@ -40,16 +43,12 @@ class InfoManager:
         target : ???, goal : ???, speed : float, retro_pose : Liste des 10 précédents
                                                                 tuples (time(), Util.Pose()}
         """
-        self.field = field
-        self.team = team
-        self.opponent_team = op_team
-
-        self.ball = {'position': self.field.ball.position, 'retro_pose': []}
+        self.ball = {'position': Position(), 'retro_pose': []}
         self.game = {'play': None, 'state': None, 'sequence': None}
-        self.friend = self.init_team_dictionary(self.team)
-        self.enemy = self.init_team_dictionary(self.opponent_team)
+        self.friend = self.init_team_dictionary()
+        self.enemy = self.init_team_dictionary()
 
-    def init_team_dictionary(self, team):
+    def init_team_dictionary(self):
         """
         Initialise le dictionnaire de données pour l'équipe passée en paramètre.
 
@@ -64,27 +63,26 @@ class InfoManager:
         t_player_key = ('pose', 'position', 'orientation', 'kick', 'skill', 'tactic',
                         'next_pose', 'target', 'goal', 'speed', 'retro_pose')
         team_data = {}
-        for player in team.players:
-            t_player_data = (player.pose, player.pose.position, player.pose.orientation,
+        team_data['count'] = 6 #Should not be hardcoded
+        for i in range(team_data['count']):
+            t_player_data = (Pose(), Position(), 0,
                              0, None, None, None, None, None, None, [])
-            team_data[str(player.id)] = dict(zip(t_player_key, t_player_data))
-        team_data['is_yellow'] = self.team.is_team_yellow
-        team_data['count'] = len(self.team.players)
+            team_data[str(i)] = dict(zip(t_player_key, t_player_data))
         return team_data
 
-    def update(self):
+    def update(self, game_state):
         """ Interface public pour update de l'infomanager. """
-        self.update_ball()
-        self.update_team(self.friend, self.team)
-        self.update_team(self.enemy, self.opponent_team)
+        self.update_ball(game_state.field.ball)
+        self.update_team(self.friend, game_state.friends)
+        self.update_team(self.enemy, game_state.enemies)
 
 
-    def update_ball(self):
+    def update_ball(self, ball):
         """
         Mets à jour la position de la balle, de même que ses anciennes positions.
         """
-        self.ball['position'] = self.field.ball.position
-        self.ball['retro_pose'].append((time(), self.field.ball.position))
+        self.ball['position'] = ball.position
+        self.ball['retro_pose'].append((time(), ball.position))
         if len(self.ball['retro_pose']) > 10:
             self.ball['retro_pose'].pop(0)
 
