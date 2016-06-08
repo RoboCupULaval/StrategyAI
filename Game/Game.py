@@ -14,16 +14,14 @@ class Game():
         self.ball = Ball()
         self.field = Field(self.ball)
         self.referee = referee
-        blue_team, yellow_team = self.create_teams()
-        self.blue_team = blue_team
-        self.yellow_team = yellow_team
+        self.blue_team, self.yellow_team = self.create_teams()
 
         if is_team_yellow:
-            self.friends = yellow_team
-            self.enemies = blue_team
+            self.friends = self.yellow_team
+            self.enemies = self.blue_team
         else:
-            self.friends = blue_team
-            self.enemies = yellow_team
+            self.friends = self.blue_team
+            self.enemies = self.yellow_team
 
         self.delta = None
 
