@@ -4,13 +4,14 @@ __author__ = 'Robocup ULaval'
 
 from abc import abstractmethod
 from functools import wraps
-from ... import InfoManager
-from ....Util import geometry
-from ..Skill import Action
+from UltimateStrat import InfoManager
+from Util import geometry
+from UltimateStrat.STP.Skill import Action
 
 class Tactique :
     '''
     Classe mère de toutes les tactiques
+    méthodes:
         exec(self) : Exécute une Action selon l'état courant
         dispatch(self) : Trouve la fonction qui calcul le prochain état. est appelé après exec().
     attributs:
@@ -28,8 +29,10 @@ class Tactique :
         self.next_state = "halt"
 
     def exec(self):
+        self.dispatch()
 
-        pass
+    def halt(self):
+        self.next_state = "halt"
 
     def dispatch(self):
         self.current_state = self.next_state
