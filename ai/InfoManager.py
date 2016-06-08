@@ -10,11 +10,36 @@ __author__ = 'RoboCupULaval'
 
 
 class InfoManager:
-    """ InfoManager fait le lien entre le Blackboard qui contient l'information
-        sur la partie et le reste de l'application. Il est majoritairement
-        composé de getters et setters
+    """
+    InfoManager contient l'information sur la partie, la balle
+    et les joueurs. C'est l'objet que les composantes de
+    l'intelligence artificielle doivent consulter pour connaître
+    l'état de la partie.
     """
     def __init__(self, field, team, op_team):
+        """
+        L'infomanager s'initialise avec quatre dictionnaires;
+        la partie, la balle, l'équipe alliée et l'équipe adverse.
+
+        ball : {position : Util.Position(), retro_pose : liste des 10 précédents
+                                                        tuples (time(), Util.Position()}
+
+        game : {play : STP.Play.Play(), state : ???, sequence : play_sequence}
+        Play sequence est défini dans chacun des play; il s'agit d'une liste de 6
+        tactiques qui seront assignées à chacun des robots pour le play sélectionné.
+
+
+        friend et ennemy sont divisés de la même façon :
+        {is_yellow : Bool, count : int, id(6 fois) : dict}
+
+        Les 6 dernières clés correpondent à l'identifiant de chacun des robots, et est
+        mappé à un autre dictionnaire contenant l'information sur le joueur spécifié :
+
+        {pose : Util.Pose(), position : Util.Position(), orientation : int/float, kick : Bool,
+        skill : STP.Skill.Skill(), tactic : STP.Tactic.Tactic(), next_pose : ???,
+        target : ???, goal : ???, speed : float, retro_pose : Liste des 10 précédents
+                                                                tuples (time(), Util.Pose()}
+        """
         self.field = field
         self.team = team
         self.opponent_team = op_team
@@ -25,6 +50,17 @@ class InfoManager:
         self.enemy = self.init_team_dictionary(self.opponent_team)
 
     def init_team_dictionary(self, team):
+        """
+        Initialise le dictionnaire de données pour l'équipe passée en paramètre.
+
+        Args:
+            team: Équipe de joueur dont on veut initialiser les données.
+                Peut être composoée d'un nombre arbitraire de joueurs.
+
+        Returns: Le dictionnaire de données de l'équipe.
+
+        """
+
         t_player_key = ('pose', 'position', 'orientation', 'kick', 'skill', 'tactic',
                         'next_pose', 'target', 'goal', 'speed', 'retro_pose')
         team_data = {}
@@ -37,19 +73,31 @@ class InfoManager:
         return team_data
 
     def update(self):
-        """ Interface public pour update de BlackBoard. """
+        """ Interface public pour update de l'infomanager. """
         self.update_ball()
         self.update_team(self.friend, self.team)
         self.update_team(self.enemy, self.opponent_team)
 
 
     def update_ball(self):
+        """
+        Mets à jour la position de la balle, de même que ses anciennes positions.
+        """
         self.ball['position'] = self.field.ball.position
         self.ball['retro_pose'].append((time(), self.field.ball.position))
         if len(self.ball['retro_pose']) > 10:
             self.ball['retro_pose'].pop(0)
 
     def update_team(self, team_data, team):
+        """
+        Mets à jour les données de chacun des joueurs de l'équipe
+        passée en paramètre.
+
+        Args:
+            team_data: Dictionnaire de données de l'équipe.
+            team: Équipe de joueur dont on veut initialiser les données.
+                Peut être composée d'un nombre arbitraire de joueurs.
+        """
         for i in range(team_data['count']):
             team_data[str(i)]['pose'] = team.players[i].pose
             team_data[str(i)]['position'] = team.players[i].pose.position
@@ -59,7 +107,6 @@ class InfoManager:
                 team_data[str(i)]['retro_pose'].pop(0)
 
 
-    # +++ BLACKBOARD +++
     # About Game
     # ---Getter
     def get_current_play(self):
@@ -73,7 +120,7 @@ class InfoManager:
         # TODO : Enforce that play is a subclass of Play()
         self.game['play'] = play
 
-    # Special stuff
+    # Sequences
     def init_play_sequence(self):
         self.game['sequence'] = 0
 
