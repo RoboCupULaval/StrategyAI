@@ -9,7 +9,7 @@ from Util import geometry
 from UltimateStrat.STP.Skill import Action
 
 class Tactique :
-    '''
+    """
     Classe mère de toutes les tactiques
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
@@ -20,7 +20,7 @@ class Tactique :
         player_id : Identifiant du joueur auquel est assigné la tactique
         current_state : chcîne de caratères définissant l'état courant
         next_state : chcîne de caratères définissant l'état suivant
-    '''
+    """
     def __init__(self, info_manager, team_id, player_id):
         self.info_manager = info_manager
         self.team_id = team_id
