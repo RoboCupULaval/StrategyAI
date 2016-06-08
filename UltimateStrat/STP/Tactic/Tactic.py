@@ -9,7 +9,28 @@ from ....Util import geometry
 from ..Skill import Action
 
 class Tactique :
-    def __init__(self, info_manager):
+    '''
+    Classe mère de toutes les tactiques
+        exec(self) : Exécute une Action selon l'état courant
+        dispatch(self) : Trouve la fonction qui calcul le prochain état. est appelé après exec().
+    attributs:
+        info_manager: référence à la façade InfoManager
+        team_id : Identifiant de l'équipe
+        player_id : Identifiant du joueur auquel est assigné la tactique
+        current_state : chcîne de caratères définissant l'état courant
+        next_state : chcîne de caratères définissant l'état suivant
+    '''
+    def __init__(self, info_manager, team_id, player_id):
         self.info_manager = info_manager
+        self.team_id = team_id
+        self.player_id = player_id
+        self.current_state = "halt"
+        self.next_state = "halt"
 
     def exec(self):
+
+        pass
+
+    def dispatch(self):
+        self.current_state = self.next_state
+
