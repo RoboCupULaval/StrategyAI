@@ -3,9 +3,8 @@
     Plusieurs méhtodes facilitent l'accès aux informations pertinentes pour le
     cadre STA.
 """
-from ai.Data.BlackBoard import BlackBoard
 from RULEngine.Util.geometry import * # TODO: remove wildcard
-#from Util.geometry import *
+from time import time
 
 __author__ = 'RoboCupULaval'
 
@@ -16,88 +15,128 @@ class InfoManager:
         composé de getters et setters
     """
     def __init__(self, field, team, op_team):
-        self.black_board = BlackBoard(field, team, op_team)
+        self.field = field
+        self.team = team
+        self.opponent_team = op_team
+
+        self.ball = {'position': self.field.ball.position, 'retro_pose': []}
+        self.game = {'play': None, 'state': None, 'sequence': None}
+        self.friend = self.init_team_dictionary(self.team)
+        self.enemy = self.init_team_dictionary(self.opponent_team)
+
+    def init_team_dictionary(self, team):
+        t_player_key = ('pose', 'position', 'orientation', 'kick', 'skill', 'tactic',
+                        'next_pose', 'target', 'goal', 'speed', 'retro_pose')
+        team_data = {}
+        for player in team.players:
+            t_player_data = (player.pose, player.pose.position, player.pose.orientation,
+                             0, None, None, None, None, None, None, [])
+            team_data[str(player.id)] = dict(zip(t_player_key, t_player_data))
+        team_data['is_yellow'] = self.team.is_team_yellow
+        team_data['count'] = len(self.team.players)
+        return team_data
 
     def update(self):
         """ Interface public pour update de BlackBoard. """
-        self.black_board.update()
+        self.update_ball()
+        self.update_team(self.friend, self.team)
+        self.update_team(self.enemy, self.opponent_team)
+
+
+    def update_ball(self):
+        self.ball['position'] = self.field.ball.position
+        self.ball['retro_pose'].append((time(), self.field.ball.position))
+        if len(self.ball['retro_pose']) > 10:
+            self.ball['retro_pose'].pop(0)
+
+    def update_team(self, team_data, team):
+        for i in range(team_data['count']):
+            team_data[str(i)]['pose'] = team.players[i].pose
+            team_data[str(i)]['position'] = team.players[i].pose.position
+            team_data[str(i)]['orientation'] = team.players[i].pose.orientation
+            team_data[str(i)]['retro_pose'].append((time(), team.players[i].pose))
+            if len(team_data[str(i)]['retro_pose']) > 10:
+                team_data[str(i)]['retro_pose'].pop(0)
+
 
     # +++ BLACKBOARD +++
     # About Game
     # ---Getter
     def get_current_play(self):
-        return self.black_board['game']['play']
+        return self.game['play']
 
     def get_current_play_sequence(self):
-        return self.black_board['game']['sequence']
+        return self.game['sequence']
 
     # ---Setter
     def set_play(self, play):
-        # ToDo : Enforce that play is a subclass of Play()
-        self.black_board['game']['play'] = play
+        # TODO : Enforce that play is a subclass of Play()
+        self.game['play'] = play
 
     # Special stuff
     def init_play_sequence(self):
-        self.black_board['game']['sequence'] = 0
+        self.game['sequence'] = 0
 
     def inc_play_sequence(self):
-        self.black_board['game']['sequence'] += 1
+        self.game['sequence'] += 1
 
     def get_prev_player_position(self, i):
+        # TODO : Refactor to take into account teams of less/more than 6 players
         idx = (i - 1) % 6
-        return self.black_board['friend'][str(idx)]['position']
+        return self.friend[str(idx)]['position']
+
 
     # About Friend player
     # ---Getter
     def get_player_target(self, i):
-        return self.black_board['friend'][str(i)]['target']
+        return self.friend[str(i)]['target']
 
     def get_player_goal(self, i):
-        return self.black_board['friend'][str(i)]['goal']
+        return self.friend[str(i)]['goal']
 
     def get_player_skill(self, i):
-        return self.black_board['friend'][str(i)]['skill']
+        return self.friend[str(i)]['skill']
 
     def get_player_tactic(self, i):
-        return self.black_board['friend'][str(i)]['tactic']
+        return self.friend[str(i)]['tactic']
 
     def get_player_position(self, i):
-        return self.black_board['friend'][str(i)]['position']
+        return self.friend[str(i)]['position']
 
     def get_player_pose(self, i):
-        return self.black_board['friend'][str(i)]['pose']
+        return self.friend[str(i)]['pose']
 
     def get_player_orientation(self, i):
-        return self.black_board['friend'][str(i)]['orientation']
+        return self.friend[str(i)]['orientation']
 
     def get_player_kick_state(self, i):
-        return self.black_board['friend'][str(i)]['kick']
+        return self.friend[str(i)]['kick']
 
     def get_count_player(self):
-        return self.black_board['friend']['count']
+        return self.friend['count']
 
     def get_player_next_action(self, i):
-        return self.black_board['friend'][str(i)]['next_pose']
+        return self.friend[str(i)]['next_pose']
 
     # ---Setter
     def set_player_skill_target_goal(self, i, action):
         # TODO: Enforce valid types for each attribute
-        self.black_board['friend'][str(i)]['skill'] = action['skill']
-        self.black_board['friend'][str(i)]['target'] = action['target']
-        self.black_board['friend'][str(i)]['goal'] = action['goal']
+        self.friend[str(i)]['skill'] = action['skill']
+        self.friend[str(i)]['goal'] = action['goal']
+        self.friend[str(i)]['target'] = action['target']
 
     def set_player_tactic(self, i, tactic):
         # TODO: Enforce valid type
-        self.black_board['friend'][str(i)]['tactic'] = tactic
+        self.friend[str(i)]['tactic'] = tactic
 
     def set_player_next_action(self, i, next_action):
         # TODO: Enforce valid type
-        self.black_board['friend'][str(i)]['next_pose'] = next_action
+        self.friend[str(i)]['next_pose'] = next_action
 
     # About Ball
     # ---Getter
     def get_ball_position(self):
-        return self.black_board['ball']['position']
+        return self.ball['position']
 
     """ +++ INTELLIGENCE MODULE +++ """
     # State machine
@@ -111,7 +150,7 @@ class InfoManager:
         return 'pTestBench'
 
     def get_speed(self, i):
-        list_pose = self.black_board['friend'][str(i)]['retro_pose']
+        list_pose = self.friend[str(i)]['retro_pose']
 
         if not len(list_pose) == 10:
             return {'speed': 0, 'normal': (0, 0), 'vector': (0, 0)}
@@ -135,7 +174,7 @@ class InfoManager:
 
     @property
     def get_ball_speed(self):
-        list_pose = self.black_board['ball']['retro_pose']
+        list_pose = self.ball['retro_pose']
 
         if not len(list_pose) == 10:
             return {'speed': 0, 'normal': (0, 0), 'vector': (0, 0)}
