@@ -6,11 +6,11 @@ from RULEngine.Command import Command
 from RULEngine.Util.Pose import Pose
 import RULEngine.Util.geometry as geometry
 
-from AI.Executor.CoachExecutor import CoachExecutor
-from AI.Executor.PlayExecutor import PlayExecutor
-from AI.Executor.TacticExecutor import TacticExecutor
-from AI.Executor.SkillExecutor import SkillExecutor
-from AI.InfoManager import InfoManager
+from ai.Executor.CoachExecutor import CoachExecutor
+from ai.Executor.PlayExecutor import PlayExecutor
+from ai.Executor.TacticExecutor import TacticExecutor
+from ai.Executor.SkillExecutor import SkillExecutor
+from ai.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 
@@ -27,15 +27,14 @@ class UltimateStrategy(Strategy):
         l'InfoManager et finalement envoyée au serveur de communication.
     """
 
-    def __init__(self, field, referee, team, opponent_team, is_team_yellow=False):
+    def __init__(self, is_team_yellow=False):
         """ Constructeur, réplique une grande partie du GameState pour
             construire l'InfoManager. TODO: éliminer cette redondance (DRY)
         """
-        Strategy.__init__(self, field, referee, team, opponent_team)
+        Strategy.__init__(self, is_team_yellow)
 
         # Create InfoManager
-        self.team.is_team_yellow = is_team_yellow
-        self.info_manager = InfoManager(field, team, opponent_team)
+        self.info_manager = InfoManager()
 
         # Create Executors
         self.ex_coach = CoachExecutor(self.info_manager)
@@ -43,9 +42,9 @@ class UltimateStrategy(Strategy):
         self.ex_tactic = TacticExecutor(self.info_manager)
         self.ex_skill = SkillExecutor(self.info_manager)
 
-    def on_start(self):
+    def on_start(self, game_state):
         """ Boucle principale de l'IA, est appelé par Framework """
-        self.info_manager.update()
+        self.info_manager.update(game_state)
         # Main Strategy sequence
         self.ex_coach.exec()
         self.ex_play.exec()
@@ -59,20 +58,18 @@ class UltimateStrategy(Strategy):
             if isinstance(next_action, Pose):
 
                 # Move Manager :: if next action is Pose
-                command = Command.MoveToAndRotate(self.team.players[i],
-                                                  self.team,
+                command = Command.MoveToAndRotate(game_state.friends.players[i],
                                                   next_action)
-                self._send_command(command)
+                self.send_command(command)
             elif isinstance(next_action, int):
 
                 # Kick Manager :: if next action is int
                 if not 0 < next_action <= 8:
                     next_action = 5
 
-                command = Command.Kick(self.team.players[i],
-                                       self.team,
+                command = Command.Kick(game_state.friends.players[i],
                                        next_action)
-                self._send_command(command)
+                self.send_command(command)
 
                 player_pos = self.info_manager.get_player_position(i)
                 ball_pos = self.info_manager.get_ball_position()
@@ -89,19 +86,17 @@ class UltimateStrategy(Strategy):
                     if len(next_action) == 0:
                         next_action = next_pose
                     self.info_manager.set_player_next_action(i, next_action)
-                    command = Command.MoveToAndRotate(self.team.players[i],
-                                                      self.team,
+                    command = Command.MoveToAndRotate(game_state.friends.players[i],
                                                       next_pose)
-                    self._send_command(command)
+                    self.send_command(command)
                 else:
                     # TODO: code smell
-                    command = Command.MoveToAndRotate(self.team.players[i],
-                                                      self.team,
+                    command = Command.MoveToAndRotate(game_state.friends.players[i],
                                                       next_action[0])
-                    self._send_command(command)
+                    self.send_command(command)
 
-    def on_halt(self):
-        self.on_start()
+    def on_halt(self, game_state):
+        self.on_start(game_state)
 
-    def on_stop(self):
-        self.on_start()
+    def on_stop(self, game_state):
+        self.on_start(game_state)

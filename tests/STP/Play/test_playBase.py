@@ -1,6 +1,6 @@
 #Under MIT License, see LICENSE.txt
 import unittest
-from AI.STP.Play.PlayBase import PlayBase
+from ai.STP.Play.PlayBase import PlayBase
 
 __author__ = 'RoboCupULaval'
 

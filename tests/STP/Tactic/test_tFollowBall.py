@@ -7,8 +7,8 @@ from RULEngine.Game.Team import Team
 from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose, Position
 
-from AI.STP.Tactic.tFollowBall import tFollowBall
-from AI.InfoManager import InfoManager
+from ai.STP.Tactic.tFollowBall import tFollowBall
+from ai.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 
@@ -49,7 +49,7 @@ class TestTacticFollowBall(TestCase):
 
     def test_if_ball_is_too_near(self):
         # Changement de la position de la balle pour la mettre proche du robot 0
-        self.info.black_board.bb['ball']['position'] = Position(50, 50)
+        self.info.ball['position'] = Position(50, 50)
 
         result = self.tactic.apply(self.info, 0)
         bot_pst = self.info.get_player_position(0)

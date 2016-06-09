@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 from unittest import TestCase
-from AI.STP.Skill.sStop import sStop
+from ai.STP.Skill.sStop import sStop
 from RULEngine.Util.Pose import Pose, Position
 
 __author__ = 'RoboCupULaval'
