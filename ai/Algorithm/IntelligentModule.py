@@ -2,11 +2,11 @@
 """
     Contient les classes mères pour les modules intelligents.
 """
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 
 __author__ = 'RoboCupULaval'
 
-class IntelligentModule(object):
+class IntelligentModule(object, metaclass=ABCMeta):
     """
         Classe mère des modules intelligents.
         Actuellement ne défini que l'attribut *state*
@@ -30,7 +30,7 @@ class IntelligentModule(object):
     def str(self):
         """ Ne pas utiliser """
 
-class Pathfinder(IntelligentModule):
+class Pathfinder(IntelligentModule, metaclass=ABCMeta):
     """
         Classe mère des pathfinders.
         Défini l'interface publique et la documente.
@@ -55,3 +55,15 @@ class Pathfinder(IntelligentModule):
             :return: String
         """
         return str(self.paths)
+
+    @abstractmethod
+    def get_path(self, pid=None):
+        """
+            Si l'ID est précisé, retourne la liste des *Pose* pour le chemin
+            de ce robot. Autrement, retourne le dictionnaire. Cette méthode est
+            aussi responsable de faire les appels pour mettre à jour les
+            informatoins.
+
+            :param id: int de 0 à 5 représentant les robots de l'équipe alliée
+            :return: { id : [Pose, Pose, ...] } || [Pose, Pose, ...]
+        """
