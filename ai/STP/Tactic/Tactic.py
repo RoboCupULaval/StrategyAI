@@ -8,7 +8,7 @@ from ... import InfoManager
 from ..Skill import Stop
 
 
-class Tactique:
+class Tactic:
     """
     Classe mère de toutes les tactiques
     méthodes:
@@ -28,7 +28,7 @@ class Tactique:
         self.player_id = player_id
         self.current_state = 'halt'
         self.next_state = 'halt'
-        self.dispatch = {'halt': halt}
+        self.dispatch = {'halt': self.halt}
 
     def halt(self):
         arret = Stop(self.info_manager, self.player_id)
@@ -37,7 +37,7 @@ class Tactique:
 
     def exec(self):
         # Trouver la prochaine action
-        next_action = self.dispatch[self.current_state]
+        next_action = self.dispatch[self.current_state]()
         next_pose = next_action.exec()
         self.info_manager.set_player_next_action(self.player_id, next_pose)
         self.current_state = self.next_state

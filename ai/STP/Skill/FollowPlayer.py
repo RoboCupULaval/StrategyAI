@@ -9,7 +9,7 @@ class FollowPlayer(Action):
         target_id : L'identifiant du joueur à suivre
     """
     def __init__(self, info_manager, target_id):
-        Action.__init__(self, info_manager);
+        Action.__init__(self, info_manager)
         self.target_id = target_id
 
     def exec(self):
