@@ -1,7 +1,7 @@
 #Under MIT License, see LICENSE.txt
 #!/usr/bin/python
 from .command_sender import CommandSender
-import socket
+from .udp_utils import udp_socket
 from .protobuf import grSim_Packet_pb2 as grSim_Packet
 from .protobuf.grSim_Commands_pb2 import grSim_Robot_Command
 import math
@@ -10,10 +10,7 @@ import math
 class UDPCommandSender(CommandSender):
 
     def __init__(self, host, port):
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.connection_info = (host, port)
-        self.server.connect(self.connection_info)
+        self.server = udp_socket(host, port)
 
     def get_new_packet(self):
         return grSim_Packet.grSim_Packet()
