@@ -41,10 +41,10 @@ class InfluenceMap(object):
         self._strengthdecay = strengthdecay
         self._strengthpeak = strengthpeak
         self._effectradius = effectradius
-        self._borderstrength = -strengthpeak * 0.03 # TODO change this variable for something not magic!
-        self._addedpoint = [] # TODO find a better name for this variable please.
-        self._board = [] # this is the board that change depending on the point received
-        self._starterboard = [] # this is the board that stay the same after the border are applied.
+        self._borderstrength = -strengthpeak * 0.03  # TODO change this variable for something not magic!
+        self._addedpoint = []                       # TODO find a better name for this variable please.
+        self._board = []                            # this is the board that change depending on the point received
+        self._starterboard = []                     # this is the board that stay the same after the border are applied.
 
         number_of_rows_and_columns = self.calculate_rows_and_columns()
 
@@ -100,7 +100,7 @@ class InfluenceMap(object):
         """
         self.put_boarders()
         self.propagate_borders()
-        self.put_goals()
+        self.initialize_goals()
         self._board = numpy.copy(self._starterboard)
 
     def put_boarders(self):
@@ -207,8 +207,18 @@ class InfluenceMap(object):
                                                              self.distance(border, 0, x, y))))
                         self._starterboard[x, y] += decay
 
+    def initialize_goals(self):
+        v_h_goal_offset = (self.calculate_goal_vertical_offset(), self.calculate_goal_horizontal_offset())
+        self.put_goals_and_propagate(v_h_goal_offset)
+        pass
 
-    def put_goals(self):
+    def calculate_goal_vertical_offset(self):
+        return int(ceil(FIELD_GOAL_Y_TOP / self._resolution))
+
+    def calculate_goal_horizontal_offset(self):
+        return int(ceil(FIELD_GOAL_SEGMENT / self._resolution))
+
+    def put_goals_and_propagate(self, v_h_offset):
         pass
 
     def add_point(self, row, column, strength=0):
@@ -440,7 +450,7 @@ class InfluenceMap(object):
 
     def update(self):
         self.clear_point_on_board()
-
+        # todo request from infomanagers players position
 
     def transform_field_to_board_position(self, position):
         # TODO see if that holds up

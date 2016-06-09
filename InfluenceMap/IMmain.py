@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
     current_time = time.time()
 
-    IM = InfluenceMap(50.0, strengthdecay=0.9, effectradius=43)
+    IM = InfluenceMap(50.0, strengthdecay=0.9, effectradius=40)
 
     print("Class creation --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
@@ -33,14 +33,14 @@ if __name__ == "__main__":
     IM.add_point_and_propagate_influence(43, 43, 100)
     IM.add_point_and_propagate_influence(5, 5, -100)
     IM.add_point_and_propagate_influence(75, 75, 100)
-    IM.add_point_and_propagate_influence(75, 75, -100)
+    IM.add_point_and_propagate_influence(120, 180, -100)
 
 
     print("Points Adding      --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
 
     #print(IM.find_closest_point_of_strength_around(20, 20, 0))
-    #print(IM.find_closest_point_of_strength_around(100, 150, -1000, False))
+    print(IM.find_closest_point_of_strength_around(100, 150, -1000, False))
     #print(IM.find_points_of_strength_in_square(50, 50, 5, 0))
 
     print("Find closest       --- %s seconds ---" % (time.time() - current_time))
