@@ -14,13 +14,7 @@ class TestCoachExecutor:
     @classmethod
     def setup(cls):
         """ Setup """
-        players = []
-        for i in range(6):
-            players.append(Player.Player(i))
-
-        cls.info_manager = InfoManager(Field.Field(Ball.Ball()),
-                                       Team.Team(players, True),
-                                       Team.Team(players, False))
+        cls.info_manager = InfoManager()
         cls.coach = CoachExecutor(cls.info_manager)
 
     def test_exec(self):

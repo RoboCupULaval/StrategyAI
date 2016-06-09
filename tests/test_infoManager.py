@@ -3,6 +3,7 @@ import unittest
 from ai.InfoManager import InfoManager
 from RULEngine.Game import Ball, Field, Team, Player
 from RULEngine.Util.Position import Position
+from RULEngine.Framework import GameState
 
 
 __author__ = 'RoboCupULaval'
@@ -14,19 +15,13 @@ class TestInfoManager(unittest.TestCase):
         ball = Ball.Ball()
         self.field = Field.Field(ball)
 
-        blue_players = []
-        yellow_players = []
-        for i in range(6):
-            bPlayer = Player.Player(i)
-            yPlayer = Player.Player(i)
-            blue_players.append(bPlayer)
-            yellow_players.append(yPlayer)
-        blue_team = Team.Team(blue_players, False)
-        yellow_team = Team.Team(yellow_players, True)
+        blue_team = Team.Team(False)
+        yellow_team = Team.Team(True)
 
-        self.info_manager = InfoManager(self.field, blue_team, yellow_team)
+        self.info_manager = InfoManager()
 
-
+        game_state = GameState(self.field, None, blue_team, yellow_team, {})
+        self.info_manager.update(game_state)
 
     def test_can_get_current_play(self):
         self.info_manager.game['play'] = "awesomePlay!"
