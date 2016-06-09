@@ -1,7 +1,7 @@
 #Under MIT License, see LICENSE.txt
 #!/usr/bin/python
 
-from .udp_server import PBPacketReceiver
+from .udp_pb_server import PBPacketReceiver
 from .protobuf import referee_pb2 as ssl_referee
 
 
