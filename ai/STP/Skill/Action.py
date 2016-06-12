@@ -21,6 +21,12 @@ class Action:
     def __init__(self, info_manager):
         self.info_manager = info_manager
 
+    def on_before(self):
+        pass
+
+    def on_after(self):
+        pass
+
     @abstractmethod
     def exec(self):
         pass
