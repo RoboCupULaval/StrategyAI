@@ -7,6 +7,7 @@ from RULEngine.Util.geometry import get_distance, get_angle
 from .Util.geometry import get_milliseconds
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from .Debug.DebugManager import DebugManager
 from time import time
 
 __author__ = 'RoboCupULaval'
@@ -19,7 +20,7 @@ class InfoManager:
     l'intelligence artificielle doivent consulter pour connaître
     l'état de la partie.
     """
-    def __init__(self):
+    def __init__(self, is_debug=False):
         """
         L'infomanager s'initialise avec quatre dictionnaires;
         la partie, la balle, l'équipe alliée et l'équipe adverse.
@@ -47,6 +48,10 @@ class InfoManager:
         self.game = {'play': None, 'state': None, 'sequence': None}
         self.friend = self.init_team_dictionary()
         self.enemy = self.init_team_dictionary()
+        if is_debug:
+            self.debug_manager = DebugManager()
+        else:
+            self.debug_manager = None
 
     def init_team_dictionary(self):
         """
