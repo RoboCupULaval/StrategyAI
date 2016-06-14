@@ -1,6 +1,8 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
+""" Module définissant des constantes de programmations python pour l'IA """
+from .Position import Position
+from .DebugType import Color
 __author__ = 'RoboCupULaval'
-from ..Util.Position import Position
 
 ROBOT_RADIUS = 90
 PLAYER_PER_TEAM = 6
@@ -24,3 +26,11 @@ FIELD_GOAL_BLUE_TOP_CIRCLE = Position(FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2)
 FIELD_GOAL_BLUE_BOTTOM_CIRCLE = Position(FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2 * -1)
 FIELD_GOAL_YELLOW_TOP_CIRCLE = Position(FIELD_X_RIGHT, FIELD_GOAL_SEGMENT / 2)
 FIELD_GOAL_YELLOW_BOTTOM_CIRCLE = Position(FIELD_X_RIGHT, FIELD_GOAL_SEGMENT / 2 * -1)
+
+# Communication information
+SENDER_NAME = "ai"
+DEFAULT_DEBUG_TIMEOUT = 300 #ms
+DEFAULT_TEXT_SIZE = 14 #px
+DEFAULT_TEXT_FONT = 'Arial'
+DEFAULT_TEXT_ALIGN = 'Left'
+DEFAULT_TEXT_COLOR = Color(0, 0, 0)

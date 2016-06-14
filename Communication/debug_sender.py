@@ -3,6 +3,10 @@
     commandes au serveur de débogage.
 """
 from ..Util.Exception import InvalidDebugType
+from ..Util.constant import SENDER_NAME, DEFAULT_DEBUG_TIMEOUT,\
+                            DEFAULT_TEXT_ALIGN, DEFAULT_TEXT_COLOR,\
+                            DEFAULT_TEXT_FONT, DEFAULT_TEXT_SIZE
+from ..Util.DebugType import Point, Circle
 
 class DebugCommand(object):
     """
@@ -11,14 +15,14 @@ class DebugCommand(object):
        Implémente la version 1.0 du protocole.
     """
 
-    def __init__(self):
+    def __init__(self, p_type_, p_link, p_data, p_version="v1.0"):
         """ Constructeur, définie à vide les attributs nécessaires. """
         super().__init__()
-        self.name = "ai"
-        self.version = "v1.0"
-        self.type_ = -1
-        self.link = None
-        self.data = None
+        self.name = SENDER_NAME
+        self.version = p_version
+        self.type_ = p_type_
+        self.link = p_link
+        self.data = p_data
 
     def _get_packet(self):
         """ Retourne le dictionnaire du paquet. """
@@ -35,14 +39,16 @@ class DebugCommand(object):
             la représentation en dictionnaire du paquet.
         """
         if self.type_ == -1:
-            raise InvalidDebugType("Le type de paquet de débogage est invalide.")
+            raise InvalidDebugType("Le type de paquet de débogage est\
+                                    invalide.")
         return self._get_packet()
 
     def repr(self):
         """ Représentation: dictionnaire du paquet. """
         return str(self._get_packet())
 
-def get_debug_packets(debug_manager):
+
+def get_debug_packets(p_debug_manager):
     """
         Reçoit une instance du DebugManager de StrategyIA et retourne une liste
         de commande pour le serveur de débogage.
@@ -51,6 +57,91 @@ def get_debug_packets(debug_manager):
             les informations.
         :return: [DebugCommand, DebugCommand, ...]
     """
-    # TODO: implémenter
-    print("Not implemented yet.")
-    print(str(debug_manager))
+    commands = []
+    # série de if stupide
+    if p_debug_manager.has_log_info():
+        commands = commands + _get_log_packets(p_debug_manager)
+    if p_debug_manager.has_draw_info():
+        commands = commands + _get_draw_packets(p_debug_manager)
+    if p_debug_manager.has_influence_map_info():
+        commands = commands + _get_influence_map_packets(p_debug_manager)
+    if p_debug_manager.has_text():
+        commands = commands + _get_text_packets(p_debug_manager)
+
+    return map(_get_packet, commands)
+
+def _get_log_packets(debug_manager):
+    """
+        Exécute la logique nécessaire pour construire les paquets de débogages
+        concernant les journaux.
+    """
+    commands = []
+    # log est un Log
+    for log in debug_manager.get_logs():
+        # on assume une structure en tuple (level, message)
+        commands.append(DebugCommand(2, None, {'level': log.level,
+                                               'message': log.message}))
+    return commands
+
+def _get_draw_packets(debug_manager):
+    """
+        Exécute la logique nécessaire pour construire les paquets de débogages
+        concernant les figures à faire dessiner.
+    """
+    commands = []
+    # figure_info est un FigureInfo
+    for figure_info in debug_manager.get_draw():
+        # strucuture générale
+        figure, color = figure_info
+
+        # s'il s'agit d'un point
+        if figure is Point:
+            data = {'point': (figure.x, figure.y),
+                    'width': figure.width,
+                    'color': (color.r, color.g, color.b),
+                    'timeout': 0}
+            commands.append(DebugCommand(3004, None, data))
+
+        # s'il s'agit d'un cercle
+        if figure is Circle:
+            data = {'center': (figure.center.x, figure.center.y),
+                    'radius': figure.radius,
+                    'color': color,
+                    'style': figure.style,
+                    'is_fill': True,
+                    'timeout': 0}
+            commands.append(DebugCommand(3003, None, data))
+        return commands
+
+def _get_influence_map_packets(p_debug_manager):
+    """
+        Exécute la logique nécessaire pour construire les paquets de débogages
+        concernant l'affichage des influences maps.
+    """
+    print("Non implemented, _get_influence_map_packets -- " +
+          str(p_debug_manager))
+    return []
+
+def _get_text_packets(p_debug_manager):
+    """
+        Exécute la logique nécessaire pour construire les paquets de débogages
+        concernant l'affichage des influences maps.
+    """
+    commands = []
+    # TextInfo
+    for txt in p_debug_manager.get_text_info():
+        data = {'position': (txt.position.x, txt.position.y),
+                'text': txt.text,
+                'size': DEFAULT_TEXT_SIZE,
+                'font': DEFAULT_TEXT_FONT,
+                'align': DEFAULT_TEXT_ALIGN,
+                'color': DEFAULT_TEXT_COLOR,
+                'has_bold': False,
+                'has_italic': False,
+                'timeout': DEFAULT_DEBUG_TIMEOUT}
+        commands.append(DebugCommand(3008, None, data))
+    return commands
+
+def _get_packet(p_cmd):
+    """ Appel de la fonction pour récupérer le dictionnaire de commande. """
+    return p_cmd.get_packet()
