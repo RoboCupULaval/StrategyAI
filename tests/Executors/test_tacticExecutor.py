@@ -8,6 +8,7 @@ from RULEngine.Game.Ball import Ball
 from RULEngine.Game.Team import Team
 from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Position
+from RULEngine.Framework import GameState
 
 from ai.STP.Play.PlayBase import PlayBase
 from ai.STP.Tactic.tNull import tNull
@@ -31,11 +32,11 @@ class TestTacticExecutor(TestCase):
         self.skillbook = SkillBase()
 
         # Initialise InfoManager with teams, field, play, tactic and skill.
-        self.team = Team([Player(bot_id) for bot_id in range(6)], True)
+        self.team = Team(True)
         for player in self.team.players:
             self.team.players[player.id].position = Position(100 * player.id, 100 * player.id)
 
-        self.op_team = Team([Player(bot_id) for bot_id in range(6)], False)
+        self.op_team = Team(False)
         for player in self.op_team.players:
             pos_x = -100 * player.id - 100
             pos_y = -100 * player.id - 100
@@ -43,8 +44,10 @@ class TestTacticExecutor(TestCase):
 
         self.field = Field(Ball())
         self.field.ball.set_position(Position(1000, 0), 1)
-        self.info = InfoManager(self.field, self.team, self.op_team)
-        self.info.update()
+        self.info = InfoManager()
+
+        game_state = GameState(self.field, None, self.team, self.op_team, {})
+        self.info.update(game_state)
 
         # simulate the CoachExecutor without the static function getcurrentplay from the infomanager
         self.info.set_play('pHalt')
