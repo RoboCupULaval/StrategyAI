@@ -59,14 +59,10 @@ def get_debug_packets(p_debug_manager):
     """
     commands = []
     # série de if stupide
-    if p_debug_manager.has_log_info():
-        commands = commands + _get_log_packets(p_debug_manager)
-    if p_debug_manager.has_draw_info():
-        commands = commands + _get_draw_packets(p_debug_manager)
-    if p_debug_manager.has_influence_map_info():
-        commands = commands + _get_influence_map_packets(p_debug_manager)
-    if p_debug_manager.has_text():
-        commands = commands + _get_text_packets(p_debug_manager)
+    commands = commands + _get_log_packets(p_debug_manager)
+    commands = commands + _get_draw_packets(p_debug_manager)
+    commands = commands + _get_influence_map_packets(p_debug_manager)
+    commands = commands + _get_text_packets(p_debug_manager)
 
     return map(_get_packet, commands)
 
@@ -111,15 +107,14 @@ def _get_draw_packets(debug_manager):
                     'is_fill': True,
                     'timeout': 0}
             commands.append(DebugCommand(3003, None, data))
-        return commands
+    return commands
 
 def _get_influence_map_packets(p_debug_manager):
     """
         Exécute la logique nécessaire pour construire les paquets de débogages
         concernant l'affichage des influences maps.
     """
-    print("Non implemented, _get_influence_map_packets -- " +
-          str(p_debug_manager))
+    # TODO: implémenter la construction des paquets
     return []
 
 def _get_text_packets(p_debug_manager):
@@ -129,7 +124,7 @@ def _get_text_packets(p_debug_manager):
     """
     commands = []
     # TextInfo
-    for txt in p_debug_manager.get_text_info():
+    for txt in p_debug_manager.get_text():
         data = {'position': (txt.position.x, txt.position.y),
                 'text': txt.text,
                 'size': DEFAULT_TEXT_SIZE,

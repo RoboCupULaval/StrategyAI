@@ -8,6 +8,6 @@ class CommandSender(metaclass=ABCMeta):
     """ Classe mère, impose l'interface aux CommandSender. """
 
     @abstractmethod
-    def send_command(self):
-        """ Fournit le service pour envoyer un type de commande. """
+    def send_packet(self, command):
+        """ Fournit le service pour envoyer un type de paquet. """
         pass

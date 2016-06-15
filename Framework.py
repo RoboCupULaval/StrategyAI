@@ -16,7 +16,7 @@ from .Game.Referee import Referee
 from .Communication.vision import Vision
 from .Communication import debug_sender
 from .Communication.referee import RefereeServer
-from .Communication.udp_command_sender import UDPCommandSender
+from .Communication.udp_command_sender import UDPCommandSender, UDPDebugSender
 from .Command.Command import Stop
 from .Util.Exception import StopPlayerError
 
@@ -32,6 +32,7 @@ class Framework(object):
     def __init__(self, is_team_yellow=False):
         """ Constructeur de la classe, établis les propriétés de bases. """
         self.command_sender = UDPCommandSender("127.0.0.1", 20011)
+        self.debug_sender = UDPDebugSender("127.0.0.1", 20021)
         self.game = None
         self.is_yellow = is_team_yellow
         self.strategy = None
@@ -114,7 +115,7 @@ class Framework(object):
             commands = self.get_commands()
             for command in commands:
                 command = command.toSpeedCommand()
-                self.command_sender.send_command(command)
+                self.command_sender.send_packet(command)
 
     def get_commands(self):
         """ Obtiens les commandes du **Coach**. """
@@ -185,6 +186,7 @@ class Framework(object):
 
     def _send_debug_commands(self):
         """ Récupère les paquets de débogages et les envoies au serveur. """
-        debugs_commands = debug_sender.get_debug_packets(self.strategy.info_manager.debug_manager)
-        # TODO: implémenter un debug_command_sender à l'aide d'un UDP Sender
-        #       puis flush les commandes
+        debug_manager = self.strategy.info_manager.debug_manager
+        if debug_manager:
+            debugs_commands = debug_sender.get_debug_packets(debug_manager)
+            self.debug_sender.send_packet(debugs_commands)
