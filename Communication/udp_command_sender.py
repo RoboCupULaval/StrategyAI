@@ -1,16 +1,13 @@
 # Under MIT License, see LICENSE.txt
-import socket
 
 from .command_sender import CommandSender
 from .protobuf import grSim_Packet_pb2 as grSim_Packet
+from .udp_utils import udp_socket
 
 class UDPCommandSender(CommandSender):
 
     def __init__(self, host, port):
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.connection_info = (host, port)
-        self.server.connect(self.connection_info)
+        self.server = udp_socket(host, port)
 
     def get_new_packet(self):
         return grSim_Packet.grSim_Packet()
@@ -20,17 +17,16 @@ class UDPCommandSender(CommandSender):
 
     def send_command(self, command):
         packet = grSim_Packet.grSim_Packet()
-        #grSimCommand = grSim_Robot_Command()
         packet.commands.isteamyellow = command.team.is_team_yellow
         packet.commands.timestamp = 0
-        grSimCommand = packet.commands.robot_commands.add()
-        grSimCommand.id = command.player.id
-        grSimCommand.wheelsspeed = False
-        grSimCommand.veltangent = command.pose.position.x
-        grSimCommand.velnormal = command.pose.position.y
-        grSimCommand.velangular = command.pose.orientation
-        grSimCommand.spinner = True
-        grSimCommand.kickspeedx = command.kick_speed
-        grSimCommand.kickspeedz = 0
+        grsim_command = packet.commands.robot_commands.add()
+        grsim_command.id = command.player.id
+        grsim_command.wheelsspeed = False
+        grsim_command.veltangent = command.pose.position.x
+        grsim_command.velnormal = command.pose.position.y
+        grsim_command.velangular = command.pose.orientation
+        grsim_command.spinner = True
+        grsim_command.kickspeedx = command.kick_speed
+        grsim_command.kickspeedz = 0
 
         self.server.send(packet.SerializeToString())
