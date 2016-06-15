@@ -7,8 +7,8 @@ from RULEngine.Game.Team import Team
 from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose, Position
 
-from UltimateStrat.STP.Tactic.tFollowPrevFriend import tFollowPrevFriend
-from UltimateStrat.InfoManager import InfoManager
+from ai.STP.Tactic.tFollowPrevFriend import tFollowPrevFriend
+from ai.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 
@@ -40,19 +40,22 @@ class TestTacticFollowPrevFriend(TestCase):
 
     def test_if_ball_is_far(self):
         result = self.tactic.apply(self.info, 0)
-        bot_pst = self.info.getPlayerPosition(0)
-        ball_pst = self.info.getBallPosition()
+        bot_pst = self.info.get_player_position(0)
+        player_pst = self.info.get_prev_player_position(0)
 
         self.assertIsNotNone(result)
         self.assertIsInstance(result, dict)
-        self.assertEqual(result, {'skill': 'sGoToTarget', 'target': ball_pst, 'goal': bot_pst})
+        expect = {'skill': 'sGoToTarget', 'target': player_pst, 'goal': bot_pst}
+        print("Expected\n" + str(expect))
+        print("Result\n" + str(result))
+        self.assertEqual(result, expect)
 
     def test_if_ball_is_too_near(self):
         # Changement de la position de la balle pour la mettre proche du robot 0
-        self.info.black_board.bb['ball']['position'] = Position(50, 50)
+        self.info.ball['position'] = Position(50, 50)
 
         result = self.tactic.apply(self.info, 0)
-        bot_pst = self.info.getPlayerPosition(0)
+        bot_pst = self.info.get_player_position(0)
 
         self.assertIsNotNone(result)
         self.assertIsInstance(result, dict)

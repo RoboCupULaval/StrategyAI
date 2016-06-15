@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 from unittest import TestCase
-from UltimateStrat.STP.Skill.sGoBehindTargetGoal_GK import sGoBehindTargetGoal_GK
+from ai.STP.Skill.sGoBehindTargetGoal_GK import sGoBehindTargetGoal_GK
 from RULEngine.Util.Pose import Pose, Position
 from RULEngine.Util.geometry import get_angle, get_distance
 from RULEngine.Util.area import stayInsideCircle

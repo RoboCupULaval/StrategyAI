@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 from unittest import TestCase
-from UltimateStrat.STP.Skill.sKickLow import sKickLow
+from ai.STP.Skill.sKickLow import sKickLow
 from RULEngine.Util.Pose import Pose, Position
 
 __author__ = 'RoboCupULaval'

@@ -7,8 +7,8 @@ from RULEngine.Game.Team import Team
 from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose, Position
 
-from UltimateStrat.STP.Tactic.tGoalKeeper import tGoalKeeper
-from UltimateStrat.InfoManager import InfoManager
+from ai.STP.Tactic.tGoalKeeper import tGoalKeeper
+from ai.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 
@@ -40,7 +40,7 @@ class TestTacticGoalKeeper(TestCase):
 
     def test_return(self):
         result = self.tactic.apply(self.info, 0)
-        ball_pst = self.info.getBallPosition()
+        ball_pst = self.info.get_ball_position()
 
         self.assertIsNotNone(result)
         self.assertIsInstance(result, dict)

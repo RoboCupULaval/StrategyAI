@@ -7,8 +7,8 @@ from RULEngine.Game.Team import Team
 from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose, Position
 
-from UltimateStrat.STP.Tactic.tStop import tStop
-from UltimateStrat.InfoManager import InfoManager
+from ai.STP.Tactic.tStop import tStop
+from ai.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 
@@ -40,7 +40,7 @@ class TestTacticStop(TestCase):
 
     def test_return(self):
         result = self.tactic.apply(self.info, 0)
-        bot_pst = self.info.getPlayerPosition(0)
+        bot_pst = self.info.get_player_position(0)
 
         self.assertIsNotNone(result)
         self.assertIsInstance(result, dict)
