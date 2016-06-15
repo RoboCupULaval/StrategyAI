@@ -11,15 +11,6 @@ from ..Skill import Stop
 class Tactic:
     """
     Classe mère de toutes les tactiques
-    méthodes:
-        exec(self) : Exécute une Action selon l'état courant
-        dispatch(self) : Trouve la fonction qui calcul le prochain état. est appelé après exec().
-    attributs:
-        :param pInfoManager: référence à la façade InfoManager
-        :param  pTeamId : Identifiant de l'équipe
-        :param pPlayerId : Identifiant du joueur auquel est assigné la tactique
-        current_state : chcîne de caratères définissant l'état courant
-        next_state : chcîne de caratères définissant l'état suivant
     """
 
     def __init__(self, pInfoManager, pTeamId, pPlayerId):
