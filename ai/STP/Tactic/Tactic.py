@@ -15,27 +15,45 @@ class Tactic:
         exec(self) : Exécute une Action selon l'état courant
         dispatch(self) : Trouve la fonction qui calcul le prochain état. est appelé après exec().
     attributs:
-        info_manager: référence à la façade InfoManager
-        team_id : Identifiant de l'équipe
-        player_id : Identifiant du joueur auquel est assigné la tactique
+        :param pInfoManager: référence à la façade InfoManager
+        :param  pTeamId : Identifiant de l'équipe
+        :param pPlayerId : Identifiant du joueur auquel est assigné la tactique
         current_state : chcîne de caratères définissant l'état courant
         next_state : chcîne de caratères définissant l'état suivant
     """
 
-    def __init__(self, info_manager, team_id, player_id):
-        self.info_manager = info_manager
-        self.team_id = team_id
-        self.player_id = player_id
+    def __init__(self, pInfoManager, pTeamId, pPlayerId):
+        """
+            Initialise la tactique
+
+            Lors de la création d'une nouvelle tactique, il faut ajouter
+             les états de la tactique en utilisant self.dispatch.update().
+             Sinon, on risque de perdre l'état halt
+
+            :param pInfoManager: référence à la façade InfoManager
+            :param  pTeamId : Identifiant de l'équipe
+            :param pPlayerId : Identifiant du joueur auquel est assigné la tactique
+        """
+        self.info_manager = pInfoManager
+        self.team_id = pTeamId
+        self.player_id = pPlayerId
         self.current_state = 'halt'
         self.next_state = 'halt'
         self.dispatch = {'halt': self.halt}
 
     def halt(self):
-        arret = Stop(self.info_manager, self.player_id)
+        """
+            S'exécute lorsque l'état Courant est en arrêt
+            :return: l'action Stop crée
+        """
+        stop = Stop(self.info_manager, self.player_id)
         self.next_state = 'halt'
-        return arret
+        return stop
 
     def exec(self):
+        """
+            Exécute une Action selon l'état courant
+        """
         # Trouver la prochaine action
         next_action = self.dispatch[self.current_state]()
         next_pose = next_action.exec()

@@ -11,15 +11,13 @@ from ...Util import geometry
 class Action:
     """
     Classe mère de toutes les actions
-    méthodes:
-        exec(self) : Retourne un tuple (Pose, kick)
-            où Pose est la position où le robot doit aller
-               kick est un booléen qui détermine si le robot doit frapper ou non
-    attributs:
-        info_manager: référence à la façade InfoManager
     """
-    def __init__(self, info_manager):
-        self.info_manager = info_manager
+    def __init__(self, pInfoManager):
+        """
+        Initialise l'action
+        :param pInfoManager: référence vers l'InfoManager
+        """
+        self.InfoManager = pInfoManager
 
     def on_before(self):
         pass
@@ -29,4 +27,11 @@ class Action:
 
     @abstractmethod
     def exec(self):
+        """
+        Exécute la classe, doit être implémenté par les classes filles
+        :return: Un tuple (Pose, kick)
+            où Pose est la position où le robot doit aller
+               kick est un booléen qui détermine si le robot doit frapper ou non
+        """
         pass
+

@@ -8,12 +8,23 @@ class Stop(Action):
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur
     '''
-    def __init__(self, info_manager, player_id):
-        Action.__init__(self, info_manager)
+    def __init__(self, pInfoManager, pPlayerId):
+        """
+        Initialise l'action Stop
+        :param pInfoManager: référence vers l'InfoManager
+        :param pPlayerId: Identifiant du joueur qui s'arrête
+        """
+        Action.__init__(self, pInfoManager)
         # Note: Non sécuritaire, car on pourrait mettre la position d'un joueur adverse
-        self.player_id = player_id
+        self.PlayerId = pPlayerId
 
     def exec(self):
-        pose = self.info_manager.get_player_position(self.player_id)
+        """
+        Exécute l'arrêt
+        :return: Un tuple (Pose, kick)
+                     où Pose est la position du joueur
+                        kick est faux (on ne botte pas)
+        """
+        pose = self.InfoManager.get_player_position(self.PlayerId)
         kick = False
         return tuple(pose, kick)
