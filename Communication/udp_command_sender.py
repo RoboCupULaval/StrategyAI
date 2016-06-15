@@ -1,11 +1,8 @@
-#Under MIT License, see LICENSE.txt
-#!/usr/bin/python
-from .command_sender import CommandSender
+# Under MIT License, see LICENSE.txt
 import socket
-from .protobuf import grSim_Packet_pb2 as grSim_Packet
-from .protobuf.grSim_Commands_pb2 import grSim_Robot_Command
-import math
 
+from .command_sender import CommandSender
+from .protobuf import grSim_Packet_pb2 as grSim_Packet
 
 class UDPCommandSender(CommandSender):
 
@@ -35,7 +32,5 @@ class UDPCommandSender(CommandSender):
         grSimCommand.spinner = True
         grSimCommand.kickspeedx = command.kick_speed
         grSimCommand.kickspeedz = 0
-
-        #packet.commands.robot_commands.append(grSimCommand)
 
         self.server.send(packet.SerializeToString())

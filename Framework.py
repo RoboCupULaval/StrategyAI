@@ -14,6 +14,7 @@ import time
 from .Game.Game import Game
 from .Game.Referee import Referee
 from .Communication.vision import Vision
+from .Communication import debug_sender
 from .Communication.referee import RefereeServer
 from .Communication.udp_command_sender import UDPCommandSender
 from .Command.Command import Stop
@@ -143,16 +144,18 @@ class Framework(object):
         times = deque(maxlen=10)
         last_time = time.time()
 
-        #Wait for first frame
+        # Wait for first frame
         while not self.vision.get_latest_frame():
             time.sleep(0.01)
             print("En attente d'une image de la vision.")
+
         # TODO: Replace with a loop that will stop when the game is over
         while not self.thread_terminate.is_set():
             self.update_game_state()
             self.update_players_and_ball()
             self.update_strategies()
             self.send_robot_commands()
+            self._send_debug_commands()
             #time.sleep(0.01)
             new_time = time.time()
             times.append(new_time - last_time)
@@ -179,3 +182,9 @@ class Framework(object):
             print("Could not stop players")
             raise StopPlayerError("Au nettoyage il a été impossible d'arrêter\
                                     les joueurs.")
+
+    def _send_debug_commands(self):
+        """ Récupère les paquets de débogages et les envoies au serveur. """
+        debugs_commands = debug_sender.get_debug_packets(self.strategy.info_manager.debug_manager)
+        # TODO: implémenter un debug_command_sender à l'aide d'un UDP Sender
+        #       puis flush les commandes
