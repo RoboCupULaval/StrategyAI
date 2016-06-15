@@ -178,7 +178,7 @@ class Framework(object):
                 team = self.game.blue_team
             for player in team.players:
                 command = Stop(player)
-                self.command_sender.send_command(command)
+                self.command_sender.send_packet(command)
         except:
             print("Could not stop players")
             raise StopPlayerError("Au nettoyage il a été impossible d'arrêter\
