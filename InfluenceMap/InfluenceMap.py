@@ -18,6 +18,7 @@ class InfluenceMap(object):
 
     by convention in this class the row are x and the column is y.
     decay algorithm = strengthpeak * (strengthdecay**distance)
+    (valeur+chaude, valeur+froide),(couleur+chaude,couleur+froide),(row,column),
 
     """
     def __init__(self, resolution=100.0, strengthdecay=0.8, strengthpeak=100, effectradius=8):
@@ -442,6 +443,16 @@ class InfluenceMap(object):
                         result.append((x, y))
 
         return result
+
+    def find_max_value_in_board(self):
+
+        max_value_list = []
+        for x in self._board.flat[::]:
+            if not max_value_list:
+                max_value_list.append()
+        return max_value_list
+
+
 
     def clear_point_on_board(self):
         # todo add a point checking maybe?

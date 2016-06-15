@@ -40,8 +40,9 @@ if __name__ == "__main__":
     current_time = time.time()
 
     #print(IM.find_closest_point_of_strength_around(20, 20, 0))
-    print(IM.find_closest_point_of_strength_around(100, 150, -1000, False))
+    #print(IM.find_closest_point_of_strength_around(100, 150, -1000, False))
     #print(IM.find_points_of_strength_in_square(50, 50, 5, 0))
+    print(IM.find_max_value_in_board())
 
     print("Find closest       --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
