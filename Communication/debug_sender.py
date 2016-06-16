@@ -32,7 +32,6 @@ class DebugCommand(object):
                 'link': self.link,
                 'data': self.data}
 
-
     def get_packet(self):
         """
             Valide que les informations du paquets sont adéquates et retourne

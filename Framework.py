@@ -31,17 +31,17 @@ class Framework(object):
 
     def __init__(self, is_team_yellow=False):
         """ Constructeur de la classe, établis les propriétés de bases. """
-        self.command_sender = UDPCommandSender("127.0.0.1", 20011)
-        self.debug_sender = UDPDebugSender("127.0.0.1", 20021)
+        self.command_sender = None
+        self.debug_sender = None
         self.game = None
         self.is_yellow = is_team_yellow
         self.strategy = None
-        self.referee = RefereeServer()
+        self.referee = None
         self.running_thread = False
         self.last_frame = 0
         self.thread_terminate = threading.Event()
         self.last_time = 0
-        self.vision = Vision()
+        self.vision = None
 
 
     def create_game(self, strategy):
@@ -128,7 +128,14 @@ class Framework(object):
     def start_game(self, strategy, async=False):
         """ Démarrage du moteur de l'IA initial. """
 
-        if self.running_thread:
+
+        # on peut eventuellement demarrer une autre game
+        if not self.running_thread:
+            self.command_sender = UDPCommandSender("127.0.0.1", 20011)
+            self.debug_sender = UDPDebugSender("127.0.0.1", 20021)
+            self.referee = RefereeServer()
+            self.vision = Vision()
+        else:
             self.stop_game()
 
         self.create_game(strategy)
