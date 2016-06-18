@@ -14,9 +14,10 @@ import time
 from .Game.Game import Game
 from .Game.Referee import Referee
 from .Communication.vision import Vision
-from .Communication import debug_sender
+from .Communication import debug
 from .Communication.referee import RefereeServer
-from .Communication.udp_command_sender import UDPCommandSender, UDPDebugSender
+from .Communication.udp_service import RobotCommandSender, DebugCommandSender,\
+                                       DebugCommandReceiver
 from .Command.Command import Stop
 from .Util.Exception import StopPlayerError
 
@@ -31,6 +32,8 @@ class Framework(object):
 
     def __init__(self, is_team_yellow=False):
         """ Constructeur de la classe, établis les propriétés de bases. """
+        # TODO: refactor pour avoir des objets qui contiennent les petits
+        # détails d'implémentations (12/7 fields)
         self.command_sender = None
         self.debug_sender = None
         self.game = None
@@ -129,10 +132,11 @@ class Framework(object):
         """ Démarrage du moteur de l'IA initial. """
 
 
-        # on peut eventuellement demarrer une autre game
+        # on peut eventuellement demarrer une autre instance du moteur
         if not self.running_thread:
-            self.command_sender = UDPCommandSender("127.0.0.1", 20011)
-            self.debug_sender = UDPDebugSender("127.0.0.1", 20021)
+            self.command_sender = RobotCommandSender("127.0.0.1", 20011)
+            self.debug_sender = DebugCommandSender("127.0.0.1", 20021)
+            self.debug_receiver = DebugCommandReceiver("127.0.0.1", 10021)
             self.referee = RefereeServer()
             self.vision = Vision()
         else:
@@ -157,14 +161,18 @@ class Framework(object):
             time.sleep(0.01)
             print("En attente d'une image de la vision.")
 
-        # TODO: Replace with a loop that will stop when the game is over
+        # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
         while not self.thread_terminate.is_set():
             self.update_game_state()
             self.update_players_and_ball()
             self.update_strategies()
             self.send_robot_commands()
-            self._send_debug_commands()
-            #time.sleep(0.01)
+
+            # s'il n'y a pas de façade, le débogage n'est pas actif
+            if self._info_manager().debug_manager:
+                self._send_debug_commands()
+                self._receive_debug_commands()
+
             new_time = time.time()
             times.append(new_time - last_time)
             print(len(times) / sum(times))
@@ -191,9 +199,29 @@ class Framework(object):
             raise StopPlayerError("Au nettoyage il a été impossible d'arrêter\
                                     les joueurs.")
 
+    def _info_manager(self):
+        """ Retourne la référence vers l'InfoManager de l'IA. """
+        return self.strategy.info_manager
+
     def _send_debug_commands(self):
         """ Récupère les paquets de débogages et les envoies au serveur. """
-        debug_manager = self.strategy.info_manager.debug_manager
+        debug_manager = self._info_manager().debug_manager
         if debug_manager:
-            debugs_commands = debug_sender.get_debug_packets(debug_manager)
+            debugs_commands = debug.pack_commands(debug_manager)
             self.debug_sender.send_packet(debugs_commands)
+
+    def _receive_debug_commands(self):
+        """
+            Effectue la réception des commandes de débogages du serveur et les
+            enregistres dans la façade de débogage.
+        """
+        commands = debug.unpack_commands(self.debug_receiver.receive_packet())
+        debug_manager = self._info_manager().debug_manager
+        for command in commands:
+            type_ = command['type']
+            if type_ == 5000:
+                debug_manager.toggle_human_control()
+            elif type_ == 5001:
+                debug_manager.set_strategy(command.data['strategy'])
+            elif type_ == 5002:
+                debug_manager.set_tactic(command.link, command.data)

@@ -1,6 +1,6 @@
 """
-    Le module implémente les classes et la logique nécessaire pour envoyer les
-    commandes au serveur de débogage.
+    Le module implémente les classes et la logique nécessaire pour envoyer et
+    reçevoir les commandes au serveur de débogage.
 """
 from ..Util.Exception import InvalidDebugType
 from ..Util.constant import SENDER_NAME, DEFAULT_DEBUG_TIMEOUT,\
@@ -47,10 +47,11 @@ class DebugCommand(object):
         return str(self._get_packet())
 
 
-def get_debug_packets(p_debug_manager):
+def pack_commands(p_debug_manager):
     """
         Reçoit une instance du DebugManager de StrategyIA et retourne une liste
-        de commande pour le serveur de débogage.
+        de paquets pour le serveur de débogage selon les commandes inscrites
+        dans la façade de débogage.
 
         :param debug_manager: Référence vers la façade de débogage pour obtenir
             les informations.
@@ -64,6 +65,20 @@ def get_debug_packets(p_debug_manager):
     commands = commands + _get_text_packets(p_debug_manager)
 
     return map(_get_packet, commands)
+
+def unpack_commands(p_raw_packets):
+    """
+        Reçoit une liste de paquets brutes désérialisés et construit les
+        commandes de débogage envoyé par le serveur.
+
+        :param p_raw_packets: Liste des paquets brutes.
+    """
+    packets = []
+    for rpacket in p_raw_packets:
+        debug_command = DebugCommand(rpacket['type'], rpacket['link'], rpacket['data'])
+        debug_command.name = 'ui'
+        packets.append(debug_command)
+    return packets
 
 def _get_log_packets(debug_manager):
     """
