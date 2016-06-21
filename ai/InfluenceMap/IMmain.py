@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
     current_time = time.time()
 
-    IM = InfluenceMap(50.0, strengthdecay=0.9, effectradius=40)
+    IM = InfluenceMap(30.0, strengthdecay=0.9, effectradius=40)
 
     print("Class creation --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
@@ -61,26 +61,26 @@ if __name__ == "__main__":
     # IM.add_point_and_propagate_influence(100, 50, -100)
 
 
-    IM.add_point_and_propagate_stencil(15, 15, True)
-    IM.add_point_and_propagate_stencil(20, 15, True)
-    IM.add_point_and_propagate_stencil(10, 15, True)
-    IM.add_point_and_propagate_stencil(15, 30, True)
-    IM.add_point_and_propagate_stencil(15, 45, True)
-    IM.add_point_and_propagate_stencil(15, 100, True)
+    IM.add_point_and_propagate_stencil(1, 180, False)
+    # IM.add_point_and_propagate_stencil(20, 15, True)
+    # IM.add_point_and_propagate_stencil(10, 15, True)
+    # IM.add_point_and_propagate_stencil(15, 30, True)
+    # IM.add_point_and_propagate_stencil(15, 45, True)
+    # IM.add_point_and_propagate_stencil(15, 100, True)
     IM.add_point_and_propagate_stencil(30, 15, False)
-    IM.add_point_and_propagate_stencil(45, 15, False)
-    IM.add_point_and_propagate_stencil(60, 15, False)
+    # IM.add_point_and_propagate_stencil(45, 15, False)
+    # IM.add_point_and_propagate_stencil(60, 15, False)
     IM.add_point_and_propagate_stencil(45, 45, True)
-    IM.add_point_and_propagate_stencil(50, 50, False)
-    IM.add_point_and_propagate_stencil(75, 75, False)
-    IM.add_point_and_propagate_stencil(43, 43, True)
-    IM.add_point_and_propagate_stencil(5, 5, False)
-    IM.add_point_and_propagate_stencil(75, 75, True)
-    IM.add_point_and_propagate_stencil(120, 180, False)
-    IM.add_point_and_propagate_stencil(90, 100, True)
-    IM.add_point_and_propagate_stencil(100, 90, False)
-    IM.add_point_and_propagate_stencil(100, 15, True)
-    IM.add_point_and_propagate_stencil(100, 50, False)
+    # IM.add_point_and_propagate_stencil(50, 50, False)
+    # IM.add_point_and_propagate_stencil(75, 75, False)
+    # IM.add_point_and_propagate_stencil(43, 43, True)
+    # IM.add_point_and_propagate_stencil(5, 5, False)
+    # IM.add_point_and_propagate_stencil(75, 75, True)
+    # IM.add_point_and_propagate_stencil(120, 180, False)
+    # IM.add_point_and_propagate_stencil(90, 100, True)
+    # IM.add_point_and_propagate_stencil(100, 90, False)
+    # IM.add_point_and_propagate_stencil(100, 15, True)
+    # IM.add_point_and_propagate_stencil(100, 50, False)
 
 
 
@@ -90,8 +90,8 @@ if __name__ == "__main__":
     #print(IM.find_closest_point_of_strength_around(20, 20, 0))
     #print(IM.find_closest_point_of_strength_around(100, 150, -1000, False))
     #print(IM.find_points_of_strength_in_square(50, 50, 5, 0))
-    #print(IM.find_max_value_in_board())
-    #print(IM.find_min_value_in_board())
+    print(IM.find_max_value_in_board())
+    print(IM.find_min_value_in_board())
 
 
     print("Find closest       --- %s seconds ---" % (time.time() - current_time))
