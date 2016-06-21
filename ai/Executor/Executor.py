@@ -1,19 +1,16 @@
-#Under MIT License, see LICENSE.txt
-from abc import abstractmethod
-from ai.STP.Skill.SkillBase import SkillBase
-from ai.STP.Tactic.TacticBase import TacticBase
-from ai.STP.Play.PlayBase import PlayBase
+# Under MIT License, see LICENSE.txt
+""" Module des Executor """
+from abc import abstractmethod, ABCMeta
 
 __author__ = 'RoboCupULaval'
 
+class Executor(object, metaclass=ABCMeta):
+    """ Classe abstraite des executeurs. À compléter. """
 
-class Executor:
     def __init__(self, info_manager):
         self.info_manager = info_manager
-        self.play_book = PlayBase()
-        self.tactic_book = TacticBase()
-        self.skill_book = SkillBase()
 
     @abstractmethod
     def exec(self):
+        """ Méthode qui sera appelé à chaque coup de boucle. """
         pass

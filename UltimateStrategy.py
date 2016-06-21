@@ -28,13 +28,15 @@ class UltimateStrategy(Strategy):
     """
 
     def __init__(self, is_team_yellow=False):
-        """ Constructeur, réplique une grande partie du GameState pour
-            construire l'InfoManager. TODO: éliminer cette redondance (DRY)
         """
+            Constructeur, réplique une grande partie du GameState pour
+            construire l'InfoManager.
+        """
+        # TODO: Enforce DRY
         Strategy.__init__(self, is_team_yellow)
 
         # Create InfoManager
-        self.info_manager = InfoManager()
+        self.info_manager = InfoManager(is_debug=True)
 
         # Create Executors
         self.ex_coach = CoachExecutor(self.info_manager)
@@ -43,7 +45,7 @@ class UltimateStrategy(Strategy):
         self.ex_skill = SkillExecutor(self.info_manager)
 
     def on_start(self, game_state):
-        """ Boucle principale de l'IA, est appelé par Framework """
+        """ *État* actif du **Coach**. """
         self.info_manager.update(game_state)
         # Main Strategy sequence
         self.ex_coach.exec()
