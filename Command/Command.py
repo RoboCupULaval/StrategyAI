@@ -9,7 +9,8 @@ from ..Util.constant import *
 
 
 class _Command(object):
-    def __init__(self, player, team):
+    def __init__(self, player):
+        assert(isinstance(player, Player))
         self.player = player
         self.dribble = True
         self.dribble_speed = 10
@@ -17,7 +18,7 @@ class _Command(object):
         self.kick_speed = 0
         self.is_speed_command = False
         self.pose = Pose()
-        self.team = team
+        self.team = player.team
 
     def toSpeedCommand(self):
         """
@@ -102,13 +103,11 @@ class _Command(object):
 
 
 class MoveTo(_Command):
-    def __init__(self, player, team, position):
+    def __init__(self, player, position):
         # Parameters Assertion
-        assert(isinstance(player, Player))
-        assert(isinstance(team, Team))
         assert(isinstance(position, Position))
 
-        super().__init__(player, team)
+        super().__init__(player)
         self.pose.position = stayInsideSquare(position,
                                               FIELD_Y_TOP,
                                               FIELD_Y_BOTTOM,
@@ -118,13 +117,10 @@ class MoveTo(_Command):
 
 
 class Rotate(_Command):
-    def __init__(self, player, team, orientation):
-        # Parameters Assertion
-        assert(isinstance(player, Player))
-        assert(isinstance(team, Team))
+    def __init__(self, player, orientation):
         assert(isinstance(orientation, (int, float)))
 
-        super().__init__(player, team)
+        super().__init__(player)
         self.pose.orientation = orientation
         self.pose.position = stayInsideSquare(player.pose.position,
                                               FIELD_Y_TOP,
@@ -134,13 +130,10 @@ class Rotate(_Command):
 
 
 class MoveToAndRotate(_Command):
-    def __init__(self, player, team, pose):
-        # Parameters Assertion
-        assert(isinstance(player, Player))
-        assert(isinstance(team, Team))
+    def __init__(self, player, pose):
         assert(isinstance(pose, Pose))
 
-        super().__init__(player, team)
+        super().__init__(player)
         position = stayInsideSquare(pose.position,
                                     FIELD_Y_TOP,
                                     FIELD_Y_BOTTOM,
@@ -150,14 +143,12 @@ class MoveToAndRotate(_Command):
 
 
 class Kick(_Command):
-    def __init__(self, player, team, kick_speed=5):
-        # Parameters Assertion
+    def __init__(self, player, kick_speed=5):
         assert(isinstance(player, Player))
-        assert(isinstance(team, Team))
         assert(isinstance(kick_speed, (int, float)))
         assert(0 <= kick_speed <= 8)
 
-        super().__init__(player, team)
+        super().__init__(player)
         self.kick = True
         self.kick_speed = kick_speed
         self.is_speed_command = True
@@ -165,11 +156,9 @@ class Kick(_Command):
 
 
 class Stop(_Command):
-    def __init__(self, player, team):
-        # Parameters Assertion
+    def __init__(self, player):
         assert(isinstance(player, Player))
-        assert(isinstance(team, Team))
 
-        super().__init__(player, team)
+        super().__init__(player)
         self.is_speed_command = True
         self.pose = Pose()

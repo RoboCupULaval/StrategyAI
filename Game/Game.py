@@ -1,51 +1,33 @@
 #Under MIT License, see LICENSE.txt
-import math
 
 from . import Referee
 from ..Util.Pose import Pose
 from ..Util.Position import Position
-from ..Util.constant import PLAYER_PER_TEAM
-
+from .Team import Team
+from .Ball import Ball
+from .Field import Field
 
 class Game():
-    def __init__(self, field, referee, blue_team, yellow_team, blue_team_strategy):
-        self.field = field
+    def __init__(self, referee, is_team_yellow):
+        self.ball = Ball()
+        self.field = Field(self.ball)
         self.referee = referee
-        self.blue_team = blue_team
-        self.yellow_team = yellow_team
-        self.blue_team_strategy = blue_team_strategy
+        self.blue_team, self.yellow_team = self.create_teams()
+
+        if is_team_yellow:
+            self.friends = self.yellow_team
+            self.enemies = self.blue_team
+        else:
+            self.friends = self.blue_team
+            self.enemies = self.yellow_team
+
         self.delta = None
 
-    def update_strategies(self):
-        state = self.referee.command.name
-        if state == "HALT":
-            self.blue_team_strategy.on_halt()
+    def create_teams(self):
+        blue_team = Team(is_team_yellow=False)
+        yellow_team = Team(is_team_yellow=True)
 
-        elif state == "NORMAL_START":
-            self.blue_team_strategy.on_start()
-
-        elif state == "STOP":
-            self.blue_team_strategy.on_stop()
-
-    def get_commands(self):
-        blue_team_commands = [command for command in self._get_blue_team_commands()] #Copy
-
-        self.blue_team_strategy.commands.clear()
-
-        return blue_team_commands
-
-    def _get_blue_team_commands(self):
-        blue_team_commands = self.blue_team_strategy.commands
-        #blue_team_commands = self._remove_commands_from_opponent_team(blue_team_commands, self.yellow_team)
-        return blue_team_commands
-
-    @staticmethod
-    def _remove_commands_from_opponent_team(commands, opponent_team):
-        final_commands = []
-        for command in commands:
-            if command.team != opponent_team:
-                final_commands.append(command)
-        return final_commands
+        return blue_team, yellow_team
 
     def update_game_state(self, referee_command):
         # TODO: Réviser code, ça semble louche

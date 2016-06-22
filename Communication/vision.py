@@ -1,8 +1,8 @@
 #Under MIT License, see LICENSE.txt
 #!/usr/bin/python
 
-from .udp_server import PBPacketReceiver
-from . import messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
+from .udp_pb_server import PBPacketReceiver
+from .protobuf import messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
 
 
 class Vision(PBPacketReceiver):

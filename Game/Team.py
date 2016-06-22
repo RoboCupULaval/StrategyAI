@@ -1,7 +1,11 @@
 #Under MIT License, see LICENSE.txt
+
+from .Player import Player
+from ..Util.constant import PLAYER_PER_TEAM
+
 class Team():
-    def __init__(self, players, is_team_yellow):
-        self.players = players
+    def __init__(self, is_team_yellow):
+        self.players = [Player(self, i) for i in range(PLAYER_PER_TEAM)]
         self.is_team_yellow = is_team_yellow
         self.score = 0
 
