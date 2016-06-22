@@ -9,7 +9,6 @@ from collections import deque
 import pickle
 from socketserver import BaseRequestHandler
 
-from .command_interface import CommandSender, CommandReceiver
 from .protobuf import grSim_Packet_pb2 as grSim_Packet
 from .udp_utils import udp_socket, MulticastThreadedUDPServer
 
@@ -52,7 +51,7 @@ class PBPacketReceiver(object):
             return None
 
 
-class RobotCommandSender(CommandSender):
+class GrSimCommandSender(object):
     """ Service qui envoie les commandes de mouvements aux robots. """
 
     def __init__(self, host, port):
@@ -67,7 +66,7 @@ class RobotCommandSender(CommandSender):
         """
         self.server.send(packet.SerializeToString())
 
-    def send_packet(self, command):
+    def send_command(self, command):
         """
             Construit le paquuet à envoyer à partir de la commande reçut.
 
@@ -88,7 +87,7 @@ class RobotCommandSender(CommandSender):
 
         self._send_packet(packet)
 
-class DebugCommandSender(CommandSender):
+class DebugCommandSender(object):
     """
         Définition du service capable d'envoyer des paquets de débogages au
         serveur et à l'interface de débogage. S'occupe de la sérialisation.
@@ -101,12 +100,12 @@ class DebugCommandSender(CommandSender):
         """ Envoi un seul paquet. """
         self.server.send(pickle.dumps(p_packet))
 
-    def send_packet(self, p_packets):
+    def send_command(self, p_packets):
         """ Reçoit une liste de paquets et les envoies. """
         for packet in p_packets:
             self._send_packet(packet)
 
-class DebugCommandReceiver(CommandReceiver):
+class DebugCommandReceiver(object):
     """
         Service capable d'écouter un port multicast UDP, de reçevoir et de
         traiter les paquets brutes envoyer par le serveur de débogage.
@@ -130,7 +129,7 @@ class DebugCommandReceiver(CommandReceiver):
                 p_packet_list.append(pickle.loads(data))
         return ThreadedUDPRequestHandler
 
-    def receive_packet(self):
+    def receive_command(self):
         """ Vide la file et retourne une liste des paquets brutes. """
         for _ in range(len(self.packet_list)):
             yield self.packet_list.pop()

@@ -16,7 +16,7 @@ from .Game.Referee import Referee
 from .Communication.vision import Vision
 from .Communication import debug
 from .Communication.referee import RefereeServer
-from .Communication.udp_service import RobotCommandSender, DebugCommandSender,\
+from .Communication.udp_serveur import GrSimCommandSender, DebugCommandSender,\
                                        DebugCommandReceiver
 from .Command.Command import Stop
 from .Util.Exception import StopPlayerError
@@ -118,7 +118,7 @@ class Framework(object):
             commands = self.get_commands()
             for command in commands:
                 command = command.toSpeedCommand()
-                self.command_sender.send_packet(command)
+                self.command_sender.send_command(command)
 
     def get_commands(self):
         """ Obtiens les commandes du **Coach**. """
@@ -134,7 +134,7 @@ class Framework(object):
 
         # on peut eventuellement demarrer une autre instance du moteur
         if not self.running_thread:
-            self.command_sender = RobotCommandSender("127.0.0.1", 20011)
+            self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
             self.debug_sender = DebugCommandSender("127.0.0.1", 20021)
             self.debug_receiver = DebugCommandReceiver("127.0.0.1", 10021)
             self.referee = RefereeServer()
@@ -193,7 +193,7 @@ class Framework(object):
                 team = self.game.blue_team
             for player in team.players:
                 command = Stop(player)
-                self.command_sender.send_packet(command)
+                self.command_sender.send_command(command)
         except:
             print("Could not stop players")
             raise StopPlayerError("Au nettoyage il a été impossible d'arrêter\
@@ -208,14 +208,14 @@ class Framework(object):
         debug_manager = self._info_manager().debug_manager
         if debug_manager:
             debugs_commands = debug.pack_commands(debug_manager)
-            self.debug_sender.send_packet(debugs_commands)
+            self.debug_sender.send_command(debugs_commands)
 
     def _receive_debug_commands(self):
         """
             Effectue la réception des commandes de débogages du serveur et les
             enregistres dans la façade de débogage.
         """
-        commands = debug.unpack_commands(self.debug_receiver.receive_packet())
+        commands = debug.unpack_commands(self.debug_receiver.receive_command())
         debug_manager = self._info_manager().debug_manager
         for command in commands:
             type_ = command['type']
