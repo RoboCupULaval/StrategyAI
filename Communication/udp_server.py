@@ -10,7 +10,7 @@ import pickle
 from socketserver import BaseRequestHandler
 
 from .protobuf import grSim_Packet_pb2 as grSim_Packet
-from .udp_utils import udp_socket, MulticastThreadedUDPServer
+from .udp_utils import udp_socket, MulticastThreadedUDPServer, ThreadedUDPServer
 
 from ..Util.constant import DEBUG_RECEIVE_BUFFER_SIZE
 
@@ -68,7 +68,7 @@ class GrSimCommandSender(object):
 
     def send_command(self, command):
         """
-            Construit le paquuet à envoyer à partir de la commande reçut.
+            Construit le paquet à envoyer à partir de la commande reçut.
 
             :param command: Command pour un robot
         """
@@ -113,7 +113,7 @@ class DebugCommandReceiver(object):
     def __init__(self, host, port):
         self.packet_list = deque(maxlen=DEBUG_RECEIVE_BUFFER_SIZE)
         handler = self.get_udp_handler(self.packet_list)
-        self.server = MulticastThreadedUDPServer(host, port, handler)
+        self.server = ThreadedUDPServer(host, port, handler)
 
     def get_udp_handler(self, p_packet_list):
         """ Retourne la classe pour reçevoir async les paquets """

@@ -4,7 +4,7 @@
     serveur de vision.
 """
 
-from .udp_service import PBPacketReceiver
+from .udp_server import PBPacketReceiver
 from .protobuf import messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
 
 class Vision(PBPacketReceiver):

@@ -16,8 +16,9 @@ from .Game.Referee import Referee
 from .Communication.vision import Vision
 from .Communication import debug
 from .Communication.referee import RefereeServer
-from .Communication.udp_serveur import GrSimCommandSender, DebugCommandSender,\
-                                       DebugCommandReceiver
+from .Communication.udp_server import GrSimCommandSender, DebugCommandSender,\
+                                      DebugCommandReceiver
+from .Communication.serial_command_sender import SerialCommandSender
 from .Command.Command import Stop
 from .Util.Exception import StopPlayerError
 
@@ -128,13 +129,16 @@ class Framework(object):
 
         return commands
 
-    def start_game(self, strategy, async=False):
+    def start_game(self, strategy, async=False, serial=False):
         """ Démarrage du moteur de l'IA initial. """
 
 
         # on peut eventuellement demarrer une autre instance du moteur
         if not self.running_thread:
-            self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
+            if serial:
+                self.command_sender = SerialCommandSender()
+            else:
+                self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
             self.debug_sender = DebugCommandSender("127.0.0.1", 20021)
             self.debug_receiver = DebugCommandReceiver("127.0.0.1", 10021)
             self.referee = RefereeServer()
