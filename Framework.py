@@ -38,7 +38,7 @@ class Framework(object):
         self.command_sender = None
         self.debug_sender = None
         self.game = None
-        self.is_yellow = is_team_yellow
+        self.is_team_yellow = is_team_yellow
         self.strategy = None
         self.referee = None
         self.running_thread = False
@@ -58,9 +58,9 @@ class Framework(object):
 
         self.referee = Referee()
 
-        self.strategy = strategy(self.is_yellow)
+        self.strategy = strategy()
 
-        self.game = Game(self.referee, self.is_yellow)
+        self.game = Game(self.referee, self.is_team_yellow)
 
         return self.game
 
@@ -173,7 +173,7 @@ class Framework(object):
         self.running_thread.join()
         self.thread_terminate.clear()
         try:
-            if self.is_yellow:
+            if self.is_team_yellow:
                 team = self.game.yellow_team
             else:
                 team = self.game.blue_team
