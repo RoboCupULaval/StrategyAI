@@ -22,13 +22,18 @@ class IntelligentModule(object, metaclass=ABCMeta):
 
         self.state = pInfoManager
 
-    def get_info_manager(self):
-        """ Retourne la référence de l'InfoManager """
-        return self.state
+    @abstractmethod
+    def update(self):
+        """ Effectue la mise à jour du module """
+        pass
 
     @abstractmethod
     def str(self):
-        """ Ne pas utiliser """
+        """
+            La représentation en string d'un module intelligent devrait
+            permettre de facilement envoyer son information dans un fichier de
+            log.
+        """
 
 class Pathfinder(IntelligentModule, metaclass=ABCMeta):
     """
@@ -50,9 +55,7 @@ class Pathfinder(IntelligentModule, metaclass=ABCMeta):
 
     def str(self):
         """
-            Retourne la représentation en String de paths.
-
-            :return: String
+            Retourne le en string le dictionnaire des paths.
         """
         return str(self.paths)
 
@@ -60,9 +63,7 @@ class Pathfinder(IntelligentModule, metaclass=ABCMeta):
     def get_path(self, pid=None):
         """
             Si l'ID est précisé, retourne la liste des *Pose* pour le chemin
-            de ce robot. Autrement, retourne le dictionnaire. Cette méthode est
-            aussi responsable de faire les appels pour mettre à jour les
-            informatoins.
+            de ce robot. Autrement, retourne le dictionnaire.
 
             :param id: int de 0 à 5 représentant les robots de l'équipe alliée
             :return: { id : [Pose, Pose, ...] } || [Pose, Pose, ...]
