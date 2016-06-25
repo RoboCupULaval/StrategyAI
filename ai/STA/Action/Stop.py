@@ -1,5 +1,6 @@
 # Under MIT license, see LICENSE.txt
 from .Action import Action
+from ...Util.types import AICommand
 
 class Stop(Action):
     '''
@@ -24,6 +25,6 @@ class Stop(Action):
                      où Pose est la position du joueur
                         kick est faux (on ne botte pas)
         """
-        move_destination = self.InfoManager.get_player_position(self.player_id)
+        move_destination = self.info_manager.get_player_pose(self.player_id)
         kick_strength = 0
         return AICommand(move_destination, kick_strength)

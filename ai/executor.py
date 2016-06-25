@@ -47,15 +47,17 @@ class StrategyExecutor(Executor):
             meilleure stratégie pour le contexte.
         """
         # TODO: rendre dynamique
-        self.strategy = StrategyBook().get_strategy("HumanControl")()
+        self.strategy = StrategyBook().get_strategy("HumanControl")(self.info_manager)
 
     def _assign_tactics(self):
         """
             Détermine à quel robot assigner les tactiques de la stratégie en
             cours.
         """
-        tactic_sequence = self.strategy.tactics_sequence
+        tactic_sequence = self.strategy.get_next_tactics_sequence()
         for i in range(0, 6):
+            tactic = tactic_sequence[i]
+            tactic.player_id = i
             self.info_manager.set_player_tactic(i, tactic_sequence[i])
 
 
@@ -70,7 +72,7 @@ class TacticExecutor(Executor):
         Executor.__init__(self, info_manager)
 
     def exec(self):
-        """ Obtient la Tactic de chaque robot et calcul la Skill à assigner. """
+        """ Obtient la Tactic de chaque robot et fait progresser la FSM. """
         for i in range(0, 6):
             self.info_manager.get_player_tactic(i).exec()
 
@@ -87,9 +89,10 @@ class PathfinderExecutor(Executor):
             des joueurs de notre équipe.
         """
         self.pathfinder = self.info_manager.acquire_module('Pathfinder')
-        paths = self.pathfinder.get_paths()
-        for i in range(0, 6):
-            self.info_manager.set_player_next_action(paths[i])
+        if self.pathfinder: # on desactive l'executor si aucun module ne fournit de pathfinding
+            paths = self.pathfinder.get_paths()
+            for i in range(0, 6):
+                self.info_manager.set_player_next_action(paths[i])
 
 class ModuleExecutor(Executor):
     """ Met à jour tous les modules intelligents enregistré. """
@@ -97,5 +100,9 @@ class ModuleExecutor(Executor):
         Executor.__init__(self, info_manager)
 
     def exec(self):
-        for i in self.info_manager.modules:
-            i.update()
+        modules = self.info_manager.modules
+        for key in modules:
+            try:
+                modules[key].update()
+            except:
+                print("Un module est défini à None, clef: " + str(key))

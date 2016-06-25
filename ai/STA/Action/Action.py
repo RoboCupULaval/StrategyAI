@@ -3,9 +3,6 @@
 from abc import abstractmethod
 from functools import wraps
 
-from ...Util import geometry
-from ...Util.types import AICommand
-
 __author__ = 'Robocup ULaval'
 
 class Action:
@@ -16,7 +13,7 @@ class Action:
         """
             :param pInfoManager: référence vers l'InfoManager
         """
-        self.InfoManager = p_info_manager
+        self.info_manager = p_info_manager
 
     def on_before(self):
         pass

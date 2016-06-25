@@ -64,6 +64,10 @@ class Coach(object):
         self.pathfinder_executor.exec()
 
 class CoachCommandSender(object):
+    """
+        Construit les commandes et les places dans un champ pour que Framework
+        puissent les envoyer aux robots.
+    """
     
     def __init__(self, p_info_manager):
         self.game_state = None
@@ -86,8 +90,10 @@ class CoachCommandSender(object):
     def _generate_command(self, p_next_action):
         if p_next_action.kick_strength > 0:
             return self._generate_kick_command(p_next_action.kick_strength)
-        else:
+        elif p_next_action.move_destination:
             return self._generate_move_command(p_next_action.move_destination)
+        else:
+            return self._generate_empty_command()
 
     def _generate_kick_command(self, p_kick_strength):
         kick_strength = self._sanitize_kick_strength(p_kick_strength)
@@ -96,6 +102,9 @@ class CoachCommandSender(object):
 
     def _generate_move_command(self, p_move_destination):
         return Command.MoveToAndRotate(self._get_player(), p_move_destination)
+
+    def _generate_empty_command(self):
+        return Command.MoveToAndRotate(self._get_player(), self._get_player().pose)
 
     def _get_player(self):
         # FIXME: On ne parle qu'à ses amis

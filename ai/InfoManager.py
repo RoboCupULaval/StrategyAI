@@ -58,6 +58,7 @@ class InfoManager:
         else:
             self.debug_manager = None
 
+
     def init_team_dictionary(self):
         """
         Initialise le dictionnaire de données pour l'équipe passée en paramètre.
@@ -82,12 +83,12 @@ class InfoManager:
 
     def update(self, game_state):
         """ Interface public pour update de l'infomanager. """
-        self.update_ball(game_state.field.ball)
-        self.update_team(self.friend, game_state.friends)
-        self.update_team(self.enemy, game_state.enemies)
+        self._update_ball(game_state.field.ball)
+        self._update_team(self.friend, game_state.friends)
+        self._update_team(self.enemy, game_state.enemies)
 
 
-    def update_ball(self, ball):
+    def _update_ball(self, ball):
         """
         Mets à jour la position de la balle, de même que ses anciennes positions.
         """
@@ -96,7 +97,7 @@ class InfoManager:
         if len(self.ball['retro_pose']) > 10:
             self.ball['retro_pose'].pop(0)
 
-    def update_team(self, team_data, team):
+    def _update_team(self, team_data, team):
         """
         Mets à jour les données de chacun des joueurs de l'équipe
         passée en paramètre.
