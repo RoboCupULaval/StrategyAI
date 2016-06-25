@@ -2,11 +2,11 @@
     Le module implémente les classes et la logique nécessaire pour envoyer et
     reçevoir les commandes au serveur de débogage.
 """
-from ..Util.Exception import InvalidDebugType
+from ..Util.exception import InvalidDebugType
 from ..Util.constant import SENDER_NAME, DEFAULT_DEBUG_TIMEOUT,\
                             DEFAULT_TEXT_ALIGN, DEFAULT_TEXT_COLOR,\
                             DEFAULT_TEXT_FONT, DEFAULT_TEXT_SIZE
-from ..Util.DebugType import Point, Circle
+from ..Util.debug_type import Point, Circle
 
 class DebugCommand(object):
     """

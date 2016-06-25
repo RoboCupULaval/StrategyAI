@@ -13,3 +13,7 @@ class StopPlayerError(Exception):
         les joueurs.
     """
     pass
+
+class NonExistentModule(Exception):
+    """ Est levé par l'InfoManager quand un module intelligent n'existe pas. """
+    pass

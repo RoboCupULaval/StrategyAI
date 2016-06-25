@@ -20,7 +20,7 @@ from .Communication.udp_server import GrSimCommandSender, DebugCommandSender,\
                                       DebugCommandReceiver
 from .Communication.serial_command_sender import SerialCommandSender
 from .Command.Command import Stop
-from .Util.Exception import StopPlayerError
+from .Util.exception import StopPlayerError
 
 GameState = namedtuple('GameState', ['field', 'referee', 'friends',
                                      'enemies', 'debug'])
@@ -38,7 +38,7 @@ class Framework(object):
         self.command_sender = None
         self.debug_sender = None
         self.game = None
-        self.is_yellow = is_team_yellow
+        self.is_team_yellow = is_team_yellow
         self.strategy = None
         self.referee = None
         self.running_thread = False
@@ -58,9 +58,9 @@ class Framework(object):
 
         self.referee = Referee()
 
-        self.strategy = strategy(self.is_yellow)
+        self.strategy = strategy()
 
-        self.game = Game(self.referee, self.is_yellow)
+        self.game = Game(self.referee, self.is_team_yellow)
 
         return self.game
 
@@ -111,24 +111,6 @@ class Framework(object):
                          enemies=game.enemies,
                          debug={})
 
-    def send_robot_commands(self):
-        """
-            Envoie les commandes au robots par la communication à l'embarquée.
-        """
-        if self.vision.get_latest_frame():
-            commands = self.get_commands()
-            for command in commands:
-                command = command.toSpeedCommand()
-                self.command_sender.send_command(command)
-
-    def get_commands(self):
-        """ Obtiens les commandes du **Coach**. """
-        commands = [command for command in self.strategy.commands] #Copy
-
-        self.strategy.commands.clear()
-
-        return commands
-
     def start_game(self, strategy, async=False, serial=False):
         """ Démarrage du moteur de l'IA initial. """
 
@@ -170,7 +152,7 @@ class Framework(object):
             self.update_game_state()
             self.update_players_and_ball()
             self.update_strategies()
-            self.send_robot_commands()
+            self._send_robot_commands()
 
             # s'il n'y a pas de façade, le débogage n'est pas actif
             if self._info_manager().debug_manager:
@@ -191,7 +173,7 @@ class Framework(object):
         self.running_thread.join()
         self.thread_terminate.clear()
         try:
-            if self.is_yellow:
+            if self.is_team_yellow:
                 team = self.game.yellow_team
             else:
                 team = self.game.blue_team
@@ -202,6 +184,17 @@ class Framework(object):
             print("Could not stop players")
             raise StopPlayerError("Au nettoyage il a été impossible d'arrêter\
                                     les joueurs.")
+
+    def _send_robot_commands(self):
+        if self.vision.get_latest_frame(): # pourquoi?
+            commands = self._get_coach_commands()
+            for command in commands:
+                command = command.toSpeedCommand()
+                self.command_sender.send_command(command)
+
+    def _get_coach_commands(self):
+        return self.strategy.commands
+
 
     def _info_manager(self):
         """ Retourne la référence vers l'InfoManager de l'IA. """
