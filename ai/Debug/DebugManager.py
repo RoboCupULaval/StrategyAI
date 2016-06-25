@@ -1,12 +1,14 @@
 # Under MIT License, see LICENSE.txt
-""" Ce module expose un tableau blanc qui centralise l'information liée à
+"""
+    Ce module expose un tableau blanc qui centralise l'information liée à
     l'interface de debug. Il est géré par l'infoManager.
 """
 
-from RULEngine.Util.DebugType import Log, Point, Circle, FigureInfo, TextInfo
+from RULEngine.Util.debug_type import Log, Point, Circle, FigureInfo, TextInfo
 
 class DebugManager:
-    """ DebugManager représente un infoManager spécialisé dans la
+    """
+        DebugManager représente un infoManager spécialisé dans la
         gestion des informations retournées par l'interface de
         debug.
     """

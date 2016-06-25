@@ -1,24 +1,28 @@
 # Under MIT License, see LICENSE.txt
-""" Ce module expose un tableau blanc qui centralise l'information de l'IA.
+"""
+    Ce module expose un tableau blanc qui centralise l'information de l'IA.
     Plusieurs méhtodes facilitent l'accès aux informations pertinentes pour le
     cadre STA.
 """
-from RULEngine.Util.geometry import get_distance, get_angle
+import math as m
+from time import time
+
+from .Debug.DebugManager import DebugManager
 from .Util.geometry import get_milliseconds
+
+from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from .Debug.DebugManager import DebugManager
-from time import time
+from RULEngine.Util.exception import NonExistentModule
 
 __author__ = 'RoboCupULaval'
 
-
 class InfoManager:
     """
-    InfoManager contient l'information sur la partie, la balle
-    et les joueurs. C'est l'objet que les composantes de
-    l'intelligence artificielle doivent consulter pour connaître
-    l'état de la partie.
+        InfoManager contient l'information sur la partie, la balle
+        et les joueurs. C'est l'objet que les composantes de
+        l'intelligence artificielle doivent consulter pour connaître
+        l'état de la partie.
     """
     def __init__(self, is_debug=False):
         """
@@ -48,6 +52,7 @@ class InfoManager:
         self.game = {'play': None, 'state': None, 'sequence': None}
         self.friend = self.init_team_dictionary()
         self.enemy = self.init_team_dictionary()
+        self.modules = {}
         if is_debug:
             self.debug_manager = DebugManager()
         else:
@@ -222,6 +227,21 @@ class InfoManager:
             # print('SPEED:{0:.4f} | NORMAL:{1} | VECTOR:{2}'.format(speed, normal, vector))
             return {'speed': speed, 'normal': normal, 'vector': vector}
 
+    def get_strategic_state(self):
+        """
+            Retourne un des 8 états stratégiques possibles.
+
+            * Hors Jeu
+            * Mise en jeu
+            * Défense avec balle
+            * Défense sans balle
+            * Offense avec balle
+            * Offense sans balle
+            * ???
+            * ???
+        """
+        return None
+
     @property
     def get_ball_speed(self):
         list_pose = self.ball['retro_pose']
@@ -245,3 +265,16 @@ class InfoManager:
 
             # print('SPEED:{0:.4f} | NORMAL:{1} | VECTOR:{2}'.format(speed, normal, vector))
             return {'speed': speed, 'normal': normal, 'vector': vector}
+
+
+    def register_module(self, module_name, module_ref):
+        """ Enregistre un module intelligent. """
+        self.modules[module_name] = module_ref
+
+    def acquire_module(self, module_name):
+        """ Acquiert la référence sur un module. """
+        print(str(self.modules))
+        try:
+            return self.modules[module_name]
+        except KeyError:
+            raise NonExistentModule("Le module " + module_name + " n'existe pas.")

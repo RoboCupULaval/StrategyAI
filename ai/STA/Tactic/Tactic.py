@@ -5,7 +5,7 @@ __author__ = 'Robocup ULaval'
 from abc import abstractmethod
 from functools import wraps
 from ... import InfoManager
-from ..Skill import Stop
+from ..Action import Stop
 
 
 class Tactic:

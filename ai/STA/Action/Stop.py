@@ -1,4 +1,5 @@
-from . import Action
+# Under MIT license, see LICENSE.txt
+from .Action import Action
 
 class Stop(Action):
     '''
@@ -8,15 +9,13 @@ class Stop(Action):
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur
     '''
-    def __init__(self, pInfoManager, pPlayerId):
+    def __init__(self, p_info_manager, p_player_id):
         """
-        Initialise l'action Stop
-        :param pInfoManager: référence vers l'InfoManager
-        :param pPlayerId: Identifiant du joueur qui s'arrête
+            :param pInfoManager: référence vers l'InfoManager
+            :param pPlayerId: Identifiant du joueur qui s'arrête
         """
-        Action.__init__(self, pInfoManager)
-        # Note: Non sécuritaire, car on pourrait mettre la position d'un joueur adverse
-        self.PlayerId = pPlayerId
+        Action.__init__(self, p_info_manager)
+        self.player_id = p_player_id
 
     def exec(self):
         """
@@ -25,6 +24,6 @@ class Stop(Action):
                      où Pose est la position du joueur
                         kick est faux (on ne botte pas)
         """
-        pose = self.InfoManager.get_player_position(self.PlayerId)
-        kick = False
-        return tuple(pose, kick)
+        move_destination = self.InfoManager.get_player_position(self.player_id)
+        kick_strength = 0
+        return AICommand(move_destination, kick_strength)

@@ -1,23 +1,22 @@
 # Under MIT licence, see LICENCE.txt
 
-__author__ = 'Robocup ULaval'
-
-
 from abc import abstractmethod
 from functools import wraps
-from ... import InfoManager
+
 from ...Util import geometry
+from ...Util.types import AICommand
+
+__author__ = 'Robocup ULaval'
 
 class Action:
     """
     Classe mère de toutes les actions
     """
-    def __init__(self, pInfoManager):
+    def __init__(self, p_info_manager):
         """
-        Initialise l'action
-        :param pInfoManager: référence vers l'InfoManager
+            :param pInfoManager: référence vers l'InfoManager
         """
-        self.InfoManager = pInfoManager
+        self.InfoManager = p_info_manager
 
     def on_before(self):
         pass
@@ -28,10 +27,8 @@ class Action:
     @abstractmethod
     def exec(self):
         """
-        Exécute la classe, doit être implémenté par les classes filles
-        :return: Un tuple (Pose, kick)
-            où Pose est la position où le robot doit aller
-               kick est un booléen qui détermine si le robot doit frapper ou non
+        Calcul la prochaine action d'un joueur
+        :return: AICommand
         """
         pass
 
