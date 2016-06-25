@@ -1,5 +1,5 @@
-#Under MIT License, see LICENSE.txt
-#!/usr/bin/python
+# Under MIT License, see LICENSE.txt
+
 import struct
 
 STARTBYTE = b'\x7E'

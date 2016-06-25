@@ -3,7 +3,6 @@
 from . import serial_protocol as protocol
 import math
 import os
-import serial
 import time
 
 class SerialCommandSender(object):
