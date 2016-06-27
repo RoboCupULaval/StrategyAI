@@ -42,7 +42,7 @@ class Framework(object):
         self.ai_coach = None
         self.referee = None
         self.running_thread = False
-        self.last_frame = 0
+        self.last_frame_number = 0
         self.thread_terminate = threading.Event()
         self.times = 0
         self.last_time = 0
@@ -78,14 +78,24 @@ class Framework(object):
     def update_players_and_ball(self):
         """ Met à jour le GameState selon la frame de vision obtenue. """
         vision_frame = self.vision.get_latest_frame()
-        if vision_frame and vision_frame.detection.frame_number != self.last_frame:
-            self.last_frame = vision_frame.detection.frame_number
-            this_time = vision_frame.detection.t_capture
-            time_delta = this_time - self.last_time
-            self.last_time = this_time
-            print("frame: %i, time: %d, delta: %d, FPS: %d" % \
-                    (vision_frame.detection.frame_number, this_time, time_delta, 1/time_delta))
+        if self._is_frame_number_different(vision_frame):
+            time_delta = self._compute_vision_time_delta(vision_frame)
             self.game.update(vision_frame, time_delta)
+
+    def _is_frame_number_different(self, vision_frame):
+        if vision_frame is not None:
+            return vision_frame.detection.frame_number != self.last_frame_number
+        else:
+            return False
+
+    def _compute_vision_time_delta(self, vision_frame):
+        self.last_frame_number = vision_frame.detection.frame_number
+        this_time = vision_frame.detection.t_capture
+        time_delta = this_time - self.last_time
+        self.last_time = this_time
+        print("frame: %i, time: %d, delta: %f, FPS: %d" % \
+                (vision_frame.detection.frame_number, this_time, time_delta, 1/time_delta))
+        return time_delta
 
     def update_strategies(self):
         """ Change l'état du **Coach** """
@@ -139,7 +149,6 @@ class Framework(object):
     def game_thread_main_loop(self):
         """ Fonction exécuté et agissant comme boucle principale. """
 
-        self._init_time_keeper()
         self._wait_for_first_frame()
 
         # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
@@ -154,9 +163,6 @@ class Framework(object):
             self._send_robot_commands()
             self._send_debug_commands()
             self._receive_debug_commands()
-
-            # Time
-            self._update_time_keeper()
 
     def stop_game(self):
         """
@@ -177,19 +183,6 @@ class Framework(object):
             print("Could not stop players")
             raise StopPlayerError("Au nettoyage il a été impossible d'arrêter\
                                     les joueurs.")
-
-
-    # TODO: class extraction pour time keeper/manager
-    def _init_time_keeper(self):
-        self.times = deque(maxlen=10)
-        self.last_time = time.time()
-
-    def _update_time_keeper(self):
-        new_time = time.time()
-        self.times.append(new_time - self.last_time)
-        # FIXME: pourquoi on imprime cette valeur? à log si important
-        # print(len(self.times) / sum(self.times))
-        self.last_time = new_time
 
     def _wait_for_first_frame(self):
         while not self.vision.get_latest_frame():
