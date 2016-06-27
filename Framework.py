@@ -7,7 +7,7 @@
     frames de la vision. Cette boucle est la boucle principale et appel le
     prochain état du **Coach**.
 """
-from collections import deque, namedtuple
+from collections import namedtuple
 import threading
 import time
 
