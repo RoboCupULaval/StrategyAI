@@ -188,7 +188,7 @@ class Framework(object):
         new_time = time.time()
         self.times.append(new_time - self.last_time)
         # FIXME: pourquoi on imprime cette valeur? à log si important
-        print(len(self.times) / sum(self.times))
+        # print(len(self.times) / sum(self.times))
         self.last_time = new_time
 
     def _wait_for_first_frame(self):
