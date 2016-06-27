@@ -14,7 +14,6 @@ import time
 from .Game.Game import Game
 from .Game.Referee import Referee
 from .Communication.vision import Vision
-from .Communication import debug
 from .Communication.referee import RefereeServer
 from .Communication.udp_server import GrSimCommandSender, DebugCommandSender,\
                                       DebugCommandReceiver
@@ -93,15 +92,14 @@ class Framework(object):
 
         game_state = self.get_game_state()
 
-        state = self.referee.command.name
-        if state == "HALT":
-            self.ai_coach.on_halt(game_state)
-
-        elif state == "NORMAL_START":
-            self.ai_coach.on_start(game_state)
+        # FIXME: il y a probablement un refactor à faire avec ça
+        # state = self.referee.command.name
+        state = "NORMAL_START"
+        if state == "NORMAL_START":
+            self.ai_coach.main_loop(game_state)
 
         elif state == "STOP":
-            self.ai_coach.on_stop(game_state)
+            self.ai_coach.stop(game_state)
 
     def get_game_state(self):
         """ Retourne le **GameState** actuel. *** """
@@ -213,13 +211,12 @@ class Framework(object):
         """ Récupère les paquets de débogages et les envoies au serveur. """
         ai_debug_commands = self.ai_coach.get_debug_commands()
         if ai_debug_commands:
-            packed_debug_commands = debug.pack_commands(ai_debug_commands)
-            self.debug_sender.send_command(packed_debug_commands)
+            self.debug_sender.send_command(ai_debug_commands)
 
     def _receive_debug_commands(self):
         """
             Effectue la réception des commandes de débogages du serveur et les
             enregistres dans la façade de débogage.
         """
-        commands = debug.unpack_commands(self.debug_receiver.receive_command())
+        commands = self.debug_receiver.receive_command()
         self.ai_coach.set_debug_commands(commands)
