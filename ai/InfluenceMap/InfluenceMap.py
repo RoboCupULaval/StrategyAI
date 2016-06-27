@@ -2,13 +2,17 @@
 
 from math import ceil, sqrt
 from RULEngine.Util.constant import *
+from RULEngine.Util.Position import Position
 from os import remove
 import numpy
+
+
+from ai.Algorithm.IntelligentModule import IntelligentModule
 
 __author__ = 'RoboCupULaval'
 
 
-class InfluenceMap(object):
+class InfluenceMap(IntelligentModule):
     """
     Class InfluenceMap
     A class to amke an influence map
@@ -22,7 +26,7 @@ class InfluenceMap(object):
 
     """
 
-    def __init__(self, resolution=100.0, strengthdecay=0.8, strengthpeak=100, effectradius=8):
+    def __init__(self, pInfoManager, resolution=100.0, strengthdecay=0.8, strengthpeak=100, effectradius=8):
         assert (isinstance(resolution, float))
         assert (isinstance(strengthdecay, float))
         assert (0 < strengthdecay < 1)
@@ -30,8 +34,12 @@ class InfluenceMap(object):
         assert (isinstance(effectradius, int))
         assert (0 < effectradius)
 
+        super().__init__(pInfoManager)
+
+# ****************************************************************************************
+# ***************** REMOVE! **************************************************************
         # todo see how to better implement a graphic representation!
-        # this option is not useful anymore...
+        # this option is not very useful anymore...
         numpy.set_printoptions(threshold=10000)
         # GOD NO!
         try:
@@ -39,15 +47,18 @@ class InfluenceMap(object):
             remove("Stencil")
         except OSError:
             print("Nothing to remove!")
-
+# ****************************************************************************************
+        # board parameters
         self._resolution = resolution
         self._strengthdecay = strengthdecay
         self._strengthpeak = strengthpeak
         self._effectradius = effectradius
         self._borderstrength = -strengthpeak * 0.03  # TODO change this variable for something not magic!
-        self._addedpoint = []  # TODO find a better name for this variable please.
-        self._board = []  # this is the board that change depending on the point received
-        self._starterboard = []  # this is the board that stay the same after the border are applied.
+
+        # point parameters
+        self._ballpositiononboard = ()
+        self._friendly_bots_on_board = []  # TODO find a better name for this variable please.
+        self._enemy_bots_on_board = []
 
         number_of_rows_and_columns = self.calculate_rows_and_columns()
 
@@ -58,8 +69,18 @@ class InfluenceMap(object):
 
         self._stencil = self.create_stencil_of_point_and_influence()
 
-        # TODO see if i should move this elsewhere it's own method
-        self._starterboard = self.create_influence_board()
+        self._starterboard = self.create_standard_influence_board()
+        self._board = self.create_standard_influence_board()
+
+# **********************************************************************************************************
+# ********************************* Getter / Setter ********************************************************
+    def get_board(self):
+        return self._board
+
+    def get_starterboard(self):
+        return self._starterboard
+# ****************************************************************************************
+# ****************************** Initialization ******************************************
 
     def calculate_rows_and_columns(self):
         """
@@ -74,12 +95,12 @@ class InfluenceMap(object):
         numberofcolumn = (abs(FIELD_X_LEFT) + FIELD_X_RIGHT) / self._resolution
 
         # make sure we have int and more than the resolution needs
-        numberofrow = int(ceil(numberofrow)) + 2
-        numberofcolumn = int(ceil(numberofcolumn)) + 2
+        numberofrow = int(ceil(numberofrow))
+        numberofcolumn = int(ceil(numberofcolumn))
 
         return numberofrow, numberofcolumn
 
-    def create_influence_board(self):
+    def create_standard_influence_board(self):
         """
         Create the list of zeros that represent the influence board with numpy
 
@@ -89,16 +110,6 @@ class InfluenceMap(object):
 
         return numpy.zeros((self._numberofrows, self._numberofcolumns), numpy.int16)
 
-    def print_board_to_file(self):
-        """
-        Create a file in the same running directory with a representation of the current board.
-        """
-
-        numpy.savetxt("IMBoard", self._board, fmt='%4i')
-        # todo remove this line while not in debug mode
-        print(self._numberofrows, "  ", self._numberofcolumns, "  -  ", self._addedpoint)
-        print(self._effectradius)
-
     def adjust_effect_radius(self):
         distance_from_center = 0
         starting_point = self._strengthpeak
@@ -106,6 +117,11 @@ class InfluenceMap(object):
             distance_from_center += 1
             decay = int((self._strengthpeak * (self._strengthdecay ** distance_from_center)))
             starting_point = decay
+        # TODO check this
+        """
+        if (self._effectradius * 2) > self._numberofrows:
+            self._effectradius = self._numberofrows / 2 - 1
+        """
         if self._effectradius > distance_from_center:
             self._effectradius = distance_from_center
 
@@ -113,43 +129,43 @@ class InfluenceMap(object):
         """
         Initialize the borders of the starterboard and make a copy for the board.
         """
-        self.put_boarders()
-        self.propagate_borders()
-        self.initialize_goals()
-        self._board = numpy.copy(self._starterboard)
+        temp_array = self.create_standard_influence_board()
+        self._put_boarders(temp_array)
+        self._propagate_borders(temp_array)
+        numpy.add(temp_array, self._starterboard, out=self._starterboard)
+        numpy.add(temp_array, self._board, out=self._board)
 
-    def put_boarders(self):
+    def _put_boarders(self, board_to_apply):
         """
-        Set the border to the borderstrength on all the border cases.
+        Set the border to the borderstrength on half the border cases.
         """
-        self._starterboard[0] = self._borderstrength
-        self._starterboard[:, 0] = self._borderstrength
-        # todo delete following
-        # self._starterboard[:, -1] = self._borderstrength
-        # self._starterboard[-1] = self._borderstrength
+        board_to_apply[0] = self._borderstrength
+        board_to_apply[:, 0] = self._borderstrength
 
-    def propagate_borders(self):
+    def _propagate_borders(self, board_to_apply):
         """
         Propagate the borders on the starterboard.
         """
         # keep the effectradius low while making the border speed up greatly the initialization and you don't need
         # so much border.
         # TODO see if this variable is okay, maybe change the way it is determined
-        border_variance = 1
+        border_variance = 2
         temporary_effectradius = int(ceil(ROBOT_RADIUS / self._resolution)) + border_variance
+        # TODO make this faster? use the stencil function or make it in cython?
 
+        # TODO make sure this does what you think it does.
         # Top border
-        for border in range(self._numberofcolumns):
+        for border in range(0, self._numberofcolumns):
             # only for the rows affected by the change.
-            for x in range(1, temporary_effectradius):
+            for x in range(0, temporary_effectradius):
 
-                if border - temporary_effectradius - 1 < 1:
-                    columnmin = 1
+                if border - temporary_effectradius - 1 < 0:
+                    columnmin = 0
                 else:
                     columnmin = border - temporary_effectradius - 1
 
                 if border + temporary_effectradius + 1 > self._numberofcolumns:
-                    columnmax = self._numberofcolumns - 1
+                    columnmax = self._numberofcolumns
                 else:
                     columnmax = border + temporary_effectradius + 1
                 # for every columns affected
@@ -157,20 +173,20 @@ class InfluenceMap(object):
                     if ((x - 0) ** 2 + (y - border) ** 2) <= temporary_effectradius ** 2:
                         decay = int((self._borderstrength * (self._strengthdecay **
                                                              self.distance(0, border, x, y))))
-                        self._starterboard[x, y] += decay
+                        board_to_apply[x, y] += decay
 
         # left border
-        for border in range(self._numberofrows):
+        for border in range(0, self._numberofrows):
 
-            for y in range(1, temporary_effectradius):
+            for y in range(0, temporary_effectradius):
 
-                if border - temporary_effectradius - 1 < 1:
-                    rowmin = 1
+                if border - temporary_effectradius - 1 < 0:
+                    rowmin = 0
                 else:
                     rowmin = border - temporary_effectradius - 1
 
                 if border + temporary_effectradius + 1 > self._numberofrows:
-                    rowmax = self._numberofrows - 1
+                    rowmax = self._numberofrows
                 else:
                     rowmax = border + temporary_effectradius + 1
 
@@ -178,37 +194,53 @@ class InfluenceMap(object):
                     if ((x - border) ** 2 + (y - 0) ** 2) <= temporary_effectradius ** 2:
                         decay = int((self._borderstrength * (self._strengthdecay **
                                                              self.distance(border, 0, x, y))))
-                        self._starterboard[x, y] += decay
+                        board_to_apply[x, y] += decay
 
         # Prend l'image créer et la flip l-r et u-d puis additionne
-        temp_inverse_board = numpy.copy(self._starterboard)
+        # todo simplify
+        temp_inverse_board = numpy.copy(board_to_apply)
         temp_inverse_board = temp_inverse_board[:, ::-1]
         temp_inverse_board = temp_inverse_board[::-1, ...]
-        self._starterboard += temp_inverse_board
+        board_to_apply += temp_inverse_board
 
     def initialize_goals(self):
-        v_h_goal_offset = (self.calculate_goal_vertical_offset(), self.calculate_goal_horizontal_offset())
-        self.put_goals_and_propagate(v_h_goal_offset)
-        pass
+        temp_array = self.create_standard_influence_board()
+        v_h_goal_offset = (self._calculate_goal_vertical_offset(), self._calculate_goal_horizontal_offset())
+        self._put_goals_and_propagate(v_h_goal_offset, temp_array)
+        numpy.add(temp_array, self._starterboard, out=self._starterboard)
+        numpy.add(temp_array, self._board, out=self._board)
 
-    def calculate_goal_vertical_offset(self):
+    def _calculate_goal_vertical_offset(self):
         return int(ceil(FIELD_GOAL_Y_TOP / self._resolution))
 
-    def calculate_goal_horizontal_offset(self):
+    def _calculate_goal_horizontal_offset(self):
         return int(ceil(FIELD_GOAL_SEGMENT / self._resolution))
 
-    def put_goals_and_propagate(self, v_h_offset):
-        pass
+    def _put_goals_and_propagate(self, v_h_offset, board_to_apply):
+        """
+
+        Args:
+            v_h_offset:
+
+        Returns:
+
+        """
+        # TODO take into account what team you are ie: orientation and strength adjustment
+        # TODO remove that next if?
+        if self._numberofrows % 2 == 0:
+            for x in range(int(self._numberofrows / 2 - v_h_offset[0]),
+                           int(self._numberofrows / 2 + v_h_offset[0]) + 1):
+                self.add_point_and_propagate_stencil(x, 0, board_to_apply)
+
+        numpy.add((numpy.negative(board_to_apply[:, ::-1])), board_to_apply, out=board_to_apply)
+        numpy.savetxt("Debug", board_to_apply, fmt='%5i')
 
     def create_stencil_of_point_and_influence(self):
         stencil = numpy.zeros((self._effectradius * 2 + 1, self._effectradius * 2 + 1), numpy.int16)
         center = (self._effectradius, self._effectradius)
-        stencil[center[0], center[1]] = self._strengthpeak
         it = numpy.nditer(stencil, flags=['multi_index'], op_flags=['writeonly'])
         while not it.finished:
-            if not (it.multi_index[0] == center[0] and it.multi_index[1] == center[1]) \
-                    and ((it.multi_index[0] - center[0]) ** 2 + (it.multi_index[1] - center[1]) ** 2) <= \
-                    self._effectradius ** 2:
+            if ((it.multi_index[0] - center[0]) ** 2 + (it.multi_index[1] - center[1]) ** 2) <= self._effectradius ** 2:
 
                 decay = int((self._strengthpeak * (self._strengthdecay **
                                                    self.distance(it.multi_index[0], it.multi_index[1], center[0],
@@ -220,6 +252,9 @@ class InfluenceMap(object):
         numpy.savetxt("Stencil", stencil, fmt='%4i')
 
         return stencil
+
+# ******************************************************************************************
+# **********************Adding points and influences methods *******************************
 
     def get_fitted_stencil(self, row, column, inverse=False):
         """
@@ -238,41 +273,51 @@ class InfluenceMap(object):
         if inverse:
             temp_stencil = numpy.negative(temp_stencil)
 
-        if self._effectradius - row > 0:
+        both_borders_adjustment = 0
+
+        if self._effectradius - row >= 0:
             temp_stencil = temp_stencil[(self._effectradius - row):, ...]
             h_borders_top = True
-        elif self._effectradius + row > self._numberofrows:
-            row += 1
-            temp_stencil = temp_stencil[0:(self._effectradius + (self._numberofrows - row)), ...]
-            h_borders_bot = True
+            both_borders_adjustment = self._effectradius - row
 
-        if self._effectradius - column > 0:
+        if self._effectradius + row >= self._numberofrows:
+            if both_borders_adjustment or self._effectradius - row == 0:
+                temp_stencil = temp_stencil[0:(self._effectradius + (self._numberofrows -
+                                            row) - both_borders_adjustment), ...]
+                h_borders_bot = True
+            else:
+                temp_stencil = temp_stencil[0:(self._effectradius + (self._numberofrows -
+                                            row) + 1), ...]
+                h_borders_bot = True
+
+        if self._effectradius - column >= 0:
             temp_stencil = temp_stencil[..., (self._effectradius - column):]
             v_borders_left = True
-        elif self._effectradius + column > self._numberofcolumns:
-            column += 1
+
+        if self._effectradius + column >= self._numberofcolumns:
             temp_stencil = temp_stencil[..., 0:(self._effectradius + (self._numberofcolumns - column))]
             v_borders_right = True
 
-        if h_borders_top:
+        if h_borders_top and h_borders_bot:
+            pass
+        elif h_borders_top:
             h_bot_stack = numpy.zeros((self._numberofrows - (self._effectradius + row + 1), temp_stencil.shape[1]),
                                       numpy.int16)
             temp_stencil = numpy.concatenate((temp_stencil, h_bot_stack), axis=0)
         elif h_borders_bot:
-
             h_top_stack = numpy.zeros((self._numberofrows - ((self._numberofrows - row) +
-                                       self._effectradius), temp_stencil.shape[1]), numpy.int16)
+                                       self._effectradius) - 1, temp_stencil.shape[1]), numpy.int16)
             temp_stencil = numpy.concatenate((h_top_stack, temp_stencil), axis=0)
         else:
             h_bot_stack = numpy.zeros((self._numberofrows - (self._effectradius + row + 1), temp_stencil.shape[1]),
                                       numpy.int16)
-
-            h_top_stack = numpy.zeros((row - self._effectradius , temp_stencil.shape[1]), numpy.int16)
-
+            h_top_stack = numpy.zeros((row - self._effectradius, temp_stencil.shape[1]), numpy.int16)
             temp_stencil = numpy.concatenate((temp_stencil, h_bot_stack), axis=0)
             temp_stencil = numpy.concatenate((h_top_stack, temp_stencil), axis=0)
 
-        if v_borders_left:
+        if v_borders_left and v_borders_right:
+            pass
+        elif v_borders_left:
             v_right_stack = numpy.zeros((temp_stencil.shape[0],
                                          self._numberofcolumns - (self._effectradius + column + 1)), numpy.int16)
             temp_stencil = numpy.concatenate((temp_stencil, v_right_stack), axis=1)
@@ -284,15 +329,13 @@ class InfluenceMap(object):
         else:
             v_right_stack = numpy.zeros((temp_stencil.shape[0],
                                          self._numberofcolumns - (self._effectradius + column + 1)), numpy.int16)
-
             v_left_stack = numpy.zeros((temp_stencil.shape[0], column - self._effectradius), numpy.int16)
-
             temp_stencil = numpy.concatenate((temp_stencil, v_right_stack), axis=1)
             temp_stencil = numpy.concatenate((v_left_stack, temp_stencil), axis=1)
 
         return temp_stencil
 
-    def add_point_and_propagate_influence(self, row, column, strength=0):
+    def add_point_and_propagate_influence(self, row, column, board_to_apply, strength=0):
         """
         Use add_point_and_propagate_stencil if you add a point of strenght == +- self._strengthpeak
         Add a point to the board and apply its influence on it.
@@ -300,26 +343,28 @@ class InfluenceMap(object):
             row: The row of the point
             column: The column of the point
             strength: The strength of the point
+            board_to_apply: The numpy.ndarray on which to apply the point
         """
         assert (isinstance(row, int))
         assert (isinstance(column, int))
-        assert (isinstance(strength, int))
         assert (0 <= row <= self._numberofrows)
         assert (0 <= column <= self._numberofcolumns)
+        assert (isinstance(board_to_apply, numpy.ndarray))
+        assert (board_to_apply.shape[0] == self._numberofrows)
+        assert (board_to_apply.shape[1] == self._numberofcolumns)
+        assert (isinstance(strength, int))
         assert (-self._strengthpeak <= strength <= self._strengthpeak)
 
-        self._board[row, column] = strength
-        self._addedpoint.append((row, column, strength))
-
-        if row - self._effectradius - 1 < 1:
-            rowmin = 1
+        # todo check the following if statements please
+        if row - self._effectradius < 0:
+            rowmin = 0
         else:
-            rowmin = row - self._effectradius - 1
+            rowmin = row - self._effectradius
 
-        if row + self._effectradius + 1 > self._numberofrows:
-            rowmax = self._numberofrows
+        if row + self._effectradius > self._numberofrows - 1:
+            rowmax = self._numberofrows - 1
         else:
-            rowmax = row + self._effectradius + 1
+            rowmax = row + self._effectradius
 
         if column - self._effectradius - 1 < 1:
             columnmin = 1
@@ -331,15 +376,39 @@ class InfluenceMap(object):
         else:
             columnmax = column + self._effectradius + 1
 
-        for x in range(rowmin, rowmax):
-            for y in range(columnmin, columnmax):
-                if not (x == row and y == column) and ((x - row) ** 2 + (y - column) ** 2) <= self._effectradius ** 2:
-                    decay = int((strength * (self._strengthdecay ** self.distance(x, y, row, column))))
-                    self._board[x, y] += decay
+        it = numpy.nditer(board_to_apply[rowmin:(rowmax+1), columnmin:(columnmax+1)], flags=['multi_index'],
+                          op_flags=['readwrite'])
 
-    def add_point_and_propagate_stencil(self, row, column, inverse=False):
+        while not it.finished:
+            if ((it.multi_index[0] - (row - rowmin)) ** 2 + (it.multi_index[1] - (column - columnmin)) ** 2) <= \
+                            self._effectradius ** 2:
+                it[0] += int((strength * (self._strengthdecay ** self.distance(it.multi_index[0], it.multi_index[1],
+                                                                               (row - rowmin), (column - columnmin)))))
+            it.iternext()
+
+    def add_point_and_propagate_stencil(self, row, column, board_to_apply, inverse=False):
+        """
+
+        Args:
+            row:
+            column:
+            board_to_apply:
+            inverse:
+
+        Returns:
+
+        """
+        assert (isinstance(row, int))
+        assert (isinstance(column, int))
+        assert (isinstance(inverse, bool))
+        assert (0 <= row <= self._numberofrows)
+        assert (0 <= column <= self._numberofcolumns)
+        assert (isinstance(board_to_apply, numpy.ndarray))
+        assert (board_to_apply.shape[0] == self._numberofrows)
+        assert (board_to_apply.shape[1] == self._numberofcolumns)
+
         stencil = self.get_fitted_stencil(row, column, inverse=inverse)
-        numpy.add(self._board, stencil, out=self._board)
+        numpy.add(board_to_apply, stencil, out=board_to_apply)
 
     def add_square_and_propagate(self, top, bottom, left, right, strength):
         """
@@ -370,7 +439,10 @@ class InfluenceMap(object):
 
         for x in range(top, bottom):
             for y in range(left, right):
-                self.add_point_and_propagate_influence(x, y, inverse)
+                self.add_point_and_propagate_influence(x, y, self._board, strength=strength)
+
+# ********************************************************************************************************
+# **************************************** Generic point finding *****************************************
 
     def find_closest_point_of_strength_around(self, row, column, strengthrequired, over=True):
         """
@@ -445,82 +517,83 @@ class InfluenceMap(object):
 
         return result
 
-    def find_points_of_strength_in_square(self, centerx, centery, radius, strength, over=True):
-        """
-        Do not use, too slow!
-        Args:
-            centerx: row of the point in the center of the square
-            centery: column of the point in the center of the square
-            radius: half the length of a side of the square to search inside of.
-            strength: the strength to compare to.
-            over: (bool) True: search for over or equal the strength. False; search for lower or equal the strength.
+    def find_points_over_strength_square(self, top_row, bot_row, left_column, right_column, strength):
 
-        Returns: A list of tuple (row, column) of the case(s) that meet the critera of strength . Empty if none found.
+        ind_x, ind_y = numpy.where(self._board[top_row:bot_row, left_column:right_column] >= strength)
+        ind_x = ind_x.tolist()
+        ind_x = [x+top_row for x in ind_x]
+        ind_y = ind_y.tolist()
+        ind_y = [x+left_column for x in ind_y]
+        indices = zip(ind_x, ind_y)
+        return list(indices)
 
-        """
-        assert (isinstance(centerx, int))
-        assert (isinstance(centery, int))
-        assert (isinstance(radius, int))
-        assert (isinstance(strength, int))
-        assert (isinstance(over, bool))
-        assert (0 <= centerx <= self._numberofrows)
-        assert (0 <= centery <= self._numberofcolumns)
-        assert (radius < self._numberofcolumns)
-        assert (-(self._strengthpeak ** 2) <= strength <= self._strengthpeak ** 2)
+    def find_points_under_strength_square(self, top_row, bot_row, left_column, right_column, strength):
 
-        result = []
-
-        if centerx - radius - 1 < 1:
-            rowmin = 1
-        else:
-            rowmin = centerx - radius - 1
-
-        if centerx + radius + 1 > self._numberofrows:
-            rowmax = self._numberofrows
-        else:
-            rowmax = centerx + radius + 1
-
-        if centery - radius - 1 < 1:
-            columnmin = 1
-        else:
-            columnmin = centery - radius - 1
-
-        if centery + radius + 1 > self._numberofcolumns:
-            columnmax = self._numberofcolumns
-        else:
-            columnmax = centery + radius + 1
-
-        if over:
-            for x in range(rowmin, rowmax + 1):
-                for y in range(columnmin, columnmax + 1):
-                    if self._board[x, y] >= strength:
-                        result.append((x, y))
-        else:
-            for x in range(rowmin, rowmax + 1):
-                for y in range(columnmin, columnmax + 1):
-                    if self._board[x, y] <= strength:
-                        result.append((x, y))
-
-        return result
+        ind_x, ind_y = numpy.where(self._board[top_row:bot_row, left_column:right_column] <= strength)
+        ind_x = ind_x.tolist()
+        ind_x = [x+top_row for x in ind_x]
+        ind_y = ind_y.tolist()
+        ind_y = [x+left_column for x in ind_y]
+        indices = zip(ind_x, ind_y)
+        return list(indices)
 
     def find_max_value_in_board(self):
-        val = numpy.max(self._board)
         uniques = numpy.unique(self._board)
-        indices = uniques[-1]
-        x, y = numpy.where(self._board >= indices)
-        return val, (x, y)
+        max_in_board = uniques[-1]
+        x, y = numpy.where(self._board >= max_in_board)
+        x = x.tolist()
+        y = y.tolist()
+        indices = zip(x, y)
+        return max_in_board, indices
 
     def find_min_value_in_board(self):
-        val = numpy.max(self._board)
         uniques = numpy.unique(self._board)
-        indices = uniques[-1]
-        x, y = numpy.where(self._board <= indices)
-        return val, (x, y)
+        min_in_board = uniques[0]
+        x, y = numpy.where(self._board <= min_in_board)
+        x = x.tolist()
+        y = y.tolist()
+        indices = zip(x, y)
+        return min_in_board, indices
+
+# **********************************************************************************************************
+# ************************************ Player representation methods****************************************
+
+    def update_friend_position_from_state(self):
+        self._friendly_bots_on_board.clear()
+        for i in range(self.state.get_count_player):
+            friend_position = self.state.get_player_position(i)
+            friend_position = self.transform_field_to_board_position(friend_position)
+            self._friendly_bots_on_board.append(friend_position)
+
+    def add_friend_position_on_board(self, row, column):
+        self._friendly_bots_on_board.append((row, column))
+
+    def add_friend_position_from_id(self, id):
+        friend_position = self.state.get_player_position(id)
+        self._friendly_bots_on_board.append(self.transform_field_to_board_position(friend_position))
+
+# **********************************************************************************************************
+# ************************************ Ball representation methods *****************************************
+
+    def find_ball_position_from_state(self):
+        return self.transform_field_to_board_position(self.state.get_ball_position())
+
+    def set_ball_position_from_state(self):
+        self._ballpositiononboard = self.find_ball_position_from_state()
+
+    def set_ball_position(self, row, column):
+        self._ballpositiononboard = (row, column)
+
+    def get_ball_influence(self):
+        return self._board[self._ballpositiononboard[0], self._ballpositiononboard[1]]
+
+# **********************************************************************************************************
+# ********************************************* misc methods ***********************************************
 
     def clear_point_on_board(self):
         # todo add a point checking maybe?
         self._board = numpy.copy(self._starterboard)
-        self._addedpoint.clear()
+        self._friendly_bots_on_board.clear()
 
     def update(self):
         self.clear_point_on_board()
@@ -531,10 +604,12 @@ class InfluenceMap(object):
         pass
 
     def get_points_from_list_on_board(self):
-        for x in self._addedpoint:
+        # todo change this to better reflect reality
+        for x in self._friendly_bots_on_board:
             self.add_point_and_propagate_stencil(x[0], x[1][0], x[1][0])
 
-    def
+    def export_board(self):
+        return self._board.tolist()
 
     def transform_field_to_board_position(self, position):
         # TODO see if that holds up
@@ -571,6 +646,19 @@ class InfluenceMap(object):
 
         tempposition = Position(xpos, ypos)
         return tempposition
+
+    def print_board_to_file(self):
+        """
+        Create a file in the same running directory with a representation of the current board.
+        """
+
+        numpy.savetxt("IMBoard", self._board, fmt='%5i')
+        # todo remove this line while not in debug mode
+        print(self._numberofrows, "  ", self._numberofcolumns, "  -  ", self._friendly_bots_on_board)
+        print(self._starterboard.shape[0], " x ", self._starterboard.shape[1], "  erad: ", self._effectradius)
+
+    def str(self):
+        return str("Influence Map - ", str(self._numberofrows), " x ", str(self._numberofcolumns))
 
     def distance(self, x1, y1, x2, y2):
         # TODO possibly move this function somewhere else
