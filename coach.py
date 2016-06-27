@@ -41,7 +41,12 @@ class Coach(object):
         self._update_ai(p_game_state)
         self.coach_command_sender.generate_and_send_commands(p_game_state)
 
+    def halt(self):
+        """ Hack pour sync les frames de vision et les itérations de l'IA """
+        pass
+
     def stop(self, game_state):
+        """ *Devrait* déinit pour permettre un arrêt propre. """
         pass
 
     @property
@@ -63,7 +68,7 @@ class Coach(object):
 
     def _set_debug_commands(self, ui_debug_commands, debug_manager):
         for command in ui_debug_commands:
-            debug_command = ui_debug.analyse_commands(command)
+            debug_command = ui_debug.wrap_command(command)
             debug_manager.add_ui_command(debug_command)
 
     def _init_intelligent_modules(self):

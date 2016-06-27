@@ -6,6 +6,11 @@
 from collections import namedtuple
 
 # TODO: refactor le module
+def wrap_command(raw_command):
+    command = DebugCommand(raw_command['type'], raw_command['link'], raw_command['data'])
+    command.name = 'ui'
+    return command
+
 class DebugManager:
     """
         DebugManager représente un infoManager spécialisé dans la
