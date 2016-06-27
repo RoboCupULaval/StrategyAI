@@ -5,6 +5,7 @@ from RULEngine.Command import Command
 
 import ai.executor as executor
 from ai.InfoManager import InfoManager
+import ai.Debug.debug_manager as ui_debug
 
 __author__ = 'RoboCupULaval'
 
@@ -35,21 +36,35 @@ class Coach(object):
         self.coach_command_sender = CoachCommandSender(self.info_manager)
         self._init_intelligent_modules()
 
-    def on_start(self, p_game_state):
-        """ *État* actif du **Coach**. """
+    def main_loop(self, p_game_state):
+        """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
         self._update_ai(p_game_state)
         self.coach_command_sender.generate_and_send_commands(p_game_state)
 
-
-    def on_halt(self, game_state):
-        self.on_start(game_state)
-
-    def on_stop(self, game_state):
-        self.on_start(game_state)
+    def stop(self, game_state):
+        pass
 
     @property
-    def commands(self):
-        return self.coach_command_sender.commands
+    def robot_commands(self):
+        return self.coach_command_sender.robot_commands
+
+    def get_debug_commands(self):
+        """ Élément de l'interface entre RULEngine/StrategyIA """
+        debug_manager = self.info_manager.debug_manager
+        if debug_manager:
+            return debug_manager.get_commands()
+        else:
+            return []
+
+    def set_debug_commands(self, ui_debug_commands):
+        debug_manager = self.info_manager.debug_manager
+        if debug_manager:
+            self._set_debug_commands(ui_debug_commands, debug_manager)
+
+    def _set_debug_commands(self, ui_debug_commands, debug_manager):
+        for command in ui_debug_commands:
+            debug_command = ui_debug.analyse_commands(command)
+            debug_manager.add_ui_command(debug_command)
 
     def _init_intelligent_modules(self):
         self.info_manager.register_module('Pathfinder', None)
@@ -68,12 +83,12 @@ class CoachCommandSender(object):
         Construit les commandes et les places dans un champ pour que Framework
         puissent les envoyer aux robots.
     """
-    
+
     def __init__(self, p_info_manager):
         self.game_state = None
         self.info_manager = p_info_manager
         self.current_player_id = None
-        self.commands = []
+        self.robot_commands = []
 
     def generate_and_send_commands(self, p_game_state):
         self.game_state = p_game_state
@@ -82,10 +97,10 @@ class CoachCommandSender(object):
             self.current_player_id = i
             next_action = self.info_manager.get_player_next_action(i)
             command = self._generate_command(next_action)
-            self.commands.append(command)
+            self.robot_commands.append(command)
 
     def _clear_commands(self):
-        self.commands = []
+        self.robot_commands = []
 
     def _generate_command(self, p_next_action):
         if p_next_action.kick_strength > 0:
