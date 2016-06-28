@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 """ Module supérieur de l'IA """
 
-from RULEngine.Command import Command
+from RULEngine.Command import command
 
 import ai.executor as executor
 from ai.InfoManager import InfoManager
@@ -139,16 +139,15 @@ class CoachCommandSender(object):
     def _generate_kick_command(self, p_kick_strength):
         kick_strength = self._sanitize_kick_strength(p_kick_strength)
 
-        return Command.Kick(self._get_player(), kick_strength)
+        return command.Kick(self._get_player(), kick_strength)
 
     def _generate_move_command(self, p_move_destination):
-        return Command.MoveToAndRotate(self._get_player(), p_move_destination)
+        return command.MoveToAndRotate(self._get_player(), p_move_destination)
 
     def _generate_empty_command(self):
-        return Command.MoveToAndRotate(self._get_player(), self._get_player().pose)
+        return command.MoveToAndRotate(self._get_player(), self._get_player().pose)
 
     def _get_player(self):
-        # FIXME: On ne parle qu'à ses amis
         return self.game_state.friends.players[self.current_player_id]
 
 
