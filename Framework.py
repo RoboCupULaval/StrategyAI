@@ -70,10 +70,6 @@ class Framework(object):
         """ Met à jour le **GameState** selon la vision et l'arbitre. """
         # TODO: implémenter correctement la méthode
         pass
-        #referee_command = self.referee.get_latest_frame()
-        #if referee_command:
-        #    pass
-            #self.game.update_game_state(referee_command)
 
     def update_players_and_ball(self, vision_frame):
         """ Met à jour le GameState selon la frame de vision obtenue. """
