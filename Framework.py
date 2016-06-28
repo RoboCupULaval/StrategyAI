@@ -18,7 +18,7 @@ from .Communication.referee import RefereeServer
 from .Communication.udp_server import GrSimCommandSender, DebugCommandSender,\
                                       DebugCommandReceiver
 from .Communication.serial_command_sender import SerialCommandSender
-from .Command.Command import Stop
+from .Command.command import Stop
 from .Util.exception import StopPlayerError
 
 GameState = namedtuple('GameState', ['field', 'referee', 'friends',
@@ -75,12 +75,10 @@ class Framework(object):
         #    pass
             #self.game.update_game_state(referee_command)
 
-    def update_players_and_ball(self):
+    def update_players_and_ball(self, vision_frame):
         """ Met à jour le GameState selon la frame de vision obtenue. """
-        vision_frame = self.vision.get_latest_frame()
-        if self._is_frame_number_different(vision_frame):
-            time_delta = self._compute_vision_time_delta(vision_frame)
-            self.game.update(vision_frame, time_delta)
+        time_delta = self._compute_vision_time_delta(vision_frame)
+        self.game.update(vision_frame, time_delta)
 
     def _is_frame_number_different(self, vision_frame):
         if vision_frame is not None:
@@ -110,6 +108,7 @@ class Framework(object):
 
         elif state == "STOP":
             self.ai_coach.stop(game_state)
+
 
     def get_game_state(self):
         """ Retourne le **GameState** actuel. *** """
@@ -155,14 +154,19 @@ class Framework(object):
         while not self.thread_terminate.is_set():
             # TODO: method extract
             # Mise à jour
-            self.update_game_state()
-            self.update_players_and_ball()
-            self.update_strategies()
+            current_vision_frame = self._acquire_vision_frame()
+            if self._is_frame_number_different(current_vision_frame):
+                self.update_game_state()
+                self.update_players_and_ball(current_vision_frame)
+                self.update_strategies()
 
-            # Communication
-            self._send_robot_commands()
-            self._send_debug_commands()
-            self._receive_debug_commands()
+                # Communication
+                self._send_robot_commands()
+                self._send_debug_commands()
+                self._receive_debug_commands()
+
+    def _acquire_vision_frame(self):
+        return self.vision.get_latest_frame()
 
     def stop_game(self):
         """
