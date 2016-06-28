@@ -7,6 +7,12 @@ import ai.executor as executor
 from ai.InfoManager import InfoManager
 import ai.Debug.debug_manager as ui_debug
 
+# debug stuff
+from ai.Debug.debug_manager import DebugCommand
+from ai.Util.types import AICommand
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
+
 __author__ = 'RoboCupULaval'
 
 class Coach(object):
@@ -39,7 +45,22 @@ class Coach(object):
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
         self._update_ai(p_game_state)
+
+        self._hard_coded_commands()
+
         self.coach_command_sender.generate_and_send_commands(p_game_state)
+
+    def _hard_coded_commands(self):
+        debug_manager = self.info_manager.debug_manager
+
+        # add circle at center
+        #debug_manager.add_circle((0, 0), 100, None)
+        debug_manager.add_log(1, "Foo Bar")
+
+        # follow ball as dumb as possible
+        goto_ball = AICommand(Pose(self.info_manager.get_ball_position()), 0)
+
+        self.info_manager.set_player_next_action(0, goto_ball)
 
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
