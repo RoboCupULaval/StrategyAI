@@ -202,7 +202,7 @@ class Framework(object):
 
     def _send_debug_commands(self):
         """ Récupère les paquets de débogages et les envoies au serveur. """
-        ai_debug_commands = self.ai_coach.get_debug_commands()
+        ai_debug_commands = self.ai_coach.get_debug_commands_and_clear()
         if ai_debug_commands:
             self.debug_sender.send_command(ai_debug_commands)
 
