@@ -98,7 +98,13 @@ class DebugCommandSender(object):
 
     def _send_packet(self, p_packet):
         """ Envoi un seul paquet. """
-        self.server.send(pickle.dumps(p_packet))
+        print("Envoie commandes debug")
+        try:
+            self.server.send(pickle.dumps(p_packet))
+        except ConnectionRefusedError:
+            # FIXME: ceci est un hack!
+            print("no connection")
+            pass
 
     def send_command(self, p_packets):
         """ Reçoit une liste de paquets et les envoies. """

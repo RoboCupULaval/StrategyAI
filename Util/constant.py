@@ -1,7 +1,6 @@
 # Under MIT License, see LICENSE.txt
 """ Module définissant des constantes de programmations python pour l'IA """
 from .Position import Position
-from .debug_type import Color
 __author__ = 'RoboCupULaval'
 
 ROBOT_RADIUS = 90
@@ -34,11 +33,4 @@ FIELD_GOAL_YELLOW_BOTTOM_CIRCLE = Position(FIELD_X_RIGHT, FIELD_GOAL_SEGMENT / 2
 DELTA_T = 17 #ms, hack, à éviter
 
 # Communication information
-SENDER_NAME = "ai"
-DEFAULT_DEBUG_TIMEOUT = 300 #ms
-DEFAULT_TEXT_SIZE = 14 #px
-DEFAULT_TEXT_FONT = 'Arial'
-DEFAULT_TEXT_ALIGN = 'Left'
-DEFAULT_TEXT_COLOR = Color(0, 0, 0)
-
 DEBUG_RECEIVE_BUFFER_SIZE = 100

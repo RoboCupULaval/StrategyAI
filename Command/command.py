@@ -1,4 +1,4 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
 import math
 from ..Util.Pose import Pose, Position
 from ..Game.Player import Player
@@ -143,7 +143,9 @@ class MoveToAndRotate(_Command):
 
 
 class Kick(_Command):
-    def __init__(self, player, kick_speed=5):
+    def __init__(self, player, kick_speed=0.5):
+        """ Kick speed est un float entre 0 et 1 """
+        kick_speed = kick_speed * 8 # FIXME: pourquoi 8, à mettre en constante
         assert(isinstance(player, Player))
         assert(isinstance(kick_speed, (int, float)))
         assert(0 <= kick_speed <= 8)
