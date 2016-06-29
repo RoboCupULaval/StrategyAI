@@ -1,4 +1,6 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
+
+
 class Field():
     def __init__(self, ball):
         self.ball = ball

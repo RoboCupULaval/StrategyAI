@@ -1,4 +1,4 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
 
 from . import Referee
 from ..Util.Pose import Pose
@@ -6,6 +6,7 @@ from ..Util.Position import Position
 from .Team import Team
 from .Ball import Ball
 from .Field import Field
+
 
 class Game():
     def __init__(self, referee, is_team_yellow):

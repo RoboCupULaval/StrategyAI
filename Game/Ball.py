@@ -1,6 +1,7 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
 from ..Util.Position import Position
 import math
+
 
 class Ball():
     def __init__(self):

@@ -1,7 +1,8 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
 
 from .Player import Player
 from ..Util.constant import PLAYER_PER_TEAM
+
 
 class Team():
     def __init__(self, is_team_yellow):

@@ -145,10 +145,10 @@ class MoveToAndRotate(_Command):
 class Kick(_Command):
     def __init__(self, player, kick_speed=0.5):
         """ Kick speed est un float entre 0 et 1 """
-        kick_speed = kick_speed * 8 # FIXME: pourquoi 8, à mettre en constante
         assert(isinstance(player, Player))
         assert(isinstance(kick_speed, (int, float)))
-        assert(0 <= kick_speed <= 8)
+        assert(0 <= kick_speed <= 1)
+        kick_speed = kick_speed * KICK_MAX_SPD
 
         super().__init__(player)
         self.kick = True
