@@ -29,6 +29,7 @@ class Coach(object):
             construire l'InfoManager.
         """
         self.info_manager = InfoManager(is_debug=True)
+        self.debug_manager = self.info_manager.debug_manager
         self.module_executor = executor.ModuleExecutor(self.info_manager)
         self.strategy_executor = executor.StrategyExecutor(self.info_manager)
         self.tatic_executor = executor.TacticExecutor(self.info_manager)
@@ -55,21 +56,19 @@ class Coach(object):
 
     def get_debug_commands(self):
         """ Élément de l'interface entre RULEngine/StrategyIA """
-        debug_manager = self.info_manager.debug_manager
-        if debug_manager:
-            return debug_manager.get_commands()
+        if self.debug_manager:
+            return self.debug_manager.get_commands()
         else:
             return []
 
     def set_debug_commands(self, ui_debug_commands):
-        debug_manager = self.info_manager.debug_manager
-        if debug_manager:
-            self._set_debug_commands(ui_debug_commands, debug_manager)
+        if self.debug_manager:
+            self._set_debug_commands(ui_debug_commands)
 
-    def _set_debug_commands(self, ui_debug_commands, debug_manager):
+    def _set_debug_commands(self, ui_debug_commands):
         for command in ui_debug_commands:
             debug_command = ui_debug.wrap_command(command)
-            debug_manager.add_ui_command(debug_command)
+            self.debug_manager.add_ui_command(debug_command)
 
     def _init_intelligent_modules(self):
         self.info_manager.register_module('Pathfinder', None)
