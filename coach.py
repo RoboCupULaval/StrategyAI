@@ -12,6 +12,7 @@ from ai.Debug.debug_manager import DebugCommand
 from ai.Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+import random
 
 __author__ = 'RoboCupULaval'
 
@@ -54,14 +55,13 @@ class Coach(object):
     def _hard_coded_commands(self):
         debug_manager = self.info_manager.debug_manager
 
+        random.seed()
+        roulette = random.randint(1, 1000)
         # add circle at center
-        #debug_manager.add_circle((0, 0), 100, None)
-        debug_manager.add_log(1, "Foo Bar")
-
-        # follow ball as dumb as possible
-        goto_ball = AICommand(Pose(self.info_manager.get_ball_position()), 0)
-
-        self.info_manager.set_player_next_action(0, goto_ball)
+        if roulette > 995:
+            print("Envoi d'un log")
+            #debug_manager.add_log(1, "FOO BAR")
+            debug_manager.add_point((500, 500))
 
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
@@ -75,10 +75,12 @@ class Coach(object):
     def robot_commands(self):
         return self.coach_command_sender.robot_commands
 
-    def get_debug_commands(self):
+    def get_debug_commands_and_clear(self):
         """ Élément de l'interface entre RULEngine/StrategyIA """
         if self.debug_manager:
-            return self.debug_manager.get_commands()
+            debug_commands = self.debug_manager.get_commands()
+            self.debug_manager.clear()
+            return debug_commands
         else:
             return []
 
