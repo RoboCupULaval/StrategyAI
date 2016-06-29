@@ -7,13 +7,12 @@
 import math as m
 from time import time
 
-from .Debug.DebugManager import DebugManager
+from .Debug.debug_manager import DebugManager
 from .Util.geometry import get_milliseconds
 
 from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.exception import NonExistentModule
 
 __author__ = 'RoboCupULaval'
 
@@ -274,8 +273,11 @@ class InfoManager:
 
     def acquire_module(self, module_name):
         """ Acquiert la référence sur un module. """
-        print(str(self.modules))
         try:
             return self.modules[module_name]
         except KeyError:
             raise NonExistentModule("Le module " + module_name + " n'existe pas.")
+
+class NonExistentModule(Exception):
+    """ Est levée si le module intelligent requis n'est pas enregistré. """
+    pass

@@ -105,4 +105,5 @@ class ModuleExecutor(Executor):
             try:
                 modules[key].update()
             except:
-                print("Un module est défini à None, clef: " + str(key))
+                pass
+                #print("Un module est défini à None, clef: " + str(key))

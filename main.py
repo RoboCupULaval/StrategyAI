@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 """ Point d'entrée de l'intelligence artificielle. """
 from RULEngine.Framework import Framework
-from Coach import Coach 
+from coach import Coach 
 
 __author__ = 'RoboCupULaval'
 
