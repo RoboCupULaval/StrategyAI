@@ -1,10 +1,11 @@
 # Under MIT License, see LICENSE.txt
 
 from math import ceil, sqrt
-from RULEngine.Util.constant import *
-from RULEngine.Util.Position import Position
 from os import remove
 import numpy
+
+from RULEngine.Util.constant import *
+from RULEngine.Util.Position import Position
 
 
 from ai.Algorithm.IntelligentModule import IntelligentModule
@@ -14,23 +15,37 @@ __author__ = 'RoboCupULaval'
 
 class InfluenceMap(IntelligentModule):
     """
-    Class InfluenceMap
-    A class to amke an influence map
+    Une classe représentant une influence map d'un terrain de robosoccer. C'est une matrice de cellule représentant le
+    terrain auquelle on ajoute des points avec des influences qui se propajent sur le reste du terrain.
 
-    Parameter:
-        TODO implement them
+    La matrice et le code respecte le format suivant:
+        - axe X ou axe 0 est l'axe représentant les rangées / l'axe 0 de la matrice /
+          la largeur (axe Y) du terrain physique
+        - axe Y ou axe 1 est l'axe représentant les colonnes / l'axe 1 de la matrice /
+          la longueur (axe X) du terrain physique
+        - Le point d'origine (0, 0) se situe au coin supérieur gauche du terrain physique.
 
-    by convention in this class the row are x and the column is y.
-    decay algorithm = strengthpeak * (strengthdecay**distance)
-    (valeur+chaude, valeur+froide),(couleur+chaude,couleur+froide),(row,column),
-
+    L'algorithm de propagation de l'influence est:
+    (force appliqué à la case) = (force du point d'origine de l'influence) * ((facteur de réduction) ** (distance))
+    transfomé en int arrondie vers 0.
     """
 
-    def __init__(self, pInfoManager, resolution=100.0, strengthdecay=0.8, strengthpeak=100, effectradius=8):
-        assert (isinstance(resolution, float))
+    def __init__(self, pInfoManager, resolution=100, strengthdecay=0.8, strengthpeak=100, effectradius=8):
+        """
+        Constructeur de la classe InfluenceMap
+
+        Args:
+            pInfoManager:  référence vers l'InfoManager
+            resolution:    résolution des cases (défaut = 100)
+            strengthdecay: facteur de réduction de l'influence par la distance (défaut = 0.8)
+            strengthpeak:  maximum de la force appliquable par un point (est aussi le min) (défaut = 100)
+            effectradius:  distance qui borne la propagation de l'influence autour de l'origine (défaut = 40)
+        """
+        assert (isinstance(resolution, int))
         assert (isinstance(strengthdecay, float))
         assert (0 < strengthdecay < 1)
         assert (isinstance(strengthpeak, int))
+        assert (0 < strengthpeak)
         assert (isinstance(effectradius, int))
         assert (0 < effectradius)
 
@@ -48,20 +63,20 @@ class InfluenceMap(IntelligentModule):
         except OSError:
             print("Nothing to remove!")
 # ****************************************************************************************
+
         # board parameters
         self._resolution = resolution
         self._strengthdecay = strengthdecay
         self._strengthpeak = strengthpeak
         self._effectradius = effectradius
-        self._borderstrength = -strengthpeak * 0.03  # TODO change this variable for something not magic!
+        self._borderstrength = -strengthpeak * 0.03  # TODO change this variable for something not out of thin air!
 
         # point parameters
         self._ballpositiononboard = ()
-        self._friendly_bots_on_board = []  # TODO find a better name for this variable please.
+        self._friendly_bots_on_board = []
         self._enemy_bots_on_board = []
 
         number_of_rows_and_columns = self.calculate_rows_and_columns()
-
         self._numberofrows = number_of_rows_and_columns[0]
         self._numberofcolumns = number_of_rows_and_columns[1]
 
@@ -75,26 +90,29 @@ class InfluenceMap(IntelligentModule):
 # **********************************************************************************************************
 # ********************************* Getter / Setter ********************************************************
     def get_board(self):
+        """
+        Returns: self._board, l'array utiliser pour calculer l'influence map.
+        """
         return self._board
 
     def get_starterboard(self):
+        """
+        Returns: self._starterboard, l'array utiliser pour calculer les bordures, les buts et autres points pré match.
+        """
         return self._starterboard
+
 # ****************************************************************************************
 # ****************************** Initialization ******************************************
-
     def calculate_rows_and_columns(self):
         """
-        Determine the best number of rows and columns for the set resolution with the field constants.
+        Utilise la resolution pour calculer le nombre de rangée(rows) et de colonne(columns) pour le terrain
 
-        Returns: tuple (int * int), the number of rows and the number of columns
-
+        Returns: tuple (int * int), le nombre de rangées et le nombre de colonnes
         """
 
-        # set the number of Horizontal/Vertical case for the field given the resolution chosen
         numberofrow = (abs(FIELD_Y_BOTTOM) + FIELD_Y_TOP) / self._resolution
         numberofcolumn = (abs(FIELD_X_LEFT) + FIELD_X_RIGHT) / self._resolution
 
-        # make sure we have int and more than the resolution needs
         numberofrow = int(ceil(numberofrow))
         numberofcolumn = int(ceil(numberofcolumn))
 
@@ -102,15 +120,20 @@ class InfluenceMap(IntelligentModule):
 
     def create_standard_influence_board(self):
         """
-        Create the list of zeros that represent the influence board with numpy
+        Crée un objet numpy.ndarray, une liste à 2 dimension de self._numberofrows par self._numberofcolumns d'int16.
 
-        Returns: List, a numpy matrix self._numberofrows x self._numberofcolumns of int16 initiated at 0.
-
+        Returns: Un numpy.ndarray d'int16 de self._numberofrows par self._numberofcolumns.
         """
-
         return numpy.zeros((self._numberofrows, self._numberofcolumns), numpy.int16)
 
     def adjust_effect_radius(self):
+        """
+        Permet d'ajuster le rayon d'effet de l'influence (self._effectradius) si celui-ci éxède la propagation normale.
+
+        Si la propagation de l'influence se retrouve à zéro avant d'avoir atteint le rayon d'effet défini à la création
+        de la classe, cette méthode l'ajuste pour quelle donne exactement le rayon qui permet d'afficher tous les points
+        qui ne donnent pas zéro.
+        """
         distance_from_center = 0
         starting_point = self._strengthpeak
         while starting_point >= 1:
@@ -127,27 +150,25 @@ class InfluenceMap(IntelligentModule):
 
     def initialize_borders(self):
         """
-        Initialize the borders of the starterboard and make a copy for the board.
+        Ajoute des bordures au starterboard et au board.
         """
         temp_array = self.create_standard_influence_board()
-        self._put_boarders(temp_array)
-        self._propagate_borders(temp_array)
+        self._put_and_propagate_borders(temp_array)
         numpy.add(temp_array, self._starterboard, out=self._starterboard)
         numpy.add(temp_array, self._board, out=self._board)
 
-    def _put_boarders(self, board_to_apply):
+    def _put_and_propagate_borders(self, board_to_apply):
         """
-        Set the border to the borderstrength on half the border cases.
+        Mets des bordures sur un array numpy.ndarray vierge.
+
+        Args:
+            board_to_apply: Un numpy.ndarray un array vierge pour y ajouter des bordures.
         """
         board_to_apply[0] = self._borderstrength
         board_to_apply[:, 0] = self._borderstrength
 
-    def _propagate_borders(self, board_to_apply):
-        """
-        Propagate the borders on the starterboard.
-        """
-        # keep the effectradius low while making the border speed up greatly the initialization and you don't need
-        # so much border.
+        # keep the effectradius low while making the border speed up greatly the initialization, also you don't need
+        # so much border
         # TODO see if this variable is okay, maybe change the way it is determined
         border_variance = 2
         temporary_effectradius = int(ceil(ROBOT_RADIUS / self._resolution)) + border_variance
@@ -204,6 +225,10 @@ class InfluenceMap(IntelligentModule):
         board_to_apply += temp_inverse_board
 
     def initialize_goals(self):
+        """
+        Mets des buts sur le starterboard et le board
+        """
+        # todo fetch which side we are on.
         temp_array = self.create_standard_influence_board()
         v_h_goal_offset = (self._calculate_goal_vertical_offset(), self._calculate_goal_horizontal_offset())
         self._put_goals_and_propagate(v_h_goal_offset, temp_array)
@@ -211,19 +236,25 @@ class InfluenceMap(IntelligentModule):
         numpy.add(temp_array, self._board, out=self._board)
 
     def _calculate_goal_vertical_offset(self):
+        """
+        Calcule la dimension vertical du but p/r à la résolution.
+        Returns: int la valeur verticale du but ajusté à la résolution
+        """
         return int(ceil(FIELD_GOAL_Y_TOP / self._resolution))
 
     def _calculate_goal_horizontal_offset(self):
+        """
+        Calcule la dimension horizontale du but p/r à la résolution.
+        Returns: int la valeur horizontale du but ajusté à la résolution
+        """
         return int(ceil(FIELD_GOAL_SEGMENT / self._resolution))
 
     def _put_goals_and_propagate(self, v_h_offset, board_to_apply):
         """
+        Mets des buts sur un numpy.ndarray vierge.
 
         Args:
-            v_h_offset:
-
-        Returns:
-
+            v_h_offset: tuple la dimension verticale et horizontale des buts.
         """
         # TODO take into account what team you are ie: orientation and strength adjustment
         # TODO remove that next if?
@@ -236,6 +267,11 @@ class InfluenceMap(IntelligentModule):
         numpy.savetxt("Debug", board_to_apply, fmt='%5i')
 
     def create_stencil_of_point_and_influence(self):
+        """
+        Crée une image d'un point de valeur maximale pour pouvoir ajouter des points sans recalculer chaque case. Store
+        le stencil résultant dans la variable de classe self._stencil
+        """
+        # todo cyton maybe?
         stencil = numpy.zeros((self._effectradius * 2 + 1, self._effectradius * 2 + 1), numpy.int16)
         center = (self._effectradius, self._effectradius)
         it = numpy.nditer(stencil, flags=['multi_index'], op_flags=['writeonly'])
@@ -248,9 +284,6 @@ class InfluenceMap(IntelligentModule):
                 stencil[it.multi_index[0], it.multi_index[1]] += decay
             it.iternext()
 
-        # todo remove this after debug
-        numpy.savetxt("Stencil", stencil, fmt='%4i')
-
         return stencil
 
 # ******************************************************************************************
@@ -258,21 +291,32 @@ class InfluenceMap(IntelligentModule):
 
     def get_fitted_stencil(self, row, column, inverse=False):
         """
+        Ajuste le stencil de la classe (self._stencil) pour pouvoir l'utiliser dans le board.
+
+        Ajuste la valeur des cases en fonction de la valeur de force voulue, (max et min seulement).
+        Coupe le stencil et/ou ajoute des rangées et colonnes pour ajusté le stencil au format du board.
 
         Args:
-            row:
-            column:
-            inverse:
+            row: int la rangée du point d'origine de la force
+            column: int La colonne du point d'origine de la force
+            inverse: bool True prend le max de force, False prende le min de force
 
-        Returns:
+        Returns: numpy.ndarray de format du board avec le point proprement placé.
 
         """
+        assert isinstance(row, int)
+        assert (0 <= row < self._numberofrows)
+        assert isinstance(column, int)
+        assert (0 <= column < self._numberofcolumns)
+        assert isinstance(inverse, bool)
+
         temp_stencil = numpy.copy(self._stencil)
         v_borders_left, v_borders_right, h_borders_top, h_borders_bot = False, False, False, False
 
         if inverse:
             temp_stencil = numpy.negative(temp_stencil)
 
+        # emmagasine le nombre de rangée coupé et sert seulement si le point chevauche les deux bordures.
         both_borders_adjustment = 0
 
         if self._effectradius - row >= 0:
@@ -337,18 +381,21 @@ class InfluenceMap(IntelligentModule):
 
     def add_point_and_propagate_influence(self, row, column, board_to_apply, strength=0):
         """
-        Use add_point_and_propagate_stencil if you add a point of strenght == +- self._strengthpeak
-        Add a point to the board and apply its influence on it.
+        Pose un point et propage son influence sur l'array donné.
+
+        Cette méthode sert seulement au cas ou le point n'a pas une force égale à +- le maximum de
+        force(self._strengthpeak)
+
         Args:
-            row: The row of the point
-            column: The column of the point
-            strength: The strength of the point
-            board_to_apply: The numpy.ndarray on which to apply the point
+            row: int la rangée du point d'origine de la force
+            column: int La colonne du point d'origine de la force
+            board_to_apply: numpy.ndarray l'array auqelle on applique le point doit avoir le format du board
+            strength: int la force du point à appliquer
         """
         assert (isinstance(row, int))
         assert (isinstance(column, int))
-        assert (0 <= row <= self._numberofrows)
-        assert (0 <= column <= self._numberofcolumns)
+        assert (0 <= row < self._numberofrows)
+        assert (0 <= column < self._numberofcolumns)
         assert (isinstance(board_to_apply, numpy.ndarray))
         assert (board_to_apply.shape[0] == self._numberofrows)
         assert (board_to_apply.shape[1] == self._numberofcolumns)
@@ -388,21 +435,21 @@ class InfluenceMap(IntelligentModule):
 
     def add_point_and_propagate_stencil(self, row, column, board_to_apply, inverse=False):
         """
+        Pose un point et propage son influence sur l'array donné.
+
+        Utilise un stencil.
 
         Args:
-            row:
-            column:
-            board_to_apply:
-            inverse:
-
-        Returns:
-
+            row: int la rangée du point d'origine de la force
+            column: int La colonne du point d'origine de la force
+            board_to_apply: numpy.ndarray l'array auqelle on applique le point doit avoir le format du board
+            inverse: bool True prend le max de force, False prende le min de force
         """
         assert (isinstance(row, int))
         assert (isinstance(column, int))
         assert (isinstance(inverse, bool))
-        assert (0 <= row <= self._numberofrows)
-        assert (0 <= column <= self._numberofcolumns)
+        assert (0 <= row < self._numberofrows)
+        assert (0 <= column < self._numberofcolumns)
         assert (isinstance(board_to_apply, numpy.ndarray))
         assert (board_to_apply.shape[0] == self._numberofrows)
         assert (board_to_apply.shape[1] == self._numberofcolumns)
@@ -412,22 +459,23 @@ class InfluenceMap(IntelligentModule):
 
     def add_square_and_propagate(self, top, bottom, left, right, strength):
         """
-        Add a point to the board and apply its influence on it.
+        Met un carré de point dans l'array donné.
+
         Args:
-            top: top side of the square
-            bottom: bottom side of the square
-            left: left side of the square
-            right: right side of the square
-            strength: The strength of the point
+            top: int rangée supérieure du carré
+            bottom: int rangée inférieure du carré
+            left: int colonne gauche du carré
+            right: int colonne droite du carré
+            strength: int la force du point à appliquer doit être égale à +- la force maximale(self._strength)
         """
         assert (isinstance(top, int))
         assert (isinstance(bottom, int))
         assert (isinstance(left, int))
         assert (isinstance(right, int))
-        assert (0 < top < self._numberofrows - 1)
-        assert (0 < bottom < self._numberofrows - 1)
-        assert (0 < left < self._numberofcolumns - 1)
-        assert (0 < right < self._numberofcolumns - 1)
+        assert (0 <= top < self._numberofrows)
+        assert (0 <= bottom < self._numberofrows)
+        assert (0 <= left < self._numberofcolumns)
+        assert (0 <= right < self._numberofcolumns)
         assert (top <= bottom)
         assert (left <= right)
         assert (isinstance(strength, int))
@@ -439,22 +487,14 @@ class InfluenceMap(IntelligentModule):
 
         for x in range(top, bottom):
             for y in range(left, right):
-                self.add_point_and_propagate_influence(x, y, self._board, strength=strength)
+                self.add_point_and_propagate_stencil(x, y, self._board, inverse=inverse)
 
 # ********************************************************************************************************
 # **************************************** Generic point finding *****************************************
 
     def find_closest_point_of_strength_around(self, row, column, strengthrequired, over=True):
         """
-        Do not use. too slow
-        Args:
-            row: center row of the point you want to search around.
-            column: center column of the point you want to search around.
-            strengthrequired: the strength to compare to.
-            over: (bool) if true find a strenght over or equal the strengthrequired. Else find lower or equal.
-
-        Returns: A list of tuple (row, column) of the case(s) that meet the critera of strength . Empty if none found.
-
+        Ne pas utiliser, sert de placement pour replacer plus tard.
         """
         assert (isinstance(row, int))
         assert (isinstance(column, int))
@@ -558,28 +598,27 @@ class InfluenceMap(IntelligentModule):
 # **********************************************************************************************************
 # ************************************ Player representation methods****************************************
 
-    def update_friend_position_from_state(self):
+    def update_friend_position(self):
         self._friendly_bots_on_board.clear()
         for i in range(self.state.get_count_player):
             friend_position = self.state.get_player_position(i)
             friend_position = self.transform_field_to_board_position(friend_position)
             self._friendly_bots_on_board.append(friend_position)
+            self.add_point_and_propagate_stencil(friend_position[0], friend_position[1], self._board, inverse=False)
 
-    def add_friend_position_on_board(self, row, column):
-        self._friendly_bots_on_board.append((row, column))
 
-    def add_friend_position_from_id(self, id):
-        friend_position = self.state.get_player_position(id)
-        self._friendly_bots_on_board.append(self.transform_field_to_board_position(friend_position))
+# **********************************************************************************************************
+# ************************************ Foes representation methods *****************************************
+    # TODO ask about implementation of foes in infomanager
+
+    def update_foes_position(self):
+        pass
 
 # **********************************************************************************************************
 # ************************************ Ball representation methods *****************************************
 
-    def find_ball_position_from_state(self):
-        return self.transform_field_to_board_position(self.state.get_ball_position())
-
-    def set_ball_position_from_state(self):
-        self._ballpositiononboard = self.find_ball_position_from_state()
+    def update_ball_position(self):
+        self._ballpositiononboard = self.transform_field_to_board_position(self.state.get_ball_position())
 
     def set_ball_position(self, row, column):
         self._ballpositiononboard = (row, column)
@@ -625,7 +664,7 @@ class InfluenceMap(IntelligentModule):
         xpos = int(round(xpos / self._resolution, 0))
         ypos = int(round(ypos / self._resolution, 0))
 
-        return (xpos, ypos)
+        return xpos, ypos
 
     def transform_board_to_field_position(self, row, column):
         # TODO see if that holds up
@@ -654,16 +693,29 @@ class InfluenceMap(IntelligentModule):
 
         numpy.savetxt("IMBoard", self._board, fmt='%5i')
         # todo remove this line while not in debug mode
-        print(self._numberofrows, "  ", self._numberofcolumns, "  -  ", self._friendly_bots_on_board)
+        print(self._numberofrows, "  ", self._numberofcolumns, "  - friendlies =  ", self._friendly_bots_on_board)
         print(self._starterboard.shape[0], " x ", self._starterboard.shape[1], "  erad: ", self._effectradius)
 
     def str(self):
+        # todo comment and make sure this is right!
         return str("Influence Map - ", str(self._numberofrows), " x ", str(self._numberofcolumns))
 
     def distance(self, x1, y1, x2, y2):
+        """
+        Retourne la distance entre deux points x et y.
+
+        Args:
+            x1: int
+            y1: int
+            x2: int
+            y2: int
+
+        Returns: La distance entre les deux points, aucun type défini.
+
+        """
         # TODO possibly move this function somewhere else
-        assert (isinstance(x1, int) or isinstance(x1, float))
-        assert (isinstance(x2, int) or isinstance(x2, float))
-        assert (isinstance(y1, int) or isinstance(y1, float))
-        assert (isinstance(y2, int) or isinstance(y2, float))
+        assert (isinstance(x1, int))
+        assert (isinstance(x2, int))
+        assert (isinstance(y1, int))
+        assert (isinstance(y2, int))
         return sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)

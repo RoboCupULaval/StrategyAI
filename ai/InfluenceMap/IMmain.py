@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     current_time = time.time()
 
-    IM = InfluenceMap([], 50.0, strengthdecay=0.9, effectradius=40)
+    IM = InfluenceMap([], 50, strengthdecay=0.9, effectradius=40)
 
     print("Class creation        --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # IM.add_point_and_propagate_influence(100, 15, 100)
     # IM.add_point_and_propagate_influence(100, 50, -100)
 
-    # IM.add_point_and_propagate_stencil(1, 180, False)
+    IM.add_point_and_propagate_stencil(1, 179, IM.get_board(), False)
     # IM.add_point_and_propagate_stencil(20, 15, True)
     # IM.add_point_and_propagate_stencil(10, 15, True)
     # IM.add_point_and_propagate_stencil(15, 30, True)
