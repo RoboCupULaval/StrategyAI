@@ -58,10 +58,9 @@ class Coach(object):
         random.seed()
         roulette = random.randint(1, 1000)
         # add circle at center
-        if roulette > 995:
-            print("Envoi d'un log")
-            #debug_manager.add_log(1, "FOO BAR")
-            debug_manager.add_point((500, 500))
+        #debug_manager.add_log(1, "FOO BAR")
+        debug_manager.add_influence_map([[100, 50], [25, 0]])
+        print(self.info_manager.debug_manager.draw[0].repr())
 
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """

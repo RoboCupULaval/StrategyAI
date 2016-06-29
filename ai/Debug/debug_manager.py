@@ -6,7 +6,17 @@
 from collections import namedtuple
 
 # couleur rgb
-Color = namedtuple('Color', 'r g b')
+# Color = namedtuple('Color', 'r g b')
+
+class Color(object):
+    # FIXME: hack
+    def __init__(self, r=0, g=0, b=0):
+        self.r = r
+        self.g = g
+        self.b = b
+
+    def repr(self):
+        return (self.r, self.g, self.b)
 
 # Solarized color definition
 YELLOW = Color(181, 137, 0)
@@ -77,16 +87,15 @@ class DebugManager:
 
     def add_point(self, point, color=MAGENTA):
         data = {'point': point,
-                'color': color,
+                'color': color.repr(),
                 'timeout': 0}
         point = DebugCommand(3004, None, data)
         self.draw.append(point)
 
-    def add_circle(self, center, radius, style):
+    def add_circle(self, center, radius):
         data = {'center': center,
                 'radius': radius,
-                'color': None,
-                'style': style,
+                'color': MAGENTA.repr(),
                 'is_fill': True,
                 'timeout': 0}
         circle = DebugCommand(3003, None, data)
@@ -94,7 +103,11 @@ class DebugManager:
 
     def add_influence_map(self, influence_map):
         # TODO implement
-        pass
+        data = {'field_data': influence_map,
+                'coldest_color': BLUE.repr(),
+                'hottest_color': RED.repr()}
+        command = DebugCommand(3007, None, data)
+        self.draw.append(command)
 
     def add_text(self, position, text, color):
         data = {'position': position,
