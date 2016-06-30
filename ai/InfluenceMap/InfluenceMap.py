@@ -87,6 +87,11 @@ class InfluenceMap(IntelligentModule):
         self._starterboard = self.create_standard_influence_board()
         self._board = self.create_standard_influence_board()
 
+        self.initialize_borders()
+        self.initialize_goals()
+
+        self.state.debug_manager.add_influence_map(self.export_board())
+
 # **********************************************************************************************************
 # ********************************* Getter / Setter ********************************************************
     def get_board(self):

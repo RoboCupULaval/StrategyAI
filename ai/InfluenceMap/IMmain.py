@@ -14,9 +14,6 @@ if __name__ == "__main__":
     print("Class creation        --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
 
-    IM.initialize_borders()
-    IM.initialize_goals()
-
     print("Initial Setup         --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
 
