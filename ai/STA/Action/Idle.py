@@ -2,7 +2,7 @@
 from .Action import Action
 from ...Util.types import AICommand
 
-class Stop(Action):
+class Idle(Action):
     '''
     Action Stop: Arrête le robot
     Méthodes :
