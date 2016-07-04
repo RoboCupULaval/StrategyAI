@@ -5,7 +5,7 @@ __author__ = 'Robocup ULaval'
 from abc import abstractmethod
 from functools import wraps
 from ... import InfoManager
-from ..Action.Stop import Stop
+from ..Action.Idle import Idle
 
 
 class Tactic:
@@ -33,7 +33,7 @@ class Tactic:
             S'exécute lorsque l'état courant est *Halt*
             :return: l'action Stop crée
         """
-        stop = Stop(self.info_manager, self.player_id)
+        stop = Idle(self.info_manager, self.player_id)
         self.next_state = 'halt'
         return stop
 
