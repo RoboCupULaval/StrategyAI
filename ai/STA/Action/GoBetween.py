@@ -18,6 +18,9 @@ class GoBetween(Action):
         exec(self): Retourne la pose où se rendre
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur
+        position1 : La première position formant la droite
+        position2 : La deuxième position formant la droite
+        minimum_distance : La distance minimale qu'il doit y avoir entre le robot et chacun des points
     """
     def __init__(self, p_info_manager, p_player_id, p_position1, p_position2, p_minimum_distance=0):
         """
@@ -28,6 +31,12 @@ class GoBetween(Action):
             :param p_minimum_distance: La distance minimale qu'il doit y avoir entre le robot et chacun des points
         """
         Action.__init__(self, p_info_manager)
+        assert(isinstance(p_player_id, int))
+        assert(isinstance(p_position1, Position))
+        assert(isinstance(p_position2, Position))
+        assert(isinstance(p_minimum_distance, (int, float)))
+        assert(distance(p_position1, p_position2) > 2*p_minimum_distance)
+
         self.player_id = p_player_id
         self.position1 = p_position1
         self.position2 = p_position2
@@ -36,7 +45,7 @@ class GoBetween(Action):
     def exec(self):
         """
         Calcul le point le plus proche du robot sur la droite entre les deux positions
-        :return: Un tuple (Pose, kick) où Pose est la destination du joueur kick est faux (on ne botte pas)
+        :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
         """
         robot_position = self.info_manager.get_player_pose(self.player_id).position
         delta_x = self.position2.x - self.position1.x
@@ -77,6 +86,7 @@ class GoBetween(Action):
 
         # Calcul de l'orientation de la pose de destination
         destination_orientation = get_angle(destination_position, self.info_manager.get_player_target)
+        # TODO: vérifier l'utilisation de target vs goal
 
         destination_pose = Pose(destination_position, destination_orientation)
         kick_strength = 0

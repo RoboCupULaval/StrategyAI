@@ -2,6 +2,7 @@
 from .Action import Action
 from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_angle
 
 __author__ = 'Robocup ULaval'
@@ -23,6 +24,8 @@ class MoveWithBall(Action):
             :param p_destination: La position où on souhaite déplacer le robot
         """
         Action.__init__(self, p_info_manager)
+        assert(isinstance(p_player_id, int))
+        assert(isinstance(p_destination, Position))
         self.player_id = p_player_id
         self.destination = p_destination
 
@@ -33,7 +36,7 @@ class MoveWithBall(Action):
         corrections de trajectoire nécessaire.
         :return: Un tuple (Pose, kick) où Pose est la destination du joueur kick est faux (on ne botte pas)
         """
-        #TODO: Améliorer le comportement en ajoutant l'intervalle d'anle correspondant à la largeur du dribleur
+        # TODO: Améliorer le comportement en ajoutant l'intervalle d'anle correspondant à la largeur du dribleur
         destination_orientation = get_angle(self.info_manager.get_player_pose(self.player_id).position,
                                             self.info_manager.get_ball_position())
         destination_pose = Pose(self.destination, destination_orientation)

@@ -21,6 +21,7 @@ class GrabBall(Action):
             :param p_player_id: Identifiant du joueur qui prend le contrôle de la balle
         """
         Action.__init__(self, p_info_manager)
+        assert(isinstance(p_player_id, int))
         self.player_id = p_player_id
 
     def exec(self):
