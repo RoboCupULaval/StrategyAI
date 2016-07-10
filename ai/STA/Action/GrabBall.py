@@ -9,16 +9,16 @@ __author__ = 'Robocup ULaval'
 
 class GrabBall(Action):
     """
-    Action GrabBall: Déplace le robot afin qu'il prenne contrôle de la balle
-    Méthodes :
-        exec(self): Retourne la pose où se rendre
+    Action GrabBall: DÃ©place le robot afin qu'il prenne contrÃ´le de la balle
+    MÃ©thodes :
+        exec(self): Retourne la pose oÃ¹ se rendre
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur
     """
     def __init__(self, p_info_manager, p_player_id):
         """
-            :param p_info_manager: référence vers l'InfoManager
-            :param p_player_id: Identifiant du joueur qui prend le contrôle de la balle
+            :param p_info_manager: rÃ©fÃ©rence vers l'InfoManager
+            :param p_player_id: Identifiant du joueur qui prend le contrÃ´le de la balle
         """
         Action.__init__(self, p_info_manager)
         assert(isinstance(p_player_id, int))
@@ -26,8 +26,8 @@ class GrabBall(Action):
 
     def exec(self):
         """
-        Place le robot afin qu'il prenne le contrôle de la balle
-        :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
+        Place le robot afin qu'il prenne le contrÃ´le de la balle
+        :return: Un tuple (Pose, kick) oÃ¹ Pose est la destination du joueur et kick est nul (on ne botte pas)
         """
         ball_position = self.info_manager.get_ball_position()
         destination_orientation = get_angle(self.info_manager.get_player_pose(self.player_id).position, ball_position)

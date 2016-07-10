@@ -10,18 +10,18 @@ __author__ = 'Robocup ULaval'
 
 class MoveWithBall(Action):
     """
-    Action MoveWithBall: Déplace le robot en tenant compte de la possession de la balle
-    Méthodes :
-        exec(self): Retourne la pose où se rendre
+    Action MoveWithBall: DÃ©place le robot en tenant compte de la possession de la balle
+    MÃ©thodes :
+        exec(self): Retourne la pose oÃ¹ se rendre
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur
-        destination : La position où on souhaite déplacer le robot
+        destination : La position oÃ¹ on souhaite dÃ©placer le robot
     """
     def __init__(self, p_info_manager, p_player_id, p_destination):
         """
-            :param p_info_manager: référence vers l'InfoManager
-            :param p_player_id: Identifiant du joueur qui se déplace avec la balle
-            :param p_destination: La position où on souhaite déplacer le robot
+            :param p_info_manager: rÃ©fÃ©rence vers l'InfoManager
+            :param p_player_id: Identifiant du joueur qui se dÃ©place avec la balle
+            :param p_destination: La position oÃ¹ on souhaite dÃ©placer le robot
         """
         Action.__init__(self, p_info_manager)
         assert(isinstance(p_player_id, int))
@@ -31,12 +31,12 @@ class MoveWithBall(Action):
 
     def exec(self):
         """
-        Exécute le déplacement en tenant compte de la possession de la balle. Le robot se déplace vers la destination,
-        mais s'oriente de façon à garder la balle sur le dribleur. C'est la responsabilité de la Tactique de faire les
-        corrections de trajectoire nécessaire.
-        :return: Un tuple (Pose, kick) où Pose est la destination du joueur kick est faux (on ne botte pas)
+        ExÃ©cute le dÃ©placement en tenant compte de la possession de la balle. Le robot se dÃ©place vers la destination,
+        mais s'oriente de faÃ§on Ã  garder la balle sur le dribleur. C'est la responsabilitÃ© de la Tactique de faire les
+        corrections de trajectoire nÃ©cessaire.
+        :return: Un tuple (Pose, kick) oÃ¹ Pose est la destination du joueur kick est faux (on ne botte pas)
         """
-        # TODO: Améliorer le comportement en ajoutant l'intervalle d'anle correspondant à la largeur du dribleur
+        # TODO: AmÃ©liorer le comportement en ajoutant l'intervalle d'anle correspondant Ã  la largeur du dribleur
         destination_orientation = get_angle(self.info_manager.get_player_pose(self.player_id).position,
                                             self.info_manager.get_ball_position())
         destination_pose = Pose(self.destination, destination_orientation)
