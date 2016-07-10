@@ -5,6 +5,7 @@ from ai.STA.Action.Idle import Idle
 from ai.STA.Action.GrabBall import GrabBall
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.MoveWithBall import MoveWithBall
+from ai.STA.Action.Kick import Kick
 from ai.InfoManager import InfoManager
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
@@ -65,6 +66,26 @@ class TestActions(unittest.TestCase):
 
     def test_GoBetween(self):
         pass
+
+    def test_kick(self):
+
+        # test avec la valeur 0 (nulle)
+        self.kick = Kick(self.info_manager,self.player_id,0)
+        current_pose = self.info_manager.get_player_pose(self.player_id)
+        current_pose_string = "AICommand(move_destination=" + str(current_pose) + ", kick_strength=0)"
+        self.assertEqual(str(Kick.exec(self.kick)),current_pose_string)
+
+        # test avec la valeur 1 (force maximale)
+        self.kick = Kick(self.info_manager, self.player_id, 1)
+        current_pose = self.info_manager.get_player_pose(self.player_id)
+        current_pose_string = "AICommand(move_destination=" + str(current_pose) + ", kick_strength=1)"
+        self.assertEqual(str(Kick.exec(self.kick)), current_pose_string)
+
+        # test avec la valeur 0.3 (force intermediaire)
+        self.kick = Kick(self.info_manager, self.player_id, 0.3)
+        current_pose = self.info_manager.get_player_pose(self.player_id)
+        current_pose_string = "AICommand(move_destination=" + str(current_pose) + ", kick_strength=0.3)"
+        self.assertEqual(str(Kick.exec(self.kick)), current_pose_string)
 
 if __name__ == "__main__":
     unittest.main()
