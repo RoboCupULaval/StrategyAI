@@ -4,6 +4,9 @@ from math import ceil, sqrt
 from os import remove
 import numpy
 
+#remove
+import timeit
+
 from RULEngine.Util.constant import *
 from RULEngine.Util.Position import Position
 
@@ -30,24 +33,24 @@ class InfluenceMap(IntelligentModule):
     transfomé en int arrondie vers 0.
     """
 
-    def __init__(self, pInfoManager, resolution=100, strengthdecay=0.8, strengthpeak=100, effectradius=8):
+    def __init__(self, pInfoManager, resolution=100, strength_decay=0.8, strength_peak=100, effect_radius=25):
         """
         Constructeur de la classe InfluenceMap
 
         Args:
             pInfoManager:  référence vers l'InfoManager
             resolution:    résolution des cases (défaut = 100)
-            strengthdecay: facteur de réduction de l'influence par la distance (défaut = 0.8)
-            strengthpeak:  maximum de la force appliquable par un point (est aussi le min) (défaut = 100)
-            effectradius:  distance qui borne la propagation de l'influence autour de l'origine (défaut = 40)
+            strength_decay: facteur de réduction de l'influence par la distance (défaut = 0.8)
+            strength_peak:  maximum de la force appliquable par un point (est aussi le min) (défaut = 100)
+            effect_radius:  distance qui borne la propagation de l'influence autour de l'origine (défaut = 40)
         """
         assert (isinstance(resolution, int))
-        assert (isinstance(strengthdecay, float))
-        assert (0 < strengthdecay < 1)
-        assert (isinstance(strengthpeak, int))
-        assert (0 < strengthpeak)
-        assert (isinstance(effectradius, int))
-        assert (0 < effectradius)
+        assert (isinstance(strength_decay, float))
+        assert (0 < strength_decay < 1)
+        assert (isinstance(strength_peak, int))
+        assert (0 < strength_peak)
+        assert (isinstance(effect_radius, int))
+        assert (0 < effect_radius)
 
         super().__init__(pInfoManager)
 
@@ -55,7 +58,6 @@ class InfluenceMap(IntelligentModule):
 # ***************** REMOVE! **************************************************************
         # todo see how to better implement a graphic representation!
         # this option is not very useful anymore...
-        numpy.set_printoptions(threshold=10000)
         # GOD NO!
         try:
             remove("IMBoard")
@@ -66,10 +68,10 @@ class InfluenceMap(IntelligentModule):
 
         # board parameters
         self._resolution = resolution
-        self._strengthdecay = strengthdecay
-        self._strengthpeak = strengthpeak
-        self._effectradius = effectradius
-        self._borderstrength = -strengthpeak * 0.03  # TODO change this variable for something not out of thin air!
+        self._strengthdecay = strength_decay
+        self._strengthpeak = strength_peak
+        self._effectradius = effect_radius
+        self._borderstrength = -strength_peak * 0.03  # TODO change this variable for something not out of thin air!
 
         # point parameters
         self._ballpositiononboard = ()
@@ -80,6 +82,7 @@ class InfluenceMap(IntelligentModule):
         self._numberofrows = number_of_rows_and_columns[0]
         self._numberofcolumns = number_of_rows_and_columns[1]
 
+        print(timeit.Timer(self.adjust_effect_radius).timeit(1))
         self.adjust_effect_radius()
 
         self._stencil = self.create_stencil_of_point_and_influence()
@@ -87,24 +90,11 @@ class InfluenceMap(IntelligentModule):
         self._starterboard = self.create_standard_influence_board()
         self._board = self.create_standard_influence_board()
 
+
         self.initialize_borders()
         self.initialize_goals()
-
-        self.state.debug_manager.add_influence_map(self.export_board())
-
-# **********************************************************************************************************
-# ********************************* Getter / Setter ********************************************************
-    def get_board(self):
-        """
-        Returns: self._board, l'array utiliser pour calculer l'influence map.
-        """
-        return self._board
-
-    def get_starterboard(self):
-        """
-        Returns: self._starterboard, l'array utiliser pour calculer les bordures, les buts et autres points pré match.
-        """
-        return self._starterboard
+        # TODO see what to do with that next line. useful when using ui-debug
+        #self.state.debug_manager.add_influence_map(self.export_board())
 
 # ****************************************************************************************
 # ****************************** Initialization ******************************************
@@ -114,7 +104,6 @@ class InfluenceMap(IntelligentModule):
 
         Returns: tuple (int * int), le nombre de rangées et le nombre de colonnes
         """
-
         numberofrow = (abs(FIELD_Y_BOTTOM) + FIELD_Y_TOP) / self._resolution
         numberofcolumn = (abs(FIELD_X_LEFT) + FIELD_X_RIGHT) / self._resolution
 

@@ -2,6 +2,7 @@
 
 from InfluenceMap import InfluenceMap
 import time
+from timeit import *
 
 __author__ = 'RoboCupULaval'
 
@@ -9,7 +10,7 @@ if __name__ == "__main__":
 
     current_time = time.time()
 
-    IM = InfluenceMap([], 50, strengthdecay=0.9, effectradius=40)
+    IM = InfluenceMap([], 50, strength_decay=0.9, effect_radius=40)
 
     print("Class creation        --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
@@ -17,7 +18,7 @@ if __name__ == "__main__":
     print("Initial Setup         --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
 
-    IM.add_point_and_propagate_influence(15, 15, IM.get_board(), 100)
+    IM.add_point_and_propagate_influence(15, 15, IM._board, 100)
     # IM.add_point_and_propagate_influence(20, 15, 100)
     # IM.add_point_and_propagate_influence(10, 15, 100)
     # IM.add_point_and_propagate_influence(15, 30, 100)
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     # IM.add_point_and_propagate_influence(100, 15, 100)
     # IM.add_point_and_propagate_influence(100, 50, -100)
 
-    IM.add_point_and_propagate_stencil(1, 179, IM.get_board(), False)
+    IM.add_point_and_propagate_stencil(1, 179, IM._board, False)
     # IM.add_point_and_propagate_stencil(20, 15, True)
     # IM.add_point_and_propagate_stencil(10, 15, True)
     # IM.add_point_and_propagate_stencil(15, 30, True)
@@ -59,7 +60,6 @@ if __name__ == "__main__":
     # IM.add_point_and_propagate_stencil(100, 15, True)
     # IM.add_point_and_propagate_stencil(100, 50, False)
     #
-
 
     print("Points Adding         --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
