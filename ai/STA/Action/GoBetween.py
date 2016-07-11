@@ -1,5 +1,5 @@
 # Under MIT licence, see LICENCE.txt
-from math import sqrt
+import math
 from .Action import Action
 from ...Util.types import AICommand
 from ...Util.geometry import distance
@@ -51,29 +51,39 @@ class GoBetween(Action):
         delta_x = self.position2.x - self.position1.x
         delta_y = self.position2.y - self.position1.y
 
-        # Équation de la droite reliant les deux positions
-        a1 = delta_y / delta_x                                  # pente
-        b1 = self.position1.y - a1*self.position1.x             # ordonnée à l'origine
+        if delta_x != 0 and delta_y != 0:   # droite quelconque
+            # Équation de la droite reliant les deux positions
+            a1 = delta_y / delta_x                                  # pente
+            b1 = self.position1.y - a1*self.position1.x             # ordonnée à l'origine
 
-        # Équation de la droite perpendiculaire
-        a2 = -1/a1                                              # pente perpendiculaire à a1
-        b2 = robot_position.y - a2*robot_position.x             # ordonnée à l'origine
+            # Équation de la droite perpendiculaire
+            a2 = -1/a1                                              # pente perpendiculaire à a1
+            b2 = robot_position.y - a2*robot_position.x             # ordonnée à l'origine
 
-        # Calcul des coordonnées de la destination
-        x = (b2 - b1)/(a1 - a2)                                 # a1*x + b1 = a2*x + b2
-        y = a1*x + b1
+            # Calcul des coordonnées de la destination
+            x = (b2 - b1)/(a1 - a2)                                 # a1*x + b1 = a2*x + b2
+            y = a1*x + b1
+        elif delta_x == 0:  # droite verticale
+            x = self.position1.x
+            y = robot_position.y
+        elif delta_y == 0:  # droite horizontale
+            x = robot_position.x
+            y = self.position1.y
+
         destination_position = Position(x, y)
 
         # Vérification que destination_position se trouve entre position1 et position2
-        distance_positions = sqrt(delta_x**2 + delta_y**2)
+        distance_positions = math.sqrt(delta_x**2 + delta_y**2)
         distance_dest_pos1 = distance(self.position1, destination_position)
         distance_dest_pos2 = distance(self.position2, destination_position)
 
-        if distance_dest_pos1 >= distance_positions: # Si position2 est entre position1 et destination_position
+        if distance_dest_pos1 >= distance_positions and distance_dest_pos1 > distance_dest_pos2:
+            # Si position2 est entre position1 et destination_position
             new_x = self.position2.x - self.minimum_distance * delta_x / distance_positions
             new_y = self.position2.y - self.minimum_distance * delta_y / distance_positions
             destination_position = Position(new_x, new_y)
-        elif distance_dest_pos2 >= distance_positions: # Si position1 est entre position2 et destination_position
+        elif distance_dest_pos2 >= distance_positions and distance_dest_pos2 > distance_dest_pos1:
+            # Si position1 est entre position2 et destination_position
             new_x = self.position1.x + self.minimum_distance * delta_x / distance_positions
             new_y = self.position1.y + self.minimum_distance * delta_y / distance_positions
             destination_position = Position(new_x, new_y)
@@ -85,7 +95,7 @@ class GoBetween(Action):
             destination_position = stayOutsideCircle(destination_position, self.position2, self.minimum_distance)
 
         # Calcul de l'orientation de la pose de destination
-        destination_orientation = get_angle(destination_position, self.info_manager.get_player_target)
+        destination_orientation = get_angle(destination_position, self.info_manager.get_player_target(self.player_id))
         # TODO: vérifier l'utilisation de target vs goal
 
         destination_pose = Pose(destination_position, destination_orientation)

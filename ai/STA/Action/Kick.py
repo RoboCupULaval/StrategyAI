@@ -20,7 +20,7 @@ class Kick(Action):
         Action.__init__(self, p_info_manager)
         assert(isinstance(p_player_id, int))
         assert(isinstance(p_force, (int, float)))
-        assert(p_force >= 0 and p_force <= 1)
+        assert(1 >= p_force >= 0)
         self.player_id = p_player_id
         self.force = p_force
 
