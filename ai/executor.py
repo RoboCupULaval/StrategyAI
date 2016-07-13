@@ -6,6 +6,7 @@ from .STA.Strategy.StrategyBook import StrategyBook
 
 __author__ = 'RoboCupULaval'
 
+
 class Executor(object, metaclass=ABCMeta):
     """ Classe abstraite des executeurs. """
 
@@ -16,6 +17,7 @@ class Executor(object, metaclass=ABCMeta):
     def exec(self):
         """ Méthode qui sera appelé à chaque coup de boucle. """
         pass
+
 
 class StrategyExecutor(Executor):
     """
@@ -76,6 +78,7 @@ class TacticExecutor(Executor):
         for i in range(0, 6):
             self.info_manager.get_player_tactic(i).exec()
 
+
 class PathfinderExecutor(Executor):
     """ Récupère les paths calculés pour les robots et les assignent. """
 
@@ -94,6 +97,7 @@ class PathfinderExecutor(Executor):
             for i in range(0, 6):
                 self.info_manager.set_player_next_action(paths[i])
 
+
 class ModuleExecutor(Executor):
     """ Met à jour tous les modules intelligents enregistré. """
     def __init__(self, info_manager):
@@ -106,3 +110,5 @@ class ModuleExecutor(Executor):
                 modules[key].update()
             except:
                 print("Un module est défini à None, clef: " + str(key))
+
+
