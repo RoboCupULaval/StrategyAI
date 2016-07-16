@@ -6,6 +6,7 @@ from ai.STA.Action.GrabBall import GrabBall
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.MoveWithBall import MoveWithBall
 from ai.STA.Action.Kick import Kick
+from ai.STA.Action.GoBehind import GoBehind
 from ai.InfoManager import InfoManager
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
@@ -115,6 +116,26 @@ class TestActions(unittest.TestCase):
         # test distance entre les positions insuffisantes
         self.assertRaises(AssertionError, GoBetween, self.info_manager, self.player_id, Position(1, 1),
                           Position(-1, -1), 50)
+
+    def test_GoBehind(self):
+        #TODO: faire davantage de cas de test
+        distance_behind = 2
+
+        # test avec une droite quelconque
+        self.go_behind = GoBehind(self.info_manager, self.player_id, Position(1.5,2.3), Position(18.3,27.8), distance_behind)
+        output_string = "AICommand(move_destination=[(x=-0.5, y=0.2999999999999998, z=0.0), theta=0.7853981633974483], kick_strength=0)"
+        self.assertEqual(str(GoBehind.exec(self.go_behind)), output_string)
+
+        # test avec une droite verticale
+        self.go_behind = GoBehind(self.info_manager, self.player_id, Position(1000,250.3), Position(1000, 725.8), distance_behind)
+        output_string = "AICommand(move_destination=[(x=1000.0, y=248.3, z=0.0), theta=1.5707963267948966], kick_strength=0)"
+        self.assertEqual(str(GoBehind.exec(self.go_behind)), output_string)
+
+        # test avec une droite horizontale
+        self.go_behind = GoBehind(self.info_manager, self.player_id, Position(175.8, -200.34), Position(-276.8, -200.34),
+                                  distance_behind)
+        output_string = "AICommand(move_destination=[(x=177.8, y=-200.34, z=0.0), theta=-3.141592653589793], kick_strength=0)"
+        self.assertEqual(str(GoBehind.exec(self.go_behind)), output_string)
 
     def test_kick(self):
 
