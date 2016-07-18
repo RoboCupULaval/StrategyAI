@@ -40,7 +40,7 @@ class GoBehind(Action):
         self.position2 = p_position2
         self.distance_behind = p_distance_behind
 
-    def get_destination(self, position1, position2, distance_behind):
+    def get_destination(self):
         """
             Calcule le point situé à  x pixels derrière la position 1 par rapport à la position 2
             :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
@@ -76,6 +76,6 @@ class GoBehind(Action):
 
     def exec(self):
 
-        destination_pose = self.get_destination(self.position1, self.position2, self.distance_behind)
+        destination_pose = self.get_destination()
         kick_strength = 0
         return AICommand(destination_pose, kick_strength)
