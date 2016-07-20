@@ -22,24 +22,31 @@ class GoGetBall(Tactic):
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball
         self.player_id = player_id
-        self.future_target = future_target
-        self.distance_behind = 20 # amount of pixels to go to behind ball
-        self.tolerated_angle_difference = 1 # in radians
-        self.tolerated_radius_to_go_grab_ball = 20
-        self.tolerated_radius_to_halt = 5
+        self.future_target = future_target # TODO: implémenter la target du info_manager lorsque le conflit entre target et goal sera résolu
+        # constants
+        self.robot_radius = 90
+        self.distance_behind = self.robot_radius + 30 # in millimeters
+        self.tolerated_angle_to_go_grab_ball = 1 # in radians; must be large in case ball moves fast
+        self.tolerated_radius_to_go_grab_ball = self.robot_radius + 30
+        self.tolerated_angle_to_halt = 0.09
+        self.tolerated_radius_to_halt = self.robot_radius + 5
 
-    # Util methods
-    # TODO: mettre dans Util si utile dans d'autres cas
+    # Util methods TODO: mettre dans Util si utiles dans d'autres cas
+    def angle_to_ball_is_tolerated(self, player_position, ball_position, angle_to_verify):
+        angle_player_to_ball = get_angle(player_position, ball_position)
+        angle_ball_to_target = get_angle(ball_position, self.future_target)
+        angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
+        if angle_difference < angle_to_verify:
+            return True
+        return False
+
     def player_can_grab_ball(self):
         player_position = self.info_manager.get_player_position(self.player_id)
         ball_position = self.info_manager.get_ball_position()
 
         if isInsideCircle(ball_position, ball_position, self.tolerated_radius_to_go_grab_ball):
-            angle_player_to_ball = get_angle(player_position, ball_position)
-            angle_ball_to_target = get_angle(ball_position, self.future_target)
-            angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
 
-            if angle_difference < self.tolerated_angle_difference:
+            if self.angle_to_ball_is_tolerated(player_position, ball_position, self.tolerated_angle_to_go_grab_ball):
                 return True
 
         return False
@@ -49,7 +56,10 @@ class GoGetBall(Tactic):
         ball_position = self.info_manager.get_ball_position()
 
         if player_position.isInsideCircle(ball_position, ball_position, self.tolerated_radius_to_halt):
-            return True
+
+            if self.angle_to_ball_is_tolerated(player_position, ball_position, self.tolerated_angle_to_halt):
+                return True
+
         return False
 
     # States
@@ -66,8 +76,6 @@ class GoGetBall(Tactic):
         return go_behind
 
     def grab_ball(self):
-        player_position = self.info_manager.get_player_position(self.player_id)
-        ball_position = self.info_manager.get_ball_position()
 
         if self.player_grabbed_ball():
             self.next_state = self.halt
