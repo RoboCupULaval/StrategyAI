@@ -1,4 +1,4 @@
-from . import Tactic
+from ai.STA.Tactic import Tactic
 from ai.STA.Action.MoveTo import MoveTo
 
 class GoGetBall(Tactic):

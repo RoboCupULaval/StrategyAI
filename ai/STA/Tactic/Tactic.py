@@ -4,8 +4,8 @@ __author__ = 'Robocup ULaval'
 
 from abc import abstractmethod
 from functools import wraps
-from ... import InfoManager
-from ..Action.Idle import Idle
+from ai import InfoManager
+from ai.STA.Action.Idle import Idle
 
 
 class Tactic:
