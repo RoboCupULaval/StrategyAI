@@ -89,3 +89,12 @@ def get_nearest(ref_position, list_of_position, number=1):
             list_sorted.append(dict_position_distance[bot_dst])
         else:
             return list_sorted
+
+def angle_to_ball_is_tolerated(player_position, ball_position, target_position, tolerated_angle):
+        angle_player_to_ball = get_angle(player_position, ball_position)
+        angle_ball_to_target = get_angle(ball_position, target_position)
+        angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
+        if angle_difference < tolerated_angle:
+            return True
+        return False
+
