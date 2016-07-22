@@ -2,8 +2,10 @@
 
 from abc import abstractmethod
 from functools import wraps
+from ai.InfoManager import InfoManager
 
 __author__ = 'Robocup ULaval'
+
 
 class Action:
     """
@@ -11,8 +13,9 @@ class Action:
     """
     def __init__(self, p_info_manager):
         """
-            :param pInfoManager: référence vers l'InfoManager
+            :param p_info_manager: référence vers l'InfoManager
         """
+        assert(isinstance(p_info_manager, InfoManager))
         self.info_manager = p_info_manager
 
     def on_before(self):
