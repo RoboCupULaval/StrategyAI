@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     current_time = time.time()
 
-    IM = InfluenceMap([], 50, strength_decay=0.9, effect_radius=40)
+    IM = InfluenceMap([], 100, strength_decay=0.9, effect_radius=40)
 
     print("Class creation        --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
@@ -18,10 +18,10 @@ if __name__ == "__main__":
     #IM.add_point_and_propagate_influence(30, 10, IM._board, 100)
     # IM.add_point_and_propagate_influence(0, 0, IM._board, -100)
     # IM.add_point_and_propagate_influence(29, 45, IM._board, -100)
-    IM.add_point_and_propagate_influence(21, 45, IM._board, -100)
-    IM.add_point_and_propagate_influence(20, 45, IM._board, -100)
-    IM.add_point_and_propagate_influence(19, 45, IM._board, -100)
-    IM.add_point_and_propagate_influence(22, 45, IM._board, -100)
+    IM.add_point_and_propagate_influence(15, 45, IM._board, -100)
+    IM.add_point_and_propagate_influence(20, 45, IM._board, 100)
+    # IM.add_point_and_propagate_influence(19, 45, IM._board, -100)
+    # IM.add_point_and_propagate_influence(22, 45, IM._board, -100)
 
     # IM.add_point_and_propagate_influence(30, 15, -100)
     # IM.add_point_and_propagate_influence(45, 15, -100)

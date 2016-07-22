@@ -58,7 +58,6 @@ class InfluenceMap(IntelligentModule):
         # GOD NO!
         try:
             remove("IMBoard")
-            remove("Stencil")
         except OSError:
             print("Nothing to remove!")
 # ****************************************************************************************
@@ -83,6 +82,7 @@ class InfluenceMap(IntelligentModule):
 
         self._stencil = self._create_stencil_of_point_and_influence()
 
+        self._stencils_for_every_points = []
         self._borders_board = None
         self._goals_board = None
         self._static_boards = self._create_standard_influence_board()
@@ -284,6 +284,10 @@ class InfluenceMap(IntelligentModule):
         numpy.add(self._goals_board, self._static_boards, out=self._static_boards)
         self._clamp_board(self._static_boards)
 
+    def _create_stencils_for_every_points(self):
+        array_of_zeros = numpy.zeros((self._numberofrows, self._numberofcolumns), dtype=numpy.int8)
+        pass
+
 # ******************************************************************************************
 # **********************Adding points and influences methods *******************************
 
@@ -391,6 +395,9 @@ class InfluenceMap(IntelligentModule):
             return -self._strengthpeak
         return influence_to_clamp
 
+    def _compute_value_by_distance(self, strength, distance):
+        return int(strength * (self._strengthdecay ** distance))
+
     def add_point_and_propagate_influence(self, row, column, board_to_apply, strength=0):
         """
         Pose un point et propage son influence sur l'array donné.
@@ -424,13 +431,13 @@ class InfluenceMap(IntelligentModule):
                                       flags=['multi_index'], op_flags=['readwrite'])
 
         while not cases_iterator.finished:
-            to_put = cases_iterator[0] + int((strength *
-                                              (self._strengthdecay ** self.distance(cases_iterator.multi_index[0],
-                                                                                    cases_iterator.multi_index[1],
-                                                                                    (row - rowmin),
-                                                                                    (column - columnmin)))))
-
-            cases_iterator[0] = self._clamp_influence(to_put)
+            to_put = self._compute_value_by_distance(strength, self.distance(cases_iterator.multi_index[0],
+                                                                             cases_iterator.multi_index[1],
+                                                                             (row - rowmin),
+                                                                             (column - columnmin)))
+            influence_already_in_case = cases_iterator[0]
+            influence_to_put_instead = self._clamp_influence(to_put + influence_already_in_case)
+            cases_iterator[0] = influence_to_put_instead
             cases_iterator.iternext()
 
     def add_point_and_propagate_stencil(self, row, column, board_to_apply, inverse=False):
@@ -563,6 +570,12 @@ class InfluenceMap(IntelligentModule):
 
 # **********************************************************************************************************************
 # ********************************************* misc methods ***********************************************************
+
+    def coords_to_linear(self, row, column):
+        return self._numberofcolumns * row + column
+
+    def get_number_of_cells(self):
+        return self._numberofrows * self._numberofcolumns
 
     def clear_points_on_board(self):
         # todo add a point checking maybe?
