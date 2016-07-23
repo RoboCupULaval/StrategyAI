@@ -30,7 +30,7 @@ class InfluenceMap(IntelligentModule):
     transfomé en int arrondie vers 0.
     """
 
-    def __init__(self, info_manager, resolution=100, strength_decay=0.8, strength_peak=100, effect_radius=25):
+    def __init__(self, info_manager, resolution=100, strength_decay=0.75, strength_peak=100, effect_radius=25):
         """
             Constructeur de la classe InfluenceMap
 
@@ -250,7 +250,6 @@ class InfluenceMap(IntelligentModule):
             v_h_offset: tuple la dimension verticale et horizontale des buts.
         """
         # TODO take into account what team you are ie: orientation and strength adjustment
-        # TODO remove that next if?
         for x in range(int(self._numberofrows / 2 - v_h_offset[0]),
                        int(self._numberofrows / 2 + v_h_offset[0]) + 1):
             self.add_point_and_propagate_influence(x, 0, board_to_apply, 100)
@@ -268,9 +267,10 @@ class InfluenceMap(IntelligentModule):
         center = (self._effectradius, self._effectradius)
         it = numpy.nditer(stencil, flags=['multi_index'], op_flags=['writeonly'])
         while not it.finished:
-            decay = int((self._strengthpeak * (self._strengthdecay **
-                                               self.distance(it.multi_index[0], it.multi_index[1], center[0],
-                                                             center[1]))))
+            decay = self._compute_value_by_distance(self._strengthpeak, self.distance(it.multi_index[0],
+                                                                                      it.multi_index[1],
+                                                                                      center[0],
+                                                                                      center[1]))
             stencil[it.multi_index[0], it.multi_index[1]] += decay
             it.iternext()
 
@@ -288,8 +288,11 @@ class InfluenceMap(IntelligentModule):
         array_of_zeros = numpy.zeros((self._numberofrows, self._numberofcolumns), dtype=numpy.int8)
         pass
 
-# ******************************************************************************************
-# **********************Adding points and influences methods *******************************
+# **********************************************************************************************************************
+# **********************Adding points and influences methods ***********************************************************
+
+    def _compute_value_by_distance(self, strength, distance):
+        return int(strength * (self._strengthdecay ** distance))
 
     def _clamp_board(self, board_to_clamp):
         cases_iterator = numpy.nditer(board_to_clamp, op_flags=['readwrite'])
@@ -297,6 +300,13 @@ class InfluenceMap(IntelligentModule):
         while not cases_iterator.finished:
             cases_iterator[0] = self._clamp_influence(cases_iterator[0])
             cases_iterator.iternext()
+
+    def _clamp_influence(self, influence_to_clamp):
+        if influence_to_clamp > self._strengthpeak:
+            return self._strengthpeak
+        elif influence_to_clamp < -self._strengthpeak:
+            return -self._strengthpeak
+        return influence_to_clamp
 
     def get_fitted_stencil(self, row, column, inverse=False):
         """
@@ -320,83 +330,91 @@ class InfluenceMap(IntelligentModule):
         assert isinstance(inverse, bool)
 
         temp_stencil = numpy.copy(self._stencil)
-        v_borders_left, v_borders_right, h_borders_top, h_borders_bot = False, False, False, False
 
+        # les quatres flags suivant servent à déterminer s'il faut ajouter des colonnes ou rangé manquates pour
+        # rendre le stencil aux mêmes dimensions que le board
+        horizontally_borders_left, horizontally_borders_right = False, False
+        vertically_borders_top, vertically_borders_bot = False, False
+
+        # TODO see if we can scale the stencil instead of only applying +- strenghtpeak
         if inverse:
             temp_stencil = numpy.negative(temp_stencil)
 
         # emmagasine le nombre de rangée coupé et sert seulement si le point chevauche les deux bordures.
-        both_borders_adjustment = 0
+        vertically_borders_both_adjustment = False
 
+        # regarde si le stencil chevauche la bordure top ^
         if self._effectradius - row >= 0:
+            # coupe le stencil pour retirer le surplus qui se trouve au dessus du board
             temp_stencil = temp_stencil[(self._effectradius - row):, ...]
-            h_borders_top = True
-            both_borders_adjustment = self._effectradius - row
+            vertically_borders_top = True
+            # emmagasine le nombre de rangée coupé pour ajuster plus tard
+            vertically_borders_both_adjustment = self._effectradius - row
 
+        # regarde si le stencil chevauche ou dépasse la bordure bottom v
         if self._effectradius + row >= self._numberofrows:
-            if both_borders_adjustment or self._effectradius - row == 0:
+            # regarde si le stencil chevauche ou dépasse aussi la bordure top calculé précèdemment
+            if vertically_borders_both_adjustment or self._effectradius - row == 0:
+                # si elle chevauche les deux bordures horizontallement
                 temp_stencil = temp_stencil[0:(self._effectradius + (self._numberofrows -
-                                            row) - both_borders_adjustment), ...]
-                h_borders_bot = True
+                                            row) - vertically_borders_both_adjustment), ...]
+                vertically_borders_bot = True
             else:
+                # si elle ne chevauche ou ne depasse pas les deux bordure verticale
                 temp_stencil = temp_stencil[0:(self._effectradius + (self._numberofrows -
                                             row) + 1), ...]
-                h_borders_bot = True
+                vertically_borders_bot = True
 
+        # regarde si le stencil chevauche ou dépasse la bordure gauche <
         if self._effectradius - column >= 0:
             temp_stencil = temp_stencil[..., (self._effectradius - column):]
-            v_borders_left = True
+            horizontally_borders_left = True
 
+        # regarde si le stencil chevauche ou dépasse la bordure droite >
         if self._effectradius + column >= self._numberofcolumns:
             temp_stencil = temp_stencil[..., 0:(self._effectradius + (self._numberofcolumns - column))]
-            v_borders_right = True
+            horizontally_borders_right = True
 
-        if h_borders_top and h_borders_bot:
+        # ajuste le stencil en ajoutant des rangées et colonnes vides pour matcher les dimensions du board
+        if vertically_borders_top and vertically_borders_bot:
             pass
-        elif h_borders_top:
-            h_bot_stack = numpy.zeros((self._numberofrows - (self._effectradius + row + 1), temp_stencil.shape[1]),
-                                      numpy.int16)
-            temp_stencil = numpy.concatenate((temp_stencil, h_bot_stack), axis=0)
-        elif h_borders_bot:
-            h_top_stack = numpy.zeros((self._numberofrows - ((self._numberofrows - row) +
-                                       self._effectradius) - 1, temp_stencil.shape[1]), numpy.int16)
-            temp_stencil = numpy.concatenate((h_top_stack, temp_stencil), axis=0)
+        elif vertically_borders_top:
+            vertical_bot_stack = numpy.zeros((self._numberofrows - (self._effectradius + row + 1),
+                                              temp_stencil.shape[1]), numpy.int16)
+            temp_stencil = numpy.concatenate((temp_stencil, vertical_bot_stack), axis=0)
+        elif vertically_borders_bot:
+            vertical_top_stack = numpy.zeros((self._numberofrows - ((self._numberofrows - row) +
+                                                                    self._effectradius) - 1,
+                                              temp_stencil.shape[1]), numpy.int16)
+            temp_stencil = numpy.concatenate((vertical_top_stack, temp_stencil), axis=0)
         else:
-            h_bot_stack = numpy.zeros((self._numberofrows - (self._effectradius + row + 1), temp_stencil.shape[1]),
-                                      numpy.int16)
-            h_top_stack = numpy.zeros((row - self._effectradius, temp_stencil.shape[1]), numpy.int16)
-            temp_stencil = numpy.concatenate((temp_stencil, h_bot_stack), axis=0)
-            temp_stencil = numpy.concatenate((h_top_stack, temp_stencil), axis=0)
+            vertical_bot_stack = numpy.zeros((self._numberofrows - (self._effectradius + row + 1),
+                                              temp_stencil.shape[1]), numpy.int16)
+            vertical_top_stack = numpy.zeros((row - self._effectradius, temp_stencil.shape[1]), numpy.int16)
+            temp_stencil = numpy.concatenate((temp_stencil, vertical_bot_stack), axis=0)
+            temp_stencil = numpy.concatenate((vertical_top_stack, temp_stencil), axis=0)
 
-        if v_borders_left and v_borders_right:
+        if horizontally_borders_left and horizontally_borders_right:
             pass
-        elif v_borders_left:
-            v_right_stack = numpy.zeros((temp_stencil.shape[0],
-                                         self._numberofcolumns - (self._effectradius + column + 1)), numpy.int16)
-            temp_stencil = numpy.concatenate((temp_stencil, v_right_stack), axis=1)
-        elif v_borders_right:
+        elif horizontally_borders_left:
+            horizontal_right_stack = numpy.zeros((temp_stencil.shape[0],
+                                                  self._numberofcolumns - (self._effectradius + column + 1)),
+                                                 numpy.int16)
+            temp_stencil = numpy.concatenate((temp_stencil, horizontal_right_stack), axis=1)
+        elif horizontally_borders_right:
 
-            v_left_stack = numpy.zeros((temp_stencil.shape[0], self._numberofcolumns -
-                                        ((self._numberofcolumns - column) + self._effectradius)), numpy.int16)
-            temp_stencil = numpy.concatenate((v_left_stack, temp_stencil), axis=1)
+            horizontal_left_stack = numpy.zeros((temp_stencil.shape[0],
+                                                 self._numberofcolumns - ((self._numberofcolumns - column) +
+                                                                          self._effectradius)), numpy.int16)
+            temp_stencil = numpy.concatenate((horizontal_left_stack, temp_stencil), axis=1)
         else:
-            v_right_stack = numpy.zeros((temp_stencil.shape[0],
-                                         self._numberofcolumns - (self._effectradius + column + 1)), numpy.int16)
-            v_left_stack = numpy.zeros((temp_stencil.shape[0], column - self._effectradius), numpy.int16)
-            temp_stencil = numpy.concatenate((temp_stencil, v_right_stack), axis=1)
-            temp_stencil = numpy.concatenate((v_left_stack, temp_stencil), axis=1)
+            horizontal_right_stack = numpy.zeros((temp_stencil.shape[0], self._numberofcolumns -
+                                                  (self._effectradius + column + 1)), numpy.int16)
+            horizontal_left_stack = numpy.zeros((temp_stencil.shape[0], column - self._effectradius), numpy.int16)
+            temp_stencil = numpy.concatenate((temp_stencil, horizontal_right_stack), axis=1)
+            temp_stencil = numpy.concatenate((horizontal_left_stack, temp_stencil), axis=1)
 
         return temp_stencil
-
-    def _clamp_influence(self, influence_to_clamp):
-        if influence_to_clamp > self._strengthpeak:
-            return self._strengthpeak
-        elif influence_to_clamp < -self._strengthpeak:
-            return -self._strengthpeak
-        return influence_to_clamp
-
-    def _compute_value_by_distance(self, strength, distance):
-        return int(strength * (self._strengthdecay ** distance))
 
     def add_point_and_propagate_influence(self, row, column, board_to_apply, strength=0):
         """
@@ -463,6 +481,7 @@ class InfluenceMap(IntelligentModule):
 
         stencil = self.get_fitted_stencil(row, column, inverse=inverse)
         numpy.add(board_to_apply, stencil, out=board_to_apply)
+        self._clamp_board(board_to_apply)
 
     def add_square_and_propagate(self, top, bottom, left, right, strength):
         """
