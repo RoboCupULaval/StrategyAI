@@ -8,10 +8,10 @@ __author__ = 'RoboCupULaval'
 
 def get_distance(position_1, position_2):
     """
-    Distance between two positions.
-    :param position_1: Position
-    :param position_2: Position
-    :return: float - distance in millimeter
+    Calcul la distance entre deux positions.
+    :param position_1: Position 1.
+    :param position_2: Position 2.
+    :return: La distance en millimètres entre les deux positions, sous forme de float.
     """
     assert(isinstance(position_1, Position))
     assert(isinstance(position_2, Position))
@@ -20,10 +20,10 @@ def get_distance(position_1, position_2):
 
 def get_angle(main_position, other):
     """
-    Angle between position1 and position2 between -pi and pi
-    :param main_position: Position of reference
-    :param other: Position of object
-    :return: float angle between two positions in radians
+    Calcul l'angle entre deux positions et l'axe abscisses. Le résultat est en radians entre -pi et pi.
+    :param main_position: La position de référence.
+    :param other: Position de l'objet.
+    :return: L'angle entre les deux positions et l'axe des abscisses, en radians, sous forme de float.
     """
     assert isinstance(main_position, Position), "TypeError main_position"
     assert isinstance(other, Position), "TypeError other"
@@ -35,9 +35,9 @@ def get_angle(main_position, other):
 
 def cvt_angle_360(orientation):
     """
-    Convert radians angle to 0-360 degrees
-    :param orientation: float angle in radians
-    :return: int angle with 0 to 360 range.
+    Convertit un angle en radians en degrés 0-359.
+    :param orientation: L'angle à convertir, en radians.
+    :return: L'angle entre 0 et 359 degrés, sous forme de float.
     """
     assert isinstance(orientation, (int, float)), "TypeError orientation"
     orientation = m.degrees(orientation)
@@ -54,14 +54,14 @@ def cvt_angle_360(orientation):
                 break
             else:
                 orientation -= 360
-    return int(orientation)
+    return orientation
 
 
 def cvt_angle_180(orientation):
     """
-    Convert radians angle to -180-180 degrees (same as m.degrees())
-    :param orientation: float angle in radians
-    :return: int angle with 180 to -179 range.
+    Convertit un angle en radians en degrés -180-180.
+    :param orientation: L'angle en radians, sous forme d'un int ou d'un float.
+    :return: L'angle entre  -179 et 180 degrés, sous forme d'un float.
     """
     assert isinstance(orientation, (int, float)), "TypeError orientation"
 
@@ -71,10 +71,23 @@ def cvt_angle_180(orientation):
     elif orientation <= -180:
         return orientation+360
     else:
-        return int(orientation)
+        return orientation
 
 
 def get_nearest(ref_position, list_of_position, number=1):
+    """
+    Classe une liste de positions en ordre croissant de distance par rapport à une position de référence et retourne le
+    nombre de positions voulu. Mettre le nombre de positions voulu à 1 permet de trouver la position la plus proche.
+    :param ref_position: La position de référence.
+    :param list_of_position: Une liste de positions.
+    :param number: Le nombre de positions à retourner.
+    :return: Une liste contenant le nombre de positions voulu, classée en ordre croissant de distance par rapport à la
+    position de référence.
+    """
+    assert isinstance(ref_position, Position)
+    assert isinstance(list_of_position, list)
+    assert isinstance(number, int)
+
     dict_position_distance = {}
     for bot_position in list_of_position:
         dst = get_distance(ref_position, bot_position)
@@ -93,9 +106,9 @@ def get_nearest(ref_position, list_of_position, number=1):
 
 def get_milliseconds(time_sec):
     """
-    Convert the time in seconds represented as a float into milliseconds int
-    :param time_sec: The time as seconds float
-    :return: The time as milliseconds int
+    Convertit un temps en secondes sous forme de float en millisecondes sous forme d'un int.
+    :param time_sec: Le temps en secondes, sous forme de float.
+    :return: Le temps en millisecondes, sous forme de int.
     """
     assert isinstance(time_sec, float)
     return int(round(time_sec * 1000))
@@ -103,12 +116,12 @@ def get_milliseconds(time_sec):
 
 def det(a, b):
     """
-    Compute the determinant of the matrix
+    Calcul le déterminant de la matrice
     [a.x  a.y]
     [b.x  b.y]
-    :param a: The first position
-    :param b: The second position
-    :return: The determinant as a float
+    :param a: La première position.
+    :param b: La seconde position.
+    :return: Le déterminant, sous forme d'un float.
     """
     assert(isinstance(a, Position))
     assert(isinstance(b, Position))
@@ -137,12 +150,13 @@ def get_line_equation(point1, point2):
 
 def get_lines_intersection(point_a1, point_a2, point_b1, point_b2):
     """
-    Compute the position of the intersection of the two lines given by the four points.
-    :param point_a1: Point 1 on line A
-    :param point_a2: Point 2 on line A
-    :param point_b1: Point 1 on line B
-    :param point_b2: Point 2 on line B
-    :return: The position of the intersection of the two lines. Infinity if the lines are parallels.
+    Calcul la position de l'intersection de deux lignes, données chacune par deux points.
+    :param point_a1: Point 1 sur la ligne A.
+    :param point_a2: Point 2 sur la ligne A.
+    :param point_b1: Point 1 sur la ligne B.
+    :param point_b2: Point 2 sur la ligne B.
+    :return: La position de l'intersection des deux lignes. La position est située à l'infinie si les lignes
+    sont parallèles.
     """
     assert isinstance(point_a1, Position)
     assert isinstance(point_a2, Position)
@@ -159,7 +173,6 @@ def get_lines_intersection(point_a1, point_a2, point_b1, point_b2):
         # Les lignes sont parallèles
         return Position(9999999, 9999999)
 
-    # The purpose of the determinant det1 and det2 is to reduce the number of multiplications
     det1 = point_a1.x * point_a2.y - point_a1.y * point_a2.x
     det2 = point_b1.x * point_b2.y - point_b1.y * point_b2.x
 
@@ -210,11 +223,11 @@ def get_closest_point_on_line(reference, point1, point2):
 
 def get_time_to_travel(dist, speed, accel):
     """
-    Compute the time required to travel a given distance at the current speed and acceleration
-    :param dist: The distance to travel
-    :param speed: The current speed
-    :param accel: The current acceleration
-    :return: The time required to travel the distance as a float
+    Calcul le temps nécessaire pour parcourir la distance, en fonction de la vitesse et de l'accélération actuelles.
+    :param dist: La distance à parcourir.
+    :param speed: La vitesse actuelle.
+    :param accel: L'accélération actuelle.
+    :return: Le temps nécessaire pour parcourir la distance, sous forme de float.
     """
     assert isinstance(dist, (int, float))
     assert isinstance(speed, (int, float))
@@ -234,21 +247,21 @@ def get_time_to_travel(dist, speed, accel):
 
 def get_first_to_arrive(distance1, speed1, acceleration1, distance2, speed2, acceleration2):
     """
-    Determine which object will arrive first to its destination
-    :param distance1: The distance to be completed by the object 1
-    :param speed1: The current speed of the object 1
-    :param acceleration1: The current acceleration of the object 1
-    :param distance2: The distance to be completed by the object 2
-    :param speed2: The current speed of the object 2
-    :param acceleration2: The current acceleration of the object 2
-    :return: 1 if the object 1 will arrive first to the destination, 2 otherwise
+    Détermine quel objet va arriver en premier à sa destination.
+    :param distance1: La distance que l'objet 1 doit franchir.
+    :param speed1: La vitesse actuelle de l'objet 1.
+    :param acceleration1: L'accélération actuelle de l'objet 1.
+    :param distance2: La distance que l'objet 2 doit franchir.
+    :param speed2: La vitesse actuelle de l'objet 2.
+    :param acceleration2: L'accélération actuelle de l'objet 2.
+    :return: 1 si l'objet 1 va arriver en premier à sa destination, 2 sinon.
     """
     assert isinstance(distance1, (int, float))
     assert isinstance(speed1, (int, float))
-    assert isinstance((acceleration1, (int, float)))
+    assert isinstance(acceleration1, (int, float))
     assert isinstance(distance2, (int, float))
     assert isinstance(speed2, (int, float))
-    assert isinstance((acceleration2, (int, float)))
+    assert isinstance(acceleration2, (int, float))
 
     time1 = get_time_to_travel(distance1, speed1, acceleration1)
     time2 = get_time_to_travel(distance2, speed2, acceleration2)
