@@ -6,6 +6,7 @@ from ai.STA.Action.GrabBall import GrabBall
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.MoveWithBall import MoveWithBall
 from ai.STA.Action.Kick import Kick
+from ai.STA.Action.ProtectGoal import ProtectGoal
 from ai.InfoManager import InfoManager
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
@@ -135,6 +136,9 @@ class TestActions(unittest.TestCase):
         current_pose = self.info_manager.get_player_pose(self.player_id)
         current_pose_string = "AICommand(move_destination=" + str(current_pose) + ", kick_strength=0.3)"
         self.assertEqual(str(Kick.exec(self.kick)), current_pose_string)
+
+    def test_ProtectGoal(self):
+        self.fail()
 
 if __name__ == "__main__":
     unittest.main()
