@@ -12,6 +12,7 @@ from ai.Debug.debug_manager import DebugCommand
 from ai.Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from ai.Algorithm.PathfinderRRT import PathfinderRRT
 
 __author__ = 'RoboCupULaval'
 
@@ -92,7 +93,7 @@ class Coach(object):
             self.debug_manager.add_ui_command(debug_command)
 
     def _init_intelligent_modules(self):
-        self.info_manager.register_module('Pathfinder', None)
+        self.info_manager.register_module('Pathfinder', PathfinderRRT(self.info_manager))
 
     def _update_ai(self, p_game_state):
         """ Effectue une itération de mise à jour de l'ia. """
