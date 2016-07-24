@@ -23,7 +23,7 @@ class GoGetBall(Tactic):
         self.player_id = player_id
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball
-        self.target = info_manager.get_player_target
+        self.target = info_manager.get_player_target(player_id)
 
 
     def get_behind_ball(self):
