@@ -115,6 +115,7 @@ class InfoManager:
                 team_data[str(i)]['retro_pose'].pop(0)
 
 
+
     # About Game
     # ---Getter
     def get_current_play(self):

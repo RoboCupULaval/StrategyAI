@@ -4,6 +4,7 @@
 from abc import abstractmethod, ABCMeta
 from .STA.Strategy.StrategyBook import StrategyBook
 
+
 __author__ = 'RoboCupULaval'
 
 class Executor(object, metaclass=ABCMeta):
@@ -79,7 +80,7 @@ class PathfinderExecutor(Executor):
 
     def __init__(self, info_manager):
         Executor.__init__(self, info_manager)
-        self.pathfinder = None
+        self.pathfinder = self.info_manager.acquire_module("Pathfinder")
 
     def exec(self):
         """
@@ -88,6 +89,8 @@ class PathfinderExecutor(Executor):
         """
         self.pathfinder = self.info_manager.acquire_module('Pathfinder')
         if self.pathfinder: # on desactive l'executor si aucun module ne fournit de pathfinding
+
+            #Multi thread
             paths = self.pathfinder.get_paths()
             for i in range(0, 6):
                 self.info_manager.set_player_next_action(paths[i])
