@@ -1,4 +1,4 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
 from math import *
 
 from RULEngine.Util import Position
