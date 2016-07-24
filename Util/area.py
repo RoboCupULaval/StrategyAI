@@ -187,10 +187,11 @@ def stayOutsideGoalArea(position, is_yellow):
 def player_can_grab_ball(info_manager, player_id):
     player_position = info_manager.get_player_position(player_id)
     ball_position = info_manager.get_ball_position()
+    target_position = info_manager.get_player_position(info_manager.get_player_target())
 
-    if isInsideCircle(ball_position, ball_position, RADIUS_TO_GRAB_BALL):
+    if isInsideCircle(player_position, ball_position, RADIUS_TO_GRAB_BALL):
 
-        if angle_to_ball_is_tolerated(player_position, ball_position, ANGLE_TO_GRAB_BALL):
+        if angle_to_ball_is_tolerated(player_position, ball_position, target_position, ANGLE_TO_GRAB_BALL):
             return True
 
     return False
@@ -198,10 +199,11 @@ def player_can_grab_ball(info_manager, player_id):
 def player_grabbed_ball(info_manager, player_id):
     player_position = info_manager.get_player_position(player_id)
     ball_position = info_manager.get_ball_position()
+    target_position = info_manager.get_player_position(info_manager.get_player_target())
 
-    if player_position.isInsideCircle(player_position, ball_position,RADIUS_TO_HALT):
+    if player_position.isInsideCircle(player_position, ball_position, RADIUS_TO_HALT):
 
-        if angle_to_ball_is_tolerated(player_position, ball_position, ANGLE_TO_HALT):
+        if angle_to_ball_is_tolerated(player_position, ball_position, target_position, ANGLE_TO_HALT):
             return True
 
     return False

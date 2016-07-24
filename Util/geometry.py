@@ -2,6 +2,7 @@
 from ..Util.Position import Position
 from ..Game.Player import Player
 import math as m
+from .constant import *
 
 __author__ = 'RoboCupULaval'
 
@@ -98,3 +99,10 @@ def angle_to_ball_is_tolerated(player_position, ball_position, target_position, 
             return True
         return False
 
+def get_required_kick_force(position1,position2): # simple calculation
+
+    distance = get_distance(position1,position2)
+    max_field_distance_possible = m.sqrt((FIELD_X_RIGHT - FIELD_X_LEFT)**2 + (FIELD_Y_TOP - FIELD_Y_BOTTOM)**2)
+
+    kick_force = distance * KICK_MAX_SPD / max_field_distance_possible
+    return kick_force
