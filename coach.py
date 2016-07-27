@@ -8,11 +8,11 @@ from ai.InfoManager import InfoManager
 import ai.Debug.debug_manager as ui_debug
 
 # debug stuff
+from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Debug.debug_manager import DebugCommand
 from ai.Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-import random
 
 __author__ = 'RoboCupULaval'
 
@@ -55,13 +55,7 @@ class Coach(object):
     def _hard_coded_commands(self):
         debug_manager = self.info_manager.debug_manager
 
-        random.seed()
-        roulette = random.randint(1, 1000)
-        # add circle at center
-        if roulette > 995:
-            print("Envoi d'un log")
-            #debug_manager.add_log(1, "FOO BAR")
-            debug_manager.add_point((500, 500))
+        #self.info_manager.set_player_next_action(0, goto_ball)
 
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
@@ -94,7 +88,7 @@ class Coach(object):
             self.debug_manager.add_ui_command(debug_command)
 
     def _init_intelligent_modules(self):
-        self.info_manager.register_module('Pathfinder', None)
+        self.info_manager.register_module('Pathfinder', PathfinderRRT(self.info_manager))
 
     def _update_ai(self, p_game_state):
         """ Effectue une itération de mise à jour de l'ia. """
