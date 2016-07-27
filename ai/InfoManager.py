@@ -270,7 +270,7 @@ class InfoManager:
 
     def register_module(self, module_name, module_ref):
         """ Enregistre un module intelligent. """
-        self.modules[module_name] = module_ref
+        self.modules[module_name] = module_ref(self)
 
     def acquire_module(self, module_name):
         """ Acquiert la référence sur un module. """

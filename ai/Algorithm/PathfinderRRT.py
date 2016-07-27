@@ -5,14 +5,15 @@
     les trajectoires des robots de l'équipe. Les détails de l'algorithme sont
     disponibles sur la page wikipedia.
 """
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from .IntelligentModule import IntelligentModule
 import random
 import math
 import copy
 
-class PathfinderRRT(IntelligentModule):
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
+from .IntelligentModule import Pathfinder
+
+class PathfinderRRT(Pathfinder):
     """
         La classe hérite de IntelligentModule pour définir sa propriété state.
         L'interface expose une méthode qui force le calcul de toutes les
@@ -35,9 +36,40 @@ class PathfinderRRT(IntelligentModule):
             self.paths[i] = []
 
 
+    def get_paths(self):
+        """
+            Méthode qui lance le calcul de la trajectoire pour chaque robot de
+            l'équipe.
+
+            :return: None
+        """
+
+        paths = []
+        for pid in range(6):
+            paths.append(self.get_path(pid))
+
+        return paths
+
+
+    def get_path(self, pid=None):
+        """
+            Retourne la trajectoire du robot.
+
+            :param pid: Identifiant du robot, 0 à 5.
+            :return: Une liste de Pose, [Pose]
+        """
+
+        path = self._compute_path(pid)
+
+        return [Pose(Position(point[0], point[1], point), 0) for point in path]
+
+
+    def update(self):
+        #TODO: à réviser
+        pass
+
 
     def _compute_path(self, pid):
-
         """
             Cette méthode calcul la trajectoire pour un robot.
 
@@ -80,39 +112,6 @@ class PathfinderRRT(IntelligentModule):
         smoothed_path = list(reversed(smoothed_path[:-1]))
         return smoothed_path
 
-    def get_paths(self):
-        """
-            Méthode qui lance le calcul de la trajectoire pour chaque robot de
-            l'équipe.
-
-            :return: None
-        """
-
-        paths = []
-        list_of_pid = [0, 1, 2, 3, 4, 5]
-        for pid in list_of_pid:
-            paths.append(self.get_path(pid))
-
-        return paths
-
-
-
-
-    def get_path(self, pid):
-        """
-            Retourne la trajectoire du robot.
-
-            :param pid: Identifiant du robot, 0 à 5.
-            :return: Une liste de Pose, [Pose]
-        """
-
-        path = self._compute_path(pid)
-
-        return [Pose(Position(point[0], point[1], point), 0) for point in path]
-
-    def str(self):
-        """ Affichage en String directe """
-        return str(self.paths)
 
 
 class RRT():

@@ -37,12 +37,12 @@ class Coach(object):
         """
         self.info_manager = InfoManager(is_debug=True)
         self.debug_manager = self.info_manager.debug_manager
+        self._init_intelligent_modules()
         self.module_executor = executor.ModuleExecutor(self.info_manager)
         self.strategy_executor = executor.StrategyExecutor(self.info_manager)
         self.tatic_executor = executor.TacticExecutor(self.info_manager)
         self.pathfinder_executor = executor.PathfinderExecutor(self.info_manager)
         self.coach_command_sender = CoachCommandSender(self.info_manager)
-        self._init_intelligent_modules()
 
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
@@ -88,7 +88,8 @@ class Coach(object):
             self.debug_manager.add_ui_command(debug_command)
 
     def _init_intelligent_modules(self):
-        self.info_manager.register_module('Pathfinder', PathfinderRRT(self.info_manager))
+        """ Enregistre les modules existant dans l'info manager"""
+        self.info_manager.register_module('Pathfinder', PathfinderRRT)
 
     def _update_ai(self, p_game_state):
         """ Effectue une itération de mise à jour de l'ia. """
