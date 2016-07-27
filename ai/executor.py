@@ -90,7 +90,7 @@ class PathfinderExecutor(Executor):
         self.pathfinder = self.info_manager.acquire_module('Pathfinder')
         if self.pathfinder: # on desactive l'executor si aucun module ne fournit de pathfinding
 
-            #Multi thread
+
             paths = self.pathfinder.get_paths()
             for i in range(0, 6):
                 self.info_manager.set_player_next_action(paths[i])
