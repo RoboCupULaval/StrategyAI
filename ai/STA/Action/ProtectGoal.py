@@ -74,6 +74,3 @@ class ProtectGoal(Action):
         destination_pose = Pose(destination_position, destination_orientation)
         kick_strength = 0
         return AICommand(destination_pose, kick_strength)
-
-
-
