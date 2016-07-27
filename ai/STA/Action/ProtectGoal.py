@@ -13,22 +13,22 @@ __author__ = 'Robocup ULaval'
 
 class ProtectGoal(Action):
     """
-    Action ProtectGoal: Action de base pour le gardien de but. Déplace le gardien entre la balle et le centre du but, à
+    Action ProtectGoal: Action de base pour le gardien de but. DÃ©place le gardien entre la balle et le centre du but, Ã 
     une certaine distance de celui-ci, tout en restant dans la zone du gardien.
-    Méthodes:
-        exec(self): Retourne la pose où se rendre.
+    MÃ©thodes:
+        exec(self): Retourne la pose oÃ¹ se rendre.
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du gardien.
-        is_right_goal : Un booléen indiquant si le but à protéger est celui de droite.
+        is_right_goal : Un boolÃ©en indiquant si le but Ã  protÃ©ger est celui de droite.
         minimum_distance : La distance minimale qu'il doit y avoir entre le gardien et le centre du but.
         maximum_distance : La distance maximale qu'il doit y avoir entre le gardien et le centre du but.
     """
     def __init__(self, p_info_manager, p_player_id, p_is_right_goal=True, p_minimum_distance=FIELD_GOAL_RADIUS/2,
                  p_maximum_distance=None):
         """
-        :param p_info_manager: Une référence vers l'InfoManager.
+        :param p_info_manager: Une rÃ©fÃ©rence vers l'InfoManager.
         :param p_player_id: L'identifiant du joueur qui est le gardien de but.
-        :param p_is_right_goal: Un booléen indiquant si le but à protéger est celui de droite.
+        :param p_is_right_goal: Un boolÃ©en indiquant si le but Ã  protÃ©ger est celui de droite.
         :param p_minimum_distance: La distance minimale qu'il doit y avoir entre le gardien et le centre du but.
         :param p_maximum_distance: La distance maximale qu'il doit y avoir entre le gardien et le centre du but.
         """
@@ -48,7 +48,7 @@ class ProtectGoal(Action):
     def exec(self):
         """
         Calcul la pose que doit prendre le gardien en fonction de la position de la balle.
-        :return: Un tuple (Pose, kick) où Pose est la destination du gardien et kick est nul (on ne botte pas)
+        :return: Un tuple (Pose, kick) oÃ¹ Pose est la destination du gardien et kick est nul (on ne botte pas)
         """
         goalkeeper_position = self.info_manager.get_player_pose(self.player_id).position
         ball_position = self.info_manager.get_ball_position()
@@ -59,10 +59,10 @@ class ProtectGoal(Action):
         destination_position = Position()
         #destination_position = get_closest_point_on_line(goalkeeper_position, goal_position, ball_position)
 
-        # Vérification que destination_position respecte la distance minimale
+        # VÃ©rification que destination_position respecte la distance minimale
         destination_position = stayOutsideCircle(destination_position, goal_position, self.minimum_distance)
 
-        # Vérification que destination_position respecte la distance maximale
+        # VÃ©rification que destination_position respecte la distance maximale
         if self.maximum_distance is None:
             destination_position = stayInsideGoalArea(destination_position, self.is_right_goal)
         else:

@@ -8,13 +8,13 @@ import math as m
 from time import time
 
 from .Debug.debug_manager import DebugManager
-from .Util.geometry import get_milliseconds
 
-from RULEngine.Util.geometry import get_distance, get_angle
+from RULEngine.Util.geometry import get_distance, get_angle, get_milliseconds
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 
 __author__ = 'RoboCupULaval'
+
 
 class InfoManager:
     """

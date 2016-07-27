@@ -2,11 +2,10 @@
 import math
 from .Action import Action
 from ...Util.types import AICommand
-from ...Util.geometry import distance
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.area import stayOutsideCircle
-from RULEngine.Util.geometry import get_angle
+from RULEngine.Util.geometry import get_angle, get_distance
 
 __author__ = 'Robocup ULaval'
 
