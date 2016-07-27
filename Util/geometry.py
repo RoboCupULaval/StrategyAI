@@ -2,6 +2,7 @@
 from ..Util.Position import Position
 from ..Game.Player import Player
 import math as m
+from .constant import *
 
 __author__ = 'RoboCupULaval'
 
@@ -270,3 +271,19 @@ def get_first_to_arrive(distance1, speed1, acceleration1, distance2, speed2, acc
         return 0
     else:
         return 2 if time1 < time2 else 1
+
+def angle_to_ball_is_tolerated(player_position, ball_position, target_position, tolerated_angle):
+        angle_player_to_ball = get_angle(player_position, ball_position)
+        angle_ball_to_target = get_angle(ball_position, target_position)
+        angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
+        if angle_difference < tolerated_angle:
+            return True
+        return False
+
+def get_required_kick_force(position1,position2): # simple calculation
+
+    distance = get_distance(position1,position2)
+    max_field_distance_possible = m.sqrt((FIELD_X_RIGHT - FIELD_X_LEFT)**2 + (FIELD_Y_TOP - FIELD_Y_BOTTOM)**2)
+
+    kick_force = distance * KICK_MAX_SPD / max_field_distance_possible
+    return kick_force
