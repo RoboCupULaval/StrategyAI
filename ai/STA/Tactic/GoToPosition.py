@@ -4,12 +4,13 @@ from ai.STA.Tactic import Tactic
 from ai.STA.Action.MoveTo import MoveTo
 from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.constant import ANGLE_TO_HALT
+from RULEngine.Util.constant import ANGLE_TO_HALT, POSITION_DEADZONE
 
 __author__ = 'RoboCupULaval'
 
 
 class GoToPosition(Tactic):
+    # TODO : Renommer la classe pour illustrer le fait qu'elle set une Pose et non juste une Position
     """
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
@@ -21,23 +22,21 @@ class GoToPosition(Tactic):
         destination_pose : La pose de destination du robot
     """
 
-    def __init__(self, info_manager, player_id, destination_pose, deadzone):
+    def __init__(self, info_manager, player_id, destination_pose):
         Tactic.__init__(self, info_manager)
         assert isinstance(player_id, int)
         assert isinstance(destination_pose, Pose)
-        assert isinstance(deadzone, (int, float))
 
         self.current_state = self.move_to_position
         self.next_state = self.move_to_position
         self.player_id = player_id
         self.destination_pose = destination_pose
-        self.deadzone = deadzone
 
     def move_to_position(self):
         player_position = self.info_manager.get_player_position(self.player_id)
         player_orientation = self.info_manager.get_player_orientation(self.player_id)
 
-        if get_distance(player_position, self.destination_pose.position) <= self.deadzone or \
+        if get_distance(player_position, self.destination_pose.position) <= POSITION_DEADZONE or \
                 get_angle(player_orientation, self.destination_pose.orientation) <= ANGLE_TO_HALT:
                 self.next_state = self.halt
         else:
