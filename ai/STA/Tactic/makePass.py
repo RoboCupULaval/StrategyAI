@@ -10,14 +10,15 @@ __author__ = 'RoboCupULaval'
 
 
 class MakePass(Tactic):
+    # TODO : vérifier que la balle a été bottée avant de retourner à halt
     """
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
     attributs:
         info_manager: référence à la façade InfoManager
         player_id : Identifiant du joueur auquel est assigné la tactique
-        current_state : chcîne de caratères définissant l'état courant
-        next_state : chcîne de caratères définissant l'état suivant
+        current_state : L'état courant de la tactique
+        next_state : L'état suivant de la tactique
     """
 
     def __init__(self, info_manager, player_id):
