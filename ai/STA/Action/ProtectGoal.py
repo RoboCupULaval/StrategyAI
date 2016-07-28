@@ -1,9 +1,11 @@
 # Under MIT licence, see LICENCE.txt
+
 import math
 from .Action import Action
 from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.constant import *
+from RULEngine.Util.Position import Position
+from RULEngine.Util.constant import FIELD_GOAL_RADIUS, PLAYER_PER_TEAM, FIELD_X_RIGHT, FIELD_X_LEFT
 from RULEngine.Util.area import stayInsideCircle, stayOutsideCircle, stayInsideGoalArea
 from RULEngine.Util.geometry import get_angle, get_closest_point_on_line
 
@@ -33,6 +35,7 @@ class ProtectGoal(Action):
         """
         Action.__init__(self, p_info_manager)
         assert isinstance(p_player_id, int)
+        assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert isinstance(p_is_right_goal, bool)
         assert isinstance(p_minimum_distance, (int, float))
         assert (isinstance(p_maximum_distance, (int, float)) or p_maximum_distance is None)

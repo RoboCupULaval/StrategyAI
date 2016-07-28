@@ -4,7 +4,7 @@ from ai.STA.Tactic import Tactic
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GrabBall import GrabBall
 from RULEngine.Util.area import player_can_grab_ball, player_grabbed_ball
-from RULEngine.Util.constant import DISTANCE_BEHIND
+from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM
 
 __author__ = 'RoboCupULaval'
 
@@ -24,6 +24,7 @@ class GoGetBall(Tactic):
     def __init__(self, info_manager, player_id):
         Tactic.__init__(self, info_manager)
         assert isinstance(player_id, int)
+        assert PLAYER_PER_TEAM >= player_id >= 0
 
         self.player_id = player_id
         self.current_state = self.get_behind_ball

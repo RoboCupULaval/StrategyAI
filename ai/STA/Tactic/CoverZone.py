@@ -1,6 +1,9 @@
+# Under MIT licence, see LICENCE.txt
+
 from .Tactic import Tactic
 from RULEngine.Util.area import isInsideSquare
 from RULEngine.Util.Position import Position
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'RoboCupULaval'
 
@@ -13,6 +16,7 @@ class CoverZone(Tactic):
     def __init__(self, p_info_manager, p_player_id, p_y_top, p_y_bottom, p_x_left, p_x_right):
         Tactic.__init__(self, p_info_manager)
         assert isinstance(p_player_id, int)
+        assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert isinstance(p_y_top, (int, float))
         assert isinstance(p_y_bottom, (int, float))
         assert isinstance(p_x_left, (int, float))

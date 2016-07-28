@@ -5,6 +5,7 @@ from ai.STA.Action import MoveTo, Idle
 from RULEngine.Util.area import player_grabbed_ball
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import get_angle
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'RoboCupULaval'
 
@@ -24,6 +25,7 @@ class ReceivePass(Tactic):
     def __init__(self, info_manager, player_id):
         Tactic.__init__(self, info_manager)
         assert isinstance(player_id, int)
+        assert PLAYER_PER_TEAM >= player_id >= 0
 
         self.current_state = self.rotate_towards_ball
         self.next_state = self.rotate_towards_ball

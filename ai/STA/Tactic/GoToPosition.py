@@ -4,7 +4,7 @@ from ai.STA.Tactic import Tactic
 from ai.STA.Action.MoveTo import MoveTo
 from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.constant import ANGLE_TO_HALT, POSITION_DEADZONE
+from RULEngine.Util.constant import ANGLE_TO_HALT, POSITION_DEADZONE, PLAYER_PER_TEAM
 
 __author__ = 'RoboCupULaval'
 
@@ -25,6 +25,7 @@ class GoToPosition(Tactic):
     def __init__(self, info_manager, player_id, destination_pose):
         Tactic.__init__(self, info_manager)
         assert isinstance(player_id, int)
+        assert PLAYER_PER_TEAM >= player_id >= 0
         assert isinstance(destination_pose, Pose)
 
         self.current_state = self.move_to_position

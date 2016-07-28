@@ -4,6 +4,7 @@ from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_angle
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'Robocup ULaval'
 
@@ -25,6 +26,7 @@ class MoveWithBall(Action):
         """
         Action.__init__(self, p_info_manager)
         assert(isinstance(p_player_id, int))
+        assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert(isinstance(p_destination, Position))
         self.player_id = p_player_id
         self.destination = p_destination

@@ -5,6 +5,7 @@ from ai.STA.Action import Kick
 from ai.STA.Action import Idle
 from RULEngine.Util.area import player_grabbed_ball
 from RULEngine.Util.geometry import get_required_kick_force
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'RoboCupULaval'
 
@@ -24,6 +25,7 @@ class MakePass(Tactic):
     def __init__(self, info_manager, player_id):
         Tactic.__init__(self, info_manager)
         assert isinstance(player_id, int)
+        assert PLAYER_PER_TEAM >= player_id >= 0
 
         self.current_state = self.kick_ball_towards_target
         self.next_state = self.kick_ball_towards_target
