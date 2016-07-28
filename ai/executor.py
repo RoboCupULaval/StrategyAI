@@ -3,7 +3,7 @@
 
 from abc import abstractmethod, ABCMeta
 from .STA.Strategy.StrategyBook import StrategyBook
-
+from .Util.types import AICommand
 
 __author__ = 'RoboCupULaval'
 
@@ -88,11 +88,13 @@ class PathfinderExecutor(Executor):
             des joueurs de notre équipe.
         """
         self.pathfinder = self.info_manager.acquire_module('Pathfinder')
-        if self.pathfinder: # on desactive l'executor si aucun module ne fournit de pathfinding
+        if self.pathfinder:
 
             paths = self.pathfinder.get_paths()
             for i in range(0, 6):
-                self.info_manager.set_player_next_action(paths[i])
+                action = self.info_manager.get_player_next_action(i)
+                action = AICommand(paths[i][0], action.kick_strength)
+                self.info_manager.set_player_next_action(i, action)
 
 class ModuleExecutor(Executor):
     """ Met à jour tous les modules intelligents enregistré. """

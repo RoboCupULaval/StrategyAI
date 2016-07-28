@@ -13,6 +13,8 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from .IntelligentModule import Pathfinder
 
+OBSTACLE_DEAD_ZONE = 200
+
 class PathfinderRRT(Pathfinder):
     """
         La classe hérite de IntelligentModule pour définir sa propriété state.
@@ -85,7 +87,7 @@ class PathfinderRRT(Pathfinder):
 
             # TODO info manager changer get_player_position
             position = self.state.get_player_position(other_pid)
-            obstacleList.append([position.x, position.y, 200])
+            obstacleList.append([position.x, position.y, OBSTACLE_DEAD_ZONE])
 
         initial_position_of_main_player = self.state.get_player_position(pid)
 

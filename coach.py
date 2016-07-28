@@ -55,7 +55,8 @@ class Coach(object):
     def _hard_coded_commands(self):
         debug_manager = self.info_manager.debug_manager
 
-        #self.info_manager.set_player_next_action(0, goto_ball)
+        goto_ball = AICommand(Pose(self.info_manager.get_ball_position(), 0), 0)
+        self.info_manager.set_player_next_action(0, goto_ball)
 
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
