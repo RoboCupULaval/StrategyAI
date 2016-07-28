@@ -8,11 +8,11 @@ from ai.InfoManager import InfoManager
 import ai.Debug.debug_manager as ui_debug
 
 # debug stuff
+from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Debug.debug_manager import DebugCommand
 from ai.Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from ai.Algorithm.PathfinderRRT import PathfinderRRT
 
 __author__ = 'RoboCupULaval'
 
@@ -37,12 +37,12 @@ class Coach(object):
         """
         self.info_manager = InfoManager(is_debug=True)
         self.debug_manager = self.info_manager.debug_manager
+        self._init_intelligent_modules()
         self.module_executor = executor.ModuleExecutor(self.info_manager)
         self.strategy_executor = executor.StrategyExecutor(self.info_manager)
         self.tatic_executor = executor.TacticExecutor(self.info_manager)
         self.pathfinder_executor = executor.PathfinderExecutor(self.info_manager)
         self.coach_command_sender = CoachCommandSender(self.info_manager)
-        self._init_intelligent_modules()
 
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
@@ -55,14 +55,7 @@ class Coach(object):
     def _hard_coded_commands(self):
         debug_manager = self.info_manager.debug_manager
 
-        # add circle at center
-        #debug_manager.add_circle((0, 0), 100, None)
-        debug_manager.add_log(1, "Foo Bar")
-
-        # follow ball as dumb as possible
-        goto_ball = AICommand(Pose(self.info_manager.get_ball_position()), 0)
-
-        self.info_manager.set_player_next_action(0, goto_ball)
+        #self.info_manager.set_player_next_action(0, goto_ball)
 
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
@@ -76,10 +69,12 @@ class Coach(object):
     def robot_commands(self):
         return self.coach_command_sender.robot_commands
 
-    def get_debug_commands(self):
+    def get_debug_commands_and_clear(self):
         """ Élément de l'interface entre RULEngine/StrategyIA """
         if self.debug_manager:
-            return self.debug_manager.get_commands()
+            debug_commands = self.debug_manager.get_commands()
+            self.debug_manager.clear()
+            return debug_commands
         else:
             return []
 
@@ -93,7 +88,8 @@ class Coach(object):
             self.debug_manager.add_ui_command(debug_command)
 
     def _init_intelligent_modules(self):
-        self.info_manager.register_module('Pathfinder', PathfinderRRT(self.info_manager))
+        """ Enregistre les modules existant dans l'info manager"""
+        self.info_manager.register_module('Pathfinder', PathfinderRRT)
 
     def _update_ai(self, p_game_state):
         """ Effectue une itération de mise à jour de l'ia. """
