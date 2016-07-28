@@ -61,7 +61,7 @@ class PathfinderRRT(Pathfinder):
 
         path = self._compute_path(pid)
 
-        return [Pose(Position(point[0], point[1], point), 0) for point in path]
+        return [Pose(Position(point[0], point[1]), 0) for point in path]
 
 
     def update(self):
@@ -88,7 +88,15 @@ class PathfinderRRT(Pathfinder):
             obstacleList.append([position.x, position.y, 200])
 
         initial_position_of_main_player = self.state.get_player_position(pid)
+
+
         target_of_player = self.state.get_player_target(pid)
+        try :
+            target_of_player.x
+            target_of_player.y
+        except AttributeError:
+            target_of_player = self.state.get_player_position(pid)
+
 
         rrt = RRT(start=[initial_position_of_main_player.x,
                          initial_position_of_main_player.y],
@@ -108,7 +116,7 @@ class PathfinderRRT(Pathfinder):
         #Path smoothing
         maxIter = 50
         smoothed_path = path_smoothing(not_smoothed_path, maxIter, obstacleList)
-        print(smoothed_path)
+
         smoothed_path = list(reversed(smoothed_path[:-1]))
         return smoothed_path
 
@@ -277,8 +285,10 @@ def get_target_point(path, targetL):
             ti = i-1
             last_pair_len = d
             break
-
-    partRatio = (l - targetL) / last_pair_len
+    try :
+        partRatio = (l - targetL) / last_pair_len
+    except ZeroDivisionError:
+        partRatio = 0
     #  print(partRatio)
     #  print((ti,len(path),path[ti],path[ti+1]))
 
