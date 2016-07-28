@@ -41,6 +41,7 @@ def isInsideCircle(position, center, radius):
 def isOutsideSquare(position, X_TOP, X_BOTTOM, Y_LEFT, Y_RIGHT):
     return not isInsideSquare(position, X_TOP, X_BOTTOM, Y_LEFT, Y_RIGHT)
 
+
 def isOutsideCircle(position, center, radius):
     return not isInsideCircle(position, center, radius)
 
@@ -73,6 +74,7 @@ def stayInsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
             pos_x = X_LEFT
 
         return Position(pos_x, pos_y)
+
 
 def stayInsideCircle(position, center, radius):
     # Parameters assertions
@@ -184,6 +186,7 @@ def stayOutsideGoalArea(position, is_yellow):
         position = stayOutsideCircle(position, circle_bot, FIELD_GOAL_RADIUS)
         return Position(position.x, position.y)
 
+
 def player_can_grab_ball(info_manager, player_id):
     player_position = info_manager.get_player_position(player_id)
     ball_position = info_manager.get_ball_position()
@@ -195,6 +198,7 @@ def player_can_grab_ball(info_manager, player_id):
             return True
 
     return False
+
 
 def player_grabbed_ball(info_manager, player_id):
     player_position = info_manager.get_player_position(player_id)

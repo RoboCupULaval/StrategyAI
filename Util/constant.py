@@ -36,8 +36,11 @@ DELTA_T = 17 #ms, hack, à éviter
 DEBUG_RECEIVE_BUFFER_SIZE = 100
 
 # Radius and angles for tactics
-DISTANCE_BEHIND = ROBOT_RADIUS + 30 # in millimeters
-ANGLE_TO_GRAB_BALL = 1 # in radians; must be large in case ball moves fast
-RADIUS_TO_GRAB_BALL  = ROBOT_RADIUS + 30
+DISTANCE_BEHIND = ROBOT_RADIUS + 30  # in millimeters
+ANGLE_TO_GRAB_BALL = 1  # in radians; must be large in case ball moves fast
+RADIUS_TO_GRAB_BALL = ROBOT_RADIUS + 30
 ANGLE_TO_HALT = 0.09
 RADIUS_TO_HALT = ROBOT_RADIUS + 5
+
+# Deadzones
+POSITION_DEADZONE = 50
