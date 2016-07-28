@@ -5,8 +5,7 @@ from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import *
 from RULEngine.Util.area import stayInsideCircle, stayOutsideCircle, stayInsideGoalArea
-from RULEngine.Util.geometry import get_angle
-#from RULEngine.Util.geometry import get_closest_point_on_line
+from RULEngine.Util.geometry import get_angle, get_closest_point_on_line
 
 __author__ = 'Robocup ULaval'
 
@@ -36,7 +35,7 @@ class ProtectGoal(Action):
         assert isinstance(p_player_id, int)
         assert isinstance(p_is_right_goal, bool)
         assert isinstance(p_minimum_distance, (int, float))
-        assert isinstance(p_maximum_distance, (int, float, None))
+        assert (isinstance(p_maximum_distance, (int, float)) or p_maximum_distance is None)
         if p_maximum_distance is not None:
             assert p_maximum_distance >= p_minimum_distance
 
@@ -55,9 +54,8 @@ class ProtectGoal(Action):
         goal_x = FIELD_X_RIGHT if self.is_right_goal else FIELD_X_LEFT
         goal_position = Position(goal_x, 0)
 
-        # Calcul de la position pour d'interception entre la balle et le centre du but
-        destination_position = Position()
-        #destination_position = get_closest_point_on_line(goalkeeper_position, goal_position, ball_position)
+        # Calcul de la position d'interception entre la balle et le centre du but
+        destination_position = get_closest_point_on_line(goalkeeper_position, goal_position, ball_position)
 
         # Vérification que destination_position respecte la distance minimale
         destination_position = stayOutsideCircle(destination_position, goal_position, self.minimum_distance)

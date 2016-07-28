@@ -12,6 +12,7 @@ from ai.InfoManager import InfoManager
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Game.Ball import Ball
+from RULEngine.Util.constant import *
 import unittest
 from math import pi, atan, sqrt
 
@@ -141,7 +142,7 @@ class TestActions(unittest.TestCase):
     def test_kick(self):
 
         # test avec la valeur 0 (nulle)
-        self.kick = Kick(self.info_manager,self.player_id,0)
+        self.kick = Kick(self.info_manager,self.player_id, 0)
         current_pose = self.info_manager.get_player_pose(self.player_id)
         current_pose_string = "AICommand(move_destination=" + str(current_pose) + ", kick_strength=0)"
         self.assertEqual(str(Kick.exec(self.kick)),current_pose_string)
@@ -159,7 +160,16 @@ class TestActions(unittest.TestCase):
         self.assertEqual(str(Kick.exec(self.kick)), current_pose_string)
 
     def test_ProtectGoal(self):
-        self.fail()
+        # test de base
+        self.ball.set_position(Position(0, 0), 1)
+        self.info_manager.friend['0']['pose'] = Pose(Position(4450, 10), 0)
+        self.protectGoal = ProtectGoal(self.info_manager, 0)
+        output_string = "AICommand(move_destination=[(x=" + str(FIELD_X_RIGHT - FIELD_GOAL_RADIUS/2) + \
+                        ", y=0.0, z=0.0), theta=" + str(pi) + "], kick_strength=0)"
+        self.assertEqual(output_string, str(self.protectGoal.exec()))
+
+        # test distance max < distance min
+        self.assertRaises(AssertionError, ProtectGoal, self.info_manager, 0, True, 50, 40)
 
 if __name__ == "__main__":
     unittest.main()
