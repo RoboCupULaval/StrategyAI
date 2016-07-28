@@ -1,32 +1,46 @@
+# Under MIT licence, see LICENCE.txt
+
 from ai.STA.Tactic import Tactic
 from ai.STA.Action.MoveTo import MoveTo
+from RULEngine.Util.geometry import get_distance, get_angle
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.constant import ANGLE_TO_HALT
 
-class GoGetBall(Tactic):
+__author__ = 'RoboCupULaval'
+
+
+class GoToPosition(Tactic):
     """
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
     attributs:
         info_manager: référence à la façade InfoManager
-        team_id : Identifiant de l'équipe
         player_id : Identifiant du joueur auquel est assigné la tactique
-        current_state : chcîne de caratères définissant l'état courant
-        next_state : chcîne de caratères définissant l'état suivant
+        current_state : L'état courant de la tactique
+        next_state : L'état suivant de la tactique
+        destination_pose : La pose de destination du robot
     """
 
-    def __init__(self, info_manager, team_id, player_id, destination_position):
-        Tactic.__init__(self, info_manager, team_id, player_id)
+    def __init__(self, info_manager, player_id, destination_pose, deadzone):
+        Tactic.__init__(self, info_manager)
+        assert isinstance(player_id, int)
+        assert isinstance(destination_pose, Pose)
+        assert isinstance(deadzone, (int, float))
+
         self.current_state = self.move_to_position
         self.next_state = self.move_to_position
         self.player_id = player_id
-        self.destination_position = destination_position
+        self.destination_pose = destination_pose
+        self.deadzone = deadzone
 
     def move_to_position(self):
         player_position = self.info_manager.get_player_position(self.player_id)
+        player_orientation = self.info_manager.get_player_orientation(self.player_id)
 
-        if player_position == self.destination_position:
+        if get_distance(player_position, self.destination_pose.position) <= self.deadzone or \
+                get_angle(player_orientation, self.destination_pose.orientation) <= ANGLE_TO_HALT:
                 self.next_state = self.halt
         else:
             self.next_state = self.move_to_position
 
-        move_to = MoveTo(self.info_manager, self.player_id, self.destination_position)
-        return move_to
+        return MoveTo(self.info_manager, self.player_id, self.destination_pose)
