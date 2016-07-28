@@ -1,11 +1,11 @@
 # Under MIT licence, see LICENCE.txt
 
-__author__ = 'Robocup ULaval'
-
 from abc import abstractmethod
 from functools import wraps
 from ai import InfoManager
 from ai.STA.Action.Idle import Idle
+
+__author__ = 'Robocup ULaval'
 
 
 class Tactic:
@@ -19,6 +19,7 @@ class Tactic:
 
             :param p_info_manager: référence à la façade InfoManager
         """
+        assert isinstance(p_info_manager, InfoManager)
         self.info_manager = p_info_manager
         self.player_id = None
         self.current_state = self.halt
@@ -37,7 +38,7 @@ class Tactic:
         """
             Exécute une *Action* selon l'état courant
         """
-        next_action = self.current_state
+        next_action = self.current_state()
         next_ai_command = next_action.exec()
         self.info_manager.set_player_next_action(self.player_id, next_ai_command)
         self.current_state = self.next_state
