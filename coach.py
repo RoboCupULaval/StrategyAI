@@ -59,7 +59,6 @@ class Coach(object):
         self.ui_commands = []
 
         # TODO: hack
-        
         cmd_tactics = {'strategy': list(STRATEGY_BOOK.keys()),
                        'tactic': ['goto_position', 'goalkeeper', 'cover_zone', 'go_get_ball'],
                        'action': ['None']}
