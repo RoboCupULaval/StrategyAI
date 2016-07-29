@@ -23,7 +23,8 @@ from ai.STA.Tactic.CoverZone import CoverZone
 __author__ = 'RoboCupULaval'
 
 # FIXME: hack
-STRATEGY_BOOK = {'' : []}
+STRATEGY_BOOK = {'foo' : [],
+                 'bar' : []}
 STRATEGY_COMMAND = 5002
 TACTIC_COMMAND = 5003
 
@@ -58,7 +59,8 @@ class Coach(object):
         self.ui_commands = []
 
         # TODO: hack
-        cmd_tactics = {'strategy': ['None'],
+        
+        cmd_tactics = {'strategy': list(STRATEGY_BOOK.keys()),
                        'tactic': ['goto_position', 'goalkeeper', 'cover_zone', 'go_get_ball'],
                        'action': ['None']}
         cmd = DebugCommand(1001, None, cmd_tactics)
@@ -76,7 +78,6 @@ class Coach(object):
     def _hack_parse_ui_commands(self):
 
         for cmd in self.ui_commands:
-            print(cmd)
             if cmd['type'] == TACTIC_COMMAND:
                 self._hack_assign_tactic(cmd)
             elif cmd['type'] == STRATEGY_COMMAND:
@@ -117,7 +118,12 @@ class Coach(object):
 
     def _hack_set_strategy_sequence(self, strat):
         for pid in range(6):
-            self.tactics[pid] = STRATEGY_BOOK[strat][pid]
+            try:
+                self.tactics[pid] = STRATEGY_BOOK[strat][pid]
+            except KeyError:
+                pass
+            except IndexError:
+                pass
 
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
