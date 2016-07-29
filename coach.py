@@ -60,7 +60,7 @@ class Coach(object):
         self.debug_manager.logs.append(cmd)
 
     def _hack_set_init_tactics(self):
-        l_tactics = [Stop(self.info_manager, 0),
+        l_tactics = [GoalKeeper(self.info_manager, 0),
                      Stop(self.info_manager, 1),
                      Stop(self.info_manager, 2),
                      Stop(self.info_manager, 3),
