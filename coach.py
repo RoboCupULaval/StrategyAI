@@ -22,6 +22,11 @@ from ai.STA.Tactic.CoverZone import CoverZone
 
 __author__ = 'RoboCupULaval'
 
+# FIXME: hack
+STRATEGY_BOOK = {'' : []}
+STRATEGY_COMMAND = 5002
+TACTIC_COMMAND = 5003
+
 class Coach(object):
     """
         Niveau supérieur de l'IA, est appelé et créé par Framework.
@@ -68,23 +73,14 @@ class Coach(object):
                      Stop(self.info_manager, 5)]
         return l_tactics
 
-    def main_loop(self, p_game_state):
-        """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
-        self._update_ai(p_game_state)
-
-        self._hack_parse_ui_commands()
-        self._hard_coded_commands()
-
-        self.coach_command_sender.generate_and_send_commands(p_game_state)
-
     def _hack_parse_ui_commands(self):
+
         for cmd in self.ui_commands:
             print(cmd)
-            data = cmd['data']
-            pid = int(cmd['link'])
-            tact = data['tactic']
-            if pid < 6 and pid >= 0:
-                self.tactics[pid] = self._hack_get_tactic(tact, pid)
+            if cmd['type'] == TACTIC_COMMAND:
+                self._hack_assign_tactic(cmd)
+            elif cmd['type'] == STRATEGY_COMMAND:
+                self._hack_set_strategy_sequence(cmd['data']['strategy'])
 
     def _hack_get_tactic(self, t, pid):
         ref = None
@@ -101,8 +97,7 @@ class Coach(object):
 
         return ref
 
-
-    def _hard_coded_commands(self):
+    def _hack_hard_coded_commands(self):
         debug_manager = self.info_manager.debug_manager
         #goalKeeper = ProtectGoal(self.info_manager, 0, False).exec()
         goto_ball = AICommand(Pose(self.info_manager.get_ball_position()), 0)
@@ -111,6 +106,28 @@ class Coach(object):
 
         for t in self.tactics:
             t.exec()
+
+    def _hack_assign_tactic(self, cmd):
+        data = cmd['data']
+        pid = int(cmd['link'])
+        tact = data['tactic']
+        if pid < 6 and pid >= 0:
+            self.tactics[pid] = self._hack_get_tactic(tact, pid)
+
+
+    def _hack_set_strategy_sequence(self, strat):
+        for pid in range(6):
+            self.tactics[pid] = STRATEGY_BOOK[strat][pid]
+
+    def main_loop(self, p_game_state):
+        """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
+        self._update_ai(p_game_state)
+
+        self._hack_parse_ui_commands()
+        self._hack_hard_coded_commands()
+
+        self.coach_command_sender.generate_and_send_commands(p_game_state)
+
 
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
