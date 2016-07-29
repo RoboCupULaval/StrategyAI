@@ -12,6 +12,9 @@ from ai.Debug.debug_manager import DebugCommand
 from ai.Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from ai.STA.Action.ProtectGoal import ProtectGoal
+from ai.STA.Tactic.CoverZone import CoverZone
+from ai.STA.Tactic.GoalKeeper import GoalKeeper
 
 __author__ = 'RoboCupULaval'
 
@@ -42,6 +45,7 @@ class Coach(object):
         self.pathfinder_executor = executor.PathfinderExecutor(self.info_manager)
         self.coach_command_sender = CoachCommandSender(self.info_manager)
         self._init_intelligent_modules()
+        self.goalKeeper = GoalKeeper(self.info_manager, 0)
 
         # TODO: hack
         cmd_tactics = {'strategy': ['None'],
@@ -60,8 +64,11 @@ class Coach(object):
 
     def _hard_coded_commands(self):
         debug_manager = self.info_manager.debug_manager
+        #goalKeeper = ProtectGoal(self.info_manager, 0, False).exec()
         goto_ball = AICommand(Pose(self.info_manager.get_ball_position()), 0)
-        self.info_manager.set_player_next_action(0, goto_ball)
+        #self.info_manager.set_player_next_action(0, goalKeeper)
+        self.goalKeeper.exec()
+        #self.info_manager.set_player_next_action(1, goto_ball)
 
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
