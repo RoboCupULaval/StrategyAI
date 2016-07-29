@@ -40,7 +40,6 @@ class GoalKeeper(Tactic):
         self.next_state = self.protect_goal
 
     def protect_goal(self):
-        print("protect")
         # FIXME : enlever ce hack de merde
         target_dict = {'skill': None, 'goal': None, 'target': self.info_manager.get_ball_position()}
         self.info_manager.set_player_skill_target_goal(self.player_id, target_dict)
@@ -55,7 +54,6 @@ class GoalKeeper(Tactic):
         return ProtectGoal(self.info_manager, self.player_id, self.is_yellow, p_minimum_distance=300)
 
     def go_behind_ball(self):
-        print("go_behind")
         ball_position = self.info_manager.get_ball_position()
 
         if player_can_grab_ball(self.info_manager, self.player_id):
