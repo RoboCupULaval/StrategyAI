@@ -1,33 +1,41 @@
+# Under MIT licence, see LICENCE.txt
+
 from ai.STA.Tactic import Tactic
-from ai.STA.Action import MoveTo
+from ai.STA.Action import MoveTo, Idle
 from RULEngine.Util.area import player_grabbed_ball
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import get_angle
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 
-class makePass(Tactic):
+__author__ = 'RoboCupULaval'
+
+
+class ReceivePass(Tactic):
+    # TODO : Ajouter un état permettant de faire une translation pour attraper la balle si celle-ci se dirige à côté
     """
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
     attributs:
         info_manager: référence à la façade InfoManager
-        team_id : Identifiant de l'équipe
         player_id : Identifiant du joueur auquel est assigné la tactique
-        current_state : chcîne de caratères définissant l'état courant
-        next_state : chcîne de caratères définissant l'état suivant
+        current_state : L'état courant de la tactique
+        next_state : L'état suivant de la tactique
     """
 
-    def __init__(self, info_manager, team_id, player_id):
-        Tactic.__init__(self, info_manager, team_id, player_id)
+    def __init__(self, info_manager, player_id):
+        Tactic.__init__(self, info_manager)
+        assert isinstance(player_id, int)
+        assert PLAYER_PER_TEAM >= player_id >= 0
+
         self.current_state = self.rotate_towards_ball
         self.next_state = self.rotate_towards_ball
         self.player_id = player_id
 
     def rotate_towards_ball(self):
-
-        if player_grabbed_ball():
+        if player_grabbed_ball(self.info_manager, self.player_id):
             self.next_state = self.halt
-            return 0 # what to return here?
-        else: # keep rotating
+            return Idle(self.info_manager, self.player_id)
+        else:  # keep rotating
             current_position = self.info_manager.get_player_position()
             ball_position = self.info_manager.get_ball_position()
 
