@@ -1,6 +1,6 @@
 # Under MIT licence, see LICENCE.txt
 
-from ai.STA.Tactic import Tactic
+from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GrabBall import GrabBall
 from RULEngine.Util.area import player_can_grab_ball, player_grabbed_ball

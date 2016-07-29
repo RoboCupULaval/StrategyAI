@@ -1,6 +1,6 @@
 # Under MIT licence, see LICENCE.txt
 
-from ai.STA.Tactic import Tactic
+from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.MoveTo import MoveTo
 from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose

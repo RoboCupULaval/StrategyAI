@@ -12,11 +12,6 @@ from .Debug.debug_manager import DebugManager
 from RULEngine.Util.geometry import get_distance, get_angle, get_milliseconds
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from .STA.Tactic.CoverZone import CoverZone
-#from .STA.Tactic.GoGetBall import GoGetBall
-#from .STA.Tactic.GoalKeeper import GoalKeeper
-#from .STA.Tactic.GoToPosition import GoToPosition
-#from .STA.Tactic.Stop import Stop
 
 __author__ = 'RoboCupULaval'
 
