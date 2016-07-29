@@ -5,6 +5,8 @@ from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GrabBall import GrabBall
 from RULEngine.Util.area import player_can_grab_ball, player_grabbed_ball
 from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
 
 __author__ = 'RoboCupULaval'
 
@@ -30,6 +32,10 @@ class GoGetBall(Tactic):
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball
         self.target = self.info_manager.get_player_target(player_id)
+        # FIXME: hack
+        if self.target is None:
+            self.target = self.info_manager.get_ball_position()
+            self.info_manager.set_player_target(self.player_id, self.target)
 
     def get_behind_ball(self):
         ball_position = self.info_manager.get_ball_position()
