@@ -13,6 +13,8 @@ from ai.Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 
+from ai.STA.Tactic.CoverZone import CoverZone
+
 __author__ = 'RoboCupULaval'
 
 class Coach(object):
@@ -45,7 +47,7 @@ class Coach(object):
 
         # TODO: hack
         cmd_tactics = {'strategy': ['None'],
-                       'tactic': ['Foo', 'Bar', 'Baz'],
+                       'tactic': ['goto_position', 'goalkeeper', 'cover_zone', 'go_get_ball'],
                        'action': ['None']}
         cmd = DebugCommand(1001, None, cmd_tactics)
         self.debug_manager.logs.append(cmd)
@@ -86,8 +88,6 @@ class Coach(object):
 
     def set_debug_commands(self, ui_debug_commands):
         if self.debug_manager:
-            for cmd in ui_debug_commands:
-                print(cmd)
             self._set_debug_commands(ui_debug_commands)
 
     def _set_debug_commands(self, ui_debug_commands):
@@ -132,10 +132,13 @@ class CoachCommandSender(object):
         self.robot_commands = []
 
     def _generate_command(self, p_next_action):
-        if p_next_action.kick_strength > 0:
-            return self._generate_kick_command(p_next_action.kick_strength)
-        elif p_next_action.move_destination:
-            return self._generate_move_command(p_next_action.move_destination)
+        if p_next_action is not None:
+            if p_next_action.kick_strength > 0:
+                return self._generate_kick_command(p_next_action.kick_strength)
+            elif p_next_action.move_destination:
+                return self._generate_move_command(p_next_action.move_destination)
+            else:
+                return self._generate_empty_command()
         else:
             return self._generate_empty_command()
 

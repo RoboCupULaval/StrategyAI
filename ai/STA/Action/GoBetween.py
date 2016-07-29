@@ -1,6 +1,6 @@
 # Under MIT licence, see LICENCE.txt
 import math
-from .Action import Action
+from ..Action.Action import Action
 from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position

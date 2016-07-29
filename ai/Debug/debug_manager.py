@@ -139,7 +139,7 @@ class DebugManager:
         self.text.append(text)
 
     def add_ui_command(self, debug_command):
-        print(debug_command.repr())
+        print(debug_command)
         self.ui_commands.append(debug_command)
 
     # FIXME: extraction probable

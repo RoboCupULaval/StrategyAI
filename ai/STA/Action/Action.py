@@ -1,8 +1,6 @@
 # Under MIT licence, see LICENCE.txt
 
 from abc import abstractmethod
-from functools import wraps
-from ai.InfoManager import InfoManager
 
 __author__ = 'Robocup ULaval'
 

@@ -1,6 +1,6 @@
 # Under MIT licence, see LICENCE.txt
 
-from .Tactic import Tactic
+from ..Tactic import Tactic
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
@@ -11,7 +11,7 @@ from RULEngine.Util.constant import PLAYER_PER_TEAM, ROBOT_RADIUS
 __author__ = 'RoboCupULaval'
 
 
-class CoverZone(Tactic):
+class CoverZone(Tactic.Tactic):
     """
     méthodes:
         exec(self) : Exécute une Action selon l'état courant

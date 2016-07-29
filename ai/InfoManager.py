@@ -12,6 +12,11 @@ from .Debug.debug_manager import DebugManager
 from RULEngine.Util.geometry import get_distance, get_angle, get_milliseconds
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from .STA.Tactic.CoverZone import CoverZone
+#from .STA.Tactic.GoGetBall import GoGetBall
+#from .STA.Tactic.GoalKeeper import GoalKeeper
+#from .STA.Tactic.GoToPosition import GoToPosition
+#from .STA.Tactic.Stop import Stop
 
 __author__ = 'RoboCupULaval'
 
@@ -52,6 +57,9 @@ class InfoManager:
         self.friend = self.init_team_dictionary()
         self.enemy = self.init_team_dictionary()
         self.modules = {}
+#        self.tactic = [Stop(self), Stop(self), Stop(self), Stop(self), Stop(self), Stop(self)]
+        self.tactic = list(range(6))
+
         if is_debug:
             self.debug_manager = DebugManager()
         else:
@@ -181,8 +189,8 @@ class InfoManager:
         self.friend[str(i)]['target'] = action['target']
 
     def set_player_tactic(self, i, tactic):
-        # TODO: Enforce valid type
-        self.friend[str(i)]['tactic'] = tactic
+        # FIXME: hack
+        self.tactic[i] = tactic
 
     def set_player_next_action(self, i, next_action):
         # TODO: Enforce valid type
