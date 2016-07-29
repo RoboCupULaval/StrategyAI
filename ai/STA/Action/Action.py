@@ -13,7 +13,8 @@ class Action:
         """
             :param p_info_manager: référence vers l'InfoManager
         """
-        assert(isinstance(p_info_manager, InfoManager))
+        # FIXME: hack
+        # assert(isinstance(p_info_manager, InfoManager))
         self.info_manager = p_info_manager
 
     def on_before(self):

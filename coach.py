@@ -70,10 +70,12 @@ class Coach(object):
 
     def _hack_parse_ui_commands(self):
         for cmd in self.ui_commands:
-            data = cmd.data
-            pid = data['id']
+            print(cmd)
+            data = cmd['data']
+            pid = int(cmd['link'])
             tact = data['tactic']
-            self.tactics[pid] = self._hack_get_tactic(tact, pid)
+            if pid < 6 and pid >= 0:
+                self.tactics[pid] = self._hack_get_tactic(tact, pid)
 
     def _hack_get_tactic(self, t, pid):
         ref = None
@@ -88,17 +90,18 @@ class Coach(object):
         else:
             ref = Stop(self.info_manager, pid)
 
+        return ref
+
 
     def _hard_coded_commands(self):
         debug_manager = self.info_manager.debug_manager
         #goalKeeper = ProtectGoal(self.info_manager, 0, False).exec()
         goto_ball = AICommand(Pose(self.info_manager.get_ball_position()), 0)
         #self.info_manager.set_player_next_action(0, goalKeeper)
-        self.goalKeeper.exec()
         #self.info_manager.set_player_next_action(1, goto_ball)
 
-        for tactic in self.tactics:
-            tactic.exec()
+        for t in self.tactics:
+            t.exec()
 
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
@@ -127,9 +130,10 @@ class Coach(object):
 
     def _set_debug_commands(self, ui_debug_commands):
         for command in ui_debug_commands:
-            debug_command = ui_debug.wrap_command(command)
-            self.ui_commands.append(debug_command)
             # FIXME: hack
+            #debug_command = ui_debug.wrap_command(command)
+
+            self.ui_commands.append(command)
             # self.debug_manager.add_ui_command(debug_command)
 
     def _init_intelligent_modules(self):
