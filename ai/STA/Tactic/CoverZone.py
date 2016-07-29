@@ -40,8 +40,8 @@ class CoverZone(Tactic):
         self.y_bottom = p_y_bottom
         self.x_left = p_x_left
         self.x_right = p_x_right
-        self.current_state = self.cover_zone()
-        self.next_state = self.cover_zone()
+        self.current_state = self.cover_zone
+        self.next_state = self.cover_zone
 
     def cover_zone(self):
         enemy_positions = self.get_enemy_in_zone()
@@ -73,8 +73,10 @@ class CoverZone(Tactic):
         return MoveTo(self.info_manager, self.player_id, destination)
 
     def get_enemy_in_zone(self):
+        enemy_dict = self.info_manager.enemy
         enemy_list = []
-        for robot in self.info_manager.enemy:
-            if isInsideSquare(robot['position'], self.y_top, self.y_bottom, self.x_left, self.x_right):
-                enemy_list.append(robot['position'])
+        for robot in range(6):
+            pos = enemy_dict[str(robot)]['position']
+            if isInsideSquare(pos, self.y_top, self.y_bottom, self.x_left, self.x_right):
+                enemy_list.append(pos)
         return enemy_list
