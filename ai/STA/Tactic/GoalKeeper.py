@@ -4,6 +4,7 @@ from .Tactic import Tactic
 from ..Action.ProtectGoal import ProtectGoal
 from ai.STA.Action.GrabBall import GrabBall
 from ai.STA.Action.GoBehind import GoBehind
+from ai.STA.Action.Idle import Idle
 from RULEngine.Util.area import isInsideGoalArea, player_can_grab_ball, player_grabbed_ball
 from RULEngine.Util.constant import PLAYER_PER_TEAM, DISTANCE_BEHIND
 
@@ -62,6 +63,7 @@ class GoalKeeper(Tactic):
         return GoBehind(self.info_manager, self.player_id, ball_position, ball_position, DISTANCE_BEHIND)
 
     def grab_ball(self):
+        """
         if player_grabbed_ball(self.info_manager, self.player_id):
             self.next_state = self.halt
         elif player_can_grab_ball(self.info_manager, self.player_id):
@@ -70,3 +72,6 @@ class GoalKeeper(Tactic):
             self.next_state = self.go_behind_ball  # back to go_behind; the ball has moved
 
         return GrabBall(self.info_manager, self.player_id)
+        """
+        self.next_state = self.halt
+        return Idle(self.info_manager, self.player_id)

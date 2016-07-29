@@ -48,7 +48,7 @@ class Strategy(metaclass=ABCMeta):
             try:
                 next_tactics_sequence.append(self.tactics_sequence[i])
             except IndexError:
-                next_tactics_sequence.append(Stop(self.info_manager))
+                next_tactics_sequence.append(Stop(self.info_manager, 0))
         return next_tactics_sequence
 
 class HumanControl(Strategy):
