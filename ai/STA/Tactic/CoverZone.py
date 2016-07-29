@@ -1,6 +1,6 @@
 # Under MIT licence, see LICENCE.txt
 
-from ..Tactic import Tactic
+from . import Tactic
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle

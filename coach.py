@@ -2,6 +2,7 @@
 """ Module supérieur de l'IA """
 
 from RULEngine.Command import command
+from RULEngine.Util.constant import *
 
 import ai.executor as executor
 from ai.InfoManager import InfoManager
@@ -12,7 +13,10 @@ from ai.Debug.debug_manager import DebugCommand
 from ai.Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-
+from ai.STA.Tactic.GoGetBall import GoGetBall
+from ai.STA.Tactic.GoalKeeper import GoalKeeper
+from ai.STA.Tactic.GoToPosition import GoToPosition
+from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.CoverZone import CoverZone
 
 __author__ = 'RoboCupULaval'
@@ -44,6 +48,8 @@ class Coach(object):
         self.pathfinder_executor = executor.PathfinderExecutor(self.info_manager)
         self.coach_command_sender = CoachCommandSender(self.info_manager)
         self._init_intelligent_modules()
+        self.tactics = [Stop(self.info_manager, 0), Stop(self.info_manager, 1), Stop(self.info_manager, 2), Stop(self.info_manager, 3), Stop(self.info_manager, 4), Stop(self.info_manager, 5)]
+        self.ui_commands = []
 
         # TODO: hack
         cmd_tactics = {'strategy': ['None'],
@@ -56,14 +62,39 @@ class Coach(object):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
         self._update_ai(p_game_state)
 
+        self._hack_parse_ui_commands()
         self._hard_coded_commands()
 
         self.coach_command_sender.generate_and_send_commands(p_game_state)
+
+    def _hack_parse_ui_commands(self):
+        for cmd in self.ui_commands:
+            data = cmd.data
+            pid = data['id']
+            tact = data['tactic']
+            self.tactics[pid] = self._hack_get_tactic(tact, pid)
+
+    def _hack_get_tactic(self, t, pid):
+        ref = None
+        if t == "goto_position":
+            ref = GoToPosition(self.info_manager, pid, Pose(self.info_manager.get_ball_position(), 0))
+        elif t == "goalkeeper":
+            ref = GoalKeeper(self.info_manager, pid)
+        elif t == "cover_zone":
+            ref = CoverZone(self.info_manager, pid, FIELD_Y_TOP, FIELD_Y_TOP/2, FIELD_X_LEFT, FIELD_X_LEFT/2)
+        elif t == "go_get_ball":
+            ref = GoGetBall(self.info_manager, pid)
+        else:
+            ref = Stop(self.info_manager, pid)
+
 
     def _hard_coded_commands(self):
         debug_manager = self.info_manager.debug_manager
         goto_ball = AICommand(Pose(self.info_manager.get_ball_position()), 0)
         self.info_manager.set_player_next_action(0, goto_ball)
+
+        for tactic in self.tactics:
+            tatctic.exec()
 
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
@@ -93,7 +124,9 @@ class Coach(object):
     def _set_debug_commands(self, ui_debug_commands):
         for command in ui_debug_commands:
             debug_command = ui_debug.wrap_command(command)
-            self.debug_manager.add_ui_command(debug_command)
+            self.ui_commands.append(debug_command)
+            # FIXME: hack
+            # self.debug_manager.add_ui_command(debug_command)
 
     def _init_intelligent_modules(self):
         self.info_manager.register_module('Pathfinder', None)
