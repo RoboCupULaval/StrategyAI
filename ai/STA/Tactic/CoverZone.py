@@ -11,7 +11,7 @@ from RULEngine.Util.constant import PLAYER_PER_TEAM, ROBOT_RADIUS
 __author__ = 'RoboCupULaval'
 
 
-class CoverZone(Tactic):
+class CoverZone(Tactic.Tactic):
     """
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
