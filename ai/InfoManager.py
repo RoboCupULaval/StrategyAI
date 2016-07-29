@@ -178,10 +178,12 @@ class InfoManager:
 
     # ---Setter
     def set_player_skill_target_goal(self, i, action):
-        # TODO: Enforce valid types for each attribute
-        self.friend[str(i)]['skill'] = action['skill']
-        self.friend[str(i)]['goal'] = action['goal']
-        self.friend[str(i)]['target'] = action['target']
+        # FIXME: retirer!
+        self.set_player_target(i, action['target'])
+
+    def set_player_target(self, pid, target):
+        assert isinstance(target, Position), "target is not a Position"
+        self.friend[str(pid)]['target'] = target
 
     def set_player_tactic(self, i, tactic):
         # FIXME: hack
