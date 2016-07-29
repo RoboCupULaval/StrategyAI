@@ -38,6 +38,6 @@ class Tactic:
             Exécute une *Action* selon l'état courant
         """
         next_action = self.current_state
-        next_ai_command = next_action.exec()
+        next_ai_command = next_action().exec()
         self.info_manager.set_player_next_action(self.player_id, next_ai_command)
         self.current_state = self.next_state

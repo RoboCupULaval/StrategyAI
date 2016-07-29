@@ -5,6 +5,51 @@
 """
 from collections import namedtuple
 
+# couleur rgb
+# Color = namedtuple('Color', 'r g b')
+
+class Color(object):
+    # FIXME: hack
+    def __init__(self, r=0, g=0, b=0):
+        self.r = r
+        self.g = g
+        self.b = b
+
+    def repr(self):
+        return (self.r, self.g, self.b)
+
+# Solarized color definition
+YELLOW = Color(181, 137, 0)
+ORANGE = Color(203, 75, 22)
+RED = Color(220, 50, 47)
+MAGENTA = Color(211, 54, 130)
+VIOLET = Color(108, 113, 196)
+BLUE = Color(38, 139, 210)
+CYAN = Color(42, 161, 152)
+GREEN = Color(133, 153, 0)
+
+# Alias pour les identifiants des robots
+COLOR_ID0 = YELLOW
+COLOR_ID1 = ORANGE
+COLOR_ID2 = RED
+COLOR_ID3 = MAGENTA
+COLOR_ID4 = VIOLET
+COLOR_ID5 = BLUE
+
+COLOR_ID_MAP = {0: COLOR_ID0,
+                1: COLOR_ID1,
+                2: COLOR_ID2,
+                3: COLOR_ID3,
+                4: COLOR_ID4,
+                5: COLOR_ID5}
+
+SENDER_NAME = "ai"
+DEFAULT_DEBUG_TIMEOUT = 300 #ms
+DEFAULT_TEXT_SIZE = 14 #px
+DEFAULT_TEXT_FONT = 'Arial'
+DEFAULT_TEXT_ALIGN = 'Left'
+DEFAULT_TEXT_COLOR = Color(0, 0, 0)
+
 # TODO: refactor le module
 def wrap_command(raw_command):
     command = DebugCommand(raw_command['type'], raw_command['link'], raw_command['data'])
@@ -23,6 +68,7 @@ class DebugManager:
         self.influence_map = []
         self.text = []
         self.draw = []
+        self.ui_commands = []
 
     def get_commands(self):
         commands = self._get_draw_commands()
@@ -40,27 +86,44 @@ class DebugManager:
         log = DebugCommand(2, None, {'level': level, 'message': message})
         self.logs.append(log)
 
-    def add_point(self, x, y, width):
-        data = {'point': (x, y),
-                'width': width,
-                'color': None,
+    def add_point(self, point, color=VIOLET):
+        data = {'point': point,
+                'color': color.repr(),
+                'width': 5,
                 'timeout': 0}
         point = DebugCommand(3004, None, data)
         self.draw.append(point)
 
-    def add_circle(self, center, radius, style):
+    def add_circle(self, center, radius):
         data = {'center': center,
                 'radius': radius,
-                'color': None,
-                'style': style,
+                'color': CYAN.repr(),
                 'is_fill': True,
                 'timeout': 0}
         circle = DebugCommand(3003, None, data)
         self.draw.append(circle)
 
+    def add_line(self, start_point, end_point):
+        data = {'start': start_point,
+                'end': end_point,
+                'color': MAGENTA.repr()}
+        command = DebugCommand(3001, None, data)
+        self.draw.append(command)
+
+    def add_rectangle(self, top_left, bottom_right):
+        data = {'top_left': top_left,
+                'bottom_right': bottom_right,
+                'color': YELLOW.repr(),
+                'is_fill': True}
+        command = DebugCommand(3006, None, data)
+        self.draw.append(command)
+
     def add_influence_map(self, influence_map):
-        # TODO implement
-        pass
+        data = {'field_data': influence_map,
+                'coldest_color': BLUE.repr(),
+                'hottest_color': RED.repr()}
+        command = DebugCommand(3007, None, data)
+        self.draw.append(command)
 
     def add_text(self, position, text, color):
         data = {'position': position,
@@ -74,6 +137,14 @@ class DebugManager:
                 'timeout': DEFAULT_DEBUG_TIMEOUT}
         text = DebugCommand(3008, None, data)
         self.text.append(text)
+
+    def add_ui_command(self, debug_command):
+        print(debug_command.repr())
+        self.ui_commands.append(debug_command)
+
+    # FIXME: extraction probable
+    def exec_ui_commands(self):
+        pass
 
     def _get_logs_commands(self):
         return self.logs
@@ -108,7 +179,7 @@ class DebugCommand(object):
        Implémente la version 1.0 du protocole.
     """
 
-    def __init__(self, p_type_, p_link, p_data, p_version="v1.0"):
+    def __init__(self, p_type_, p_link, p_data, p_version="1.0"):
         """ Constructeur, définie à vide les attributs nécessaires. """
         super().__init__()
         self.name = SENDER_NAME
@@ -150,38 +221,3 @@ class DebugCommand(object):
 class InvalidDebugType(Exception):
     """ Est levée si un paquet de débogage n'a pas le bon type. """
     pass
-
-# couleur rgb
-Color = namedtuple('Color', 'r g b')
-
-# Solarized color definition
-YELLOW = Color(181, 137, 0)
-ORANGE = Color(203, 75, 22)
-RED = Color(220, 50, 47)
-MAGENTA = Color(211, 54, 130)
-VIOLET = Color(108, 113, 196)
-BLUE = Color(38, 139, 210)
-CYAN = Color(42, 161, 152)
-GREEN = Color(133, 153, 0)
-
-# Alias pour les identifiants des robots
-COLOR_ID0 = YELLOW
-COLOR_ID1 = ORANGE
-COLOR_ID2 = RED
-COLOR_ID3 = MAGENTA
-COLOR_ID4 = VIOLET
-COLOR_ID5 = BLUE
-
-COLOR_ID_MAP = {0: COLOR_ID0,
-                1: COLOR_ID1,
-                2: COLOR_ID2,
-                3: COLOR_ID3,
-                4: COLOR_ID4,
-                5: COLOR_ID5}
-
-SENDER_NAME = "ai"
-DEFAULT_DEBUG_TIMEOUT = 300 #ms
-DEFAULT_TEXT_SIZE = 14 #px
-DEFAULT_TEXT_FONT = 'Arial'
-DEFAULT_TEXT_ALIGN = 'Left'
-DEFAULT_TEXT_COLOR = Color(0, 0, 0)

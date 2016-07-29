@@ -43,6 +43,13 @@ class Coach(object):
         self.coach_command_sender = CoachCommandSender(self.info_manager)
         self._init_intelligent_modules()
 
+        # TODO: hack
+        cmd_tactics = {'strategy': ['None'],
+                       'tactic': ['Foo', 'Bar', 'Baz'],
+                       'action': ['None']}
+        cmd = DebugCommand(1001, None, cmd_tactics)
+        self.debug_manager.logs.append(cmd)
+
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
         self._update_ai(p_game_state)
@@ -53,14 +60,7 @@ class Coach(object):
 
     def _hard_coded_commands(self):
         debug_manager = self.info_manager.debug_manager
-
-        # add circle at center
-        #debug_manager.add_circle((0, 0), 100, None)
-        debug_manager.add_log(1, "Foo Bar")
-
-        # follow ball as dumb as possible
         goto_ball = AICommand(Pose(self.info_manager.get_ball_position()), 0)
-
         self.info_manager.set_player_next_action(0, goto_ball)
 
     def halt(self):
@@ -75,15 +75,19 @@ class Coach(object):
     def robot_commands(self):
         return self.coach_command_sender.robot_commands
 
-    def get_debug_commands(self):
+    def get_debug_commands_and_clear(self):
         """ Élément de l'interface entre RULEngine/StrategyIA """
         if self.debug_manager:
-            return self.debug_manager.get_commands()
+            debug_commands = self.debug_manager.get_commands()
+            self.debug_manager.clear()
+            return debug_commands
         else:
             return []
 
     def set_debug_commands(self, ui_debug_commands):
         if self.debug_manager:
+            for cmd in ui_debug_commands:
+                print(cmd)
             self._set_debug_commands(ui_debug_commands)
 
     def _set_debug_commands(self, ui_debug_commands):
