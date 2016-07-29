@@ -82,6 +82,8 @@ class Coach(object):
             elif cmd['type'] == STRATEGY_COMMAND:
                 self._hack_set_strategy_sequence(cmd['data']['strategy'])
 
+        self.ui_commands = []
+
     def _hack_get_tactic(self, t, pid):
         ref = None
         if t == "goto_position":

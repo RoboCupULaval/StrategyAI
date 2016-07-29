@@ -5,6 +5,7 @@ from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
 from RULEngine.Util.area import isInsideSquare, stayInsideSquare
+from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM, ROBOT_RADIUS
 
@@ -70,7 +71,7 @@ class CoverZone(Tactic):
 
         destination = stayInsideSquare(self.info_manager.get_ball_position(), self.y_top, self.y_bottom, self.x_left,
                                        self.x_right)
-        return MoveTo(self.info_manager, self.player_id, destination)
+        return MoveTo(self.info_manager, self.player_id, Pose(destination, 0))
 
     def get_enemy_in_zone(self):
         enemy_dict = self.info_manager.enemy
