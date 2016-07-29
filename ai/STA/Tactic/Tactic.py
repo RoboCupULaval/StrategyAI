@@ -19,7 +19,7 @@ class Tactic:
 
             :param p_info_manager: référence à la façade InfoManager
         """
-        assert isinstance(p_info_manager, InfoManager)
+        #assert isinstance(p_info_manager, InfoManager)
         self.info_manager = p_info_manager
         self.player_id = None
         self.current_state = self.halt
