@@ -87,10 +87,8 @@ class Coach(object):
 
     def _hack_get_tactic(self, t, pid, target):
         ref = None
-        target_tup = self._hack_str_to_tuple(target)
-        x, y = target_tup
         if t == "goto_position":
-            ref = GoToPosition(self.info_manager, pid, Pose(Position(x, y), 0))
+            ref = GoToPosition(self.info_manager, pid, Pose(Position(target[0], target[1]), 0))
         elif t == "goalkeeper":
             ref = GoalKeeper(self.info_manager, pid)
         elif t == "cover_zone":
@@ -102,19 +100,13 @@ class Coach(object):
 
         return ref
 
-    def _hack_str_to_tuple(self, target_str):
-        target_str = target_str.replace('(', '')
-        target_str = target_str.replace(')', '')
-        target_str_list = target_str.split(',')
-        return int(float(target_str_list[0])), int(float(target_str_list[1]))
-
     def _hack_hard_coded_commands(self):
         for t in self.tactics:
             t.exec()
 
     def _hack_assign_tactic(self, cmd):
         data = cmd['data']
-        pid = int(cmd['link'])
+        pid = int(data['id'])
         tact = data['tactic']
         if pid < 6 and pid >= 0:
             self.tactics[pid] = self._hack_get_tactic(tact, pid, data['target'])
@@ -168,7 +160,7 @@ class Coach(object):
         for command in ui_debug_commands:
             # FIXME: hack
             #debug_command = ui_debug.wrap_command(command)
-
+            print(command)
             self.ui_commands.append(command)
             # self.debug_manager.add_ui_command(debug_command)
 
