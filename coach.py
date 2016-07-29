@@ -49,7 +49,7 @@ class Coach(object):
         self.pathfinder_executor = executor.PathfinderExecutor(self.info_manager)
         self.coach_command_sender = CoachCommandSender(self.info_manager)
         self._init_intelligent_modules()
-        self.tactics = [Stop(self.info_manager, 0), Stop(self.info_manager, 1), Stop(self.info_manager, 2), Stop(self.info_manager, 3), Stop(self.info_manager, 4), Stop(self.info_manager, 5)]
+        self.tactics = self._hack_set_init_tactics()
         self.ui_commands = []
 
         # TODO: hack
@@ -58,6 +58,15 @@ class Coach(object):
                        'action': ['None']}
         cmd = DebugCommand(1001, None, cmd_tactics)
         self.debug_manager.logs.append(cmd)
+
+    def _hack_set_init_tactics(self):
+        l_tactics = [Stop(self.info_manager, 0),
+                     Stop(self.info_manager, 1),
+                     Stop(self.info_manager, 2),
+                     Stop(self.info_manager, 3),
+                     Stop(self.info_manager, 4),
+                     Stop(self.info_manager, 5)]
+        return l_tactics
 
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
