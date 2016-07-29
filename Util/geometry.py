@@ -273,12 +273,15 @@ def get_first_to_arrive(distance1, speed1, acceleration1, distance2, speed2, acc
         return 2 if time1 < time2 else 1
 
 def angle_to_ball_is_tolerated(player_position, ball_position, target_position, tolerated_angle):
-        angle_player_to_ball = get_angle(player_position, ball_position)
-        angle_ball_to_target = get_angle(ball_position, target_position)
-        angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
-        if angle_difference < tolerated_angle:
-            return True
-        return False
+    assert isinstance(ball_position, Position), "ball_position is not a Position"
+    assert isinstance(player_position, Position), "player_position is not a Position"
+    assert isinstance(target_position, Position), "target_position is not a Position"
+    angle_player_to_ball = get_angle(player_position, ball_position)
+    angle_ball_to_target = get_angle(ball_position, target_position)
+    angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
+    if angle_difference < tolerated_angle:
+        return True
+    return False
 
 def get_required_kick_force(position1,position2): # simple calculation
 

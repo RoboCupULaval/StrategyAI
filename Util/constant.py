@@ -4,6 +4,7 @@ from .Position import Position
 __author__ = 'RoboCupULaval'
 
 ROBOT_RADIUS = 90
+BALL_RADIUS = 22
 PLAYER_PER_TEAM = 6
 KICK_MAX_SPD = 8.0
 
@@ -40,7 +41,7 @@ DISTANCE_BEHIND = ROBOT_RADIUS + 30  # in millimeters
 ANGLE_TO_GRAB_BALL = 1  # in radians; must be large in case ball moves fast
 RADIUS_TO_GRAB_BALL = ROBOT_RADIUS + 30
 ANGLE_TO_HALT = 0.09
-RADIUS_TO_HALT = ROBOT_RADIUS + 5
+RADIUS_TO_HALT = ROBOT_RADIUS + BALL_RADIUS
 
 # Deadzones
 POSITION_DEADZONE = 50
