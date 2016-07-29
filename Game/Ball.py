@@ -16,8 +16,9 @@ class Ball():
         if pos != self._position:
             self.velocity.x = (pos.x - self._position.x)/delta
             self.velocity.y = (pos.y - self._position.y)/delta
-            print(math.sqrt(self.velocity.x**2 + self.velocity.y**2))
-            print(delta)
+            # FIXME: hack
+            #print(math.sqrt(self.velocity.x**2 + self.velocity.y**2))
+            #print(delta)
 
             self._position = pos
 

@@ -87,8 +87,9 @@ class Framework(object):
         this_time = vision_frame.detection.t_capture
         time_delta = this_time - self.last_time
         self.last_time = this_time
-        print("frame: %i, time: %d, delta: %f, FPS: %d" % \
-                (vision_frame.detection.frame_number, this_time, time_delta, 1/time_delta))
+        # FIXME: hack
+        # print("frame: %i, time: %d, delta: %f, FPS: %d" % \
+        #        (vision_frame.detection.frame_number, this_time, time_delta, 1/time_delta))
         return time_delta
 
     def update_strategies(self):
