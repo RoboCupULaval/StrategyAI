@@ -67,11 +67,12 @@ class Coach(object):
 
     def _hack_set_init_tactics(self):
         l_tactics = [GoalKeeper(self.info_manager, 0),
-                     Stop(self.info_manager, 1),
-                     Stop(self.info_manager, 2),
-                     Stop(self.info_manager, 3),
-                     Stop(self.info_manager, 4),
-                     Stop(self.info_manager, 5)]
+                     GoGetBall(self.info_manager, 1),
+                     CoverZone(self.info_manager, 2, FIELD_Y_TOP, 0, FIELD_X_LEFT, FIELD_X_LEFT / 2),
+                     CoverZone(self.info_manager, 3, 0, FIELD_Y_BOTTOM, FIELD_X_LEFT, FIELD_X_LEFT / 2),
+                     CoverZone(self.info_manager, 4, FIELD_Y_TOP, 0, FIELD_X_LEFT / 2, 0),
+                     CoverZone(self.info_manager, 5, 0, FIELD_Y_BOTTOM, FIELD_X_LEFT / 2, 0)]
+
         return l_tactics
 
     def _hack_parse_ui_commands(self):
