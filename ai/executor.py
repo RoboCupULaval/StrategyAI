@@ -2,7 +2,18 @@
 """ Module contenant les Executors """
 
 from abc import abstractmethod, ABCMeta
-from .STA.Strategy.StrategyBook import StrategyBook
+from .STA.Strategy.StrategyBook import StrategyBook, TACTIC_BOOK
+
+from .STA.Tactic import tactic_constants
+from .STA.Tactic.GoGetBall import GoGetBall
+from .STA.Tactic.GoalKeeper import GoalKeeper
+from .STA.Tactic.GoToPosition import GoToPosition
+from .STA.Tactic.Stop import Stop
+from .STA.Tactic.CoverZone import CoverZone
+
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
+from RULEngine.Util.constant import *
 
 __author__ = 'RoboCupULaval'
 
@@ -46,19 +57,25 @@ class StrategyExecutor(Executor):
             Récupère l'état stratégique en cours, le score SWOT et choisit la
             meilleure stratégie pour le contexte.
         """
-        # TODO: rendre dynamique
-        self.strategy = StrategyBook().get_strategy("HumanControl")(self.info_manager)
+        if not self.info_manager.debug_manager.human_control:
+            self.strategy = StrategyBook().get_strategy(self.info_manager.strategy)(self.info_manager)
+        else:
+            self.strategy = StrategyBook().get_strategy("HumanControl")(self.info_manager)
 
     def _assign_tactics(self):
         """
             Détermine à quel robot assigner les tactiques de la stratégie en
             cours.
         """
-        tactic_sequence = self.strategy.get_next_tactics_sequence()
-        for i in range(0, 6):
-            tactic = tactic_sequence[i]
-            tactic.player_id = i
-            self.info_manager.set_player_tactic(i, tactic_sequence[i])
+        human_control = self.info_manager.debug_manager.human_control
+        if not human_control:
+            tactic_sequence = self.strategy.get_next_tactics_sequence()
+            for pid in range(6):
+                tactic = tactic_sequence[pid]
+                tactic.player_id = pid
+                self.info_manager.set_player_tactic(pid, tactic_sequence[pid])
+        else:
+            pass
 
 
 class TacticExecutor(Executor):
@@ -73,8 +90,9 @@ class TacticExecutor(Executor):
 
     def exec(self):
         """ Obtient la Tactic de chaque robot et fait progresser la FSM. """
-        #for i in range(0, 6):
-            #self.info_manager.get_player_tactic(i).exec()
+        for pid in range(0, 6):
+            tactic = self.info_manager.get_player_tactic(pid)
+            tactic.exec()
 
 class PathfinderExecutor(Executor):
     """ Récupère les paths calculés pour les robots et les assignent. """
@@ -106,4 +124,57 @@ class ModuleExecutor(Executor):
                 modules[key].update()
             except:
                 pass
-                #print("Un module est défini à None, clef: " + str(key))
+
+class DebugExecutor(Executor):
+    """ S'occupe d'interpréter les commandes de debug """
+    def __init__(self, info_manager):
+        Executor.__init__(self, info_manager)
+        self.debug_manager = self.info_manager.debug_manager
+
+    def exec(self):
+        if self.debug_manager.human_control:
+            self._exec_when_human_control()
+        else:
+            pass
+
+    def _exec_when_human_control(self):
+        debug_commands = self.debug_manager.get_ui_commands()
+        for cmd in debug_commands:
+            self._parse_command(cmd)
+
+    def _parse_command(self, cmd):
+        if cmd.is_strategy_cmd():
+            self.info_manager.strategy = cmd.data['strategy']
+        elif cmd.is_tactic_cmd():
+            pid = self._sanitize_pid(cmd.data['id'])
+            tactic_name = cmd.data['tactic']
+            tactic_ref = self._parse_tactic(tactic_name, pid, cmd.data)
+            self.info_manager.set_player_tactic(pid, tactic_ref)
+        else:
+            pass
+
+    def _parse_tactic(self, tactic_name, pid, data):
+        # TODO: redéfinir le paquet pour set une tactique pour que les données supplémentaire
+        # soit un tuple
+        target = data['target']
+        tactic_ref = None
+        if tactic_name == "goto_position":
+            tactic_ref = GoToPosition(self.info_manager, pid, Pose(Position(target[0], target[1]), 0))
+        elif tactic_name == "goalkeeper":
+            tactic_ref = GoalKeeper(self.info_manager, pid)
+        elif tactic_name == "cover_zone":
+            tactic_ref = CoverZone(self.info_manager, pid, FIELD_Y_TOP, FIELD_Y_TOP/2, FIELD_X_LEFT, FIELD_X_LEFT/2)
+        elif tactic_name == "get_ball":
+            tactic_ref = GoGetBall(self.info_manager, pid)
+        else:
+            tactic_ref = Stop(self.info_manager, pid)
+
+        return tactic_ref
+
+    def _sanitize_pid(self, pid):
+        if pid >= 0 and pid < 6:
+            return pid
+        elif pid >= 6 and pid < 12:
+            return pid - 6
+        else:
+            return 0

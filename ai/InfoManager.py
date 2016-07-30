@@ -52,8 +52,8 @@ class InfoManager:
         self.friend = self.init_team_dictionary()
         self.enemy = self.init_team_dictionary()
         self.modules = {}
-#        self.tactic = [Stop(self), Stop(self), Stop(self), Stop(self), Stop(self), Stop(self)]
-        self.tactic = list(range(6))
+        self.strategy = "HumanControl"
+        self.tactics = list(range(6))
 
         if is_debug:
             self.debug_manager = DebugManager()
@@ -152,11 +152,8 @@ class InfoManager:
     def get_player_goal(self, i):
         return self.friend[str(i)]['goal']
 
-    def get_player_skill(self, i):
-        return self.friend[str(i)]['skill']
-
-    def get_player_tactic(self, i):
-        return self.friend[str(i)]['tactic']
+    def get_player_tactic(self, pid):
+        return self.tactics[pid]
 
     def get_player_position(self, i):
         return self.friend[str(i)]['position']
@@ -187,7 +184,7 @@ class InfoManager:
 
     def set_player_tactic(self, i, tactic):
         # FIXME: hack
-        self.tactic[i] = tactic
+        self.tactics[i] = tactic
 
     def set_player_next_action(self, i, next_action):
         # TODO: Enforce valid type

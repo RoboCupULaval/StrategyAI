@@ -3,8 +3,17 @@
 
 from abc import ABCMeta
 
-from ..Tactic.Stop import Stop
 from ..Tactic import tactic_constants
+from ..Tactic.GoGetBall import GoGetBall
+from ..Tactic.GoalKeeper import GoalKeeper
+from ..Tactic.GoToPosition import GoToPosition
+from ..Tactic.Stop import Stop
+from ..Tactic.CoverZone import CoverZone
+
+TACTIC_BOOK = {'goto_position' : GoToPosition,
+               'goalkeeper' : GoalKeeper,
+               'cover_zone' : CoverZone,
+               'get_ball' : GoGetBall}
 
 class StrategyBook(object):
     """
@@ -17,6 +26,9 @@ class StrategyBook(object):
 
     def get_strategy(self, strategy_name):
         return self.book[strategy_name]
+
+    def get_strategies_name_list(self):
+        return list(self.book.keys())
 
 class Strategy(metaclass=ABCMeta):
     """ Définie l'interface commune aux stratégies. """
@@ -34,8 +46,8 @@ class Strategy(metaclass=ABCMeta):
         return self._generate_next_tactics_sequence()
 
     def _init_tactics_sequence(self, p_starting_tactics_sequence):
-        for tactic in p_starting_tactics_sequence:
-            self.tactics_sequence.append(tactic())
+        for pid in range(6):
+            self.tactics_sequence.append(p_starting_tactics_sequence[pid](self.info_manager, pid))
 
     def _remove_finished_tactics(self):
         for tactic in self.tactics_sequence:
@@ -44,13 +56,13 @@ class Strategy(metaclass=ABCMeta):
 
     def _generate_next_tactics_sequence(self):
         next_tactics_sequence = []
-        for i in range(0, 6):
+        for pid in range(6):
             try:
-                next_tactics_sequence.append(self.tactics_sequence[i])
+                next_tactics_sequence.append(self.tactics_sequence[pid])
             except IndexError:
-                next_tactics_sequence.append(Stop(self.info_manager, 0))
+                next_tactics_sequence.append(Stop(self.info_manager, pid))
         return next_tactics_sequence
 
 class HumanControl(Strategy):
     def __init__(self, p_info_manager):
-        super().__init__(p_info_manager, [])
+        super().__init__(p_info_manager, [Stop, Stop, Stop, Stop, Stop, Stop])

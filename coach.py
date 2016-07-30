@@ -7,26 +7,15 @@ from RULEngine.Util.constant import *
 import ai.executor as executor
 from ai.InfoManager import InfoManager
 import ai.Debug.debug_manager as ui_debug
+from ai.STA.Strategy.StrategyBook import StrategyBook, TACTIC_BOOK
 
 # debug stuff
 from ai.Debug.debug_manager import DebugCommand
 from ai.Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from ai.STA.Tactic.GoGetBall import GoGetBall
-from ai.STA.Action.ProtectGoal import ProtectGoal
-from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.GoToPosition import GoToPosition
-from ai.STA.Tactic.Stop import Stop
-from ai.STA.Tactic.CoverZone import CoverZone
 
 __author__ = 'RoboCupULaval'
-
-# FIXME: hack
-STRATEGY_BOOK = {'foo' : [],
-                 'bar' : []}
-STRATEGY_COMMAND = 5002
-TACTIC_COMMAND = 5003
 
 class Coach(object):
     """
@@ -49,84 +38,18 @@ class Coach(object):
         """
         self.info_manager = InfoManager(is_debug=True)
         self.debug_manager = self.info_manager.debug_manager
+        self.debug_executor = executor.DebugExecutor(self.info_manager)
         self.module_executor = executor.ModuleExecutor(self.info_manager)
         self.strategy_executor = executor.StrategyExecutor(self.info_manager)
         self.tatic_executor = executor.TacticExecutor(self.info_manager)
         self.pathfinder_executor = executor.PathfinderExecutor(self.info_manager)
         self.coach_command_sender = CoachCommandSender(self.info_manager)
         self._init_intelligent_modules()
-        self.tactics = self._hack_set_init_tactics()
-        self.ui_commands = []
-
-        # TODO: hack
-        cmd_tactics = {'strategy': list(STRATEGY_BOOK.keys()),
-                       'tactic': ['goto_position', 'goalkeeper', 'cover_zone', 'go_get_ball'],
-                       'action': ['None']}
-        cmd = DebugCommand(1001, None, cmd_tactics)
-        self.debug_manager.logs.append(cmd)
-
-    def _hack_set_init_tactics(self):
-        l_tactics = [GoalKeeper(self.info_manager, 0),
-                     GoGetBall(self.info_manager, 1),
-                     CoverZone(self.info_manager, 2, FIELD_Y_TOP, 0, FIELD_X_LEFT, FIELD_X_LEFT / 2),
-                     CoverZone(self.info_manager, 3, 0, FIELD_Y_BOTTOM, FIELD_X_LEFT, FIELD_X_LEFT / 2),
-                     CoverZone(self.info_manager, 4, FIELD_Y_TOP, 0, FIELD_X_LEFT / 2, 0),
-                     CoverZone(self.info_manager, 5, 0, FIELD_Y_BOTTOM, FIELD_X_LEFT / 2, 0)]
-
-        return l_tactics
-
-    def _hack_parse_ui_commands(self):
-
-        for cmd in self.ui_commands:
-            if cmd['type'] == TACTIC_COMMAND:
-                self._hack_assign_tactic(cmd)
-            elif cmd['type'] == STRATEGY_COMMAND:
-                self._hack_set_strategy_sequence(cmd['data']['strategy'])
-
-        self.ui_commands = []
-
-    def _hack_get_tactic(self, t, pid, target):
-        ref = None
-        if t == "goto_position":
-            ref = GoToPosition(self.info_manager, pid, Pose(Position(target[0], target[1]), 0))
-        elif t == "goalkeeper":
-            ref = GoalKeeper(self.info_manager, pid)
-        elif t == "cover_zone":
-            ref = CoverZone(self.info_manager, pid, FIELD_Y_TOP, FIELD_Y_TOP/2, FIELD_X_LEFT, FIELD_X_LEFT/2)
-        elif t == "go_get_ball":
-            ref = GoGetBall(self.info_manager, pid)
-        else:
-            ref = Stop(self.info_manager, pid)
-
-        return ref
-
-    def _hack_hard_coded_commands(self):
-        for t in self.tactics:
-            t.exec()
-
-    def _hack_assign_tactic(self, cmd):
-        data = cmd['data']
-        pid = int(data['id'])
-        tact = data['tactic']
-        if pid < 6 and pid >= 0:
-            self.tactics[pid] = self._hack_get_tactic(tact, pid, data['target'])
-
-
-    def _hack_set_strategy_sequence(self, strat):
-        for pid in range(6):
-            try:
-                self.tactics[pid] = STRATEGY_BOOK[strat][pid]
-            except KeyError:
-                pass
-            except IndexError:
-                pass
+        self._init_ui_debug()
 
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
         self._update_ai(p_game_state)
-
-        self._hack_parse_ui_commands()
-        self._hack_hard_coded_commands()
 
         self.coach_command_sender.generate_and_send_commands(p_game_state)
 
@@ -147,29 +70,33 @@ class Coach(object):
         """ Élément de l'interface entre RULEngine/StrategyIA """
         if self.debug_manager:
             debug_commands = self.debug_manager.get_commands()
-            self.debug_manager.clear()
+            for cmd in debug_commands:
+                print(cmd)
             return debug_commands
         else:
             return []
 
     def set_debug_commands(self, ui_debug_commands):
         if self.debug_manager:
-            self._set_debug_commands(ui_debug_commands)
-
-    def _set_debug_commands(self, ui_debug_commands):
-        for command in ui_debug_commands:
-            # FIXME: hack
-            #debug_command = ui_debug.wrap_command(command)
-            print(command)
-            self.ui_commands.append(command)
-            # self.debug_manager.add_ui_command(debug_command)
+            for command in ui_debug_commands:
+                self.debug_manager.add_ui_command(command)
 
     def _init_intelligent_modules(self):
         self.info_manager.register_module('Pathfinder', None)
 
+    def _init_ui_debug(self):
+        # FIXME: exécuter uniquement sur handshake plutôt qu'à l'init du coach
+        cmd_tactics = {'strategy': list(StrategyBook().get_strategies_name_list()),
+                       'tactic': list(TACTIC_BOOK.keys()),
+                       'action': ['None']}
+        cmd = DebugCommand(1001, None, cmd_tactics)
+        self.debug_manager.add_odd_command(cmd)
+
+
     def _update_ai(self, p_game_state):
         """ Effectue une itération de mise à jour de l'ia. """
         self.info_manager.update(p_game_state)
+        self.debug_executor.exec()
         self.strategy_executor.exec()
         self.tatic_executor.exec()
         # TODO: Optimiser les moments de mises à jours des modules intelligents

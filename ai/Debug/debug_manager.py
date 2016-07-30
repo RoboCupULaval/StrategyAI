@@ -5,8 +5,8 @@
 """
 from collections import namedtuple
 
-# couleur rgb
-# Color = namedtuple('Color', 'r g b')
+STRATEGY_COMMAND_TYPE = 5002
+TACTIC_COMMAND_TYPE = 5003
 
 class Color(object):
     # FIXME: hack
@@ -68,19 +68,22 @@ class DebugManager:
         self.influence_map = []
         self.text = []
         self.draw = []
+        self.odd = []
         self.ui_commands = []
+        self.human_control = False
 
     def get_commands(self):
         commands = self._get_draw_commands()
         commands = commands + self._get_influence_map_commands()
         commands = commands + self._get_logs_commands()
         commands = commands + self._get_text_commands()
+        commands = commands + self._get_odd_commands()
         return [c.get_packet_repr() for c in commands]
 
-    def clear(self):
-        self._clear_draw()
-        self._clear_influence_map()
-        self._clear_logs()
+    def get_ui_commands(self):
+        cmds = self.ui_commands
+        self.ui_commands = []
+        return cmds
 
     def add_log(self, level, message):
         log = DebugCommand(2, None, {'level': level, 'message': message})
@@ -139,38 +142,39 @@ class DebugManager:
         self.text.append(text)
 
     def add_ui_command(self, debug_command):
-        print(debug_command)
-        self.ui_commands.append(debug_command)
+        self.human_control = True
+        self.ui_commands.append(UIDebugCommand(debug_command))
 
-    # FIXME: extraction probable
-    def exec_ui_commands(self):
-        pass
+    def add_odd_command(self, odd_cmd):
+        self.odd.append(odd_cmd)
+
+    def set_human_control(self, status=True):
+        self.human_control = status
 
     def _get_logs_commands(self):
-        return self.logs
+        logs = self.logs
+        self.logs = []
+        return logs
 
     def _get_influence_map_commands(self):
-        return self.influence_map
+        im = self.influence_map
+        self.influence_map = []
+        return im
 
     def _get_text_commands(self):
-        return self.text
+        text = self.text
+        self.text = []
+        return text
 
     def _get_draw_commands(self):
-        return self.draw
-        self._clear_text()
-
-    def _clear_logs(self):
-        self.logs = []
-
-    def _clear_influence_map(self):
-        self.influence_map = []
-
-    def _clear_text(self):
-        self.text = []
-
-    def _clear_draw(self):
+        draw = self.draw
         self.draw = []
+        return draw
 
+    def _get_odd_commands(self):
+        odd = self.odd
+        self.odd = []
+        return odd
 
 class DebugCommand(object):
     """
@@ -217,6 +221,18 @@ class DebugCommand(object):
         """ Représentation: dictionnaire du paquet. """
         return str(self._get_packet())
 
+class UIDebugCommand(object):
+
+    def __init__(self, raw_cmd):
+        print(raw_cmd)
+        self.data = raw_cmd['data']
+        self.cmd_type = raw_cmd['type']
+
+    def is_strategy_cmd(self):
+        return self.cmd_type == STRATEGY_COMMAND_TYPE
+
+    def is_tactic_cmd(self):
+        return self.cmd_type == TACTIC_COMMAND_TYPE
 
 class InvalidDebugType(Exception):
     """ Est levée si un paquet de débogage n'a pas le bon type. """
