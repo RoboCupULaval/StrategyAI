@@ -118,10 +118,10 @@ class InfluenceMap(IntelligentModule):
 
     def _create_standard_influence_board(self):
         """
-        Crée un objet numpy.ndarray, une liste à 2 dimenson de self._number_of_rows par self._number_of_columns d'int16.
+        Crée un objet numpy.ndarray, une liste à 2 dimenson de self._number_of_rows par self._number_of_columns d'int8.
 
-        :return: Un numpy.ndarray d'int16 de self._number_of_rows par self._number_of_columns, style c (row-major).
-        :rtype: numpy.ndarray dtype=numpy.int16
+        :return: Un numpy.ndarray d'int8 de self._number_of_rows par self._number_of_columns, style c (row-major).
+        :rtype: numpy.ndarray dtype=numpy.int8
         """
         return numpy.zeros((self._number_of_rows, self._number_of_columns), numpy.int8)
 
@@ -155,7 +155,7 @@ class InfluenceMap(IntelligentModule):
         Mets des bordures sur un array numpy.ndarray vierge.
 
         :param board_to_apply: Un numpy.ndarray un array vierge pour y ajouter des bordures.
-        :type board_to_apply: numpy.ndarray dtype=numpy.int16
+        :type board_to_apply: numpy.ndarray dtype=numpy.int8
         """
 
         board_to_apply[0] = self._border_strength
@@ -233,7 +233,7 @@ class InfluenceMap(IntelligentModule):
         :param v_h_offset: la dimension verticale et horizontale des buts.
         :type v_h_offset: tuple (int * int)
         :param board_to_apply: Un numpy.ndarray un array vierge pour y ajouter des buts.
-        :type board_to_apply: numpy.ndarray dtype=numpy.int16
+        :type board_to_apply: numpy.ndarray dtype=numpy.int8
         """
 
         # TODO take into account what team you are ie: orientation and strength adjustment
@@ -304,7 +304,7 @@ class InfluenceMap(IntelligentModule):
         Parcours chaque cases du tableau et les clampe.
 
         :param board_to_clamp: Un numpy.ndarray à clampé
-        :type board_to_clamp: numpy.ndarray dtype=numpy.int16
+        :type board_to_clamp: numpy.ndarray dtype=numpy.int8
         """
         cases_iterator = numpy.nditer(board_to_clamp, op_flags=['readwrite'])
 
@@ -319,7 +319,7 @@ class InfluenceMap(IntelligentModule):
         :param int row: la rangée du point d'origine de la force
         :param int column: int La colonne du point d'origine de la force
         :param board_to_apply: numpy.ndarray l'array sur lequel on ajoute un point et on le propage
-        :type board_to_apply: numpy.ndarray dtype=numpy.int16
+        :type board_to_apply: numpy.ndarray dtype=numpy.int8
         :param int strength: la force du point à appliquer
         """
         assert (isinstance(row, int))
@@ -516,8 +516,8 @@ class InfluenceMap(IntelligentModule):
         print(self._starterboard.shape[0], " x ", self._starterboard.shape[1], "  erad: ", self._effect_radius)
 
     def str(self):
-        # todo comment and make sure this is right!
-        return str("Influence Map - ", str(self._number_of_rows), " x ", str(self._number_of_columns))
+        # todo comment and make sure this is right! Embelish?
+        return "Influence Map - ", str(self._number_of_rows), " x ", str(self._number_of_columns)
 
     def distance(self, x1, y1, x2, y2):
         assert (isinstance(x1, int))
