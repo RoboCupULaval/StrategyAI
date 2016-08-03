@@ -2,6 +2,7 @@
 from .Action import Action
 from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 
 class MoveTo(Action):
@@ -21,6 +22,7 @@ class MoveTo(Action):
         """
         Action.__init__(self, p_info_manager)
         assert(isinstance(p_player_id, int))
+        assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert(isinstance(p_destination, Pose))
         self.player_id = p_player_id
         self.destination = p_destination

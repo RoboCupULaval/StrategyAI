@@ -8,13 +8,13 @@ import math as m
 from time import time
 
 from .Debug.debug_manager import DebugManager
-from .Util.geometry import get_milliseconds
 
-from RULEngine.Util.geometry import get_distance, get_angle
+from RULEngine.Util.geometry import get_distance, get_angle, get_milliseconds
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 
 __author__ = 'RoboCupULaval'
+
 
 class InfoManager:
     """
@@ -52,6 +52,9 @@ class InfoManager:
         self.friend = self.init_team_dictionary()
         self.enemy = self.init_team_dictionary()
         self.modules = {}
+        self.strategy = "HumanControl"
+        self.tactics = list(range(6))
+
         if is_debug:
             self.debug_manager = DebugManager()
         else:
@@ -85,6 +88,10 @@ class InfoManager:
         self._update_ball(game_state.field.ball)
         self._update_team(self.friend, game_state.friends)
         self._update_team(self.enemy, game_state.enemies)
+        ui_debug_commands = game_state.debug
+        if self.debug_manager:
+            for command in ui_debug_commands:
+                self.debug_manager.add_ui_command(command)
 
 
     def _update_ball(self, ball):
@@ -150,11 +157,8 @@ class InfoManager:
     def get_player_goal(self, i):
         return self.friend[str(i)]['goal']
 
-    def get_player_skill(self, i):
-        return self.friend[str(i)]['skill']
-
-    def get_player_tactic(self, i):
-        return self.friend[str(i)]['tactic']
+    def get_player_tactic(self, pid):
+        return self.tactics[pid]
 
     def get_player_position(self, i):
         return self.friend[str(i)]['position']
@@ -176,14 +180,16 @@ class InfoManager:
 
     # ---Setter
     def set_player_skill_target_goal(self, i, action):
-        # TODO: Enforce valid types for each attribute
-        self.friend[str(i)]['skill'] = action['skill']
-        self.friend[str(i)]['goal'] = action['goal']
-        self.friend[str(i)]['target'] = action['target']
+        # FIXME: retirer!
+        self.set_player_target(i, action['target'])
+
+    def set_player_target(self, pid, target):
+        assert isinstance(target, Position), "target is not a Position"
+        self.friend[str(pid)]['target'] = target
 
     def set_player_tactic(self, i, tactic):
-        # TODO: Enforce valid type
-        self.friend[str(i)]['tactic'] = tactic
+        # FIXME: hack
+        self.tactics[i] = tactic
 
     def set_player_next_action(self, i, next_action):
         # TODO: Enforce valid type

@@ -1,12 +1,12 @@
 # Under MIT licence, see LICENCE.txt
 import math
-from .Action import Action
+from ..Action.Action import Action
 from ...Util.types import AICommand
-from ...Util.geometry import distance
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.area import stayOutsideCircle
-from RULEngine.Util.geometry import get_angle
+from RULEngine.Util.geometry import get_angle, get_distance
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'Robocup ULaval'
 
@@ -32,10 +32,11 @@ class GoBetween(Action):
         """
         Action.__init__(self, p_info_manager)
         assert(isinstance(p_player_id, int))
+        assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert(isinstance(p_position1, Position))
         assert(isinstance(p_position2, Position))
         assert(isinstance(p_minimum_distance, (int, float)))
-        assert(distance(p_position1, p_position2) > 2*p_minimum_distance)
+        assert(get_distance(p_position1, p_position2) > 2*p_minimum_distance)
 
         self.player_id = p_player_id
         self.position1 = p_position1
@@ -74,8 +75,8 @@ class GoBetween(Action):
 
         # Vérification que destination_position se trouve entre position1 et position2
         distance_positions = math.sqrt(delta_x**2 + delta_y**2)
-        distance_dest_pos1 = distance(self.position1, destination_position)
-        distance_dest_pos2 = distance(self.position2, destination_position)
+        distance_dest_pos1 = get_distance(self.position1, destination_position)
+        distance_dest_pos2 = get_distance(self.position2, destination_position)
 
         if distance_dest_pos1 >= distance_positions and distance_dest_pos1 > distance_dest_pos2:
             # Si position2 est entre position1 et destination_position

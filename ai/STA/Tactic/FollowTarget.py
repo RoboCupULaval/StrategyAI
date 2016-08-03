@@ -1,4 +1,4 @@
-from . import Tactic
+from ai.STA.Tactic import Tactic
 
 
 class FollowTarget(Tactic):

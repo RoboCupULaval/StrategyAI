@@ -5,8 +5,18 @@
 """
 from collections import namedtuple
 
-# couleur rgb
-Color = namedtuple('Color', 'r g b')
+STRATEGY_COMMAND_TYPE = 5002
+TACTIC_COMMAND_TYPE = 5003
+
+class Color(object):
+    # FIXME: hack
+    def __init__(self, r=0, g=0, b=0):
+        self.r = r
+        self.g = g
+        self.b = b
+
+    def repr(self):
+        return (self.r, self.g, self.b)
 
 # Solarized color definition
 YELLOW = Color(181, 137, 0)
@@ -58,43 +68,65 @@ class DebugManager:
         self.influence_map = []
         self.text = []
         self.draw = []
+        self.odd = []
+        self.ui_commands = []
+        self.human_control = False
 
     def get_commands(self):
         commands = self._get_draw_commands()
         commands = commands + self._get_influence_map_commands()
         commands = commands + self._get_logs_commands()
         commands = commands + self._get_text_commands()
+        commands = commands + self._get_odd_commands()
         return [c.get_packet_repr() for c in commands]
 
-    def clear(self):
-        self._clear_draw()
-        self._clear_influence_map()
-        self._clear_logs()
+    def get_ui_commands(self):
+        cmds = self.ui_commands
+        self.ui_commands = []
+        return cmds
 
     def add_log(self, level, message):
         log = DebugCommand(2, None, {'level': level, 'message': message})
         self.logs.append(log)
 
-    def add_point(self, point, color=MAGENTA):
+    def add_point(self, point, color=VIOLET):
         data = {'point': point,
-                'color': color,
+                'color': color.repr(),
+                'width': 5,
                 'timeout': 0}
         point = DebugCommand(3004, None, data)
         self.draw.append(point)
 
-    def add_circle(self, center, radius, style):
+    def add_circle(self, center, radius):
         data = {'center': center,
                 'radius': radius,
-                'color': None,
-                'style': style,
+                'color': CYAN.repr(),
                 'is_fill': True,
                 'timeout': 0}
         circle = DebugCommand(3003, None, data)
         self.draw.append(circle)
 
+    def add_line(self, start_point, end_point):
+        data = {'start': start_point,
+                'end': end_point,
+                'color': MAGENTA.repr()}
+        command = DebugCommand(3001, None, data)
+        self.draw.append(command)
+
+    def add_rectangle(self, top_left, bottom_right):
+        data = {'top_left': top_left,
+                'bottom_right': bottom_right,
+                'color': YELLOW.repr(),
+                'is_fill': True}
+        command = DebugCommand(3006, None, data)
+        self.draw.append(command)
+
     def add_influence_map(self, influence_map):
-        # TODO implement
-        pass
+        data = {'field_data': influence_map,
+                'coldest_color': BLUE.repr(),
+                'hottest_color': RED.repr()}
+        command = DebugCommand(3007, None, data)
+        self.draw.append(command)
 
     def add_text(self, position, text, color):
         data = {'position': position,
@@ -109,31 +141,40 @@ class DebugManager:
         text = DebugCommand(3008, None, data)
         self.text.append(text)
 
+    def add_ui_command(self, debug_command):
+        self.human_control = True
+        self.ui_commands.append(UIDebugCommand(debug_command))
+
+    def add_odd_command(self, odd_cmd):
+        self.odd.append(odd_cmd)
+
+    def set_human_control(self, status=True):
+        self.human_control = status
+
     def _get_logs_commands(self):
-        return self.logs
+        logs = self.logs
+        self.logs = []
+        return logs
 
     def _get_influence_map_commands(self):
-        return self.influence_map
+        im = self.influence_map
+        self.influence_map = []
+        return im
 
     def _get_text_commands(self):
-        return self.text
+        text = self.text
+        self.text = []
+        return text
 
     def _get_draw_commands(self):
-        return self.draw
-        self._clear_text()
-
-    def _clear_logs(self):
-        self.logs = []
-
-    def _clear_influence_map(self):
-        self.influence_map = []
-
-    def _clear_text(self):
-        self.text = []
-
-    def _clear_draw(self):
+        draw = self.draw
         self.draw = []
+        return draw
 
+    def _get_odd_commands(self):
+        odd = self.odd
+        self.odd = []
+        return odd
 
 class DebugCommand(object):
     """
@@ -180,6 +221,18 @@ class DebugCommand(object):
         """ Représentation: dictionnaire du paquet. """
         return str(self._get_packet())
 
+class UIDebugCommand(object):
+
+    def __init__(self, raw_cmd):
+        print(raw_cmd)
+        self.data = raw_cmd['data']
+        self.cmd_type = raw_cmd['type']
+
+    def is_strategy_cmd(self):
+        return self.cmd_type == STRATEGY_COMMAND_TYPE
+
+    def is_tactic_cmd(self):
+        return self.cmd_type == TACTIC_COMMAND_TYPE
 
 class InvalidDebugType(Exception):
     """ Est levée si un paquet de débogage n'a pas le bon type. """

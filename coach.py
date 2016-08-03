@@ -2,13 +2,14 @@
 """ Module supérieur de l'IA """
 
 from RULEngine.Command import command
+from RULEngine.Util.constant import *
 
 import ai.executor as executor
 from ai.InfoManager import InfoManager
 import ai.Debug.debug_manager as ui_debug
+from ai.STA.Strategy.StrategyBook import StrategyBook, TACTIC_BOOK
 
 # debug stuff
-from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Debug.debug_manager import DebugCommand
 from ai.Util.types import AICommand
 from RULEngine.Util.Pose import Pose
@@ -37,25 +38,21 @@ class Coach(object):
         """
         self.info_manager = InfoManager(is_debug=True)
         self.debug_manager = self.info_manager.debug_manager
-        self._init_intelligent_modules()
+        self.debug_executor = executor.DebugExecutor(self.info_manager)
         self.module_executor = executor.ModuleExecutor(self.info_manager)
         self.strategy_executor = executor.StrategyExecutor(self.info_manager)
         self.tatic_executor = executor.TacticExecutor(self.info_manager)
         self.pathfinder_executor = executor.PathfinderExecutor(self.info_manager)
         self.coach_command_sender = CoachCommandSender(self.info_manager)
+        self._init_intelligent_modules()
+        self._init_ui_debug()
 
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
         self._update_ai(p_game_state)
 
-        self._hard_coded_commands()
-
         self.coach_command_sender.generate_and_send_commands(p_game_state)
 
-    def _hard_coded_commands(self):
-        debug_manager = self.info_manager.debug_manager
-
-        #self.info_manager.set_player_next_action(0, goto_ball)
 
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
@@ -73,27 +70,28 @@ class Coach(object):
         """ Élément de l'interface entre RULEngine/StrategyIA """
         if self.debug_manager:
             debug_commands = self.debug_manager.get_commands()
-            self.debug_manager.clear()
+            for cmd in debug_commands:
+                print(cmd)
             return debug_commands
         else:
             return []
 
-    def set_debug_commands(self, ui_debug_commands):
-        if self.debug_manager:
-            self._set_debug_commands(ui_debug_commands)
-
-    def _set_debug_commands(self, ui_debug_commands):
-        for command in ui_debug_commands:
-            debug_command = ui_debug.wrap_command(command)
-            self.debug_manager.add_ui_command(debug_command)
-
     def _init_intelligent_modules(self):
-        """ Enregistre les modules existant dans l'info manager"""
-        self.info_manager.register_module('Pathfinder', PathfinderRRT)
+        self.info_manager.register_module('Pathfinder', None)
+
+    def _init_ui_debug(self):
+        # FIXME: exécuter uniquement sur handshake plutôt qu'à l'init du coach
+        cmd_tactics = {'strategy': list(StrategyBook().get_strategies_name_list()),
+                       'tactic': list(TACTIC_BOOK.keys()),
+                       'action': ['None']}
+        cmd = DebugCommand(1001, None, cmd_tactics)
+        self.debug_manager.add_odd_command(cmd)
+
 
     def _update_ai(self, p_game_state):
         """ Effectue une itération de mise à jour de l'ia. """
         self.info_manager.update(p_game_state)
+        self.debug_executor.exec()
         self.strategy_executor.exec()
         self.tatic_executor.exec()
         # TODO: Optimiser les moments de mises à jours des modules intelligents
@@ -125,10 +123,13 @@ class CoachCommandSender(object):
         self.robot_commands = []
 
     def _generate_command(self, p_next_action):
-        if p_next_action.kick_strength > 0:
-            return self._generate_kick_command(p_next_action.kick_strength)
-        elif p_next_action.move_destination:
-            return self._generate_move_command(p_next_action.move_destination)
+        if p_next_action is not None:
+            if p_next_action.kick_strength > 0:
+                return self._generate_kick_command(p_next_action.kick_strength)
+            elif p_next_action.move_destination:
+                return self._generate_move_command(p_next_action.move_destination)
+            else:
+                return self._generate_empty_command()
         else:
             return self._generate_empty_command()
 
