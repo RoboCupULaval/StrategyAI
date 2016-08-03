@@ -1,6 +1,8 @@
 #Under MIT License, see LICENSE.txt
 
+
 from InfluenceMap import InfluenceMap
+from RULEngine.Util.Position import Position
 import time
 
 
@@ -15,8 +17,20 @@ if __name__ == "__main__":
     print("Class creation        --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
 
-    # IM.add_point_and_propagate_influence(15, 45, IM._board, -100)
-    # IM.add_point_and_propagate_influence(20, 45, IM._board, -100)
+    P1 = Position(4500, 3000)
+    print("position = ", P1)
+    B1 = IM.transform_field_to_board_position(P1)
+    print("Transformed = ", B1[0], "  ", B1[1])
+    print(IM.transform_board_to_field_position(B1[0], B1[1]))
+    print("========================================================")
+    P2 = Position(-1000, -1000)
+    print("position = ", P2)
+    B2 = IM.transform_field_to_board_position(P2)
+    print("Transformed = ", B2[0], "  ", B2[1])
+    print(IM.transform_board_to_field_position(B2[0], B2[1]))
+
+    # IM.add_point_and_propagate_influence(B2[0], B2[1], IM._board, -100)
+    # IM.add_point_and_propagate_influence(B1[0], B1[1], IM._board, -100)
     # IM.add_point_and_propagate_influence(0, 0, IM._board, -100)
     # IM.add_point_and_propagate_influence(15, 0, IM._board, -100)
     # IM.add_point_and_propagate_influence(20, 20, IM._board, 100)
@@ -34,7 +48,7 @@ if __name__ == "__main__":
     print("Diverse functions     --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
 
-    # IM.print_board_to_file()
+    IM.print_board_to_file()
 
     print("Clear & Print         --- %s seconds ---" % (time.time() - current_time))
     current_time = time.time()
