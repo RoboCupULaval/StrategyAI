@@ -8,6 +8,7 @@ import ai.executor as executor
 from ai.InfoManager import InfoManager
 import ai.Debug.debug_manager as ui_debug
 from ai.STA.Strategy.StrategyBook import StrategyBook, TACTIC_BOOK
+from ai.Algorithm.PathfinderRRT import PathfinderRRT
 
 # debug stuff
 from ai.Debug.debug_manager import DebugCommand
@@ -37,6 +38,7 @@ class Coach(object):
             construire l'InfoManager.
         """
         self.info_manager = InfoManager(is_debug=True)
+        self._init_intelligent_modules()
         self.debug_manager = self.info_manager.debug_manager
         self.debug_executor = executor.DebugExecutor(self.info_manager)
         self.module_executor = executor.ModuleExecutor(self.info_manager)
@@ -44,7 +46,6 @@ class Coach(object):
         self.tatic_executor = executor.TacticExecutor(self.info_manager)
         self.pathfinder_executor = executor.PathfinderExecutor(self.info_manager)
         self.coach_command_sender = CoachCommandSender(self.info_manager)
-        self._init_intelligent_modules()
         self._init_ui_debug()
 
     def main_loop(self, p_game_state):
@@ -77,7 +78,7 @@ class Coach(object):
             return []
 
     def _init_intelligent_modules(self):
-        self.info_manager.register_module('Pathfinder', None)
+        self.info_manager.register_module('Pathfinder', PathfinderRRT)
 
     def _init_ui_debug(self):
         # FIXME: exécuter uniquement sur handshake plutôt qu'à l'init du coach
