@@ -76,11 +76,6 @@ class Coach(object):
         else:
             return []
 
-    def set_debug_commands(self, ui_debug_commands):
-        if self.debug_manager:
-            for command in ui_debug_commands:
-                self.debug_manager.add_ui_command(command)
-
     def _init_intelligent_modules(self):
         self.info_manager.register_module('Pathfinder', None)
 

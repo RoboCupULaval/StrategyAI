@@ -88,6 +88,10 @@ class InfoManager:
         self._update_ball(game_state.field.ball)
         self._update_team(self.friend, game_state.friends)
         self._update_team(self.enemy, game_state.enemies)
+        ui_debug_commands = game_state.debug
+        if self.debug_manager:
+            for command in ui_debug_commands:
+                self.debug_manager.add_ui_command(command)
 
 
     def _update_ball(self, ball):
