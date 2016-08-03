@@ -10,7 +10,7 @@ import pickle
 from socketserver import BaseRequestHandler
 
 from .protobuf import grSim_Packet_pb2 as grSim_Packet
-from .udp_utils import udp_socket, MulticastThreadedUDPServer, ThreadedUDPServer
+from .udp_utils import udp_socket, ThreadedUDPServer
 
 from ..Util.constant import DEBUG_RECEIVE_BUFFER_SIZE
 
@@ -24,7 +24,7 @@ class PBPacketReceiver(object):
     def __init__(self, host, port, packet_type):
         self.packet_list = deque(maxlen=100)
         handler = self.get_udp_handler(self.packet_list, packet_type)
-        self.server = MulticastThreadedUDPServer(host, port, handler)
+        self.server = ThreadedUDPServer(host, port, handler)
 
     def get_udp_handler(self, packet_list, packet_type):
         class ThreadedUDPRequestHandler(BaseRequestHandler):

@@ -5,6 +5,7 @@ from socketserver import ThreadingMixIn, UDPServer
 import threading
 import socket
 import struct
+from ipaddress import ip_address
 
 class ThreadedUDPServer(ThreadingMixIn, UDPServer):
 
@@ -12,25 +13,22 @@ class ThreadedUDPServer(ThreadingMixIn, UDPServer):
 
     def __init__(self, host, port, handler):
         super(ThreadedUDPServer, self).__init__(('', port), handler)
-        self._initialize(host, port)
+        if ip_address(host).is_multicast:
+            self.register_multicast_membership(host)
         self._start()
 
-    def _initialize(self, host, port):
-        pass
+    def register_multicast_membership(self, host):
+        self.socket.setsockopt(socket.IPPROTO_IP,
+                               socket.IP_ADD_MEMBERSHIP,
+                               struct.pack("=4sl",
+                                           socket.inet_aton(host),
+                                           socket.INADDR_ANY))
 
     def _start(self):
         server_thread = threading.Thread(target=self.serve_forever)
         server_thread.daemon = True
         server_thread.start()
 
-class MulticastThreadedUDPServer(ThreadedUDPServer):
-
-    def _initialize(self, host, port):
-        self.socket.setsockopt(socket.IPPROTO_IP,
-                               socket.IP_ADD_MEMBERSHIP,
-                               struct.pack("=4sl",
-                                           socket.inet_aton(host),
-                                           socket.INADDR_ANY))
 
 def udp_socket(host, port):
     skt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

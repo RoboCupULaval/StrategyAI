@@ -22,7 +22,7 @@ from .Command.command import Stop
 from .Util.exception import StopPlayerError
 
 GameState = namedtuple('GameState', ['field', 'referee', 'friends',
-                                     'enemies', 'debug'])
+                                     'enemies', 'timestamp', 'debug'])
 
 class Framework(object):
     """
@@ -111,11 +111,14 @@ class Framework(object):
         """ Retourne le **GameState** actuel. *** """
 
         game = self.game
-        return GameState(field=game.field,
-                         referee=game.referee,
-                         friends=game.friends,
-                         enemies=game.enemies,
-                         debug={})
+        return GameState(
+            field=game.field,
+            referee=game.referee,
+            friends=game.friends,
+            enemies=game.enemies,
+            timestamp=self.last_time,
+            debug=self.debug_receiver.receive_command()
+        )
 
     def start_game(self, ai_coach, async=False, serial=False):
         """ Démarrage du moteur de l'IA initial. """
@@ -129,8 +132,8 @@ class Framework(object):
                 self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
             self.debug_sender = DebugCommandSender("127.0.0.1", 20021)
             self.debug_receiver = DebugCommandReceiver("127.0.0.1", 10021)
-            self.referee = RefereeServer()
-            self.vision = Vision()
+            self.referee = RefereeServer('127.0.0.1')
+            self.vision = Vision("127.0.0.1")
         else:
             self.stop_game()
 
@@ -160,7 +163,6 @@ class Framework(object):
                 # Communication
                 self._send_robot_commands()
                 self._send_debug_commands()
-                self._receive_debug_commands()
 
     def _acquire_vision_frame(self):
         return self.vision.get_latest_frame()
@@ -206,11 +208,3 @@ class Framework(object):
         ai_debug_commands = self.ai_coach.get_debug_commands_and_clear()
         if ai_debug_commands:
             self.debug_sender.send_command(ai_debug_commands)
-
-    def _receive_debug_commands(self):
-        """
-            Effectue la réception des commandes de débogages du serveur et les
-            enregistres dans la façade de débogage.
-        """
-        commands = self.debug_receiver.receive_command()
-        self.ai_coach.set_debug_commands(commands)
