@@ -4,14 +4,29 @@
     Tree. Le module contient une classe qui peut être instanciée et qui calcule
     les trajectoires des robots de l'équipe. Les détails de l'algorithme sont
     disponibles sur la page wikipedia.
+
 """
 import random
 import math
 import copy
+import time
+import socket
+import pickle
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from .IntelligentModule import Pathfinder
+from ai.Algorithm.IntelligentModule import Pathfinder
+
+class UDPSending(object):
+    def __init__(self, ip='localhost', port=10021):
+        self._ip = ip
+        self._port = port
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    def send_message(self, p_object):
+        if isinstance(p_object, dict):
+            p_object = pickle.dumps(p_object)
+        self._sock.sendto(p_object, (self._ip, self._port))
 
 class PathfinderRRT(Pathfinder):
     """
@@ -31,10 +46,13 @@ class PathfinderRRT(Pathfinder):
             :param pInfoManager: référence sur l'InfoManager
         """
         super().__init__(pInfoManager)
+        self.last_paths_generated = [[self.state.get_player_position(x)] for x in range(6)]
+        self.last_time_for_paths = time.time()
+        self.time_limit = 1
         self.paths = {}
+        self.udp = UDPSending(port=20021)
         for i in range(6):
             self.paths[i] = []
-
 
     def get_paths(self):
         """
@@ -43,12 +61,25 @@ class PathfinderRRT(Pathfinder):
 
             :return: None
         """
+        if time.time() > self.last_time_for_paths + self.time_limit:
+            self.last_time_for_paths = time.time()
+            paths = []
+            for pid in range(6):
+                paths.append(self.get_path(pid))
+            self.last_paths_generated = paths
 
-        paths = []
-        for pid in range(6):
-            paths.append(self.get_path(pid))
+            self.draw_path()
 
-        return paths
+
+        return self.last_paths_generated
+
+    def draw_path(self):
+        pkg = dict(zip(['name', 'version', 'link', 'type', 'data'], ['Etienne', '1.0', None, 3002, dict()]))
+        pkg['data']['points'] = self.last_paths_generated
+        pkg['data']['style'] = 'DashLine'
+        pkg['data']['width'] = 2
+        pkg['data']['timeout'] = 1
+        self.udp.send_message(pkg)
 
 
     def get_path(self, pid=None):
@@ -118,7 +149,9 @@ class PathfinderRRT(Pathfinder):
         smoothed_path = path_smoothing(not_smoothed_path, maxIter, obstacleList)
 
         smoothed_path = list(reversed(smoothed_path[:-1]))
+        print(smoothed_path)
         return smoothed_path
+
 
 
 
@@ -229,11 +262,13 @@ class Node():
 def get_expand_dis(start, goal):
     """Modifie la distance entre 2 noeuds selon la distance entre le départ et le but.
      Utile pour la précision et les performances."""
-
-    dx = goal[0]-start[0]
-    dy = goal[1]-start[1]
-    d = math.sqrt(dx * dx + dy * dy)
-
+    try :
+        dx = goal[0]-start[0]
+        dy = goal[1]-start[1]
+        d = math.sqrt(dx * dx + dy * dy)
+        # TODO voir comment on regle ça
+    except TypeError:
+        d = 0
     if d < 600 :
         expand_dis = d/2
 
@@ -246,10 +281,13 @@ def get_expand_dis(start, goal):
 def get_goal_sample_rate(start, goal):
     """Modifie la probabilité d'obtenir directement le but comme point selon la distance entre le départ et le but.
      Utile pour la précision et les performances."""
-
-    dx = goal[0]-start[0]
-    dy = goal[1]-start[1]
-    d = math.sqrt(dx * dx + dy * dy)
+    try :
+        dx = goal[0]-start[0]
+        dy = goal[1]-start[1]
+        d = math.sqrt(dx * dx + dy * dy)
+    except TypeError:
+        goal_sample_rate = 5
+        return goal_sample_rate
 
     if d < 600 :
         goal_sample_rate = (10-d/140)**2
@@ -263,11 +301,14 @@ def get_path_length(path):
 
     """Donne la longueur du trajet"""
     path_length = 0
-    for i in range(len(path) - 1):
-        dx = path[i + 1][0] - path[i][0]
-        dy = path[i + 1][1] - path[i][1]
-        d = math.sqrt(dx * dx + dy * dy)
-        path_length += d
+    try :
+        for i in range(len(path) - 1):
+            dx = path[i + 1][0] - path[i][0]
+            dy = path[i + 1][1] - path[i][1]
+            d = math.sqrt(dx * dx + dy * dy)
+            path_length += d
+    except TypeError:
+        pass
 
     return path_length
 
