@@ -31,7 +31,8 @@ class InfluenceMap(IntelligentModule):
     transfomé en int arrondie vers 0.
     """
 
-    def __init__(self, info_manager, resolution=100, strength_decay=0.85, strength_peak=100, effect_radius=25):
+    def __init__(self, info_manager, resolution=100, strength_decay=0.85, strength_peak=100, effect_radius=25,
+                 have_static=False):
         """
             Constructeur de la classe InfluenceMap
 
@@ -89,7 +90,8 @@ class InfluenceMap(IntelligentModule):
         self._goals_board = self._create_standard_influence_board()
 
         # todo determine how to choose if you want different kinds of static boards (ex: borders, goals, to determine..)
-        self._create_static_board()
+        if have_static:
+            self._create_static_board()
 
         self.update()
 
@@ -120,7 +122,7 @@ class InfluenceMap(IntelligentModule):
         """
         Crée un objet numpy.ndarray, une liste à 2 dimenson de self._number_of_rows par self._number_of_columns d'int8.
 
-        :return: Un numpy.ndarray d'int8 de self._number_of_rows par self._number_of_columns, style c (row-major).
+        :return: Un numpy.ndarray d'int8 de self._number_of_rows par self._number_of_columns.
         :rtype: numpy.ndarray dtype=numpy.int8
         """
         return numpy.zeros((self._number_of_rows, self._number_of_columns), numpy.int8)
@@ -426,6 +428,9 @@ class InfluenceMap(IntelligentModule):
         indices = zip(x, y)
         return min_in_board, indices
 
+    def find_max_value_in_circle(self, center, radius):
+        pass
+
 # **********************************************************************************************************************
 # ************************************ Player representation methods****************************************************
 
@@ -480,28 +485,36 @@ class InfluenceMap(IntelligentModule):
         return self._board.tolist()
 
     def transform_field_to_board_position(self, position):
-        # TODO see if that holds up
+        assert(isinstance(position, Position))
+        assert(FIELD_X_LEFT <= position.x <= FIELD_X_RIGHT)
+        assert(FIELD_Y_BOTTOM <= position.y <= FIELD_Y_TOP)
+        # this should hold up
 
-        xpos = position.x + ((abs(FIELD_X_LEFT) + FIELD_X_RIGHT) / 2)
+        xpos = -position.x + ((abs(FIELD_X_LEFT) + FIELD_X_RIGHT) / 2)
         ypos = position.y + ((abs(FIELD_Y_BOTTOM) + FIELD_Y_TOP) / 2)
 
-        xpos = int(round(xpos / self._resolution, 0))
-        ypos = int(round(ypos / self._resolution, 0))
+        xpos = int(xpos / self._resolution)
+        ypos = int(ypos / self._resolution)
 
-        return xpos, ypos
+        if ypos == self._number_of_rows:
+            ypos -= 1
+        if xpos == self._number_of_columns:
+            xpos -= 1
+
+        return ypos, xpos
 
     def transform_board_to_field_position(self, row, column):
-        # TODO see if that holds up
-        
-        if row >= self._number_of_rows / 2:
-            xpos = FIELD_X_LEFT + (column * self._resolution - int(self._resolution / 2))
-        else:
-            xpos = FIELD_X_LEFT + (column * self._resolution + int(self._resolution / 2))
+        assert(isinstance(row, int))
+        assert(isinstance(column, int))
+        assert(0 <= row <= self._number_of_rows)
+        assert(0 <= column <= self._number_of_columns)
 
-        if column >= self._number_of_columns / 2:
-            ypos = FIELD_Y_TOP - (row * self._resolution - int(self._resolution / 2))
-        else:
-            ypos = FIELD_Y_TOP - (row * self._resolution + int(self._resolution / 2))
+        # This should hold up
+        ypos = row * self._resolution
+        xpos = column * self._resolution
+
+        ypos = (ypos - ((abs(FIELD_Y_BOTTOM) + FIELD_Y_TOP) / 2)) + (self._resolution / 2)
+        xpos = (xpos - ((abs(FIELD_X_LEFT) + FIELD_X_RIGHT) / 2)) + (self._resolution / 2)
 
         tempposition = Position(xpos, ypos)
         return tempposition
@@ -513,7 +526,7 @@ class InfluenceMap(IntelligentModule):
 
         numpy.savetxt("IMBoard", self._board, fmt='%4i')
         # todo remove this line while not in debug mode
-        print(self._starterboard.shape[0], " x ", self._starterboard.shape[1], "  erad: ", self._effect_radius)
+        print(self._starterboard.shape[0], " x ", self._starterboard.shape[1])
 
     def str(self):
         # todo comment and make sure this is right! Embelish?
