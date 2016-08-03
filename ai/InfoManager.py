@@ -123,6 +123,7 @@ class InfoManager:
                 team_data[str(i)]['retro_pose'].pop(0)
 
 
+
     # About Game
     # ---Getter
     def get_current_play(self):
@@ -276,7 +277,7 @@ class InfoManager:
 
     def register_module(self, module_name, module_ref):
         """ Enregistre un module intelligent. """
-        self.modules[module_name] = module_ref
+        self.modules[module_name] = module_ref(self)
 
     def acquire_module(self, module_name):
         """ Acquiert la référence sur un module. """

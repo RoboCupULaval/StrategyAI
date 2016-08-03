@@ -15,6 +15,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import *
 
+
 __author__ = 'RoboCupULaval'
 
 class Executor(object, metaclass=ABCMeta):
@@ -36,7 +37,6 @@ class StrategyExecutor(Executor):
     """
     def __init__(self, info_manager):
         """ Constructeur de la classe.
-
             :param info_manager: Référence à la facade InfoManager pour pouvoir
             accéder aux informations du GameState.
         """
@@ -82,7 +82,6 @@ class TacticExecutor(Executor):
     """ Fait avancer chaque FSM d'une itération. """
     def __init__(self, info_manager):
         """ Constructeur.
-
             :param info_manager: Référence à la facade InfoManager pour pouvoir
             accéder aux informations du GameState.
         """
@@ -99,7 +98,7 @@ class PathfinderExecutor(Executor):
 
     def __init__(self, info_manager):
         Executor.__init__(self, info_manager)
-        self.pathfinder = None
+        self.pathfinder = self.info_manager.acquire_module("Pathfinder")
 
     def exec(self):
         """
@@ -108,6 +107,7 @@ class PathfinderExecutor(Executor):
         """
         self.pathfinder = self.info_manager.acquire_module('Pathfinder')
         if self.pathfinder: # on desactive l'executor si aucun module ne fournit de pathfinding
+
             paths = self.pathfinder.get_paths()
             for i in range(0, 6):
                 self.info_manager.set_player_next_action(paths[i])
