@@ -52,8 +52,8 @@ class InfoManager:
         self.friend = self.init_team_dictionary()
         self.enemy = self.init_team_dictionary()
         self.modules = {}
-#        self.tactic = [Stop(self), Stop(self), Stop(self), Stop(self), Stop(self), Stop(self)]
-        self.tactic = list(range(6))
+        self.strategy = "HumanControl"
+        self.tactics = list(range(6))
 
         if is_debug:
             self.debug_manager = DebugManager()
@@ -88,6 +88,10 @@ class InfoManager:
         self._update_ball(game_state.field.ball)
         self._update_team(self.friend, game_state.friends)
         self._update_team(self.enemy, game_state.enemies)
+        ui_debug_commands = game_state.debug
+        if self.debug_manager:
+            for command in ui_debug_commands:
+                self.debug_manager.add_ui_command(command)
 
 
     def _update_ball(self, ball):
@@ -116,6 +120,7 @@ class InfoManager:
             team_data[str(i)]['retro_pose'].append((time(), team.players[i].pose))
             if len(team_data[str(i)]['retro_pose']) > 10:
                 team_data[str(i)]['retro_pose'].pop(0)
+
 
 
     # About Game
@@ -152,11 +157,8 @@ class InfoManager:
     def get_player_goal(self, i):
         return self.friend[str(i)]['goal']
 
-    def get_player_skill(self, i):
-        return self.friend[str(i)]['skill']
-
-    def get_player_tactic(self, i):
-        return self.friend[str(i)]['tactic']
+    def get_player_tactic(self, pid):
+        return self.tactics[pid]
 
     def get_player_position(self, i):
         return self.friend[str(i)]['position']
@@ -187,7 +189,7 @@ class InfoManager:
 
     def set_player_tactic(self, i, tactic):
         # FIXME: hack
-        self.tactic[i] = tactic
+        self.tactics[i] = tactic
 
     def set_player_next_action(self, i, next_action):
         # TODO: Enforce valid type
@@ -274,7 +276,7 @@ class InfoManager:
 
     def register_module(self, module_name, module_ref):
         """ Enregistre un module intelligent. """
-        self.modules[module_name] = module_ref
+        self.modules[module_name] = module_ref(self)
 
     def acquire_module(self, module_name):
         """ Acquiert la référence sur un module. """
