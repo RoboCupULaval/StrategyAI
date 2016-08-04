@@ -20,7 +20,7 @@ class TestInfoManager(unittest.TestCase):
 
         self.info_manager = InfoManager()
 
-        game_state = GameState(self.field, None, blue_team, yellow_team, {})
+        game_state = GameState(self.field, None, blue_team, yellow_team, 0, [])
         self.info_manager.update(game_state)
 
     def test_can_get_current_play(self):
