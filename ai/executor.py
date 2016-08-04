@@ -113,6 +113,7 @@ class PathfinderExecutor(Executor):
             paths = self.pathfinder.get_paths()
             for i in range(0, 6):
                 action = self.info_manager.get_player_next_action(i)
+                pose = paths[i][0]
                 action = AICommand(paths[i][0], action.kick_strength)
                 self.info_manager.set_player_next_action(i, action)
 

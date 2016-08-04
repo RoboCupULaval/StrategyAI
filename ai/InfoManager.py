@@ -54,6 +54,7 @@ class InfoManager:
         self.modules = {}
         self.strategy = "HumanControl"
         self.tactics = list(range(6))
+        self.timestamp = 0
 
         if is_debug:
             self.debug_manager = DebugManager()

@@ -17,18 +17,10 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.Algorithm.IntelligentModule import Pathfinder
 
-class UDPSending(object):
-    def __init__(self, ip='localhost', port=10021):
-        self._ip = ip
-        self._port = port
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    def send_message(self, p_object):
-        if isinstance(p_object, dict):
-            p_object = pickle.dumps(p_object)
-        self._sock.sendto(p_object, (self._ip, self._port))
+from ai.Debug.debug_manager import COLOR_ID0, COLOR_ID1, COLOR_ID2, COLOR_ID3, COLOR_ID4, COLOR_ID5
 
 OBSTACLE_DEAD_ZONE = 200
+TIME_TO_UPDATE = 5
 
 class PathfinderRRT(Pathfinder):
     """
@@ -40,21 +32,20 @@ class PathfinderRRT(Pathfinder):
         Une méthode permet de récupérer la trajectoire d'un robot spécifique.
     """
 
-    def __init__(self, pInfoManager):
+    def __init__(self, info_manager):
         """
             Constructeur, appel le constructeur de la classe mère pour assigner
             la référence sur l'InfoManager.
 
-            :param pInfoManager: référence sur l'InfoManager
+            :param info_manager: référence sur l'InfoManager
         """
-        super().__init__(pInfoManager)
+        super().__init__(info_manager)
         self.last_paths_generated = [[self.state.get_player_position(x)] for x in range(6)]
-        self.last_time_for_paths = time.time()
-        self.time_limit = 1
         self.paths = {}
-        self.udp = UDPSending(port=20021)
         for i in range(6):
             self.paths[i] = []
+
+        self.last_timestamp = self.state.timestamp
 
     def get_paths(self):
         """
@@ -63,25 +54,15 @@ class PathfinderRRT(Pathfinder):
 
             :return: None
         """
-        if time.time() > self.last_time_for_paths + self.time_limit:
-            self.last_time_for_paths = time.time()
-            paths = []
-            for pid in range(6):
-                paths.append(self.get_path(pid))
-            self.last_paths_generated = paths
-
-            self.draw_path()
-
-
         return self.last_paths_generated
 
-    def draw_path(self):
-        pkg = dict(zip(['name', 'version', 'link', 'type', 'data'], ['Etienne', '1.0', None, 3002, dict()]))
-        pkg['data']['points'] = self.last_paths_generated
-        pkg['data']['style'] = 'DashLine'
-        pkg['data']['width'] = 2
-        pkg['data']['timeout'] = 1
-        self.udp.send_message(pkg)
+    def draw_path(self, paths):
+        color_list = [COLOR_ID0, COLOR_ID1, COLOR_ID2, COLOR_ID3, COLOR_ID4, COLOR_ID5]
+        for i in range(6):
+            for path_element in paths[i]:
+                x = path_element.position.x
+                y = path_element.position.y
+                self.state.debug_manager.add_point((x, y), color_list[i])
 
 
     def get_path(self, pid=None):
@@ -94,12 +75,21 @@ class PathfinderRRT(Pathfinder):
 
         path = self._compute_path(pid)
 
-        return [Pose(Position(point[0], point[1]), 0) for point in path]
+        return [Pose(Position(point[0], point[1])) for point in path]
 
 
     def update(self):
         #TODO: à réviser
-        pass
+        if self.state.timestamp - self.last_timestamp > TIME_TO_UPDATE:
+            self.last_timestamp = self.state.timestamp
+            paths = []
+            for pid in range(6):
+                path_element = self.get_path(pid)
+                print(path_element)
+                paths.append(self.get_path(pid))
+            self.last_paths_generated = paths
+            self.draw_path(self.last_paths_generated)
+            print("update rrt")
 
 
     def _compute_path(self, pid):
@@ -151,7 +141,6 @@ class PathfinderRRT(Pathfinder):
         smoothed_path = path_smoothing(not_smoothed_path, maxIter, obstacleList)
 
         smoothed_path = list(reversed(smoothed_path[:-1]))
-        print(smoothed_path)
         return smoothed_path
 
 

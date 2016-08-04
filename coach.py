@@ -128,6 +128,7 @@ class CoachCommandSender(object):
             if p_next_action.kick_strength > 0:
                 return self._generate_kick_command(p_next_action.kick_strength)
             elif p_next_action.move_destination:
+                assert(isinstance(p_next_action.move_destination, Pose))
                 return self._generate_move_command(p_next_action.move_destination)
             else:
                 return self._generate_empty_command()
