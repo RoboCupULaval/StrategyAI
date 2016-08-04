@@ -48,9 +48,13 @@ class Game():
         self._update_players(vision_frame, delta)
 
     def _update_ball(self, vision_frame, delta):
-        ball_position = Position(vision_frame.detection.balls[0].x, vision_frame.detection.balls[0].y,
-                                 vision_frame.detection.balls[0].z)
-        self.field.move_ball(ball_position, delta)
+        try:
+            ball_position = Position(vision_frame.detection.balls[0].x,
+                                     vision_frame.detection.balls[0].y,
+                                     vision_frame.detection.balls[0].z)
+            self.field.move_ball(ball_position, delta)
+        except IndexError:
+            print("Ball not found")
 
     def _update_players(self, vision_frame, delta):
         blue_team = vision_frame.detection.robots_blue
