@@ -46,8 +46,8 @@ class StrategyExecutor(Executor):
             Récupère l'état stratégique en cours, le score SWOT et choisit la
             meilleure stratégie pour le contexte.
         """
-        # TODO: rendre dynamique
-        self.strategy = StrategyBook().get_strategy("HumanControl")(self.info_manager)
+        self.strategy_book = StrategyBook(self.info_manager)
+        self.strategy = self.strategy_book.get_optimal_strategy()(self.info_manager)
 
     def _assign_tactics(self):
         """
