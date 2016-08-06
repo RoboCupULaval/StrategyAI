@@ -19,12 +19,13 @@ from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.GoToPosition import GoToPosition
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.CoverZone import CoverZone
+from ai.STA.Strategy.SimpleDefense import SimpleDefense
 
 __author__ = 'RoboCupULaval'
 
 # FIXME: hack
-STRATEGY_BOOK = {'foo' : [],
-                 'bar' : []}
+STRATEGY_BOOK = {'SimpleDefense' : SimpleDefense,
+                 'SimpleOffense' : []}
 STRATEGY_COMMAND = 5002
 TACTIC_COMMAND = 5003
 
@@ -54,8 +55,8 @@ class Coach(object):
         self.tatic_executor = executor.TacticExecutor(self.info_manager)
         self.pathfinder_executor = executor.PathfinderExecutor(self.info_manager)
         self.coach_command_sender = CoachCommandSender(self.info_manager)
+        self.tactics = []
         self._init_intelligent_modules()
-        self.tactics = self._hack_set_init_tactics()
         self.ui_commands = []
 
         # TODO: hack
@@ -64,16 +65,6 @@ class Coach(object):
                        'action': ['None']}
         cmd = DebugCommand(1001, None, cmd_tactics)
         self.debug_manager.logs.append(cmd)
-
-    def _hack_set_init_tactics(self):
-        l_tactics = [GoalKeeper(self.info_manager, 0),
-                     GoGetBall(self.info_manager, 1),
-                     CoverZone(self.info_manager, 2, FIELD_Y_TOP, 0, FIELD_X_LEFT, FIELD_X_LEFT / 2),
-                     CoverZone(self.info_manager, 3, 0, FIELD_Y_BOTTOM, FIELD_X_LEFT, FIELD_X_LEFT / 2),
-                     CoverZone(self.info_manager, 4, FIELD_Y_TOP, 0, FIELD_X_LEFT / 2, 0),
-                     CoverZone(self.info_manager, 5, 0, FIELD_Y_BOTTOM, FIELD_X_LEFT / 2, 0)]
-
-        return l_tactics
 
     def _hack_parse_ui_commands(self):
 
@@ -133,8 +124,9 @@ class Coach(object):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
         self._update_ai(p_game_state)
 
-        self._hack_parse_ui_commands()
-        self._hack_hard_coded_commands()
+        #self._hack_parse_ui_commands()
+        #self._hack_hard_coded_commands()
+
 
         self.coach_command_sender.generate_and_send_commands(p_game_state)
 

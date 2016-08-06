@@ -22,7 +22,7 @@ class Strategy(metaclass=ABCMeta):
 
     def _init_tactics_sequence(self, p_starting_tactics_sequence):
         for tactic in p_starting_tactics_sequence:
-            self.tactics_sequence.append(tactic())
+            self.tactics_sequence.append(tactic)
 
     def _remove_finished_tactics(self):
         for tactic in self.tactics_sequence:

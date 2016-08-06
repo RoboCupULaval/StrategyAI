@@ -1,10 +1,9 @@
 # Under MIT license, see LICENSE.txt
 """ Livre des stratégies. """
 
-from . strategy_conditionals import *
-
-# import strategies
 from . HumanControl import HumanControl
+from . SimpleDefense import SimpleDefense
+from . SimpleOffense import SimpleOffense
 
 class StrategyBook(object):
     """
@@ -31,8 +30,16 @@ class StrategyBook(object):
 
         # simple choice
         if self.ball_in_offense_zone():
-            self.chosen_strategy = HumanControl # offensive strat
+            self.chosen_strategy = SimpleOffense
         else:
-            self.chosen_strategy = HumanControl # defensive strat
+            self.chosen_strategy = SimpleDefense
+
+        #self.debug_show_all_players_tactics() # debug
 
         return self.chosen_strategy
+
+    def debug_show_all_players_tactics(self):
+        for i in range(0,6):
+            debug_string = ""
+            debug_string += "Robot:" + str(i) + str(self.info_manager.get_player_tactic(i))
+        print(debug_string)

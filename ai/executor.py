@@ -55,6 +55,7 @@ class StrategyExecutor(Executor):
             cours.
         """
         tactic_sequence = self.strategy.get_next_tactics_sequence()
+
         for i in range(0, 6):
             tactic = tactic_sequence[i]
             tactic.player_id = i
@@ -73,8 +74,8 @@ class TacticExecutor(Executor):
 
     def exec(self):
         """ Obtient la Tactic de chaque robot et fait progresser la FSM. """
-        #for i in range(0, 6):
-            #self.info_manager.get_player_tactic(i).exec()
+        for i in range(0, 6):
+            self.info_manager.get_player_tactic(i).exec()
 
 class PathfinderExecutor(Executor):
     """ Récupère les paths calculés pour les robots et les assignent. """
