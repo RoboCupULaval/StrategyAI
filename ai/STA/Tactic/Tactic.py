@@ -24,6 +24,7 @@ class Tactic:
         self.player_id = None
         self.current_state = self.halt
         self.next_state = self.halt
+        self.status_flag = 1 # TODO: hack
 
     def halt(self):
         """
