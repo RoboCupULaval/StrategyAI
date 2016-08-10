@@ -1,5 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
+import math as m
+
 
 class Position(object):
     """ Vector with [x, y, z] """
@@ -33,7 +35,7 @@ class Position(object):
     def __sub__(self, other):
         """ Return self - other """
         if not isinstance(other, (Position, int, float)):
-            raise NotImplemented
+            raise NotImplementedError
         else:
             new_x = self.x - (other.x if isinstance(other, Position) else other)
             new_y = self.y - (other.y if isinstance(other, Position) else other)
@@ -42,7 +44,7 @@ class Position(object):
     def __mul__(self, other):
         """ Return self * other """
         if not isinstance(other, (int, float)):
-            raise NotImplemented
+            raise NotImplementedError
         else:
             new_x = self.x * other
             new_y = self.y * other
@@ -51,16 +53,21 @@ class Position(object):
     def __truediv__(self, other):
         """ Return self / other """
         if not isinstance(other, (int, float)):
-            raise NotImplemented
+            raise NotImplementedError
         else:
             new_x = self.x / other
             new_y = self.y / other
             return Position(new_x, new_y)
 
     def __eq__(self, other):
-        """ Return self == other """
-        assert(isinstance(other, Position)), 'other should be Position.'
-        return self.x == other.x and self.y == other.y
+        """
+            L'égalité est vérifié au niveau de l'unité.
+            La comparison de float exige toujours un seuil de tolérance.
+            Dans ce cas-ci, les décimales n'importent pas.
+            Position(0.5, 0) == Position(0, 0) -> True
+            (math.floor en arrière)
+        """
+        return m.floor(self.x) == m.floor(other.x) and m.floor(self.y) == m.floor(other.y)
 
     def __ne__(self, other):
         """ Return self != other """

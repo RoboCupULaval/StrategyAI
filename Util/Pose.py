@@ -19,4 +19,15 @@ class Pose(object):
     def __str__(self):
         return '[{}, theta={}]'.format(self.position, self.orientation)
     def __repr__(self):
-        return self.__str__()   
+        return self.__str__()
+
+    def __eq__(self, other):
+        """
+            L'égalité est vérifié au niveau de l'unité.
+            Pose([0.5, 0, 0]) == Pose([1, 0, 0]) -> True
+            (math.round en arrière)
+        """
+        return self.position == other.position and self.orientation == other.orientation
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
