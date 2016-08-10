@@ -2,11 +2,11 @@
 import math
 from .Action import Action
 from ...Util.types import AICommand
-from ...Util.geometry import distance
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.area import stayOutsideCircle
-from RULEngine.Util.geometry import get_angle
+from RULEngine.Util.geometry import get_angle, get_distance
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'Robocup ULaval'
 
@@ -32,6 +32,7 @@ class GoBehind(Action):
         """
         Action.__init__(self, p_info_manager)
         assert(isinstance(p_player_id, int))
+        assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert(isinstance(p_position1, Position))
         assert(isinstance(p_position2, Position))
 
@@ -48,23 +49,26 @@ class GoBehind(Action):
 
         delta_x = self.position2.x - self.position1.x
         delta_y = self.position2.y - self.position1.y
-
+        theta = math.atan2(delta_y, delta_x)
+        """
         # Calcul des coordonnées derrière la position 1 (destination) selon la position 2
         # TODO: calculer le "point derriere" optimal au lieu d une distance egale en x et y
         if delta_x > 0:
-            x = self.position1.x - self.distance_behind
+            x = self.position1.x - self.distance_behind * math.cos(theta)
         elif delta_x < 0:
-            x = self.position1.x + self.distance_behind
+            x = self.position1.x + self.distance_behind * math.cos(theta)
         elif delta_x == 0:
             x = self.position1.x
 
         if delta_y > 0:
-            y = self.position1.y - self.distance_behind
+            y = self.position1.y - self.distance_behind * math.sin(theta)
         elif delta_y < 0:
-            y = self.position1.y + self.distance_behind
+            y = self.position1.y + self.distance_behind * math.sin(theta)
         elif delta_y == 0:
             y = self.position1.y
-
+        """
+        x = self.position1.x - self.distance_behind * math.cos(theta)
+        y = self.position1.y - self.distance_behind * math.sin(theta)
         destination_position = Position(x, y)
 
         # Calcul de l'orientation de la pose de destination

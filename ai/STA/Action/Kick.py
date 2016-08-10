@@ -1,6 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from .Action import Action
 from ...Util.types import AICommand
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 
 class Kick(Action):
@@ -19,6 +20,7 @@ class Kick(Action):
         """
         Action.__init__(self, p_info_manager)
         assert(isinstance(p_player_id, int))
+        assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert(isinstance(p_force, (int, float)))
         assert(1 >= p_force >= 0)
         self.player_id = p_player_id
