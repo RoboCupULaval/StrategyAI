@@ -283,36 +283,14 @@ class InfluenceMap(IntelligentModule):
         """
         return int(strength * (self._strength_decay ** distance))
 
-    def _clamp_influence(self, influence_to_clamp):
-        """
-        Arrondi la valeur passé au maximum du strength s'il le dépasse, à -1 * le strenght s'il en est en-dessous de
-        cela et ne fait rien s'il se trouve entre le strength et son négatif.
-
-        :param influence_to_clamp: la valeur de l'influence d'une case pour clamper
-        :type influence_to_clamp: int
-
-        :return: la valeur clampé
-        :rtype: int
-
-        """
-        if influence_to_clamp > self._strength_peak:
-            return self._strength_peak
-        elif influence_to_clamp < -self._strength_peak:
-            return -self._strength_peak
-        return influence_to_clamp
-
     def _clamp_board(self, board_to_clamp):
         """
-        Parcours chaque cases du tableau et les clampe.
+        Arrondis toutes les cellules du tableau pour qu'ils soient dans [-self._strength_peak, self._strength_peak].
 
         :param board_to_clamp: Un numpy.ndarray à clampé
         :type board_to_clamp: numpy.ndarray dtype=numpy.int8
         """
-        cases_iterator = numpy.nditer(board_to_clamp, op_flags=['readwrite'])
-
-        while not cases_iterator.finished:
-            cases_iterator[0] = self._clamp_influence(cases_iterator[0])
-            cases_iterator.iternext()
+        numpy.clip(board_to_clamp, -self._strength_peak, self._strength_peak, out=board_to_clamp)
 
     def add_point_and_propagate_influence(self, row, column, board_to_apply, strength=0):
         """
@@ -349,9 +327,10 @@ class InfluenceMap(IntelligentModule):
                                                                              (row - rowmin),
                                                                              (column - columnmin)))
             influence_already_in_case = cases_iterator[0]
-            influence_to_put_instead = self._clamp_influence(to_put + influence_already_in_case)
+            influence_to_put_instead = to_put + influence_already_in_case
             cases_iterator[0] = influence_to_put_instead
             cases_iterator.iternext()
+        self._clamp_board(board_to_apply)
 
 # **********************************************************************************************************************
 # **************************************** Generic point finding *******************************************************
