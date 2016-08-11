@@ -5,6 +5,7 @@
 """
 from collections import namedtuple
 
+
 STRATEGY_COMMAND_TYPE = 5002
 TACTIC_COMMAND_TYPE = 5003
 
@@ -63,22 +64,17 @@ class DebugManager:
         debug.
     """
 
-    def __init__(self):
-        self.logs = []
-        self.influence_map = []
-        self.text = []
-        self.draw = []
-        self.odd = []
+    def __init__(self, availabe_strategies, availabe_tactics):
+        self.commands = []
         self.ui_commands = []
         self.human_control = False
+        self.availabe_strategies = availabe_strategies
+        self.availabe_tactics = availabe_tactics
 
     def get_commands(self):
-        commands = self._get_draw_commands()
-        commands = commands + self._get_influence_map_commands()
-        commands = commands + self._get_logs_commands()
-        commands = commands + self._get_text_commands()
-        commands = commands + self._get_odd_commands()
-        return [c.get_packet_repr() for c in commands]
+        packet_represented_commands = [c.get_packet_repr() for c in self.commands]
+        self.commands = []
+        return packet_represented_commands
 
     def get_ui_commands(self):
         cmds = self.ui_commands
@@ -87,7 +83,7 @@ class DebugManager:
 
     def add_log(self, level, message):
         log = DebugCommand(2, None, {'level': level, 'message': message})
-        self.logs.append(log)
+        self.commands.append(log)
 
     def add_point(self, point, color=VIOLET):
         data = {'point': point,
@@ -95,7 +91,7 @@ class DebugManager:
                 'width': 5,
                 'timeout': 0}
         point = DebugCommand(3004, None, data)
-        self.draw.append(point)
+        self.commands.append(point)
 
     def add_circle(self, center, radius):
         data = {'center': center,
@@ -104,14 +100,14 @@ class DebugManager:
                 'is_fill': True,
                 'timeout': 0}
         circle = DebugCommand(3003, None, data)
-        self.draw.append(circle)
+        self.commands.append(circle)
 
     def add_line(self, start_point, end_point):
         data = {'start': start_point,
                 'end': end_point,
                 'color': MAGENTA.repr()}
         command = DebugCommand(3001, None, data)
-        self.draw.append(command)
+        self.commands.append(command)
 
     def add_rectangle(self, top_left, bottom_right):
         data = {'top_left': top_left,
@@ -119,14 +115,14 @@ class DebugManager:
                 'color': YELLOW.repr(),
                 'is_fill': True}
         command = DebugCommand(3006, None, data)
-        self.draw.append(command)
+        self.commands.append(command)
 
     def add_influence_map(self, influence_map):
         data = {'field_data': influence_map,
                 'coldest_color': BLUE.repr(),
                 'hottest_color': RED.repr()}
         command = DebugCommand(3007, None, data)
-        self.draw.append(command)
+        self.commands.append(command)
 
     def add_text(self, position, text, color):
         data = {'position': position,
@@ -139,42 +135,17 @@ class DebugManager:
                 'has_italic': False,
                 'timeout': DEFAULT_DEBUG_TIMEOUT}
         text = DebugCommand(3008, None, data)
-        self.text.append(text)
+        self.commands.append(text)
 
     def add_ui_command(self, debug_command):
         self.human_control = True
         self.ui_commands.append(UIDebugCommand(debug_command))
 
     def add_odd_command(self, odd_cmd):
-        self.odd.append(odd_cmd)
+        self.commands.append(odd_cmd)
 
     def set_human_control(self, status=True):
         self.human_control = status
-
-    def _get_logs_commands(self):
-        logs = self.logs
-        self.logs = []
-        return logs
-
-    def _get_influence_map_commands(self):
-        im = self.influence_map
-        self.influence_map = []
-        return im
-
-    def _get_text_commands(self):
-        text = self.text
-        self.text = []
-        return text
-
-    def _get_draw_commands(self):
-        draw = self.draw
-        self.draw = []
-        return draw
-
-    def _get_odd_commands(self):
-        odd = self.odd
-        self.odd = []
-        return odd
 
 class DebugCommand(object):
     """
