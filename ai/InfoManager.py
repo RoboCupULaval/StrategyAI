@@ -52,7 +52,6 @@ class InfoManager:
         self.friend = self.init_team_dictionary()
         self.enemy = self.init_team_dictionary()
         self.modules = {}
-        self.strategy = "HumanControl"
         self.tactics = list(range(6))
         self.timestamp = 0
         self.debug_manager = DebugManager()
@@ -188,6 +187,7 @@ class InfoManager:
     def set_player_tactic(self, i, tactic):
         # FIXME: hack
         self.tactics[i] = tactic
+
 
     def set_player_next_action(self, i, next_action):
         # TODO: Enforce valid type

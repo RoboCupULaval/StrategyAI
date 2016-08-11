@@ -4,7 +4,12 @@ from .GoToPosition import GoToPosition
 from .Stop import Stop
 from .CoverZone import CoverZone
 
-TACTIC_BOOK = {'goto_position' : GoToPosition,
-               'goalkeeper' : GoalKeeper,
-               'cover_zone' : CoverZone,
-               'get_ball' : GoGetBall}
+class TacticBook(object):
+    def __init__(self):
+        self.tactic_book = {'goto_position' : GoToPosition,
+                            'goalkeeper' : GoalKeeper,
+                            'cover_zone' : CoverZone,
+                            'get_ball' : GoGetBall}
+
+    def get_tactics_name_list(self):
+        return list(self.tactic_book.keys())

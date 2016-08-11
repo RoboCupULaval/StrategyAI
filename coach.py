@@ -8,10 +8,10 @@ from RULEngine.Util.Pose import Pose
 import ai.executor as executor
 from ai.InfoManager import InfoManager
 import ai.Debug.debug_manager as ui_debug
-from ai.STA.Strategy.StrategyBook import StrategyBook, TACTIC_BOOK
+from ai.STA.Strategy.StrategyBook import StrategyBook
+from ai.STA.Tactic.TacticBook import TacticBook
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Debug.debug_manager import DebugManager, DebugCommand
-
 
 __author__ = 'RoboCupULaval'
 
@@ -78,10 +78,10 @@ class Coach(object):
 
     def _init_ui_debug(self):
         # FIXME: exécuter uniquement sur handshake plutôt qu'à l'init du coach
-        cmd_tactics = {'strategy': list(StrategyBook().get_strategies_name_list()),
-                       'tactic': list(TACTIC_BOOK.keys()),
+        cmd_tactics = {'strategy': StrategyBook(self.info_manager).get_strategies_name_list(),
+                       'tactic': TacticBook().get_tactics_name_list(),
                        'action': ['None']}
-        cmd = DebugCommand(1001, None, cmd_tactics)
+        cmd = DebugCommand(1001, cmd_tactics)
         self.debug_manager.add_odd_command(cmd)
 
 

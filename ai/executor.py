@@ -5,7 +5,8 @@ from abc import abstractmethod, ABCMeta
 
 from .Util.types import AICommand
 
-from .STA.Strategy.StrategyBook import StrategyBook, TACTIC_BOOK
+from .STA.Strategy.StrategyBook import StrategyBook
+from .STA.Tactic.TacticBook import TacticBook
 from .STA.Tactic import tactic_constants
 from .STA.Tactic.GoGetBall import GoGetBall
 from .STA.Tactic.GoalKeeper import GoalKeeper
@@ -60,9 +61,10 @@ class StrategyExecutor(Executor):
             meilleure stratégie pour le contexte.
         """
         if not self.info_manager.debug_manager.human_control:
-            self.strategy = StrategyBook().get_strategy(self.info_manager.strategy)(self.info_manager)
+            self.strategy_book = StrategyBook(self.info_manager)
+            self.strategy = self.strategy_book.get_optimal_strategy()(self.info_manager)
         else:
-            self.strategy = StrategyBook().get_strategy("HumanControl")(self.info_manager)
+            self.strategy = self.strategy_book.get_strategy("HumanControl")
 
     def _assign_tactics(self):
         """
@@ -72,10 +74,10 @@ class StrategyExecutor(Executor):
         human_control = self.info_manager.debug_manager.human_control
         if not human_control:
             tactic_sequence = self.strategy.get_next_tactics_sequence()
-            for pid in range(6):
-                tactic = tactic_sequence[pid]
-                tactic.player_id = pid
-                self.info_manager.set_player_tactic(pid, tactic_sequence[pid])
+            for i in range(0, 6):
+                tactic = tactic_sequence[i]
+                tactic.player_id = i
+                self.info_manager.set_player_tactic(i, tactic_sequence[i])
         else:
             pass
 
@@ -91,9 +93,26 @@ class TacticExecutor(Executor):
 
     def exec(self):
         """ Obtient la Tactic de chaque robot et fait progresser la FSM. """
-        for pid in range(0, 6):
-            tactic = self.info_manager.get_player_tactic(pid)
-            tactic.exec()
+        for i in range(0, 6):
+            self.info_manager.get_player_tactic(i).exec()
+
+class PathfinderExecutor(Executor):
+    """ Récupère les paths calculés pour les robots et les assignent. """
+
+    def __init__(self, info_manager):
+        Executor.__init__(self, info_manager)
+        self.pathfinder = None
+
+    def exec(self):
+        """
+            Appel le module de pathfinder enregistré pour modifier le mouvement
+            des joueurs de notre équipe.
+        """
+        self.pathfinder = self.info_manager.acquire_module('Pathfinder')
+        if self.pathfinder: # on desactive l'executor si aucun module ne fournit de pathfinding
+            paths = self.pathfinder.get_paths()
+            for i in range(0, 6):
+                self.info_manager.set_player_next_action(paths[i])
 
 class ModuleExecutor(Executor):
     """ Met à jour tous les modules intelligents enregistré. """
