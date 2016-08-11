@@ -64,12 +64,10 @@ class DebugManager:
         debug.
     """
 
-    def __init__(self, availabe_strategies, availabe_tactics):
+    def __init__(self):
         self.commands = []
         self.ui_commands = []
         self.human_control = False
-        self.availabe_strategies = availabe_strategies
-        self.availabe_tactics = availabe_tactics
 
     def get_commands(self):
         packet_represented_commands = [c.get_packet_repr() for c in self.commands]

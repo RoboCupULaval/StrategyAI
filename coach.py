@@ -37,14 +37,13 @@ class Coach(object):
             Constructeur, réplique une grande partie du GameState pour
             construire l'InfoManager.
         """
-        self.info_manager = InfoManager(is_debug=True)
+        self.info_manager = InfoManager()
         self._init_intelligent_modules()
         self.debug_manager = self.info_manager.debug_manager
         self.debug_executor = executor.DebugExecutor(self.info_manager)
         self.module_executor = executor.ModuleExecutor(self.info_manager)
         self.strategy_executor = executor.StrategyExecutor(self.info_manager)
         self.tatic_executor = executor.TacticExecutor(self.info_manager)
-        self.pathfinder_executor = executor.PathfinderExecutor(self.info_manager)
         self.coach_command_sender = CoachCommandSender(self.info_manager)
         self._init_ui_debug()
 
@@ -78,7 +77,7 @@ class Coach(object):
             return []
 
     def _init_intelligent_modules(self):
-        self.info_manager.register_module('Pathfinder', PathfinderRRT)
+        pass
 
     def _init_ui_debug(self):
         # FIXME: exécuter uniquement sur handshake plutôt qu'à l'init du coach
@@ -92,12 +91,10 @@ class Coach(object):
     def _update_ai(self, p_game_state):
         """ Effectue une itération de mise à jour de l'ia. """
         self.info_manager.update(p_game_state)
-        self.debug_executor.exec()
+        self.module_executor.exec()
         self.strategy_executor.exec()
         self.tatic_executor.exec()
-        # TODO: Optimiser les moments de mises à jours des modules intelligents
-        self.module_executor.exec()
-        self.pathfinder_executor.exec()
+        self.debug_executor.exec()
 
 class CoachCommandSender(object):
     """

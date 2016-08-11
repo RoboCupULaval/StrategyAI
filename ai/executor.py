@@ -95,28 +95,6 @@ class TacticExecutor(Executor):
             tactic = self.info_manager.get_player_tactic(pid)
             tactic.exec()
 
-class PathfinderExecutor(Executor):
-    """ Récupère les paths calculés pour les robots et les assignent. """
-
-    def __init__(self, info_manager):
-        Executor.__init__(self, info_manager)
-        self.pathfinder = self.info_manager.acquire_module("Pathfinder")
-
-    def exec(self):
-        """
-            Appel le module de pathfinder enregistré pour modifier le mouvement
-            des joueurs de notre équipe.
-        """
-        self.pathfinder = self.info_manager.acquire_module('Pathfinder')
-        if self.pathfinder:
-
-            paths = self.pathfinder.get_paths()
-            for i in range(0, 6):
-                action = self.info_manager.get_player_next_action(i)
-                pose = paths[i][0]
-                action = AICommand(paths[i][0], action.kick_strength)
-                self.info_manager.set_player_next_action(i, action)
-
 class ModuleExecutor(Executor):
     """ Met à jour tous les modules intelligents enregistré. """
     def __init__(self, info_manager):

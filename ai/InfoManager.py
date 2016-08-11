@@ -23,7 +23,7 @@ class InfoManager:
         l'intelligence artificielle doivent consulter pour connaître
         l'état de la partie.
     """
-    def __init__(self, is_debug=False):
+    def __init__(self):
         """
         L'infomanager s'initialise avec quatre dictionnaires;
         la partie, la balle, l'équipe alliée et l'équipe adverse.
@@ -55,11 +55,7 @@ class InfoManager:
         self.strategy = "HumanControl"
         self.tactics = list(range(6))
         self.timestamp = 0
-
-        if is_debug:
-            self.debug_manager = DebugManager()
-        else:
-            self.debug_manager = None
+        self.debug_manager = DebugManager()
 
 
     def init_team_dictionary(self):
