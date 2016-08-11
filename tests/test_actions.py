@@ -15,6 +15,7 @@ from RULEngine.Game.Ball import Ball
 from RULEngine.Util.constant import *
 import unittest
 from math import pi, atan, sqrt
+from ai.Util.types import AICommand
 
 
 class TestActions(unittest.TestCase):
@@ -121,23 +122,26 @@ class TestActions(unittest.TestCase):
 
     def test_GoBehind(self):
         #TODO: faire davantage de cas de test
-        distance_behind = 2
+        distance_behind = 500
 
         # test avec une droite quelconque
         self.go_behind = GoBehind(self.info_manager, self.player_id, Position(1.5,2.3), Position(18.3,27.8), distance_behind)
-        output_string = "AICommand(move_destination=[(x=-0.5, y=0.2999999999999998, z=0.0), theta=0.7853981633974483], kick_strength=0)"
-        self.assertEqual(str(GoBehind.exec(self.go_behind)), output_string)
+        aicmd_obtenu = GoBehind.exec(self.go_behind)
+        aicmd_cible = AICommand(Pose(Position(-273, -415), 0.9882), 0)
+        self.assertEqual(aicmd_obtenu, aicmd_cible)
 
         # test avec une droite verticale
         self.go_behind = GoBehind(self.info_manager, self.player_id, Position(1000,250.3), Position(1000, 725.8), distance_behind)
-        output_string = "AICommand(move_destination=[(x=1000.0, y=248.3, z=0.0), theta=1.5707963267948966], kick_strength=0)"
-        self.assertEqual(str(GoBehind.exec(self.go_behind)), output_string)
+        aicmd_obtenu = GoBehind.exec(self.go_behind)
+        aicmd_cible = AICommand(Pose(Position(1000, -249), 1.5707), 0)
+        self.assertEqual(aicmd_obtenu, aicmd_cible)
 
         # test avec une droite horizontale
         self.go_behind = GoBehind(self.info_manager, self.player_id, Position(175.8, -200.34), Position(-276.8, -200.34),
                                   distance_behind)
-        output_string = "AICommand(move_destination=[(x=177.8, y=-200.34, z=0.0), theta=-3.141592653589793], kick_strength=0)"
-        self.assertEqual(str(GoBehind.exec(self.go_behind)), output_string)
+        aicmd_obtenu = GoBehind.exec(self.go_behind)
+        aicmd_cible = AICommand(Pose(Position(675, -200), -3.1415), 0)
+        self.assertEqual(aicmd_obtenu, aicmd_cible)
 
     def test_kick(self):
 
@@ -164,9 +168,10 @@ class TestActions(unittest.TestCase):
         self.ball.set_position(Position(0, 0), 1)
         self.info_manager.friend['0']['pose'] = Pose(Position(4450, 10), 0)
         self.protectGoal = ProtectGoal(self.info_manager, 0)
-        output_string = "AICommand(move_destination=[(x=" + str(FIELD_X_RIGHT - FIELD_GOAL_RADIUS/2) + \
-                        ", y=0.0, z=0.0), theta=" + str(pi) + "], kick_strength=0)"
-        self.assertEqual(output_string, str(self.protectGoal.exec()))
+
+        aicmd_obtenu = self.protectGoal.exec()
+        aicmd_cible = AICommand(Pose(Position(3529, 7), -3.1394), 0)
+        self.assertEqual(aicmd_obtenu, aicmd_cible)
 
         # test distance max < distance min
         self.assertRaises(AssertionError, ProtectGoal, self.info_manager, 0, True, 50, 40)
