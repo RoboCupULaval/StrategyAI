@@ -2,6 +2,7 @@
 
 import math as m
 
+POSITION_DELTA_TOLERANCE_MAGNITUDE = 1e1
 
 class Position(object):
     """ Vector with [x, y, z] """
@@ -65,9 +66,13 @@ class Position(object):
             La comparison de float exige toujours un seuil de tolérance.
             Dans ce cas-ci, les décimales n'importent pas.
             Position(0.5, 0) == Position(0, 0) -> True
-            (math.floor en arrière)
+            (multiplication par la magnitude de tolérance, définie dans constant.py, puis conversion pour couper les décimales)
         """
-        return m.floor(self.x) == m.floor(other.x) and m.floor(self.y) == m.floor(other.y)
+        scaled_left_side_x = int(self.x * POSITION_DELTA_TOLERANCE_MAGNITUDE)
+        scaled_right_side_x = int(other.x * POSITION_DELTA_TOLERANCE_MAGNITUDE)
+        scaled_left_side_y = int(self.y * POSITION_DELTA_TOLERANCE_MAGNITUDE)
+        scaled_right_side_y = int(other.y * POSITION_DELTA_TOLERANCE_MAGNITUDE)
+        return scaled_left_side_x == scaled_right_side_x and scaled_left_side_y == scaled_right_side_y
 
     def __ne__(self, other):
         """ Return self != other """

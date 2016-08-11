@@ -1,7 +1,8 @@
 #Under MIT License, see LICENSE.txt
-from ..Util.Position import Position
+from .Position import Position
 import math as m
 
+ORIENTATION_DELTA_TOLERANCE_MAGNITUDE = 1e4
 
 class Pose(object):
     """  Container of position and orientation """
@@ -22,12 +23,10 @@ class Pose(object):
         return self.__str__()
 
     def __eq__(self, other):
-        """
-            L'égalité est vérifié au niveau de l'unité.
-            Pose([0.5, 0, 0]) == Pose([1, 0, 0]) -> True
-            (math.round en arrière)
-        """
-        return self.position == other.position and self.orientation == other.orientation
+        orientation_left_side = int(self.orientation * ORIENTATION_DELTA_TOLERANCE_MAGNITUDE)
+        orientation_right_side = int(other.orientation * ORIENTATION_DELTA_TOLERANCE_MAGNITUDE)
+        orientation_test = orientation_left_side == orientation_right_side
+        return self.position == other.position and orientation_test
 
     def __ne__(self, other):
         return not self.__eq__(other)
