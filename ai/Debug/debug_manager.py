@@ -45,7 +45,7 @@ COLOR_ID_MAP = {0: COLOR_ID0,
                 5: COLOR_ID5}
 
 SENDER_NAME = "ai"
-DEFAULT_DEBUG_TIMEOUT = 300 #ms
+DEFAULT_DEBUG_TIMEOUT = 1 #s
 DEFAULT_TEXT_SIZE = 14 #px
 DEFAULT_TEXT_FONT = 'Arial'
 DEFAULT_TEXT_ALIGN = 'Left'
@@ -80,15 +80,16 @@ class DebugManager:
         return cmds
 
     def add_log(self, level, message):
-        log = DebugCommand(2, None, {'level': level, 'message': message})
+        log = DebugCommand(2, {'level': level, 'message': message})
         self.commands.append(log)
 
-    def add_point(self, point, color=VIOLET):
-        data = {'point': point,
+    def add_point(self, point, color=VIOLET, width=5, timeout=DEFAULT_DEBUG_TIMEOUT):
+        int_point = int(point[0]), int(point[1])
+        data = {'point': int_point,
                 'color': color.repr(),
-                'width': 5,
-                'timeout': 0}
-        point = DebugCommand(3004, None, data)
+                'width': width,
+                'timeout': timeout}
+        point = DebugCommand(3004, data)
         self.commands.append(point)
 
     def add_circle(self, center, radius):
@@ -97,14 +98,14 @@ class DebugManager:
                 'color': CYAN.repr(),
                 'is_fill': True,
                 'timeout': 0}
-        circle = DebugCommand(3003, None, data)
+        circle = DebugCommand(3003, data)
         self.commands.append(circle)
 
     def add_line(self, start_point, end_point):
         data = {'start': start_point,
                 'end': end_point,
                 'color': MAGENTA.repr()}
-        command = DebugCommand(3001, None, data)
+        command = DebugCommand(3001, data)
         self.commands.append(command)
 
     def add_rectangle(self, top_left, bottom_right):
@@ -112,14 +113,14 @@ class DebugManager:
                 'bottom_right': bottom_right,
                 'color': YELLOW.repr(),
                 'is_fill': True}
-        command = DebugCommand(3006, None, data)
+        command = DebugCommand(3006, data)
         self.commands.append(command)
 
     def add_influence_map(self, influence_map):
         data = {'field_data': influence_map,
                 'coldest_color': BLUE.repr(),
                 'hottest_color': RED.repr()}
-        command = DebugCommand(3007, None, data)
+        command = DebugCommand(3007, data)
         self.commands.append(command)
 
     def add_text(self, position, text, color):
@@ -132,7 +133,7 @@ class DebugManager:
                 'has_bold': False,
                 'has_italic': False,
                 'timeout': DEFAULT_DEBUG_TIMEOUT}
-        text = DebugCommand(3008, None, data)
+        text = DebugCommand(3008, data)
         self.commands.append(text)
 
     def add_ui_command(self, debug_command):
@@ -152,7 +153,7 @@ class DebugCommand(object):
        Implémente la version 1.0 du protocole.
     """
 
-    def __init__(self, p_type_, p_link, p_data, p_version="1.0"):
+    def __init__(self, p_type_, p_data, p_link=None, p_version="1.0"):
         """ Constructeur, définie à vide les attributs nécessaires. """
         super().__init__()
         self.name = SENDER_NAME

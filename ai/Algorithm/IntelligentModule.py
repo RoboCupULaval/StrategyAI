@@ -35,7 +35,7 @@ class IntelligentModule(object, metaclass=ABCMeta):
             log.
         """
 
-class Pathfinder(IntelligentModule, metaclass=ABCMeta):
+class Pathfinder(metaclass=ABCMeta):
     """
         Classe mère des pathfinders.
         Défini l'interface publique et la documente.
@@ -60,7 +60,7 @@ class Pathfinder(IntelligentModule, metaclass=ABCMeta):
         return str(self.paths)
 
     @abstractmethod
-    def get_path(self, pid=None):
+    def get_path(self, pid=None, target=None):
         """
             Si l'ID est précisé, retourne la liste des *Pose* pour le chemin
             de ce robot. Autrement, retourne le dictionnaire.

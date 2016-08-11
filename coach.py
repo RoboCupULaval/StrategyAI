@@ -2,19 +2,16 @@
 """ Module supérieur de l'IA """
 
 from RULEngine.Command import command
-from RULEngine.Util.constant import *
+from RULEngine.Util.Position import Position
+from RULEngine.Util.Pose import Pose
 
 import ai.executor as executor
 from ai.InfoManager import InfoManager
 import ai.Debug.debug_manager as ui_debug
 from ai.STA.Strategy.StrategyBook import StrategyBook, TACTIC_BOOK
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
+from ai.Debug.debug_manager import DebugManager, DebugCommand
 
-# debug stuff
-from ai.Debug.debug_manager import DebugCommand
-from ai.Util.types import AICommand
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
 
 __author__ = 'RoboCupULaval'
 
@@ -47,10 +44,10 @@ class Coach(object):
         self.coach_command_sender = CoachCommandSender(self.info_manager)
         self._init_ui_debug()
 
+
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
         self._update_ai(p_game_state)
-
         self.coach_command_sender.generate_and_send_commands(p_game_state)
 
 
