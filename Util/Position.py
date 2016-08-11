@@ -2,7 +2,7 @@
 
 import math as m
 
-POSITION_DELTA_TOLERANCE_MAGNITUDE = 1e1
+POSITION_DELTA_TOLERANCE_MAGNITUDE = 1e0
 
 class Position(object):
     """ Vector with [x, y, z] """
