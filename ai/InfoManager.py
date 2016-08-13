@@ -175,6 +175,9 @@ class InfoManager:
     def get_player_next_action(self, i):
         return self.friend[str(i)]['next_pose']
 
+    def get_enemy_position(self, i):
+        return self.enemy[str(i)]['position']
+
     # ---Setter
     def set_player_skill_target_goal(self, i, action):
         # FIXME: retirer!
