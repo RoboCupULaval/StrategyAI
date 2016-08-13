@@ -5,6 +5,7 @@
 """
 from collections import namedtuple
 
+
 STRATEGY_COMMAND_TYPE = 5002
 TACTIC_COMMAND_TYPE = 5003
 
@@ -44,7 +45,7 @@ COLOR_ID_MAP = {0: COLOR_ID0,
                 5: COLOR_ID5}
 
 SENDER_NAME = "ai"
-DEFAULT_DEBUG_TIMEOUT = 300 #ms
+DEFAULT_DEBUG_TIMEOUT = 1 #s
 DEFAULT_TEXT_SIZE = 14 #px
 DEFAULT_TEXT_FONT = 'Arial'
 DEFAULT_TEXT_ALIGN = 'Left'
@@ -64,21 +65,14 @@ class DebugManager:
     """
 
     def __init__(self):
-        self.logs = []
-        self.influence_map = []
-        self.text = []
-        self.draw = []
-        self.odd = []
+        self.commands = []
         self.ui_commands = []
         self.human_control = False
 
     def get_commands(self):
-        commands = self._get_draw_commands()
-        commands = commands + self._get_influence_map_commands()
-        commands = commands + self._get_logs_commands()
-        commands = commands + self._get_text_commands()
-        commands = commands + self._get_odd_commands()
-        return [c.get_packet_repr() for c in commands]
+        packet_represented_commands = [c.get_packet_repr() for c in self.commands]
+        self.commands = []
+        return packet_represented_commands
 
     def get_ui_commands(self):
         cmds = self.ui_commands
@@ -86,16 +80,17 @@ class DebugManager:
         return cmds
 
     def add_log(self, level, message):
-        log = DebugCommand(2, None, {'level': level, 'message': message})
-        self.logs.append(log)
+        log = DebugCommand(2, {'level': level, 'message': message})
+        self.commands.append(log)
 
-    def add_point(self, point, color=VIOLET):
-        data = {'point': point,
+    def add_point(self, point, color=VIOLET, width=5, timeout=DEFAULT_DEBUG_TIMEOUT):
+        int_point = int(point[0]), int(point[1])
+        data = {'point': int_point,
                 'color': color.repr(),
-                'width': 5,
-                'timeout': 0}
-        point = DebugCommand(3004, None, data)
-        self.draw.append(point)
+                'width': width,
+                'timeout': timeout}
+        point = DebugCommand(3004, data)
+        self.commands.append(point)
 
     def add_circle(self, center, radius):
         data = {'center': center,
@@ -103,31 +98,31 @@ class DebugManager:
                 'color': CYAN.repr(),
                 'is_fill': True,
                 'timeout': 0}
-        circle = DebugCommand(3003, None, data)
-        self.draw.append(circle)
+        circle = DebugCommand(3003, data)
+        self.commands.append(circle)
 
     def add_line(self, start_point, end_point):
         data = {'start': start_point,
                 'end': end_point,
                 'color': MAGENTA.repr()}
-        command = DebugCommand(3001, None, data)
-        self.draw.append(command)
+        command = DebugCommand(3001, data)
+        self.commands.append(command)
 
     def add_rectangle(self, top_left, bottom_right):
         data = {'top_left': top_left,
                 'bottom_right': bottom_right,
                 'color': YELLOW.repr(),
                 'is_fill': True}
-        command = DebugCommand(3006, None, data)
-        self.draw.append(command)
+        command = DebugCommand(3006, data)
+        self.commands.append(command)
 
     def add_influence_map(self, influence_map):
 
         data = {'field_data': influence_map,
                 'coldest_color': BLUE.repr(),
                 'hottest_color': RED.repr()}
-        command = DebugCommand(3007, None, data)
-        self.draw.append(command)
+        command = DebugCommand(3007, data)
+        self.commands.append(command)
 
     def add_text(self, position, text, color):
         data = {'position': position,
@@ -139,43 +134,18 @@ class DebugManager:
                 'has_bold': False,
                 'has_italic': False,
                 'timeout': DEFAULT_DEBUG_TIMEOUT}
-        text = DebugCommand(3008, None, data)
-        self.text.append(text)
+        text = DebugCommand(3008, data)
+        self.commands.append(text)
 
     def add_ui_command(self, debug_command):
         self.human_control = True
         self.ui_commands.append(UIDebugCommand(debug_command))
 
     def add_odd_command(self, odd_cmd):
-        self.odd.append(odd_cmd)
+        self.commands.append(odd_cmd)
 
     def set_human_control(self, status=True):
         self.human_control = status
-
-    def _get_logs_commands(self):
-        logs = self.logs
-        self.logs = []
-        return logs
-
-    def _get_influence_map_commands(self):
-        im = self.influence_map
-        self.influence_map = []
-        return im
-
-    def _get_text_commands(self):
-        text = self.text
-        self.text = []
-        return text
-
-    def _get_draw_commands(self):
-        draw = self.draw
-        self.draw = []
-        return draw
-
-    def _get_odd_commands(self):
-        odd = self.odd
-        self.odd = []
-        return odd
 
 class DebugCommand(object):
     """
@@ -184,7 +154,7 @@ class DebugCommand(object):
        Implémente la version 1.0 du protocole.
     """
 
-    def __init__(self, p_type_, p_link, p_data, p_version="1.0"):
+    def __init__(self, p_type_, p_data, p_link=None, p_version="1.0"):
         """ Constructeur, définie à vide les attributs nécessaires. """
         super().__init__()
         self.name = SENDER_NAME

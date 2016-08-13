@@ -2,19 +2,16 @@
 """ Module supérieur de l'IA """
 
 from RULEngine.Command import command
-from RULEngine.Util.constant import *
+from RULEngine.Util.Position import Position
+from RULEngine.Util.Pose import Pose
 
 import ai.executor as executor
 from ai.InfoManager import InfoManager
 import ai.Debug.debug_manager as ui_debug
-from ai.STA.Strategy.StrategyBook import StrategyBook, TACTIC_BOOK
+from ai.STA.Strategy.StrategyBook import StrategyBook
+from ai.STA.Tactic.TacticBook import TacticBook
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
-
-# debug stuff
-from ai.Debug.debug_manager import DebugCommand
-from ai.Util.types import AICommand
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
+from ai.Debug.debug_manager import DebugManager, DebugCommand
 
 __author__ = 'RoboCupULaval'
 
@@ -37,21 +34,20 @@ class Coach(object):
             Constructeur, réplique une grande partie du GameState pour
             construire l'InfoManager.
         """
-        self.info_manager = InfoManager(is_debug=True)
+        self.info_manager = InfoManager()
         self._init_intelligent_modules()
         self.debug_manager = self.info_manager.debug_manager
         self.debug_executor = executor.DebugExecutor(self.info_manager)
         self.module_executor = executor.ModuleExecutor(self.info_manager)
         self.strategy_executor = executor.StrategyExecutor(self.info_manager)
         self.tatic_executor = executor.TacticExecutor(self.info_manager)
-        self.pathfinder_executor = executor.PathfinderExecutor(self.info_manager)
         self.coach_command_sender = CoachCommandSender(self.info_manager)
         self._init_ui_debug()
+
 
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
         self._update_ai(p_game_state)
-
         self.coach_command_sender.generate_and_send_commands(p_game_state)
 
     def halt(self):
@@ -77,26 +73,24 @@ class Coach(object):
             return []
 
     def _init_intelligent_modules(self):
-        self.info_manager.register_module('Pathfinder', PathfinderRRT)
+        pass
 
     def _init_ui_debug(self):
         # FIXME: exécuter uniquement sur handshake plutôt qu'à l'init du coach
-        cmd_tactics = {'strategy': list(StrategyBook().get_strategies_name_list()),
-                       'tactic': list(TACTIC_BOOK.keys()),
+        cmd_tactics = {'strategy': StrategyBook(self.info_manager).get_strategies_name_list(),
+                       'tactic': TacticBook().get_tactics_name_list(),
                        'action': ['None']}
-        cmd = DebugCommand(1001, None, cmd_tactics)
+        cmd = DebugCommand(1001, cmd_tactics)
         self.debug_manager.add_odd_command(cmd)
 
 
     def _update_ai(self, p_game_state):
         """ Effectue une itération de mise à jour de l'ia. """
         self.info_manager.update(p_game_state)
-        self.debug_executor.exec()
+        self.module_executor.exec()
         self.strategy_executor.exec()
         self.tatic_executor.exec()
-        # TODO: Optimiser les moments de mises à jours des modules intelligents
-        self.module_executor.exec()
-        self.pathfinder_executor.exec()
+        self.debug_executor.exec()
 
 class CoachCommandSender(object):
     """

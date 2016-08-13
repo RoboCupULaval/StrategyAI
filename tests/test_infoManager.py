@@ -64,16 +64,12 @@ class TestInfoManager(unittest.TestCase):
         with self.assertRaises(Exception):
             self.info_manager.get_player_goal(42)
 
-    def test_can_get_player_skill(self):
-        self.info_manager.friend['1']['skill'] = "AttackLeft"
-        self.assertEqual(self.info_manager.get_player_skill(1), 'AttackLeft')
-
     def test_fails_get_player_skill_player_invalid(self):
         with self.assertRaises(Exception):
             self.info_manager.get_player_skill(42)
 
     def test_can_get_player_tactic(self):
-        self.info_manager.friend['1']['tactic'] = "Kick Properly"
+        self.info_manager.tactics[1] = "Kick Properly"
         self.assertEqual(self.info_manager.get_player_tactic(1), 'Kick Properly')
 
     def test_fails_get_player_tactic_player_invalid(self):
@@ -123,13 +119,6 @@ class TestInfoManager(unittest.TestCase):
         with self.assertRaises(Exception):
             self.info_manager.get_player_next_action(42)
 
-    def test_can_set_player_skill_target_goal(self):
-        action= {'skill': 'sDance', 'target': 'tDance', 'goal' : 'ball'}
-        self.info_manager.set_player_skill_target_goal(1, action)
-        self.assertEqual(self.info_manager.friend['1']['skill'], 'sDance')
-        self.assertEqual(self.info_manager.friend['1']['target'], 'tDance')
-        self.assertEqual(self.info_manager.friend['1']['goal'], 'ball')
-
     def test_fails_set_player_skill_target_goal_player_invalid(self):
         with self.assertRaises(Exception):
             action= {'skill': 'sDance', 'target': 'tDance', 'goal' : 'ball'}
@@ -142,7 +131,7 @@ class TestInfoManager(unittest.TestCase):
 
     def test_can_set_player_tactic(self):
         self.info_manager.set_player_tactic(1, 'tDance')
-        self.assertEqual(self.info_manager.friend['1']['tactic'], 'tDance')
+        self.assertEqual(self.info_manager.tactics[1], 'tDance')
 
     def test_fails_set_player_tactic_invalid_player(self):
         with self.assertRaises(Exception):

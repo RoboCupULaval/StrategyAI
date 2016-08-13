@@ -47,15 +47,6 @@ class PathfinderRRT(Pathfinder):
 
         self.last_timestamp = self.state.timestamp
 
-    def get_paths(self):
-        """
-            Méthode qui lance le calcul de la trajectoire pour chaque robot de
-            l'équipe.
-
-            :return: None
-        """
-        return self.last_paths_generated
-
     def draw_path(self, paths):
         color_list = [COLOR_ID0, COLOR_ID1, COLOR_ID2, COLOR_ID3, COLOR_ID4, COLOR_ID5]
         for i in range(6):
@@ -65,7 +56,7 @@ class PathfinderRRT(Pathfinder):
                 self.state.debug_manager.add_point((x, y), color_list[i])
 
 
-    def get_path(self, pid=None):
+    def get_path(self, pid=None, target=None):
         """
             Retourne la trajectoire du robot.
 
@@ -73,26 +64,12 @@ class PathfinderRRT(Pathfinder):
             :return: Une liste de Pose, [Pose]
         """
 
-        path = self._compute_path(pid)
+        path = self._compute_path(pid, target)
 
         return [Pose(Position(point[0], point[1])) for point in path]
 
 
-    def update(self):
-        #TODO: à réviser
-        if self.state.timestamp - self.last_timestamp > TIME_TO_UPDATE:
-            self.last_timestamp = self.state.timestamp
-            paths = []
-            for pid in range(6):
-                path_element = self.get_path(pid)
-                print(path_element)
-                paths.append(self.get_path(pid))
-            self.last_paths_generated = paths
-            self.draw_path(self.last_paths_generated)
-            print("update rrt")
-
-
-    def _compute_path(self, pid):
+    def _compute_path(self, pid, target):
         """
             Cette méthode calcul la trajectoire pour un robot.
 
@@ -101,7 +78,7 @@ class PathfinderRRT(Pathfinder):
         """
 
         # TODO mettre les buts dans les obstacles
-        list_of_pid = [0,1,2,3,4,5]
+        list_of_pid = list(range(6))
         list_of_pid.remove(pid)
         obstacleList = []
         for other_pid in list_of_pid:
@@ -113,7 +90,8 @@ class PathfinderRRT(Pathfinder):
         initial_position_of_main_player = self.state.get_player_position(pid)
 
 
-        target_of_player = self.state.get_player_target(pid)
+        target_of_player = target
+        assert(isinstance(target_of_player, Position)), "La cible du joueur doit être une Position"
         try :
             target_of_player.x
             target_of_player.y

@@ -1,19 +1,9 @@
 # Under MIT license, see LICENSE.txt
 """ Livre des stratégies. """
 
-from abc import ABCMeta
-
-from ..Tactic import tactic_constants
-from ..Tactic.GoGetBall import GoGetBall
-from ..Tactic.GoalKeeper import GoalKeeper
-from ..Tactic.GoToPosition import GoToPosition
-from ..Tactic.Stop import Stop
-from ..Tactic.CoverZone import CoverZone
-
-TACTIC_BOOK = {'goto_position' : GoToPosition,
-               'goalkeeper' : GoalKeeper,
-               'cover_zone' : CoverZone,
-               'get_ball' : GoGetBall}
+from . HumanControl import HumanControl
+from . SimpleDefense import SimpleDefense
+from . SimpleOffense import SimpleOffense
 
 class StrategyBook(object):
     """
@@ -21,48 +11,44 @@ class StrategyBook(object):
         configuration des stratégies et de les exposer au Behavior Tree en
         charge de sélectionner la stratégie courante.
     """
-    def __init__(self):
-        self.book = {'HumanControl': HumanControl}
 
-    def get_strategy(self, strategy_name):
-        return self.book[strategy_name]
+    def __init__(self, p_info_manager):
+        self.strategy_book = {'SimpleDefense' : SimpleDefense,
+                              'SimpleOffense' : SimpleOffense,
+                              'HumanControl' : HumanControl}
+        self.info_manager = p_info_manager
 
     def get_strategies_name_list(self):
-        return list(self.book.keys())
+        return list(self.strategy_book.keys())
 
-class Strategy(metaclass=ABCMeta):
-    """ Définie l'interface commune aux stratégies. """
-    def __init__(self, p_info_manager, p_starting_tactics_sequence):
-        self.info_manager = p_info_manager
-        self.tactics_sequence = []
-        self._init_tactics_sequence(p_starting_tactics_sequence)
+    def ball_in_offense_zone(self):
+        self.team_zone_side = "left"  # constante bidon TODO: trouver une facon de demander au InfoManager notre zone initiale
+        self.ball_x_position = self.info_manager.get_ball_position().x
 
-    def get_next_tactics_sequence(self):
-        """
-            Retourne 6 tactics, si la séquence de tactiques de la stratégie
-            est épuiséee, les dernières tactiques sont *Stop*.
-        """
-        self._remove_finished_tactics()
-        return self._generate_next_tactics_sequence()
+        if self.team_zone_side == "left":
+            return self.ball_x_position > 0
+        return self.ball_x_position < 0
 
-    def _init_tactics_sequence(self, p_starting_tactics_sequence):
-        for pid in range(6):
-            self.tactics_sequence.append(p_starting_tactics_sequence[pid](self.info_manager, pid))
+    def most_opponents_in_our_zone(self):
+        pass
 
-    def _remove_finished_tactics(self):
-        for tactic in self.tactics_sequence:
-            if  tactic_constants.is_complete(tactic.status_flag):
-                self.tactics_sequence.remove(tactic)
+    def get_optimal_strategy(self):
 
-    def _generate_next_tactics_sequence(self):
-        next_tactics_sequence = []
-        for pid in range(6):
-            try:
-                next_tactics_sequence.append(self.tactics_sequence[pid])
-            except IndexError:
-                next_tactics_sequence.append(Stop(self.info_manager, pid))
-        return next_tactics_sequence
+        # simple choice
+        if self.ball_in_offense_zone():
+            self.chosen_strategy = SimpleOffense
+        else:
+            self.chosen_strategy = SimpleDefense
 
-class HumanControl(Strategy):
-    def __init__(self, p_info_manager):
-        super().__init__(p_info_manager, [Stop, Stop, Stop, Stop, Stop, Stop])
+        #self.debug_show_all_players_tactics() # debug
+
+        return self.chosen_strategy
+
+    def get_strategy(self, strategy_name):
+        self.strategy_book[strategy_name]
+
+    def debug_show_all_players_tactics(self):
+        for i in range(0,6):
+            debug_string = ""
+            debug_string += "Robot:" + str(i) + str(self.info_manager.get_player_tactic(i))
+        print(debug_string)
