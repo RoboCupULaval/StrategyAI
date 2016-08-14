@@ -1,6 +1,6 @@
 # Under MIT licence, see LICENCE.txt
 
-from ai.STA.Tactic import Tactic
+from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action import MoveTo, Idle
 from RULEngine.Util.area import player_grabbed_ball
 from RULEngine.Util.Pose import Pose
