@@ -50,6 +50,7 @@ class InfluenceMap(IntelligentModule):
         assert (isinstance(effect_radius, int))
         assert (0 < effect_radius)
 
+
         super().__init__(info_manager)
 
 # ****************************************************************************************
@@ -98,6 +99,7 @@ class InfluenceMap(IntelligentModule):
         # TODO see what to do with that next line. useful when using ui-debug
         if self.state is not None:
             self.state.debug_manager.add_influence_map(self.export_board())
+
 
 # **********************************************************************************************************************
 # ****************************** Initialization ************************************************************************
@@ -159,6 +161,10 @@ class InfluenceMap(IntelligentModule):
         :param board_to_apply: Un numpy.ndarray un array vierge pour y ajouter des bordures.
         :type board_to_apply: numpy.ndarray dtype=numpy.int8
         """
+        assert(isinstance(board_to_apply, numpy.ndarray))
+        assert(board_to_apply.shape[0] == self._number_of_rows)
+        assert(board_to_apply.shape[1] == self._number_of_columns)
+        assert(board_to_apply.dtype == numpy.int8)
 
         board_to_apply[0] = self._border_strength
         board_to_apply[:, 0] = self._border_strength
