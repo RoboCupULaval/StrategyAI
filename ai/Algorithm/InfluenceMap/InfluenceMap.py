@@ -32,7 +32,7 @@ class InfluenceMap(IntelligentModule):
     """
 
     def __init__(self, info_manager, resolution=100, strength_decay=0.85, strength_peak=100, effect_radius=25,
-                 have_static=False):
+                 have_static=False, have_it_executed=False):
         """
             Constructeur de la classe InfluenceMap
 
@@ -49,7 +49,6 @@ class InfluenceMap(IntelligentModule):
         assert (0 < strength_peak)
         assert (isinstance(effect_radius, int))
         assert (0 < effect_radius)
-
 
         super().__init__(info_manager)
 
@@ -79,6 +78,10 @@ class InfluenceMap(IntelligentModule):
         self._number_of_rows = rows
         self._number_of_columns = columns
 
+        if self.state != None:
+            self.have_it_executed = have_it_executed
+            self._last_updated = self.state.timestamp
+
         self._adjust_effect_radius()
 
         # different tableau pour enregistrer les différentes représentation
@@ -95,15 +98,6 @@ class InfluenceMap(IntelligentModule):
             self._create_static_board()
 
         self.update()
-
-        # TODO see what to do with that next line. useful when using ui-debug
-        if self.state is not None:
-            self.state.debug_manager.add_influence_map(self.export_board())
-
-
-# **********************************************************************************************************************
-# ****************************** Initialization ************************************************************************
-# **********************************************************************************************************************
 
     def _calculate_rows_and_columns(self):
         """
@@ -270,10 +264,6 @@ class InfluenceMap(IntelligentModule):
         self._clamp_board(self._static_boards)
         # numpy.savetxt("Debug", self._static_boards, fmt='%5i')
 
-
-# **********************************************************************************************************************
-# **********************Adding points and influences methods ***********************************************************
-
     def _compute_value_by_distance(self, strength, distance):
         """
         Calcule la valeur qu'une recoit d'un point de force strength à distance distance.
@@ -337,9 +327,6 @@ class InfluenceMap(IntelligentModule):
             cases_iterator[0] = influence_to_put_instead
             cases_iterator.iternext()
         self._clamp_board(board_to_apply)
-
-# **********************************************************************************************************************
-# **************************************** Generic point finding *******************************************************
 
     def find_points_over_strength_square(self, top_row, bot_row, left_column, right_column, strength):
         """
@@ -416,9 +403,6 @@ class InfluenceMap(IntelligentModule):
     def find_max_value_in_circle(self, center, radius):
         pass
 
-# **********************************************************************************************************************
-# ************************************ Player representation methods****************************************************
-
     def update_friend_position(self):
         """
         Fetch la position de nos robots dans l'infomanager et les applique sur le tableau principal.
@@ -430,16 +414,9 @@ class InfluenceMap(IntelligentModule):
             self._friendly_bots_on_board.append(friend_position)
             self.add_point_and_propagate_influence(friend_position[0], friend_position[1], self._board, 100)
 
-
-# **********************************************************************************************************************
-# ************************************ Foes representation methods *****************************************************
     # TODO ask about implementation of foes in infomanager
-
     def update_foes_position(self):
         pass
-
-# **********************************************************************************************************************
-# ************************************ Ball representation methods *****************************************************
 
     def update_ball_position(self):
         self._ball_position_on_board = self.transform_field_to_board_position(self.state.get_ball_position())
@@ -450,21 +427,22 @@ class InfluenceMap(IntelligentModule):
     def get_ball_influence(self):
         return self._board[self._ball_position_on_board[0], self._ball_position_on_board[1]]
 
-# **********************************************************************************************************************
-# ********************************************* misc methods ***********************************************************
     def get_number_of_cells(self):
         return self._number_of_rows * self._number_of_columns
 
     def update(self):
-        if self._static_boards is not None:
-            self._board = numpy.copy(self._static_boards)
-        else:
-            self._board = self._create_standard_influence_board()
+        if self.have_it_executed:
+            if self.state.timestamp - self._last_updated > 5:
+                if self._static_boards is not None:
+                    self._board = numpy.copy(self._static_boards)
+                else:
+                    self._board = self._create_standard_influence_board()
 
-        if self.state is not None:
-            self.update_friend_position()
-            self.update_foes_position()
-            self.update_ball_position()
+                self.update_friend_position()
+                self.update_foes_position()
+                self.update_ball_position()
+                self.state.debug_manager.add_influence_map(self.export_board())
+                self._last_updated = self.state.timestamp
 
     def export_board(self):
         return self._board.tolist()

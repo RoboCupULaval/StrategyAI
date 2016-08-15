@@ -120,7 +120,8 @@ class DebugManager:
 
         data = {'field_data': influence_map,
                 'coldest_color': BLUE.repr(),
-                'hottest_color': RED.repr()}
+                'hottest_color': GREEN.repr(),
+                'timeout': 4}
         command = DebugCommand(3007, data)
         self.commands.append(command)
 
