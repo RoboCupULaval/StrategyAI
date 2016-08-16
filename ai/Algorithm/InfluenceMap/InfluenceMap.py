@@ -52,16 +52,6 @@ class InfluenceMap(IntelligentModule):
 
         super().__init__(info_manager)
 
-# ****************************************************************************************
-# ***************** REMOVE! **************************************************************
-        # todo see how to better implement a graphic representation!
-        # GOD NO!
-        try:
-            remove("IMBoard")
-        except OSError:
-            print("Nothing to remove!")
-# ****************************************************************************************
-
         # board parameters
         self._resolution = resolution
         self._strength_decay = strength_decay
