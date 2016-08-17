@@ -52,6 +52,18 @@ class InfluenceMap(IntelligentModule):
 
         super().__init__(info_manager)
 
+        """
+# ****************************************************************************************
+# ***************** REMOVE! **************************************************************
+        # todo see how to better implement a graphic representation!
+        # GOD NO!
+        try:
+            remove("IMBoard")
+        except OSError:
+            print("Nothing to remove!")
+# ****************************************************************************************
+        """
+
         # board parameters
         self._resolution = resolution
         self._strength_decay = strength_decay
@@ -68,7 +80,7 @@ class InfluenceMap(IntelligentModule):
         self._number_of_rows = rows
         self._number_of_columns = columns
 
-        if self.state != None:
+        if self.state is not None:
             self.have_it_executed = have_it_executed
             self._last_updated = self.state.timestamp
 
