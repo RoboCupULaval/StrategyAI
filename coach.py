@@ -54,12 +54,11 @@ class Coach(object):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
         delta_timestamp = p_game_state.timestamp - self.last_update_timestap
         if delta_timestamp > TIMESTAMP_MINIMAL_DELTA or math.isclose(delta_timestamp, TIMESTAMP_MINIMAL_DELTA, abs_tol=1e-4):
-            print("Update")
             self.last_update_timestap = p_game_state.timestamp
             self._update_ai(p_game_state)
             self.coach_command_sender.generate_and_send_commands(p_game_state)
         else:
-            print("Skip update, pas un assez long délais: " + str(delta_timestamp))
+            pass
 
 
     def halt(self):
