@@ -7,7 +7,7 @@ from RULEngine.Command.command import _Command
 from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE
+from RULEngine.Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE, SPEED_ABSOLUTE_TOLERANCE
 
 class TestCommand(unittest.TestCase):
 
@@ -54,20 +54,20 @@ class TestCommand(unittest.TestCase):
         self.uut = functools.partial(self.cmd._convertPositionToSpeed, Pose())
 
         # sanity
-        self.assertNotEqual(self.uut(Pose()), Pose(Position(1234, -543, abs_tol=1e-3), 0))
+        self.assertNotEqual(self.uut(Pose()), Pose(Position(1234, -543, abs_tol=SPEED_ABSOLUTE_TOLERANCE), 0))
 
         speed_pose_I = self.uut(Pose(Position(900, 900), 0))
-        self.assertEqual(speed_pose_I, Pose(Position(math.sqrt(2)/2, math.sqrt(2)/2, abs_tol=1e-3), 0))
+        self.assertEqual(speed_pose_I, Pose(Position(math.sqrt(2)/2, math.sqrt(2)/2, abs_tol=SPEED_ABSOLUTE_TOLERANCE), 0))
         speed_pose_II = self.uut(Pose(Position(-900, 900), 0))
-        self.assertEqual(speed_pose_II, Pose(Position(-math.sqrt(2)/2, math.sqrt(2)/2, abs_tol=1e-3), 0))
+        self.assertEqual(speed_pose_II, Pose(Position(-math.sqrt(2)/2, math.sqrt(2)/2, abs_tol=SPEED_ABSOLUTE_TOLERANCE), 0))
         speed_pose_III = self.uut(Pose(Position(-900, -900), 0))
-        self.assertEqual(speed_pose_III, Pose(Position(-math.sqrt(2)/2, -math.sqrt(2)/2, abs_tol=1e-3), 0))
+        self.assertEqual(speed_pose_III, Pose(Position(-math.sqrt(2)/2, -math.sqrt(2)/2, abs_tol=SPEED_ABSOLUTE_TOLERANCE), 0))
         speed_pose_IV = self.uut(Pose(Position(900, -900), 0))
-        self.assertEqual(speed_pose_IV, Pose(Position(math.sqrt(2)/2, -math.sqrt(2)/2, abs_tol=1e-3), 0))
+        self.assertEqual(speed_pose_IV, Pose(Position(math.sqrt(2)/2, -math.sqrt(2)/2, abs_tol=SPEED_ABSOLUTE_TOLERANCE), 0))
         speed_pose = self.uut(Pose(Position(1000, 300), 0))
-        self.assertEqual(speed_pose, Pose(Position(0.957, 0.287, abs_tol=1e-3), 0))
+        self.assertEqual(speed_pose, Pose(Position(0.957, 0.287, abs_tol=SPEED_ABSOLUTE_TOLERANCE), 0))
         speed_pose = self.uut(Pose(Position(300, 1000), 0))
-        self.assertEqual(speed_pose, Pose(Position(0.287, 0.957, abs_tol=1e-3), 0))
+        self.assertEqual(speed_pose, Pose(Position(0.287, 0.957, abs_tol=SPEED_ABSOLUTE_TOLERANCE), 0))
 
     def test_compute_theta_direction(self):
         """ Test du calcul de theta_direction, 4 décimales de précisions. """
