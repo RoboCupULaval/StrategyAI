@@ -6,6 +6,7 @@ class TestPosition(unittest.TestCase):
 
     def test_eq(self):
         # les tests sont fait avec la tolérance par défaut défini dans position.py
+        self.assertFalse(Position(900, 900) == Position()) # sanity check
         pos1 = Position()
         pos2 = Position()
         self.assertEqual(pos1, pos2)
@@ -30,3 +31,8 @@ class TestPosition(unittest.TestCase):
         pos12 = Position(1, 0)
         self.assertTrue(pos10 == pos11)
         self.assertTrue(pos10 == pos12)
+
+        # test pour voir si la tolérance est respectée
+        pos11.abs_tol = 1e-1
+        self.assertFalse(pos11 == pos10)
+        self.assertFalse(pos10 == pos11)

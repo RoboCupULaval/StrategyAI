@@ -69,7 +69,8 @@ class Position(object):
             Position(0.5, 0) == Position(0, 0) -> True
             (multiplication par la magnitude de tolérance, définie dans constant.py, puis conversion pour couper les décimales)
         """
-        return math.isclose(self.x, other.x, abs_tol=self.abs_tol) and math.isclose(self.y, other.y, abs_tol=self.abs_tol)
+        min_abs_tol = min(self.abs_tol, other.abs_tol)
+        return math.isclose(self.x, other.x, abs_tol=min_abs_tol) and math.isclose(self.y, other.y, abs_tol=min_abs_tol)
 
     def __ne__(self, other):
         """ Return self != other """
