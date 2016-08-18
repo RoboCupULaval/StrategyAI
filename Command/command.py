@@ -6,7 +6,7 @@ from ..Game.Player import Player
 from ..Game.Team import Team
 from ..Util.area import *
 from ..Util.geometry import *
-from ..Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE
+from ..Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE, SPEED_ABSOLUTE_TOLERANCE
 
 
 class _Command(object):
@@ -47,29 +47,20 @@ class _Command(object):
             :param target_pose: the absolute position the robot should go to.
             :returns: A Pose object with speed vectors.
         """
-        position = self._compute_position_for_speed_command(current_pose.position, target_pose.position)
-        orientation = self._compute_theta_for_speed_command(current_pose.orientation, target_pose.orientation)
+        position = self._compute_position_for_speed_command(current_pose.position, target_pose.position, current_pose.orientation)
+        orientation = self._compute_orientation_for_speed_command(current_pose.orientation, target_pose.orientation)
 
         return Pose(position, orientation)
 
-    def _compute_orientation_for_speed_command(self, current_orientation, target_orientation):
-        target_theta = next_pose.orientation
-        current_theta = current_pose.orientation
 
-        theta_direction = self._compute_theta_direction(current_theta, theta)
-
-        theta_speed = self._compute_theta_speed(theta_direction)
-
-        return theta_speed if theta_direction >= 0 else -theta_speed
-
-    def _compute_position_for_speed_command(self, current_position, target_position):
+    def _compute_position_for_speed_command(self, current_position, target_position, current_theta):
         target_x = target_position.x
         target_y = target_position.y
         current_x = current_position.x
         current_y = current_position.y
 
-        direction_x = x - current_x
-        direction_y = y - current_y
+        direction_x = target_x - current_x
+        direction_y = target_y - current_y
         norm = math.hypot(direction_x, direction_y)
         speed = 1 if norm >= 50 else 0
         if norm:
@@ -77,8 +68,19 @@ class _Command(object):
             direction_y /= norm
         cosangle = math.cos(-current_theta)
         sinangle = math.sin(-current_theta)
-        new_x = (direction_x * cosangle - direction_y * sinangle) * speed
-        new_y = (direction_y * cosangle + direction_x * sinangle) * speed
+        speed_x = (direction_x * cosangle - direction_y * sinangle) * speed
+        speed_y = (direction_y * cosangle + direction_x * sinangle) * speed
+
+        return Position(speed_x, speed_y, abs_tol=SPEED_ABSOLUTE_TOLERANCE)
+
+
+    def _compute_orientation_for_speed_command(self, current_orientation, target_orientation):
+
+        theta_direction = self._compute_theta_direction(current_orientation, target_orientation)
+        theta_speed = self._compute_theta_speed(theta_direction)
+
+        return theta_speed if theta_direction >= 0 else -theta_speed
+
 
     def _compute_theta_direction(self, current_theta, target_theta):
         """
