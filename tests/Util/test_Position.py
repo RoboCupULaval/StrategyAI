@@ -5,6 +5,7 @@ from RULEngine.Util.Position import Position
 class TestPosition(unittest.TestCase):
 
     def test_eq(self):
+        # les tests sont fait avec la tolérance par défaut défini dans position.py
         pos1 = Position()
         pos2 = Position()
         self.assertEqual(pos1, pos2)
@@ -22,10 +23,10 @@ class TestPosition(unittest.TestCase):
         pos8 = Position(0, 0)
         pos9 = Position(1, 0)
         self.assertTrue(pos7 == pos8)
-        self.assertFalse(pos7 == pos9)
+        self.assertTrue(pos7 == pos9)
 
         pos10 = Position(0.5, 0)
         pos11 = Position(-0.5, 0)
         pos12 = Position(1, 0)
         self.assertTrue(pos10 == pos11)
-        self.assertFalse(pos10 == pos12)
+        self.assertTrue(pos10 == pos12)

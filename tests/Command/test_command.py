@@ -59,6 +59,6 @@ class TestCommand(unittest.TestCase):
         # on test les cas où la Position est éloigné et doit être modifié
         # l'orientation est ignorée
         speed_pose_I = uut(target_pose_I)
-        self.assertEqual(speed_pose_I, Pose(Position(), 0))
+        self.assertEqual(speed_pose_I, Pose(Position(abs_tol=1e-3), 0))
 
-        self.assertTrue(False)
+        #self.assertTrue(False)

@@ -1,12 +1,12 @@
 # Under MIT License, see LICENSE.txt
 
-import math as m
+import math
 
 POSITION_DELTA_TOLERANCE_MAGNITUDE = 1e0
 
 class Position(object):
     """ Vector with [x, y, z] """
-    def __init__(self, x=0, y=0, z=0):
+    def __init__(self, x=0, y=0, z=0, abs_tol=POSITION_DELTA_TOLERANCE_MAGNITUDE):
         assert(isinstance(x, (int, float))), 'x should be int or float.'
         assert(isinstance(y, (int, float))), 'y should be int or float.'
         assert(isinstance(z, (int, float))), 'z should be int or float.'
@@ -14,6 +14,7 @@ class Position(object):
         self.x = float(x)
         self.y = float(y)
         self.z = float(z)
+        self.abs_tol = abs_tol
 
     def copy(self):
         """
@@ -68,11 +69,7 @@ class Position(object):
             Position(0.5, 0) == Position(0, 0) -> True
             (multiplication par la magnitude de tolérance, définie dans constant.py, puis conversion pour couper les décimales)
         """
-        scaled_left_side_x = int(self.x * POSITION_DELTA_TOLERANCE_MAGNITUDE)
-        scaled_right_side_x = int(other.x * POSITION_DELTA_TOLERANCE_MAGNITUDE)
-        scaled_left_side_y = int(self.y * POSITION_DELTA_TOLERANCE_MAGNITUDE)
-        scaled_right_side_y = int(other.y * POSITION_DELTA_TOLERANCE_MAGNITUDE)
-        return scaled_left_side_x == scaled_right_side_x and scaled_left_side_y == scaled_right_side_y
+        return math.isclose(self.x, other.x, abs_tol=self.abs_tol) and math.isclose(self.y, other.y, abs_tol=self.abs_tol)
 
     def __ne__(self, other):
         """ Return self != other """
