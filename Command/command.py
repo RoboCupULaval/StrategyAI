@@ -1,11 +1,12 @@
 # Under MIT License, see LICENSE.txt
 import math
+
 from ..Util.Pose import Pose, Position
 from ..Game.Player import Player
 from ..Game.Team import Team
 from ..Util.area import *
 from ..Util.geometry import *
-from ..Util.constant import *
+from ..Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE
 
 
 class _Command(object):
@@ -37,35 +38,35 @@ class _Command(object):
 
         return self
 
-    def _convertPositionToSpeed(self, current_pose, next_pose):
+    def _convertPositionToSpeed(self, current_pose, target_pose):
         """
             Converts an absolute position to a
             speed command relative to the player.
 
             :param current_pose: the current position of a player.
-            :param next_pose: the absolute position the robot should go to.
+            :param target_pose: the absolute position the robot should go to.
             :returns: A Pose object with speed vectors.
         """
-        #TODO: Cleanup
-        x = next_pose.position.x
-        y = next_pose.position.y
-        theta = next_pose.orientation
-        current_theta = current_pose.orientation
-        current_x = current_pose.position.x
-        current_y = current_pose.position.y
-        theta_direction = theta - current_theta
-        if theta_direction >= math.pi:
-            theta_direction -= 2 * math.pi
-        elif theta_direction <= -math.pi:
-            theta_direction += 2*math.pi
+        position = self._compute_position_for_speed_command(current_pose.position, target_pose.position)
+        orientation = self._compute_theta_for_speed_command(current_pose.orientation, target_pose.orientation)
 
-        if (theta_direction == 0):
-            theta_speed = 0
-        elif (abs(theta_direction) > 0.2):
-            theta_speed = 2
-        elif(abs(theta_direction) <= 0.2 and abs(theta_direction) > 0):
-            theta_speed = 0.4
-        new_theta = theta_speed if theta_direction >= 0 else -theta_speed
+        return Pose(position, orientation)
+
+    def _compute_orientation_for_speed_command(current_orientation, target_orientation):
+        target_theta = next_pose.orientation
+        current_theta = current_pose.orientation
+
+        theta_direction = self._compute_theta_direction(current_theta, theta)
+
+        self._compute_theta_speed(theta_direction)
+
+        return theta_speed if theta_direction >= 0 else -theta_speed
+
+    def _compute_position_for_speed_command(current_position, target_position):
+        target_x = target_position.x
+        target_y = target_position.y
+        current_x = current_position.x
+        current_y = current_position.y
 
         direction_x = x - current_x
         direction_y = y - current_y
@@ -79,8 +80,23 @@ class _Command(object):
         new_x = (direction_x * cosangle - direction_y * sinangle) * speed
         new_y = (direction_y * cosangle + direction_x * sinangle) * speed
 
-        return Pose(Position(new_x, new_y), new_theta)
+    def _compute_theta_direction(current_theta, target_theta):
 
+        theta_direction = target_theta - current_theta
+        if theta_direction >= math.pi:
+            theta_direction -= 2 * math.pi
+        elif theta_direction <= -math.pi:
+            theta_direction += 2*math.pi
+        return theta_direction
+
+    def _compute_theta_speed(theta_direction):
+        # FIXME: magic number!
+        if math.isclose(theta_direction, 0, abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE):
+            return 0
+        elif abs(theta_direction) > 0.2:
+            return 2 # pourquoi 2? qu'est-ce que sa représente?
+        elif abs(theta_direction) <= 0.2:
+            return 0.4 # même question ...
 
 # class SetSpeed(_Command):
 #     def __init__(self, player, team, pose):
