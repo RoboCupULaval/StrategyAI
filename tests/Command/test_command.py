@@ -19,44 +19,38 @@ class TestCommand(unittest.TestCase):
         # fyi: uut -> unit under test
         uut = functools.partial(cmd._convertPositionToSpeed, current_pose)
 
-        target_pose_self = Pose()
-        target_pose_self_rotate1 = Pose(Position(), math.pi/2)
-        target_pose_self_rotate2 = Pose(Position(), math.pi)
-        target_pose_self_rotate3 = Pose(Position(), 3*math.pi/2)
-        target_pose_self_rotate4 = Pose(Position(), 0.2)
-        target_pose_self_rotate5 = Pose(Position(), 0.19)
-        target_pose_self_rotate6 = Pose(Position(), -0.2)
-        target_pose_self_rotate7 = Pose(Position(), -0.19)
-        target_pose_self_rotate8 = Pose(Position(), math.pi+ORIENTATION_ABSOLUTE_TOLERANCE)
-
-        # position dans quadrant I
-        target_pose_I = Pose(Position(900, 900))
-
-        # position dans quandrant III
-        target_pose_III = Pose(Position(-900, -900))
-
         # on test les cas où la position est la même, mais l'orientation peut changer
         # les edge case d'orientation devraient tous être validés
-        speed_self = uut(target_pose_self)
+        speed_self = uut(Pose())
         self.assertEqual(speed_self, Pose())
-        speed_self_rotate1 = uut(target_pose_self_rotate1)
+        speed_self_rotate1 = uut(Pose(Position(), math.pi/2))
         self.assertEqual(speed_self_rotate1, Pose(Position(), 2))
-        speed_self_rotate2 = uut(target_pose_self_rotate2)
+        speed_self_rotate2 = uut(Pose(Position(), math.pi))
         self.assertEqual(speed_self_rotate2, Pose(Position(), 2))
-        speed_self_rotate3 = uut(target_pose_self_rotate3)
+        speed_self_rotate3 = uut(Pose(Position(), 3*math.pi/2))
         self.assertEqual(speed_self_rotate3, Pose(Position(), -2))
-        speed_self_rotate8 = uut(target_pose_self_rotate8)
+        speed_self_rotate8 = uut(Pose(Position(), math.pi+ORIENTATION_ABSOLUTE_TOLERANCE))
         self.assertEqual(speed_self_rotate8, Pose(Position(), -2)) # test edge case transition rotation negative
-        speed_self_rotate4 = uut(target_pose_self_rotate4)
+        speed_self_rotate4 = uut(Pose(Position(), 0.20))
         self.assertEqual(speed_self_rotate4, Pose(Position(), 0.4))
-        speed_self_rotate5 = uut(target_pose_self_rotate5)
+        speed_self_rotate5 = uut(Pose(Position(), 0.19))
         self.assertEqual(speed_self_rotate5, Pose(Position(), 0.4))
-        speed_self_rotate6 = uut(target_pose_self_rotate6)
+        speed_self_rotate6 = uut(Pose(Position(), -0.20))
         self.assertEqual(speed_self_rotate6, Pose(Position(), -0.4))
-        speed_self_rotate7 = uut(target_pose_self_rotate7)
+        speed_self_rotate7 = uut(Pose(Position(), -0.19))
         self.assertEqual(speed_self_rotate7, Pose(Position(), -0.4))
 
         # on test les cas où la Position est éloigné et doit être modifié
         # l'orientation est ignorée
-        speed_pose_I = uut(target_pose_I)
-        self.assertEqual(speed_pose_I, Pose(Position(0, 0, abs_tol=1e-3), 0))
+        speed_pose_I = uut(Pose(Position(900, 900), 0))
+        self.assertEqual(speed_pose_I, Pose(Position(math.sqrt(2)/2, math.sqrt(2)/2, abs_tol=1e-3), 0))
+        speed_pose_II = uut(Pose(Position(-900, 900), 0))
+        self.assertEqual(speed_pose_II, Pose(Position(-math.sqrt(2)/2, math.sqrt(2)/2, abs_tol=1e-3), 0))
+        speed_pose_III = uut(Pose(Position(-900, -900), 0))
+        self.assertEqual(speed_pose_III, Pose(Position(-math.sqrt(2)/2, -math.sqrt(2)/2, abs_tol=1e-3), 0))
+        speed_pose_IV = uut(Pose(Position(900, -900), 0))
+        self.assertEqual(speed_pose_IV, Pose(Position(math.sqrt(2)/2, -math.sqrt(2)/2, abs_tol=1e-3), 0))
+        speed_pose = uut(Pose(Position(1000, 300), 0))
+        self.assertEqual(speed_pose, Pose(Position(0.957, 0.287, abs_tol=1e-3), 0))
+        speed_pose = uut(Pose(Position(300, 1000), 0))
+        self.assertEqual(speed_pose, Pose(Position(0.287, 0.957, abs_tol=1e-3), 0))
