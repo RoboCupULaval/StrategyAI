@@ -8,6 +8,7 @@
     prochain état du **Coach**.
 """
 from collections import namedtuple
+import signal
 import threading
 import time
 
@@ -143,6 +144,7 @@ class Framework(object):
 
         self.create_game(ai_coach)
 
+        signal.signal(signal.SIGINT, self._sigint_handler)
         self.running_thread = threading.Thread(target=self.game_thread_main_loop)
         self.running_thread.start()
 
@@ -204,11 +206,17 @@ class Framework(object):
                 command = command.toSpeedCommand()
                 self.command_sender.send_command(command)
 
+
     def _get_coach_robot_commands(self):
         return self.ai_coach.robot_commands
+
 
     def _send_debug_commands(self):
         """ Récupère les paquets de débogages et les envoies au serveur. """
         ai_debug_commands = self.ai_coach.get_debug_commands_and_clear()
         if ai_debug_commands:
             self.debug_sender.send_command(ai_debug_commands)
+
+
+    def _sigint_handler(self, signum, frame):
+        self.stop_game()
