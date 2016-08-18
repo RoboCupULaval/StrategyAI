@@ -13,13 +13,13 @@ class TestCommand(unittest.TestCase):
 
     def setUp(self):
         self.cmd = _Command(Player(None, 0))
-        self.current_pose = Pose()
-        # uut est la fonction avec l'argument de la current_pose déjà établi, on peut appeler cette 'nouvelle' fonction en ne passant que le dernier paramètre
+        # uut fonction spécial que certains test modifient pour simplifier les autres tests
         # fyi: uut -> unit under test
-        self.uut = functools.partial(self.cmd._convertPositionToSpeed, self.current_pose)
+        self.uut = None
 
     def test_convert_position_to_speed_orientation(self):
         """ Diverses tests pour valider l'orientation obtenu dans la Speed """
+        self.uut = functools.partial(self.cmd._convertPositionToSpeed, Pose())
 
         # sanity
         self.assertFalse(self.uut(Pose()) == Pose(Position(), 1.57))
@@ -51,8 +51,10 @@ class TestCommand(unittest.TestCase):
             ont des composantes inférieur à 1, il faut donc changer lors de la construction des Pose la tolérance absolu
             de la Position (l'un ou l'autre est suffisant).
         """
+        self.uut = functools.partial(self.cmd._convertPositionToSpeed, Pose())
+
         # sanity
-        self.assertFalse(self.uut(Pose()) == Pose(Position(1234, -543, abs_tol=1e-3), 0))
+        self.assertNotEqual(self.uut(Pose()), Pose(Position(1234, -543, abs_tol=1e-3), 0))
 
         speed_pose_I = self.uut(Pose(Position(900, 900), 0))
         self.assertEqual(speed_pose_I, Pose(Position(math.sqrt(2)/2, math.sqrt(2)/2, abs_tol=1e-3), 0))
@@ -66,3 +68,18 @@ class TestCommand(unittest.TestCase):
         self.assertEqual(speed_pose, Pose(Position(0.957, 0.287, abs_tol=1e-3), 0))
         speed_pose = self.uut(Pose(Position(300, 1000), 0))
         self.assertEqual(speed_pose, Pose(Position(0.287, 0.957, abs_tol=1e-3), 0))
+
+    def test_compute_theta_direction(self):
+        """ Test du calcul de theta_direction, 4 décimales de précisions. """
+        self.uut = functools.partial(self.cmd._compute_theta_direction, 0)
+        # sanity
+        self.assertNotAlmostEqual(self.uut(0), math.pi, 4)
+        self.assertNotAlmostEqual(self.uut(math.pi), 0, 4)
+
+        self.assertAlmostEqual(self.uut(math.pi/2), math.pi/2, 4)
+        self.assertAlmostEqual(self.uut(math.pi-0.5), math.pi-0.5, 4)
+        self.assertAlmostEqual(self.uut(math.pi), -math.pi, 4) # NB: par construction, favorise de resotir une orientation négative, sensible à la comparaison de float
+        self.assertAlmostEqual(self.uut(-math.pi), math.pi, 4)
+        self.assertNotAlmostEqual(self.uut(math.pi), self.uut(-math.pi), 4)
+        self.assertAlmostEqual(self.uut(math.pi+0.5), -math.pi+0.5, 4)
+        self.assertAlmostEqual(self.uut(-math.pi/2), -math.pi/2, 4)

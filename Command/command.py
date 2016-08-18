@@ -52,17 +52,17 @@ class _Command(object):
 
         return Pose(position, orientation)
 
-    def _compute_orientation_for_speed_command(current_orientation, target_orientation):
+    def _compute_orientation_for_speed_command(self, current_orientation, target_orientation):
         target_theta = next_pose.orientation
         current_theta = current_pose.orientation
 
         theta_direction = self._compute_theta_direction(current_theta, theta)
 
-        self._compute_theta_speed(theta_direction)
+        theta_speed = self._compute_theta_speed(theta_direction)
 
         return theta_speed if theta_direction >= 0 else -theta_speed
 
-    def _compute_position_for_speed_command(current_position, target_position):
+    def _compute_position_for_speed_command(self, current_position, target_position):
         target_x = target_position.x
         target_y = target_position.y
         current_x = current_position.x
@@ -80,7 +80,12 @@ class _Command(object):
         new_x = (direction_x * cosangle - direction_y * sinangle) * speed
         new_y = (direction_y * cosangle + direction_x * sinangle) * speed
 
-    def _compute_theta_direction(current_theta, target_theta):
+    def _compute_theta_direction(self, current_theta, target_theta):
+        """
+            Trouve le sens de rotation le plus efficient.
+
+            Par exemple: current_theta = 30 deg et target_theta = 10 deg -> -20 deg de rotation (plutôt que 340 deg)
+        """
 
         theta_direction = target_theta - current_theta
         if theta_direction >= math.pi:
