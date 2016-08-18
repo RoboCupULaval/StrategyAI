@@ -103,25 +103,6 @@ class _Command(object):
         elif abs(theta_direction) <= 0.2:
             return 0.4 # même question ...
 
-# class SetSpeed(_Command):
-#     def __init__(self, player, team, pose):
-#         # Parameters Assertion
-#         assert(isinstance(player, Player))
-#         assert(isinstance(team, Team))
-#         assert(isinstance(pose, Pose))
-#
-#         super().__init__(player, team)
-#         self.is_speed_command = True
-#         pose.orientation = pose.orientation * 180 / math.pi
-#         if m.sqrt(pose.position.x ** 2 + pose.position.y ** 2) <= KICK_MAX_SPD :
-#             self.pose = pose
-#         else:
-#             agl = m.radians(theta(pose.position.x, pose.position.y))
-#             dst = KICK_MAX_SPD
-#             x = dst * m.cos(agl)
-#             y = dst * m.sin(agl)
-#             self.pose = Pose(Position(x, y), convertAngle180(pose.orientation))
-
 
 class MoveTo(_Command):
     def __init__(self, player, position):
