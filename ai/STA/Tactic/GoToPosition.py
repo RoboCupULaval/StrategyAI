@@ -2,6 +2,7 @@
 
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.MoveTo import MoveTo
+from ai.STA.Tactic import tactic_constants
 from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import ANGLE_TO_HALT, POSITION_DEADZONE, PLAYER_PER_TEAM
@@ -19,6 +20,7 @@ class GoToPosition(Tactic):
         player_id : Identifiant du joueur auquel est assigné la tactique
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique
+        status_flag : L'indicateur de progression de la tactique
         destination_pose : La pose de destination du robot
     """
 
@@ -39,8 +41,10 @@ class GoToPosition(Tactic):
 
         if get_distance(player_position, self.destination_pose.position) <= POSITION_DEADZONE or \
                 get_angle(player_position, self.destination_pose.position) <= ANGLE_TO_HALT:
+                self.status_flag = tactic_constants.SUCCESS
                 self.next_state = self.halt
         else:
+            self.status_flag = tactic_constants.WIP
             self.next_state = self.move_to_position
 
         return MoveTo(self.info_manager, self.player_id, self.destination_pose)
