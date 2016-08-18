@@ -83,3 +83,27 @@ class TestCommand(unittest.TestCase):
         self.assertNotAlmostEqual(self.uut(math.pi), self.uut(-math.pi), 4)
         self.assertAlmostEqual(self.uut(math.pi+0.5), -math.pi+0.5, 4)
         self.assertAlmostEqual(self.uut(-math.pi/2), -math.pi/2, 4)
+
+    def test_compute_theta_speed(self):
+        """
+            Test des magic numbers ...
+
+            Les résultats possible sont fixe, même s'ils peuvent être des float, on utilise des assertEqual
+        """
+        self.uut = functools.partial(self.cmd._compute_theta_speed) # techniquement inutile, on pourrait assigner directement
+
+        # sanity
+        self.assertNotEqual(self.uut(math.pi/2), 0)
+
+        self.assertEqual(self.uut(0), 0)
+        self.assertEqual(self.uut(0.0001), 0)
+        self.assertEqual(self.uut(-0.0001), 0)
+
+        self.assertEqual(self.uut(0.2000001), 2)
+        self.assertEqual(self.uut(2), 2)
+        self.assertEqual(self.uut(-2), 2)
+        self.assertEqual(self.uut(-0.2000001), 2)
+
+        self.assertEqual(self.uut(0.1999999), 0.4)
+        self.assertEqual(self.uut(-0.1999999), 0.4)
+        self.assertEqual(self.uut(0.0005), 0.4)

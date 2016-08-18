@@ -94,13 +94,14 @@ class _Command(object):
             theta_direction += 2*math.pi
         return theta_direction
 
-    def _compute_theta_speed(theta_direction):
+    def _compute_theta_speed(self, theta_direction):
         # FIXME: magic number!
+        # TODO: Mettre un cutoff puis calculer la vitesse de rotation selon une formule pour obtenir une courbe
         if math.isclose(theta_direction, 0, abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE):
             return 0
         elif abs(theta_direction) > 0.2:
             return 2 # pourquoi 2? qu'est-ce que sa représente?
-        elif abs(theta_direction) <= 0.2:
+        elif abs(theta_direction) < 0.2 or math.isclose(abs(theta_direction), 0.2, abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE):
             return 0.4 # même question ...
 
 
