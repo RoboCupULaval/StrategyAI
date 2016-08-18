@@ -22,14 +22,8 @@ class _Command(object):
 
     def toSpeedCommand(self):
         """
-            If is_speed_command is false,
-            converts the command to a speed commmand.
-
-            If is_speed_command is true,
-            returns the command.
-
-            Always returns self, meaning the command
-            may have changed in the process.
+            Transforme la commande en une commande de vitesse (SpeedCommand)
+            et affecte le drapeau.
         """
         if not self.is_speed_command:
             self.pose = self._convertPositionToSpeed(self.player.pose,
@@ -53,6 +47,12 @@ class _Command(object):
 
 
     def _compute_position_for_speed_command(self, current_position, target_position, current_theta):
+        """
+            Calcul la différence en x et en y entre la position actuelle et la position cible.
+            La norme du delta_x et delta_y calculé est normalisée.
+            Si la norme, qui représente la distance dans ce contexte, est supérieur à une deadzone, on retourne zéro.
+            La position est aussi réglée pour avoir une tolérance de 3 décimales.
+        """
         target_x = target_position.x
         target_y = target_position.y
         current_x = current_position.x
@@ -75,35 +75,45 @@ class _Command(object):
 
 
     def _compute_orientation_for_speed_command(self, current_orientation, target_orientation):
-
-        theta_direction = self._compute_theta_direction(current_orientation, target_orientation)
-        theta_speed = self._compute_theta_speed(theta_direction)
-
-        return theta_speed if theta_direction >= 0 else -theta_speed
-
-
-    def _compute_theta_direction(self, current_theta, target_theta):
         """
-            Trouve le sens de rotation le plus efficient.
+            On trouve une orientation [-pi, pi] en choississant le plus petit delta_direction.
+            La valeur de retour est un magic number, soit {0, 0.4, 2}.
+        """
+
+        delta_theta = self._compute_optimal_delta_theta(current_orientation, target_orientation)
+        theta_speed = self._compute_theta_speed(delta_theta)
+
+        return theta_speed if delta_theta >= 0 else -theta_speed
+
+
+    def _compute_optimal_delta_theta(self, current_theta, target_theta):
+        """
+            Trouve l'angle de rotation le plus optimal.
 
             Par exemple: current_theta = 30 deg et target_theta = 10 deg -> -20 deg de rotation (plutôt que 340 deg)
+            NB: L'exemple est écrit en degrées, mais tous les calculs sont effectués en radians
         """
+        delta_theta = target_theta - current_theta
+        optimal_delta_theta = 0
 
-        theta_direction = target_theta - current_theta
-        if theta_direction >= math.pi:
-            theta_direction -= 2 * math.pi
-        elif theta_direction <= -math.pi:
-            theta_direction += 2*math.pi
-        return theta_direction
+        if delta_theta >= math.pi:
+            optimal_delta_theta = delta_theta - 2 * math.pi
+        elif delta_theta <= -math.pi:
+            optimal_delta_theta = delta_theta + 2*math.pi
+        else:
+            optimal_delta_theta = delta_theta
 
-    def _compute_theta_speed(self, theta_direction):
+        return optimal_delta_theta
+
+    def _compute_theta_speed(self, delta_theta):
+        """ MAGIC NUMBER !!! """
         # FIXME: magic number!
         # TODO: Mettre un cutoff puis calculer la vitesse de rotation selon une formule pour obtenir une courbe
-        if math.isclose(theta_direction, 0, abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE):
+        if math.isclose(delta_theta, 0, abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE):
             return 0
-        elif abs(theta_direction) > 0.2:
+        elif abs(delta_theta) > 0.2:
             return 2 # pourquoi 2? qu'est-ce que sa représente?
-        elif abs(theta_direction) < 0.2 or math.isclose(abs(theta_direction), 0.2, abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE):
+        elif abs(delta_theta) < 0.2 or math.isclose(abs(delta_theta), 0.2, abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE):
             return 0.4 # même question ...
 
 

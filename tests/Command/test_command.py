@@ -69,9 +69,9 @@ class TestCommand(unittest.TestCase):
         speed_pose = self.uut(Pose(Position(300, 1000), 0))
         self.assertEqual(speed_pose, Pose(Position(0.287, 0.957, abs_tol=SPEED_ABSOLUTE_TOLERANCE), 0))
 
-    def test_compute_theta_direction(self):
+    def test_compute_optimal_delta_theta(self):
         """ Test du calcul de theta_direction, 4 décimales de précisions. """
-        self.uut = functools.partial(self.cmd._compute_theta_direction, 0)
+        self.uut = functools.partial(self.cmd._compute_optimal_delta_theta, 0)
         # sanity
         self.assertNotAlmostEqual(self.uut(0), math.pi, 4)
         self.assertNotAlmostEqual(self.uut(math.pi), 0, 4)
