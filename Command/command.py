@@ -6,8 +6,7 @@ from ..Game.Player import Player
 from ..Game.Team import Team
 from ..Util.area import *
 from ..Util.geometry import *
-from ..Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE, SPEED_ABSOLUTE_TOLERANCE
-
+from ..Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE, SPEED_ABSOLUTE_TOLERANCE, SPEED_DEAD_ZONE_DISTANCE
 
 class _Command(object):
     def __init__(self, player):
@@ -59,19 +58,20 @@ class _Command(object):
         current_x = current_position.x
         current_y = current_position.y
 
-        direction_x = target_x - current_x
-        direction_y = target_y - current_y
-        norm = math.hypot(direction_x, direction_y)
-        speed = 1 if norm >= 50 else 0
-        if norm:
-            direction_x /= norm
-            direction_y /= norm
-        cosangle = math.cos(-current_theta)
-        sinangle = math.sin(-current_theta)
-        speed_x = (direction_x * cosangle - direction_y * sinangle) * speed
-        speed_y = (direction_y * cosangle + direction_x * sinangle) * speed
+        delta_x = target_x - current_x
+        delta_y = target_y - current_y
+        norm = math.hypot(delta_x, delta_y)
 
-        return Position(speed_x, speed_y, abs_tol=SPEED_ABSOLUTE_TOLERANCE)
+        speed = 1 if norm >= SPEED_DEAD_ZONE_DISTANCE else 0
+
+        if norm > 0:
+            delta_x /= norm
+            delta_y /= norm
+        else:
+            delta_x = 0
+            delta_y = 0
+
+        return Position(delta_x, delta_y, abs_tol=SPEED_ABSOLUTE_TOLERANCE) * speed
 
 
     def _compute_orientation_for_speed_command(self, current_orientation, target_orientation):
