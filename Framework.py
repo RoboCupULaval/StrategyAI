@@ -201,7 +201,7 @@ class Framework(object):
         if self.vision.get_latest_frame():
             commands = self._get_coach_robot_commands()
             for command in commands:
-                command = command.toSpeedCommand()
+                command = command.to_speed_command()
                 self.command_sender.send_command(command)
 
     def _get_coach_robot_commands(self):

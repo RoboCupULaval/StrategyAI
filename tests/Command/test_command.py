@@ -19,7 +19,7 @@ class TestCommand(unittest.TestCase):
 
     def test_convert_position_to_speed_orientation(self):
         """ Diverses tests pour valider l'orientation obtenu dans la Speed """
-        self.uut = functools.partial(self.cmd._convertPositionToSpeed, Pose())
+        self.uut = functools.partial(self.cmd._convert_position_to_speed, Pose())
 
         # sanity
         self.assertFalse(self.uut(Pose()) == Pose(Position(), 1.57))
@@ -51,7 +51,7 @@ class TestCommand(unittest.TestCase):
             ont des composantes inférieur à 1, il faut donc changer lors de la construction des Pose la tolérance absolu
             de la Position (l'un ou l'autre est suffisant).
         """
-        self.uut = functools.partial(self.cmd._convertPositionToSpeed, Pose())
+        self.uut = functools.partial(self.cmd._convert_position_to_speed, Pose())
 
         # sanity
         self.assertNotEqual(self.uut(Pose()), Pose(Position(1234, -543, abs_tol=SPEED_ABSOLUTE_TOLERANCE), 0))

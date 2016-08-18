@@ -1,4 +1,12 @@
 # Under MIT License, see LICENSE.txt
+"""
+    Ce module permet de créer des commandes pour faire agir les robots.
+    Des fonctions utilitaire permettent de transformer une commande de
+    Position (Pose) en une commande de vitesse.
+
+    L'embarqué et le simulateur utilise un vecteur de vitesse (Pose) pour
+    contrôler les robots.
+"""
 import math
 
 from ..Util.Pose import Pose, Position
@@ -20,18 +28,17 @@ class _Command(object):
         self.pose = Pose()
         self.team = player.team
 
-    def toSpeedCommand(self):
+    def to_speed_command(self):
         """
             Transforme la commande en une commande de vitesse (SpeedCommand)
             et affecte le drapeau.
         """
         if not self.is_speed_command:
-            self.pose = self._convertPositionToSpeed(self.player.pose,
-                                                     self.pose)
+            self.pose = self._convert_position_to_speed(self.player.pose, self.pose)
 
         return self
 
-    def _convertPositionToSpeed(self, current_pose, target_pose):
+    def _convert_position_to_speed(self, current_pose, target_pose):
         """
             Converts an absolute position to a
             speed command relative to the player.
