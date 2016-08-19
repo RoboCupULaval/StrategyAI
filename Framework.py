@@ -21,6 +21,9 @@ from .Communication.serial_command_sender import SerialCommandSender
 from .Command.command import Stop
 from .Util.exception import StopPlayerError
 
+LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
+UI_DEBUG_MULTICAST_ADDRESS = "127.0.0.1"
+
 GameState = namedtuple('GameState', ['field', 'referee', 'friends',
                                      'enemies', 'timestamp', 'debug'])
 
@@ -129,11 +132,12 @@ class Framework(object):
             if serial:
                 self.command_sender = SerialCommandSender()
             else:
-                self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
-            self.debug_sender = DebugCommandSender("127.0.0.1", 20021)
-            self.debug_receiver = DebugCommandReceiver("127.0.0.1", 10021)
-            self.referee = RefereeServer('127.0.0.1')
-            self.vision = Vision("127.0.0.1")
+                self.command_sender = GrSimCommandSender(LOCAL_UDP_MULTICAST_ADDRESS, 20011)
+
+            self.debug_sender = DebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS, 20021)
+            self.debug_receiver = DebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
+            self.referee = RefereeServer(LOCAL_UDP_MULTICAST_ADDRESS)
+            self.vision = Vision(LOCAL_UDP_MULTICAST_ADDRESS)
         else:
             self.stop_game()
 
