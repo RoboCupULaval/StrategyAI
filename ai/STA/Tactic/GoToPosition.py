@@ -2,6 +2,7 @@
 
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.MoveTo import MoveTo
+from ai.STA.Action.Idle import Idle
 from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import ANGLE_TO_HALT, POSITION_DEADZONE, PLAYER_PER_TEAM
@@ -35,7 +36,7 @@ class GoToPosition(Tactic):
         self.current_state = self.get_next_path_element
         self.next_state = self.get_next_path_element
         self.player_id = player_id
-        self.destination_pose = destination_pose # FIXME: hack!
+        self.destination_pose = None
 
     def get_next_path_element(self):
         path = self.info_manager.paths[self.player_id]
@@ -47,7 +48,7 @@ class GoToPosition(Tactic):
         else:
             self.next_state = self.halt
 
-        return MoveTo(self.info_manager, self.player_id, self.info_manager.get_player_position(self.player_id))
+        return Idle(self.info_manager, self.player_id)
 
     def move_to_position(self):
         assert(isinstance(self.destination_pose, Pose)), "La destination_pose devrait être une Pose"
@@ -56,7 +57,7 @@ class GoToPosition(Tactic):
 
         if get_distance(player_position, self.destination_pose.position) <= POSITION_DEADZONE and \
                 get_angle(player_position, self.destination_pose.position) <= ANGLE_TO_HALT:
-                self.next_state = get_next_path_element
+                self.next_state = self.get_next_path_element
         else:
             self.next_state = self.move_to_position
 
