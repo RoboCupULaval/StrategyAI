@@ -83,13 +83,13 @@ class DebugManager:
         log = DebugCommand(2, {'level': level, 'message': message})
         self.commands.append(log)
 
-    def add_point(self, point, color=VIOLET, width=5, timeout=DEFAULT_DEBUG_TIMEOUT):
+    def add_point(self, point, color=VIOLET, width=5, link=None, timeout=DEFAULT_DEBUG_TIMEOUT):
         int_point = int(point[0]), int(point[1])
         data = {'point': int_point,
                 'color': color.repr(),
                 'width': width,
                 'timeout': timeout}
-        point = DebugCommand(3004, data)
+        point = DebugCommand(3004, data, p_link=link)
         self.commands.append(point)
 
     def add_circle(self, center, radius):
@@ -138,6 +138,7 @@ class DebugManager:
 
     def add_ui_command(self, debug_command):
         self.human_control = True
+        print(debug_command)
         self.ui_commands.append(UIDebugCommand(debug_command))
 
     def add_odd_command(self, odd_cmd):

@@ -28,6 +28,10 @@ class GoToPosition(Tactic):
         assert PLAYER_PER_TEAM >= player_id >= 0
         assert isinstance(destination_pose, Pose)
 
+        pathfinder = self.info_manager.acquire_module('Pathfinder')
+        self.path = pathfinder.get_path(player_id, destination_pose)
+        pathfinder.draw_path(self.path, player_id)
+
         self.current_state = self.move_to_position
         self.next_state = self.move_to_position
         self.player_id = player_id
