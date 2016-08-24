@@ -37,7 +37,7 @@ class GoToPosition(Tactic):
         player_position = self.info_manager.get_player_position(self.player_id)
         player_orientation = self.info_manager.get_player_orientation(self.player_id)
 
-        if get_distance(player_position, self.destination_pose.position) <= POSITION_DEADZONE or \
+        if get_distance(player_position, self.destination_pose.position) <= POSITION_DEADZONE and \
                 get_angle(player_position, self.destination_pose.position) <= ANGLE_TO_HALT:
                 self.next_state = self.halt
         else:

@@ -1,5 +1,6 @@
 # Under MIT License, see LICENSE.txt
 """ Module supérieur de l'IA """
+import math
 
 from RULEngine.Command import command
 from RULEngine.Util.Position import Position
@@ -14,6 +15,8 @@ from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Debug.debug_manager import DebugManager, DebugCommand
 
 __author__ = 'RoboCupULaval'
+
+TIMESTAMP_MINIMAL_DELTA = 0.015 #15 ms de mise à jour pour la boucle de l'ia
 
 class Coach(object):
     """
@@ -44,11 +47,18 @@ class Coach(object):
         self.coach_command_sender = CoachCommandSender(self.info_manager)
         self._init_ui_debug()
 
+        self.last_update_timestap = 0
+
 
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
-        self._update_ai(p_game_state)
-        self.coach_command_sender.generate_and_send_commands(p_game_state)
+        delta_timestamp = p_game_state.timestamp - self.last_update_timestap
+        if delta_timestamp > TIMESTAMP_MINIMAL_DELTA or math.isclose(delta_timestamp, TIMESTAMP_MINIMAL_DELTA, abs_tol=1e-4):
+            self.last_update_timestap = p_game_state.timestamp
+            self._update_ai(p_game_state)
+            self.coach_command_sender.generate_and_send_commands(p_game_state)
+        else:
+            pass
 
 
     def halt(self):
