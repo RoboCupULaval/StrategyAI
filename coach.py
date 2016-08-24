@@ -84,7 +84,7 @@ class Coach(object):
             return []
 
     def _init_intelligent_modules(self):
-        pass
+        self.info_manager.register_module('Pathfinder', PathfinderRRT)
 
     def _init_ui_debug(self):
         # FIXME: exécuter uniquement sur handshake plutôt qu'à l'init du coach
