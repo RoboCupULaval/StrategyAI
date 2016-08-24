@@ -1,12 +1,20 @@
 # Under MIT License, see LICENSE.txt
+"""
+    Ce module permet de créer des commandes pour faire agir les robots.
+    Des fonctions utilitaire permettent de transformer une commande de
+    Position (Pose) en une commande de vitesse.
+
+    L'embarqué et le simulateur utilise un vecteur de vitesse (Pose) pour
+    contrôler les robots.
+"""
 import math
+
 from ..Util.Pose import Pose, Position
 from ..Game.Player import Player
 from ..Game.Team import Team
 from ..Util.area import *
 from ..Util.geometry import *
-from ..Util.constant import *
-
+from ..Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE, SPEED_ABSOLUTE_TOLERANCE, SPEED_DEAD_ZONE_DISTANCE
 
 class _Command(object):
     def __init__(self, player):
@@ -20,86 +28,100 @@ class _Command(object):
         self.pose = Pose()
         self.team = player.team
 
-    def toSpeedCommand(self):
+    def to_speed_command(self):
         """
-            If is_speed_command is false,
-            converts the command to a speed commmand.
-
-            If is_speed_command is true,
-            returns the command.
-
-            Always returns self, meaning the command
-            may have changed in the process.
+            Transforme la commande en une commande de vitesse (SpeedCommand)
+            et affecte le drapeau.
         """
         if not self.is_speed_command:
-            self.pose = self._convertPositionToSpeed(self.player.pose,
-                                                     self.pose)
+            self.pose = self._convert_position_to_speed(self.player.pose, self.pose)
 
         return self
 
-    def _convertPositionToSpeed(self, current_pose, next_pose):
+    def _convert_position_to_speed(self, current_pose, target_pose):
         """
             Converts an absolute position to a
             speed command relative to the player.
 
             :param current_pose: the current position of a player.
-            :param next_pose: the absolute position the robot should go to.
+            :param target_pose: the absolute position the robot should go to.
             :returns: A Pose object with speed vectors.
         """
-        #TODO: Cleanup
-        x = next_pose.position.x
-        y = next_pose.position.y
-        theta = next_pose.orientation
-        current_theta = current_pose.orientation
-        current_x = current_pose.position.x
-        current_y = current_pose.position.y
-        theta_direction = theta - current_theta
-        if theta_direction >= math.pi:
-            theta_direction -= 2 * math.pi
-        elif theta_direction <= -math.pi:
-            theta_direction += 2*math.pi
+        position = self._compute_position_for_speed_command(current_pose.position, target_pose.position, current_pose.orientation)
+        orientation = self._compute_orientation_for_speed_command(current_pose.orientation, target_pose.orientation)
 
-        if (theta_direction == 0):
-            theta_speed = 0
-        elif (abs(theta_direction) > 0.2):
-            theta_speed = 2
-        elif(abs(theta_direction) <= 0.2 and abs(theta_direction) > 0):
-            theta_speed = 0.4
-        new_theta = theta_speed if theta_direction >= 0 else -theta_speed
-
-        direction_x = x - current_x
-        direction_y = y - current_y
-        norm = math.hypot(direction_x, direction_y)
-        speed = 1 if norm >= 50 else 0
-        if norm:
-            direction_x /= norm
-            direction_y /= norm
-        cosangle = math.cos(-current_theta)
-        sinangle = math.sin(-current_theta)
-        new_x = (direction_x * cosangle - direction_y * sinangle) * speed
-        new_y = (direction_y * cosangle + direction_x * sinangle) * speed
-
-        return Pose(Position(new_x, new_y), new_theta)
+        return Pose(position, orientation)
 
 
-# class SetSpeed(_Command):
-#     def __init__(self, player, team, pose):
-#         # Parameters Assertion
-#         assert(isinstance(player, Player))
-#         assert(isinstance(team, Team))
-#         assert(isinstance(pose, Pose))
-#
-#         super().__init__(player, team)
-#         self.is_speed_command = True
-#         pose.orientation = pose.orientation * 180 / math.pi
-#         if m.sqrt(pose.position.x ** 2 + pose.position.y ** 2) <= KICK_MAX_SPD :
-#             self.pose = pose
-#         else:
-#             agl = m.radians(theta(pose.position.x, pose.position.y))
-#             dst = KICK_MAX_SPD
-#             x = dst * m.cos(agl)
-#             y = dst * m.sin(agl)
-#             self.pose = Pose(Position(x, y), convertAngle180(pose.orientation))
+    def _compute_position_for_speed_command(self, current_position, target_position, current_theta):
+        """
+            Calcul la différence en x et en y entre la position actuelle et la position cible.
+            La norme du delta_x et delta_y calculé est normalisée.
+            Si la norme, qui représente la distance dans ce contexte, est supérieur à une deadzone, on retourne zéro.
+            La position est aussi réglée pour avoir une tolérance de 3 décimales.
+        """
+        target_x = target_position.x
+        target_y = target_position.y
+        current_x = current_position.x
+        current_y = current_position.y
+
+        delta_x = target_x - current_x
+        delta_y = target_y - current_y
+        norm = math.hypot(delta_x, delta_y)
+
+        speed = 1 if norm >= SPEED_DEAD_ZONE_DISTANCE else 0
+
+        if norm > 0:
+            delta_x /= norm
+            delta_y /= norm
+        else:
+            delta_x = 0
+            delta_y = 0
+
+        return Position(delta_x, delta_y, abs_tol=SPEED_ABSOLUTE_TOLERANCE) * speed
+
+
+    def _compute_orientation_for_speed_command(self, current_orientation, target_orientation):
+        """
+            On trouve une orientation [-pi, pi] en choississant le plus petit delta_direction.
+            La valeur de retour est un magic number, soit {0, 0.4, 2}.
+        """
+
+        delta_theta = self._compute_optimal_delta_theta(current_orientation, target_orientation)
+        theta_speed = self._compute_theta_speed(delta_theta)
+
+        return theta_speed if delta_theta >= 0 else -theta_speed
+
+
+    def _compute_optimal_delta_theta(self, current_theta, target_theta):
+        """
+            Trouve l'angle de rotation le plus optimal.
+
+            Par exemple: current_theta = 30 deg et target_theta = 10 deg -> -20 deg de rotation (plutôt que 340 deg)
+            NB: L'exemple est écrit en degrées, mais tous les calculs sont effectués en radians
+        """
+        delta_theta = target_theta - current_theta
+        optimal_delta_theta = 0
+
+        if delta_theta >= math.pi:
+            optimal_delta_theta = delta_theta - 2 * math.pi
+        elif delta_theta <= -math.pi:
+            optimal_delta_theta = delta_theta + 2*math.pi
+        else:
+            optimal_delta_theta = delta_theta
+
+        return optimal_delta_theta
+
+    def _compute_theta_speed(self, delta_theta):
+        """ MAGIC NUMBER !!! """
+        # FIXME: magic number!
+        # TODO: Mettre un cutoff puis calculer la vitesse de rotation selon une formule pour obtenir une courbe
+        if math.isclose(delta_theta, 0, abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE):
+            return 0
+        elif abs(delta_theta) > 0.2:
+            return 2 # pourquoi 2? qu'est-ce que sa représente?
+        elif abs(delta_theta) < 0.2 or math.isclose(abs(delta_theta), 0.2, abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE):
+            return 0.4 # même question ...
 
 
 class MoveTo(_Command):
