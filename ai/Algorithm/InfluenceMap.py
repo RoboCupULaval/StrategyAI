@@ -1,12 +1,10 @@
 # Under MIT License, see LICENSE.txt
 
 from math import ceil, sqrt
-from os import remove
 import numpy
 
 from RULEngine.Util.constant import *
 from RULEngine.Util.Position import Position
-
 
 from ai.Algorithm.IntelligentModule import IntelligentModule
 
@@ -24,7 +22,7 @@ class InfluenceMap(IntelligentModule):
         - axe Y ou axe 1 est l'axe représentant les colonnes / l'axe 1 de la matrice /
           la longueur (axe X) du terrain physique
         - Le point d'origine (0, 0) se situe au coin supérieur gauche du terrain physique.
-        -Ce qui veut dire que c'est tableaux sont row-major.
+        - Ce qui veut dire que c'est tableaux sont row-major.
 
     L'algorithm de propagation de l'influence est:
     (force appliqué à la case) = (force du point d'origine de l'influence) * ((facteur de réduction) ** (distance))
@@ -42,27 +40,18 @@ class InfluenceMap(IntelligentModule):
             :param strength_peak:  maximum de la force appliquable par un point (est aussi le min) (défaut = 100)
             :param effect_radius:  distance qui borne la propagation de l'influence autour de l'origine (défaut = 40)
         """
-        assert (isinstance(resolution, int))
-        assert (isinstance(strength_decay, float))
-        assert (0 < strength_decay < 1)
-        assert (isinstance(strength_peak, int))
-        assert (0 < strength_peak)
-        assert (isinstance(effect_radius, int))
-        assert (0 < effect_radius)
+        assert isinstance(resolution, int), "Creation InfluenceMap avec param resolution autre que int"
+        assert isinstance(strength_decay, float), "Creation InfluenceMap avec param strength_decay autre que int"
+        assert isinstance(effect_radius, int), "Creation InfluenceMap avec param effect_radius autre que int"
+        assert isinstance(strength_peak, int), "Creation InfluenceMap avec param strength_peak autre que int"
+        assert isinstance(have_static, bool), "Creation InfluenceMap avec param have_static autre que bool"
+        assert isinstance(have_it_executed, bool), "Creation InfluenceMap avec param have_it_executed autre que bool"
+        assert 0 < resolution, "Creation InfluenceMap avec param resolution <= 0"
+        assert 0 < strength_decay < 1, "Creation InfluenceMap avec param strength_decay pas dans intervalle ]0, 1["
+        assert 0 < strength_peak, "Creation InfluenceMap avec param strength_decay <= à 0"
+        assert 0 < effect_radius, "Creation InfluenceMap avec param effect_radius <= 0"
 
         super().__init__(info_manager)
-
-        """
-# ****************************************************************************************
-# ***************** REMOVE! **************************************************************
-        # todo see how to better implement a graphic representation!
-        # GOD NO!
-        try:
-            remove("IMBoard")
-        except OSError:
-            print("Nothing to remove!")
-# ****************************************************************************************
-        """
 
         # board parameters
         self._resolution = resolution
@@ -76,9 +65,7 @@ class InfluenceMap(IntelligentModule):
         self._friendly_bots_on_board = []
         self._enemy_bots_on_board = []
 
-        rows, columns = self._calculate_rows_and_columns()
-        self._number_of_rows = rows
-        self._number_of_columns = columns
+        self._number_of_rows, self._number_of_columns = self._calculate_rows_and_columns()
 
         if self.state is not None:
             self.have_it_executed = have_it_executed
@@ -99,7 +86,154 @@ class InfluenceMap(IntelligentModule):
         if have_static:
             self._create_static_board()
 
-        self.update()
+    def update(self):
+        if self.have_it_executed:
+            if self.state.timestamp - self._last_updated > 5:
+                if self._static_boards is not None:
+                    self._board = numpy.copy(self._static_boards)
+                else:
+                    self._board = self._create_standard_influence_board()
+
+                self._update_friend_position()
+                self.update_foes_position()
+                self._update_ball_position()
+                self.state.debug_manager.add_influence_map(self.export_board())
+                self._last_updated = self.state.timestamp
+
+    def export_board(self):
+        return self._board.tolist()
+
+    def find_points_over_strength_square(self, top_left_position, bottom_right_position, strength):
+        """
+        Retourne les points qui se trouve au-dessus ou égale à la force demandé dans le tableau principal(_board)
+
+        :param Positon top_left_position: la rangé supérieure
+        :param Position bottom_right_position: la rangé inférieure
+        :param int strength: le force à trouvé qui est égale ou au dessus.
+
+        :return: un liste de point qui se trouve au dessus ou égale à la force demandé
+        """
+        assert isinstance(top_left_position, Position), "Cette méthode requiert un object Position"
+        assert isinstance(bottom_right_position, Position), "Cette méthode requiert un object Position"
+
+        top_row, left_column = self._transform_field_to_board_position(top_left_position)
+        bot_row, right_column = self._transform_field_to_board_position(bottom_right_position)
+        ind_x, ind_y = numpy.where(self._board[top_row:bot_row, left_column:right_column] >= strength)
+        ind_x = ind_x.tolist()
+        ind_x = [x+top_row for x in ind_x]
+        ind_y = ind_y.tolist()
+        ind_y = [x+left_column for x in ind_y]
+        indices = zip(ind_x, ind_y)
+        return list(indices)
+
+    def find_points_under_strength_square(self, top_left_position, bottom_right_position, strength):
+        """
+        Retourne les points qui se trouve au-dessous ou égale à la force demandé dans le tableau principal(_board)
+
+        :param Positon top_left_position: la rangé supérieure
+        :param Position bottom_right_position: la rangé inférieure
+        :param int strength: le force à trouvé qui est égale ou au dessous.
+
+        :return: un liste de point qui se trouve au-dessous ou égale à la force demandé
+        :rtype: une liste de tuple rangée * colonne (int * int) list
+        """
+        assert isinstance(top_left_position, Position), "Cette méthode requiert un object Position"
+        assert isinstance(bottom_right_position, Position), "Cette méthode requiert un object Position"
+
+        top_row, left_column = self._transform_field_to_board_position(top_left_position)
+        bot_row, right_column = self._transform_field_to_board_position(bottom_right_position)
+        ind_x, ind_y = numpy.where(self._board[top_row:bot_row, left_column:right_column] <= strength)
+        ind_x = ind_x.tolist()
+        ind_x = [x+top_row for x in ind_x]
+        ind_y = ind_y.tolist()
+        ind_y = [x+left_column for x in ind_y]
+        indices = zip(ind_x, ind_y)
+        return list(indices)
+
+    def find_max_value_in_board(self):
+        """
+        Permet de trouver les points du tableau qui ont la plus grande valeur du tableau
+
+        :return: la valeur maximale du tableau et la liste de point (rangée * colonne) des point qui ont la valeur max
+        :rtype: tuple (int * (int * int) list)
+        """
+        uniques = numpy.unique(self._board)
+        max_in_board = uniques[-1]
+        x, y = numpy.where(self._board >= max_in_board)
+        x = x.tolist()
+        y = y.tolist()
+        indices = zip(x, y)
+        return max_in_board, indices
+
+    def find_min_value_in_board(self):
+        """
+        Permet de trouver les points du tableau qui ont la plus petite valeur du tableau
+
+        :return: la valeur minimale du tableau et la liste de point (rangée * colonne) des point qui ont la valeur min
+        :rtype: tuple (int * (int * int) list)
+        """
+        uniques = numpy.unique(self._board)
+        min_in_board = uniques[0]
+        x, y = numpy.where(self._board <= min_in_board)
+        x = x.tolist()
+        y = y.tolist()
+        indices = zip(x, y)
+        return min_in_board, indices
+
+    def find_max_value_in_circle(self, center, radius):
+        pass
+
+    def get_influence_at_position(self, position):
+        assert isinstance(position, Position), "accessing this function require a Position object"
+
+        row_column_in_board = self._transform_field_to_board_position(position)
+        return self._board[row_column_in_board[0], row_column_in_board[1]]
+
+    def set_ball_position(self, row, column):
+        assert isinstance(row, int), "Setting the ball's row position with this method is only posible with an int"
+        assert isinstance(column, int), "Setting the ball's column position with this method is only posible with " \
+                                        "an int"
+        assert 0 <= row <= self._number_of_rows, "setting the ball's row position at the exterior of the board"
+        assert 0 <= column <= self._number_of_columns, "setting the ball's column position at the exterior" \
+                                                       " of the board"
+
+        self._ball_position_on_board = (row, column)
+
+    def get_ball_influence(self):
+        return self._board[self._ball_position_on_board[0], self._ball_position_on_board[1]]
+
+    def get_number_of_cells(self):
+        return self._number_of_rows * self._number_of_columns
+
+    def print_board_to_file(self):
+        """
+        Create a file in the same running directory with a representation of the current board.
+        """
+
+        numpy.savetxt("IMBoard", self._board, fmt='%4i')
+        # todo remove this line while not in debug mode
+        print(self._starterboard.shape[0], " x ", self._starterboard.shape[1])
+
+    def str(self):
+        # todo comment and make sure this is right! Embelish?
+        return "Influence Map - ", str(self._number_of_rows), " x ", str(self._number_of_columns)
+
+    def _update_friend_position(self):
+        """
+        Fetch la position de nos robots dans l'infomanager et les applique sur le tableau principal.
+        """
+        self._friendly_bots_on_board.clear()
+        for i in range(self.state.get_count_player()):
+            friend_position = self._transform_field_to_board_position(self.state.get_player_position(i))
+            self._friendly_bots_on_board.append(friend_position)
+            self._add_point_and_propagate_influence(friend_position[0], friend_position[1], self._board, 100)
+
+    # TODO ask about implementation of foes in infomanager
+    def update_foes_position(self):
+        pass
+
+    def _update_ball_position(self):
+        self._ball_position_on_board = self._transform_field_to_board_position(self.state.get_ball_position())
 
     def _calculate_rows_and_columns(self):
         """
@@ -108,11 +242,8 @@ class InfluenceMap(IntelligentModule):
         :return: le nombre de rangées et le nombre de colonnes
         :rtype: tuple (int * int)
         """
-        numberofrow = (abs(FIELD_Y_BOTTOM) + FIELD_Y_TOP) / self._resolution
-        numberofcolumn = (abs(FIELD_X_LEFT) + FIELD_X_RIGHT) / self._resolution
-
-        numberofrow = int(ceil(numberofrow))
-        numberofcolumn = int(ceil(numberofcolumn))
+        numberofrow = int(ceil((abs(FIELD_Y_BOTTOM) + FIELD_Y_TOP) / self._resolution))
+        numberofcolumn = int(ceil((abs(FIELD_X_LEFT) + FIELD_X_RIGHT) / self._resolution))
 
         return numberofrow, numberofcolumn
 
@@ -132,13 +263,22 @@ class InfluenceMap(IntelligentModule):
         Si la propagation de l'influence se retrouve à zéro avant d'avoir atteint le rayon d'effet défini à la création
         de la classe, cette méthode l'ajuste pour quelle donne exactement le rayon qui permet d'afficher tous les points
         qui ne donnent pas zéro.
+
+        influence dans les cases:
+        100 91 86 ... 6 5 4 3 2 1 0 0 0 0 0 0 0  sans effect_radius ajusté (si effect_radius est trop gros)
+                v
+        100 91 86 ... 6 5 4 3 2 1                avec effect_radius ajusté
+
+        Coupe le nombre d'itérations des boucles de mise en place de l'influence lorsque le calcul donnerait une
+        influence à 0.
         """
         distance_from_center = 0
-        starting_point = self._strength_peak
-        while starting_point >= 1:
+        strenght_value_at_current_distance = self._strength_peak
+        while strenght_value_at_current_distance >= 1:
             distance_from_center += 1
-            decay = int((self._strength_peak * (self._strength_decay ** distance_from_center)))
-            starting_point = decay
+            decay = self._compute_value_by_distance(self._strength_peak, distance_from_center)
+            strenght_value_at_current_distance = decay
+
         if self._effect_radius > distance_from_center:
             self._effect_radius = distance_from_center
 
@@ -182,7 +322,7 @@ class InfluenceMap(IntelligentModule):
 
                 # for every columns affected
                 for y in range(columnmin, columnmax):
-                    decay = self._compute_value_by_distance(self._border_strength, self.distance(0, border, x, y))
+                    decay = self._compute_value_by_distance(self._border_strength, self._distance(0, border, x, y))
                     board_to_apply[x, y] += decay
 
         # left border
@@ -194,11 +334,10 @@ class InfluenceMap(IntelligentModule):
                 rowmax = min(self._number_of_rows, border + temp_effectradius + 1)
 
                 for x in range(rowmin, rowmax):
-                    decay = self._compute_value_by_distance(self._border_strength, self.distance(border, 0, x, y))
+                    decay = self._compute_value_by_distance(self._border_strength, self._distance(border, 0, x, y))
                     board_to_apply[x, y] += decay
 
         # Prend l'image créer et la flip l-r et u-d puis additionne
-        # board_to_apply[int(self._number_of_rows/2):-1,int(self._number_of_columns/2):-1] = 0
         temp_inverse_board = numpy.copy(board_to_apply)
         temp_inverse_board = temp_inverse_board[::-1, ::-1]
         board_to_apply += temp_inverse_board
@@ -244,7 +383,7 @@ class InfluenceMap(IntelligentModule):
         for x in range(int(self._number_of_rows / 2 - v_h_offset[0]),
                        int(self._number_of_rows / 2 + v_h_offset[0]) + 1,
                        6):
-            self.add_point_and_propagate_influence(x, 0, board_to_apply, 100)
+            self._add_point_and_propagate_influence(x, 0, board_to_apply, 100)
 
         numpy.add((numpy.negative(board_to_apply[:, ::-1])), board_to_apply, out=board_to_apply)
 
@@ -290,7 +429,7 @@ class InfluenceMap(IntelligentModule):
         """
         numpy.clip(board_to_clamp, -self._strength_peak, self._strength_peak, out=board_to_clamp)
 
-    def add_point_and_propagate_influence(self, row, column, board_to_apply, strength=0):
+    def _add_point_and_propagate_influence(self, row, column, board_to_apply, strength=0):
         """
         Pose un point et propage son influence sur le tableau donné.
 
@@ -320,136 +459,17 @@ class InfluenceMap(IntelligentModule):
                                       flags=['multi_index'], op_flags=['readwrite'])
 
         while not cases_iterator.finished:
-            to_put = self._compute_value_by_distance(strength, self.distance(cases_iterator.multi_index[0],
-                                                                             cases_iterator.multi_index[1],
-                                                                             (row - rowmin),
-                                                                             (column - columnmin)))
+            to_put = self._compute_value_by_distance(strength, self._distance(cases_iterator.multi_index[0],
+                                                                              cases_iterator.multi_index[1],
+                                                                              (row - rowmin),
+                                                                              (column - columnmin)))
             influence_already_in_case = cases_iterator[0]
             influence_to_put_instead = to_put + influence_already_in_case
             cases_iterator[0] = influence_to_put_instead
             cases_iterator.iternext()
         self._clamp_board(board_to_apply)
 
-    def find_points_over_strength_square(self, top_row, bot_row, left_column, right_column, strength):
-        """
-        Retourne les points qui se trouve au-dessus ou égale à la force demandé dans le tableau principal(_board)
-
-        :param int top_row: la rangé supérieure
-        :param int bot_row: la rangé inférieure
-        :param int left_column: la colonne gauche
-        :param int right_column: la colonne droite
-        :param int strength: le force à trouvé
-
-        :return: un liste de point qui se trouve au dessus ou égale à la force demandé
-        """
-
-        ind_x, ind_y = numpy.where(self._board[top_row:bot_row, left_column:right_column] >= strength)
-        ind_x = ind_x.tolist()
-        ind_x = [x+top_row for x in ind_x]
-        ind_y = ind_y.tolist()
-        ind_y = [x+left_column for x in ind_y]
-        indices = zip(ind_x, ind_y)
-        return list(indices)
-
-    def find_points_under_strength_square(self, top_row, bot_row, left_column, right_column, strength):
-        """
-        Retourne les points qui se trouve au-dessous ou égale à la force demandé dans le tableau principal(_board)
-
-        :param int top_row: la rangé supérieure
-        :param int bot_row: la rangé inférieure
-        :param int left_column: la colonne gauche
-        :param int right_column: la colonne droite
-        :param int strength: le force à trouvé
-
-        :return: un liste de point qui se trouve au-dessous ou égale à la force demandé
-        :rtype: une liste de tuple rangée * colonne (int * int) list
-        """
-        ind_x, ind_y = numpy.where(self._board[top_row:bot_row, left_column:right_column] <= strength)
-        ind_x = ind_x.tolist()
-        ind_x = [x+top_row for x in ind_x]
-        ind_y = ind_y.tolist()
-        ind_y = [x+left_column for x in ind_y]
-        indices = zip(ind_x, ind_y)
-        return list(indices)
-
-    def find_max_value_in_board(self):
-        """
-        Permet de trouver les points du tableau qui ont la plus grande valeur du tableau
-
-        :return: la valeur maximale du tableau et la liste de point (rangée * colonne) des point qui ont la valeur max
-        :rtype: tuple (int * (int * int) list)
-        """
-        uniques = numpy.unique(self._board)
-        max_in_board = uniques[-1]
-        x, y = numpy.where(self._board >= max_in_board)
-        x = x.tolist()
-        y = y.tolist()
-        indices = zip(x, y)
-        return max_in_board, indices
-
-    def find_min_value_in_board(self):
-        """
-        Permet de trouver les points du tableau qui ont la plus petite valeur du tableau
-
-        :return: la valeur minimale du tableau et la liste de point (rangée * colonne) des point qui ont la valeur min
-        :rtype: tuple (int * (int * int) list)
-        """
-        uniques = numpy.unique(self._board)
-        min_in_board = uniques[0]
-        x, y = numpy.where(self._board <= min_in_board)
-        x = x.tolist()
-        y = y.tolist()
-        indices = zip(x, y)
-        return min_in_board, indices
-
-    def find_max_value_in_circle(self, center, radius):
-        pass
-
-    def update_friend_position(self):
-        """
-        Fetch la position de nos robots dans l'infomanager et les applique sur le tableau principal.
-        """
-        self._friendly_bots_on_board.clear()
-        for i in range(self.state.get_count_player()):
-            friend_position = self.state.get_player_position(i)
-            friend_position = self.transform_field_to_board_position(friend_position)
-            self._friendly_bots_on_board.append(friend_position)
-            self.add_point_and_propagate_influence(friend_position[0], friend_position[1], self._board, 100)
-
-    # TODO ask about implementation of foes in infomanager
-    def update_foes_position(self):
-        pass
-
-    def update_ball_position(self):
-        self._ball_position_on_board = self.transform_field_to_board_position(self.state.get_ball_position())
-
-    def set_ball_position(self, row, column):
-        self._ball_position_on_board = (row, column)
-
-    def get_ball_influence(self):
-        return self._board[self._ball_position_on_board[0], self._ball_position_on_board[1]]
-
-    def get_number_of_cells(self):
-        return self._number_of_rows * self._number_of_columns
-
-    def update(self):
-        if self.have_it_executed:
-            if self.state.timestamp - self._last_updated > 5:
-                if self._static_boards is not None:
-                    self._board = numpy.copy(self._static_boards)
-                else:
-                    self._board = self._create_standard_influence_board()
-
-                self.update_friend_position()
-                self.update_foes_position()
-                self.update_ball_position()
-                self.state.debug_manager.add_influence_map(self.export_board())
-                self._last_updated = self.state.timestamp
-
-    def export_board(self):
-        return self._board.tolist()
-
-    def transform_field_to_board_position(self, position):
+    def _transform_field_to_board_position(self, position):
         assert(isinstance(position, Position))
         assert(FIELD_X_LEFT <= position.x <= FIELD_X_RIGHT)
         assert(FIELD_Y_BOTTOM <= position.y <= FIELD_Y_TOP)
@@ -468,7 +488,7 @@ class InfluenceMap(IntelligentModule):
 
         return ypos, xpos
 
-    def transform_board_to_field_position(self, row, column):
+    def _transform_board_to_field_position(self, row, column):
         assert(isinstance(row, int))
         assert(isinstance(column, int))
         assert(0 <= row <= self._number_of_rows)
@@ -484,28 +504,10 @@ class InfluenceMap(IntelligentModule):
         tempposition = Position(xpos, ypos)
         return tempposition
 
-    def print_board_to_file(self):
-        """
-        Create a file in the same running directory with a representation of the current board.
-        """
-
-        numpy.savetxt("IMBoard", self._board, fmt='%4i')
-        # todo remove this line while not in debug mode
-        print(self._starterboard.shape[0], " x ", self._starterboard.shape[1])
-
-    def str(self):
-        # todo comment and make sure this is right! Embelish?
-        return "Influence Map - ", str(self._number_of_rows), " x ", str(self._number_of_columns)
-
-    def distance(self, x1, y1, x2, y2):
-        assert (isinstance(x1, int))
+    def _distance(self, x1, y1, x2, y2):
+        assert (isinstance(x1, int or float))
         assert (isinstance(x2, int))
         assert (isinstance(y1, int))
         assert (isinstance(y2, int))
 
         return sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
-
-    def is_inside_circle(self, position_point, position_center, radius):
-        row, column = position_point
-        row_center, column_center = position_center
-        return ((row - row_center) ** 2) + ((column - column_center) ** 2) <= (radius ** 2)
