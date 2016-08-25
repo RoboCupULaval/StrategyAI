@@ -1,4 +1,4 @@
-[![Build Status](https://drone.io/github.com/RoboCupULaval/StrategyIA/status.png)](https://drone.io/github.com/RoboCupULaval/StrategyIA/latest)
+[![Build Status](https://travis-ci.org/RoboCupULaval/StrategyIA.svg?branch=dev)](https://drone.io/github.com/RoboCupULaval/StrategyIA/latest)
 
 # StrategyIA
 
