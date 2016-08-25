@@ -11,9 +11,11 @@ install:
 # command to run tests
 script: nosetests
 notifications:
-    slack: robocupulaval:TyyFRQ6Tpv49h1bmIlXJNfxu
+    slack: 
         on_success: change
         on_failure: always
+        rooms:
+            - robocupulaval:TyyFRQ6Tpv49h1bmIlXJNfxu#team-ia-github
     email:
         recipients:
             - alexandre.gingras-courchesne.1@ulaval.ca
