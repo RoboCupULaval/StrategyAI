@@ -1,0 +1,22 @@
+language: python
+python:
+  - "3.5"
+# command to install dependencies
+install:
+    - pip install -r requirements.txt
+# command to run tests
+script: nosetests
+notifications:
+    slack: 
+        on_success: change
+        on_failure: always
+        rooms:
+            - robocupulaval:TyyFRQ6Tpv49h1bmIlXJNfxu#team-ia-github
+    email:
+        recipients:
+            - alexandre.gingras-courchesne.1@ulaval.ca
+            - julien_morissette@outlook.com
+            - maxime.menard.1@ulaval.ca
+            - felixpelletier23@gmail.com
+        on_success: change
+        on_failure: always
