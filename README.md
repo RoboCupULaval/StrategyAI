@@ -1,4 +1,4 @@
-[![Build Status](https://drone.io/github.com/RoboCupULaval/RULEngine/status.png)](https://drone.io/github.com/RoboCupULaval/RULEngine/latest)
+[![Build Status](https://travis-ci.org/RoboCupULaval/RULEngine.svg?branch=dev)](https://travis-ci.org/RoboCupULaval/RULEngine)
 
 #RULEngine
 Toute contribution au code est sous [la licence libre MIT](https://opensource.org/licenses/mit-license.php).
@@ -12,8 +12,6 @@ Cloner le dépôt avec les commandes:
 ```
 git clone https://github.com/RoboCupULaval/RULEngine.git
 git checkout dev
-git submodule init
-git submodule update
 ```
 
 ### Guide d'utilisation
