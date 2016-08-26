@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from .Tactic import Tactic
+from ai.STA.Tactic import tactic_constants
 from ..Action.ProtectGoal import ProtectGoal
 from ai.STA.Action.GrabBall import GrabBall
 from ai.STA.Action.GoBehind import GoBehind
@@ -24,6 +25,7 @@ class GoalKeeper(Tactic):
         player_id : Identifiant du gardien de but
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique
+        status_flag : L'indicateur de progression de la tactique
         is_yellow : un booléen indiquant si le gardien est dans l'équipe des jaunes, ce qui détermine quel but est
         protégé. Les jaunes protègent le but de droite et les bleus, le but de gauche.
     """
@@ -39,6 +41,7 @@ class GoalKeeper(Tactic):
         self.is_yellow = p_is_yellow
         self.current_state = self.protect_goal
         self.next_state = self.protect_goal
+        self.status_flag = tactic_constants.WIP
 
     def protect_goal(self):
         # FIXME : enlever ce hack de merde
@@ -67,6 +70,7 @@ class GoalKeeper(Tactic):
     def grab_ball(self):
         if player_grabbed_ball(self.info_manager, self.player_id):
             self.next_state = self.halt
+            self.status_flag = tactic_constants.SUCCESS
         elif player_can_grab_ball(self.info_manager, self.player_id):
             self.next_state = self.grab_ball
         else:

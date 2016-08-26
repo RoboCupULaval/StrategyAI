@@ -194,6 +194,11 @@ class InfoManager:
         # TODO: Enforce valid type
         self.friend[str(i)]['next_pose'] = next_action
 
+    # About Enemy robots
+    # ---Getter
+    def get_enemy_position(self, i):
+        return self.enemy[str(i)]['position']
+
     # About Ball
     # ---Getter
     def get_ball_position(self):

@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic import tactic_constants
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
@@ -28,6 +29,7 @@ class CoverZone(Tactic):
         moitié droite du terrain.
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique
+        status_flag : L'indicateur de progression de la tactique
     """
 
     def __init__(self, p_info_manager, p_player_id, p_y_top, p_y_bottom, p_x_left, p_x_right, p_is_yellow=False):
@@ -48,6 +50,7 @@ class CoverZone(Tactic):
         self.is_yellow = p_is_yellow
         self.current_state = self.cover_zone
         self.next_state = self.cover_zone
+        self.status_flag = tactic_constants.WIP
 
     def cover_zone(self):
         enemy_positions = self.get_enemy_in_zone()

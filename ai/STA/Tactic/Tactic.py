@@ -3,6 +3,7 @@
 from abc import abstractmethod
 from functools import wraps
 from ai import InfoManager
+from ai.STA.Tactic import tactic_constants
 from ai.STA.Action.Idle import Idle
 
 __author__ = 'RobocupULaval'
@@ -24,7 +25,7 @@ class Tactic:
         self.player_id = None
         self.current_state = self.halt
         self.next_state = self.halt
-        self.status_flag = 1 # TODO: hack
+        self.status_flag = tactic_constants.INIT
 
     def halt(self):
         """
