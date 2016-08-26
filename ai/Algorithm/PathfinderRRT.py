@@ -17,7 +17,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.Algorithm.IntelligentModule import Pathfinder
 
-from ai.Debug.debug_manager import COLOR_ID0, COLOR_ID1, COLOR_ID2, COLOR_ID3, COLOR_ID4, COLOR_ID5
+from ai.Debug.debug_manager import COLOR_ID_MAP
 
 OBSTACLE_DEAD_ZONE = 200
 TIME_TO_UPDATE = 5
@@ -47,13 +47,11 @@ class PathfinderRRT(Pathfinder):
 
         self.last_timestamp = self.state.timestamp
 
-    def draw_path(self, paths):
-        color_list = [COLOR_ID0, COLOR_ID1, COLOR_ID2, COLOR_ID3, COLOR_ID4, COLOR_ID5]
-        for i in range(6):
-            for path_element in paths[i]:
-                x = path_element.position.x
-                y = path_element.position.y
-                self.state.debug_manager.add_point((x, y), color_list[i])
+    def draw_path(self, path, pid=0):
+        for path_element in path:
+            x = path_element.position.x
+            y = path_element.position.y
+            self.state.debug_manager.add_point((x, y), COLOR_ID_MAP[pid], link="path - " + str(pid), timeout=30)
 
 
     def get_path(self, pid=None, target=None):
@@ -64,6 +62,9 @@ class PathfinderRRT(Pathfinder):
             :return: Une liste de Pose, [Pose]
         """
 
+        assert(isinstance(pid, int)), "Un pid doit être passé"
+        assert(isinstance(target, Pose) or isinstance(target, Position)), "La cible doit être une Pose ou Position"
+        target = target.position if (isinstance(target, Pose)) else target
         path = self._compute_path(pid, target)
 
         return [Pose(Position(point[0], point[1])) for point in path]

@@ -1,5 +1,0 @@
-notify:
-  slack:
-    webhook_url:  https://hooks.slack.com/services/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
-    channel: team-ia-github
-    username: drone.io

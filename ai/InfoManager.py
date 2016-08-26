@@ -55,6 +55,7 @@ class InfoManager:
         self.tactics = list(range(6))
         self.timestamp = 0
         self.debug_manager = DebugManager()
+        self.paths = [[],[],[],[],[],[]]
 
 
     def init_team_dictionary(self):
