@@ -115,14 +115,12 @@ class PathfinderRRT(Pathfinder):
 
         not_smoothed_path = rrt.planning(obstacleList)
 
-        #Path smoothing
+        # Path smoothing
         maxIter = 50
+        # Il faut inverser la liste du chemin lissé tout en retirant le point de départ
         smoothed_path = path_smoothing(not_smoothed_path, maxIter, obstacleList)
-
         smoothed_path = list(reversed(smoothed_path[:-1]))
         return smoothed_path
-
-
 
 
 class RRT():
@@ -217,6 +215,7 @@ class RRT():
                 return False  # collision
 
         return True  # safe
+
 
 class Node():
     """
