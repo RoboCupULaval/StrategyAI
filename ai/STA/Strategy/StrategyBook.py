@@ -5,6 +5,7 @@ from . HumanControl import HumanControl
 from . SimpleDefense import SimpleDefense
 from . SimpleOffense import SimpleOffense
 
+
 class StrategyBook(object):
     """
         Cette classe est capable de récupérer les stratégies enregistrés dans la
