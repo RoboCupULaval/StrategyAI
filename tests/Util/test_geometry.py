@@ -13,27 +13,51 @@ class TestGeometry(unittest.TestCase):
         self.positionN = RULEngine.Util.Position.Position(0, 10000, 0)
         self.positionNE = RULEngine.Util.Position.Position(10000, 10000, 0)
         self.positionNO = RULEngine.Util.Position.Position(-10000, 10000, 0)
+        self.positionS = RULEngine.Util.Position.Position(0, -10000, 0)
         self.positionSE = RULEngine.Util.Position.Position(10000, -10000, 0)
         self.positionSO = RULEngine.Util.Position.Position(-10000, -10000, 0)
 
     def test_get_distance(self):
         dist = RULEngine.Util.geometry.get_distance(self.position, self.positionN)
         self.assertEqual(dist, 1000)
+
         approx_dist = RULEngine.Util.geometry.get_distance(self.positionNE, self.positionSO)
-        self.assertAlmostEqual()
+        compValue = m.sqrt(2*(2000**2))
+        self.assertAlmostEqual(approx_dist, compValue) # On veut quelle précision pour geo?
 
     def test_get_angle(self):
-
+        self.assertEqual(RULEngine.Util.geometry.get_angle(self.positionN), (m.pi)/2)
+        self.assertEqual(RULEngine.Util.geometry.get_angle(self.positionNE), (m.pi)/4)
+        self.assertEqual(RULEngine.Util.geometry.get_angle(self.positionNO), 3*(m.pi)/4)
+        self.assertEqual(RULEngine.Util.geometry.get_angle(self.positionSE), -1*(m.pi)/4)
+        self.assertEqual(RULEngine.Util.geometry.get_angle(self.positionSO), -3*(m.pi)/4)
 
     def test_cvt_angle_360(self):
+        self.assertEqual(RULEngine.Util.geometry.cvt_angle_360((m.pi)/4), 45)
+        self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(3*(m.pi)/4), 135)
+        self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(-3*(m.pi)/4), 225)
+        self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(-1*(m.pi)/4), 345)
+        self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(7*(m.pi)), 180)
 
     def test_cvt_angle_180(self):
+        self.assertEqual(RULEngine.Util.geometry.cvt_angle_360((m.pi)/4), 45)
+        self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(3*(m.pi)/4), 135)
+        self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(-3*(m.pi)/4), -135)
+        self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(-1*(m.pi)/4), -45)
+        self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(7*(m.pi)), 180)
 
     def test_get_nearest(self):
+        # Cas où on a des distances égales
+        # Cas normal
+        list_of_positions = [self.positionNE, self.positionSE, self.positionSO, self.positionN]
+        self.assertEqual(RULEngine.Util.geometry.get_nearest(self.position, list_of_positions), self.positionN)
 
+        list_of_positions.remove(self.positionN)
+        list_of_positions.append(self.positionS)
+        self.assertEqual(RULEngine.Util.geometry.get_nearest(self.position, list_of_positions), self.positionS)
 
     def test_get_milliseconds(self):
-
+        self.assertEqual(RULEngine.Util.geometry.getmilliseconds(1.555555), 1555)
 
     def test_det(self):
 
