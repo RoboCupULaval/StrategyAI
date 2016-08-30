@@ -60,7 +60,8 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(RULEngine.Util.geometry.getmilliseconds(1.555555), 1555)
 
     def test_det(self):
-
+        self.assertEqual(RULEngine.Util.geometry.det(self.positionNE, self.positionSO), 0)
+        self.assertEqual(RULEngine.Util.geometry.det(self.positionNE, self.positionS), -1*(1000**2))
 
     def test_get_line_equation(self):
 
