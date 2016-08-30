@@ -9,14 +9,18 @@ __author__ = 'RoboCupULaval'
 class TestGeometry(unittest.TestCase):
 
     def SetUp(self):
-        self.position = Position
-        self.positionN = Position(0, 10000, 0)
-        self.positionNE = Position(10000, 10000, 0)
-        self.positionNO = Position(-10000, 10000, 0)
-        self.positionSE = Position()
+        self.position = RULEngine.Util.Position.Position()
+        self.positionN = RULEngine.Util.Position.Position(0, 10000, 0)
+        self.positionNE = RULEngine.Util.Position.Position(10000, 10000, 0)
+        self.positionNO = RULEngine.Util.Position.Position(-10000, 10000, 0)
+        self.positionSE = RULEngine.Util.Position.Position(10000, -10000, 0)
+        self.positionSO = RULEngine.Util.Position.Position(-10000, -10000, 0)
+
     def test_get_distance(self):
-
-
+        dist = RULEngine.Util.geometry.get_distance(self.position, self.positionN)
+        self.assertEqual(dist, 1000)
+        approx_dist = RULEngine.Util.geometry.get_distance(self.positionNE, self.positionSO)
+        self.assertAlmostEqual()
 
     def test_get_angle(self):
 
