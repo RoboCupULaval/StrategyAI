@@ -168,6 +168,8 @@ class DebugExecutor(Executor):
             tactic_ref = CoverZone(self.info_manager, pid, FIELD_Y_TOP, FIELD_Y_TOP/2, FIELD_X_LEFT, FIELD_X_LEFT/2)
         elif tactic_name == "get_ball":
             tactic_ref = GoGetBall(self.info_manager, pid)
+        elif tactic_name == "tStop":
+            tactic_ref = Stop(self.info_manager, pid)
         else:
             tactic_ref = Stop(self.info_manager, pid)
 
