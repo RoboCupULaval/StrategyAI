@@ -64,7 +64,7 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(RULEngine.Util.geometry.det(self.positionNE, self.positionS), -1*(1000**2))
 
     def test_get_line_equation(self):
-
+        self.assertEqual(RULEngine.Util.geometry.get_line_equation(self.positionNE, self.positionSO), {1, 0})
 
     def test_get_lines_intersection(self):
 
