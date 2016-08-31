@@ -172,7 +172,7 @@ def get_lines_intersection(point_a1, point_a2, point_b1, point_b2):
     denominator = delta_x_a * delta_y_b - delta_y_a * delta_x_b
     if denominator == 0:
         # Les lignes sont parallèles
-        return Position(9999999, 9999999)
+        return Position(m.inf, m.inf)
 
     det1 = point_a1.x * point_a2.y - point_a1.y * point_a2.x
     det2 = point_b1.x * point_b2.y - point_b1.y * point_b2.x
@@ -236,7 +236,7 @@ def get_time_to_travel(dist, speed, accel):
 
     if accel == 0:
         if speed == 0:
-            return 9999999
+            return m.inf
         else:
             return dist / speed
     else:
