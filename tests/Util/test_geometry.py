@@ -67,7 +67,13 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(RULEngine.Util.geometry.get_line_equation(self.positionNE, self.positionSO), {1, 0})
 
     def test_get_lines_intersection(self):
-
+        no_intersection = RULEngine.Util.geometry.get_lines_intersection(self.positionS, self.positionN, self.positionNO, self.positionSO)
+        infinite_position = RULEngine.Util.Position(m.inf, m.inf)
+        self.assertEqual(no_intersection, infinite_position)
+        null_intersection = RULEngine.Util.geometry.get_lines_intersection(self.positionSE, self.positionNO, self.positionNE, self.positionSO)
+        self.assertEqual(null_intersection, self.position)
+        intersection = RULEngine.Util.geometry.get_lines_intersection(self.positionNE, self.positionNO, self.position, self.positionN)
+        self.assertEqual(intersection, self.positionN)
 
     def test_get_closest_point_on_line(self):
 
