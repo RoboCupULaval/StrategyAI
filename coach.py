@@ -84,7 +84,7 @@ class Coach(object):
             return []
 
     def _init_intelligent_modules(self):
-        # self.info_manager.register_module('InfluenceMap', InfluenceMap)
+        self.info_manager.register_module('InfluenceMap', InfluenceMap)
         self.info_manager.register_module('Pathfinder', PathfinderRRT)
 
 

@@ -29,7 +29,7 @@ class InfluenceMap(IntelligentModule):
     transfomé en int arrondie vers 0.
     """
 
-    def __init__(self, info_manager, resolution=100, strength_decay=0.85, strength_peak=100, effect_radius=25,
+    def __init__(self, info_manager, resolution=100, strength_decay=0.90, strength_peak=100, effect_radius=40,
                  have_static=False, have_it_executed=False):
         """
             Constructeur de la classe InfluenceMap
@@ -62,8 +62,6 @@ class InfluenceMap(IntelligentModule):
 
         # things on the baord parameters
         self._ball_position_on_board = ()
-        self._friendly_bots_on_board = []
-        self._enemy_bots_on_board = []
 
         self._number_of_rows, self._number_of_columns = self._calculate_rows_and_columns()
 
@@ -88,14 +86,14 @@ class InfluenceMap(IntelligentModule):
 
     def update(self):
         if self.have_it_executed:
-            if self.state.timestamp - self._last_updated > 5:
+            if self.state.timestamp - self._last_updated > 1:
+                # purge the board with a new one (static or not)
                 if self._static_boards is not None:
                     self._board = numpy.copy(self._static_boards)
                 else:
                     self._board = self._create_standard_influence_board()
 
-                self._update_friend_position()
-                self.update_foes_position()
+                self._update_and_draw_robot_position()
                 self._update_ball_position()
                 self.state.debug_manager.add_influence_map(self.export_board())
                 self._last_updated = self.state.timestamp
@@ -189,16 +187,6 @@ class InfluenceMap(IntelligentModule):
         row_column_in_board = self._transform_field_to_board_position(position)
         return self._board[row_column_in_board[0], row_column_in_board[1]]
 
-    def set_ball_position(self, row, column):
-        assert isinstance(row, int), "Setting the ball's row position with this method is only posible with an int"
-        assert isinstance(column, int), "Setting the ball's column position with this method is only posible with " \
-                                        "an int"
-        assert 0 <= row <= self._number_of_rows, "setting the ball's row position at the exterior of the board"
-        assert 0 <= column <= self._number_of_columns, "setting the ball's column position at the exterior" \
-                                                       " of the board"
-
-        self._ball_position_on_board = (row, column)
-
     def get_ball_influence(self):
         return self._board[self._ball_position_on_board[0], self._ball_position_on_board[1]]
 
@@ -218,19 +206,26 @@ class InfluenceMap(IntelligentModule):
         # todo comment and make sure this is right! Embelish?
         return "Influence Map - ", str(self._number_of_rows), " x ", str(self._number_of_columns)
 
-    def _update_friend_position(self):
+    def _update_and_draw_robot_position(self):
         """
-        Fetch la position de nos robots dans l'infomanager et les applique sur le tableau principal.
+        Fetch la position des robots dans l'infomanager et les applique sur le tableau principal
         """
-        self._friendly_bots_on_board.clear()
+        robots_position = []
         for i in range(self.state.get_count_player()):
-            friend_position = self._transform_field_to_board_position(self.state.get_player_position(i))
-            self._friendly_bots_on_board.append(friend_position)
-            self._add_point_and_propagate_influence(friend_position[0], friend_position[1], self._board, 100)
+            try:
+                friend_position = self._transform_field_to_board_position(self.state.get_player_position(i))
+                robots_position.append(friend_position)
+                self._add_point_and_propagate_influence(friend_position[0], friend_position[1], self._board, 100)
+            except:
+                pass
 
-    # TODO ask about implementation of foes in infomanager
-    def update_foes_position(self):
-        pass
+            try:
+                enemy_position = self._transform_field_to_board_position(self.state.get_enemy_position(i))
+                robots_position.append(enemy_position)
+                self._add_point_and_propagate_influence(enemy_position[0], enemy_position[1], self._board, -100)
+            except:
+                pass
+        self._clamp_board(self._board)
 
     def _update_ball_position(self):
         self._ball_position_on_board = self._transform_field_to_board_position(self.state.get_ball_position())
@@ -249,12 +244,12 @@ class InfluenceMap(IntelligentModule):
 
     def _create_standard_influence_board(self):
         """
-        Crée un objet numpy.ndarray, une liste à 2 dimenson de self._number_of_rows par self._number_of_columns d'int8.
+        Crée un objet numpy.ndarray, une liste à 2 dimenson de self._number_of_rows par self._number_of_columns d'int16.
 
-        :return: Un numpy.ndarray d'int8 de self._number_of_rows par self._number_of_columns.
-        :rtype: numpy.ndarray dtype=numpy.int8
+        :return: Un numpy.ndarray d'int16 de self._number_of_rows par self._number_of_columns.
+        :rtype: numpy.ndarray dtype=numpy.int16
         """
-        return numpy.zeros((self._number_of_rows, self._number_of_columns), numpy.int8)
+        return numpy.zeros((self._number_of_rows, self._number_of_columns), numpy.int16)
 
     def _adjust_effect_radius(self):
         """
@@ -295,12 +290,12 @@ class InfluenceMap(IntelligentModule):
         Mets des bordures sur un array numpy.ndarray vierge.
 
         :param board_to_apply: Un numpy.ndarray un array vierge pour y ajouter des bordures.
-        :type board_to_apply: numpy.ndarray dtype=numpy.int8
+        :type board_to_apply: numpy.ndarray dtype=numpy.int16
         """
         assert(isinstance(board_to_apply, numpy.ndarray))
         assert(board_to_apply.shape[0] == self._number_of_rows)
         assert(board_to_apply.shape[1] == self._number_of_columns)
-        assert(board_to_apply.dtype == numpy.int8)
+        assert(board_to_apply.dtype == numpy.int16)
 
         board_to_apply[0] = self._border_strength
         board_to_apply[:, 0] = self._border_strength
@@ -376,7 +371,7 @@ class InfluenceMap(IntelligentModule):
         :param v_h_offset: la dimension verticale et horizontale des buts.
         :type v_h_offset: tuple (int * int)
         :param board_to_apply: Un numpy.ndarray un array vierge pour y ajouter des buts.
-        :type board_to_apply: numpy.ndarray dtype=numpy.int8
+        :type board_to_apply: numpy.ndarray dtype=numpy.int16
         """
 
         # TODO take into account what team you are ie: orientation and strength adjustment
@@ -425,7 +420,7 @@ class InfluenceMap(IntelligentModule):
         Arrondis toutes les cellules du tableau pour qu'ils soient dans [-self._strength_peak, self._strength_peak].
 
         :param board_to_clamp: Un numpy.ndarray à clampé
-        :type board_to_clamp: numpy.ndarray dtype=numpy.int8
+        :type board_to_clamp: numpy.ndarray dtype=numpy.int16
         """
         numpy.clip(board_to_clamp, -self._strength_peak, self._strength_peak, out=board_to_clamp)
 
@@ -433,10 +428,12 @@ class InfluenceMap(IntelligentModule):
         """
         Pose un point et propage son influence sur le tableau donné.
 
+        Il est important de clamper le board après avoir utiliser cette méthode!
+
         :param int row: la rangée du point d'origine de la force
         :param int column: int La colonne du point d'origine de la force
         :param board_to_apply: numpy.ndarray l'array sur lequel on ajoute un point et on le propage
-        :type board_to_apply: numpy.ndarray dtype=numpy.int8
+        :type board_to_apply: numpy.ndarray dtype=numpy.int16
         :param int strength: la force du point à appliquer
         """
         assert (isinstance(row, int))
@@ -467,7 +464,6 @@ class InfluenceMap(IntelligentModule):
             influence_to_put_instead = to_put + influence_already_in_case
             cases_iterator[0] = influence_to_put_instead
             cases_iterator.iternext()
-        self._clamp_board(board_to_apply)
 
     def _transform_field_to_board_position(self, position):
         assert(isinstance(position, Position))
