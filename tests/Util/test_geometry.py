@@ -87,9 +87,22 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(close_point, self.positionN)
 
     def test_get_time_to_travel(self):
-        
+        null_time = RULEngine.Util.geometry.get_time_to_travel(0, 3, 2)
+        self.assertEqual(null_time, 0)
+        time_stop = RULEngine.Util.geometry.get_time_to_travel(10, 3, 0)
+        self.assertEqual(time_stop, m.inf)
+        time_stop = RULEngine.Util.geometry.get_time_to_travel(10, 0, 3)
+        self.assertEqual(time_stop, m.inf)
+        time = RULEngine.Util.geometry.get_time_to_travel(100, 5, 2)
+        self.assertEqual(time, (m.sqrt(825)-5)/4)
 
     def test_get_first_to_arrive(self):
+        neither  = RULEngine.Util.geometry.get_first_to_arrive(120, 2, 3, 120, 2, 3)
+        self.assertEqual(neither, 0)
+        first = RULEngine.Util.geometry.get_first_to_arrive(100, 2, 3, 120, 2, 3)
+        self.assertEqual(first, 1)
+        second = RULEngine.Util.geometry.get_first_to_arrive(120, 2, 3, 100, 2, 3)
+        self.assertEqual(second, 2)
 
     def test_angle_to_ball_is_tolerated(self):
 
