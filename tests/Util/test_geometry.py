@@ -76,8 +76,18 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(intersection, self.positionN)
 
     def test_get_closest_point_on_line(self):
+        # Quand le point est nul (0, 0)
+        close_null_point = RULEngine.Util.geometry.get_closest_point_on_line(self.positionNE, self.positionSE, self.positionNO)
+        self.assertEqual(close_null_point, self.position)
+        # Quand le point est sur une position à l'extérieure des deux points
+        close_nonexistent_point = RULEngine.Util.geometry.get_closest_point_on_line(self.positionSE, self.position, self.positionN)
+        self.assertEqual(close_nonexistent_point, self.positionS)
+        # Point normal
+        close_point = RULEngine.Util.geometry.get_closest_point_on_line(self.positionNE, self.position, self.positionN)
+        self.assertEqual(close_point, self.positionN)
 
     def test_get_time_to_travel(self):
+        
 
     def test_get_first_to_arrive(self):
 
