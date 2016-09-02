@@ -26,11 +26,11 @@ class TestGeometry(unittest.TestCase):
         self.assertAlmostEqual(approx_dist, compValue) # On veut quelle précision pour geo?
 
     def test_get_angle(self):
-        self.assertEqual(RULEngine.Util.geometry.get_angle(self.positionN), (m.pi)/2)
-        self.assertEqual(RULEngine.Util.geometry.get_angle(self.positionNE), (m.pi)/4)
-        self.assertEqual(RULEngine.Util.geometry.get_angle(self.positionNO), 3*(m.pi)/4)
-        self.assertEqual(RULEngine.Util.geometry.get_angle(self.positionSE), -1*(m.pi)/4)
-        self.assertEqual(RULEngine.Util.geometry.get_angle(self.positionSO), -3*(m.pi)/4)
+        self.assertEqual(RULEngine.Util.geometry.get_angle(self.position, self.positionN), (m.pi)/2)
+        self.assertEqual(RULEngine.Util.geometry.get_angle(self.position, self.positionNE), (m.pi)/4)
+        self.assertEqual(RULEngine.Util.geometry.get_angle(self.position, self.positionNO), 3*(m.pi)/4)
+        self.assertEqual(RULEngine.Util.geometry.get_angle(self.position, self.positionSE), -1*(m.pi)/4)
+        self.assertEqual(RULEngine.Util.geometry.get_angle(self.position, self.positionSO), -3*(m.pi)/4)
 
     def test_cvt_angle_360(self):
         self.assertEqual(RULEngine.Util.geometry.cvt_angle_360((m.pi)/4), 45)
@@ -57,7 +57,7 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(RULEngine.Util.geometry.get_nearest(self.position, list_of_positions), self.positionS)
 
     def test_get_milliseconds(self):
-        self.assertEqual(RULEngine.Util.geometry.getmilliseconds(1.555555), 1555)
+        self.assertEqual(RULEngine.Util.geometry.get_milliseconds(1.555555), 1555)
 
     def test_det(self):
         self.assertEqual(RULEngine.Util.geometry.det(self.positionNE, self.positionSO), 0)
@@ -97,7 +97,7 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(time, (m.sqrt(825)-5)/4)
 
     def test_get_first_to_arrive(self):
-        neither  = RULEngine.Util.geometry.get_first_to_arrive(120, 2, 3, 120, 2, 3)
+        neither = RULEngine.Util.geometry.get_first_to_arrive(120, 2, 3, 120, 2, 3)
         self.assertEqual(neither, 0)
         first = RULEngine.Util.geometry.get_first_to_arrive(100, 2, 3, 120, 2, 3)
         self.assertEqual(first, 1)
