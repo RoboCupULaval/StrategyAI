@@ -240,8 +240,8 @@ def get_time_to_travel(dist, speed, accel):
         else:
             return dist / speed
     else:
-        time1 = (-speed + m.sqrt(speed ** 2 - 4 * accel * dist)) / (2 * accel)
-        time2 = (-speed - m.sqrt(speed ** 2 - 4 * accel * dist)) / (2 * accel)
+        time1 = (-speed + m.sqrt(speed ** 2 + 4 * accel * dist)) / (2 * accel)
+        time2 = (-speed - m.sqrt(speed ** 2 + 4 * accel * dist)) / (2 * accel)
 
         return time2 if time1 < time2 else time1
 
