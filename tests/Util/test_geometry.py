@@ -36,7 +36,7 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(RULEngine.Util.geometry.cvt_angle_360((m.pi)/4), 45)
         self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(3*(m.pi)/4), 135)
         self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(-3*(m.pi)/4), 225)
-        self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(-1*(m.pi)/4), 345)
+        self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(-1*(m.pi)/4), 315)
         self.assertEqual(RULEngine.Util.geometry.cvt_angle_360(7*(m.pi)), 180)
 
     def test_cvt_angle_180(self):
