@@ -274,7 +274,8 @@ def get_first_to_arrive(distance1, speed1, acceleration1, distance2, speed2, acc
 
 def angle_to_ball_is_tolerated(player_position, ball_position, target_position, tolerated_angle):
     """
-    Détermine si le joueur est capable de botter la balle à la destination désirée
+    Détermine si le joueur est capable de botter la balle à la destination désirée.
+    On assume que le joueur a la balle.
     :param player_position: La position du joueur
     :param ball_position: La position de la balle
     :param target_position: La position où le joueur veut botter la balle
