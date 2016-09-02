@@ -57,7 +57,8 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(RULEngine.Util.geometry.get_nearest(self.position, list_of_positions), self.positionS)
 
     def test_get_milliseconds(self):
-        self.assertEqual(RULEngine.Util.geometry.get_milliseconds(1.555555), 1555)
+        self.assertEqual(RULEngine.Util.geometry.get_milliseconds(1.555555), 1556)
+        self.assertEqual(RULEngine.Util.geometry.get_milliseconds(1.444444), 1444)
 
     def test_det(self):
         self.assertEqual(RULEngine.Util.geometry.det(self.positionNE, self.positionSO), 0)
