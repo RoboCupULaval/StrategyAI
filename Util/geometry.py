@@ -129,79 +129,79 @@ def det(a, b):
     return a.x * b.y - a.y * b.x
 
 
-def get_line_equation(point1, point2):
+def get_line_equation(position1, position2):
     """
-    Calcul l'équation de la droite formée par deux points.
-    :param point1: Le premier point de la droite.
-    :param point2: Le second point de la droite.
+    Calcul l'équation de la droite formée par deux positions.
+    :param position1: La première position de la droite.
+    :param position2: La seconde position de la droite.
     :exception ZeroDivisionError: Une exception est soulevée si la droite est verticale.
     :return: Un tuple contenant la pente et l'ordonnée à l'origine (a, b).
     """
-    assert isinstance(point1, Position)
-    assert isinstance(point2, Position)
+    assert isinstance(position1, Position)
+    assert isinstance(position2, Position)
 
-    delta_x = point2.x - point1.x
-    delta_y = point2.y - point1.y
+    delta_x = position2.x - position1.x
+    delta_y = position2.y - position1.y
 
     a = delta_y / delta_x
-    b = point1.y - a * point1.x
+    b = position1.y - a * position1.x
 
     return a, b
 
 
-def get_lines_intersection(point_a1, point_a2, point_b1, point_b2):
+def get_lines_intersection(position_a1, position_a2, position_b1, position_b2):
     """
-    Calcul la position de l'intersection de deux lignes, données chacune par deux points.
-    :param point_a1: Point 1 sur la ligne A.
-    :param point_a2: Point 2 sur la ligne A.
-    :param point_b1: Point 1 sur la ligne B.
-    :param point_b2: Point 2 sur la ligne B.
+    Calcul la position de l'intersection de deux lignes, données chacune par deux positions.
+    :param position_a1: Position 1 sur la ligne A.
+    :param position_a2: Position 2 sur la ligne A.
+    :param position_b1: Position 1 sur la ligne B.
+    :param position_b2: Position 2 sur la ligne B.
     :return: La position de l'intersection des deux lignes. La position est située à l'infinie si les lignes
     sont parallèles.
     """
-    assert isinstance(point_a1, Position)
-    assert isinstance(point_a2, Position)
-    assert isinstance(point_b1, Position)
-    assert isinstance(point_b2, Position)
+    assert isinstance(position_a1, Position)
+    assert isinstance(position_a2, Position)
+    assert isinstance(position_b1, Position)
+    assert isinstance(position_b2, Position)
 
-    delta_x_a = point_a1.x - point_a2.x
-    delta_y_a = point_a1.y - point_a2.y
-    delta_x_b = point_b1.x - point_b2.x
-    delta_y_b = point_b1.y - point_b2.y
+    delta_x_a = position_a1.x - position_a2.x
+    delta_y_a = position_a1.y - position_a2.y
+    delta_x_b = position_b1.x - position_b2.x
+    delta_y_b = position_b1.y - position_b2.y
 
     denominator = delta_x_a * delta_y_b - delta_y_a * delta_x_b
     if denominator == 0:
         # Les lignes sont parallèles
-        return Position(9999999, 9999999)
+        return Position(m.inf, m.inf)
 
-    det1 = point_a1.x * point_a2.y - point_a1.y * point_a2.x
-    det2 = point_b1.x * point_b2.y - point_b1.y * point_b2.x
+    det1 = position_a1.x * position_a2.y - position_a1.y * position_a2.x
+    det2 = position_b1.x * position_b2.y - position_b1.y * position_b2.x
 
     x = (det1 * delta_x_b - det2 * delta_x_a)
     y = (det1 * delta_y_b - det2 * delta_y_a)
     return Position(x, y)
 
 
-def get_closest_point_on_line(reference, point1, point2):
+def get_closest_point_on_line(reference, position1, position2):
     """
     Calcul la position du point d'une droite le plus près d'une position de référence. La droite est donnée par deux
     positions. La ligne reliant la position recherchée et la position de référence est perpendiculaire à la droite.
     :param reference: La position de référence
-    :param point1: Le premier point formant la droite
-    :param point2: Le second point formant la droite
+    :param position1: Le premier point formant la droite
+    :param position2: Le second point formant la droite
     :return: La position du point de la droite le plus proche de la position de référence.
     """
     assert isinstance(reference, Position)
-    assert isinstance(point1, Position)
-    assert isinstance(point2, Position)
+    assert isinstance(position1, Position)
+    assert isinstance(position2, Position)
 
-    delta_x = point2.x - point1.x
-    delta_y = point2.y - point1.y
+    delta_x = position2.x - position1.x
+    delta_y = position2.y - position1.y
 
     if delta_x != 0 and delta_y != 0:   # droite quelconque
         # Équation de la droite reliant les deux positions
         a1 = delta_y / delta_x                          # pente
-        b1 = point1.y - a1*point1.x                     # ordonnée à l'origine
+        b1 = position1.y - a1*position1.x                     # ordonnée à l'origine
 
         # Équation de la droite perpendiculaire
         a2 = -1/a1                                      # pente perpendiculaire à a1
@@ -212,12 +212,12 @@ def get_closest_point_on_line(reference, point1, point2):
         y = a1*x + b1
 
     elif delta_x == 0:  # droite verticale
-        x = point1.x
+        x = position1.x
         y = reference.y
 
     elif delta_y == 0:  # droite horizontale
         x = reference.x
-        y = point1.y
+        y = position1.y
 
     return Position(x, y)
 
@@ -236,7 +236,7 @@ def get_time_to_travel(dist, speed, accel):
 
     if accel == 0:
         if speed == 0:
-            return 9999999
+            return m.inf
         else:
             return dist / speed
     else:
@@ -273,9 +273,19 @@ def get_first_to_arrive(distance1, speed1, acceleration1, distance2, speed2, acc
         return 2 if time1 < time2 else 1
 
 def angle_to_ball_is_tolerated(player_position, ball_position, target_position, tolerated_angle):
+    """
+    Détermine si le joueur est capable de botter la balle à la destination désirée.
+    On assume que le joueur a la balle.
+    :param player_position: La position du joueur
+    :param ball_position: La position de la balle
+    :param target_position: La position où le joueur veut botter la balle
+    :param tolerated_angle: L'incertitude d'angle toléré pour que le botté soit possible, en radian sous forme de float,
+    :return: Si le joueur est capable de faire le botté ou non, sous forme de booléen.
+    """
     assert isinstance(ball_position, Position), "ball_position is not a Position"
     assert isinstance(player_position, Position), "player_position is not a Position"
     assert isinstance(target_position, Position), "target_position is not a Position"
+    assert isinstance(tolerated_angle, (int, float)), "tolerated_angle is neither a int nor a float"
     angle_player_to_ball = get_angle(player_position, ball_position)
     angle_ball_to_target = get_angle(ball_position, target_position)
     angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
@@ -283,9 +293,17 @@ def angle_to_ball_is_tolerated(player_position, ball_position, target_position, 
         return True
     return False
 
-def get_required_kick_force(position1,position2): # simple calculation
-
-    distance = get_distance(position1,position2)
+def get_required_kick_force(position1, position2): # simple calculation
+    """
+    Calcul la force nécessaire pour que le botteur du joueur puisse envoyer la balle à destination.
+     On assume que les joeur est cappable de botter la balle
+    :param position1: La position du joueur
+    :param position2: La destination
+    :return: la force nécessaire, en mm/s.
+    """
+    assert isinstance(position1, Position)
+    assert isinstance(position2, Position)
+    distance = get_distance(position1, position2)
     max_field_distance_possible = m.sqrt((FIELD_X_RIGHT - FIELD_X_LEFT)**2 + (FIELD_Y_TOP - FIELD_Y_BOTTOM)**2)
 
     kick_force = distance * KICK_MAX_SPD / max_field_distance_possible
