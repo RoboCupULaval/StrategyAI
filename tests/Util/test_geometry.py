@@ -8,7 +8,7 @@ __author__ = 'RoboCupULaval'
 
 class TestGeometry(unittest.TestCase):
 
-    def SetUp(self):
+    def setUp(self):
         self.position = RULEngine.Util.Position.Position()
         self.positionN = RULEngine.Util.Position.Position(0, 10000, 0)
         self.positionNE = RULEngine.Util.Position.Position(10000, 10000, 0)
