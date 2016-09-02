@@ -68,7 +68,7 @@ class TestGeometry(unittest.TestCase):
 
     def test_get_lines_intersection(self):
         no_intersection = RULEngine.Util.geometry.get_lines_intersection(self.positionS, self.positionN, self.positionNO, self.positionSO)
-        infinite_position = RULEngine.Util.Position(m.inf, m.inf)
+        infinite_position = RULEngine.Util.Position.Position(m.inf, m.inf)
         self.assertEqual(no_intersection, infinite_position)
         null_intersection = RULEngine.Util.geometry.get_lines_intersection(self.positionSE, self.positionNO, self.positionNE, self.positionSO)
         self.assertEqual(null_intersection, self.position)
@@ -108,7 +108,7 @@ class TestGeometry(unittest.TestCase):
         ball_position = self.positionN + RULEngine.Util.Position.Position(0, 5000, 0)
         not_tolerated = RULEngine.Util.geometry.angle_to_ball_is_tolerated(self.positionN, ball_position, self.positionS, m.pi/4)
         self.assertEqual(not_tolerated, False)
-        ball_position = self.positionS + RULEngine.Util.Position(0, 5000, 0)
+        ball_position = self.positionS + RULEngine.Util.Position.Position(0, 5000, 0)
         tolerated = RULEngine.Util.geometry.angle_to_ball_is_tolerated(self.positionS, ball_position, self.positionN, m.pi/4)
         self.assertEqual(not_tolerated, True)
 
