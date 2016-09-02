@@ -19,7 +19,7 @@ class TestGeometry(unittest.TestCase):
 
     def test_get_distance(self):
         dist = RULEngine.Util.geometry.get_distance(self.position, self.positionN)
-        self.assertEqual(dist, 1000)
+        self.assertEqual(dist, float(1000))
 
         approx_dist = RULEngine.Util.geometry.get_distance(self.positionNE, self.positionSO)
         compValue = m.sqrt(2*(2000**2))
@@ -61,8 +61,8 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(RULEngine.Util.geometry.get_milliseconds(1.444444), 1444)
 
     def test_det(self):
-        self.assertEqual(RULEngine.Util.geometry.det(self.positionNE, self.positionSO), 0)
-        self.assertEqual(RULEngine.Util.geometry.det(self.positionNE, self.positionS), -1*(1000**2))
+        self.assertEqual(RULEngine.Util.geometry.det(self.positionNE, self.positionSO), float(0))
+        self.assertEqual(RULEngine.Util.geometry.det(self.positionNE, self.positionS), float(-1*(1000**2)))
 
     def test_get_line_equation(self):
         self.assertEqual(RULEngine.Util.geometry.get_line_equation(self.positionNE, self.positionSO), {1, 0})
