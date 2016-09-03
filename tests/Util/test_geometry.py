@@ -66,6 +66,7 @@ class TestGeometry(unittest.TestCase):
 
     def test_get_line_equation(self):
         self.assertEqual(RULEngine.Util.geometry.get_line_equation(self.positionNE, self.positionSO), (1, 0))
+        self.assertEqual(RULEngine.Util.geometry.get_line_equation(self.positionNE, self.positionNO), (0, 10000))
 
     def test_get_lines_intersection(self):
         no_intersection = RULEngine.Util.geometry.get_lines_intersection(self.positionS, self.positionN, self.positionNO, self.positionSO)
@@ -117,3 +118,5 @@ class TestGeometry(unittest.TestCase):
 
     # def test_get_required_kick_force(self): # simple calculation
 
+if __name__ == '__main__':
+    unittest.main()

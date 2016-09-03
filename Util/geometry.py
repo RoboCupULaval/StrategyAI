@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 from ..Util.Position import Position
 from ..Game.Player import Player
+import numpy as np
 import math as m
 from .constant import *
 
@@ -174,11 +175,15 @@ def get_lines_intersection(position_a1, position_a2, position_b1, position_b2):
         # Les lignes sont parallèles
         return Position(m.inf, m.inf)
 
-    det1 = position_a1.x * position_a2.y - position_a1.y * position_a2.x
-    det2 = position_b1.x * position_b2.y - position_b1.y * position_b2.x
+    a = np.matrix([[delta_x_a, -delta_x_b], [delta_y_a, -delta_y_b]])
+    b = np.matrix([[position_b1.x - position_a1.x], [position_b1.y - position_a1.y]])
 
-    x = (det1 * delta_x_b - det2 * delta_x_a)
-    y = (det1 * delta_y_b - det2 * delta_y_a)
+    scale = np.linalg.solve(a, b)
+
+    intersection = np.matrix([[position_a1.x], [position_a1.y]]) + scale.item((0, 0))*np.matrix([[delta_x_a], [delta_y_a]])
+    x = intersection.item((0, 0))
+    y = intersection.item((1, 0))
+
     return Position(x, y)
 
 
