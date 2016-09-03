@@ -270,7 +270,7 @@ def get_first_to_arrive(distance1, speed1, acceleration1, distance2, speed2, acc
     if time1 == time2:
         return 0
     else:
-        return 2 if time1 < time2 else 1
+        return 1 if time1 < time2 else 2
 
 def angle_to_ball_is_tolerated(player_position, ball_position, target_position, tolerated_angle):
     """
