@@ -102,9 +102,9 @@ class TestGeometry(unittest.TestCase):
     def test_get_first_to_arrive(self):
         neither = RULEngine.Util.geometry.get_first_to_arrive(120, 2, 3, 120, 2, 3)
         self.assertEqual(neither, 0)
-        first = RULEngine.Util.geometry.get_first_to_arrive(100, 2, 3, 120, 2, 3)
+        first = RULEngine.Util.geometry.get_first_to_arrive(20, 2, 3, 120, 2, 3)
         self.assertEqual(first, 1)
-        second = RULEngine.Util.geometry.get_first_to_arrive(120, 2, 3, 100, 2, 3)
+        second = RULEngine.Util.geometry.get_first_to_arrive(120, 2, 3, 20, 2, 3)
         self.assertEqual(second, 2)
 
     def test_angle_to_ball_is_tolerated(self):
