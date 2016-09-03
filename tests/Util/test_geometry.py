@@ -90,8 +90,10 @@ class TestGeometry(unittest.TestCase):
     def test_get_time_to_travel(self):
         null_time = RULEngine.Util.geometry.get_time_to_travel(0, 3, 2)
         self.assertEqual(null_time, 0)
-        time_stop = RULEngine.Util.geometry.get_time_to_travel(10, 3, 0)
+        time_stop = RULEngine.Util.geometry.get_time_to_travel(10, 0, 0)
         self.assertEqual(time_stop, m.inf)
+        time_constant = RULEngine.Util.geometry.get_time_to_travel(10, 3, 0)
+        self.assertEqual(time_constant, 10/3)
         time_start = RULEngine.Util.geometry.get_time_to_travel(10, 0, 3)
         self.assertEqual(time_start, m.sqrt(120)/6)
         time = RULEngine.Util.geometry.get_time_to_travel(100, 5, 2)
