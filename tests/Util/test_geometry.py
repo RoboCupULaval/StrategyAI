@@ -22,7 +22,7 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(dist, 10000)
 
         approx_dist = RULEngine.Util.geometry.get_distance(self.positionNE, self.positionSO)
-        compValue = m.sqrt(2*(2000**2))
+        compValue = m.sqrt(2*(20000**2))
         self.assertAlmostEqual(approx_dist, compValue) # On veut quelle précision pour geo?
 
     def test_get_angle(self):
@@ -65,7 +65,7 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(RULEngine.Util.geometry.det(self.positionNE, self.positionS), -1*(10000**2))
 
     def test_get_line_equation(self):
-        self.assertEqual(RULEngine.Util.geometry.get_line_equation(self.positionNE, self.positionSO), {1, 0})
+        self.assertEqual(RULEngine.Util.geometry.get_line_equation(self.positionNE, self.positionSO), (1, 0))
 
     def test_get_lines_intersection(self):
         no_intersection = RULEngine.Util.geometry.get_lines_intersection(self.positionS, self.positionN, self.positionNO, self.positionSO)
