@@ -92,8 +92,8 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(null_time, 0)
         time_stop = RULEngine.Util.geometry.get_time_to_travel(10, 3, 0)
         self.assertEqual(time_stop, m.inf)
-        time_stop = RULEngine.Util.geometry.get_time_to_travel(10, 0, 3)
-        self.assertEqual(time_stop, m.inf)
+        time_start = RULEngine.Util.geometry.get_time_to_travel(10, 0, 3)
+        self.assertEqual(time_start, m.sqrt(120)/6)
         time = RULEngine.Util.geometry.get_time_to_travel(100, 5, 2)
         self.assertEqual(time, (m.sqrt(825)-5)/4)
 
