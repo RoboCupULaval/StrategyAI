@@ -183,7 +183,7 @@ def get_lines_intersection(position_a1, position_a2, position_b1, position_b2):
     intersection1 = np.matrix([[position_a1.x], [position_a1.y]]) + scale.item((0, 0))*np.matrix([[delta_x_a], [delta_y_a]])
     intersection2 = np.matrix([[position_b1.x], [position_b1.y]]) + scale.item((1, 0))*np.matrix([[delta_x_b], [delta_y_b]])
 
-    assert intersection1 == intersection2
+    assert np.allclose(intersection1, intersection2)
 
     x = intersection1.item((0, 0))
     y = intersection1.item((1, 0))
