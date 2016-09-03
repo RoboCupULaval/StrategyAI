@@ -50,11 +50,13 @@ class TestGeometry(unittest.TestCase):
         # Cas où on a des distances égales
         # Cas normal
         list_of_positions = [self.positionNE, self.positionSE, self.positionSO, self.positionN]
-        self.assertEqual(RULEngine.Util.geometry.get_nearest(self.position, list_of_positions), self.positionN)
+        nearest = RULEngine.Util.geometry.get_nearest(self.position, list_of_positions)
+        self.assertEqual(nearest[0], self.positionN)
 
         list_of_positions.remove(self.positionN)
         list_of_positions.append(self.positionS)
-        self.assertEqual(RULEngine.Util.geometry.get_nearest(self.position, list_of_positions), self.positionS)
+        nearest = RULEngine.Util.geometry.get_nearest(self.position, list_of_positions)
+        self.assertEqual(nearest[0], self.positionS)
 
     def test_get_milliseconds(self):
         self.assertEqual(RULEngine.Util.geometry.get_milliseconds(1.555555), 1556)
