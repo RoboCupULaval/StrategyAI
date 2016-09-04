@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic import tactic_constants
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.Idle import Idle
 from RULEngine.Util.area import player_grabbed_ball
@@ -20,6 +21,7 @@ class MakePass(Tactic):
         player_id : Identifiant du joueur auquel est assigné la tactique
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique
+        status_flag : L'indicateur de progression de la tactique
     """
 
     def __init__(self, info_manager, player_id):
@@ -41,11 +43,12 @@ class MakePass(Tactic):
             kick_ball = Kick(self.info_manager, self.player_id, kick_force)
 
             self.next_state = self.halt
+            self.status_flag = tactic_constants.WIP
             return kick_ball
 
         else: # returns error, strategy goes back to GoGetBall
             self.next_state = self.halt
-            # TODO : Mettre flag d'état à failed
+            self.status_flag = tactic_constants.FAILURE
             return Idle(self.info_manager, self.player_id)
 
 

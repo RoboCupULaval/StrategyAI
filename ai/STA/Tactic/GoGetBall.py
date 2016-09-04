@@ -3,6 +3,7 @@
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GrabBall import GrabBall
+from ai.STA.Tactic import tactic_constants
 from RULEngine.Util.area import player_can_grab_ball, player_grabbed_ball
 from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM
 from RULEngine.Util.Pose import Pose
@@ -20,6 +21,7 @@ class GoGetBall(Tactic):
         player_id : Identifiant du joueur auquel est assigné la tactique
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique
+        status_flag : L'indicateur de progression de la tactique
         target: Position à laquelle faire face après avoir pris la balle
     """
 
@@ -38,6 +40,7 @@ class GoGetBall(Tactic):
             self.info_manager.set_player_target(self.player_id, self.target)
 
     def get_behind_ball(self):
+        self.status_flag = tactic_constants.WIP
         ball_position = self.info_manager.get_ball_position()
 
         if player_can_grab_ball(self.info_manager, self.player_id):
@@ -51,6 +54,7 @@ class GoGetBall(Tactic):
     def grab_ball(self):
         if player_grabbed_ball(self.info_manager, self.player_id):
             self.next_state = self.halt
+            self.status_flag = tactic_constants.SUCCESS
         elif player_can_grab_ball(self.info_manager, self.player_id):
             self.next_state = self.grab_ball
         else:

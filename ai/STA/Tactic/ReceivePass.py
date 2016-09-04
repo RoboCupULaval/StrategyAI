@@ -1,7 +1,9 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Action import MoveTo, Idle
+from ai.STA.Action.MoveTo import MoveTo
+from ai.STA.Action.Idle import Idle
+from ai.STA.Tactic import tactic_constants
 from RULEngine.Util.area import player_grabbed_ball
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import get_angle
@@ -20,6 +22,7 @@ class ReceivePass(Tactic):
         player_id : Identifiant du joueur auquel est assigné la tactique
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique
+        status_flag : L'indicateur de progression de la tactique
     """
 
     def __init__(self, info_manager, player_id):
@@ -34,6 +37,7 @@ class ReceivePass(Tactic):
     def rotate_towards_ball(self):
         if player_grabbed_ball(self.info_manager, self.player_id):
             self.next_state = self.halt
+            self.status_flag = tactic_constants.SUCCESS
             return Idle(self.info_manager, self.player_id)
         else:  # keep rotating
             current_position = self.info_manager.get_player_position()
@@ -44,4 +48,5 @@ class ReceivePass(Tactic):
 
             move_to = MoveTo(self.info_manager,self.player_id,pose_towards_ball)
             self.next_state = self.rotate_towards_ball
+            self.status_flag = tactic_constants.WIP
             return move_to
