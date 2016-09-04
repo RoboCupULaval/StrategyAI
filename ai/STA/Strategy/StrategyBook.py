@@ -26,8 +26,8 @@ class StrategyBook(object):
         self.ball_x_position = self.info_manager.get_ball_position().x
 
         if self.team_zone_side == "left":
-            return self.ball_x_position > 0
-        return self.ball_x_position < 0
+            return self.ball_x_position >= -50
+        return self.ball_x_position < -50
 
     def most_opponents_in_our_zone(self):
         pass

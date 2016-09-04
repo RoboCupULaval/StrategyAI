@@ -77,8 +77,8 @@ class Coach(object):
         """ Élément de l'interface entre RULEngine/StrategyIA """
         if self.debug_manager:
             debug_commands = self.debug_manager.get_commands()
-            for cmd in debug_commands:
-                print(cmd)
+            #for cmd in debug_commands:
+                #print(cmd)
             return debug_commands
         else:
             return []
