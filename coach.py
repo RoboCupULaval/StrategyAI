@@ -12,6 +12,7 @@ import ai.Debug.debug_manager as ui_debug
 from ai.STA.Strategy.StrategyBook import StrategyBook
 from ai.STA.Tactic.TacticBook import TacticBook
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
+from ai.Algorithm.InfluenceMap import InfluenceMap
 from ai.Debug.debug_manager import DebugManager, DebugCommand
 
 __author__ = 'RoboCupULaval'
@@ -60,7 +61,6 @@ class Coach(object):
         else:
             pass
 
-
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
         pass
@@ -84,7 +84,9 @@ class Coach(object):
             return []
 
     def _init_intelligent_modules(self):
+        self.info_manager.register_module('InfluenceMap', InfluenceMap)
         self.info_manager.register_module('Pathfinder', PathfinderRRT)
+
 
     def _init_ui_debug(self):
         # FIXME: exécuter uniquement sur handshake plutôt qu'à l'init du coach

@@ -117,9 +117,13 @@ class DebugManager:
         self.commands.append(command)
 
     def add_influence_map(self, influence_map):
+
         data = {'field_data': influence_map,
-                'coldest_color': BLUE.repr(),
-                'hottest_color': RED.repr()}
+                'coldest_numb': -100,
+                'hottest_numb': 100,
+                'coldest_color': (0, 255, 0),
+                'hottest_color': (255, 0, 0),
+                'timeout': 2}
         command = DebugCommand(3007, data)
         self.commands.append(command)
 
