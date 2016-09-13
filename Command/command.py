@@ -14,7 +14,7 @@ from ..Game.Player import Player
 from ..Game.Team import Team
 from ..Util.area import *
 from ..Util.geometry import *
-from ..Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE, SPEED_ABSOLUTE_TOLERANCE, SPEED_DEAD_ZONE_DISTANCE
+from ..Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE, SPEED_ABSOLUTE_TOLERANCE, SPEED_DEAD_ZONE_DISTANCE, DEFAULT_MAX_SPEED
 
 class _Command(object):
     def __init__(self, player):
@@ -69,7 +69,7 @@ class _Command(object):
         delta_y = target_y - current_y
         norm = math.hypot(delta_x, delta_y)
 
-        speed = 1 if norm >= SPEED_DEAD_ZONE_DISTANCE else 0
+        speed = DEFAULT_MAX_SPEED if norm >= SPEED_DEAD_ZONE_DISTANCE else 0
 
         if norm > 0:
             delta_x /= norm
