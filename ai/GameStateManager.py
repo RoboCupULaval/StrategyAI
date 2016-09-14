@@ -2,13 +2,14 @@
 """
     Ce module garde en mémoire l'état du jeu
 """
-from RULEngine.Util.constant import *
+from RULEngine.Util.constant import PLAYER_PER_TEAM
+from RULEngine.Framework import GameState
 import RULEngine.Game.Ball
 import RULEngine.Game.Field
 import RULEngine.Game.Team
 import RULEngine.Util.geometry
 
-class GameState:
+class GameStateManager:
     """
         Constructeur
         :param my_team_is_yellow: Booléen, la couleur de notre équipe est-elle jaune?
@@ -17,6 +18,7 @@ class GameState:
         self.field = RULEngine.Game.Field.Field(RULEngine.Game.Ball.Ball())
         self.my_team = RULEngine.Game.Team.Team(True)
         self.other_team = RULEngine.Game.Team.Team(False)
+        self.timestamp = 0
 
     """
         Met à jour la position de la balle
@@ -52,8 +54,22 @@ class GameState:
         :param new_team_info: Team, info de l'équipe à mettre à jour
     """
     def _update_team(self, is_my_team, new_team_info):
-        for i in range (0, )
+        for i in range (0, PLAYER_PER_TEAM-1):
+            self._update_player(is_my_team, i)
     """
+        Met à jour le timestamp
+        :param new_timestamp: float, valeur du nouveau timestamp
+    """
+    def _update_timestamp(self, new_timestamp):
+        self.timestamp = new_timestamp
+    """
+        Met à jour le jeu
+        :param new_game_state: État du jeu, sous forme de named tuple
+        Pour le format du tuple, voir RULEngine/framework.py
     """
     def update(self, new_game_state):
-
+        is_my_team = True
+        self._update_field(new_game_state.field)
+        self._update_team(is_my_team, new_game_state.friends)
+        self._update_team(not is_my_team, new_game_state.enemies)
+        self._update_timestamp(new_game_state.timestamp)
