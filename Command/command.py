@@ -78,7 +78,9 @@ class _Command(object):
             delta_x = 0
             delta_y = 0
 
-        return Position(delta_x, delta_y, abs_tol=SPEED_ABSOLUTE_TOLERANCE) * speed
+        speed_x, speed_y = self._correct_for_referential_frame(delta_x, delta_y, current_theta)
+
+        return Position(speed_x, speed_y, abs_tol=SPEED_ABSOLUTE_TOLERANCE) * speed
 
 
     def _compute_orientation_for_speed_command(self, current_orientation, target_orientation):
@@ -92,6 +94,13 @@ class _Command(object):
 
         return theta_speed if delta_theta >= 0 else -theta_speed
 
+    def _correct_for_referential_frame(self, x, y, orientation):
+        cos = math.cos(-orientation)
+        sin = math.sin(-orientation)
+
+        corrected_x = (x * cos - y * sin)
+        corrected_y = (y * cos + x * sin)
+        return corrected_x, corrected_y
 
     def _compute_optimal_delta_theta(self, current_theta, target_theta):
         """
