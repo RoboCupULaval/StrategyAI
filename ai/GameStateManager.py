@@ -3,7 +3,6 @@
     Ce module garde en mémoire l'état du jeu
 """
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from RULEngine.Framework import GameState
 import RULEngine.Game.Ball
 import RULEngine.Game.Field
 import RULEngine.Game.Team
@@ -12,7 +11,6 @@ import RULEngine.Util.geometry
 class GameStateManager:
     """
         Constructeur
-        :param my_team_is_yellow: Booléen, la couleur de notre équipe est-elle jaune?
     """
     def __init__(self):
         self.field = RULEngine.Game.Field.Field(RULEngine.Game.Ball.Ball())
