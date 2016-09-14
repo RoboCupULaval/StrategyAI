@@ -43,6 +43,7 @@ class TestCommand(unittest.TestCase):
         speed_self_rotate7 = self.uut(Pose(Position(), -0.19))
         self.assertEqual(speed_self_rotate7, Pose(Position(), -0.4))
 
+
     def test_convert_position_to_speed_position(self):
         """
             Test de la Position obtenu dans la Speed.
@@ -68,6 +69,12 @@ class TestCommand(unittest.TestCase):
         self.assertEqual(speed_pose, Pose(Position(0.957, 0.287, abs_tol=SPEED_ABSOLUTE_TOLERANCE), 0))
         speed_pose = self.uut(Pose(Position(300, 1000), 0))
         self.assertEqual(speed_pose, Pose(Position(0.287, 0.957, abs_tol=SPEED_ABSOLUTE_TOLERANCE), 0))
+
+        # test pour frame de ref
+        self.uut = functools.partial(self.cmd._convert_position_to_speed, Pose(Position(0, 0, abs_tol=1e-4), math.pi/2))
+        # sanity
+        self.assertNotEqual(self.uut(Pose(Position(500, 0))).position, Position(1, 0, abs_tol=1e-4))
+        self.assertEqual(self.uut(Pose(Position(500, 0))).position, Position(6.1232e-17, -1.0000, abs_tol=1e-4))
 
     def test_compute_optimal_delta_theta(self):
         """ Test du calcul de theta_direction, 4 décimales de précisions. """
@@ -107,3 +114,17 @@ class TestCommand(unittest.TestCase):
         self.assertEqual(self.uut(0.1999999), 0.4)
         self.assertEqual(self.uut(-0.1999999), 0.4)
         self.assertEqual(self.uut(0.0005), 0.4)
+
+    def test_correct_for_referential_frame(self):
+        """
+            Test pour valider que le changement d'axes de référence est bien calculé.
+        """
+        self.uut = functools.partial(self.cmd._correct_for_referential_frame, 0.5, 0.5)
+        x1, y1 = self.uut(0)
+        x2, y2 = self.uut(math.pi)
+        x3, y3 = self.uut((2*math.pi)/1000)
+        self.assertNotEqual(Position(x1, y1, abs_tol=1e-2), Position(x2, y2))
+        self.assertEqual(Position(x1, y1, abs_tol=1e-2), Position(x3, y3))
+
+        x4, y4 = self.uut((math.pi/2 + 0.47))
+        self.assertEqual(Position(x4, y4, abs_tol=1e-2), Position(0.21, -0.67))
