@@ -53,7 +53,7 @@ class GameStateManager:
         :param new_team_info: Team, info de l'équipe à mettre à jour
     """
     def _update_team(self, is_my_team, new_team_info):
-        for i in range (0, PLAYER_PER_TEAM-1):
+        for i in range(PLAYER_PER_TEAM):
             self._update_player(is_my_team, i)
 
     """
