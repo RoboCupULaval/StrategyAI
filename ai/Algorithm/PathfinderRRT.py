@@ -15,10 +15,10 @@ import pickle
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import DEFAULT_PATH_TIMEOUT
+from RULEngine.Util.constant import POSITION_DEADZONE
 from ai.Algorithm.IntelligentModule import Pathfinder
 
-from ai.Debug.debug_manager import COLOR_ID_MAP
+from ai.Debug.debug_manager import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 
 OBSTACLE_DEAD_ZONE = 200
 TIME_TO_UPDATE = 5
@@ -52,7 +52,7 @@ class PathfinderRRT(Pathfinder):
         for path_element in path:
             x = path_element.position.x
             y = path_element.position.y
-            self.state.debug_manager.add_point((x, y), COLOR_ID_MAP[pid], link="path - " + str(pid), timeout=DEFAULT_PATH_TIMEOUT)
+            self.state.debug_manager.add_point((x, y), COLOR_ID_MAP[pid], width=5, link="path - " + str(pid), timeout=DEFAULT_PATH_TIMEOUT)
 
 
     def get_path(self, pid=None, target=None):
