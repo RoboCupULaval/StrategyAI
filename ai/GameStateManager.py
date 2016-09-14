@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 """
     Ce module garde en mémoire l'état du jeu
+    NOTE: Il manque les getters
 """
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 import RULEngine.Game.Ball
@@ -54,12 +55,14 @@ class GameStateManager:
     def _update_team(self, is_my_team, new_team_info):
         for i in range (0, PLAYER_PER_TEAM-1):
             self._update_player(is_my_team, i)
+
     """
         Met à jour le timestamp
         :param new_timestamp: float, valeur du nouveau timestamp
     """
     def _update_timestamp(self, new_timestamp):
         self.timestamp = new_timestamp
+
     """
         Met à jour le jeu
         :param new_game_state: État du jeu, sous forme de named tuple
