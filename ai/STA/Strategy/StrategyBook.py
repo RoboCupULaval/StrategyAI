@@ -5,6 +5,7 @@ from . HumanControl import HumanControl
 from . SimpleDefense import SimpleDefense
 from . SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
+from . TestingStrategy import TestingStrategy
 
 class StrategyBook(object):
     """
@@ -17,7 +18,8 @@ class StrategyBook(object):
         self.strategy_book = {'SimpleDefense' : SimpleDefense,
                               'SimpleOffense' : SimpleOffense,
                               'HumanControl' : HumanControl,
-                              'DoNothing' : DoNothing}
+                              'DoNothing' : DoNothing,
+                              "TestingStrategy": TestingStrategy}
         self.info_manager = p_info_manager
 
     def get_strategies_name_list(self):
@@ -44,7 +46,8 @@ class StrategyBook(object):
 
         self.chosen_strategy = DoNothing
 
-        return self.chosen_strategy
+        #return self.chosen_strategy
+        return TestingStrategy
 
     def get_strategy(self, strategy_name):
         self.strategy_book[strategy_name]
