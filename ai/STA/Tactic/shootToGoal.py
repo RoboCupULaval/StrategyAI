@@ -39,7 +39,7 @@ class ShootToGoal(Tactic):
         if player_grabbed_ball(self.info_manager, self.player_id):  # derniere verification avant de frapper
             player_position = self.info_manager.get_player_position(self.player_id)
             kick_force = get_required_kick_force(player_position, goal_position)
-
+            kick_force = 7
             kick_ball = Kick(self.info_manager, self.player_id, kick_force)
 
             self.next_state = self.halt
