@@ -63,8 +63,10 @@ class StrategyExecutor(Executor):
         if not self.info_manager.debug_manager.human_control:
             self.strategy_book = StrategyBook(self.info_manager)
             self.strategy = self.strategy_book.get_optimal_strategy()(self.info_manager)
-        else:
+        elif not self.info_manager.debug_manager.tactic_control:
             self.strategy = self.info_manager.strategy(self.info_manager)
+        else:
+            pass
 
     def _assign_tactics(self):
         """
@@ -78,10 +80,11 @@ class StrategyExecutor(Executor):
             for i in range(0, 6):
                 tactic_sequence.append(Stop(self.info_manager, i))
 
-        for i in range(0, 6):
-            tactic = tactic_sequence[i]
-            tactic.player_id = i
-            self.info_manager.set_player_tactic(i, tactic_sequence[i])
+        if not self.info_manager.debug_manager.tactic_control:
+            for i in range(0, 6):
+                tactic = tactic_sequence[i]
+                tactic.player_id = i
+                self.info_manager.set_player_tactic(i, tactic_sequence[i])
 
 
 class TacticExecutor(Executor):
@@ -97,24 +100,6 @@ class TacticExecutor(Executor):
         """ Obtient la Tactic de chaque robot et fait progresser la FSM. """
         for i in range(0, 6):
             self.info_manager.get_player_tactic(i).exec()
-
-class PathfinderExecutor(Executor):
-    """ Récupère les paths calculés pour les robots et les assignent. """
-
-    def __init__(self, info_manager):
-        Executor.__init__(self, info_manager)
-        self.pathfinder = None
-
-    def exec(self):
-        """
-            Appel le module de pathfinder enregistré pour modifier le mouvement
-            des joueurs de notre équipe.
-        """
-        self.pathfinder = self.info_manager.acquire_module('Pathfinder')
-        if self.pathfinder: # on desactive l'executor si aucun module ne fournit de pathfinding
-            paths = self.pathfinder.get_paths()
-            for i in range(0, 6):
-                self.info_manager.set_player_next_action(paths[i])
 
 class ModuleExecutor(Executor):
     """ Met à jour tous les modules intelligents enregistré. """
@@ -150,7 +135,9 @@ class DebugExecutor(Executor):
     def _parse_command(self, cmd):
         if cmd.is_strategy_cmd():
             self._parse_strategy(cmd)
+            self.info_manager.debug_manager.set_tactic_control(False)
         elif cmd.is_tactic_cmd():
+            self.info_manager.debug_manager.set_tactic_control(True)
             pid = self._sanitize_pid(cmd.data['id'])
             tactic_name = cmd.data['tactic']
             tactic_ref = self._parse_tactic(tactic_name, pid, cmd.data)

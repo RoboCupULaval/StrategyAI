@@ -71,6 +71,7 @@ class DebugManager:
         self.commands = []
         self.ui_commands = []
         self.human_control = False
+        self.tactic_control = False
 
     def get_commands(self):
         packet_represented_commands = [c.get_packet_repr() for c in self.commands]
@@ -154,6 +155,9 @@ class DebugManager:
 
     def set_human_control(self, status=True):
         self.human_control = status
+
+    def set_tactic_control(self, status=True):
+        self.tactic_control = status
 
     def send_robot_status(self, player_id, tactic, action, target):
         data = {'blue': { player_id : { 'tactic': tactic,
