@@ -155,6 +155,13 @@ class DebugManager:
     def set_human_control(self, status=True):
         self.human_control = status
 
+    def send_robot_status(player_id, tactic, action, target):
+        data = {'blue': { player_id : { 'tactic': tactic,
+                                        'action': action,
+                                        'target': target}}}
+        cmd = DebugCommand(1002, data)
+        self.commands.append(cmd)
+
 class DebugCommand(object):
     """
        Classe qui encapsule selon le protocole de communication les informations
