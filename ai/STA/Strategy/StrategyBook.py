@@ -4,8 +4,7 @@
 from . HumanControl import HumanControl
 from . SimpleDefense import SimpleDefense
 from . SimpleOffense import SimpleOffense
-from . DoNothing import DoNothing
-
+from .DoNothing import DoNothing
 
 class StrategyBook(object):
     """
@@ -39,13 +38,13 @@ class StrategyBook(object):
 
         # simple choice
         if self.ball_in_offense_zone():
-            self.chosen_strategy = DoNothing
+            self.chosen_strategy = SimpleOffense
         else:
-            self.chosen_strategy = DoNothing
+            self.chosen_strategy = SimpleDefense
 
-        #self.debug_show_all_players_tactics() # debug
+        self.chosen_strategy = DoNothing
 
-        return DoNothing
+        return self.chosen_strategy
 
     def get_strategy(self, strategy_name):
         self.strategy_book[strategy_name]
