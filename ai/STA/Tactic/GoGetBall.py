@@ -27,7 +27,6 @@ class GoGetBall(Tactic):
 
     def __init__(self, info_manager, player_id):
         Tactic.__init__(self, info_manager)
-        self.tactic_name = "GoGetBall"
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
 

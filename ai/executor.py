@@ -196,7 +196,14 @@ class DebugExecutor(Executor):
     def _send_robot_status(self):
         for player_id in range(6):
             robot_tactic = self.info_manager.get_player_tactic(player_id)
-            robot_tactic_name = robot_tactic.tactic_name
-            robot_action = robot_tactic.current_state
+            robot_tactic_name = 'None'
+            robot_action = 'None'
+            try:
+                robot_tactic_name = robot_tactic.__class__.__name__
+                robot_action = robot_tactic.current_state.__name__
+            except AttributeError:
+                robot_tactic_name = 'None'
+                robot_action = 'None'
+
             robot_target = (0, 0) # FIXME: restructurer l'API
             self.info_manager.debug_manager.send_robot_status(player_id, robot_tactic_name, str(robot_action), robot_target)
