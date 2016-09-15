@@ -290,3 +290,20 @@ def get_required_kick_force(position1,position2): # simple calculation
 
     kick_force = distance * KICK_MAX_SPD / max_field_distance_possible
     return kick_force
+
+def rotate_point_around_origin(point,origin,angle):
+    sine = m.sin(angle)
+    cos = m.cos(angle)
+
+    point.x -= origin.x
+    point.y -= origin.y
+
+    new_x = point.x * cos - point.y * sine
+    new_y = point.x * sine + point.y * cos
+
+    new_x += origin.x
+    new_y += origin.y
+
+    new_point = Position(new_x,new_y)
+
+    return new_point

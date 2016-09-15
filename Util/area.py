@@ -199,6 +199,11 @@ def player_can_grab_ball(info_manager, player_id):
 
     return False
 
+def player_close_to_ball(info_manager,player_id):
+    player_position = info_manager.get_player_position(player_id)
+    ball_position = info_manager.get_ball_position()
+    if isInsideCircle(player_position, ball_position, RADIUS_TO_HALT + POSITION_DEADZONE):
+        return True
 
 def player_grabbed_ball(info_manager, player_id):
     player_position = info_manager.get_player_position(player_id)
