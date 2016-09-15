@@ -11,7 +11,20 @@ import RULEngine.Util.geometry
 
 
 class GameStateManager:
-    """ Constructeur """
+    """
+        Gère l'état du jeu.
+    """
+    instance = None
+
+    def __new__(cls):
+        """
+        S'assure qu'il n'y a qu'un seul ModuleManager
+        :return: L'instance du ModuleManager
+        """
+        if cls.instance is None:
+            cls.instance = object.__new__(cls)
+        return cls.instance
+
     def __init__(self):
         self.field = RULEngine.Game.Field.Field(RULEngine.Game.Ball.Ball())
         self.my_team = RULEngine.Game.Team.Team(True)

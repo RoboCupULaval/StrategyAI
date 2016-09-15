@@ -5,7 +5,19 @@ class NonExistentModule(Exception):
     pass
 
 class ModuleManager:
-    """ Constructeur """
+    """
+        Gère les modules intelligents (par exemple, le Pathfinder) présents dans le jeu.
+    """
+    instance = None
+    def __new__(cls):
+        """
+        S'assure qu'il n'y a qu'un seul ModuleManager
+        :return: L'instance du ModuleManager
+        """
+        if cls.instance is None:
+            cls.instance = object.__new__(cls)
+        return cls.instance
+
     def __init__(self):
         self.modules = {}
 
