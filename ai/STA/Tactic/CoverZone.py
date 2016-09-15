@@ -34,6 +34,7 @@ class CoverZone(Tactic):
 
     def __init__(self, p_info_manager, p_player_id, p_y_top, p_y_bottom, p_x_left, p_x_right, p_is_yellow=False):
         Tactic.__init__(self, p_info_manager)
+        self.tactic_name = "CoverZone"
         assert isinstance(p_player_id, int)
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert isinstance(p_y_top, (int, float))

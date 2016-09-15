@@ -26,6 +26,7 @@ class Tactic:
         self.current_state = self.halt
         self.next_state = self.halt
         self.status_flag = tactic_constants.INIT
+        self.tactic_name = "Tactic"
 
     def halt(self):
         """

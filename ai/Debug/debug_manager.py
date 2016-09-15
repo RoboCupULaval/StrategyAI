@@ -44,7 +44,7 @@ COLOR_ID_MAP = {0: COLOR_ID0,
                 4: COLOR_ID4,
                 5: COLOR_ID5}
 
-SENDER_NAME = "ai"
+SENDER_NAME = "AI"
 DEFAULT_TEXT_SIZE = 14 #px
 DEFAULT_TEXT_FONT = 'Arial'
 DEFAULT_TEXT_ALIGN = 'Left'
@@ -154,6 +154,13 @@ class DebugManager:
 
     def set_human_control(self, status=True):
         self.human_control = status
+
+    def send_robot_status(self, player_id, tactic, action, target):
+        data = {'blue': { player_id : { 'tactic': tactic,
+                                        'action': action,
+                                        'target': target}}}
+        cmd = DebugCommand(1002, data)
+        self.commands.append(cmd)
 
 class DebugCommand(object):
     """
