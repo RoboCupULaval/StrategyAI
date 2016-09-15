@@ -98,8 +98,9 @@ class TacticExecutor(Executor):
 
     def exec(self):
         """ Obtient la Tactic de chaque robot et fait progresser la FSM. """
-        for i in range(0, 6):
-            self.info_manager.get_player_tactic(i).exec()
+        for player_id in range(0, 6):
+            ai_command = self.info_manager.get_player_tactic(player_id).exec()
+            self.info_manager.set_player_next_action(player_id, ai_command)
 
 class ModuleExecutor(Executor):
     """ Met à jour tous les modules intelligents enregistré. """
