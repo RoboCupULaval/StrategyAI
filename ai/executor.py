@@ -76,7 +76,7 @@ class StrategyExecutor(Executor):
             tactic_sequence = self.strategy.get_next_tactics_sequence()
             for i in range(0, 6):
                 tactic = tactic_sequence[i]
-                tactic.player_id = i
+                #tactic.player_id = i
                 self.info_manager.set_player_tactic(i, tactic_sequence[i])
         else:
             pass

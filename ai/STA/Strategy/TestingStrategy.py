@@ -16,7 +16,7 @@ class TestingStrategy(Strategy):
                          Stop(self.info_manager, 4),
                          Stop(self.info_manager, 5)]
 
-        self.test_robot = 3
+        self.test_robot = 4
         self.update_test()
 
         super().__init__(self.info_manager, self.tactics)
@@ -26,5 +26,4 @@ class TestingStrategy(Strategy):
         #test2
 
     def test_go_get_ball(self):
-        print(self.test_robot)
         self.tactics[self.test_robot] = GoGetBall(self.info_manager, self.test_robot)

@@ -17,7 +17,7 @@ class Strategy(metaclass=ABCMeta):
             Retourne 6 tactics, si la séquence de tactiques de la stratégie
             est épuiséee, les dernières tactiques sont *Stop*.
         """
-        self._remove_finished_tactics()
+        #self._remove_finished_tactics()
         return self._generate_next_tactics_sequence()
 
     def _init_tactics_sequence(self, p_starting_tactics_sequence):
@@ -35,5 +35,5 @@ class Strategy(metaclass=ABCMeta):
             try:
                 next_tactics_sequence.append(self.tactics_sequence[i])
             except IndexError:
-                next_tactics_sequence.append(Stop(self.info_manager, 0))
+                next_tactics_sequence.append(Stop(self.info_manager, i))
         return next_tactics_sequence
