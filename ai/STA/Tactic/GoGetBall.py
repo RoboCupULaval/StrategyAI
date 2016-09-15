@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.GoToPosition import GoToPosition
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GrabBall import GrabBall
 from ai.STA.Tactic import tactic_constants
@@ -39,17 +40,28 @@ class GoGetBall(Tactic):
             self.target = self.info_manager.get_ball_position()
             self.info_manager.set_player_target(self.player_id, self.target)
 
+        self.move_action = None
+
     def get_behind_ball(self):
         self.status_flag = tactic_constants.WIP
         ball_position = self.info_manager.get_ball_position()
+
+        move_action_status = tactic_constants.WIP
+        try:
+            move_action_status = self.move_action.status_flag
+        except:
+            pass
 
         if player_can_grab_ball(self.info_manager, self.player_id):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.get_behind_ball
 
-        go_behind = GoBehind(self.info_manager, self.player_id, ball_position, self.target, DISTANCE_BEHIND)
-        return go_behind
+        if self.move_action is None or move_action_status == tactic_constants.SUCCESS:
+            go_behind = GoBehind(self.info_manager, self.player_id, ball_position, self.target, DISTANCE_BEHIND)
+            destination = go_behind.exec().move_destination
+            self.move_action = GoToPosition(self.info_manager, self.player_id, destination)
+        return self.move_action
 
     def grab_ball(self):
         if player_grabbed_ball(self.info_manager, self.player_id):
