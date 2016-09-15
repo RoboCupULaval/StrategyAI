@@ -77,8 +77,6 @@ class Coach(object):
         """ Élément de l'interface entre RULEngine/StrategyIA """
         if self.debug_manager:
             debug_commands = self.debug_manager.get_commands()
-            for cmd in debug_commands:
-                print(cmd)
             return debug_commands
         else:
             return []
@@ -100,10 +98,10 @@ class Coach(object):
     def _update_ai(self, p_game_state):
         """ Effectue une itération de mise à jour de l'ia. """
         self.info_manager.update(p_game_state)
+        self.debug_executor.exec()
         self.module_executor.exec()
         self.strategy_executor.exec()
         self.tatic_executor.exec()
-        self.debug_executor.exec()
 
 class CoachCommandSender(object):
     """

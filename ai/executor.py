@@ -64,22 +64,24 @@ class StrategyExecutor(Executor):
             self.strategy_book = StrategyBook(self.info_manager)
             self.strategy = self.strategy_book.get_optimal_strategy()(self.info_manager)
         else:
-            self.strategy = self.strategy_book.get_strategy("HumanControl")
+            self.strategy = self.info_manager.strategy(self.info_manager)
 
     def _assign_tactics(self):
         """
             Détermine à quel robot assigner les tactiques de la stratégie en
             cours.
         """
-        human_control = self.info_manager.debug_manager.human_control
-        if not human_control:
+        tactic_sequence = []
+        try:
             tactic_sequence = self.strategy.get_next_tactics_sequence()
+        except AttributeError:
             for i in range(0, 6):
-                tactic = tactic_sequence[i]
-                tactic.player_id = i
-                self.info_manager.set_player_tactic(i, tactic_sequence[i])
-        else:
-            pass
+                tactic_sequence.append(Stop(self.info_manager, i))
+
+        for i in range(0, 6):
+            tactic = tactic_sequence[i]
+            tactic.player_id = i
+            self.info_manager.set_player_tactic(i, tactic_sequence[i])
 
 
 class TacticExecutor(Executor):
@@ -146,7 +148,7 @@ class DebugExecutor(Executor):
 
     def _parse_command(self, cmd):
         if cmd.is_strategy_cmd():
-            self.info_manager.strategy = cmd.data['strategy']
+            self._parse_strategy(cmd)
         elif cmd.is_tactic_cmd():
             pid = self._sanitize_pid(cmd.data['id'])
             tactic_name = cmd.data['tactic']
@@ -154,6 +156,13 @@ class DebugExecutor(Executor):
             self.info_manager.set_player_tactic(pid, tactic_ref)
         else:
             pass
+
+    def _parse_strategy(self, cmd):
+        strategy_key = cmd.data['strategy']
+        if strategy_key == 'pStop':
+            self.info_manager.strategy = StrategyBook(self.info_manager).get_strategy('DoNothing')
+        else:
+            self.info_manager.strategy = StrategyBook(self.info_manager).get_strategy(strategy_key)
 
     def _parse_tactic(self, tactic_name, pid, data):
         # TODO: redéfinir le paquet pour set une tactique pour que les données supplémentaire

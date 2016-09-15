@@ -1,9 +1,10 @@
 # Under MIT license, see LICENSE.txt
 """ Livre des stratégies. """
 
-from . HumanControl import HumanControl
-from . SimpleDefense import SimpleDefense
-from . SimpleOffense import SimpleOffense
+from .HumanControl import HumanControl
+from .SimpleDefense import SimpleDefense
+from .SimpleOffense import SimpleOffense
+from .DoNothing import DoNothing
 
 class StrategyBook(object):
     """
@@ -15,7 +16,8 @@ class StrategyBook(object):
     def __init__(self, p_info_manager):
         self.strategy_book = {'SimpleDefense' : SimpleDefense,
                               'SimpleOffense' : SimpleOffense,
-                              'HumanControl' : HumanControl}
+                              'HumanControl' : HumanControl,
+                              'DoNothing' : DoNothing }
         self.info_manager = p_info_manager
 
     def get_strategies_name_list(self):
@@ -40,12 +42,12 @@ class StrategyBook(object):
         else:
             self.chosen_strategy = SimpleDefense
 
-        #self.debug_show_all_players_tactics() # debug
+        self.chosen_strategy = DoNothing
 
         return self.chosen_strategy
 
     def get_strategy(self, strategy_name):
-        self.strategy_book[strategy_name]
+        return self.strategy_book[strategy_name]
 
     def debug_show_all_players_tactics(self):
         for i in range(0,6):
