@@ -5,6 +5,8 @@ class NonExistentModule(Exception):
 
 class ModuleManager:
     def __init__(self):
+        open(module_config, r)
+        
         self.modules = {}
 
     def register_module(self, module_name, module_ref):
