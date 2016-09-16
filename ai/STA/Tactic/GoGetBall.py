@@ -4,9 +4,12 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.GoToPosition import GoToPosition
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GrabBall import GrabBall
+from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic import tactic_constants
+
 from RULEngine.Util.area import player_can_grab_ball, player_grabbed_ball
-from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM
+from RULEngine.Util.geometry import get_distance
+from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM, POSITION_DEADZONE
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 
@@ -26,41 +29,34 @@ class GoGetBall(Tactic):
         target: Position à laquelle faire face après avoir pris la balle
     """
 
-    def __init__(self, info_manager, player_id):
-        Tactic.__init__(self, info_manager)
+    def __init__(self, info_manager, player_id, target=Pose()):
+        Tactic.__init__(self, info_manager, target)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
 
         self.player_id = player_id
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball
-        self.target = self.info_manager.get_player_target(player_id)
-        # FIXME: hack
-        if self.target is None:
-            self.target = self.info_manager.get_ball_position()
-            self.info_manager.set_player_target(self.player_id, self.target)
 
-        self.move_action = None
+        self.move_action = GoToPosition(self.info_manager, self.player_id, self.info_manager.get_player_pose(self.player_id))
+        self.move_action.status_flag = tactic_constants.SUCCESS
 
     def get_behind_ball(self):
         self.status_flag = tactic_constants.WIP
         ball_position = self.info_manager.get_ball_position()
+        move_action_status = self.move_action.status_flag
 
-        move_action_status = tactic_constants.WIP
-        try:
-            move_action_status = self.move_action.status_flag
-        except:
-            pass
-
-        if player_can_grab_ball(self.info_manager, self.player_id):
-            self.next_state = self.grab_ball
+        dist = self._get_distance_from_ball()
+        if move_action_status == tactic_constants.SUCCESS and dist <= POSITION_DEADZONE:
+            self.next_state = self.halt
+        elif move_action_status == tactic_constants.SUCCESS and dist > POSITION_DEADZONE:
+            self.next_state = self.get_behind_ball
+            go_behind = GoBehind(self.info_manager, self.player_id, ball_position, self.target.position, DISTANCE_BEHIND)
+            destination = go_behind.exec().move_destination
+            self.move_action = GoToPosition(self.info_manager, self.player_id, destination)
         else:
             self.next_state = self.get_behind_ball
 
-        if self.move_action is None or move_action_status == tactic_constants.SUCCESS:
-            go_behind = GoBehind(self.info_manager, self.player_id, ball_position, self.target, DISTANCE_BEHIND)
-            destination = go_behind.exec().move_destination
-            self.move_action = GoToPosition(self.info_manager, self.player_id, destination)
         return self.move_action
 
     def grab_ball(self):
@@ -74,3 +70,17 @@ class GoGetBall(Tactic):
 
         grab_ball = GrabBall(self.info_manager,self.player_id)
         return grab_ball
+
+    def halt(self):
+        self.status_flag = tactic_constants.SUCCESS
+        dist = self._get_distance_from_ball()
+
+        if dist > POSITION_DEADZONE:
+            self.next_state = self.get_behind_ball
+        else:
+            self.next_state = self.halt
+
+        return Idle(self.info_manager, self.player_id)
+
+    def _get_distance_from_ball(self):
+        return get_distance(self.info_manager.get_player_pose(self.player_id).position, self.info_manager.get_ball_position())

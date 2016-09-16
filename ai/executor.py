@@ -165,7 +165,7 @@ class DebugExecutor(Executor):
         elif tactic_name == "cover_zone":
             tactic_ref = CoverZone(self.info_manager, pid, FIELD_Y_TOP, FIELD_Y_TOP/2, FIELD_X_LEFT, FIELD_X_LEFT/2)
         elif tactic_name == "get_ball":
-            tactic_ref = GoGetBall(self.info_manager, pid)
+            tactic_ref = GoGetBall(self.info_manager, pid, Pose(Position(4500, 0)))
         elif tactic_name == "tStop":
             tactic_ref = Stop(self.info_manager, pid)
         else:
@@ -191,7 +191,8 @@ class DebugExecutor(Executor):
                 robot_tactic_name = robot_tactic.__class__.__name__
                 robot_action = robot_tactic.current_state.__name__
                 robot_target = robot_tactic.target.to_tuple()
-            except AttributeError:
+            except AttributeError as err:
+                self.info_manager.debug_manager.add_log(4, "Erreur lors de l'acquisition des données pour le robot: " + str(player_id) + " -- " + str(err))
                 robot_tactic_name = 'None'
                 robot_action = 'None'
 
