@@ -211,7 +211,7 @@ class Framework(object):
                 y_beg = pos_beg.y
                 x_end = pos_end.x
                 y_end = pos_end.y
-                self.ai_coach.info_manager.debug_manager.add_line((x_beg, y_beg), (x_end, y_end), timeout=0.025)
+                self.ai_coach.info_manager.debug_manager.add_line((int(x_beg), int(y_beg)), (int(x_end), int(y_end)), timeout=0.025)
                 command.pose.orientation = 0
                 self.command_sender.send_command(command)
 
