@@ -28,17 +28,17 @@ class _Command(object):
         self.pose = Pose()
         self.team = player.team
 
-    def to_speed_command(self):
+    def to_speed_command(self, player_id=0):
         """
             Transforme la commande en une commande de vitesse (SpeedCommand)
             et affecte le drapeau.
         """
         if not self.is_speed_command:
-            self.pose = self._convert_position_to_speed(self.player.pose, self.pose)
+            self.pose = self._convert_position_to_speed(self.player.pose, self.pose, player_id)
 
         return self
 
-    def _convert_position_to_speed(self, current_pose, target_pose):
+    def _convert_position_to_speed(self, current_pose, target_pose, player_id=0):
         """
             Converts an absolute position to a
             speed command relative to the player.
@@ -47,13 +47,13 @@ class _Command(object):
             :param target_pose: the absolute position the robot should go to.
             :returns: A Pose object with speed vectors.
         """
-        position = self._compute_position_for_speed_command(current_pose.position, target_pose.position, current_pose.orientation)
+        position = self._compute_position_for_speed_command(current_pose.position, target_pose.position, current_pose.orientation, player_id)
         orientation = self._compute_orientation_for_speed_command(current_pose.orientation, target_pose.orientation)
 
         return Pose(position, orientation)
 
 
-    def _compute_position_for_speed_command(self, current_position, target_position, current_theta):
+    def _compute_position_for_speed_command(self, current_position, target_position, current_theta, player_id=0):
         """
             Calcul la différence en x et en y entre la position actuelle et la position cible.
             La norme du delta_x et delta_y calculé est normalisée.
@@ -69,7 +69,13 @@ class _Command(object):
         delta_y = target_y - current_y
         norm = math.hypot(delta_x, delta_y)
 
-        speed = DEFAULT_MAX_SPEED if norm >= SPEED_DEAD_ZONE_DISTANCE else 0
+        if norm >= SPEED_DEAD_ZONE_DISTANCE:
+            speed = DEFAULT_MAX_SPEED 
+        else :
+            speed = math.sqrt(norm * (DEFAULT_MAX_SPEED/SPEED_DEAD_ZONE_DISTANCE))
+
+        if player_id == 4:
+            print("Speed: " + str(speed))
 
         if norm > 0:
             delta_x /= norm

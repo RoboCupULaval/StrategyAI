@@ -202,10 +202,10 @@ class Framework(object):
         # FIXME: pourquoi on fait ce check? est-ce une erreur introduite par un des refactors?
         if self.vision.get_latest_frame():
             commands = self._get_coach_robot_commands()
-            for idx,command in enumerate(commands):
-                command = command.to_speed_command()
+            for player_id,command in enumerate(commands):
+                command = command.to_speed_command(player_id)
                 # hack debug
-                pos_beg = self.ai_coach.info_manager.get_player_position(idx)
+                pos_beg = self.ai_coach.info_manager.get_player_position(player_id)
                 pos_end = pos_beg + command.pose.position * 300
                 x_beg = pos_beg.x
                 y_beg = pos_beg.y
