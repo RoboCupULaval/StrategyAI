@@ -29,3 +29,15 @@ class TestPose(unittest.TestCase):
         self.assertTrue(pos7 == pos8)
         self.assertFalse(pos7 == pos9)
         self.assertFalse(pos7 == pos10)
+
+    def test_to_tuple(self):
+        uut = Pose()
+        #sanity check
+        self.assertNotEqual(type(uut.to_tuple()), type(Pose()))
+        self.assertEqual(type(uut.to_tuple()), type(tuple()))
+
+        self.assertEqual(uut.to_tuple(), tuple((0, 0)))
+
+        uut = Pose(Position(557, -778.5), 0)
+        self.assertEqual(uut.to_tuple(), tuple((557, -778.5)))
+        self.assertNotEqual(uut.to_tuple(), tuple((-42, 3897)))
