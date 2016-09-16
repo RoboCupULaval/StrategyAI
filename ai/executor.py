@@ -186,12 +186,13 @@ class DebugExecutor(Executor):
             robot_tactic = self.info_manager.get_player_tactic(player_id)
             robot_tactic_name = 'None'
             robot_action = 'None'
+            robot_target = (0, 0)
             try:
                 robot_tactic_name = robot_tactic.__class__.__name__
                 robot_action = robot_tactic.current_state.__name__
+                robot_target = robot_tactic.target.to_tuple()
             except AttributeError:
                 robot_tactic_name = 'None'
                 robot_action = 'None'
 
-            robot_target = (0, 0) # FIXME: restructurer l'API
             self.info_manager.debug_manager.send_robot_status(player_id, robot_tactic_name, str(robot_action), robot_target)

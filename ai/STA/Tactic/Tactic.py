@@ -6,6 +6,8 @@ from ai import InfoManager
 from ai.STA.Tactic import tactic_constants
 from ai.STA.Action.Idle import Idle
 
+from RULEngine.Util.Pose import Pose
+
 __author__ = 'RobocupULaval'
 
 
@@ -14,7 +16,7 @@ class Tactic:
         Classe mère de toutes les tactiques
     """
 
-    def __init__(self, p_info_manager):
+    def __init__(self, p_info_manager, target=Pose()):
         """
             Initialise la tactique
 
@@ -26,6 +28,7 @@ class Tactic:
         self.current_state = self.halt
         self.next_state = self.halt
         self.status_flag = tactic_constants.INIT
+        self.target = target
 
     def halt(self):
         """

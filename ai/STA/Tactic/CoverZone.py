@@ -51,6 +51,7 @@ class CoverZone(Tactic):
         self.current_state = self.cover_zone
         self.next_state = self.cover_zone
         self.status_flag = tactic_constants.WIP
+        self.target = Pose(Position(int((p_x_right - p_x_left)/2), int((p_y_top - p_y_bottom)/2)))
 
     def cover_zone(self):
         enemy_positions = self.get_enemy_in_zone()
