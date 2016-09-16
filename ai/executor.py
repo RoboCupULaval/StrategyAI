@@ -64,7 +64,7 @@ class StrategyExecutor(Executor):
             self.strategy_book = StrategyBook(self.info_manager)
             self.strategy = self.strategy_book.get_optimal_strategy()(self.info_manager)
         elif not self.info_manager.debug_manager.tactic_control:
-            self.strategy = self.info_manager.strategy(self.info_manager)
+            self.strategy = self.info_manager.strategy
         else:
             pass
 
@@ -149,9 +149,9 @@ class DebugExecutor(Executor):
     def _parse_strategy(self, cmd):
         strategy_key = cmd.data['strategy']
         if strategy_key == 'pStop':
-            self.info_manager.strategy = StrategyBook(self.info_manager).get_strategy('DoNothing')
+            self.info_manager.strategy = StrategyBook(self.info_manager).get_strategy('DoNothing')(self.info_manager)
         else:
-            self.info_manager.strategy = StrategyBook(self.info_manager).get_strategy(strategy_key)
+            self.info_manager.strategy = StrategyBook(self.info_manager).get_strategy(strategy_key)(self.info_manager)
 
     def _parse_tactic(self, tactic_name, pid, data):
         # TODO: redéfinir le paquet pour set une tactique pour que les données supplémentaire

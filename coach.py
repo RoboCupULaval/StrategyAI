@@ -54,6 +54,9 @@ class Coach(object):
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
         delta_timestamp = p_game_state.timestamp - self.last_update_timestap
+        tick_log = "Tick: " + str(p_game_state.timestamp) + " (delta=" + str(delta_timestamp) + ")"
+        self.info_manager.debug_manager.add_log(1, tick_log)
+
         if delta_timestamp > TIMESTAMP_MINIMAL_DELTA or math.isclose(delta_timestamp, TIMESTAMP_MINIMAL_DELTA, abs_tol=1e-4):
             self.last_update_timestap = p_game_state.timestamp
             self._update_ai(p_game_state)
