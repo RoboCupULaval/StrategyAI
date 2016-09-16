@@ -1,5 +1,7 @@
-from .Algorithm import PathfinderRRT
-
+# Under MIT License, see LICENSE.txt
+"""
+    Ce module garde en mémoire les modules intelligents disponibles
+"""
 class NonExistentModule(Exception):
     """ Est levée si le module intelligent requis n'est pas enregistré. """
     pass
@@ -9,6 +11,7 @@ class ModuleManager:
         Gère les modules intelligents (par exemple, le Pathfinder) présents dans le jeu.
     """
     instance = None
+
     def __new__(cls):
         """
         S'assure qu'il n'y a qu'un seul ModuleManager

@@ -1,7 +1,6 @@
 # Under MIT License, see LICENSE.txt
 """
     Ce module garde en mémoire l'état du jeu
-    NOTE: Il manque les getters
 """
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 import RULEngine.Game.Ball
@@ -31,21 +30,21 @@ class GameStateManager:
         self.other_team = RULEngine.Game.Team.Team(False)
         self.timestamp = 0
 
-    def _update_ball(self, new_ball):
+    def _update_ball_position(self, new_ball_position):
         """
             Met à jour la position de la balle
-            :param new_ball: Nouvelles informations de la balle, de type Ball
+            :param new_ball_position: Nouvelles position de la balle, de type Position
         """
-        delta = RULEngine.Util.geometry.get_angle(self.field.ball.position, new_ball.position)
-        self.field.move_ball(new_ball.position, delta)
+        delta = RULEngine.Util.geometry.get_angle(self.field.ball.position, new_ball_position)
+        self.field.move_ball(new_ball_position, delta)
 
     def _update_field(self, new_field):
         """
             Met à jour les informations du terrain
             :param new_field: Nouvelles information du terrain, de type Field
         """
-        new_ball = new_field.ball
-        self._update_ball(new_ball)
+        new_ball_position = new_field.ball.position
+        self._update_ball_position(new_ball_position)
 
     def _update_player(self, player_id, player_pose, is_my_team=True):
         """
@@ -66,7 +65,7 @@ class GameStateManager:
             :param new_team_info: Team, info de l'équipe à mettre à jour
         """
         for i in range(PLAYER_PER_TEAM):
-            self._update_player(is_my_team, i)
+            self._update_player(i, new_team_info.players[i].pose, is_my_team)
 
     def _update_timestamp(self, new_timestamp):
         """
@@ -83,8 +82,8 @@ class GameStateManager:
         """
         is_my_team = True
         self._update_field(new_game_state.field)
-        self._update_team(is_my_team, new_game_state.friends)
-        self._update_team(not is_my_team, new_game_state.enemies)
+        self._update_team(new_game_state.friends, is_my_team)
+        self._update_team(new_game_state.enemies, not is_my_team)
         self._update_timestamp(new_game_state.timestamp)
 
     def get_player_pose(self, player_id, is_my_team=True):
