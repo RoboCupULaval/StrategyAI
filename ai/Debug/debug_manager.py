@@ -52,7 +52,7 @@ DEFAULT_TEXT_COLOR = Color(0, 0, 0)
 
 # Debug timeout (seconds)
 DEFAULT_DEBUG_TIMEOUT = 1
-DEFAULT_PATH_TIMEOUT = 7
+DEFAULT_PATH_TIMEOUT = 0
 
 # TODO: refactor le module
 def wrap_command(raw_command):
