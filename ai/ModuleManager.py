@@ -1,10 +1,9 @@
 # Under MIT License, see LICENSE.txt
+
 """
     Ce module garde en mémoire les modules intelligents disponibles
 """
-class NonExistentModule(Exception):
-    """ Est levée si le module intelligent requis n'est pas enregistré. """
-    pass
+
 
 class ModuleManager:
     """
@@ -43,3 +42,9 @@ class ModuleManager:
             return self.modules[module_name]
         except KeyError:
             raise NonExistentModule("Le module " + module_name + " n'existe pas.")
+
+
+class NonExistentModule(Exception):
+    """ Est levée si le module intelligent requis n'est pas enregistré. """
+    pass
+

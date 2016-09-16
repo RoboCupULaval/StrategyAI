@@ -7,7 +7,11 @@ from ai.ModuleManager import ModuleManager
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 import unittest
 
+
 class TestGameStateManager(unittest.TestCase):
+    """
+        Teste les différentes fonctionnalités du GameStateManager
+    """
     def setUp(self):
         self.field = Field.Field(Ball.Ball())
         self.my_team = Team.Team(True)
@@ -94,7 +98,10 @@ class TestGameStateManager(unittest.TestCase):
         self.assertEqual(new_game_state.timestamp, self.GameStateManager1.timestamp)
 
 
-class ModuleManager(unittest.TestCase):
+class TestModuleManager(unittest.TestCase):
+    """
+        Teste les différentes fonctionnalités du ModuleManager
+    """
     def setUp(self):
         self.ModuleManager1 = ModuleManager()
         self.ModuleManager2 = ModuleManager()
@@ -105,3 +112,5 @@ class ModuleManager(unittest.TestCase):
              i.e. s'il ne peut y avoir qu'une seule instance du manager
         """
         self.assertTrue(self.ModuleManager1 is self.ModuleManager2)
+
+
