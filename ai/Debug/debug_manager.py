@@ -45,11 +45,14 @@ COLOR_ID_MAP = {0: COLOR_ID0,
                 5: COLOR_ID5}
 
 SENDER_NAME = "ai"
-DEFAULT_DEBUG_TIMEOUT = 1 #s
 DEFAULT_TEXT_SIZE = 14 #px
 DEFAULT_TEXT_FONT = 'Arial'
 DEFAULT_TEXT_ALIGN = 'Left'
 DEFAULT_TEXT_COLOR = Color(0, 0, 0)
+
+# Debug timeout (seconds)
+DEFAULT_DEBUG_TIMEOUT = 1
+DEFAULT_PATH_TIMEOUT = 10
 
 # TODO: refactor le module
 def wrap_command(raw_command):
@@ -101,10 +104,11 @@ class DebugManager:
         circle = DebugCommand(3003, data)
         self.commands.append(circle)
 
-    def add_line(self, start_point, end_point):
+    def add_line(self, start_point, end_point, timeout=DEFAULT_DEBUG_TIMEOUT):
         data = {'start': start_point,
                 'end': end_point,
-                'color': MAGENTA.repr()}
+                'color': MAGENTA.repr(),
+                'timeout': timeout}
         command = DebugCommand(3001, data)
         self.commands.append(command)
 

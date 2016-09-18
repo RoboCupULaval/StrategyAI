@@ -15,9 +15,10 @@ import pickle
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from RULEngine.Util.constant import POSITION_DEADZONE
 from ai.Algorithm.IntelligentModule import Pathfinder
 
-from ai.Debug.debug_manager import COLOR_ID_MAP
+from ai.Debug.debug_manager import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 
 OBSTACLE_DEAD_ZONE = 200
 TIME_TO_UPDATE = 5
@@ -51,7 +52,7 @@ class PathfinderRRT(Pathfinder):
         for path_element in path:
             x = path_element.position.x
             y = path_element.position.y
-            self.state.debug_manager.add_point((x, y), COLOR_ID_MAP[pid], link="path - " + str(pid), timeout=30)
+            self.state.debug_manager.add_point((x, y), COLOR_ID_MAP[pid], width=5, link="path - " + str(pid), timeout=DEFAULT_PATH_TIMEOUT)
 
 
     def get_path(self, pid=None, target=None):
@@ -63,11 +64,8 @@ class PathfinderRRT(Pathfinder):
         """
 
         assert(isinstance(pid, int)), "Un pid doit être passé"
-        assert(isinstance(target, Pose) or isinstance(target, Position)), "La cible doit être une Pose ou Position"
-        target = target.position if (isinstance(target, Pose)) else target
-        path = self._compute_path(pid, target)
-
-        return [Pose(Position(point[0], point[1])) for point in path]
+        assert(isinstance(target, Pose)), "La cible doit être une Pose"
+        return self._compute_path(pid, target)
 
 
     def _compute_path(self, pid, target):
@@ -91,38 +89,45 @@ class PathfinderRRT(Pathfinder):
         initial_position_of_main_player = self.state.get_player_position(pid)
 
 
-        target_of_player = target
-        assert(isinstance(target_of_player, Position)), "La cible du joueur doit être une Position"
+        target_position_of_player = target.position
+        target_orientation_of_player = target.orientation
+        assert(isinstance(target_position_of_player, Position)), "La cible du joueur doit être une Position"
         try :
-            target_of_player.x
-            target_of_player.y
+            target_position_of_player.x
+            target_position_of_player.y
         except AttributeError:
-            target_of_player = self.state.get_player_position(pid)
+            target_position_of_player = self.state.get_player_position(pid)
 
 
         rrt = RRT(start=[initial_position_of_main_player.x,
                          initial_position_of_main_player.y],
-                  goal=[target_of_player.x, target_of_player.y],
+                  goal=[target_position_of_player.x, target_position_of_player.y],
                   obstacleList=obstacleList,
                   # TODO Vérifier si le robot peut sortir du terrain
                   rand_area=[-4500, 4500],
                   expand_dis=get_expand_dis([initial_position_of_main_player.x,
                                              initial_position_of_main_player.y],
-                                            [target_of_player.x, target_of_player.y]),
+                                            [target_position_of_player.x, target_position_of_player.y]),
                   goal_sample_rate=get_goal_sample_rate([initial_position_of_main_player.x,
                                                          initial_position_of_main_player.y],
-                                                        [target_of_player.x, target_of_player.y]))
+                                                        [target_position_of_player.x, target_position_of_player.y]))
 
         not_smoothed_path = rrt.planning(obstacleList)
 
-        #Path smoothing
+        # Path smoothing
         maxIter = 50
+        # Il faut inverser la liste du chemin lissé tout en retirant le point de départ
         smoothed_path = path_smoothing(not_smoothed_path, maxIter, obstacleList)
-
         smoothed_path = list(reversed(smoothed_path[:-1]))
-        return smoothed_path
 
+        return self._smoothed_path_to_pose_list(smoothed_path, target_orientation_of_player)
 
+    def _smoothed_path_to_pose_list(self, smoothed_path, target_orientation):
+        smoothed_poses = []
+        for point in smoothed_path:
+            smoothed_poses.append(Pose(Position(point[0], point[1]), target_orientation))
+
+        return smoothed_poses
 
 
 class RRT():
@@ -217,6 +222,7 @@ class RRT():
                 return False  # collision
 
         return True  # safe
+
 
 class Node():
     """

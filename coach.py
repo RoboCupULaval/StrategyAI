@@ -77,8 +77,6 @@ class Coach(object):
         """ Élément de l'interface entre RULEngine/StrategyIA """
         if self.debug_manager:
             debug_commands = self.debug_manager.get_commands()
-            for cmd in debug_commands:
-                print(cmd)
             return debug_commands
         else:
             return []
@@ -150,7 +148,8 @@ class CoachCommandSender(object):
         return command.MoveToAndRotate(self._get_player(), p_move_destination)
 
     def _generate_empty_command(self):
-        return command.MoveToAndRotate(self._get_player(), self._get_player().pose)
+        #Envoi d'une command vide qui fait l'arrêt du robot
+        return command.Stop(self._get_player())
 
     def _get_player(self):
         return self.game_state.friends.players[self.current_player_id]

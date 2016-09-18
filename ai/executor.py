@@ -161,7 +161,7 @@ class DebugExecutor(Executor):
         target = data['target']
         tactic_ref = None
         if tactic_name == "goto_position":
-            tactic_ref = GoToPosition(self.info_manager, pid, Pose(Position(target[0], target[1]), 0))
+            tactic_ref = GoToPosition(self.info_manager, pid, Pose(Position(target[0], target[1]), self.info_manager.get_player_pose(pid).orientation))
         elif tactic_name == "goalkeeper":
             tactic_ref = GoalKeeper(self.info_manager, pid)
         elif tactic_name == "cover_zone":
