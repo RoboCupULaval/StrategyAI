@@ -57,10 +57,6 @@ class Coach(object):
         if delta_timestamp > TIMESTAMP_MINIMAL_DELTA or math.isclose(delta_timestamp, TIMESTAMP_MINIMAL_DELTA, abs_tol=1e-4):
             self.last_update_timestap = p_game_state.timestamp
             self._update_ai(p_game_state)
-            for i in range(6):
-                if i == 1:
-                    print(self.info_manager.get_player_tactic(i))
-                    #print(self.info_manager.get_player_next_action(i))
 
             self.coach_command_sender.generate_and_send_commands(p_game_state)
         else:

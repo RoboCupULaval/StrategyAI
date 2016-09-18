@@ -38,7 +38,6 @@ class GoGetBall(Tactic):
         if self.target is None:
             self.target = self.info_manager.get_ball_position()
             self.info_manager.set_player_target(self.player_id, self.target)
-        print(self.player_id)
 
     def get_behind_ball(self):
         self.status_flag = tactic_constants.WIP

@@ -44,4 +44,3 @@ class Tactic:
         next_ai_command = next_action.exec()
         self.info_manager.set_player_next_action(self.player_id, next_ai_command)
         self.current_state = self.next_state
-        print("Player id from exec: " + str(self.player_id))
