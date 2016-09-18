@@ -205,12 +205,12 @@ def player_close_to_ball(info_manager,player_id):
     if isInsideCircle(player_position, ball_position, RADIUS_TO_HALT + POSITION_DEADZONE):
         return True
 
-def player_grabbed_ball(info_manager, player_id):
+def player_close_to_ball_facing_target(info_manager, player_id):
     player_position = info_manager.get_player_position(player_id)
     ball_position = info_manager.get_ball_position()
     target_position = info_manager.get_player_target(player_id)
 
-    if isInsideCircle(player_position, ball_position, RADIUS_TO_HALT):
+    if player_close_to_ball(info_manager,player_id):
 
         if angle_to_ball_is_tolerated(player_position, ball_position, target_position, ANGLE_TO_HALT):
             return True
