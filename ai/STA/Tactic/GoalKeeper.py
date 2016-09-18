@@ -7,7 +7,7 @@ from ai.STA.Action.GrabBall import GrabBall
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
 from RULEngine.Util.Position import Position
-from RULEngine.Util.area import isInsideGoalArea, player_can_grab_ball, player_grabbed_ball
+from RULEngine.Util.area import isInsideGoalArea, player_can_grab_ball, player_close_to_ball_facing_target
 from RULEngine.Util.constant import PLAYER_PER_TEAM, DISTANCE_BEHIND
 
 __author__ = 'RoboCupULaval'
@@ -68,7 +68,7 @@ class GoalKeeper(Tactic):
         return GoBehind(self.info_manager, self.player_id, ball_position, Position(0, 0), DISTANCE_BEHIND)
 
     def grab_ball(self):
-        if player_grabbed_ball(self.info_manager, self.player_id):
+        if player_close_to_ball_facing_target(self.info_manager, self.player_id):
             self.next_state = self.halt
             self.status_flag = tactic_constants.SUCCESS
         elif player_can_grab_ball(self.info_manager, self.player_id):

@@ -4,7 +4,7 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic import tactic_constants
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.Idle import Idle
-from RULEngine.Util.area import player_grabbed_ball
+from RULEngine.Util.area import player_close_to_ball_facing_target
 from RULEngine.Util.geometry import get_required_kick_force
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
@@ -35,7 +35,7 @@ class MakePass(Tactic):
         self.target = self.info_manager.get_player_target(self.player_id)
 
     def kick_ball_towards_target(self):
-        if player_grabbed_ball(self.info_manager, self.player_id):  # derniere verification avant de frapper
+        if player_close_to_ball_facing_target(self.info_manager, self.player_id):  # derniere verification avant de frapper
             player_position = self.info_manager.get_player_position(self.player_id)
             target_position = self.info_manager.get_player_target(self.player_id)
             kick_force = get_required_kick_force(player_position, target_position)

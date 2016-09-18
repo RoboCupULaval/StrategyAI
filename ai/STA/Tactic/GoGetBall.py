@@ -4,7 +4,7 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GrabBall import GrabBall
 from ai.STA.Tactic import tactic_constants
-from RULEngine.Util.area import player_can_grab_ball, player_grabbed_ball
+from RULEngine.Util.area import player_can_grab_ball, player_close_to_ball_facing_target
 from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
@@ -52,7 +52,7 @@ class GoGetBall(Tactic):
         return go_behind
 
     def grab_ball(self):
-        if player_grabbed_ball(self.info_manager, self.player_id):
+        if player_close_to_ball_facing_target(self.info_manager, self.player_id):
             self.next_state = self.halt
             self.status_flag = tactic_constants.SUCCESS
         elif player_can_grab_ball(self.info_manager, self.player_id):

@@ -3,7 +3,7 @@
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.Idle import Idle
-from RULEngine.Util.area import player_grabbed_ball
+from RULEngine.Util.area import player_close_to_ball_facing_target
 from RULEngine.Util.geometry import get_required_kick_force
 from RULEngine.Util.constant import PLAYER_PER_TEAM, FIELD_X_LEFT, FIELD_X_RIGHT
 from RULEngine.Util.Position import Position
@@ -36,7 +36,7 @@ class ShootToGoal(Tactic):
     def kick_ball_towards_goal(self):
         goal_x = FIELD_X_RIGHT if self.score_in_right_goal else FIELD_X_LEFT
         goal_position = Position(goal_x, 0)
-        if player_grabbed_ball(self.info_manager, self.player_id):  # derniere verification avant de frapper
+        if player_close_to_ball_facing_target(self.info_manager, self.player_id):  # derniere verification avant de frapper
             player_position = self.info_manager.get_player_position(self.player_id)
             kick_force = get_required_kick_force(player_position, goal_position)
             kick_force = 7

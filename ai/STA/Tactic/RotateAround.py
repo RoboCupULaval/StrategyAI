@@ -7,7 +7,7 @@ from ai.STA.Action.GrabBall import GrabBall
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic import tactic_constants
-from RULEngine.Util.area import player_grabbed_ball, player_can_grab_ball
+from RULEngine.Util.area import player_close_to_ball_facing_target, player_can_grab_ball
 from RULEngine.Util.geometry import rotate_point_around_origin, get_required_kick_force, get_distance, get_angle
 from RULEngine.Util.constant import PLAYER_PER_TEAM, FIELD_X_LEFT, FIELD_X_RIGHT, RADIUS_TO_HALT
 from RULEngine.Util.Position import Position
@@ -38,7 +38,7 @@ class RotateAround(Tactic):
         self.player_target = self.info_manager.get_player_target(self.player_id)
 
     def checkit(self):
-        if player_grabbed_ball(self.info_manager, self.player_id):
+        if player_close_to_ball_facing_target(self.info_manager, self.player_id):
             self.status_flag = tactic_constants.SUCCESS
             self.next_state = self.halt
             return Idle(self.info_manager, self.player_id)

@@ -5,7 +5,7 @@ from ai.STA.Tactic.RotateAround import RotateAround
 from ai.STA.Tactic.Stop import Stop
 from . Strategy import Strategy
 from RULEngine.Util.Position import Position
-from RULEngine.Util.area import player_grabbed_ball
+from RULEngine.Util.area import player_close_to_ball
 
 class TestingStrategy(Strategy):
     def __init__(self, p_info_manager):
@@ -22,7 +22,11 @@ class TestingStrategy(Strategy):
 
     def update_test(self):
 
-        self.test_robot = 1 ### select robot here
+        ### select robot and target here:
+
+        self.test_robot = 1
+        self.test_target = Position(1500,-1500)
+        self.info_manager.set_player_target(self.test_robot, self.test_target)
 
         ### select test here:
 
@@ -33,10 +37,7 @@ class TestingStrategy(Strategy):
         self.tactics[self.test_robot] = GoGetBall(self.info_manager, self.test_robot)
 
     def test_go_rotate_around_ball(self):
-        test_target = Position(1500,-1500)
-        if player_grabbed_ball(self.info_manager, self.test_robot):
-            self.info_manager.set_player_target(self.test_robot, test_target)
-            ball_pos = self.info_manager.get_ball_position()
-            self.tactics[self.test_robot] = RotateAround(self.info_manager, self.test_robot, ball_pos)
+        if player_close_to_ball(self.info_manager, self.test_robot):
+            self.tactics[self.test_robot] = RotateAround(self.info_manager, self.test_robot)
         else:
             self.tactics[self.test_robot] = GoGetBall(self.info_manager, self.test_robot)

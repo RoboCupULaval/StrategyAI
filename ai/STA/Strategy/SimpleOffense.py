@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 
 from RULEngine.Util.constant import *
-from RULEngine.Util.area import player_grabbed_ball as player_facing_target_with_ball, player_close_to_ball
+from RULEngine.Util.area import player_close_to_ball_facing_target as player_facing_target_with_ball, player_close_to_ball
 from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.Pose import Pose
 from ai.STA.Tactic.GoGetBall import GoGetBall
