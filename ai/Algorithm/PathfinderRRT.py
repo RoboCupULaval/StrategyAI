@@ -20,7 +20,7 @@ from ai.Algorithm.IntelligentModule import Pathfinder
 
 from ai.Debug.debug_manager import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 
-OBSTACLE_DEAD_ZONE = 750
+OBSTACLE_DEAD_ZONE = 500
 TIME_TO_UPDATE = 5
 
 class PathfinderRRT(Pathfinder):
