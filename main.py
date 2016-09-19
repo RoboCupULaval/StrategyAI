@@ -6,4 +6,4 @@ from coach import Coach
 __author__ = 'RoboCupULaval'
 
 if __name__ == '__main__':
-    Framework().start_game(Coach, serial=True)
+    Framework().start_game(Coach)

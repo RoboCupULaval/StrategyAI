@@ -9,11 +9,13 @@ from ai.STA.Tactic import tactic_constants
 
 from RULEngine.Util.area import player_can_grab_ball, player_grabbed_ball
 from RULEngine.Util.geometry import get_distance
-from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM, POSITION_DEADZONE
+from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 
 __author__ = 'RoboCupULaval'
+
+POSITION_DEADZONE = POSITION_DEADZONE + BALL_RADIUS
 
 
 class GoGetBall(Tactic):
