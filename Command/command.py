@@ -14,7 +14,7 @@ from ..Game.Player import Player
 from ..Game.Team import Team
 from ..Util.area import *
 from ..Util.geometry import *
-from ..Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE, SPEED_ABSOLUTE_TOLERANCE, SPEED_DEAD_ZONE_DISTANCE, DEFAULT_MAX_SPEED
+from ..Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE, SPEED_ABSOLUTE_TOLERANCE, SPEED_DEAD_ZONE_DISTANCE, DEFAULT_MAX_SPEED, DEFAULT_MIN_SPEED
 
 class _Command(object):
     def __init__(self, player):
@@ -28,17 +28,17 @@ class _Command(object):
         self.pose = Pose()
         self.team = player.team
 
-    def to_speed_command(self, player_id=0):
+    def to_speed_command(self):
         """
             Transforme la commande en une commande de vitesse (SpeedCommand)
             et affecte le drapeau.
         """
         if not self.is_speed_command:
-            self.pose = self._convert_position_to_speed(self.player.pose, self.pose, player_id)
+            self.pose = self._convert_position_to_speed(self.player.pose, self.pose)
 
         return self
 
-    def _convert_position_to_speed(self, current_pose, target_pose, player_id=0):
+    def _convert_position_to_speed(self, current_pose, target_pose, deadzone=SPEED_DEAD_ZONE_DISTANCE, max_speed=DEFAULT_MAX_SPEED, min_speed=DEFAULT_MIN_SPEED):
         """
             Converts an absolute position to a
             speed command relative to the player.
@@ -47,13 +47,13 @@ class _Command(object):
             :param target_pose: the absolute position the robot should go to.
             :returns: A Pose object with speed vectors.
         """
-        position = self._compute_position_for_speed_command(current_pose.position, target_pose.position, current_pose.orientation, player_id)
+        position = self._compute_position_for_speed_command(current_pose.position, target_pose.position, current_pose.orientation, deadzone, max_speed, min_speed)
         orientation = self._compute_orientation_for_speed_command(current_pose.orientation, target_pose.orientation)
 
         return Pose(position, orientation)
 
 
-    def _compute_position_for_speed_command(self, current_position, target_position, current_theta, player_id=0):
+    def _compute_position_for_speed_command(self, current_position, target_position, current_theta, deadzone=SPEED_DEAD_ZONE_DISTANCE, max_speed=DEFAULT_MAX_SPEED, min_speed=DEFAULT_MIN_SPEED):
         """
             Calcul la différence en x et en y entre la position actuelle et la position cible.
             La norme du delta_x et delta_y calculé est normalisée.
@@ -67,19 +67,15 @@ class _Command(object):
 
         delta_x = target_x - current_x
         delta_y = target_y - current_y
-        norm = math.hypot(delta_x, delta_y)
+        distance = math.hypot(delta_x, delta_y)
 
-        if norm >= SPEED_DEAD_ZONE_DISTANCE:
-            speed = DEFAULT_MAX_SPEED 
-        else :
-            speed = math.sqrt(norm * (DEFAULT_MAX_SPEED/SPEED_DEAD_ZONE_DISTANCE))
-
-        if player_id == 4:
+        speed = self._compute_speed_from_distance(distance, deadzone, max_speed, min_speed)
+        if self.player.id == 4:
             print("Speed: " + str(speed))
 
-        if norm > 0:
-            delta_x /= norm
-            delta_y /= norm
+        if distance > 0:
+            delta_x /= distance
+            delta_y /= distance
         else:
             delta_x = 0
             delta_y = 0
@@ -99,6 +95,20 @@ class _Command(object):
         theta_speed = self._compute_theta_speed(delta_theta)
 
         return theta_speed if delta_theta >= 0 else -theta_speed
+
+    def _compute_speed_from_distance(self, distance, deadzone=SPEED_DEAD_ZONE_DISTANCE, max_speed=DEFAULT_MAX_SPEED, min_speed=DEFAULT_MIN_SPEED):
+        speed = 0
+        if distance >= deadzone:
+            speed = max_speed
+        else :
+            speed = math.sqrt(distance * (max_speed/deadzone))
+
+        speed = self._saturate_speed(speed, max_speed, min_speed)
+        return speed
+
+    def _saturate_speed(self, speed, max_speed=DEFAULT_MAX_SPEED, min_speed=DEFAULT_MIN_SPEED):
+        speed = speed if speed < max_speed else max_speed
+        return speed if speed > min_speed else min_speed
 
     def _correct_for_referential_frame(self, x, y, orientation):
         cos = math.cos(-orientation)
