@@ -24,6 +24,7 @@ from .Util.exception import StopPlayerError
 
 LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
 UI_DEBUG_MULTICAST_ADDRESS = "127.0.0.1"
+CMD_TIME_DELTA = 0.030
 
 GameState = namedtuple('GameState', ['field', 'referee', 'friends',
                                      'enemies', 'timestamp', 'debug'])
@@ -51,6 +52,7 @@ class Framework(object):
         self.times = 0
         self.last_time = 0
         self.vision = None
+        self.last_cmd_time = time.time()
 
 
     def create_game(self, ai_coach):
@@ -200,20 +202,17 @@ class Framework(object):
 
     def _send_robot_commands(self):
         # FIXME: pourquoi on fait ce check? est-ce une erreur introduite par un des refactors?
-        if self.vision.get_latest_frame():
+        cmd_time = time.time()
+        if cmd_time - self.last_cmd_time > CMD_TIME_DELTA:
             commands = self._get_coach_robot_commands()
-            for player_id,command in enumerate(commands):
-                command = command.to_speed_command(player_id)
-                # hack debug
-                pos_beg = self.ai_coach.info_manager.get_player_position(player_id)
-                pos_end = pos_beg + command.pose.position * 300
-                x_beg = pos_beg.x
-                y_beg = pos_beg.y
-                x_end = pos_end.x
-                y_end = pos_end.y
-                self.ai_coach.info_manager.debug_manager.add_line((int(x_beg), int(y_beg)), (int(x_end), int(y_end)), timeout=0.025)
-                command.pose.orientation = 0
-                self.command_sender.send_command(command)
+            self.last_cmd_time = cmd_time
+            #for player_id,command in enumerate(commands):
+                #command = command.to_speed_command(player_id)
+                #command.pose.orientation = 0
+                #self.command_sender.send_command(command)
+            cmd = commands[4].to_speed_command(4)
+            cmd.pose.orientation = -(self.ai_coach.info_manager.get_player_pose(4).orientation * 0.1)
+            self.command_sender.send_command(cmd)
 
 
     def _get_coach_robot_commands(self):

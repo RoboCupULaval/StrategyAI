@@ -4,7 +4,6 @@ import serial
 from . import serial_protocol as protocol
 import math
 import os
-import time
 
 class SerialCommandSender(object):
     
@@ -18,11 +17,8 @@ class SerialCommandSender(object):
                 raise Exception('No suitable serial port found.')
             
         self.serial = serial.Serial('/dev/' + port, baudRate)
-        self.last_time = time.time()
         
 
-    #Can only send speed commands for now.
-    #Can only send translation commands for now.
     def send_command(self, command):
         x = command.pose.position.x
         y = command.pose.position.y
@@ -30,4 +26,3 @@ class SerialCommandSender(object):
         
         sercommand = bytearray(protocol.create_speed_command(x, y, 0, command.player.id))
         self.serial.write(sercommand)
-        self.last_time = time.time()
