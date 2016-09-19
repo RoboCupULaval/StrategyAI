@@ -52,10 +52,8 @@ class GoGetBall(Tactic):
         if move_action_status == tactic_constants.SUCCESS and dist <= POSITION_DEADZONE:
             self.next_state = self.halt
         elif move_action_status == tactic_constants.SUCCESS and dist > POSITION_DEADZONE:
+            self.move_action = self._generate_move_to()
             self.next_state = self.get_behind_ball
-            go_behind = GoBehind(self.info_manager, self.player_id, ball_position, self.target.position, DISTANCE_BEHIND)
-            destination = go_behind.exec().move_destination
-            self.move_action = GoToPosition(self.info_manager, self.player_id, destination)
         else:
             self.next_state = self.get_behind_ball
 
@@ -73,7 +71,7 @@ class GoGetBall(Tactic):
         grab_ball = GrabBall(self.info_manager,self.player_id)
         return grab_ball
 
-    def halt(self):
+    def halt(self, reset=False):
         self.status_flag = tactic_constants.SUCCESS
         dist = self._get_distance_from_ball()
 
@@ -82,7 +80,15 @@ class GoGetBall(Tactic):
         else:
             self.next_state = self.halt
 
+        if reset:
+            self.move_action = self._generate_move_to()
+
         return Idle(self.info_manager, self.player_id)
 
     def _get_distance_from_ball(self):
         return get_distance(self.info_manager.get_player_pose(self.player_id).position, self.info_manager.get_ball_position())
+
+    def _generate_move_to(self):
+        go_behind = GoBehind(self.info_manager, self.player_id, self.info_manager.get_ball_position(), self.target.position, DISTANCE_BEHIND)
+        destination = go_behind.exec().move_destination
+        return GoToPosition(self.info_manager, self.player_id, destination)

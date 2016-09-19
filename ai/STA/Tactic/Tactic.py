@@ -1,7 +1,8 @@
 # Under MIT licence, see LICENCE.txt
 
 from abc import abstractmethod
-from functools import wraps
+
+from functools import wraps,partial
 from ai import InfoManager
 from ai.STA.Tactic import tactic_constants
 from ai.STA.Action.Idle import Idle
@@ -16,7 +17,7 @@ class Tactic:
         Classe mère de toutes les tactiques
     """
 
-    def __init__(self, p_info_manager, target=Pose()):
+    def __init__(self, p_info_manager, target=Pose(), time_to_live=tactic_constants.DEFAULT_TIME_TO_LIVE):
         """
             Initialise la tactique
 
@@ -29,8 +30,10 @@ class Tactic:
         self.next_state = self.halt
         self.status_flag = tactic_constants.INIT
         self.target = target
+        self.time_to_live = time_to_live
+        self.last_state_time = self.info_manager.timestamp
 
-    def halt(self):
+    def halt(self, reset=False):
         """
             S'exécute lorsque l'état courant est *Halt*
             :return: l'action Stop crée
@@ -43,7 +46,12 @@ class Tactic:
         """
             Exécute une *Action* selon l'état courant
         """
+        tactic_time = self.info_manager.timestamp
         next_action = self.current_state()
-        next_ai_command = next_action.exec()
+        if tactic_time - self.last_state_time > self.time_to_live and self.time_to_live != 0:
+            self.last_state_time = tactic_time
+            self.next_state = partial(self.halt, reset=True)
+
         self.current_state = self.next_state
+        next_ai_command = next_action.exec()
         return next_ai_command
