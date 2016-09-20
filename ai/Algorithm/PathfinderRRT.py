@@ -49,10 +49,12 @@ class PathfinderRRT(Pathfinder):
         self.last_timestamp = self.state.timestamp
 
     def draw_path(self, path, pid=0):
+        points = []
         for path_element in path:
             x = path_element.position.x
             y = path_element.position.y
-            self.state.debug_manager.add_point((x, y), COLOR_ID_MAP[pid], width=5, link="path - " + str(pid), timeout=DEFAULT_PATH_TIMEOUT)
+            points.append((x,y))
+        self.state.debug_manager.add_multiple_points(points, COLOR_ID_MAP[pid], width=5, link="path - " + str(pid), timeout=DEFAULT_PATH_TIMEOUT)
 
 
     def get_path(self, pid=None, target=None):
