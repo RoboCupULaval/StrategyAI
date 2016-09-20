@@ -62,3 +62,7 @@ target/
 .idea/*
 
 *.orig
+
+tags
+# InfluenceMap output file
+IMBoard

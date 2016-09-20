@@ -27,6 +27,7 @@ class Idle(Action):
         Exécute l'arrêt
         :return: Un tuple (Pose, kick) où Pose est la position du joueur et kick est nul (on ne botte pas)
         """
-        move_destination = self.info_manager.get_player_pose(self.player_id)
+        # un None pour que le coachcommandsender envoi une command vide.
+        move_destination = None
         kick_strength = 0
         return AICommand(move_destination, kick_strength)
