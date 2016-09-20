@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic import tactic_constants
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic import tactic_constants
@@ -25,8 +26,8 @@ class GoToPosition(Tactic):
         destination_pose : La pose de destination du robot
     """
 
-    def __init__(self, info_manager, player_id, target):
-        Tactic.__init__(self, info_manager, target)
+    def __init__(self, info_manager, player_id, target, time_to_live=tactic_constants.DEFAULT_TIME_TO_LIVE):
+        Tactic.__init__(self, info_manager, target, time_to_live=time_to_live)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
         assert isinstance(target, Pose), "La target devrait être une Pose"

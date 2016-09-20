@@ -96,6 +96,18 @@ class DebugManager:
         point = DebugCommand(3004, data, p_link=link)
         self.commands.append(point)
 
+    def add_multiple_points(self, points, color=VIOLET, width=5, link=None, timeout=DEFAULT_DEBUG_TIMEOUT):
+        points_as_tuple = []
+        for point in points:
+            points_as_tuple.append((int(point[0]), int(point[1])))
+
+        data = {'points': points_as_tuple,
+                'color': color.repr(),
+                'width': width,
+                'timeout': timeout}
+        point = DebugCommand(3005, data, p_link=link)
+        self.commands.append(point)
+
     def add_circle(self, center, radius):
         data = {'center': center,
                 'radius': radius,
