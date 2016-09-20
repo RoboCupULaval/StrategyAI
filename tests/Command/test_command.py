@@ -3,7 +3,7 @@ import unittest
 import math
 import functools
 
-from RULEngine.Command.command import _Command
+from RULEngine.Command.command import _Command, _correct_for_referential_frame
 from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
@@ -119,7 +119,7 @@ class TestCommand(unittest.TestCase):
         """
             Test pour valider que le changement d'axes de référence est bien calculé.
         """
-        self.uut = functools.partial(self.cmd._correct_for_referential_frame, 0.5, 0.5)
+        self.uut = functools.partial(_correct_for_referential_frame, 0.5, 0.5)
         x1, y1 = self.uut(0)
         x2, y2 = self.uut(math.pi)
         x3, y3 = self.uut((2*math.pi)/1000)

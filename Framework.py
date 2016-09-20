@@ -19,7 +19,7 @@ from .Communication.referee import RefereeServer
 from .Communication.udp_server import GrSimCommandSender, DebugCommandSender,\
                                       DebugCommandReceiver
 from .Communication.serial_command_sender import SerialCommandSender
-from .Command.command import Stop
+from .Command.command import Stop, PI
 from .Util.exception import StopPlayerError
 
 LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
@@ -54,6 +54,8 @@ class Framework(object):
         self.last_time = 0
         self.vision = None
         self.last_cmd_time = time.time()
+
+        self.robots_pi = [PI(), PI(), PI(), PI(), PI(), PI()]
 
 
     def create_game(self, ai_coach):
@@ -206,8 +208,9 @@ class Framework(object):
         if cmd_time - self.last_cmd_time > CMD_DELTA_TIME:
             self.last_cmd_time = cmd_time
             commands = self._get_coach_robot_commands()
-            commands[4] = commands[4].to_speed_command()
-            commands[4].pose.orientation = 0
+            #commands[4] = commands[4].to_speed_command()
+            pi_cmd = self.robots_pi[4].update_pid_and_return_speed_command(commands[4])
+            commands[4].pose = pi_cmd
             self.command_sender.send_command(commands[4])
 
             #for command in commands:
