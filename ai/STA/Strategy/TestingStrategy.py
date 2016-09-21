@@ -30,8 +30,8 @@ class TestingStrategy(Strategy):
 
         ### select test here:
 
-        #self.test_go_get_ball()
-        self.test_go_rotate_around_ball()
+        self.test_go_get_ball()
+        #self.test_go_rotate_around_ball()
 
     def test_go_get_ball(self):
         self.tactics[self.test_robot] = GoGetBall(self.info_manager, self.test_robot)
