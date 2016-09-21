@@ -53,6 +53,7 @@ class InfoManager:
         self.enemy = self.init_team_dictionary()
         self.modules = {}
         self.tactics = list(range(6))
+        self.strategy = None
         self.timestamp = 0
         self.debug_manager = DebugManager()
         self.paths = [[],[],[],[],[],[]]
@@ -88,6 +89,7 @@ class InfoManager:
         ui_debug_commands = game_state.debug
         if self.debug_manager:
             for command in ui_debug_commands:
+                self.debug_manager.set_human_control(True)
                 self.debug_manager.add_ui_command(command)
         self.timestamp = game_state.timestamp
 

@@ -40,7 +40,7 @@ class TestActions(unittest.TestCase):
 
     def test_idle(self):
         self.idle = Idle(self.info_manager, self.player_id)
-        current_pose = self.info_manager.get_player_pose(self.player_id)
+        current_pose = None
         current_pose_string = "AICommand(move_destination=" + str(current_pose) + ", kick_strength=0)"
         self.assertEqual(str(Idle.exec(self.idle)), current_pose_string)
 

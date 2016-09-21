@@ -4,6 +4,7 @@ from .GoToPosition import GoToPosition
 from .RotateAround import RotateAround
 from .Stop import Stop
 from .CoverZone import CoverZone
+from .DemoFollowBall import DemoFollowBall
 
 class TacticBook(object):
     def __init__(self):
@@ -11,7 +12,8 @@ class TacticBook(object):
                             'goalkeeper' : GoalKeeper,
                             'cover_zone' : CoverZone,
                             'get_ball' : GoGetBall,
-                            "rotate_around": RotateAround}
+                            "rotate_around": RotateAround,
+                            'demo_follow_ball' : DemoFollowBall}
 
     def get_tactics_name_list(self):
         return list(self.tactic_book.keys())
