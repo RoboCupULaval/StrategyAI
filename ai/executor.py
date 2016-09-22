@@ -13,6 +13,7 @@ from .STA.Tactic.GoalKeeper import GoalKeeper
 from .STA.Tactic.GoToPosition import GoToPosition
 from .STA.Tactic.Stop import Stop
 from .STA.Tactic.CoverZone import CoverZone
+from .STA.Tactic.DemoFollowBall import DemoFollowBall
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
@@ -159,7 +160,7 @@ class DebugExecutor(Executor):
         target = data['target']
         tactic_ref = None
         if tactic_name == "goto_position":
-            tactic_ref = GoToPosition(self.info_manager, pid, Pose(Position(target[0], target[1]), self.info_manager.get_player_pose(pid).orientation))
+            tactic_ref = GoToPosition(self.info_manager, pid, Pose(Position(target[0], target[1]), self.info_manager.get_player_pose(pid).orientation), time_to_live=0)
         elif tactic_name == "goalkeeper":
             tactic_ref = GoalKeeper(self.info_manager, pid)
         elif tactic_name == "cover_zone":
@@ -168,6 +169,8 @@ class DebugExecutor(Executor):
             tactic_ref = GoGetBall(self.info_manager, pid, Pose(Position(4500, 0)))
         elif tactic_name == "tStop":
             tactic_ref = Stop(self.info_manager, pid)
+        elif tactic_name == "demo_follow_ball":
+            tactic_ref = DemoFollowBall(self.info_manager, pid)
         else:
             tactic_ref = Stop(self.info_manager, pid)
 
