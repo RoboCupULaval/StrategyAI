@@ -46,4 +46,4 @@ class Tactic:
         self.current_state = self.next_state
 
     def __str__(self):
-        return self.__name__
+        return self.__class__.__name__

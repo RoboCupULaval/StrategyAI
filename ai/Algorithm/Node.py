@@ -9,7 +9,8 @@ __author__ = 'RoboCupULaval'
 class Node:
     """
     Node: Noeud du graphe représentant la tactique en cours. Il ne peut y avoir qu'un seul vertex entre deux noeuds
-          donnés dans un certain sens.
+          donnés dans un certain sens (ex: un seul vertex du noeud 1 au noeud 2, mais il peut y en avoir un du noeud 2
+          au noeud 1 aussi.
     Méthodes:
         add_vertex: Ajoute un vertex au noeud.
         remove_vertex: Retire un vertex du noeud.
@@ -62,14 +63,14 @@ class Node:
         self.tactic.exec()
         for vertex in self.vertices:
             if vertex.evaluate_condition():
-                return vertex.next
+                return vertex.next_node
         return -1
 
     def __str__(self):
         """
         :return: Une représentation du noeud sous forme d'une chaîne de caractères.
         """
-        output_string = "Tactic: " + str(self.tactic) + " Vertices: "
+        output_string = "Tactic: " + str(self.tactic) + "    Vertices: "
         for vertex in self.vertices:
             output_string += "\n    " + str(vertex)
         return output_string

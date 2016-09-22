@@ -40,9 +40,9 @@ class Graph:
         """
         assert isinstance(p_node_index, int)
         assert 0 <= p_node_index < len(self.nodes)
-        self.nodes.pop(p_node_index)
         for i in range(len(self.nodes)):
             self.remove_vertex(i, p_node_index)
+        self.nodes.pop(p_node_index)
 
     def add_vertex(self, p_starting_node, p_ending_node, p_condition):
         """
