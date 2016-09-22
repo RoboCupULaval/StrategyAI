@@ -22,7 +22,7 @@ from ai.Algorithm.IntelligentModule import Pathfinder
 from ai.Debug.debug_manager import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 
 OBSTACLE_DEAD_ZONE = 700
-TIME_TO_UPDATE = 5
+TIME_TO_UPDATE = 1
 
 class PathfinderRRT(Pathfinder):
     """
@@ -167,7 +167,7 @@ class RRT():
         initial_time = time.time()
         self.node_list = [self.start]
         #TODO changer le gros hack degueux pour la gestion de la loop infinie
-        while True and time.time()-initial_time < 5 :
+        while True and time.time()-initial_time < TIME_TO_UPDATE:
             # Random Sampling
 
             if random.randint(0, 100) > self.goal_sample_rate:
