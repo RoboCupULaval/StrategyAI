@@ -3,7 +3,8 @@
     Module intelligent contenant l'implementation d'un Rapidly exploring Random
     Tree. Le module contient une classe qui peut être instanciée et qui calcule
     les trajectoires des robots de l'équipe. Les détails de l'algorithme sont
-    disponibles sur la page wikipedia.
+    disponibles sur la page wikipedia. Code original http://myenigma.hatenablog.com
+    /entry/2016/03/23/092002
 
 """
 import random
@@ -20,8 +21,8 @@ from ai.Algorithm.IntelligentModule import Pathfinder
 
 from ai.Debug.debug_manager import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 
-OBSTACLE_DEAD_ZONE = 200
-TIME_TO_UPDATE = 5
+OBSTACLE_DEAD_ZONE = 700
+TIME_TO_UPDATE = 1
 
 class PathfinderRRT(Pathfinder):
     """
@@ -117,7 +118,7 @@ class PathfinderRRT(Pathfinder):
         not_smoothed_path = rrt.planning(obstacleList)
 
         # Path smoothing
-        maxIter = 50
+        maxIter = 100
         # Il faut inverser la liste du chemin lissé tout en retirant le point de départ
         smoothed_path = path_smoothing(not_smoothed_path, maxIter, obstacleList)
         smoothed_path = list(reversed(smoothed_path[:-1]))
@@ -163,9 +164,10 @@ class RRT():
 
     def planning(self, obstacleList):
         """Fonction qui s'occupe de faire le path"""
-
+        initial_time = time.time()
         self.node_list = [self.start]
-        while True:
+        #TODO changer le gros hack degueux pour la gestion de la loop infinie
+        while True and time.time()-initial_time < TIME_TO_UPDATE:
             # Random Sampling
 
             if random.randint(0, 100) > self.goal_sample_rate:
@@ -206,6 +208,9 @@ class RRT():
             last_index = node.parent
         path.append([self.start.x, self.start.y])
 
+        # TODO fix gros hack sale
+        if time.time()-initial_time >=1 :
+            path = [[self.start.x, self.start.y],[self.start.x, self.start.y]]
         return path
 
     def get_nearest_list_index(self, node_list, rnd):
