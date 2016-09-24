@@ -63,5 +63,6 @@ target/
 
 *.orig
 
+tags
 # InfluenceMap output file
 IMBoard
