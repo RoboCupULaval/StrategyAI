@@ -9,13 +9,12 @@ class Action:
     """
     Classe mère de toutes les actions
     """
-    def __init__(self, p_info_manager):
+    def __init__(self, p_gamestatemanager, p_playmanager):
         """
             :param p_info_manager: référence vers l'InfoManager
         """
-        # FIXME: hack
-        # assert(isinstance(p_info_manager, InfoManager))
-        self.info_manager = p_info_manager
+        self.GameStateManager = p_gamestatemanager
+        self.PlayManager = p_playmanager
 
     def on_before(self):
         pass
@@ -31,3 +30,5 @@ class Action:
         """
         pass
 
+    def get_name(self):
+        return self.__class__.__name__

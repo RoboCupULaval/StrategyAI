@@ -12,7 +12,7 @@ class IntelligentModule(object, metaclass=ABCMeta):
         Actuellement ne défini que l'attribut *state*
     """
 
-    def __init__(self, pInfoManager):
+    def __init__(self, p_gameState):
         """
             Reçoit une référence vers InfoManager. Cette référence est rennomée
             comme étant *state*.
@@ -20,7 +20,7 @@ class IntelligentModule(object, metaclass=ABCMeta):
             :param pInfoManager: Référence vers l'InfoManager
         """
 
-        self.state = pInfoManager
+        self.state = p_gameState
 
     @abstractmethod
     def update(self):

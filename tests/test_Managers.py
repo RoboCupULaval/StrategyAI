@@ -1,11 +1,11 @@
-from RULEngine.Game import Ball, Player, Team, Field, Referee
+import unittest
+
+from RULEngine.Framework import GameState
+from RULEngine.Game import Ball, Team, Field, Referee
 from RULEngine.Util import Pose, Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from RULEngine.Framework import GameState
-from ai.GameStateManager import GameStateManager
-from ai.ModuleManager import ModuleManager
-from ai.Algorithm.PathfinderRRT import PathfinderRRT
-import unittest
+from ai.managers.GameStateManager import GameStateManager
+from ai.managers.ModuleManager import ModuleManager
 
 
 class TestGameStateManager(unittest.TestCase):

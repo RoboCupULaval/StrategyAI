@@ -1,9 +1,9 @@
 # Under MIT license, see LICENSE.txt
 
-from ai.Algorithm.PathfinderRRT import get_expand_dis,get_goal_sample_rate,get_path_length,get_target_point,\
-    path_smoothing,line_collision_check,PathfinderRRT, RRT, Node
-from ai.InfoManager import InfoManager
 import unittest
+
+from ai.Algorithm.PathfinderRRT import get_expand_dis,get_goal_sample_rate,get_path_length, line_collision_check
+from ai.managers.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 

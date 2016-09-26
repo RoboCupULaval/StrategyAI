@@ -1,7 +1,11 @@
 # Under MIT License, see LICENSE.txt
+
+
 """
     Ce module garde en mémoire l'état du jeu
 """
+
+
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 import RULEngine.Game.Ball
 import RULEngine.Game.Field
@@ -29,6 +33,7 @@ class GameStateManager:
         self.my_team = RULEngine.Game.Team.Team(True)
         self.other_team = RULEngine.Game.Team.Team(False)
         self.timestamp = 0
+        self.debug_information_in = []
 
     def _update_ball_position(self, new_ball_position):
         """
@@ -74,6 +79,14 @@ class GameStateManager:
         """
         self.timestamp = new_timestamp
 
+    def _update_debug(self, new_debug_info):
+        """
+            Met à jour les informations de debug
+            :param new_debug_info: des commandes de debug ou rien%
+        """
+        for command in new_debug_info:
+            self.debug_information_in.append(command)
+
     def update(self, new_game_state):
         """
             Met à jour le jeu
@@ -85,6 +98,7 @@ class GameStateManager:
         self._update_team(new_game_state.friends, is_my_team)
         self._update_team(new_game_state.enemies, not is_my_team)
         self._update_timestamp(new_game_state.timestamp)
+        self._update_debug(new_game_state.debug)
 
     def get_player_pose(self, player_id, is_my_team=True):
         """
@@ -104,3 +118,10 @@ class GameStateManager:
             :return: la position de la balle
         """
         return self.field.ball.position
+
+    def get_timestamp(self):
+        """
+            Retourne le timestamp de la state
+            :return: le timestamp de la state
+        """
+        return self.timestamp
