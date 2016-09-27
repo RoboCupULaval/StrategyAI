@@ -1,4 +1,5 @@
 from ai.Debug.DebugState import DebugState
+from ai.Debug.DebugInterface import DebugInterface
 from ai.states.GameState import GameState
 from ai.states.PlayState import PlayState
 from ai.states.RobotCommandState import RobotCommandState
@@ -14,6 +15,7 @@ class WorldState:
 
         if mode_debug_active:
             self.debug_state = DebugState()
+            self.debug_interface = DebugInterface()
 
     def update(self, game_state):
         self.game_state.update(game_state)

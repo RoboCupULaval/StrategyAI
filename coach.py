@@ -28,8 +28,9 @@ class Coach(object):
 
         self.debug_executor.exec(self.world_state)
         self.play_executor.exec(self.world_state)
-
         self.robot_command_executor.exec(self.world_state)
+        self.debug_executor.exec(self.world_state)
+
         self.robot_commands = self.world_state.robot_command_state.robot_commands
 
     def get_robot_commands(self):
