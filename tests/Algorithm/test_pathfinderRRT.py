@@ -3,7 +3,7 @@
 import unittest
 
 from ai.Algorithm.PathfinderRRT import get_expand_dis,get_goal_sample_rate,get_path_length, line_collision_check
-from ai.managers.InfoManager import InfoManager
+from ai.states.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 

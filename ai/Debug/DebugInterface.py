@@ -1,9 +1,4 @@
 
-from ai.managers.PlayManager import STAStatus
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from ai.STA.Tactic.tactic_constants import DEFAULT_TIME_TO_LIVE
-from ai.Debug.UIDebugCommand import UIDebugCommand
 from ai.Debug.DebugCommand import DebugCommand
 
 
@@ -58,18 +53,11 @@ def wrap_command(raw_command):
     return command
 
 
-class DebugManager:
+class DebugInterface:
 
-    def __init__(self, p_gamestatemanager, p_playmanager):
-        self.GameStateManager = p_gamestatemanager
-        self.PlayManager = p_playmanager
+    def __init__(self):
 
         self.commands = []
-        self.ui_commands = []
-        self.human_control = False
-        self.tactic_control = False
-
-        self._send_books()
 
     def _send_commands(self):
         packet_represented_commands = [c.get_packet_repr() for c in self.commands]
@@ -150,80 +138,13 @@ class DebugManager:
         text = DebugCommand(3008, data)
         self.commands.append(text)
 
-    def update(self):
-        self._update_incomming_debug_command()
-
-        self._execute_incomming_debug_command()
-
-        self.GameStateManager.debug_information_in.clear()
-
-        return self._send_commands()
-
     # todo see if that goes here could go in RobotCommandManager!
-    def _send_books(self):
+    def send_books(self):
         cmd_tactics = {'strategy': self.PlayManager.strategybook.get_strategies_name_list(),
                        'tactic': self.PlayManager.tacticbook.get_tactics_name_list(),
                        'action': ['None']}
         cmd = DebugCommand(1001, cmd_tactics)
         self.commands.append(cmd)
 
-    def _update_incomming_debug_command(self):
-        # make sure gamestate debug send nothing if they is no ui debug command
-
-        for command in self.GameStateManager.debug_information_in:
-            print(command)
-            self.ui_commands.append(UIDebugCommand(command))
-
-        if self.ui_commands:
-            self.human_control = True
-
-    def _execute_incomming_debug_command(self):
-        if self.human_control:
-            for command in self.ui_commands:
-                self._parse_command(command)
-
-    def _parse_command(self, cmd):
-        if cmd.is_strategy_cmd():
-            self.PlayManager.set_strategy_status(STAStatus.LOCKED)
-            self.PlayManager.set_all_tactic_status(STAStatus.FREE)
-            self._parse_strategy(cmd)
-
-        elif cmd.is_tactic_cmd():
-            self._parse_tactic(cmd)
-        else:
-            pass
-
-    def _parse_strategy(self, cmd):
-        # TODO revise this function please, thank you!
-        strategy_key = cmd.data['strategy']
-        if strategy_key == 'pStop':
-            self.PlayManager.set_strategy(self.PlayManager.get_new_strategy("DoNothing")(self.GameStateManager,
-                                                                                         self.PlayManager))
-        else:
-            self.PlayManager.set_strategy(self.PlayManager.get_new_strategy(strategy_key)(self.GameStateManager,
-                                                                                          self.PlayManager))
-
-    def _parse_tactic(self, cmd):
-        # TODO make implementation for other tactic packets! And finish this please
-        pid = self._sanitize_pid(cmd.data['id'])
-        self.PlayManager.set_tactic_status(pid, STAStatus.LOCKED)
-
-        tactic_name = cmd.data['tactic']
-        target = cmd.data['target']
-        target = Pose(Position(target[0], target[1]))
-        tactic = self.PlayManager.get_new_tactic(tactic_name)(self.GameStateManager, self.PlayManager, pid,
-                                                              target=target, time_to_live=DEFAULT_TIME_TO_LIVE)
-        self.PlayManager.set_tactic(pid, tactic)
-        self.PlayManager.set_tactic_status(pid, STAStatus.LOCKED)
-
-    @staticmethod
-    def _sanitize_pid(pid):
-        # TODO find something better for this whole scheme
-        if 0 <= pid < 6:
-            return pid
-        elif 6 <= pid < 12:
-            return pid - 6
-        else:
-            return 0
 
 

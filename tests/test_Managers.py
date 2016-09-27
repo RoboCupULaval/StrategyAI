@@ -4,8 +4,8 @@ from RULEngine.Framework import GameState
 from RULEngine.Game import Ball, Team, Field, Referee
 from RULEngine.Util import Pose, Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from ai.managers.GameStateManager import GameStateManager
-from ai.managers.ModuleManager import ModuleManager
+from ai.states.GameState import GameState
+from ai.states.ModuleManager import ModuleManager
 
 
 class TestGameStateManager(unittest.TestCase):
@@ -16,8 +16,8 @@ class TestGameStateManager(unittest.TestCase):
         self.field = Field.Field(Ball.Ball())
         self.my_team = Team.Team(True)
         self.other_team = Team.Team(False)
-        self.GameStateManager1 = GameStateManager()
-        self.GameStateManager2 = GameStateManager()
+        self.GameStateManager1 = GameState()
+        self.GameStateManager2 = GameState()
 
     def test_singleton(self):
         """

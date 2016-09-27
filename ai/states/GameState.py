@@ -13,7 +13,7 @@ import RULEngine.Game.Team
 import RULEngine.Util.geometry
 
 
-class GameStateManager:
+class GameState:
     """
         Gère l'état du jeu.
     """
@@ -34,6 +34,7 @@ class GameStateManager:
         self.other_team = RULEngine.Game.Team.Team(False)
         self.timestamp = 0
         self.debug_information_in = []
+        self.ui_debug_commands = []
 
     def _update_ball_position(self, new_ball_position):
         """
@@ -79,14 +80,6 @@ class GameStateManager:
         """
         self.timestamp = new_timestamp
 
-    def _update_debug(self, new_debug_info):
-        """
-            Met à jour les informations de debug
-            :param new_debug_info: des commandes de debug ou rien%
-        """
-        for command in new_debug_info:
-            self.debug_information_in.append(command)
-
     def update(self, new_game_state):
         """
             Met à jour le jeu
@@ -98,7 +91,6 @@ class GameStateManager:
         self._update_team(new_game_state.friends, is_my_team)
         self._update_team(new_game_state.enemies, not is_my_team)
         self._update_timestamp(new_game_state.timestamp)
-        self._update_debug(new_game_state.debug)
 
     def get_player_pose(self, player_id, is_my_team=True):
         """

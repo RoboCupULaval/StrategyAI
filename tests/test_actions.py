@@ -15,7 +15,7 @@ from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.MoveWithBall import MoveWithBall
 from ai.STA.Action.ProtectGoal import ProtectGoal
 from ai.Util.types import AICommand
-from ai.managers.InfoManager import InfoManager
+from ai.states.InfoManager import InfoManager
 
 
 class TestActions(unittest.TestCase):

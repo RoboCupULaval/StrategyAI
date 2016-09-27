@@ -4,7 +4,7 @@ import unittest
 from RULEngine.Framework import GameState
 from RULEngine.Game import Ball, Field, Team
 from RULEngine.Util.Position import Position
-from ai.managers.InfoManager import InfoManager
+from ai.states.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 
