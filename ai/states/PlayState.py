@@ -3,6 +3,7 @@ from collections import namedtuple
 
 from ai.STA.Strategy.StrategyBook import StrategyBook
 from ai.STA.Tactic.TacticBook import TacticBook
+from ai.STA.Strategy.DoNothing import DoNothing
 
 STAStatus = Enum('boolean_enum', [('FREE', True), ('LOCKED', False)])
 
@@ -16,14 +17,15 @@ class PlayState(object):
         self.tactic_book = TacticBook()
         self.current_strategy = play(None, STAStatus.FREE)
         self.current_tactics = [play(None, STAStatus.FREE) for i in range(6)]
+        self.current_ai_commands = []
 
     def set_strategy(self, strategy, status=STAStatus.FREE):
-        assert self.strategy_book.check_existance_strategy(strategy)
+        assert self.strategy_book.check_existance_strategy(strategy.get_name())
 
         self.current_strategy = play(strategy, status)
 
     def set_tactic(self, player_id, tactic, status=STAStatus.FREE, args_list=None):
-        assert self.tactic_book.check_existance_tactic(tactic)
+        assert self.tactic_book.check_existance_tactic(tactic.get_name())
 
         self.current_tactics[player_id] = play(tactic, status)
 

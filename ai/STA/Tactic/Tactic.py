@@ -14,7 +14,7 @@ class Tactic:
         Classe mère de toutes les tactiques
     """
 
-    def __init__(self, p_gamestatemanager, p_playmanager, player_id, target=Pose(),
+    def __init__(self, p_gamestatemanager, player_id, target=Pose(),
                  time_to_live=tactic_constants.DEFAULT_TIME_TO_LIVE):
         """
             Initialise la tactique
@@ -22,7 +22,6 @@ class Tactic:
             :param p_info_manager: référence à la façade InfoManager
         """
         self.GameStateManager = p_gamestatemanager
-        self.PlayManager = p_playmanager
         self.player_id = player_id
         self.current_state = self.halt
         self.next_state = self.halt
@@ -36,7 +35,7 @@ class Tactic:
             S'exécute lorsque l'état courant est *Halt*
             :return: l'action Stop crée
         """
-        stop = Idle(self.GameStateManager, self.PlayManager, self.player_id)
+        stop = Idle(self.GameStateManager, self.player_id)
         self.next_state = self.halt
         return stop
 

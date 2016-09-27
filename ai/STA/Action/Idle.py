@@ -12,12 +12,12 @@ class Idle(Action):
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur
     """
-    def __init__(self, p_gamestatemanager, p_playmanager, p_player_id):
+    def __init__(self, p_gamestatemanager, p_player_id):
         """
             :param p_info_manager: référence vers l'InfoManager
             :param p_player_id: Identifiant du joueur qui s'arrête
         """
-        Action.__init__(self, p_gamestatemanager, p_playmanager)
+        Action.__init__(self, p_gamestatemanager)
         assert(isinstance(p_player_id, int))
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         self.player_id = p_player_id
