@@ -15,7 +15,7 @@ class WorldState:
 
         if mode_debug_active:
             self.debug_state = DebugState()
-            self.debug_interface = DebugInterface()
+            self.debug_interface = DebugInterface(self.debug_state)
 
     def update(self, game_state):
         self.game_state.update(game_state)

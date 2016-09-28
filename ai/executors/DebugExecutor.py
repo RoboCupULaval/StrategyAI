@@ -2,20 +2,20 @@ from RULEngine.Util.Pose import Pose, Position
 from ai.Debug.UIDebugCommand import UIDebugCommand
 from ai.executors.Executor import Executor
 from ai.states.PlayState import STAStatus
-
+import copy
 
 class DebugExecutor(Executor):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, p_world_state):
+        super().__init__(p_world_state)
 
-    def exec(self, p_world_state):
-        self.ws = p_world_state
+    def exec(self):
+
         self._execute_incoming_debug_commands()
         self._execute_outgoing_debug_commands()
 
     def _execute_incoming_debug_commands(self):
-        for command in self.ws.debug_state.raw_ui_debug_commands:
+        for command in self.ws.debug_state.from_ui_debug_commands:
             self.ws.debug_state.transformed_ui_debug_commands.append(UIDebugCommand(command))
 
         self._apply_incoming_debug_command()
@@ -26,9 +26,14 @@ class DebugExecutor(Executor):
 
     def _execute_outgoing_debug_commands(self):
         # todo make this work!
-        for command in self.ws.debug_state.to_ui_debug_commands:
+        packet_represented_commands = [c.get_packet_repr() for c in self.ws.debug_state.from_ai_raw_debug_cmds]
+        #print(self.ws.debug_state.to_ui_packet_debug_cmds)
+        self.ws.debug_state.to_ui_packet_debug_cmds = copy.deepcopy(packet_represented_commands)
+        try:
+            print(type(self.ws.debug_state.to_ui_packet_debug_cmds[0]))
+        except:
             pass
-        pass
+        self.ws.debug_state.from_ai_raw_debug_cmds.clear()
 
     def _parse_command(self, cmd):
         if cmd.is_strategy_cmd():
@@ -47,7 +52,7 @@ class DebugExecutor(Executor):
         strategy_key = cmd.data['strategy']
 
         if strategy_key == 'pStop':
-            self.ws.play_state.set_strategy("DoNothing")
+            self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy("DoNothing")(self.ws.game_state))
             self._lock_in_strategy()
 
         else:
@@ -55,7 +60,7 @@ class DebugExecutor(Executor):
             self._lock_in_strategy()
 
     def _lock_in_strategy(self):
-        self.ws.play_state.current_strategy[0](STAStatus.LOCKED)
+        self.ws.play_state.set_strategy_status(STAStatus.LOCKED)
         self.ws.play_state.set_tactic_status([0, 1, 2, 3, 4, 5], STAStatus.FREE)
 
     def _parse_tactic(self, cmd):
@@ -71,7 +76,9 @@ class DebugExecutor(Executor):
 
         target = Pose(Position(target[0], target[1]))
 
-        self.ws.play_state.set_tactic(tactic_name, STAStatus.LOCKED)
+        self.ws.play_state.set_tactic(player_id, self.ws.play_state.get_new_tactic(tactic_name)(self.ws.game_state,
+                                                                                                player_id),
+                                      STAStatus.LOCKED)
 
     def _lock_in_tactic(self, pid):
         self.ws.play_state.set_tactic_status(pid, STAStatus.LOCKED)

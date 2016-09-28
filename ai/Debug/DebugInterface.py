@@ -55,18 +55,13 @@ def wrap_command(raw_command):
 
 class DebugInterface:
 
-    def __init__(self):
+    def __init__(self, p_debug_state):
 
-        self.commands = []
-
-    def _send_commands(self):
-        packet_represented_commands = [c.get_packet_repr() for c in self.commands]
-        self.commands.clear()
-        return packet_represented_commands
+        self.debug_state = p_debug_state
 
     def add_log(self, level, message):
         log = DebugCommand(2, {'level': level, 'message': message})
-        self.commands.append(log)
+        self.debug_state.from_ai_raw_debug_cmds.append(log)
 
     def add_point(self, point, color=VIOLET, width=5, link=None, timeout=DEFAULT_DEBUG_TIMEOUT):
         int_point = int(point[0]), int(point[1])
@@ -75,7 +70,7 @@ class DebugInterface:
                 'width': width,
                 'timeout': timeout}
         point = DebugCommand(3004, data, p_link=link)
-        self.commands.append(point)
+        self.debug_state.from_ai_raw_debug_cmds.append(point)
 
     def add_multiple_points(self, points, color=VIOLET, width=5, link=None, timeout=DEFAULT_DEBUG_TIMEOUT):
         points_as_tuple = []
@@ -87,7 +82,7 @@ class DebugInterface:
                 'width': width,
                 'timeout': timeout}
         point = DebugCommand(3005, data, p_link=link)
-        self.commands.append(point)
+        self.debug_state.from_ai_raw_debug_cmds.append(point)
 
     def add_circle(self, center, radius):
         data = {'center': center,
@@ -96,7 +91,7 @@ class DebugInterface:
                 'is_fill': True,
                 'timeout': 0}
         circle = DebugCommand(3003, data)
-        self.commands.append(circle)
+        self.debug_state.from_ai_raw_debug_cmds.append(circle)
 
     def add_line(self, start_point, end_point, timeout=DEFAULT_DEBUG_TIMEOUT):
         data = {'start': start_point,
@@ -104,7 +99,7 @@ class DebugInterface:
                 'color': MAGENTA.repr(),
                 'timeout': timeout}
         command = DebugCommand(3001, data)
-        self.commands.append(command)
+        self.debug_state.from_ai_raw_debug_cmds.append(command)
 
     def add_rectangle(self, top_left, bottom_right):
         data = {'top_left': top_left,
@@ -112,7 +107,7 @@ class DebugInterface:
                 'color': YELLOW.repr(),
                 'is_fill': True}
         command = DebugCommand(3006, data)
-        self.commands.append(command)
+        self.debug_state.from_ai_raw_debug_cmds.append(command)
 
     def add_influence_map(self, influence_map):
 
@@ -123,7 +118,7 @@ class DebugInterface:
                 'hottest_color': (255, 0, 0),
                 'timeout': 2}
         command = DebugCommand(3007, data)
-        self.commands.append(command)
+        self.debug_state.from_ai_raw_debug_cmds.append(command)
 
     def add_text(self, position, text, color=DEFAULT_TEXT_COLOR):
         data = {'position': position,
@@ -136,15 +131,24 @@ class DebugInterface:
                 'has_italic': False,
                 'timeout': DEFAULT_DEBUG_TIMEOUT}
         text = DebugCommand(3008, data)
-        self.commands.append(text)
+        self.debug_state.from_ai_raw_debug_cmds.append(text)
 
     # todo see if that goes here could go in RobotCommandManager!
-    def send_books(self):
-        cmd_tactics = {'strategy': self.PlayManager.strategybook.get_strategies_name_list(),
-                       'tactic': self.PlayManager.tacticbook.get_tactics_name_list(),
+    def send_books(self, cmd_tactics_dict):
+        """
+        of the form:
+        cmd_tactics = {'strategy': strategybook.get_strategies_name_list(),
+                       'tactic': tacticbook.get_tactics_name_list(),
                        'action': ['None']}
-        cmd = DebugCommand(1001, cmd_tactics)
-        self.commands.append(cmd)
+        """
+        cmd = DebugCommand(1001, cmd_tactics_dict)
+        self.debug_state.from_ai_raw_debug_cmds.append(cmd)
 
+    def send_robot_status(self, player_id, tactic, action, target="not implemented"):
+        data = {'blue': {player_id: {'tactic': tactic,
+                                     'action': action,
+                                     'target': target}}}
+        cmd = DebugCommand(1002, data)
+        self.debug_state.from_ai_raw_debug_cmds.append(cmd)
 
 

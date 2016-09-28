@@ -4,11 +4,10 @@ from RULEngine.Util.Pose import Pose
 
 
 class RobotCommandExecutor(Executor):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, p_world_state):
+        super().__init__(p_world_state)
 
-    def exec(self, p_world_state):
-        self.ws = p_world_state
+    def exec(self):
 
         self._clear_commands()
         return self._generate_command()
@@ -28,7 +27,7 @@ class RobotCommandExecutor(Executor):
     def _retrieve_commands(self):
         return self.ws.play_state.current_ai_commands
 
-    def _parse_ai_command(self, ai_command,player_id):
+    def _parse_ai_command(self, ai_command, player_id):
         if ai_command is not None:
             if ai_command.kick_strength > 0:
                 return self._generate_kick_command(ai_command.kick_strength, player_id)

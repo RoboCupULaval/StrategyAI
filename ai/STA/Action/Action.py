@@ -9,11 +9,11 @@ class Action:
     """
     Classe mère de toutes les actions
     """
-    def __init__(self, p_gamestatemanager):
+    def __init__(self, p_game_state):
         """
             :param p_info_manager: référence vers l'InfoManager
         """
-        self.GameStateManager = p_gamestatemanager
+        self.game_state = p_game_state
 
     def on_before(self):
         pass

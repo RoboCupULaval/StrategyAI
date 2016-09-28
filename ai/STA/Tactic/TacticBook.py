@@ -5,6 +5,7 @@ from .Stop import Stop
 from .CoverZone import CoverZone
 from .DemoFollowBall import DemoFollowBall
 
+
 class TacticBook(object):
     def __init__(self):
         self.tactic_book = {'GoToPosition': GoToPosition,

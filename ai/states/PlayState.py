@@ -4,6 +4,7 @@ from collections import namedtuple
 from ai.STA.Strategy.StrategyBook import StrategyBook
 from ai.STA.Tactic.TacticBook import TacticBook
 from ai.STA.Strategy.DoNothing import DoNothing
+from RULEngine.Util.Pose import Pose
 
 STAStatus = Enum('boolean_enum', [('FREE', True), ('LOCKED', False)])
 
@@ -17,6 +18,7 @@ class PlayState(object):
         self.tactic_book = TacticBook()
         self.current_strategy = play(None, STAStatus.FREE)
         self.current_tactics = [play(None, STAStatus.FREE) for i in range(6)]
+        # self.robot_informations = [[None, Pose(), Pose(), 0] for i in range(6)]
         self.current_ai_commands = []
 
     def set_strategy(self, strategy, status=STAStatus.FREE):
@@ -35,3 +37,9 @@ class PlayState(object):
     def set_tactic_status(self, player_id_list, status=STAStatus.FREE):
         for player_id in player_id_list:
             self.current_tactics[player_id] = play(self.current_tactics[player_id].object, status)
+
+    def get_new_strategy(self, strategy_name):
+        return self.strategy_book.get_strategy(strategy_name)
+
+    def get_new_tactic(self, tactic_name):
+        return self.tactic_book.get_tactic(tactic_name)

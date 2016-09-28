@@ -16,9 +16,9 @@ class Coach(object):
         self.robot_commands = []
 
         self.world_state = WorldState()
-        self.debug_executor = DebugExecutor()
-        self.play_executor = PlayExecutor()
-        self.robot_command_executor = RobotCommandExecutor()
+        self.debug_executor = DebugExecutor(self.world_state)
+        self.play_executor = PlayExecutor(self.world_state)
+        self.robot_command_executor = RobotCommandExecutor(self.world_state)
 
     def main_loop(self, p_game_state):
         self.robot_commands.clear()
@@ -26,12 +26,14 @@ class Coach(object):
 
         self.world_state.update(p_game_state)
 
-        self.debug_executor.exec(self.world_state)
-        self.play_executor.exec(self.world_state)
-        self.robot_command_executor.exec(self.world_state)
-        self.debug_executor.exec(self.world_state)
+        self.debug_executor.exec()
+        self.play_executor.exec()
+        self.robot_command_executor.exec()
+        self.debug_executor.exec()
 
         self.robot_commands = self.world_state.robot_command_state.robot_commands
+        if self.mode_debug_active:
+            self.debug_commands = self.world_state.debug_state.to_ui_packet_debug_cmds
 
     def get_robot_commands(self):
         return self.robot_commands
