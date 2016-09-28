@@ -13,6 +13,7 @@ from .STA.Tactic.GoalKeeper import GoalKeeper
 from .STA.Tactic.GoToPosition import GoToPosition
 from .STA.Tactic.Stop import Stop
 from .STA.Tactic.CoverZone import CoverZone
+from .STA.Tactic.DemoFollowBall import DemoFollowBall
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
@@ -63,23 +64,28 @@ class StrategyExecutor(Executor):
         if not self.info_manager.debug_manager.human_control:
             self.strategy_book = StrategyBook(self.info_manager)
             self.strategy = self.strategy_book.get_optimal_strategy()(self.info_manager)
+        elif not self.info_manager.debug_manager.tactic_control:
+            self.strategy = self.info_manager.strategy
         else:
-            self.strategy = self.strategy_book.get_strategy("HumanControl")
+            pass
 
     def _assign_tactics(self):
         """
             Détermine à quel robot assigner les tactiques de la stratégie en
             cours.
         """
-        human_control = self.info_manager.debug_manager.human_control
-        if not human_control:
+        tactic_sequence = []
+        try:
             tactic_sequence = self.strategy.get_next_tactics_sequence()
+        except AttributeError:
+            for i in range(0, 6):
+                tactic_sequence.append(Stop(self.info_manager, i))
+
+        if not self.info_manager.debug_manager.tactic_control:
             for i in range(0, 6):
                 tactic = tactic_sequence[i]
                 tactic.player_id = i
                 self.info_manager.set_player_tactic(i, tactic_sequence[i])
-        else:
-            pass
 
 
 class TacticExecutor(Executor):
@@ -93,26 +99,9 @@ class TacticExecutor(Executor):
 
     def exec(self):
         """ Obtient la Tactic de chaque robot et fait progresser la FSM. """
-        for i in range(0, 6):
-            self.info_manager.get_player_tactic(i).exec()
-
-class PathfinderExecutor(Executor):
-    """ Récupère les paths calculés pour les robots et les assignent. """
-
-    def __init__(self, info_manager):
-        Executor.__init__(self, info_manager)
-        self.pathfinder = None
-
-    def exec(self):
-        """
-            Appel le module de pathfinder enregistré pour modifier le mouvement
-            des joueurs de notre équipe.
-        """
-        self.pathfinder = self.info_manager.acquire_module('Pathfinder')
-        if self.pathfinder: # on desactive l'executor si aucun module ne fournit de pathfinding
-            paths = self.pathfinder.get_paths()
-            for i in range(0, 6):
-                self.info_manager.set_player_next_action(paths[i])
+        for player_id in range(0, 6):
+            ai_command = self.info_manager.get_player_tactic(player_id).exec()
+            self.info_manager.set_player_next_action(player_id, ai_command)
 
 class ModuleExecutor(Executor):
     """ Met à jour tous les modules intelligents enregistré. """
@@ -138,6 +127,7 @@ class DebugExecutor(Executor):
             self._exec_when_human_control()
         else:
             pass
+        self._send_robot_status()
 
     def _exec_when_human_control(self):
         debug_commands = self.debug_manager.get_ui_commands()
@@ -146,8 +136,10 @@ class DebugExecutor(Executor):
 
     def _parse_command(self, cmd):
         if cmd.is_strategy_cmd():
-            self.info_manager.strategy = cmd.data['strategy']
+            self._parse_strategy(cmd)
+            self.info_manager.debug_manager.set_tactic_control(False)
         elif cmd.is_tactic_cmd():
+            self.info_manager.debug_manager.set_tactic_control(True)
             pid = self._sanitize_pid(cmd.data['id'])
             tactic_name = cmd.data['tactic']
             tactic_ref = self._parse_tactic(tactic_name, pid, cmd.data)
@@ -155,21 +147,30 @@ class DebugExecutor(Executor):
         else:
             pass
 
+    def _parse_strategy(self, cmd):
+        strategy_key = cmd.data['strategy']
+        if strategy_key == 'pStop':
+            self.info_manager.strategy = StrategyBook(self.info_manager).get_strategy('DoNothing')(self.info_manager)
+        else:
+            self.info_manager.strategy = StrategyBook(self.info_manager).get_strategy(strategy_key)(self.info_manager)
+
     def _parse_tactic(self, tactic_name, pid, data):
         # TODO: redéfinir le paquet pour set une tactique pour que les données supplémentaire
         # soit un tuple
         target = data['target']
         tactic_ref = None
         if tactic_name == "goto_position":
-            tactic_ref = GoToPosition(self.info_manager, pid, Pose(Position(target[0], target[1]), 0))
+            tactic_ref = GoToPosition(self.info_manager, pid, Pose(Position(target[0], target[1]), self.info_manager.get_player_pose(pid).orientation), time_to_live=0)
         elif tactic_name == "goalkeeper":
             tactic_ref = GoalKeeper(self.info_manager, pid)
         elif tactic_name == "cover_zone":
             tactic_ref = CoverZone(self.info_manager, pid, FIELD_Y_TOP, FIELD_Y_TOP/2, FIELD_X_LEFT, FIELD_X_LEFT/2)
         elif tactic_name == "get_ball":
-            tactic_ref = GoGetBall(self.info_manager, pid)
+            tactic_ref = GoGetBall(self.info_manager, pid, Pose(Position(4500, 0)))
         elif tactic_name == "tStop":
             tactic_ref = Stop(self.info_manager, pid)
+        elif tactic_name == "demo_follow_ball":
+            tactic_ref = DemoFollowBall(self.info_manager, pid)
         else:
             tactic_ref = Stop(self.info_manager, pid)
 
@@ -182,3 +183,20 @@ class DebugExecutor(Executor):
             return pid - 6
         else:
             return 0
+
+    def _send_robot_status(self):
+        for player_id in range(6):
+            robot_tactic = self.info_manager.get_player_tactic(player_id)
+            robot_tactic_name = 'None'
+            robot_action = 'None'
+            robot_target = (0, 0)
+            try:
+                robot_tactic_name = robot_tactic.__class__.__name__
+                robot_action = robot_tactic.current_state.__name__
+                robot_target = robot_tactic.target.to_tuple()
+            except AttributeError as err:
+                self.info_manager.debug_manager.add_log(4, "Erreur lors de l'acquisition des données pour le robot: " + str(player_id) + " -- " + str(err))
+                robot_tactic_name = 'None'
+                robot_action = 'None'
+
+            self.info_manager.debug_manager.send_robot_status(player_id, robot_tactic_name, str(robot_action), robot_target)

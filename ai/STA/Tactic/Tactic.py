@@ -1,10 +1,13 @@
 # Under MIT licence, see LICENCE.txt
 
 from abc import abstractmethod
-from functools import wraps
+
+from functools import wraps,partial
 from ai import InfoManager
 from ai.STA.Tactic import tactic_constants
 from ai.STA.Action.Idle import Idle
+
+from RULEngine.Util.Pose import Pose
 
 __author__ = 'RobocupULaval'
 
@@ -14,7 +17,7 @@ class Tactic:
         Classe mère de toutes les tactiques
     """
 
-    def __init__(self, p_info_manager):
+    def __init__(self, p_info_manager, target=Pose(), time_to_live=tactic_constants.DEFAULT_TIME_TO_LIVE):
         """
             Initialise la tactique
 
@@ -26,8 +29,11 @@ class Tactic:
         self.current_state = self.halt
         self.next_state = self.halt
         self.status_flag = tactic_constants.INIT
+        self.target = target
+        self.time_to_live = time_to_live
+        self.last_state_time = self.info_manager.timestamp
 
-    def halt(self):
+    def halt(self, reset=False):
         """
             S'exécute lorsque l'état courant est *Halt*
             :return: l'action Stop crée
@@ -40,10 +46,15 @@ class Tactic:
         """
             Exécute une *Action* selon l'état courant
         """
+        tactic_time = self.info_manager.timestamp
         next_action = self.current_state()
-        next_ai_command = next_action.exec()
-        self.info_manager.set_player_next_action(self.player_id, next_ai_command)
+        if tactic_time - self.last_state_time > self.time_to_live and self.time_to_live != 0:
+            self.last_state_time = tactic_time
+            self.next_state = partial(self.halt, reset=True)
+
         self.current_state = self.next_state
+        next_ai_command = next_action.exec()
+        return next_ai_command
 
     def __str__(self):
         return self.__class__.__name__

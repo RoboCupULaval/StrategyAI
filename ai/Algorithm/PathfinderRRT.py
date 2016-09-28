@@ -3,7 +3,8 @@
     Module intelligent contenant l'implementation d'un Rapidly exploring Random
     Tree. Le module contient une classe qui peut être instanciée et qui calcule
     les trajectoires des robots de l'équipe. Les détails de l'algorithme sont
-    disponibles sur la page wikipedia.
+    disponibles sur la page wikipedia. Code original http://myenigma.hatenablog.com
+    /entry/2016/03/23/092002
 
 """
 import random
@@ -15,12 +16,13 @@ import pickle
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from RULEngine.Util.constant import POSITION_DEADZONE
 from ai.Algorithm.IntelligentModule import Pathfinder
 
-from ai.Debug.debug_manager import COLOR_ID_MAP
+from ai.Debug.debug_manager import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 
-OBSTACLE_DEAD_ZONE = 200
-TIME_TO_UPDATE = 5
+OBSTACLE_DEAD_ZONE = 700
+TIME_TO_UPDATE = 1
 
 class PathfinderRRT(Pathfinder):
     """
@@ -48,10 +50,12 @@ class PathfinderRRT(Pathfinder):
         self.last_timestamp = self.state.timestamp
 
     def draw_path(self, path, pid=0):
+        points = []
         for path_element in path:
             x = path_element.position.x
             y = path_element.position.y
-            self.state.debug_manager.add_point((x, y), COLOR_ID_MAP[pid], link="path - " + str(pid), timeout=30)
+            points.append((x,y))
+        self.state.debug_manager.add_multiple_points(points, COLOR_ID_MAP[pid], width=5, link="path - " + str(pid), timeout=DEFAULT_PATH_TIMEOUT)
 
 
     def get_path(self, pid=None, target=None):
@@ -63,11 +67,8 @@ class PathfinderRRT(Pathfinder):
         """
 
         assert(isinstance(pid, int)), "Un pid doit être passé"
-        assert(isinstance(target, Pose) or isinstance(target, Position)), "La cible doit être une Pose ou Position"
-        target = target.position if (isinstance(target, Pose)) else target
-        path = self._compute_path(pid, target)
-
-        return [Pose(Position(point[0], point[1])) for point in path]
+        assert(isinstance(target, Pose)), "La cible doit être une Pose"
+        return self._compute_path(pid, target)
 
 
     def _compute_path(self, pid, target):
@@ -91,38 +92,45 @@ class PathfinderRRT(Pathfinder):
         initial_position_of_main_player = self.state.get_player_position(pid)
 
 
-        target_of_player = target
-        assert(isinstance(target_of_player, Position)), "La cible du joueur doit être une Position"
+        target_position_of_player = target.position
+        target_orientation_of_player = target.orientation
+        assert(isinstance(target_position_of_player, Position)), "La cible du joueur doit être une Position"
         try :
-            target_of_player.x
-            target_of_player.y
+            target_position_of_player.x
+            target_position_of_player.y
         except AttributeError:
-            target_of_player = self.state.get_player_position(pid)
+            target_position_of_player = self.state.get_player_position(pid)
 
 
         rrt = RRT(start=[initial_position_of_main_player.x,
                          initial_position_of_main_player.y],
-                  goal=[target_of_player.x, target_of_player.y],
+                  goal=[target_position_of_player.x, target_position_of_player.y],
                   obstacleList=obstacleList,
                   # TODO Vérifier si le robot peut sortir du terrain
                   rand_area=[-4500, 4500],
                   expand_dis=get_expand_dis([initial_position_of_main_player.x,
                                              initial_position_of_main_player.y],
-                                            [target_of_player.x, target_of_player.y]),
+                                            [target_position_of_player.x, target_position_of_player.y]),
                   goal_sample_rate=get_goal_sample_rate([initial_position_of_main_player.x,
                                                          initial_position_of_main_player.y],
-                                                        [target_of_player.x, target_of_player.y]))
+                                                        [target_position_of_player.x, target_position_of_player.y]))
 
         not_smoothed_path = rrt.planning(obstacleList)
 
-        #Path smoothing
-        maxIter = 50
+        # Path smoothing
+        maxIter = 100
+        # Il faut inverser la liste du chemin lissé tout en retirant le point de départ
         smoothed_path = path_smoothing(not_smoothed_path, maxIter, obstacleList)
-
         smoothed_path = list(reversed(smoothed_path[:-1]))
-        return smoothed_path
 
+        return self._smoothed_path_to_pose_list(smoothed_path, target_orientation_of_player)
 
+    def _smoothed_path_to_pose_list(self, smoothed_path, target_orientation):
+        smoothed_poses = []
+        for point in smoothed_path:
+            smoothed_poses.append(Pose(Position(point[0], point[1]), target_orientation))
+
+        return smoothed_poses
 
 
 class RRT():
@@ -156,9 +164,10 @@ class RRT():
 
     def planning(self, obstacleList):
         """Fonction qui s'occupe de faire le path"""
-
+        initial_time = time.time()
         self.node_list = [self.start]
-        while True:
+        #TODO changer le gros hack degueux pour la gestion de la loop infinie
+        while True and time.time()-initial_time < TIME_TO_UPDATE:
             # Random Sampling
 
             if random.randint(0, 100) > self.goal_sample_rate:
@@ -199,6 +208,9 @@ class RRT():
             last_index = node.parent
         path.append([self.start.x, self.start.y])
 
+        # TODO fix gros hack sale
+        if time.time()-initial_time >=1 :
+            path = [[self.start.x, self.start.y],[self.start.x, self.start.y]]
         return path
 
     def get_nearest_list_index(self, node_list, rnd):
@@ -217,6 +229,7 @@ class RRT():
                 return False  # collision
 
         return True  # safe
+
 
 class Node():
     """

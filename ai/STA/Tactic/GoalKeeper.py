@@ -7,6 +7,7 @@ from ai.STA.Action.GrabBall import GrabBall
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
 from RULEngine.Util.Position import Position
+from RULEngine.Util.Pose import Pose
 from RULEngine.Util.area import isInsideGoalArea, player_can_grab_ball, player_grabbed_ball
 from RULEngine.Util.constant import PLAYER_PER_TEAM, DISTANCE_BEHIND
 
@@ -45,8 +46,6 @@ class GoalKeeper(Tactic):
 
     def protect_goal(self):
         # FIXME : enlever ce hack de merde
-        target_dict = {'skill': None, 'goal': None, 'target': self.info_manager.get_ball_position()}
-        self.info_manager.set_player_skill_target_goal(self.player_id, target_dict)
         if not isInsideGoalArea(self.info_manager.get_ball_position(), self.is_yellow):
             self.next_state = self.protect_goal
         else:
@@ -54,7 +53,7 @@ class GoalKeeper(Tactic):
                 self.next_state = self.grab_ball
             else:
                 self.next_state = self.go_behind_ball
-
+        self.target = Pose(self.info_manager.get_ball_position())
         return ProtectGoal(self.info_manager, self.player_id, self.is_yellow, p_minimum_distance=300)
 
     def go_behind_ball(self):

@@ -44,12 +44,15 @@ COLOR_ID_MAP = {0: COLOR_ID0,
                 4: COLOR_ID4,
                 5: COLOR_ID5}
 
-SENDER_NAME = "ai"
-DEFAULT_DEBUG_TIMEOUT = 1 #s
+SENDER_NAME = "AI"
 DEFAULT_TEXT_SIZE = 14 #px
 DEFAULT_TEXT_FONT = 'Arial'
 DEFAULT_TEXT_ALIGN = 'Left'
 DEFAULT_TEXT_COLOR = Color(0, 0, 0)
+
+# Debug timeout (seconds)
+DEFAULT_DEBUG_TIMEOUT = 1
+DEFAULT_PATH_TIMEOUT = 0
 
 # TODO: refactor le module
 def wrap_command(raw_command):
@@ -68,6 +71,7 @@ class DebugManager:
         self.commands = []
         self.ui_commands = []
         self.human_control = False
+        self.tactic_control = False
 
     def get_commands(self):
         packet_represented_commands = [c.get_packet_repr() for c in self.commands]
@@ -92,6 +96,18 @@ class DebugManager:
         point = DebugCommand(3004, data, p_link=link)
         self.commands.append(point)
 
+    def add_multiple_points(self, points, color=VIOLET, width=5, link=None, timeout=DEFAULT_DEBUG_TIMEOUT):
+        points_as_tuple = []
+        for point in points:
+            points_as_tuple.append((int(point[0]), int(point[1])))
+
+        data = {'points': points_as_tuple,
+                'color': color.repr(),
+                'width': width,
+                'timeout': timeout}
+        point = DebugCommand(3005, data, p_link=link)
+        self.commands.append(point)
+
     def add_circle(self, center, radius):
         data = {'center': center,
                 'radius': radius,
@@ -101,10 +117,11 @@ class DebugManager:
         circle = DebugCommand(3003, data)
         self.commands.append(circle)
 
-    def add_line(self, start_point, end_point):
+    def add_line(self, start_point, end_point, timeout=DEFAULT_DEBUG_TIMEOUT):
         data = {'start': start_point,
                 'end': end_point,
-                'color': MAGENTA.repr()}
+                'color': MAGENTA.repr(),
+                'timeout': timeout}
         command = DebugCommand(3001, data)
         self.commands.append(command)
 
@@ -117,9 +134,13 @@ class DebugManager:
         self.commands.append(command)
 
     def add_influence_map(self, influence_map):
+
         data = {'field_data': influence_map,
-                'coldest_color': BLUE.repr(),
-                'hottest_color': RED.repr()}
+                'coldest_numb': -100,
+                'hottest_numb': 100,
+                'coldest_color': (0, 255, 0),
+                'hottest_color': (255, 0, 0),
+                'timeout': 2}
         command = DebugCommand(3007, data)
         self.commands.append(command)
 
@@ -146,6 +167,16 @@ class DebugManager:
 
     def set_human_control(self, status=True):
         self.human_control = status
+
+    def set_tactic_control(self, status=True):
+        self.tactic_control = status
+
+    def send_robot_status(self, player_id, tactic, action, target):
+        data = {'blue': { player_id : { 'tactic': tactic,
+                                        'action': action,
+                                        'target': target}}}
+        cmd = DebugCommand(1002, data)
+        self.commands.append(cmd)
 
 class DebugCommand(object):
     """
