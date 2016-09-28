@@ -6,6 +6,11 @@ from ai.Algorithm.Node import Node
 from ai.Algorithm.Vertex import Vertex
 from ai.InfoManager import InfoManager
 from ai.STA.Tactic.Stop import Stop
+from ai.STA.Tactic.GoToPosition import GoToPosition
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
+
+from ai.Util.types import AICommand
 
 __author__ = 'RoboCupULaval'
 
@@ -24,8 +29,9 @@ class TestGraph(unittest.TestCase):
         self.empty_graph = Graph()
         self.graph1 = Graph()
         self.tactic1 = Stop(self.info_manager, 1)
+        self.tactic2 = GoToPosition(self.info_manager, 0, Pose(Position(500, 0), 0))
         self.node1 = Node(self.tactic1)
-        self.node2 = Node(self.tactic1)
+        self.node2 = Node(self.tactic2)
         self.vertex1 = Vertex(1, foo)
         self.graph1.add_node(self.node1)
         self.graph1.add_node(self.node2)
@@ -73,13 +79,24 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(len(self.graph1.nodes[0].vertices), 0)
 
     def test_exec(self):
-        self.graph1.exec()
+        next_ai_command = self.graph1.exec()
+        expected_ai_command = AICommand(None, 0)
         self.assertEqual(self.graph1.current_node, 1)
-        self.empty_graph.add_node(self.node1)
+        self.assertEqual(next_ai_command, expected_ai_command)
+
         self.empty_graph.add_node(self.node2)
+        self.empty_graph.add_node(self.node1)
         self.empty_graph.add_vertex(0, 1, foo2)
-        self.empty_graph.exec()
+
+        next_ai_command = self.empty_graph.exec()
+        expected_ai_command = AICommand(None, 0)
         self.assertEqual(self.empty_graph.current_node, 0)
+        self.assertEqual(next_ai_command, expected_ai_command)
+
+        next_ai_command = self.empty_graph.exec()
+        expected_ai_command = AICommand(Pose(Position(500, 0), 0), 0)
+        self.assertEqual(self.empty_graph.current_node, 0)
+        self.assertEqual(next_ai_command, expected_ai_command)
 
     def test_set_current_node(self):
         self.assertRaises(AssertionError, self.graph1.set_current_node, "not an int")

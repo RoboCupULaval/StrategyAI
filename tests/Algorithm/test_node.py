@@ -59,12 +59,16 @@ class TestNode(unittest.TestCase):
     def test_exec(self):
         self.node1.add_vertex(self.vertex1)
         self.node1.add_vertex(self.vertex2)
-        next_node = self.node1.exec()
+        next_ai_command, next_node = self.node1.exec()
         self.assertEqual(next_node, 0)
         expected_aicmd = AICommand(Pose(Position(-4200, 0), 0), 0)
-        self.assertEqual(self.info_manager.friend['0']['next_pose'], expected_aicmd)
+        self.assertEqual(next_ai_command, expected_aicmd)
+
         self.node2.add_vertex(self.vertex2)
-        self.assertEqual(self.node2.exec(), -1)
+        expected_aicmd = AICommand(None, 0)
+        next_ai_command, next_node = self.node2.exec()
+        self.assertEqual(next_ai_command, expected_aicmd)
+        self.assertEqual(next_node, -1)
 
     def test_str(self):
         self.node1.add_vertex(self.vertex1)

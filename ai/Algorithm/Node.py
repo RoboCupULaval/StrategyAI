@@ -14,7 +14,7 @@ class Node:
     Méthodes:
         add_vertex: Ajoute un vertex au noeud.
         remove_vertex: Retire un vertex du noeud.
-        exec: Évalue si on peut passer à un noeud suivant.
+        exec: Évalue si on peut passer à un noeud suivant et exécute la tactique.
         __str__: Retourne une représentation du noeud sous forme d'une chaîne de caractères.
     Attributs:
         tactic: La tactique du noeud.
@@ -57,14 +57,14 @@ class Node:
         """
         Fait avancer la machine d'état de la tactique d'une itération et évalue la condition de chacun des vertices du
         noeud afin de déterminer si on peut passer à un noeud suivant.
-        :return: Le numéro du noeud pointé par le vertex dont la condition est remplie, sous forme de int. Retourne -1
-        si aucune condition n'est remplie.
+        :return: Un tuple contenant la prochaine commande à envoyer au robot et le numéro du noeud pointé par le vertex
+        dont la condition est remplie, sous forme de int. Ce numéro vaut -1 si aucune condition n'est remplie.
         """
-        self.tactic.exec()
+        next_ai_command = self.tactic.exec()
         for vertex in self.vertices:
             if vertex.evaluate_condition():
-                return vertex.next_node
-        return -1
+                return next_ai_command, vertex.next_node
+        return next_ai_command, -1
 
     def __str__(self):
         """

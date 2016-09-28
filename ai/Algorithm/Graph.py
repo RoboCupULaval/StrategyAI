@@ -76,11 +76,11 @@ class Graph:
         Appelle la méthode exec du noeud courant et effectue la transition vers un noued suivant si une des conditions
         est remplie, ce qui a pour effet de changer la tactique en cours.
         """
-        next_node = self.nodes[self.current_node].exec()
-        if next_node == -1:
-            return
-        else:
+        next_ai_command, next_node = self.nodes[self.current_node].exec()
+        if next_node != -1:
             self.set_current_node(next_node)
+
+        return next_ai_command
 
     def set_current_node(self, node_index):
         """
