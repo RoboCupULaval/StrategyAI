@@ -4,7 +4,7 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic import tactic_constants
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
-from ai.STA.Tactic import tactic_constants
+from ai.InfoManager import NonExistentModule
 from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import ANGLE_TO_HALT, POSITION_DEADZONE, PLAYER_PER_TEAM
@@ -32,19 +32,22 @@ class GoToPosition(Tactic):
         assert PLAYER_PER_TEAM >= player_id >= 0
         assert isinstance(target, Pose), "La target devrait être une Pose"
 
-        self.current_state = self.get_next_path_element
-        self.next_state = self.get_next_path_element
         self.player_id = player_id
         self.target = target
         self.path_target = None
 
         self._init_pathfinder()
-
+        self.current_state = self.get_next_path_element
+        self.next_state = self.get_next_path_element
 
     def _init_pathfinder(self):
-        pathfinder = self.info_manager.acquire_module('Pathfinder')
-        self.info_manager.paths[self.player_id] = pathfinder.get_path(self.player_id, self.target)
-        pathfinder.draw_path(self.info_manager.paths[self.player_id], self.player_id)
+        try:
+            pathfinder = self.info_manager.acquire_module('Pathfinder')
+            self.info_manager.paths[self.player_id] = pathfinder.get_path(self.player_id, self.target)
+            pathfinder.draw_path(self.info_manager.paths[self.player_id], self.player_id)
+        except NonExistentModule as err:
+            print(err)
+            self.info_manager.paths[self.player_id] = [self.target]
 
     def get_next_path_element(self):
         path = self.info_manager.paths[self.player_id]
