@@ -5,6 +5,7 @@ from .HumanControl import HumanControl
 from .SimpleDefense import SimpleDefense
 from .SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
+from .TestStrategy import TestStrategy
 
 
 class StrategyBook(object):
@@ -18,7 +19,8 @@ class StrategyBook(object):
         self.strategy_book = {'SimpleDefense': SimpleDefense,
                               'SimpleOffense': SimpleOffense,
                               'HumanControl': HumanControl,
-                              'DoNothing': DoNothing}
+                              'DoNothing': DoNothing,
+                              'TestStrategy': TestStrategy}
 
     def get_strategies_name_list(self):
         return list(self.strategy_book.keys())

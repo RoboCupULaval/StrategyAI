@@ -4,6 +4,7 @@ from .GoToPosition import GoToPosition
 from .Stop import Stop
 from .CoverZone import CoverZone
 from .DemoFollowBall import DemoFollowBall
+from .GoStraightTo import GoStraightTo
 
 
 class TacticBook(object):
@@ -13,7 +14,8 @@ class TacticBook(object):
                             'CoverZone': CoverZone,
                             'GoGetBall': GoGetBall,
                             'DemoFollowBall': DemoFollowBall,
-                            'Stop': Stop}
+                            'Stop': Stop,
+                            'GoStraightTo': GoStraightTo}
 
     def get_tactics_name_list(self):
         return list(self.tactic_book.keys())

@@ -2,7 +2,6 @@ from ai.Debug.DebugState import DebugState
 from ai.Debug.DebugInterface import DebugInterface
 from ai.states.GameState import GameState
 from ai.states.PlayState import PlayState
-from ai.states.RobotCommandState import RobotCommandState
 
 
 class WorldState:
@@ -11,7 +10,6 @@ class WorldState:
 
         self.play_state = PlayState()
         self.game_state = GameState()
-        self.robot_command_state = RobotCommandState()
 
         if mode_debug_active:
             self.debug_state = DebugState()

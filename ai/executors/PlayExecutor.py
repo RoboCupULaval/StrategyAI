@@ -1,8 +1,5 @@
 from ai.executors.Executor import Executor
 
-from ai.STA.Strategy.Strategy import Strategy
-from ai.STA.Strategy.DoNothing import DoNothing
-
 
 class PlayExecutor(Executor):
 
@@ -35,10 +32,12 @@ class PlayExecutor(Executor):
     # FIXME revise this function please
     def _send_robots_status(self):
         for player_id in range(0, 6):
+            player_tactic = self.ws.play_state.current_tactics[player_id][0]
+            target = (int(player_tactic.target.position.x), int(player_tactic.target.position.y))
             self.ws.debug_interface.send_robot_status(player_id,
-                                                      self.ws.play_state.current_tactics[player_id][0].get_name(),
+                                                      player_tactic.get_name(),
                                                       "None",
-                                                      self.ws.play_state.current_tactics[player_id][0].target)
+                                                      target)
 
     def _send_books(self):
         cmd_tactics = {'strategy': self.ws.play_state.strategy_book.get_strategies_name_list(),

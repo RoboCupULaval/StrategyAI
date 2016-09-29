@@ -20,6 +20,7 @@ class PlayState(object):
         self.current_tactics = [play(None, STAStatus.FREE) for i in range(6)]
         # self.robot_informations = [[None, Pose(), Pose(), 0] for i in range(6)]
         self.current_ai_commands = []
+        self.ready_to_ship_robot_packet_list = []
 
     def set_strategy(self, strategy, status=STAStatus.FREE):
         assert self.strategy_book.check_existance_strategy(strategy.get_name())

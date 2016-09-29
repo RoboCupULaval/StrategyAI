@@ -13,16 +13,16 @@ class RobotCommandExecutor(Executor):
         return self._generate_command()
 
     def _clear_commands(self):
-        self.ws.robot_command_state.robot_commands.clear()
+        self.ws.play_state.ready_to_ship_robot_packet_list.clear()
 
     def _generate_command(self):
         ai_command_list = self._retrieve_commands()
 
         # FIXME stupid range to 6 thinguy... TODO see a better way to pass playerid
         for player_id in range(0, 6):
-            self.ws.robot_command_state.robot_commands.append(self._parse_ai_command(ai_command_list[player_id],
-                                                                                     player_id))
-        return self.ws.robot_command_state.robot_commands
+            self.ws.play_state.ready_to_ship_robot_packet_list.append(self._parse_ai_command(ai_command_list[player_id],
+                                                                      player_id))
+        return self.ws.play_state.ready_to_ship_robot_packet_list
 
     def _retrieve_commands(self):
         return self.ws.play_state.current_ai_commands

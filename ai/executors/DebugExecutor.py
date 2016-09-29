@@ -4,6 +4,7 @@ from ai.executors.Executor import Executor
 from ai.states.PlayState import STAStatus
 import copy
 
+
 class DebugExecutor(Executor):
 
     def __init__(self, p_world_state):
@@ -27,12 +28,7 @@ class DebugExecutor(Executor):
     def _execute_outgoing_debug_commands(self):
         # todo make this work!
         packet_represented_commands = [c.get_packet_repr() for c in self.ws.debug_state.from_ai_raw_debug_cmds]
-        #print(self.ws.debug_state.to_ui_packet_debug_cmds)
         self.ws.debug_state.to_ui_packet_debug_cmds = copy.deepcopy(packet_represented_commands)
-        try:
-            print(type(self.ws.debug_state.to_ui_packet_debug_cmds[0]))
-        except:
-            pass
         self.ws.debug_state.from_ai_raw_debug_cmds.clear()
 
     def _parse_command(self, cmd):
@@ -56,7 +52,7 @@ class DebugExecutor(Executor):
             self._lock_in_strategy()
 
         else:
-            self.ws.play_state.set_strategy(strategy_key)
+            self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy(strategy_key)(self.ws.game_state))
             self._lock_in_strategy()
 
     def _lock_in_strategy(self):
@@ -67,17 +63,16 @@ class DebugExecutor(Executor):
         # TODO make implementation for other tactic packets! And finish this please
         # FIXME this pid thingy is getting out of control
         player_id = self._sanitize_pid(cmd.data['id'])
-
         self._lock_in_strategy()
 
         tactic_name = cmd.data['tactic']
+
         # TODO ui must send better packets back with the args.
         target = cmd.data['target']
-
         target = Pose(Position(target[0], target[1]))
 
         self.ws.play_state.set_tactic(player_id, self.ws.play_state.get_new_tactic(tactic_name)(self.ws.game_state,
-                                                                                                player_id),
+                                                                                                player_id, target),
                                       STAStatus.LOCKED)
 
     def _lock_in_tactic(self, pid):
