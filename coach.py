@@ -17,7 +17,8 @@ from ai.Debug.debug_manager import DebugManager, DebugCommand
 
 __author__ = 'RoboCupULaval'
 
-TIMESTAMP_MINIMAL_DELTA = 0.015 #15 ms de mise à jour pour la boucle de l'ia
+TIMESTAMP_MINIMAL_DELTA = 0.015 # 15 ms de mise à jour pour la boucle de l'ia
+
 
 class Coach(object):
     """
@@ -48,17 +49,16 @@ class Coach(object):
         self.coach_command_sender = CoachCommandSender(self.info_manager)
         self._init_ui_debug()
 
-        self.last_update_timestap = 0
-
+        self.last_update_timestamp = 0
 
     def main_loop(self, p_game_state):
         """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
-        delta_timestamp = p_game_state.timestamp - self.last_update_timestap
+        delta_timestamp = p_game_state.timestamp - self.last_update_timestamp
         tick_log = "Tick: " + str(p_game_state.timestamp) + " (delta=" + str(delta_timestamp) + ")"
         self.info_manager.debug_manager.add_log(1, tick_log)
 
         if delta_timestamp > TIMESTAMP_MINIMAL_DELTA or math.isclose(delta_timestamp, TIMESTAMP_MINIMAL_DELTA, abs_tol=1e-4):
-            self.last_update_timestap = p_game_state.timestamp
+            self.last_update_timestamp = p_game_state.timestamp
             self._update_ai(p_game_state)
             self.coach_command_sender.generate_and_send_commands(p_game_state)
         else:
@@ -88,7 +88,6 @@ class Coach(object):
         self.info_manager.register_module('InfluenceMap', InfluenceMap)
         self.info_manager.register_module('Pathfinder', PathfinderRRT)
 
-
     def _init_ui_debug(self):
         # FIXME: exécuter uniquement sur handshake plutôt qu'à l'init du coach
         cmd_tactics = {'strategy': StrategyBook(self.info_manager).get_strategies_name_list(),
@@ -97,7 +96,6 @@ class Coach(object):
         cmd = DebugCommand(1001, cmd_tactics)
         self.debug_manager.add_odd_command(cmd)
 
-
     def _update_ai(self, p_game_state):
         """ Effectue une itération de mise à jour de l'ia. """
         self.info_manager.update(p_game_state)
@@ -105,6 +103,7 @@ class Coach(object):
         self.module_executor.exec()
         self.strategy_executor.exec()
         self.tatic_executor.exec()
+
 
 class CoachCommandSender(object):
     """
@@ -121,7 +120,7 @@ class CoachCommandSender(object):
     def generate_and_send_commands(self, p_game_state):
         self.game_state = p_game_state
         self._clear_commands()
-        for i in range(6):
+        for i in range(len(self.game_state.friends.players)):
             self.current_player_id = i
             next_action = self.info_manager.get_player_next_action(i)
             command = self._generate_command(next_action)
@@ -151,12 +150,11 @@ class CoachCommandSender(object):
         return command.MoveToAndRotate(self._get_player(), p_move_destination)
 
     def _generate_empty_command(self):
-        #Envoi d'une command vide qui fait l'arrêt du robot
+        # Envoi d'une command vide qui fait l'arrêt du robot
         return command.Stop(self._get_player())
 
     def _get_player(self):
         return self.game_state.friends.players[self.current_player_id]
-
 
     def _sanitize_kick_strength(self, p_kick_strength):
         if p_kick_strength > 1:
