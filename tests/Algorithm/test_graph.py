@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 import unittest
-from ai.Algorithm.Graph import Graph
+from ai.Algorithm.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Node import Node
 from ai.Algorithm.Vertex import Vertex
 from ai.InfoManager import InfoManager
@@ -40,6 +40,18 @@ class TestGraph(unittest.TestCase):
     def test_init(self):
         self.assertEqual(self.empty_graph.current_node, 0)
         self.assertEqual(len(self.empty_graph.nodes), 0)
+
+    def test_get_current_tactic_name(self):
+        self.assertEqual(self.graph1.get_current_tactic_name(), "Stop")
+        self.assertEqual(self.empty_graph.get_current_tactic_name(), None)
+        self.empty_graph.add_node(self.node2)
+        self.assertEqual(self.empty_graph.get_current_tactic_name(), "GoToPosition")
+
+    def test_get_current_tactic(self):
+        self.assertIsInstance(self.graph1.get_current_tactic(), Stop)
+        self.assertEqual(self.empty_graph.get_current_tactic(), None)
+        self.empty_graph.add_node(self.node2)
+        self.assertIsInstance(self.empty_graph.get_current_tactic(), GoToPosition)
 
     def test_add_node(self):
         self.assertEqual(len(self.graph1.nodes), 2)
@@ -83,6 +95,8 @@ class TestGraph(unittest.TestCase):
         expected_ai_command = AICommand(None, 0)
         self.assertEqual(self.graph1.current_node, 1)
         self.assertEqual(next_ai_command, expected_ai_command)
+
+        self.assertRaises(EmptyGraphException, self.empty_graph.exec)
 
         self.empty_graph.add_node(self.node2)
         self.empty_graph.add_node(self.node1)

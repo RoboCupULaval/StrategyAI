@@ -10,6 +10,8 @@ class Graph:
     """
     Graph:
     Méthodes:
+        get_current_tactic_name: Retourne le nom de la tactique en cours, sous forme d'une chaîne de caractères.
+        get_current_tactic: Retourne la tactique en cours.
         add_node: Ajoute un noeud au graphe.
         remove_node: Retire un noeud du graphe.
         add_vertex: Ajoute un vertex entre deux noeuds du graphe.
@@ -24,6 +26,24 @@ class Graph:
     def __init__(self):
         self.nodes = []
         self.current_node = 0
+
+    def get_current_tactic_name(self):
+        """
+        :return: Le nom de la tactique en cours, sous forme d'une chaîne de caractères.
+        """
+        if len(self.nodes) > 0:
+            return str(self.nodes[self.current_node].tactic)
+        else:
+            return None
+
+    def get_current_tactic(self):
+        """
+        :return: La tactique en cours.
+        """
+        if len(self.nodes) > 0:
+            return self.nodes[self.current_node].tactic
+        else:
+            return None
 
     def add_node(self, p_node):
         """
@@ -76,11 +96,14 @@ class Graph:
         Appelle la méthode exec du noeud courant et effectue la transition vers un noued suivant si une des conditions
         est remplie, ce qui a pour effet de changer la tactique en cours.
         """
-        next_ai_command, next_node = self.nodes[self.current_node].exec()
-        if next_node != -1:
-            self.set_current_node(next_node)
+        if len(self.nodes) > 0:
+            next_ai_command, next_node = self.nodes[self.current_node].exec()
+            if next_node != -1:
+                self.set_current_node(next_node)
 
-        return next_ai_command
+            return next_ai_command
+        else:
+            raise EmptyGraphException("Le graph ne contient aucun noeud.")
 
     def set_current_node(self, node_index):
         """
@@ -99,3 +122,8 @@ class Graph:
         for i in range(len(self.nodes)):
             output_string += "Node " + str(i) + ": " + str(self.nodes[i]) + "\n"
         return output_string
+
+
+class EmptyGraphException(Exception):
+    """ Est levée si la méthode exec d'un graph vide est appelée"""
+    pass
