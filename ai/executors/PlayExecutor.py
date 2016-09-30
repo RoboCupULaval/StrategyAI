@@ -1,4 +1,5 @@
 from ai.executors.Executor import Executor
+from ai.states.PlayState import STAStatus
 
 
 class PlayExecutor(Executor):
@@ -22,7 +23,7 @@ class PlayExecutor(Executor):
             tactic_sequence = self.ws.play_state.current_strategy.object.get_next_tactics_sequence()
 
         for player_id in range(0, 6):
-            if self.ws.play_state.current_tactics[player_id].status:  # TODO See if that enum works as intended
+            if self.ws.play_state.current_tactics[player_id].status == STAStatus.FREE:  # TODO See if that enum works as intended
                 self.ws.play_state.set_tactic(player_id, tactic_sequence[player_id])
 
     def _execute_tactics(self):

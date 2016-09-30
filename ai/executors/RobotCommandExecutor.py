@@ -9,11 +9,16 @@ class RobotCommandExecutor(Executor):
 
     def exec(self):
 
-        self._clear_commands()
-        return self._generate_command()
+        self._clear_last_packet_commands()
+        self._generate_command()
+        self._clear_ai_commands()
+        return
 
-    def _clear_commands(self):
+    def _clear_last_packet_commands(self):
         self.ws.play_state.ready_to_ship_robot_packet_list.clear()
+
+    def _clear_ai_commands(self):
+        self.ws.play_state.current_ai_commands.clear()
 
     def _generate_command(self):
         ai_command_list = self._retrieve_commands()
@@ -25,7 +30,8 @@ class RobotCommandExecutor(Executor):
         return self.ws.play_state.ready_to_ship_robot_packet_list
 
     def _retrieve_commands(self):
-        return self.ws.play_state.current_ai_commands
+        cmd = self.ws.play_state.current_ai_commands
+        return cmd
 
     def _parse_ai_command(self, ai_command, player_id):
         if ai_command is not None:

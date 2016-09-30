@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from .Action import Action
 from ...Util.types import AICommand
-from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Pose import Pose, Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 
@@ -34,6 +34,7 @@ class MoveStraightTo(Action):
                      où Pose est la destination du joueur
                         kick est faux (on ne botte pas)
         """
-        move_destination = self.destination
+        move_destination = Pose(Position(self.destination.position.x, self.destination.position.y))
         kick_strength = 0
-        return AICommand(move_destination, kick_strength)
+        cmd = AICommand(move_destination, kick_strength)
+        return cmd
