@@ -15,6 +15,12 @@ __author__ = 'RoboCupULaval'
 
 
 class TestTransitions(Strategy):
+    """
+    Stratégie permettant de tester les transitions dans la suite de tactiques associées à un robot.
+    Robot 0: Gardien, une seule tactique.
+    Robot 1: Se déplace en suivant une trajectoire carrée. Suite de 4 tactiques GoToPosition.
+    Robot 2 à 5: Ne bouge pas, une seule tactique.
+    """
     def __init__(self, p_info_manager):
         super().__init__(p_info_manager)
 

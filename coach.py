@@ -45,7 +45,6 @@ class Coach(object):
         self.debug_executor = executor.DebugExecutor(self.info_manager)
         self.module_executor = executor.ModuleExecutor(self.info_manager)
         self.strategy_executor = executor.StrategyExecutor(self.info_manager)
-        self.tatic_executor = executor.TacticExecutor(self.info_manager)
         self.coach_command_sender = CoachCommandSender(self.info_manager)
         self._init_ui_debug()
 
@@ -102,7 +101,6 @@ class Coach(object):
         self.debug_executor.exec()
         self.module_executor.exec()
         self.strategy_executor.exec()
-        self.tatic_executor.exec()
 
 
 class CoachCommandSender(object):

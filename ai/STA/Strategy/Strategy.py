@@ -15,6 +15,10 @@ from RULEngine.Util.constant import PLAYER_PER_TEAM
 class Strategy(metaclass=ABCMeta):
     """ Définie l'interface commune aux stratégies. """
     def __init__(self, p_info_manager):
+        """
+        Initialise la stratégie en créant un graph vide pour chaque robot de l'équipe.
+        :param p_info_manager: Une référence à l'InfoManager
+        """
         self.info_manager = p_info_manager
         self.graphs = []
         for i in range(PLAYER_PER_TEAM):
@@ -44,7 +48,20 @@ class Strategy(metaclass=ABCMeta):
         commands = []
         for i in range(PLAYER_PER_TEAM):
             commands.append(self.graphs[i].exec())
+            self.info_manager.set_player_tactic(i, self.graphs[i].get_current_tactic())
         return commands
 
     def __str__(self):
         return self.__class__.__name__
+
+    def __eq__(self, other):
+        """
+        La comparaison est basée sur le nom des stratégies. Deux stratégies possédant le même nom sont considérée égale.
+        """
+        assert isinstance(other, Strategy)
+        return str(self) == str(other)
+
+    def __ne__(self, other):
+        """ Return self != other """
+        assert isinstance(other, Strategy)
+        return not self.__eq__(other)

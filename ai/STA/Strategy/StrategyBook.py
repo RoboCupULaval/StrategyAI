@@ -5,6 +5,7 @@ from .HumanControl import HumanControl
 from .SimpleDefense import SimpleDefense
 from .SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
+from ai.STA.Strategy.TestTransitions import TestTransitions
 
 
 class StrategyBook(object):
@@ -43,7 +44,7 @@ class StrategyBook(object):
         else:
             self.chosen_strategy = SimpleDefense
 
-        self.chosen_strategy = DoNothing
+        self.chosen_strategy = TestTransitions
 
         return self.chosen_strategy
 

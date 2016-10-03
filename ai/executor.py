@@ -22,6 +22,7 @@ from RULEngine.Util.constant import *
 
 __author__ = 'RoboCupULaval'
 
+
 class Executor(object, metaclass=ABCMeta):
     """ Classe abstraite des executeurs. """
 
@@ -32,6 +33,7 @@ class Executor(object, metaclass=ABCMeta):
     def exec(self):
         """ Méthode qui sera appelé à chaque coup de boucle. """
         pass
+
 
 class StrategyExecutor(Executor):
     """
@@ -45,8 +47,10 @@ class StrategyExecutor(Executor):
             accéder aux informations du GameState.
         """
         Executor.__init__(self, info_manager)
-        self.strategic_state = self.info_manager.get_strategic_state() #ref au module intelligent
+        self.strategic_state = self.info_manager.get_strategic_state()  # ref au module intelligent
         self.strategy = None
+        self.strategy_book = StrategyBook(self.info_manager)
+        self._set_strategy()
 
     def exec(self):
         """
@@ -54,7 +58,9 @@ class StrategyExecutor(Executor):
             #2 Assigne les tactiques aux robots
         """
         self._set_strategy()
-        self._assign_tactics()
+        command_list = self.strategy.exec()
+        for i in range(len(command_list)):
+            self.info_manager.set_player_next_action(i, command_list[i])
 
     def _set_strategy(self):
         """
@@ -62,46 +68,14 @@ class StrategyExecutor(Executor):
             meilleure stratégie pour le contexte.
         """
         if not self.info_manager.debug_manager.human_control:
-            self.strategy_book = StrategyBook(self.info_manager)
-            self.strategy = self.strategy_book.get_optimal_strategy()(self.info_manager)
+            optimal_strategy = self.strategy_book.get_optimal_strategy()
+            if self.strategy is None or optimal_strategy.__name__ != str(self.strategy):
+                self.strategy = optimal_strategy(self.info_manager)
         elif not self.info_manager.debug_manager.tactic_control:
             self.strategy = self.info_manager.strategy
         else:
             pass
 
-    def _assign_tactics(self):
-        """
-            Détermine à quel robot assigner les tactiques de la stratégie en
-            cours.
-        """
-        tactic_sequence = []
-        try:
-            tactic_sequence = self.strategy.get_next_tactics_sequence()
-        except AttributeError:
-            for i in range(0, 6):
-                tactic_sequence.append(Stop(self.info_manager, i))
-
-        if not self.info_manager.debug_manager.tactic_control:
-            for i in range(0, 6):
-                tactic = tactic_sequence[i]
-                tactic.player_id = i
-                self.info_manager.set_player_tactic(i, tactic_sequence[i])
-
-
-class TacticExecutor(Executor):
-    """ Fait avancer chaque FSM d'une itération. """
-    def __init__(self, info_manager):
-        """ Constructeur.
-            :param info_manager: Référence à la facade InfoManager pour pouvoir
-            accéder aux informations du GameState.
-        """
-        Executor.__init__(self, info_manager)
-
-    def exec(self):
-        """ Obtient la Tactic de chaque robot et fait progresser la FSM. """
-        for player_id in range(0, 6):
-            ai_command = self.info_manager.get_player_tactic(player_id).exec()
-            self.info_manager.set_player_next_action(player_id, ai_command)
 
 class ModuleExecutor(Executor):
     """ Met à jour tous les modules intelligents enregistré. """
@@ -115,6 +89,7 @@ class ModuleExecutor(Executor):
                 modules[key].update()
             except:
                 pass
+
 
 class DebugExecutor(Executor):
     """ S'occupe d'interpréter les commandes de debug """
@@ -177,9 +152,9 @@ class DebugExecutor(Executor):
         return tactic_ref
 
     def _sanitize_pid(self, pid):
-        if pid >= 0 and pid < 6:
+        if 0 <= pid < 6:
             return pid
-        elif pid >= 6 and pid < 12:
+        elif 6 <= pid < 12:
             return pid - 6
         else:
             return 0
