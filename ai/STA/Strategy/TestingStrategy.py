@@ -16,6 +16,7 @@ class TestingStrategy(Strategy):
         for i in range(0,5):
             self.tactics.append(Stop(self.info_manager, i))
 
+
         self.update_test()
 
         super().__init__(self.info_manager, self.tactics)
@@ -25,13 +26,14 @@ class TestingStrategy(Strategy):
         ### select robot and target here:
 
         self.test_robot = 1
-        self.test_target = Position(1500,-1500)
+        self.test_target = Position(500,1500)
         self.info_manager.set_player_target(self.test_robot, self.test_target)
 
         ### select test here:
 
-        self.test_go_get_ball()
+        #self.test_go_get_ball()
         #self.test_go_rotate_around_ball()
+        self.rotate_around_random_point()
 
     def test_go_get_ball(self):
         self.tactics[self.test_robot] = GoGetBall(self.info_manager, self.test_robot)
@@ -41,3 +43,7 @@ class TestingStrategy(Strategy):
             self.tactics[self.test_robot] = RotateAround(self.info_manager, self.test_robot)
         else:
             self.tactics[self.test_robot] = GoGetBall(self.info_manager, self.test_robot)
+
+    def rotate_around_random_point(self):
+        phony_origin = self.info_manager.get_ball_position()#Position(-1500,0)
+        self.tactics[self.test_robot] = RotateAround(self.info_manager, self.test_robot, phony_origin)
