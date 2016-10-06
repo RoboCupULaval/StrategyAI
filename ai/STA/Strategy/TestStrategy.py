@@ -1,10 +1,11 @@
 from . Strategy import Strategy
 from ai.STA.Tactic.Stop import Stop
+from ai.STA.Tactic.GoStraightTo import GoStraightTo
 
 
-class DoNothing(Strategy):
+class TestStrategy(Strategy):
     def __init__(self, p_game_state):
-        tactics = [Stop(p_game_state, 0),
+        tactics = [GoStraightTo(p_game_state, 0),
                    Stop(p_game_state, 1),
                    Stop(p_game_state, 2),
                    Stop(p_game_state, 3),

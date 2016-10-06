@@ -2,6 +2,7 @@
 
 from . Strategy import Strategy
 
+
 class HumanControl(Strategy):
-    def __init__(self, p_info_manager):
-        super().__init__(p_info_manager, [])
+    def __init__(self, p_gamestatemanager, p_playmanager):
+        super().__init__(p_gamestatemanager, p_playmanager, [])

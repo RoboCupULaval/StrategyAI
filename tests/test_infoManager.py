@@ -1,10 +1,10 @@
 # Under MIT License, see LICENSE.txt
 import unittest
-from ai.InfoManager import InfoManager
-from RULEngine.Game import Ball, Field, Team, Player
-from RULEngine.Util.Position import Position
-from RULEngine.Framework import GameState
 
+from RULEngine.Framework import GameState
+from RULEngine.Game import Ball, Field, Team
+from RULEngine.Util.Position import Position
+from ai.states.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 
@@ -113,11 +113,11 @@ class TestInfoManager(unittest.TestCase):
 
     def test_can_get_player_next_action(self):
         self.info_manager.friend['1']['next_pose'] = ((1,2,3), 10)
-        self.assertEqual(self.info_manager.get_player_next_action(1), ((1,2,3), 10))
+        self.assertEqual(self.info_manager.get_player_next_aicommand(1), ((1, 2, 3), 10))
 
     def test_fails_get_player_next_action_player_invalid(self):
         with self.assertRaises(Exception):
-            self.info_manager.get_player_next_action(42)
+            self.info_manager.get_player_next_aicommand(42)
 
     def test_fails_set_player_skill_target_goal_player_invalid(self):
         with self.assertRaises(Exception):
