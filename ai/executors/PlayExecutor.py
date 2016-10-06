@@ -19,7 +19,7 @@ class PlayExecutor(Executor):
         if strategy is not None:
             tactic_sequence = strategy.get_next_tactics_sequence()
         else:
-            self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy("DoNothing")(self.ws.game_state))
+            self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy("SimpleOffense")(self.ws.game_state))
             tactic_sequence = self.ws.play_state.current_strategy.object.get_next_tactics_sequence()
 
         for player_id in range(0, 6):
