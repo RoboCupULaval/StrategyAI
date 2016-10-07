@@ -16,14 +16,14 @@ from ..Util.area import *
 from ..Util.geometry import *
 from ..Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE, SPEED_ABSOLUTE_TOLERANCE, SPEED_DEAD_ZONE_DISTANCE, DEFAULT_MAX_SPEED, DEFAULT_MIN_SPEED
 
-DEFAULT_STATIC_GAIN = 0.001
-DEFAULT_INTEGRAL_GAIN = 0.0003
-DEFAULT_THETA_GAIN = 0.1
-MAX_INTEGRAL_PART = 0.5
-MAX_NAIVE_CMD = math.sqrt(2)/2
-MIN_NAIVE_CMD = -math.sqrt(2)/2
-MAX_THETA_CMD = math.pi/4
-MIN_THETA_CMD = -math.pi/4
+DEFAULT_STATIC_GAIN = 0.00095
+DEFAULT_INTEGRAL_GAIN = 0.0001
+DEFAULT_THETA_GAIN = 0.01
+MAX_INTEGRAL_PART = 500
+MAX_NAIVE_CMD = math.sqrt(2)/3
+MIN_NAIVE_CMD = -math.sqrt(2)/3
+MAX_THETA_CMD = math.pi/8
+MIN_THETA_CMD = -math.pi/8
 
 def _correct_for_referential_frame(x, y, orientation):
     cos = math.cos(-orientation)
