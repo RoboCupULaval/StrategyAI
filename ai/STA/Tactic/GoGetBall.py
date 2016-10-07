@@ -42,13 +42,14 @@ class GoGetBall(Tactic):
 
         self.move_action = GoToPosition(self.info_manager, self.player_id, self.info_manager.get_player_pose(self.player_id))
         self.move_action.status_flag = tactic_constants.SUCCESS
+        self.last_ball_position = self.info_manager.get_ball_position()
 
     def get_behind_ball(self):
-        self.status_flag = tactic_constants.WIP
-        ball_position = self.info_manager.get_ball_position()
-        move_action_status = self.move_action.status_flag
 
+        self.status_flag = tactic_constants.WIP
+        move_action_status = self.move_action.status_flag
         dist = self._get_distance_from_ball()
+
         if move_action_status == tactic_constants.SUCCESS and dist <= POSITION_DEADZONE:
             self.next_state = self.halt
         elif move_action_status == tactic_constants.SUCCESS and dist > POSITION_DEADZONE:
@@ -71,7 +72,7 @@ class GoGetBall(Tactic):
         grab_ball = GrabBall(self.info_manager,self.player_id)
         return grab_ball
 
-    def halt(self, reset=False):
+    def halt(self):
         self.status_flag = tactic_constants.SUCCESS
         dist = self._get_distance_from_ball()
 
@@ -79,9 +80,6 @@ class GoGetBall(Tactic):
             self.next_state = self.get_behind_ball
         else:
             self.next_state = self.halt
-
-        if reset:
-            self.move_action = self._generate_move_to()
 
         return Idle(self.info_manager, self.player_id)
 
@@ -92,3 +90,9 @@ class GoGetBall(Tactic):
         go_behind = GoBehind(self.info_manager, self.player_id, self.info_manager.get_ball_position(), self.target.position, DISTANCE_BEHIND)
         destination = go_behind.exec().move_destination
         return GoToPosition(self.info_manager, self.player_id, destination)
+
+    def _reset_ttl(self):
+        super()._reset_ttl()
+        if get_distance(self.last_ball_position, self.info_manager.get_ball_position()) > POSITION_DEADZONE:
+            self.last_ball_position = self.info_manager.get_ball_position()
+            self.move_action = self._generate_move_to()
