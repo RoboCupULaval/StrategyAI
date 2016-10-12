@@ -28,10 +28,10 @@ class GameState:
             cls.instance = object.__new__(cls)
         return cls.instance
 
-    def __init__(self):
+    def __init__(self, is_team_yellow=False):
         self.field = RULEngine.Game.Field.Field(RULEngine.Game.Ball.Ball())
-        self.my_team = RULEngine.Game.Team.Team(True)
-        self.other_team = RULEngine.Game.Team.Team(False)
+        self.my_team = RULEngine.Game.Team.Team(is_team_yellow)
+        self.other_team = RULEngine.Game.Team.Team(not is_team_yellow)
         self.timestamp = 0
         self.debug_information_in = []
         self.ui_debug_commands = []
@@ -55,7 +55,7 @@ class GameState:
     def _update_player(self, player_id, player_pose, is_my_team=True):
         """
             Met à jour les informations du joueur
-            :param is_my_team: Booléen avec valeur vrai par défaut, l'équipe du joueur est mon équipe
+            :param is_my_team: Booléen avec valeur 1vrai par défaut, l'équipe du joueur est mon équipe
             :param player_id: identifiant du joueur, en int
             :param player_pose: Nouvelle Pose à donner au joueur
         """
@@ -91,6 +91,9 @@ class GameState:
         self._update_team(new_game_state.friends, is_my_team)
         self._update_team(new_game_state.enemies, not is_my_team)
         self._update_timestamp(new_game_state.timestamp)
+
+    def get_my_team_player(self, player_id):
+        pass
 
     def get_player_pose(self, player_id, is_my_team=True):
         """

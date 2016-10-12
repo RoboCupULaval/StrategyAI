@@ -6,7 +6,7 @@
 """
 
 
-class ModuleManager:
+class ModuleState:
     """
         Gère les modules intelligents (par exemple, le Pathfinder) présents dans le jeu.
 
@@ -21,13 +21,8 @@ class ModuleManager:
             cls.instance = object.__new__(cls)
         return cls.instance
     """
-    def __init__(self, p_gamestate):
+    def __init__(self):
         self.modules = {}
-        self.gameState = p_gamestate
-
-    def update(self):
-        for module in self.modules.values():
-            module.update()
 
     def register_module(self, module_name, module_ref):
         """
@@ -36,7 +31,9 @@ class ModuleManager:
             pour recueillir les modules.
             :param module_ref: La classe associée au module_name
         """
-        self.modules[module_name] = module_ref(self.p_gameState)
+        assert isinstance(module_name, str), "le nom du module doit être un string!"
+
+        self.modules[module_name] = module_ref
 
     def acquire_module(self, module_name):
         """

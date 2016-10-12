@@ -1,13 +1,14 @@
-from ai.Debug.DebugState import DebugState
 from ai.Debug.DebugInterface import DebugInterface
+from ai.states.DebugState import DebugState
 from ai.states.GameState import GameState
 from ai.states.PlayState import PlayState
+from ai.states.ModuleState import ModuleState
 
 
 class WorldState:
-    def __init__(self, mode_debug_active=True):
+    def __init__(self, is_team_yellow=False, mode_debug_active=True):
         self.mode_debug_active = mode_debug_active
-
+        self.module_state = ModuleState()
         self.play_state = PlayState()
         self.game_state = GameState()
 

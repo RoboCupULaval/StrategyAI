@@ -5,7 +5,7 @@ from RULEngine.Game import Ball, Team, Field, Referee
 from RULEngine.Util import Pose, Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.states.GameState import GameState
-from ai.states.ModuleManager import ModuleManager
+from ai.states.ModuleState import ModuleState
 
 
 class TestGameStateManager(unittest.TestCase):
@@ -103,8 +103,8 @@ class TestModuleManager(unittest.TestCase):
         Teste les différentes fonctionnalités du ModuleManager
     """
     def setUp(self):
-        self.ModuleManager1 = ModuleManager()
-        self.ModuleManager2 = ModuleManager()
+        self.ModuleManager1 = ModuleState()
+        self.ModuleManager2 = ModuleState()
 
     def test_singleton(self):
         """
