@@ -2,11 +2,11 @@
 
 import unittest
 from math import pi
-from ai.InfoManager import InfoManager
-from ai.Util.Raycast import *
+
 from RULEngine.Game.Ball import Ball
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import BALL_RADIUS
+from ai.Util.Raycast import *
 
 __author__ = 'RoboCupULaval'
 

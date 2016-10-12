@@ -16,12 +16,12 @@ class GrabBall(Action):
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur
     """
-    def __init__(self, p_info_manager, p_player_id):
+    def __init__(self, p_game_state, p_player_id):
         """
             :param p_info_manager: référence vers l'InfoManager
             :param p_player_id: Identifiant du joueur qui prend le contrôle de la balle
         """
-        Action.__init__(self, p_info_manager)
+        Action.__init__(self, p_game_state)
         assert(isinstance(p_player_id, int))
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         self.player_id = p_player_id
@@ -31,8 +31,8 @@ class GrabBall(Action):
         Place le robot afin qu'il prenne le contrôle de la balle
         :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
         """
-        ball_position = self.info_manager.get_ball_position()
-        destination_orientation = get_angle(self.info_manager.get_player_pose(self.player_id).position, ball_position)
+        ball_position = self.game_state.get_ball_position()
+        destination_orientation = get_angle(self.game_state.get_player_pose(self.player_id).position, ball_position)
         destination_pose = Pose(ball_position, destination_orientation)
         kick_strength = 0
         return AICommand(destination_pose, kick_strength)

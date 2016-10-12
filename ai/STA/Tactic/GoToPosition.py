@@ -42,7 +42,7 @@ class GoToPosition(Tactic):
 
 
     def _init_pathfinder(self):
-        pathfinder = self.info_manager.acquire_module('Pathfinder')
+        pathfinder = self.game_state.acquire_module('Pathfinder')
         self.info_manager.paths[self.player_id] = pathfinder.get_path(self.player_id, self.target)
         pathfinder.draw_path(self.info_manager.paths[self.player_id], self.player_id)
 

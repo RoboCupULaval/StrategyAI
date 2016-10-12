@@ -1,21 +1,21 @@
 # Under MIT license, see LICENSE.txt
 
-from ai.STA.Action.MoveTo import MoveTo
-from ai.STA.Action.Idle import Idle
-from ai.STA.Action.GrabBall import GrabBall
-from ai.STA.Action.GoBetween import GoBetween
-from ai.STA.Action.MoveWithBall import MoveWithBall
-from ai.STA.Action.Kick import Kick
-from ai.STA.Action.ProtectGoal import ProtectGoal
-from ai.STA.Action.GoBehind import GoBehind
-from ai.InfoManager import InfoManager
-from RULEngine.Util.Position import Position
-from RULEngine.Util.Pose import Pose
-from RULEngine.Game.Ball import Ball
-from RULEngine.Util.constant import *
 import unittest
 from math import pi, atan, sqrt
+
+from RULEngine.Game.Ball import Ball
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.constant import *
+from ai.STA.Action.GoBehind import GoBehind
+from ai.STA.Action.GoBetween import GoBetween
+from ai.STA.Action.GrabBall import GrabBall
+from ai.STA.Action.Idle import Idle
+from ai.STA.Action.Kick import Kick
+from ai.STA.Action.MoveTo import MoveTo
+from ai.STA.Action.MoveWithBall import MoveWithBall
+from ai.STA.Action.ProtectGoal import ProtectGoal
 from ai.Util.types import AICommand
+from ai.states.InfoManager import InfoManager
 
 
 class TestActions(unittest.TestCase):

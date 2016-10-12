@@ -1,10 +1,11 @@
 # Under MIT license, see LICENSE.txt
 
-from RULEngine.Util.geometry import get_closest_point_on_line, get_distance
+from math import cos, sin
+
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM, ROBOT_RADIUS,BALL_RADIUS
-from ai.InfoManager import InfoManager
-from math import cos, sin
+from RULEngine.Util.geometry import get_closest_point_on_line, get_distance
+from ai.states.InfoManager import InfoManager
 
 __author__ = 'RoboCupULaval'
 
