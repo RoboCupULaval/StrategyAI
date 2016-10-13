@@ -7,6 +7,7 @@
     /entry/2016/03/23/092002
 
 """
+# FIXME IMPORT!
 import random
 import math
 import copy
@@ -19,7 +20,7 @@ from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import POSITION_DEADZONE
 from ai.Algorithm.IntelligentModule import Pathfinder
 
-from ai.Debug.debug_manager import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
+from ai.Debug.DebugInterface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 
 OBSTACLE_DEAD_ZONE = 700
 TIME_TO_UPDATE = 1
@@ -34,20 +35,20 @@ class PathfinderRRT(Pathfinder):
         Une méthode permet de récupérer la trajectoire d'un robot spécifique.
     """
 
-    def __init__(self, info_manager):
+    def __init__(self, p_world_state):
         """
             Constructeur, appel le constructeur de la classe mère pour assigner
             la référence sur l'InfoManager.
 
             :param info_manager: référence sur l'InfoManager
         """
-        super().__init__(info_manager)
-        self.last_paths_generated = [[self.state.get_player_position(x)] for x in range(6)]
+        super().__init__(p_world_state)
+        self.last_paths_generated = [[self.ws.game_state.get_player_pose(x).position] for x in range(6)]
         self.paths = {}
         for i in range(6):
             self.paths[i] = []
 
-        self.last_timestamp = self.state.timestamp
+        self.last_timestamp = self.ws.game_state.get_timestamp()
 
     def draw_path(self, path, pid=0):
         points = []
@@ -55,8 +56,8 @@ class PathfinderRRT(Pathfinder):
             x = path_element.position.x
             y = path_element.position.y
             points.append((x,y))
-        self.state.debug_manager.add_multiple_points(points, COLOR_ID_MAP[pid], width=5, link="path - " + str(pid), timeout=DEFAULT_PATH_TIMEOUT)
-
+        self.ws.debug_interface.add_multiple_points(points, COLOR_ID_MAP[pid], width=5, link="path - " + str(pid),
+                                                    timeout=DEFAULT_PATH_TIMEOUT)
 
     def get_path(self, pid=None, target=None):
         """
@@ -86,10 +87,10 @@ class PathfinderRRT(Pathfinder):
         for other_pid in list_of_pid:
 
             # TODO info manager changer get_player_position
-            position = self.state.get_player_position(other_pid)
+            position = self.ws.game_state.get_player_pose(other_pid).position
             obstacleList.append([position.x, position.y, OBSTACLE_DEAD_ZONE])
 
-        initial_position_of_main_player = self.state.get_player_position(pid)
+        initial_position_of_main_player = self.ws.game_state.get_player_pose(pid).position
 
 
         target_position_of_player = target.position
@@ -99,7 +100,7 @@ class PathfinderRRT(Pathfinder):
             target_position_of_player.x
             target_position_of_player.y
         except AttributeError:
-            target_position_of_player = self.state.get_player_position(pid)
+            target_position_of_player = self.ws.game_state.get_player_pose(pid).position
 
 
         rrt = RRT(start=[initial_position_of_main_player.x,

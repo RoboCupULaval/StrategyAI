@@ -5,7 +5,7 @@ from .HumanControl import HumanControl
 from .SimpleDefense import SimpleDefense
 from .SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
-from .TestStrategy import TestStrategy
+from ai.STA.Strategy.TestTransitions import TestTransitions
 
 
 class StrategyBook(object):
@@ -20,13 +20,13 @@ class StrategyBook(object):
                               'SimpleOffense': SimpleOffense,
                               'HumanControl': HumanControl,
                               'DoNothing': DoNothing,
-                              'TestStrategy': TestStrategy}
+                              'TestTransitions': TestTransitions}
 
     def get_strategies_name_list(self):
         return list(self.strategy_book.keys())
 
     def get_optimal_strategy(self):
-        return DoNothing
+        return TestTransitions
 
     def get_strategy(self, strategy_name):
         if self.check_existance_strategy(strategy_name):

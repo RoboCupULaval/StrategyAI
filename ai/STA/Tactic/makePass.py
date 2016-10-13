@@ -24,23 +24,23 @@ class MakePass(Tactic):
         status_flag : L'indicateur de progression de la tactique
     """
 
-    def __init__(self, info_manager, player_id):
-        Tactic.__init__(self, info_manager)
+    def __init__(self, game_state, player_id):
+        Tactic.__init__(self, game_state)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
 
         self.current_state = self.kick_ball_towards_target
         self.next_state = self.kick_ball_towards_target
         self.player_id = player_id
-        self.target = self.info_manager.get_player_target(self.player_id)
+        self.target = self.game_state.get_player_target(self.player_id)
 
     def kick_ball_towards_target(self):
-        if player_close_to_ball_facing_target(self.info_manager, self.player_id):  # derniere verification avant de frapper
-            player_position = self.info_manager.get_player_position(self.player_id)
-            target_position = self.info_manager.get_player_target(self.player_id)
+        if player_grabbed_ball(self.game_state, self.player_id):  # derniere verification avant de frapper
+            player_position = self.game_state.get_player_position(self.player_id)
+            target_position = self.game_state.get_player_target(self.player_id)
             kick_force = get_required_kick_force(player_position, target_position)
 
-            kick_ball = Kick(self.info_manager, self.player_id, kick_force)
+            kick_ball = Kick(self.game_state, self.player_id, kick_force)
 
             self.next_state = self.halt
             self.status_flag = tactic_constants.WIP
@@ -49,7 +49,7 @@ class MakePass(Tactic):
         else: # returns error, strategy goes back to GoGetBall
             self.next_state = self.halt
             self.status_flag = tactic_constants.FAILURE
-            return Idle(self.info_manager, self.player_id)
+            return Idle(self.game_state, self.player_id)
 
 
 

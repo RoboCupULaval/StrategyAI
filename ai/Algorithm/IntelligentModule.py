@@ -44,11 +44,11 @@ class Pathfinder(metaclass=ABCMeta):
         La valeur associée est une liste de *Pose*.
     """
 
-    def __init__(self, info_manager):
+    def __init__(self, p_world_state):
         """
             Initialise le dictionnaire *paths*.
         """
-        self.state = info_manager
+        self.ws = p_world_state
         self.paths = {}
         for i in range(6):
             self.paths[i] = []
