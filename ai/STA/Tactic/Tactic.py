@@ -33,7 +33,7 @@ class Tactic:
         self.time_to_live = time_to_live
         self.last_state_time = self.info_manager.timestamp
 
-    def halt(self, reset=False):
+    def halt(self):
         """
             S'exécute lorsque l'état courant est *Halt*
             :return: l'action Stop crée
@@ -48,10 +48,16 @@ class Tactic:
         """
         tactic_time = self.info_manager.timestamp
         next_action = self.current_state()
-        if tactic_time - self.last_state_time > self.time_to_live and self.time_to_live != 0:
-            self.last_state_time = tactic_time
-            self.next_state = partial(self.halt, reset=True)
+        if tactic_time - self.last_state_time > self.time_to_live and self.time_to_live > 0:
+            self._reset_ttl()
 
         self.current_state = self.next_state
         next_ai_command = next_action.exec()
         return next_ai_command
+
+    def _reset_ttl(self):
+        """
+            Quand le TTL expire, on réévalue le prochain état.
+            Par défaut on ne fait rien.
+        """
+        self.last_state_time = self.info_manager.timestamp

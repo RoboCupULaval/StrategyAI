@@ -72,11 +72,6 @@ class GoToPosition(Tactic):
 
         return MoveTo(self.info_manager, self.player_id, self.path_target)
 
-    def halt(self, reset=False):
+    def halt(self):
         stop = Idle(self.info_manager, self.player_id)
-        if get_distance(self.info_manager.get_player_pose(self.player_id).position, self.target.position) <= POSITION_DEADZONE:
-            self.next_state = self.halt
-        else:
-            self._init_pathfinder()
-            self.next_state = self.get_next_path_element
         return stop
