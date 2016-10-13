@@ -22,7 +22,7 @@ class GoBehind(Action):
         position1 : La position de l'objet derrière lequel le robot doit se placer (exemple: le ballon)
         position2 : La position par rapport à laquelle le robot doit être "derrière" l'objet de la position 1 (exemple: le but)
     """
-    def __init__(self, p_info_manager, p_player_id, p_position1, p_position2, p_distance_behind):
+    def __init__(self, p_game_state, p_player_id, p_position1, p_position2, p_distance_behind):
         """
             :param p_info_manager: référence vers l'InfoManager
             :param p_player_id: Identifiant du joueur qui doit se déplacer
@@ -30,7 +30,7 @@ class GoBehind(Action):
             :param p_position2: La position par rapport à laquelle le robot doit être "derrière" l'objet de la position 1 (exemple: le but)
             :param p_distance_behind: La distance a atteindre derriere la position 1
         """
-        Action.__init__(self, p_info_manager)
+        Action.__init__(self, p_game_state)
         assert(isinstance(p_player_id, int))
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert(isinstance(p_position1, Position))

@@ -1,7 +1,7 @@
 from RULEngine.Util.Pose import Pose, Position
 from ai.Debug.UIDebugCommand import UIDebugCommand
 from ai.executors.Executor import Executor
-from ai.states.PlayState import STAStatus
+from ai.STA.Strategy.HumanControl import HumanControl
 import copy
 
 
@@ -49,34 +49,24 @@ class DebugExecutor(Executor):
 
         if strategy_key == 'pStop':
             self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy("DoNothing")(self.ws.game_state))
-            self._lock_in_strategy()
 
         else:
             self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy(strategy_key)(self.ws.game_state))
-            self._lock_in_strategy()
-
-    def _lock_in_strategy(self):
-        self.ws.play_state.set_strategy_status(STAStatus.LOCKED)
-        self.ws.play_state.set_tactic_status([0, 1, 2, 3, 4, 5], STAStatus.FREE)
 
     def _parse_tactic(self, cmd):
         # TODO make implementation for other tactic packets! And finish this please
         # FIXME this pid thingy is getting out of control
         player_id = self._sanitize_pid(cmd.data['id'])
-        self._lock_in_strategy()
-
         tactic_name = cmd.data['tactic']
 
         # TODO ui must send better packets back with the args.
         target = cmd.data['target']
         target = Pose(Position(target[0], target[1]))
+        tactic = self.ws.play_state.get_new_tactic(tactic_name)(self.ws.game_state, player_id, target)
+        hc = HumanControl(self.ws.game_state)
 
-        self.ws.play_state.set_tactic(player_id, self.ws.play_state.get_new_tactic(tactic_name)(self.ws.game_state,
-                                                                                                player_id, target),
-                                      STAStatus.LOCKED)
-
-    def _lock_in_tactic(self, pid):
-        self.ws.play_state.set_tactic_status(pid, STAStatus.LOCKED)
+        hc.assign_tactic(tactic, player_id)
+        self.ws.play_state.set_strategy(hc)
 
     @staticmethod
     def _sanitize_pid(pid):

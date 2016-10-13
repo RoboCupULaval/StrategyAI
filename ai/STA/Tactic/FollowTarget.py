@@ -15,14 +15,14 @@ class FollowTarget(Tactic):
         next_state : chcîne de caratères définissant l'état suivant
     """
 
-    def __init__(self, info_manager, team_id, player_id):
-        Tactic.__init__(self, info_manager, team_id, player_id)
+    def __init__(self, game_state, team_id, player_id):
+        Tactic.__init__(self, game_state, team_id, player_id)
         self.current_state = 'halt'
         self.next_state = 'halt'
         self.dispatch.update({'follow_ball': self.follow_ball, 'follow_next_player': self.follow_next_player})
 
     def halt(self):
-        dist_ball_player1 = self.info_manager.get_player_position(0) - self.info_manager.get_ball_position()
+        dist_ball_player1 = self.game_state.get_player_position(0) - self.game_state.get_ball_position()
         if len(dist_ball_player1) < 20:
             self.next_state = 'halt'
         else:

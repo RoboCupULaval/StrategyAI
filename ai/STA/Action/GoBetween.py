@@ -22,7 +22,7 @@ class GoBetween(Action):
         position2 : La deuxième position formant la droite
         minimum_distance : La distance minimale qu'il doit y avoir entre le robot et chacun des points
     """
-    def __init__(self, p_info_manager, p_player_id, p_position1, p_position2, p_minimum_distance=0):
+    def __init__(self, p_game_state, p_player_id, p_position1, p_position2, p_minimum_distance=0):
         """
             :param p_info_manager: référence vers l'InfoManager
             :param p_player_id: Identifiant du joueur qui doit se déplacer
@@ -30,7 +30,7 @@ class GoBetween(Action):
             :param p_position2: La deuxième position formant la droite
             :param p_minimum_distance: La distance minimale qu'il doit y avoir entre le robot et chacun des points
         """
-        Action.__init__(self, p_info_manager)
+        Action.__init__(self, p_game_state)
         assert(isinstance(p_player_id, int))
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert(isinstance(p_position1, Position))
@@ -48,7 +48,7 @@ class GoBetween(Action):
         Calcul le point le plus proche du robot sur la droite entre les deux positions
         :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
         """
-        robot_position = self.info_manager.get_player_pose(self.player_id).position
+        robot_position = self.game_state.get_player_pose(self.player_id).position
         delta_x = self.position2.x - self.position1.x
         delta_y = self.position2.y - self.position1.y
 
@@ -96,7 +96,7 @@ class GoBetween(Action):
             destination_position = stayOutsideCircle(destination_position, self.position2, self.minimum_distance)
 
         # Calcul de l'orientation de la pose de destination
-        destination_orientation = get_angle(destination_position, self.info_manager.get_player_target(self.player_id))
+        destination_orientation = get_angle(destination_position, self.game_state.get_player_target(self.player_id))
         # TODO: vérifier l'utilisation de target vs goal
 
         destination_pose = Pose(destination_position, destination_orientation)

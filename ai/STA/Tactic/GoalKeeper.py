@@ -32,8 +32,8 @@ class GoalKeeper(Tactic):
     """
     # TODO: À complexifier pour prendre en compte la position des jouers adverses et la vitesse de la balle.
 
-    def __init__(self, p_game_state, p_player_id, p_is_yellow=False):
-        Tactic.__init__(self, p_game_state, p_player_id)
+    def __init__(self, p_game_state, p_player_id, p_is_yellow=False, time_to_live=0):
+        Tactic.__init__(self, p_game_state, p_player_id, time_to_live=time_to_live)
         assert isinstance(p_player_id, int)
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert isinstance(p_is_yellow, bool)
