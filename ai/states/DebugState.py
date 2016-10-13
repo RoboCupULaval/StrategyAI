@@ -1,5 +1,7 @@
+from ai.states.singleton import singleton
 
 
+@singleton
 class DebugState:
 
     def __init__(self):

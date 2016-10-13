@@ -1,12 +1,10 @@
-from enum import Enum
-from collections import namedtuple
+from ai.states.singleton import singleton
 
 from ai.STA.Strategy.StrategyBook import StrategyBook
 from ai.STA.Tactic.TacticBook import TacticBook
-from ai.STA.Strategy.DoNothing import DoNothing
-from RULEngine.Util.Pose import Pose
 
 
+@singleton
 class PlayState(object):
 
     def __init__(self):

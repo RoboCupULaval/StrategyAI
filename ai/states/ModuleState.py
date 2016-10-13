@@ -1,11 +1,12 @@
 # Under MIT License, see LICENSE.txt
-
+from ai.states.singleton import singleton
 
 """
     Ce module garde en mémoire les modules intelligents disponibles
 """
 
 
+@singleton
 class ModuleState:
     """
         Gère les modules intelligents (par exemple, le Pathfinder) présents dans le jeu.
@@ -21,8 +22,13 @@ class ModuleState:
             cls.instance = object.__new__(cls)
         return cls.instance
     """
+
+    # Gère l'état du jeu.
+
     def __init__(self):
         self.modules = {}
+        self.pathfinder = None
+
 
     def register_module(self, module_name, module_ref):
         """
@@ -45,6 +51,9 @@ class ModuleState:
             return self.modules[module_name]
         except KeyError:
             raise NonExistentModule("Le module " + module_name + " n'existe pas.")
+
+    def acquire_pathfinder(self):
+        return self.pathfinder
 
 
 class NonExistentModule(Exception):

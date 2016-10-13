@@ -1,3 +1,5 @@
+from ai.states.singleton import singleton
+
 from ai.Debug.DebugInterface import DebugInterface
 from ai.states.DebugState import DebugState
 from ai.states.GameState import GameState
@@ -5,6 +7,7 @@ from ai.states.PlayState import PlayState
 from ai.states.ModuleState import ModuleState
 
 
+@singleton
 class WorldState:
     def __init__(self, is_team_yellow=False, mode_debug_active=True):
         self.mode_debug_active = mode_debug_active
