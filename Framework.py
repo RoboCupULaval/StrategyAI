@@ -138,7 +138,7 @@ class Framework(object):
             if serial:
                 self.command_sender = SerialCommandSender()
             else:
-                self.command_sender = GrSimCommandSender(LOCAL_UDP_MULTICAST_ADDRESS, 20011)
+                self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
 
             self.debug_sender = DebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS, 20021)
             self.debug_receiver = DebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
