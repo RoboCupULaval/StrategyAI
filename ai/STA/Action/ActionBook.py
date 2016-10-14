@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from .GoBehind import GoBehind
 from .GoBetween import GoBetween
 from .GrabBall import GrabBall

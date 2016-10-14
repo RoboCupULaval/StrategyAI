@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from ai.Algorithm.Node import Node
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Tactic.GoStraightTo import GoStraightTo

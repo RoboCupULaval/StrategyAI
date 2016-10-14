@@ -1,4 +1,5 @@
 # Under MIT license, see LICENSE.txt
+
 """ Livre des stratégies. """
 
 from .HumanControl import HumanControl

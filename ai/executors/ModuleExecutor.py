@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from ai.executors.Executor import Executor
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 

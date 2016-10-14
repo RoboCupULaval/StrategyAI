@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from ai.Debug.DebugInterface import DebugInterface
 from ai.states.DebugState import DebugState
 from ai.states.GameState import GameState

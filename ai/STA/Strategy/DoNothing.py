@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from . Strategy import Strategy
 from ai.STA.Tactic.Stop import Stop
 from ai.Algorithm.Node import Node

@@ -1,3 +1,6 @@
+# Under MIT License, see LICENSE.txt
+
+
 def singleton(cls):
     instances = {}
 
