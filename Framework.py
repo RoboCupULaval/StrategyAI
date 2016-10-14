@@ -68,7 +68,7 @@ class Framework(object):
 
         self.referee = Referee()
 
-        self.ai_coach = ai_coach()
+        self.ai_coach = ai_coach(self.is_team_yellow)
 
         self.game = Game(self.referee, self.is_team_yellow)
 
@@ -208,15 +208,18 @@ class Framework(object):
         if cmd_time - self.last_cmd_time > CMD_DELTA_TIME:
             self.last_cmd_time = cmd_time
             commands = self._get_coach_robot_commands()
-            #commands[4] = commands[4].to_speed_command()
-            pi_cmd = self.robots_pi[4].update_pid_and_return_speed_command(commands[4])
-            commands[4].pose = pi_cmd
-            self.command_sender.send_command(commands[4])
 
-            #for command in commands:
-            #    command = command.to_speed_command()
-            #    command.pose.orientation = 0
-            #    self.command_sender.send_command(command)
+            #cette section doit être utilisée lors des séances d'intégration au local 0108
+            #commands[4] = commands[4].to_speed_command()
+            #pi_cmd = self.robots_pi[4].update_pid_and_return_speed_command(commands[4])
+            #commands[4].pose = pi_cmd
+            #self.command_sender.send_command(commands[4])
+
+            #cette section doit être utilisée lors des simulations avec grSim
+            for command in commands:
+                command = command.to_speed_command()
+                command.pose.orientation = 0
+                self.command_sender.send_command(command)
 
 
     def _get_coach_robot_commands(self):
