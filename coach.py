@@ -7,7 +7,6 @@ from ai.executors.RobotCommandExecutor import RobotCommandExecutor
 # FIXME this thing!
 TIMESTAMP_MINIMAL_DELTA = 0.015
 
-
 class Coach(object):
 
     def __init__(self, is_team_yellow, mode_debug_active=True):

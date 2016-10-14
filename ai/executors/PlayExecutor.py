@@ -1,6 +1,5 @@
 from ai.executors.Executor import Executor
 
-
 class PlayExecutor(Executor):
 
     def __init__(self, p_world_state):

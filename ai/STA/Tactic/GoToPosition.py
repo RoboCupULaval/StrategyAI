@@ -56,7 +56,6 @@ class GoToPosition(Tactic):
     def get_next_path_element(self):
         assert(isinstance(self.path, list)), "Le chemin doit être une liste"
 
-        print("Get next element")
         if len(self.path) > 0:
             self.path_target = self.path.pop(0) # on récupère le premier path element
             self.next_state = self.move_to_position
