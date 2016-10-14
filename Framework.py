@@ -209,16 +209,9 @@ class Framework(object):
             self.last_cmd_time = cmd_time
             commands = self._get_coach_robot_commands()
 
-            #cette section doit être utilisée lors des séances d'intégration au local 0108
-            #commands[4] = commands[4].to_speed_command()
-            #pi_cmd = self.robots_pi[4].update_pid_and_return_speed_command(commands[4])
-            #commands[4].pose = pi_cmd
-            #self.command_sender.send_command(commands[4])
-
-            #cette section doit être utilisée lors des simulations avec grSim
-            for command in commands:
-                command = command.to_speed_command()
-                command.pose.orientation = 0
+            for idx,command in enumerate(commands):
+                pi_cmd = self.robots_pi[idx].update_pid_and_return_speed_command(command)
+                command.pose = pi_cmd
                 self.command_sender.send_command(command)
 
 
