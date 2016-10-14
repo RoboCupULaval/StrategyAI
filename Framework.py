@@ -19,11 +19,14 @@ from .Communication.referee import RefereeServer
 from .Communication.udp_server import GrSimCommandSender, DebugCommandSender,\
                                       DebugCommandReceiver
 from .Communication.serial_command_sender import SerialCommandSender
-from .Command.command import Stop
+from .Command.command import Stop, PI
 from .Util.exception import StopPlayerError
 
 LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
 UI_DEBUG_MULTICAST_ADDRESS = "127.0.0.1"
+CMD_TIME_DELTA = 0.030
+
+CMD_DELTA_TIME = 0.030
 
 GameState = namedtuple('GameState', ['field', 'referee', 'friends',
                                      'enemies', 'timestamp', 'debug'])
@@ -51,6 +54,8 @@ class Framework(object):
         self.times = 0
         self.last_time = 0
         self.vision = None
+        self.last_cmd_time = time.time()
+        self.robots_pi = [PI(), PI(), PI(), PI(), PI(), PI()]
 
 
     def create_game(self, ai_coach):
@@ -199,21 +204,19 @@ class Framework(object):
             print("En attente d'une image de la vision.")
 
     def _send_robot_commands(self):
-        # FIXME: pourquoi on fait ce check? est-ce une erreur introduite par un des refactors?
-        if self.vision.get_latest_frame():
+        cmd_time = time.time()
+        if cmd_time - self.last_cmd_time > CMD_DELTA_TIME:
+            self.last_cmd_time = cmd_time
             commands = self._get_coach_robot_commands()
-            for idx,command in enumerate(commands):
-                command = command.to_speed_command()
-                # hack debug
-                pos_beg = self.ai_coach.info_manager.get_player_position(idx)
-                pos_end = pos_beg + command.pose.position * 300
-                x_beg = pos_beg.x
-                y_beg = pos_beg.y
-                x_end = pos_end.x
-                y_end = pos_end.y
-                self.ai_coach.info_manager.debug_manager.add_line((x_beg, y_beg), (x_end, y_end), timeout=0.025)
-                command.pose.orientation = 0
-                self.command_sender.send_command(command)
+            #commands[4] = commands[4].to_speed_command()
+            pi_cmd = self.robots_pi[4].update_pid_and_return_speed_command(commands[4])
+            commands[4].pose = pi_cmd
+            self.command_sender.send_command(commands[4])
+
+            #for command in commands:
+            #    command = command.to_speed_command()
+            #    command.pose.orientation = 0
+            #    self.command_sender.send_command(command)
 
 
     def _get_coach_robot_commands(self):

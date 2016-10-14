@@ -17,6 +17,10 @@ class Pose(object):
         elif self.orientation <= -m.pi:
             self.orientation += 2*m.pi
 
+    def to_tuple(self):
+        """ Retourne la position de la pose sous forme d'un tuple."""
+        return self.position.x, self.position.y
+
     def __str__(self):
         return '[{}, theta={}]'.format(self.position, self.orientation)
     def __repr__(self):
