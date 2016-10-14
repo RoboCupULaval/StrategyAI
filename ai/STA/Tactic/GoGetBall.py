@@ -23,7 +23,7 @@ class GoGetBall(Tactic):
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
     attributs:
-        info_manager: référence à la façade InfoManager
+        game_state: référence à la façade InfoManager
         player_id : Identifiant du joueur auquel est assigné la tactique
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique
@@ -93,6 +93,6 @@ class GoGetBall(Tactic):
 
     def _reset_ttl(self):
         super()._reset_ttl()
-        if get_distance(self.last_ball_position, self.info_manager.get_ball_position()) > POSITION_DEADZONE:
+        if get_distance(self.last_ball_position, self.game_state.get_ball_position()) > POSITION_DEADZONE:
             self.last_ball_position = self.game_state.get_ball_position()
             self.move_action = self._generate_move_to()
