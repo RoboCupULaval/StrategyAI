@@ -1,3 +1,4 @@
+# Under MIT License, see LICENSE.txt
 
 from ai.Debug.DebugCommand import DebugCommand
 

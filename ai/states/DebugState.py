@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from ai.states.singleton import singleton
 
 
