@@ -5,6 +5,7 @@ from .HumanControl import HumanControl
 from .SimpleDefense import SimpleDefense
 from .SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
+from .WeirdmovementStrategy import WeirdmovementStrategy
 from ai.STA.Strategy.TestTransitions import TestTransitions
 
 
@@ -20,6 +21,7 @@ class StrategyBook(object):
                               'SimpleOffense': SimpleOffense,
                               'HumanControl': HumanControl,
                               'DoNothing': DoNothing,
+                              'WeirdmovementStrategy': WeirdmovementStrategy,
                               'TestTransitions': TestTransitions}
 
     def get_strategies_name_list(self):
