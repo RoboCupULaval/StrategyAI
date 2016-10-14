@@ -4,36 +4,63 @@ from abc import ABCMeta
 
 from ..Tactic.Stop import Stop
 from ..Tactic import tactic_constants
+from ai.Algorithm.Graph import Graph
+from ai.Algorithm.Node import Node
+from ai.Algorithm.Vertex import Vertex
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 
+
+# Pour l'instant, les stratégies n'optimisent pas la gestion des ressources (ex: toujours le même robot qui va chercher
+# la balle et non le plus proche). TODO: À optimiser
 class Strategy(metaclass=ABCMeta):
     """ Définie l'interface commune aux stratégies. """
-    def __init__(self, p_info_manager, p_starting_tactics_sequence):
-        self.info_manager = p_info_manager
-        self.tactics_sequence = []
-        self._init_tactics_sequence(p_starting_tactics_sequence)
-
-    def get_next_tactics_sequence(self):
+    def __init__(self, p_game_state):
         """
-            Retourne 6 tactics, si la séquence de tactiques de la stratégie
-            est épuiséee, les dernières tactiques sont *Stop*.
+        Initialise la stratégie en créant un graph vide pour chaque robot de l'équipe.
+        :param p_game_state: Une référence à l'InfoManager
         """
-        self._remove_finished_tactics()
-        return self._generate_next_tactics_sequence()
+        self.game_state = p_game_state
+        self.graphs = []
+        for i in range(PLAYER_PER_TEAM):
+            self.graphs.append(Graph())
 
-    def _init_tactics_sequence(self, p_starting_tactics_sequence):
-        for tactic in p_starting_tactics_sequence:
-            self.tactics_sequence.append(tactic)
+    def get_current_state(self):
+        """
+            Retourne l'état actuel de la stratégie, dans une liste de 6 tuples. Chaque tuple contient:
+                -L'id d'un robot;
+                -Le nom de la Tactic qui lui est présentement assignée sous forme d'une chaîne de caractères;
+                -Le nom de l'Action en cours sous forme d'une chaîne de caractères;
+                -Sa target, soit un objet Pose.
+        """
+        state = []
+        for i in range(PLAYER_PER_TEAM):
+            current_tactic = self.graphs[i].get_current_tactic()
+            state.append((current_tactic.player_id, str(current_tactic), "None",
+                          current_tactic.target))
+        return state
 
-    def _remove_finished_tactics(self):
-        for tactic in self.tactics_sequence:
-            if  tactic_constants.is_complete(tactic.status_flag):
-                self.tactics_sequence.remove(tactic)
+    def exec(self):
+        """
+        Appelle la méthode exec de chacune des Tactics assignées aux robots.
+        :return: Une liste des 6 AICommand à envoyer aux robots. La commande située à l'indice i de la liste doit être
+        envoyée au robot i.
+        """
+        commands = []
+        for i in range(PLAYER_PER_TEAM):
+            commands.append(self.graphs[i].exec())
+        return commands
 
-    def _generate_next_tactics_sequence(self):
-        next_tactics_sequence = []
-        for i in range(0, 6):
-            try:
-                next_tactics_sequence.append(self.tactics_sequence[i])
-            except IndexError:
-                next_tactics_sequence.append(Stop(self.info_manager, 0))
-        return next_tactics_sequence
+    def __str__(self):
+        return self.__class__.__name__
+
+    def __eq__(self, other):
+        """
+        La comparaison est basée sur le nom des stratégies. Deux stratégies possédant le même nom sont considérée égale.
+        """
+        assert isinstance(other, Strategy)
+        return str(self) == str(other)
+
+    def __ne__(self, other):
+        """ Return self != other """
+        assert isinstance(other, Strategy)
+        return not self.__eq__(other)

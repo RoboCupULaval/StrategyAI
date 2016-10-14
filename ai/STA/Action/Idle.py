@@ -12,12 +12,12 @@ class Idle(Action):
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur
     """
-    def __init__(self, p_info_manager, p_player_id):
+    def __init__(self, p_game_state, p_player_id):
         """
             :param p_info_manager: référence vers l'InfoManager
             :param p_player_id: Identifiant du joueur qui s'arrête
         """
-        Action.__init__(self, p_info_manager)
+        Action.__init__(self, p_game_state)
         assert(isinstance(p_player_id, int))
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         self.player_id = p_player_id
@@ -25,7 +25,7 @@ class Idle(Action):
     def exec(self):
         """
         Exécute l'arrêt
-        :return: Un tuple (Pose, kick) où Pose est la position du joueur et kick est nul (on ne botte pas)
+        :return: Un tuple (None, kick) où None pour activer une commande de stop et kick est nul (on ne botte pas)
         """
         # un None pour que le coachcommandsender envoi une command vide.
         move_destination = None

@@ -4,10 +4,12 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic import tactic_constants
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
-from ai.STA.Tactic import tactic_constants
+from ai.states.ModuleState import NonExistentModule
 from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import ANGLE_TO_HALT, POSITION_DEADZONE, PLAYER_PER_TEAM
+
+from ai.states.ModuleState import ModuleState
 
 __author__ = 'RoboCupULaval'
 
@@ -32,22 +34,30 @@ class GoToPosition(Tactic):
         assert PLAYER_PER_TEAM >= player_id >= 0
         assert isinstance(target, Pose), "La target devrait être une Pose"
 
-        self.current_state = self.get_next_path_element
-        self.next_state = self.get_next_path_element
         self.player_id = player_id
         self.target = target
-        self.path_target = None
+        self.path_target = target
+        self.paths = {}
+        self.module_state = ModuleState()
 
         self._init_pathfinder()
-
+        self.current_state = self.move_to_position
+        self.next_state = self.move_to_position
 
     def _init_pathfinder(self):
-        pathfinder = self.info_manager.acquire_module('Pathfinder')
-        self.info_manager.paths[self.player_id] = pathfinder.get_path(self.player_id, self.target)
-        pathfinder.draw_path(self.info_manager.paths[self.player_id], self.player_id)
+        try:
+            # FIXME
+            print(self.module_state)
+            pathfinder = self.module_state.acquire_pathfinder()
+            print(pathfinder)
+            self.paths[self.player_id] = pathfinder.get_path(self.player_id, self.target)
+            pathfinder.draw_path(self.paths[self.player_id], self.player_id)
+        except NonExistentModule as err:
+            print(err)
+            self.game_state.paths[self.player_id] = [self.target]
 
     def get_next_path_element(self):
-        path = self.info_manager.paths[self.player_id]
+        path = self.paths[self.player_id]
         assert(isinstance(path, list)), "Le chemin doit être une liste"
 
         if len(path) > 0:
@@ -57,26 +67,30 @@ class GoToPosition(Tactic):
             self.status_flag = tactic_constants.SUCCESS
             self.next_state = self.halt
 
-        return Idle(self.info_manager, self.player_id)
+        return Idle(self.game_state, self.player_id)
 
     def move_to_position(self):
-        assert(isinstance(self.path_target, Pose)), "La target devrait être une Pose"
-        player_position = self.info_manager.get_player_position(self.player_id)
-        player_orientation = self.info_manager.get_player_orientation(self.player_id)
+        assert(isinstance(self.target, Pose)), "La target devrait être une Pose"
+        player_position = self.game_state.get_player_pose(self.player_id).position
+        player_orientation = self.game_state.get_player_pose(self.player_id).orientation
 
-        if get_distance(player_position, self.path_target.position) <= POSITION_DEADZONE:
-                self.next_state = self.get_next_path_element
+        if get_distance(player_position, self.target.position) <= POSITION_DEADZONE or \
+                get_angle(player_position, self.target.position) <= ANGLE_TO_HALT:
+                self.next_state = self.halt
+                self.status_flag = tactic_constants.SUCCESS
         else:
             self.status_flag = tactic_constants.WIP
             self.next_state = self.move_to_position
-
-        return MoveTo(self.info_manager, self.player_id, self.path_target)
+        return MoveTo(self.game_state, self.player_id, self.path_target)
+        # return MoveTo(self.game_state, self.player_id, Pose()) # pathfinder desactivé
 
     def halt(self, reset=False):
-        stop = Idle(self.info_manager, self.player_id)
-        if get_distance(self.info_manager.get_player_pose(self.player_id).position, self.target.position) <= POSITION_DEADZONE:
+        stop = Idle(self.game_state, self.player_id)
+
+        if get_distance(self.game_state.get_player_pose(self.player_id).position, self.target.position) <= POSITION_DEADZONE:
             self.next_state = self.halt
         else:
             self._init_pathfinder()
             self.next_state = self.get_next_path_element
+
         return stop

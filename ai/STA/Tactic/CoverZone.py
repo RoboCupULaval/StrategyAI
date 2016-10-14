@@ -32,8 +32,8 @@ class CoverZone(Tactic):
         status_flag : L'indicateur de progression de la tactique
     """
 
-    def __init__(self, p_info_manager, p_player_id, p_y_top, p_y_bottom, p_x_left, p_x_right, p_is_yellow=False):
-        Tactic.__init__(self, p_info_manager)
+    def __init__(self, p_game_state, p_player_id, p_y_top, p_y_bottom, p_x_left, p_x_right, p_is_yellow=False):
+        Tactic.__init__(self, p_game_state, p_player_id)
         assert isinstance(p_player_id, int)
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert isinstance(p_y_top, (int, float))
@@ -55,12 +55,11 @@ class CoverZone(Tactic):
 
     def cover_zone(self):
         enemy_positions = self.get_enemy_in_zone()
-        ball_pos = self.info_manager.get_ball_position()
-        self.info_manager.set_player_target(self.player_id, ball_pos)
+        ball_pos = self.game_state.get_ball_position()
 
         if len(enemy_positions) == 0:
             self.next_state = self.support_other_zone
-            return Idle(self.info_manager, self.player_id)
+            return Idle(self.game_state, self.player_id)
         else:
             self.next_state = self.cover_zone
 
@@ -69,7 +68,7 @@ class CoverZone(Tactic):
             mean_position = mean_position + pos
         mean_position /= len(enemy_positions)
         destination = stayInsideSquare(mean_position, self.y_top, self.y_bottom, self.x_left, self.x_right)
-        return GoBetween(self.info_manager, self.player_id, ball_pos, destination, 2*ROBOT_RADIUS)
+        return GoBetween(self.game_state, self.player_id, ball_pos, destination, 2*ROBOT_RADIUS)
 
     def support_other_zone(self):
         enemy_positions = self.get_enemy_in_zone()
@@ -79,17 +78,16 @@ class CoverZone(Tactic):
         else:
             self.next_state = self.cover_zone
 
-        destination = stayInsideSquare(self.info_manager.get_ball_position(), self.y_top, self.y_bottom, self.x_left,
+        destination = stayInsideSquare(self.game_state.get_ball_position(), self.y_top, self.y_bottom, self.x_left,
                                        self.x_right)
         destination = stayOutsideGoalArea(destination, self.is_yellow)
-        orientation = get_angle(destination, self.info_manager.get_ball_position())
-        return MoveTo(self.info_manager, self.player_id, Pose(destination, orientation))
+        orientation = get_angle(destination, self.game_state.get_ball_position())
+        return MoveTo(self.game_state, self.player_id, Pose(destination, orientation))
 
     def get_enemy_in_zone(self):
-        enemy_dict = self.info_manager.enemy
         enemy_list = []
         for robot in range(6):
-            pos = enemy_dict[str(robot)]['position']
+            pos = self.game_state.get_player_pose(robot, False).position
             if isInsideSquare(pos, self.y_top, self.y_bottom, self.x_left, self.x_right):
                 enemy_list.append(pos)
         return enemy_list

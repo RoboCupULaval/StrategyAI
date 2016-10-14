@@ -12,7 +12,7 @@ class IntelligentModule(object, metaclass=ABCMeta):
         Actuellement ne défini que l'attribut *state*
     """
 
-    def __init__(self, pInfoManager):
+    def __init__(self, p_gameState):
         """
             Reçoit une référence vers InfoManager. Cette référence est rennomée
             comme étant *state*.
@@ -20,7 +20,7 @@ class IntelligentModule(object, metaclass=ABCMeta):
             :param pInfoManager: Référence vers l'InfoManager
         """
 
-        self.state = pInfoManager
+        self.state = p_gameState
 
     @abstractmethod
     def update(self):
@@ -44,11 +44,11 @@ class Pathfinder(metaclass=ABCMeta):
         La valeur associée est une liste de *Pose*.
     """
 
-    def __init__(self, info_manager):
+    def __init__(self, p_world_state):
         """
             Initialise le dictionnaire *paths*.
         """
-        self.state = info_manager
+        self.ws = p_world_state
         self.paths = {}
         for i in range(6):
             self.paths[i] = []

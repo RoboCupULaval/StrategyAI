@@ -29,12 +29,12 @@ class InfluenceMap(IntelligentModule):
     transfomé en int arrondie vers 0.
     """
 
-    def __init__(self, info_manager, resolution=100, strength_decay=0.90, strength_peak=100, effect_radius=40,
+    def __init__(self, game_state, resolution=100, strength_decay=0.90, strength_peak=100, effect_radius=40,
                  have_static=False, have_it_executed=False):
         """
             Constructeur de la classe InfluenceMap
 
-            :param info_manager:  référence vers l'InfoManager
+            :param game_state:  référence vers le game state
             :param resolution:    résolution des cases (défaut = 100)
             :param strength_decay: facteur de réduction de l'influence par la distance (défaut = 0.8)
             :param strength_peak:  maximum de la force appliquable par un point (est aussi le min) (défaut = 100)
@@ -51,7 +51,7 @@ class InfluenceMap(IntelligentModule):
         assert 0 < strength_peak, "Creation InfluenceMap avec param strength_decay <= à 0"
         assert 0 < effect_radius, "Creation InfluenceMap avec param effect_radius <= 0"
 
-        super().__init__(info_manager)
+        super().__init__(game_state)
 
         # board parameters
         self._resolution = resolution
@@ -208,7 +208,7 @@ class InfluenceMap(IntelligentModule):
 
     def _update_and_draw_robot_position(self):
         """
-        Fetch la position des robots dans l'infomanager et les applique sur le tableau principal
+        Fetch la position des robots dans le gamestate et les applique sur le tableau principal
         """
         robots_position = []
         for i in range(self.state.get_count_player()):
