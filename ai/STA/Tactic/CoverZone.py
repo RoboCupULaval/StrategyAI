@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic import tactic_constants
+from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
@@ -50,7 +50,7 @@ class CoverZone(Tactic):
         self.is_yellow = p_is_yellow
         self.current_state = self.cover_zone
         self.next_state = self.cover_zone
-        self.status_flag = tactic_constants.WIP
+        self.status_flag = Flags.WIP
         self.target = Pose(Position(int((p_x_right - p_x_left)/2), int((p_y_top - p_y_bottom)/2)))
 
     def cover_zone(self):
