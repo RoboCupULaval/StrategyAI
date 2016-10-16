@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from ai.executors.Executor import Executor
 from RULEngine.Command import command
 from RULEngine.Util.Pose import Pose
@@ -42,10 +44,7 @@ class RobotCommandExecutor(Executor):
                 assert (isinstance(ai_command.move_destination, Pose))
                 return self._generate_move_command(ai_command.move_destination, player_id)
 
-            else:
-                return self._generate_empty_command(player_id)
-        else:
-            return self._generate_empty_command(player_id)
+        return self._generate_empty_command(player_id)
 
     def _retrieve_player(self, player_id):
         return self.ws.game_state.my_team.players[player_id]

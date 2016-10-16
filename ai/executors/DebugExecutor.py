@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from RULEngine.Util.Pose import Pose, Position
 from ai.Debug.UIDebugCommand import UIDebugCommand
 from ai.executors.Executor import Executor

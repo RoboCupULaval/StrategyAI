@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from ai.states.WorldState import WorldState
 from ai.executors.DebugExecutor import DebugExecutor
 from ai.executors.ModuleExecutor import ModuleExecutor

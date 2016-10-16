@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from .GoGetBall import GoGetBall
 from .GoalKeeper import GoalKeeper
 from .GoToPosition import GoToPosition
