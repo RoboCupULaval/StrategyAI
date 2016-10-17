@@ -6,6 +6,7 @@ from .SimpleDefense import SimpleDefense
 from .SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
 from ai.STA.Strategy.TestTransitions import TestTransitions
+from .chTest import chTest
 
 
 class StrategyBook(object):
@@ -20,7 +21,8 @@ class StrategyBook(object):
                               'SimpleOffense': SimpleOffense,
                               'HumanControl': HumanControl,
                               'DoNothing': DoNothing,
-                              'TestTransitions': TestTransitions}
+                              'TestTransitions': TestTransitions,
+                              "chTest": chTest}
 
     def get_strategies_name_list(self):
         return list(self.strategy_book.keys())

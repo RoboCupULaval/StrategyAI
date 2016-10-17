@@ -91,6 +91,7 @@ class GoToPosition(Tactic):
             self.next_state = self.halt
         else:
             self._init_pathfinder()
+            print("guilty")
             self.next_state = self.get_next_path_element
 
         return stop
