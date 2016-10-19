@@ -283,6 +283,14 @@ def angle_to_ball_is_tolerated(player_position, ball_position, target_position, 
         return True
     return False
 
+def angle_to_origin_then_target_is_tolerated(player_position, origin, target_position, tolerated_angle):
+    angle_player_to_origin = get_angle(player_position, origin)
+    angle_origin_to_target = get_angle(origin, target_position)
+    angle_difference = abs(angle_player_to_origin - angle_origin_to_target)
+    if angle_difference < tolerated_angle:
+        return True
+    return False
+
 def get_required_kick_force(position1,position2): # simple calculation
 
     distance = get_distance(position1,position2)

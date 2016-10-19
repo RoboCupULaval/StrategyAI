@@ -216,3 +216,15 @@ def player_close_to_ball_facing_target(info_manager, player_id):
             return True
 
     return False
+
+def player_close_to_origin_facing_target(info_manager, player_id, origin):
+    player_position = info_manager.get_player_position(player_id)
+    target_position = info_manager.get_player_target(player_id)
+
+    if player_close_to_ball(info_manager,player_id):
+
+        if angle_to_ball_is_tolerated(player_position, origin, target_position, ANGLE_TO_HALT):
+            return True
+
+    return False
+
