@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 SENDER_NAME = "AI"
 
 

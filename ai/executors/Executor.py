@@ -1,3 +1,6 @@
+# Under MIT License, see LICENSE.txt
+
+
 from abc import ABCMeta, abstractmethod
 
 

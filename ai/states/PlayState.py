@@ -1,7 +1,8 @@
-from ai.states.singleton import singleton
+# Under MIT License, see LICENSE.txt
 
 from ai.STA.Strategy.StrategyBook import StrategyBook
 from ai.STA.Tactic.TacticBook import TacticBook
+from ai.Util.singleton import singleton
 
 
 @singleton

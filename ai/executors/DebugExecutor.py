@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from RULEngine.Util.Pose import Pose, Position
 from ai.Debug.UIDebugCommand import UIDebugCommand
 from ai.executors.Executor import Executor
@@ -62,11 +64,19 @@ class DebugExecutor(Executor):
         # TODO ui must send better packets back with the args.
         target = cmd.data['target']
         target = Pose(Position(target[0], target[1]))
-        tactic = self.ws.play_state.get_new_tactic(tactic_name)(self.ws.game_state, player_id, target)
-        hc = HumanControl(self.ws.game_state)
+        tactic = self.ws.play_state.get_new_tactic('Idle')(self.ws.game_state, player_id, target)
+        try:
+            tactic = self.ws.play_state.get_new_tactic(tactic_name)(self.ws.game_state, player_id, target)
+        except:
+            print("La tactique n'a pas été appliquée par cause de mauvais arguments.")
 
-        hc.assign_tactic(tactic, player_id)
-        self.ws.play_state.set_strategy(hc)
+        if isinstance(self.ws.play_state.current_strategy, HumanControl):
+            hc = self.ws.play_state.current_strategy
+            hc.assign_tactic(tactic, player_id)
+        else:
+            hc = HumanControl(self.ws.game_state)
+            hc.assign_tactic(tactic, player_id)
+            self.ws.play_state.set_strategy(hc)
 
     @staticmethod
     def _sanitize_pid(pid):

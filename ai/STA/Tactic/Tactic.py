@@ -4,7 +4,7 @@ from functools import partial
 
 from RULEngine.Util.Pose import Pose
 from ai.STA.Action.Idle import Idle
-from ai.STA.Tactic import tactic_constants
+from ai.STA.Tactic.tactic_constants import DEFAULT_TIME_TO_LIVE, Flags
 
 __author__ = 'RobocupULaval'
 
@@ -15,7 +15,7 @@ class Tactic:
     """
 
     def __init__(self, p_game_state, player_id, target=Pose(),
-                 time_to_live=tactic_constants.DEFAULT_TIME_TO_LIVE):
+                 time_to_live=DEFAULT_TIME_TO_LIVE):
         """
             Initialise la tactique
 
@@ -25,12 +25,12 @@ class Tactic:
         self.player_id = player_id
         self.current_state = self.halt
         self.next_state = self.halt
-        self.status_flag = tactic_constants.INIT
+        self.status_flag = Flags.INIT
         self.target = target
         self.time_to_live = time_to_live
         self.last_state_time = self.game_state.get_timestamp()
 
-    def halt(self, reset=False):
+    def halt(self):
         """
             S'exécute lorsque l'état courant est *Halt*
             :return: l'action Stop crée
@@ -45,9 +45,8 @@ class Tactic:
         """
         tactic_time = self.game_state.get_timestamp()
         next_action = self.current_state()
-        if tactic_time - self.last_state_time > self.time_to_live and self.time_to_live != 0:
-            self.last_state_time = tactic_time
-            self.next_state = partial(self.halt, reset=True)
+        if tactic_time - self.last_state_time > self.time_to_live and self.time_to_live > 0:
+            self._reset_ttl()
 
         self.current_state = self.next_state
         next_ai_command = next_action.exec()
@@ -58,3 +57,10 @@ class Tactic:
 
     def __str__(self):
         return self.__class__.__name__
+
+    def _reset_ttl(self):
+        """
+            Quand le TTL expire, on réévalue le prochain état.
+            Par défaut on ne fait rien.
+        """
+        self.last_state_time = self.game_state.timestamp

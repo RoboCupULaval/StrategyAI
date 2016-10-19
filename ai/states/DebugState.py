@@ -1,4 +1,6 @@
-from ai.states.singleton import singleton
+# Under MIT License, see LICENSE.txt
+
+from ai.Util.singleton import singleton
 
 
 @singleton

@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic import tactic_constants
+from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.Idle import Idle
 from RULEngine.Util.area import player_close_to_ball_facing_target
@@ -25,7 +25,7 @@ class MakePass(Tactic):
     """
 
     def __init__(self, game_state, player_id):
-        Tactic.__init__(self, game_state)
+        Tactic.__init__(self, game_state, player_id)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
 
@@ -43,12 +43,12 @@ class MakePass(Tactic):
             kick_ball = Kick(self.game_state, self.player_id, kick_force)
 
             self.next_state = self.halt
-            self.status_flag = tactic_constants.WIP
+            self.status_flag = Flags.WIP
             return kick_ball
 
         else: # returns error, strategy goes back to GoGetBall
             self.next_state = self.halt
-            self.status_flag = tactic_constants.FAILURE
+            self.status_flag = Flags.FAILURE
             return Idle(self.game_state, self.player_id)
 
 

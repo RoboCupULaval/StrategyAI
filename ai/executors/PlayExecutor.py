@@ -1,5 +1,6 @@
-from ai.executors.Executor import Executor
+# Under MIT License, see LICENSE.txt
 
+from ai.executors.Executor import Executor
 
 class PlayExecutor(Executor):
 

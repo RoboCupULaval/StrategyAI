@@ -67,7 +67,7 @@ class InfluenceMap(IntelligentModule):
 
         if self.state is not None:
             self.have_it_executed = have_it_executed
-            self._last_updated = self.state.timestamp
+            self._last_updated = self.state.get_timestamp()
 
         self._adjust_effect_radius()
 
@@ -86,7 +86,7 @@ class InfluenceMap(IntelligentModule):
 
     def update(self):
         if self.have_it_executed:
-            if self.state.timestamp - self._last_updated > 1:
+            if self.state.get_timestamp() - self._last_updated > 1:
                 # purge the board with a new one (static or not)
                 if self._static_boards is not None:
                     self._board = numpy.copy(self._static_boards)

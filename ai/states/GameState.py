@@ -4,30 +4,16 @@
 """
     Ce module garde en mémoire l'état du jeu
 """
-from ai.states.singleton import singleton
-
-from RULEngine.Util.constant import PLAYER_PER_TEAM
 import RULEngine.Game.Ball
 import RULEngine.Game.Field
 import RULEngine.Game.Team
 import RULEngine.Util.geometry
+from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.Util.singleton import singleton
 
 
 @singleton
 class GameState:
-    """
-        Gère l'état du jeu.
-    """
-    instance = None
-
-    def __new__(cls):
-        """
-        S'assure qu'il n'y a qu'un seul ModuleManager
-        :return: L'instance du ModuleManager
-        """
-        if cls.instance is None:
-            cls.instance = object.__new__(cls)
-        return cls.instance
 
     def __init__(self, is_team_yellow=False):
         self.field = RULEngine.Game.Field.Field(RULEngine.Game.Ball.Ball())

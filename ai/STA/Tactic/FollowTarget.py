@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from ai.STA.Tactic import Tactic
 
 

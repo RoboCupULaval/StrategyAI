@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic import tactic_constants
+from ai.STA.Tactic.tactic_constants import Flags, DEFAULT_TIME_TO_LIVE
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
 from ai.states.ModuleState import NonExistentModule
@@ -28,7 +28,7 @@ class GoToPosition(Tactic):
         destination_pose : La pose de destination du robot
     """
 
-    def __init__(self, info_manager, player_id, target, time_to_live=tactic_constants.DEFAULT_TIME_TO_LIVE):
+    def __init__(self, info_manager, player_id, target, time_to_live=DEFAULT_TIME_TO_LIVE):
         Tactic.__init__(self, info_manager, target, time_to_live=time_to_live)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
@@ -36,35 +36,31 @@ class GoToPosition(Tactic):
 
         self.player_id = player_id
         self.target = target
-        self.path_target = target
-        self.paths = {}
+        self.path_target = None
         self.module_state = ModuleState()
+        self.path = []
 
         self._init_pathfinder()
-        self.current_state = self.move_to_position
-        self.next_state = self.move_to_position
+        self.current_state = self.get_next_path_element
+        self.next_state = self.get_next_path_element
 
     def _init_pathfinder(self):
         try:
-            # FIXME
-            print(self.module_state)
             pathfinder = self.module_state.acquire_pathfinder()
-            print(pathfinder)
-            self.paths[self.player_id] = pathfinder.get_path(self.player_id, self.target)
-            pathfinder.draw_path(self.paths[self.player_id], self.player_id)
+            self.path = pathfinder.get_path(self.player_id, self.target)
+            pathfinder.draw_path(self.path, self.player_id)
         except NonExistentModule as err:
             print(err)
             self.game_state.paths[self.player_id] = [self.target]
 
     def get_next_path_element(self):
-        path = self.paths[self.player_id]
-        assert(isinstance(path, list)), "Le chemin doit être une liste"
+        assert(isinstance(self.path, list)), "Le chemin doit être une liste"
 
-        if len(path) > 0:
-            self.path_target = path.pop(0) # on récupère le premier path element
+        if len(self.path) > 0:
+            self.path_target = self.path.pop(0) # on récupère le premier path element
             self.next_state = self.move_to_position
         else:
-            self.status_flag = tactic_constants.SUCCESS
+            self.status_flag = Flags.SUCCESS
             self.next_state = self.halt
 
         return Idle(self.game_state, self.player_id)
@@ -74,17 +70,14 @@ class GoToPosition(Tactic):
         player_position = self.game_state.get_player_pose(self.player_id).position
         player_orientation = self.game_state.get_player_pose(self.player_id).orientation
 
-        if get_distance(player_position, self.target.position) <= POSITION_DEADZONE or \
-                get_angle(player_position, self.target.position) <= ANGLE_TO_HALT:
-                self.next_state = self.halt
-                self.status_flag = tactic_constants.SUCCESS
+        if get_distance(player_position, self.path_target.position) <= POSITION_DEADZONE:
+                self.next_state = self.get_next_path_element
         else:
-            self.status_flag = tactic_constants.WIP
+            self.status_flag = Flags.WIP
             self.next_state = self.move_to_position
         return MoveTo(self.game_state, self.player_id, self.path_target)
-        # return MoveTo(self.game_state, self.player_id, Pose()) # pathfinder desactivé
 
-    def halt(self, reset=False):
+    def halt(self):
         stop = Idle(self.game_state, self.player_id)
 
         if get_distance(self.game_state.get_player_pose(self.player_id).position, self.target.position) <= POSITION_DEADZONE:

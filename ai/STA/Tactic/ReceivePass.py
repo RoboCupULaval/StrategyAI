@@ -5,6 +5,7 @@ from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic import tactic_constants
 from RULEngine.Util.area import player_close_to_ball_facing_target
+from ai.STA.Tactic.tactic_constants import Flags
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.constant import PLAYER_PER_TEAM
@@ -26,7 +27,7 @@ class ReceivePass(Tactic):
     """
 
     def __init__(self, game_state, player_id):
-        Tactic.__init__(self, game_state)
+        Tactic.__init__(self, game_state, player_id)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
 
@@ -35,9 +36,9 @@ class ReceivePass(Tactic):
         self.player_id = player_id
 
     def rotate_towards_ball(self):
-        if player_grabbed_ball(self.game_state, self.player_id):
+        if player_close_to_ball_facing_target(self.game_state, self.player_id):
             self.next_state = self.halt
-            self.status_flag = tactic_constants.SUCCESS
+            self.status_flag = Flags.SUCCESS
             return Idle(self.game_state, self.player_id)
         else:  # keep rotating
             current_position = self.game_state.get_player_position()
@@ -48,5 +49,5 @@ class ReceivePass(Tactic):
 
             move_to = MoveTo(self.game_state, self.player_id, pose_towards_ball)
             self.next_state = self.rotate_towards_ball
-            self.status_flag = tactic_constants.WIP
+            self.status_flag = Flags.WIP
             return move_to

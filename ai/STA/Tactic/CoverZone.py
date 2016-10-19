@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic import tactic_constants
+from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
@@ -33,7 +33,7 @@ class CoverZone(Tactic):
     """
 
     def __init__(self, p_game_state, p_player_id, p_y_top, p_y_bottom, p_x_left, p_x_right, p_is_yellow=False):
-        Tactic.__init__(self, p_game_state)
+        Tactic.__init__(self, p_game_state, p_player_id)
         assert isinstance(p_player_id, int)
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert isinstance(p_y_top, (int, float))
@@ -50,13 +50,12 @@ class CoverZone(Tactic):
         self.is_yellow = p_is_yellow
         self.current_state = self.cover_zone
         self.next_state = self.cover_zone
-        self.status_flag = tactic_constants.WIP
+        self.status_flag = Flags.WIP
         self.target = Pose(Position(int((p_x_right - p_x_left)/2), int((p_y_top - p_y_bottom)/2)))
 
     def cover_zone(self):
         enemy_positions = self.get_enemy_in_zone()
         ball_pos = self.game_state.get_ball_position()
-        self.game_state.set_player_target(self.player_id, ball_pos)
 
         if len(enemy_positions) == 0:
             self.next_state = self.support_other_zone
@@ -86,10 +85,9 @@ class CoverZone(Tactic):
         return MoveTo(self.game_state, self.player_id, Pose(destination, orientation))
 
     def get_enemy_in_zone(self):
-        enemy_dict = self.game_state.enemy
         enemy_list = []
         for robot in range(6):
-            pos = enemy_dict[str(robot)]['position']
+            pos = self.game_state.get_player_pose(robot, False).position
             if isInsideSquare(pos, self.y_top, self.y_bottom, self.x_left, self.x_right):
                 enemy_list.append(pos)
         return enemy_list

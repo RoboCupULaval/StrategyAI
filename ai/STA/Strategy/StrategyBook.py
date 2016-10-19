@@ -1,10 +1,12 @@
 # Under MIT license, see LICENSE.txt
+
 """ Livre des stratégies. """
 
 from .HumanControl import HumanControl
 from .SimpleDefense import SimpleDefense
 from .SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
+from .WeirdmovementStrategy import WeirdmovementStrategy
 from ai.STA.Strategy.TestTransitions import TestTransitions
 from .chTest import chTest
 
@@ -22,7 +24,9 @@ class StrategyBook(object):
                               'HumanControl': HumanControl,
                               'DoNothing': DoNothing,
                               'TestTransitions': TestTransitions,
-                              "chTest": chTest}
+                              "chTest": chTest,
+                              'WeirdmovementStrategy': WeirdmovementStrategy,
+                              'TestTransitions': TestTransitions}
 
     def get_strategies_name_list(self):
         return list(self.strategy_book.keys())

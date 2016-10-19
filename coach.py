@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+
 from ai.states.WorldState import WorldState
 from ai.executors.DebugExecutor import DebugExecutor
 from ai.executors.ModuleExecutor import ModuleExecutor
@@ -6,7 +8,6 @@ from ai.executors.RobotCommandExecutor import RobotCommandExecutor
 
 # FIXME this thing!
 TIMESTAMP_MINIMAL_DELTA = 0.015
-
 
 class Coach(object):
 
