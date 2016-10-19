@@ -68,7 +68,7 @@ class Framework(object):
 
         self.referee = Referee()
 
-        self.ai_coach = ai_coach()
+        self.ai_coach = ai_coach(self.is_team_yellow)
 
         self.game = Game(self.referee, self.is_team_yellow)
 
@@ -138,7 +138,7 @@ class Framework(object):
             if serial:
                 self.command_sender = SerialCommandSender()
             else:
-                self.command_sender = GrSimCommandSender(LOCAL_UDP_MULTICAST_ADDRESS, 20011)
+                self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
 
             self.debug_sender = DebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS, 20021)
             self.debug_receiver = DebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
@@ -208,15 +208,11 @@ class Framework(object):
         if cmd_time - self.last_cmd_time > CMD_DELTA_TIME:
             self.last_cmd_time = cmd_time
             commands = self._get_coach_robot_commands()
-            #commands[4] = commands[4].to_speed_command()
-            pi_cmd = self.robots_pi[4].update_pid_and_return_speed_command(commands[4])
-            commands[4].pose = pi_cmd
-            self.command_sender.send_command(commands[4])
 
-            #for command in commands:
-            #    command = command.to_speed_command()
-            #    command.pose.orientation = 0
-            #    self.command_sender.send_command(command)
+            for idx,command in enumerate(commands):
+                pi_cmd = self.robots_pi[idx].update_pid_and_return_speed_command(command)
+                command.pose = pi_cmd
+                self.command_sender.send_command(command)
 
 
     def _get_coach_robot_commands(self):
