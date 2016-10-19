@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic import tactic_constants
+from ai.STA.Tactic.tactic_constants import Flags, DEFAULT_TIME_TO_LIVE
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
 from ai.states.ModuleState import NonExistentModule
@@ -28,7 +28,7 @@ class GoToPosition(Tactic):
         destination_pose : La pose de destination du robot
     """
 
-    def __init__(self, info_manager, player_id, target, time_to_live=tactic_constants.DEFAULT_TIME_TO_LIVE):
+    def __init__(self, info_manager, player_id, target, time_to_live=DEFAULT_TIME_TO_LIVE):
         Tactic.__init__(self, info_manager, target, time_to_live=time_to_live)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
@@ -60,7 +60,7 @@ class GoToPosition(Tactic):
             self.path_target = self.path.pop(0) # on récupère le premier path element
             self.next_state = self.move_to_position
         else:
-            self.status_flag = tactic_constants.SUCCESS
+            self.status_flag = Flags.SUCCESS
             self.next_state = self.halt
 
         return Idle(self.game_state, self.player_id)
@@ -73,7 +73,7 @@ class GoToPosition(Tactic):
         if get_distance(player_position, self.path_target.position) <= POSITION_DEADZONE:
                 self.next_state = self.get_next_path_element
         else:
-            self.status_flag = tactic_constants.WIP
+            self.status_flag = Flags.WIP
             self.next_state = self.move_to_position
         return MoveTo(self.game_state, self.player_id, self.path_target)
 

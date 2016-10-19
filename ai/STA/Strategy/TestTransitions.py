@@ -10,7 +10,7 @@ from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.GoToPosition import GoToPosition
 from ai.STA.Tactic.GoStraightTo import GoStraightTo
 from ai.STA.Tactic.Stop import Stop
-from ai.STA.Tactic.tactic_constants import *
+from ai.STA.Tactic.tactic_constants import Flags
 
 __author__ = 'RoboCupULaval'
 
@@ -43,4 +43,4 @@ class TestTransitions(Strategy):
         Condition pour passer du noeud présent au noeud suivant.
         :return: Un booléen indiquant si la condition pour effectuer la transition est remplie.
         """
-        return self.graphs[1].get_current_tactic().status_flag == SUCCESS
+        return self.graphs[1].get_current_tactic().status_flag == Flags.SUCCESS

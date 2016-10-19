@@ -70,10 +70,13 @@ class DebugExecutor(Executor):
         except:
             print("La tactique n'a pas été appliquée par cause de mauvais arguments.")
 
-        hc = HumanControl(self.ws.game_state)
-
-        hc.assign_tactic(tactic, player_id)
-        self.ws.play_state.set_strategy(hc)
+        if isinstance(self.ws.play_state.current_strategy, HumanControl):
+            hc = self.ws.play_state.current_strategy
+            hc.assign_tactic(tactic, player_id)
+        else:
+            hc = HumanControl(self.ws.game_state)
+            hc.assign_tactic(tactic, player_id)
+            self.ws.play_state.set_strategy(hc)
 
     @staticmethod
     def _sanitize_pid(pid):

@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 
 from .Tactic import Tactic
-from . import tactic_constants
+from . tactic_constants import Flags
 from ai.STA.Action.MoveStraightTo import MoveStraightTo
 #TODO FIXME For the love of god change the place of this helper function!!!!!!!
 from RULEngine.Util.geometry import get_distance
@@ -10,13 +10,13 @@ class GoStraightTo(Tactic):
     def __init__(self, p_game_state, player_id, target):
         super().__init__(p_game_state, player_id)
         self.target = target
-        self.status_flag = tactic_constants.INIT
+        self.status_flag = Flags.INIT
 
     def exec(self):
         if self.check_success():
-            self.status_flag = tactic_constants.SUCCESS
+            self.status_flag = Flags.SUCCESS
         else:
-            self.status_flag = tactic_constants.WIP
+            self.status_flag = Flags.WIP
 
         next_action = MoveStraightTo(self.game_state, self.player_id, self.target)
         return next_action.exec()
