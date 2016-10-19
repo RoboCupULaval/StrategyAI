@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.states.singleton import singleton
+from ai.Util.singleton import singleton
 
 
 @singleton

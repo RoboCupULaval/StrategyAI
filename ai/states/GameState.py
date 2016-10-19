@@ -4,13 +4,12 @@
 """
     Ce module garde en mémoire l'état du jeu
 """
-from ai.states.singleton import singleton
-
-from RULEngine.Util.constant import PLAYER_PER_TEAM
 import RULEngine.Game.Ball
 import RULEngine.Game.Field
 import RULEngine.Game.Team
 import RULEngine.Util.geometry
+from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.Util.singleton import singleton
 
 
 @singleton

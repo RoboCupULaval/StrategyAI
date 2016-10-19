@@ -17,8 +17,8 @@ class WeirdmovementStrategy(Strategy):
         self.graphs[0].add_node(Node(GoStraightTo(self.game_state, 0, Pose(Position(-500, -500)))))
         self.graphs[0].add_node(Node(GoStraightTo(self.game_state, 0, Pose(Position(-1500, -1500)))))
         self.graphs[0].add_vertex(0, 1, self.condition2)
-        self.graphs[0].add_vertex(1, 2, self.condition2)
-        self.graphs[0].add_vertex(2, 0, self.condition2)
+        self.graphs[0].add_vertex(1, 2, self.condition)
+        self.graphs[0].add_vertex(2, 0, self.condition)
 
         self.graphs[1].add_node(Node(GoStraightTo(self.game_state, 1, Pose(Position(0, 0)))))
         self.graphs[1].add_node(Node(GoStraightTo(self.game_state, 1, Pose(Position(1000, 0)))))
@@ -32,6 +32,8 @@ class WeirdmovementStrategy(Strategy):
         for i in range(2, 6):
             self.graphs[i].add_node(Node(Stop(self.game_state, i)))
 
+    def condition(self):
+        return self.graphs[0].get_current_tactic().status_flag == Flags.SUCCESS
 
     def condition1(self):
         """

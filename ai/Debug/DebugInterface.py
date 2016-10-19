@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from ai.Debug.DebugCommand import DebugCommand
+from ai.states.DebugState import DebugState
 
 
 class Color(object):
@@ -56,9 +57,9 @@ def wrap_command(raw_command):
 
 class DebugInterface:
 
-    def __init__(self, p_debug_state):
+    def __init__(self):
 
-        self.debug_state = p_debug_state
+        self.debug_state = DebugState()
 
     def add_log(self, level, message):
         log = DebugCommand(2, {'level': level, 'message': message})
