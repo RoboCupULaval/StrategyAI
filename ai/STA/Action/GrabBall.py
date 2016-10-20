@@ -2,7 +2,7 @@
 from .Action import Action
 from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.geometry import get_angle
+from ai.Util.geometry import get_angle
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'Robocup ULaval'

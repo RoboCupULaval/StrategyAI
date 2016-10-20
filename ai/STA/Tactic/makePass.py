@@ -5,7 +5,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.Idle import Idle
 from RULEngine.Util.area import player_grabbed_ball
-from RULEngine.Util.geometry import get_required_kick_force
+from ai.Util.geometry import get_required_kick_force
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'RoboCupULaval'

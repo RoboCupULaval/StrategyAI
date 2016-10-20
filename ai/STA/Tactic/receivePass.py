@@ -4,9 +4,9 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic_constants import Flags
-from RULEngine.Util.area import player_grabbed_ball
+from ai.Util.area import player_grabbed_ball
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.geometry import get_angle
+from ai.Util.geometry import get_angle
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'RoboCupULaval'

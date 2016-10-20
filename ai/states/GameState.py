@@ -7,7 +7,7 @@
 import RULEngine.Game.Ball
 import RULEngine.Game.Field
 import RULEngine.Game.Team
-import RULEngine.Util.geometry
+import ai.Util.geometry
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.Util.singleton import singleton
 
@@ -28,7 +28,7 @@ class GameState:
             Met à jour la position de la balle
             :param new_ball_position: Nouvelles position de la balle, de type Position
         """
-        delta = RULEngine.Util.geometry.get_angle(self.field.ball.position, new_ball_position)
+        delta = ai.Util.geometry.get_angle(self.field.ball.position, new_ball_position)
         self.field.move_ball(new_ball_position, delta)
 
     def _update_field(self, new_field):

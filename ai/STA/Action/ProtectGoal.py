@@ -6,8 +6,8 @@ from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import FIELD_GOAL_RADIUS, PLAYER_PER_TEAM, FIELD_X_RIGHT, FIELD_X_LEFT
-from RULEngine.Util.area import stayInsideCircle, stayOutsideCircle, stayInsideGoalArea
-from RULEngine.Util.geometry import get_angle, get_closest_point_on_line
+from ai.Util.area import stayInsideCircle, stayOutsideCircle, stayInsideGoalArea
+from ai.Util.geometry import get_angle, get_closest_point_on_line
 
 __author__ = 'Robocup ULaval'
 

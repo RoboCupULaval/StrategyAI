@@ -8,7 +8,7 @@ from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.area import isInsideGoalArea, player_can_grab_ball, player_grabbed_ball
+from ai.Util.area import isInsideGoalArea, player_can_grab_ball, player_grabbed_ball
 from RULEngine.Util.constant import PLAYER_PER_TEAM, DISTANCE_BEHIND
 
 __author__ = 'RoboCupULaval'

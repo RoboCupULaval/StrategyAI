@@ -7,8 +7,8 @@ from ai.STA.Action.GrabBall import GrabBall
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic_constants import Flags
 
-from RULEngine.Util.area import player_can_grab_ball, player_grabbed_ball
-from RULEngine.Util.geometry import get_distance
+from ai.Util.area import player_can_grab_ball, player_grabbed_ball
+from ai.Util.geometry import get_distance
 from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position

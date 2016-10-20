@@ -5,11 +5,11 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
-from RULEngine.Util.area import isInsideSquare, stayInsideSquare, stayOutsideGoalArea
+from ai.Util.area import isInsideSquare, stayInsideSquare, stayOutsideGoalArea
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM, ROBOT_RADIUS
-from RULEngine.Util.geometry import get_angle
+from ai.Util.geometry import get_angle
 
 __author__ = 'RoboCupULaval'
 

@@ -4,7 +4,7 @@ from .Tactic import Tactic
 from . tactic_constants import Flags
 from ai.STA.Action.MoveStraightTo import MoveStraightTo
 #TODO FIXME For the love of god change the place of this helper function!!!!!!!
-from RULEngine.Util.geometry import get_distance
+from ai.Util.geometry import get_distance
 
 class GoStraightTo(Tactic):
     def __init__(self, p_game_state, player_id, target):
