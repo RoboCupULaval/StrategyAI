@@ -4,8 +4,8 @@ from RULEngine.Framework import GameState
 from RULEngine.Game import Ball, Team, Field, Referee
 from RULEngine.Util import Pose, Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from ai.states.GameState import GameState
-from ai.states.ModuleState import ModuleState
+from ai.states.game_state import GameState
+from ai.states.module_state import ModuleState
 
 
 class TestGameStateManager(unittest.TestCase):

@@ -1,10 +1,10 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.states.WorldState import WorldState
-from ai.executors.DebugExecutor import DebugExecutor
-from ai.executors.ModuleExecutor import ModuleExecutor
-from ai.executors.PlayExecutor import PlayExecutor
-from ai.executors.RobotCommandExecutor import RobotCommandExecutor
+from ai.states.world_state import WorldState
+from ai.executors.debug_executor import DebugExecutor
+from ai.executors.module_executor import ModuleExecutor
+from ai.executors.play_executor import PlayExecutor
+from ai.executors.command_executor import CommandExecutor
 
 # FIXME this thing!
 TIMESTAMP_MINIMAL_DELTA = 0.015
@@ -21,7 +21,7 @@ class Coach(object):
         self.debug_executor = DebugExecutor(self.world_state)
         self.module_executor = ModuleExecutor(self.world_state)
         self.play_executor = PlayExecutor(self.world_state)
-        self.robot_command_executor = RobotCommandExecutor(self.world_state)
+        self.robot_command_executor = CommandExecutor(self.world_state)
 
     def main_loop(self, p_game_state):
         self.robot_commands.clear()

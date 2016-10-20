@@ -1,11 +1,11 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.executors.Executor import Executor
+from ai.executors.executor import Executor
 from RULEngine.Command import command
 from RULEngine.Util.Pose import Pose
 
 
-class RobotCommandExecutor(Executor):
+class CommandExecutor(Executor):
     def __init__(self, p_world_state):
         super().__init__(p_world_state)
 

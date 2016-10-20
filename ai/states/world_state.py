@@ -1,10 +1,10 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.Debug.DebugInterface import DebugInterface
-from ai.states.DebugState import DebugState
-from ai.states.GameState import GameState
-from ai.states.PlayState import PlayState
-from ai.states.ModuleState import ModuleState
+from ai.Debug.debug_interface import DebugInterface
+from ai.states.debug_state import DebugState
+from ai.states.game_state import GameState
+from ai.states.play_state import PlayState
+from ai.states.module_state import ModuleState
 
 
 class WorldState:
