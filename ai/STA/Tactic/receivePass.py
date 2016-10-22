@@ -4,9 +4,9 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.area import player_grabbed_ball
+from ai.Util.ball_possession import player_grabbed_ball
 from RULEngine.Util.Pose import Pose
-from ai.Util.geometry import get_angle
+from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'RoboCupULaval'
@@ -18,7 +18,7 @@ class ReceivePass(Tactic):
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
     attributs:
-        info_manager: référence à la façade InfoManager
+        game_state: L'état courant du jeu.
         player_id : Identifiant du joueur auquel est assigné la tactique
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique

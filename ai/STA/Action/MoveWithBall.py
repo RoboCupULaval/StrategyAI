@@ -3,7 +3,7 @@ from .Action import Action
 from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from ai.Util.geometry import get_angle
+from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'Robocup ULaval'
@@ -20,7 +20,7 @@ class MoveWithBall(Action):
     """
     def __init__(self, p_game_state, p_player_id, p_destination):
         """
-            :param p_info_manager: référence vers l'InfoManager
+            :param p_game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui se déplace avec la balle
             :param p_destination: La position où on souhaite déplacer le robot
         """

@@ -4,8 +4,8 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.Idle import Idle
-from RULEngine.Util.area import player_grabbed_ball
-from ai.Util.geometry import get_required_kick_force
+from ai.Util.ball_possession import player_grabbed_ball
+from RULEngine.Util.geometry import get_required_kick_force
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'RoboCupULaval'
@@ -17,7 +17,7 @@ class MakePass(Tactic):
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
     attributs:
-        info_manager: référence à la façade InfoManager
+        game_state: L'état courant du jeu.
         player_id : Identifiant du joueur auquel est assigné la tactique
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique
@@ -46,10 +46,7 @@ class MakePass(Tactic):
             self.status_flag = Flags.WIP
             return kick_ball
 
-        else: # returns error, strategy goes back to GoGetBall
+        else:  # returns error, strategy goes back to GoGetBall
             self.next_state = self.halt
             self.status_flag = Flags.FAILURE
             return Idle(self.game_state, self.player_id)
-
-
-

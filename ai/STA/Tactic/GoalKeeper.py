@@ -6,9 +6,10 @@ from ..Action.ProtectGoal import ProtectGoal
 from ai.STA.Action.GrabBall import GrabBall
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
+from ai.Util.ball_possession import player_can_grab_ball, player_grabbed_ball
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
-from ai.Util.area import isInsideGoalArea, player_can_grab_ball, player_grabbed_ball
+from RULEngine.Util.area import isInsideGoalArea
 from RULEngine.Util.constant import PLAYER_PER_TEAM, DISTANCE_BEHIND
 
 __author__ = 'RoboCupULaval'
@@ -22,7 +23,7 @@ class GoalKeeper(Tactic):
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
     attributs:
-        info_manager: référence à la façade InfoManager
+        game_state: L'état courant du jeu.
         player_id : Identifiant du gardien de but
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique

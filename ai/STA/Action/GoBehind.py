@@ -4,8 +4,8 @@ from .Action import Action
 from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from ai.Util.area import stayOutsideCircle
-from ai.Util.geometry import get_angle, get_distance
+from RULEngine.Util.area import stayOutsideCircle
+from RULEngine.Util.geometry import get_angle, get_distance
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'Robocup ULaval'
@@ -24,7 +24,7 @@ class GoBehind(Action):
     """
     def __init__(self, p_game_state, p_player_id, p_position1, p_position2, p_distance_behind):
         """
-            :param p_info_manager: référence vers l'InfoManager
+            :param p_game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui doit se déplacer
             :param p_position1: La position de l'objet derrière lequel le robot doit se placer (exemple: le ballon)
             :param p_position2: La position par rapport à laquelle le robot doit être "derrière" l'objet de la position 1 (exemple: le but)

@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.STA.Tactic import Tactic
+from ai.STA.Tactic.Tactic import Tactic
 
 
 class FollowTarget(Tactic):
@@ -10,7 +10,7 @@ class FollowTarget(Tactic):
         exec(self) : Exécute une Action selon l'état courant
         dispatch(self) : Trouve la fonction qui calcul le prochain état. est appelé après exec().
     attributs:
-        info_manager: référence à la façade InfoManager
+        game_state: L'état courant du jeu
         team_id : Identifiant de l'équipe
         player_id : Identifiant du joueur auquel est assigné la tactique
         current_state : chcîne de caratères définissant l'état courant

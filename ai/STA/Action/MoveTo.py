@@ -16,7 +16,7 @@ class MoveTo(Action):
     """
     def __init__(self, p_game_state, p_player_id, p_destination):
         """
-            :param p_info_manager: référence vers l'InfoManager
+            :param p_game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui se déplace
             :param p_destination: destination (pose) que le joueur doit atteindre
         """

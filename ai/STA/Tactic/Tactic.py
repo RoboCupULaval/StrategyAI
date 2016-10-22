@@ -19,7 +19,7 @@ class Tactic:
         """
             Initialise la tactique
 
-            :param p_info_manager: référence à la façade InfoManager
+            :param p_game_state: L'état courant du jeu.
         """
         self.game_state = p_game_state
         self.player_id = player_id
@@ -45,7 +45,7 @@ class Tactic:
         """
         tactic_time = self.game_state.get_timestamp()
         next_action = self.current_state()
-        if tactic_time - self.last_state_time > self.time_to_live and self.time_to_live > 0:
+        if tactic_time - self.last_state_time > self.time_to_live > 0:
             self._reset_ttl()
 
         self.current_state = self.next_state

@@ -3,8 +3,8 @@
 from math import cos, sin
 
 from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import PLAYER_PER_TEAM, ROBOT_RADIUS,BALL_RADIUS
-from ai.Util.geometry import get_closest_point_on_line, get_distance
+from RULEngine.Util.constant import PLAYER_PER_TEAM, ROBOT_RADIUS, BALL_RADIUS
+from RULEngine.Util.geometry import get_closest_point_on_line, get_distance
 from ai.states.game_state import GameState
 __author__ = 'RoboCupULaval'
 

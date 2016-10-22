@@ -17,7 +17,7 @@ class Strategy(metaclass=ABCMeta):
     def __init__(self, p_game_state):
         """
         Initialise la stratégie en créant un graph vide pour chaque robot de l'équipe.
-        :param p_game_state: Une référence à l'InfoManager
+        :param p_game_state: L'état courant du jeu.
         """
         self.game_state = p_game_state
         self.graphs = []
