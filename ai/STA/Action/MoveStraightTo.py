@@ -16,7 +16,7 @@ class MoveStraightTo(Action):
     """
     def __init__(self, p_game_state, p_player_id, p_destination):
         """
-            :param p_info_manager: référence vers l'InfoManager
+            :param p_game_state: référence vers l'InfoManager
             :param p_player_id: Identifiant du joueur qui se déplace
             :param p_destination: destination (pose) que le joueur doit atteindre
         """
@@ -34,7 +34,7 @@ class MoveStraightTo(Action):
                      où Pose est la destination du joueur
                         kick est faux (on ne botte pas)
         """
-        move_destination = Pose(Position(self.destination.position.x, self.destination.position.y))
+        move_destination = self.destination
         kick_strength = 0
         cmd = AICommand(move_destination, kick_strength)
         return cmd

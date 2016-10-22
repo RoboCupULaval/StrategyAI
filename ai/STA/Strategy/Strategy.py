@@ -24,6 +24,27 @@ class Strategy(metaclass=ABCMeta):
         for i in range(PLAYER_PER_TEAM):
             self.graphs.append(Graph())
 
+    def add_tactic(self, robot_id, tactic):
+        """
+        Ajoute une tactique au graph des tactiques d'un robot.
+        :param robot_id: L'id du robot auquel est assignée la tactique.
+        :param tactic: La tactique à assigner au robot.
+        """
+        assert(isinstance(robot_id, int))
+        self.graphs[robot_id].add_node(Node(tactic))
+
+    def add_condition(self, robot_id, start_node, end_node, condition):
+        """
+        Ajoute une condition permettant de gérer la transition entre deux tactiques d'un robot.
+        :param robot_id: L'id du robot.
+        :param start_node: Le noeud de départ du vertex.
+        :param end_node: Le noeud d'arrivée du vertex.
+        :param condition: Une fonction retournant un booléen permettant de déterminer si on peut effectuer la transition
+        du noeud de départ vers le noeud d'arrivé.
+        """
+        assert(isinstance(robot_id, int))
+        self.graphs[robot_id].add_vertex(start_node, end_node, condition)
+
     def get_current_state(self):
         """
             Retourne l'état actuel de la stratégie, dans une liste de 6 tuples. Chaque tuple contient:

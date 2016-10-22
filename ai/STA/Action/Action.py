@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from abc import abstractmethod
+from ai.states.game_state import GameState
 
 __author__ = 'Robocup ULaval'
 
@@ -13,6 +14,7 @@ class Action:
         """
             :param p_info_manager: référence vers l'InfoManager
         """
+        assert(isinstance(p_game_state, GameState))
         self.game_state = p_game_state
 
     def on_before(self):

@@ -1,3 +1,4 @@
+# Under MIT License, see LICENSE.txt
 import unittest
 
 from RULEngine.Framework import GameState
