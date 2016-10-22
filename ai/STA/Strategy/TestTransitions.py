@@ -27,9 +27,9 @@ class TestTransitions(Strategy):
 
         self.add_tactic(0, GoalKeeper(self.game_state, 0))
         self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(), 3 * pi / 2)))
-        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(500, 0), 0)))
-        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(500, 500), pi / 2)))
-        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(0, 500), pi)))
+        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(1000, 0), 0)))
+        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(1000, 1000), pi / 2)))
+        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(0, 1000), pi)))
 
         self.add_condition(1, 0, 1, self.condition)
         self.add_condition(1, 1, 2, self.condition)
