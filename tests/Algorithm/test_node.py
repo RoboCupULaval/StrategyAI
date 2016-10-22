@@ -3,7 +3,7 @@
 import unittest
 from ai.Algorithm.Node import Node
 from ai.Algorithm.Vertex import Vertex
-from ai.InfoManager import InfoManager
+from ai.states.game_state import GameState
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.Stop import Stop
@@ -25,10 +25,10 @@ def foo2():
 
 class TestNode(unittest.TestCase):
     def setUp(self):
-        self.info_manager = InfoManager()
-        self.info_manager.friend['0']['position'] = Position(-4450, 0)
-        self.tactic1 = GoalKeeper(self.info_manager, 0)
-        self.tactic2 = Stop(self.info_manager, 1)
+        self.game_state = GameState()
+        self.game_state._update_player(0, Pose(Position(-4450, 0), 0))
+        self.tactic1 = GoalKeeper(self.game_state, 0)
+        self.tactic2 = Stop(self.game_state, 1)
         self.node1 = Node(self.tactic1)
         self.node2 = Node(self.tactic2)
         self.vertex1 = Vertex(0, foo)

@@ -14,7 +14,7 @@ class Action:
         """
             :param p_game_state: L'état courant du jeu.
         """
-        assert(isinstance(p_game_state, GameState))
+        # assert(isinstance(p_game_state, GameState))
         self.game_state = p_game_state
 
     def on_before(self):

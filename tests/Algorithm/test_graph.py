@@ -4,7 +4,7 @@ import unittest
 from ai.Algorithm.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Node import Node
 from ai.Algorithm.Vertex import Vertex
-from ai.InfoManager import InfoManager
+from ai.states.game_state import GameState
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.GoToPosition import GoToPosition
 from RULEngine.Util.Pose import Pose
@@ -25,11 +25,11 @@ def foo2():
 
 class TestGraph(unittest.TestCase):
     def setUp(self):
-        self.info_manager = InfoManager()
+        self.game_state = GameState()
         self.empty_graph = Graph()
         self.graph1 = Graph()
-        self.tactic1 = Stop(self.info_manager, 1)
-        self.tactic2 = GoToPosition(self.info_manager, 0, Pose(Position(500, 0), 0))
+        self.tactic1 = Stop(self.game_state, 1)
+        self.tactic2 = GoToPosition(self.game_state, 0, Pose(Position(500, 0), 0))
         self.node1 = Node(self.tactic1)
         self.node2 = Node(self.tactic2)
         self.vertex1 = Vertex(1, foo)
@@ -72,7 +72,7 @@ class TestGraph(unittest.TestCase):
         self.assertRaises(AssertionError, self.graph1.add_vertex, 420, 1, foo)
         self.assertRaises(AssertionError, self.graph1.add_vertex, 0, "not an int", foo)
         self.assertRaises(AssertionError, self.graph1.add_vertex, 0, -1, foo)
-        self.assertRaises(AssertionError, self.graph1.add_vertex,0, 420, foo)
+        self.assertRaises(AssertionError, self.graph1.add_vertex, 0, 420, foo)
         self.assertRaises(AssertionError, self.graph1.add_vertex, 0, 1, "not a callable")
         self.graph1.add_vertex(0, 1, foo)
         self.assertEqual(len(self.graph1.nodes[0].vertices), 1)
@@ -83,7 +83,7 @@ class TestGraph(unittest.TestCase):
         self.assertRaises(AssertionError, self.graph1.remove_vertex, 420, 1)
         self.assertRaises(AssertionError, self.graph1.remove_vertex, 0, "not an int")
         self.assertRaises(AssertionError, self.graph1.remove_vertex, 0, -1)
-        self.assertRaises(AssertionError, self.graph1.remove_vertex,0, 420)
+        self.assertRaises(AssertionError, self.graph1.remove_vertex, 0, 420)
         self.graph1.add_node(self.node2)
         self.graph1.remove_vertex(0, 2)
         self.assertEqual(len(self.graph1.nodes[0].vertices), 1)

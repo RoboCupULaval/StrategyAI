@@ -47,10 +47,11 @@ class GoalKeeper(Tactic):
 
     def protect_goal(self):
         # FIXME : enlever ce hack de merde
-        if not isInsideGoalArea(self.game_state.get_ball_position(), self.is_yellow):
+        ball_position = self.game_state.get_ball_position()
+        if not isInsideGoalArea(ball_position, self.is_yellow):
             self.next_state = self.protect_goal
         else:
-            if player_can_grab_ball(self.game_state, self.player_id):
+            if player_can_grab_ball(self.game_state, self.player_id, ball_position):
                 self.next_state = self.grab_ball
             else:
                 self.next_state = self.go_behind_ball
@@ -60,7 +61,7 @@ class GoalKeeper(Tactic):
     def go_behind_ball(self):
         ball_position = self.game_state.get_ball_position()
 
-        if player_can_grab_ball(self.game_state, self.player_id):
+        if player_can_grab_ball(self.game_state, self.player_id, ball_position):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -68,10 +69,11 @@ class GoalKeeper(Tactic):
         return GoBehind(self.game_state, self.player_id, ball_position, Position(0, 0), DISTANCE_BEHIND)
 
     def grab_ball(self):
-        if player_grabbed_ball(self.game_state, self.player_id):
+        ball_position = self.game_state.get_ball_position()
+        if player_grabbed_ball(self.game_state, self.player_id, ball_position):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
-        elif player_can_grab_ball(self.game_state, self.player_id):
+        elif player_can_grab_ball(self.game_state, self.player_id, ball_position):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball  # back to go_behind; the ball has moved

@@ -113,5 +113,3 @@ class TestModuleManager(unittest.TestCase):
              i.e. s'il ne peut y avoir qu'une seule instance du manager
         """
         self.assertTrue(self.ModuleManager1 is self.ModuleManager2)
-
-

@@ -68,7 +68,7 @@ class CoverZone(Tactic):
             mean_position = mean_position + pos
         mean_position /= len(enemy_positions)
         destination = stayInsideSquare(mean_position, self.y_top, self.y_bottom, self.x_left, self.x_right)
-        return GoBetween(self.game_state, self.player_id, ball_pos, destination, 2*ROBOT_RADIUS)
+        return GoBetween(self.game_state, self.player_id, ball_pos, destination, ball_pos, 2*ROBOT_RADIUS)
 
     def support_other_zone(self):
         enemy_positions = self.get_enemy_in_zone()
