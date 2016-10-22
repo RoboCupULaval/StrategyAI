@@ -11,7 +11,7 @@ __author__ = 'RoboCupULaval'
 
 def raycast(game_state, initial_position, length, direction, width, blue_players_ignored, yellow_players_ignored,
             is_ball_ignored=True):
-    assert isinstance(game_state, GameState)
+    # assert isinstance(game_state, GameState)  # l'assert échoue si GameState est un singleton
     assert isinstance(initial_position, Position)
     assert isinstance(length, (int, float))
     assert isinstance(direction, (int, float))
@@ -27,7 +27,7 @@ def raycast(game_state, initial_position, length, direction, width, blue_players
 
 def raycast2(game_state, initial_position, final_position, width, blue_players_ignored, yellow_players_ignored,
              is_ball_ignored=True):
-    assert isinstance(game_state, GameState)
+    # assert isinstance(game_state, GameState)  # l'assert échoue si GameState est un singleton
     assert isinstance(initial_position, Position)
     assert isinstance(final_position, Position)
     assert isinstance(width, (int, float))
@@ -37,7 +37,7 @@ def raycast2(game_state, initial_position, final_position, width, blue_players_i
 
     for i in range(0, PLAYER_PER_TEAM):
         if i not in blue_players_ignored:
-            player_position = game_state.get_player_position(i)
+            player_position = game_state.get_player_pose(i).position
             pos = get_closest_point_on_line(player_position, initial_position, final_position)
             if get_distance(player_position, pos) <= width + ROBOT_RADIUS:
                 return True

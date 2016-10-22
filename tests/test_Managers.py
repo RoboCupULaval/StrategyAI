@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 import unittest
 
-from RULEngine.Framework import GameState
+from RULEngine.Framework import GameState as r_GameState
 from RULEngine.Game import Ball, Team, Field, Referee
 from RULEngine.Util import Pose, Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM
@@ -82,7 +82,7 @@ class TestGameStateManager(unittest.TestCase):
             self.other_team.move_and_rotate_player(i, new_player_pose)
             new_player_pose.position += 100
 
-        new_game_state = GameState(
+        new_game_state = r_GameState(
             field=self.field,
             referee=Referee.Referee(),
             friends=self.my_team,

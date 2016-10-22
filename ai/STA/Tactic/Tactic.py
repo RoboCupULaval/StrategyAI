@@ -3,6 +3,7 @@
 from functools import partial
 
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic_constants import DEFAULT_TIME_TO_LIVE, Flags
 
@@ -21,6 +22,10 @@ class Tactic:
 
             :param p_game_state: L'état courant du jeu.
         """
+        assert isinstance(player_id, int)
+        assert PLAYER_PER_TEAM >= player_id >= 0
+        assert isinstance(target, Pose), "La target devrait être une Pose"
+
         self.game_state = p_game_state
         self.player_id = player_id
         self.current_state = self.halt

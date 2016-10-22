@@ -3,7 +3,6 @@
 import unittest
 from math import pi, atan, sqrt
 
-from RULEngine.Game.Ball import Ball
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import *
 from ai.STA.Action.GoBehind import GoBehind
@@ -23,9 +22,7 @@ class TestActions(unittest.TestCase):
         # ToDo : Use mock instead of actual objects
         self.game_state = GameState()
         self.player_id = 1  # random integer
-        self.ball = Ball()
-        self.ball.set_position(Position(5, 0), 1)
-        self.game_state._update_ball_position(self.ball)
+        self.game_state._update_ball_position(Position(5, 0))
 
     def test_move_to(self):
         self.pose = Pose(Position(0, 0, 0), orientation=0.0)
@@ -49,21 +46,18 @@ class TestActions(unittest.TestCase):
         self.assertEqual(str(self.grab_ball.exec()),
                          "AICommand(move_destination=[(x=5.0, y=0.0, z=0.0), theta=0.0], kick_strength=0)")
 
-        self.ball.set_position(Position(-5, 5), 1)
-        self.game_state._update_ball_position(self.ball)
+        self.game_state._update_ball_position(Position(-5, 5))
         self.assertEqual(str(self.grab_ball.exec()),
                          "AICommand(move_destination=[(x=-5.0, y=5.0, z=0.0), theta=" +
                          str(3*pi/4) + "], kick_strength=0)")
 
     def test_MoveWithBall(self):
         self.move_with_ball = MoveWithBall(self.game_state, self.player_id, Position(100, 0))
-        self.ball.set_position(Position(5, 0), 1)
-        self.game_state._update_ball_position(self.ball)
+        self.game_state._update_ball_position(Position(5, 0))
         self.assertEqual(str(self.move_with_ball.exec()),
                          "AICommand(move_destination=[(x=100.0, y=0.0, z=0.0), theta=0.0], kick_strength=0)")
 
-        self.ball.set_position(Position(5, 2), 1)
-        self.game_state._update_ball_position(self.ball)
+        self.game_state._update_ball_position(Position(5, 2))
         self.assertEqual(str(self.move_with_ball.exec()),
                          "AICommand(move_destination=[(x=100.0, y=0.0, z=0.0), theta=" +
                          str(atan(2/5)) + "], kick_strength=0)")
@@ -161,12 +155,12 @@ class TestActions(unittest.TestCase):
 
     def test_ProtectGoal(self):
         # test de base
-        self.ball.set_position(Position(0, 0), 1)
         self.game_state._update_player(0, Pose(Position(4450, 10), 0))
+        self.game_state._update_ball_position(Position(0, 0))
         self.protectGoal = ProtectGoal(self.game_state, 0)
 
         aicmd_obtenu = self.protectGoal.exec()
-        aicmd_cible = AICommand(Pose(Position(3529, 7), -3.1394), 0)
+        aicmd_cible = AICommand(Pose(Position(4000, 0), -pi), 0)
         self.assertEqual(aicmd_obtenu, aicmd_cible)
 
         # test distance max < distance min
