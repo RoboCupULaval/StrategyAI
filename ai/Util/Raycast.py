@@ -43,7 +43,7 @@ def raycast2(game_state, initial_position, final_position, width, blue_players_i
                 return True
 
         if i not in yellow_players_ignored:
-            enemy_position = game_state.get_enemy_position(i)
+            enemy_position = game_state.get_player_pose(i, False).position
             pos = get_closest_point_on_line(enemy_position, initial_position, final_position)
             if get_distance(enemy_position, pos) <= width + ROBOT_RADIUS:
                 return True

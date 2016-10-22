@@ -61,7 +61,7 @@ class TestNode(unittest.TestCase):
         self.node1.add_vertex(self.vertex2)
         next_ai_command, next_node = self.node1.exec()
         self.assertEqual(next_node, 0)
-        expected_aicmd = AICommand(Pose(Position(-4200, 0), 0), 0)
+        expected_aicmd = AICommand(Pose(Position(-4000, 0), 0), 0)
         self.assertEqual(next_ai_command, expected_aicmd)
 
         self.node2.add_vertex(self.vertex2)
