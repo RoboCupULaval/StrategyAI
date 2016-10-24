@@ -20,8 +20,8 @@ class chTest(Strategy):
         super().__init__(p_game_state)
 
         robot_id = 4
-        self.add_tactic(robot_id, GoStraightTo(self.game_state, 1, Pose(Position(0, 1500), pi)))
-        self.add_tactic(robot_id, GoStraightTo(self.game_state, 1, Pose(Position(1500, 1500), pi)))
+        self.add_tactic(robot_id, GoStraightTo(self.game_state, robot_id, Pose(Position(0, 1500), pi)))
+        self.add_tactic(robot_id, GoStraightTo(self.game_state, robot_id, Pose(Position(1500, 1500), pi)))
         self.add_condition(robot_id,0,1,self.condition)
         self.add_condition(robot_id,1,0,self.condition)
 
@@ -37,4 +37,4 @@ class chTest(Strategy):
         Condition pour passer du noeud présent au noeud suivant.
         :return: Un booléen indiquant si la condition pour effectuer la transition est remplie.
         """
-        return self.graphs[1].get_current_tactic().status_flag == SUCCESS
+        return self.graphs[4].get_current_tactic().status_flag == Flags.SUCCESS

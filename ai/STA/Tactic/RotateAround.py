@@ -3,16 +3,12 @@
 
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.MoveTo import MoveTo
-from ai.STA.Action.GrabBall import GrabBall
-from ai.STA.Action.Kick import Kick
 from ai.STA.Action.Idle import Idle
-from ai.STA.Tactic import tactic_constants
 from RULEngine.Util.area import player_close_to_ball_facing_target, angle_to_origin_then_target_is_tolerated, player_close_to_origin_facing_target
 from RULEngine.Util.geometry import rotate_point_around_origin, get_required_kick_force, get_distance, get_angle
-from RULEngine.Util.constant import PLAYER_PER_TEAM, FIELD_X_LEFT, FIELD_X_RIGHT, RADIUS_TO_HALT, ANGLE_TO_HALT
-from RULEngine.Util.Position import Position
+from RULEngine.Util.constant import PLAYER_PER_TEAM, ANGLE_TO_HALT
 from RULEngine.Util.Pose import Pose
-import math
+from ai.STA.Tactic.tactic_constants import Flags
 
 __author__ = 'RoboCupULaval'
 
@@ -28,43 +24,42 @@ class RotateAround(Tactic):
         next_state : L'état suivant de la tactique
     """
 
-    def __init__(self, info_manager, player_id, origin):
-        Tactic.__init__(self, info_manager)
+    def __init__(self, game_state, player_id, origin, target):
+        Tactic.__init__(self, game_state, player_id, target)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
+        self.status_flag = Flags.INIT
         self.origin = origin
-        self.current_state = self.checkit
-        self.next_state = self.checkit
-        self.player_id = player_id
-        self.player_target = self.info_manager.get_player_target(self.player_id)
-        self.player_pos = self.info_manager.get_player_position(self.player_id)
+        self.current_state = self.check_success
+        self.next_state = self.check_success
+        self.player_pos = self.game_state.get_player_pose(self.player_id).position
 
-    def checkit(self):
-        #if player_close_to_origin_facing_target(self.info_manager, self.player_id,self.origin):
-        if angle_to_origin_then_target_is_tolerated(self.player_pos,self.origin,self.player_target,ANGLE_TO_HALT):
-            self.status_flag = tactic_constants.SUCCESS
+    #TODO: implémenter le même modele architectural de fonction que dans gostraightto
+    #TODO: last modif of the type of every input pos
+    #TODO: solve problems
+    def check_success(self):
+        if angle_to_origin_then_target_is_tolerated(self.player_pos, self.origin, self.target.position, ANGLE_TO_HALT):
+            self.status_flag = Flags.SUCCESS
             self.next_state = self.halt
-            return Idle(self.info_manager, self.player_id)
         else:
-            robot_pos = self.info_manager.get_player_position(self.player_id)
-            target_pos = self.player_target
+            self.status_flag = Flags.WIP
+            self.next_state = self.rotate_around
+        return Idle(self.game_state, self.player_id)
 
-            # check if counter clockwise
-            constant_angle_increment = 1
-            if get_angle(robot_pos, target_pos) < 0:
-                constant_angle_increment *= -1
+    def rotate_around(self):
+        # check if counter clockwise
+        constant_angle_increment = 1
+        if get_angle(self.player_pos, self.target.position) < 0:
+            constant_angle_increment *= -1
 
-            # calculate new pose
-            new_position = rotate_point_around_origin(robot_pos, self.origin, constant_angle_increment)
-            new_orientation = get_angle(new_position, target_pos)
-            new_pose = Pose(new_position, new_orientation)
-            #print(str(new_pose) + "real:" + str(self.info_manager.get_player_position(self.player_id)))
-            #print(self.info_manager.get_player_position(4))
+        # calculate new pose
+        new_position = rotate_point_around_origin(self.player_pos, self.origin, constant_angle_increment)
+        new_orientation = get_angle(new_position, self.target.position)
+        new_pose = Pose(new_position, new_orientation)
 
-            # return command
-            self.next_state = self.checkit
-            self.status_flag = tactic_constants.WIP
-            go_to_position = MoveTo(self.info_manager, self.player_id, new_pose)
-            return go_to_position
+        # return command
+        self.next_state = self.check_success
+        go_to_position = MoveTo(self.game_state, self.player_id, new_pose)
+        return go_to_position
 
 

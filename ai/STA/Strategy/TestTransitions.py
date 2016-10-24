@@ -31,7 +31,7 @@ class TestTransitions(Strategy):
         self.graphs[1].add_node(Node(GoStraightTo(self.game_state, 1, Pose(Position(500, 500), pi / 2))))
         self.graphs[1].add_node(Node(GoStraightTo(self.game_state, 1, Pose(Position(0, 500), pi))))
         self.add_tactic(1,GoStraightTo(self.game_state, 1, Pose(Position(0, 500), pi)))
-        self.graphs[4].add_node(Node(GoStraightTo(self.game_state, 1, Pose(Position(0, 500), pi))))
+        self.graphs[1].add_node(Node(GoStraightTo(self.game_state, 1, Pose(Position(0, 500), pi))))
         self.graphs[1].add_vertex(0, 1, self.condition)
         self.graphs[1].add_vertex(1, 2, self.condition)
         self.graphs[1].add_vertex(2, 3, self.condition)

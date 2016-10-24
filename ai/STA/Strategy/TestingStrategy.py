@@ -40,10 +40,10 @@ class TestingStrategy(Strategy):
 
     def test_go_rotate_around_ball(self):
         if player_close_to_ball(self.info_manager, self.test_robot):
-            self.tactics[self.test_robot] = RotateAround(self.info_manager, self.test_robot)
+            self.tactics[self.test_robot] = rotate_around(self.info_manager, self.test_robot)
         else:
             self.tactics[self.test_robot] = GoGetBall(self.info_manager, self.test_robot)
 
     def rotate_around_random_point(self):
         phony_origin = self.info_manager.get_ball_position()#Position(-1500,0)
-        self.tactics[self.test_robot] = RotateAround(self.info_manager, self.test_robot, phony_origin)
+        self.tactics[self.test_robot] = rotate_around(self.info_manager, self.test_robot, phony_origin)
