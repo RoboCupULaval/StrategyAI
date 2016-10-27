@@ -25,18 +25,19 @@ class TestTransitions(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-        self.graphs[0].add_node(Node(GoalKeeper(self.game_state, 0, time_to_live=0)))
-        self.graphs[1].add_node(Node(GoStraightTo(self.game_state, 1, Pose(Position(), 3 * pi / 2))))
-        self.graphs[1].add_node(Node(GoStraightTo(self.game_state, 1, Pose(Position(500, 0), 0))))
-        self.graphs[1].add_node(Node(GoStraightTo(self.game_state, 1, Pose(Position(500, 500), pi / 2))))
-        self.graphs[1].add_node(Node(GoStraightTo(self.game_state, 1, Pose(Position(0, 500), pi))))
-        self.graphs[1].add_vertex(0, 1, self.condition)
-        self.graphs[1].add_vertex(1, 2, self.condition)
-        self.graphs[1].add_vertex(2, 3, self.condition)
-        self.graphs[1].add_vertex(3, 0, self.condition)
+        self.add_tactic(0, GoalKeeper(self.game_state, 0))
+        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(), 3 * pi / 2)))
+        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(1000, 0), 0)))
+        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(1000, 1000), pi / 2)))
+        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(0, 1000), pi)))
+
+        self.add_condition(1, 0, 1, self.condition)
+        self.add_condition(1, 1, 2, self.condition)
+        self.add_condition(1, 2, 3, self.condition)
+        self.add_condition(1, 3, 0, self.condition)
 
         for i in range(2, PLAYER_PER_TEAM):
-            self.graphs[i].add_node(Node(Stop(self.game_state, i)))
+            self.add_tactic(i, Stop(self.game_state, i))
 
     def condition(self):
         """

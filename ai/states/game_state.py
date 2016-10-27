@@ -7,7 +7,6 @@
 import RULEngine.Game.Ball
 import RULEngine.Game.Field
 import RULEngine.Game.Team
-import ai.Util.geometry
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.Util.singleton import singleton
 
@@ -20,6 +19,7 @@ class GameState:
         self.my_team = RULEngine.Game.Team.Team(is_team_yellow)
         self.other_team = RULEngine.Game.Team.Team(not is_team_yellow)
         self.timestamp = 0
+        self.last_timestamp = 0
         self.debug_information_in = []
         self.ui_debug_commands = []
 
@@ -28,8 +28,11 @@ class GameState:
             Met à jour la position de la balle
             :param new_ball_position: Nouvelles position de la balle, de type Position
         """
-        delta = ai.Util.geometry.get_angle(self.field.ball.position, new_ball_position)
-        self.field.move_ball(new_ball_position, delta)
+        # FIXME: Hack permettant de contourner la division par zéro survenant si le delta temps est nul dans move_ball
+        if self.timestamp != self.last_timestamp:
+            self.field.move_ball(new_ball_position, self.timestamp - self.last_timestamp)
+        else:
+            self.field.ball._position = new_ball_position
 
     def _update_field(self, new_field):
         """
@@ -65,6 +68,7 @@ class GameState:
             Met à jour le timestamp
             :param new_timestamp: float, valeur du nouveau timestamp
         """
+        self.last_timestamp = self.timestamp
         self.timestamp = new_timestamp
 
     def update(self, new_game_state):
@@ -74,10 +78,10 @@ class GameState:
             Pour le format du tuple, voir RULEngine/framework.py
         """
         is_my_team = True
+        self._update_timestamp(new_game_state.timestamp)
         self._update_field(new_game_state.field)
         self._update_team(new_game_state.friends, is_my_team)
         self._update_team(new_game_state.enemies, not is_my_team)
-        self._update_timestamp(new_game_state.timestamp)
 
     def get_my_team_player(self, player_id):
         pass

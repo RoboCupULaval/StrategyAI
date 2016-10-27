@@ -30,7 +30,6 @@ class ModuleState:
         self.modules = {}
         self.pathfinder = None
 
-
     def register_module(self, module_name, module_ref):
         """
             Enregistre un module dans la liste des modules intelligents utilisables

@@ -3,6 +3,7 @@
 from functools import partial
 
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic_constants import DEFAULT_TIME_TO_LIVE, Flags
 
@@ -19,8 +20,12 @@ class Tactic:
         """
             Initialise la tactique
 
-            :param p_info_manager: référence à la façade InfoManager
+            :param p_game_state: L'état courant du jeu.
         """
+        assert isinstance(player_id, int)
+        assert PLAYER_PER_TEAM >= player_id >= 0
+        assert isinstance(target, Pose), "La target devrait être une Pose"
+
         self.game_state = p_game_state
         self.player_id = player_id
         self.current_state = self.halt
@@ -45,7 +50,7 @@ class Tactic:
         """
         tactic_time = self.game_state.get_timestamp()
         next_action = self.current_state()
-        if tactic_time - self.last_state_time > self.time_to_live and self.time_to_live > 0:
+        if tactic_time - self.last_state_time > self.time_to_live > 0:
             self._reset_ttl()
 
         self.current_state = self.next_state

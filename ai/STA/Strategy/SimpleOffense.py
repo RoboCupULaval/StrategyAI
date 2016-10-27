@@ -12,6 +12,6 @@ class SimpleOffense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-        self.graphs[0].add_node(Node(GoalKeeper(self.game_state, 0)))
+        self.add_tactic(0, GoalKeeper(self.game_state, 0))
         for i in range(1, 6):
-            self.graphs[i].add_node(Node(GoGetBall(self.game_state, i)))
+            self.add_tactic(i, GoGetBall(self.game_state, i))

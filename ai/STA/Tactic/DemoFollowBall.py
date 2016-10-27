@@ -1,11 +1,10 @@
-
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import DEFAULT_TIME_TO_LIVE
 from ai.STA.Action.MoveTo import MoveTo
 from ai.STA.Action.Idle import Idle
-from ai.Util.geometry import get_distance, get_angle
+from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import POSITION_DEADZONE, BALL_RADIUS
 
@@ -18,7 +17,7 @@ class DemoFollowBall(Tactic):
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
     attributs:
-        info_manager: référence à la façade InfoManager
+        game_state: état courant du jeu
         player_id : Identifiant du joueur auquel est assigné la tactique
     """
     def __init__(self, game_state, player_id, p_target, time_to_live=DEFAULT_TIME_TO_LIVE):
@@ -36,14 +35,14 @@ class DemoFollowBall(Tactic):
         if get_distance(self.game_state.get_player_pose(self.player_id).position, self.target.position) < POSITION_DEADZONE + BALL_RADIUS:
             self.next_state = self.halt
         else:
-            self.game_state
+            self.next_state = self.move_to_ball
 
         return move
 
     def halt(self, reset=False):
         stop = Idle(self.game_state, self.player_id)
 
-        if get_distance(self.game_state.get_player_pose(self.player_id).position, self.game_state.get_ball_position()) < POSITION_DEADZONE:
+        if get_distance(self.game_state.get_player_pose(self.player_id).position, self.game_state.get_ball_position()) < POSITION_DEADZONE + BALL_RADIUS:
             self.next_state = self.halt
         else:
             self.next_state = self.move_to_ball

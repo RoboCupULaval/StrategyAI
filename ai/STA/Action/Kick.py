@@ -14,7 +14,7 @@ class Kick(Action):
     """
     def __init__(self, p_game_state, p_player_id, p_force):
         """
-            :param p_info_manager: référence vers l'InfoManager
+            :param p_game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui frappe la balle
             :param p_force: force du kicker (float entre 0 et 1)
         """

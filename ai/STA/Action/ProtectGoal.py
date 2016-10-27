@@ -6,8 +6,8 @@ from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import FIELD_GOAL_RADIUS, PLAYER_PER_TEAM, FIELD_X_RIGHT, FIELD_X_LEFT
-from ai.Util.area import stayInsideCircle, stayOutsideCircle, stayInsideGoalArea
-from ai.Util.geometry import get_angle, get_closest_point_on_line
+from RULEngine.Util.area import stayInsideCircle, stayOutsideCircle, stayInsideGoalArea
+from RULEngine.Util.geometry import get_angle, get_closest_point_on_line
 
 __author__ = 'Robocup ULaval'
 
@@ -27,7 +27,7 @@ class ProtectGoal(Action):
     def __init__(self, p_game_state, p_player_id, p_is_right_goal=True, p_minimum_distance=FIELD_GOAL_RADIUS/2,
                  p_maximum_distance=None):
         """
-        :param p_info_manager: Une référence vers l'InfoManager.
+        :param p_game_state: L'état courant du jeu.
         :param p_player_id: L'identifiant du joueur qui est le gardien de but.
         :param p_is_right_goal: Un booléen indiquant si le but à protéger est celui de droite.
         :param p_minimum_distance: La distance minimale qu'il doit y avoir entre le gardien et le centre du but.

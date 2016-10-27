@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from abc import abstractmethod
+from ai.states.game_state import GameState
 
 __author__ = 'Robocup ULaval'
 
@@ -11,8 +12,9 @@ class Action:
     """
     def __init__(self, p_game_state):
         """
-            :param p_info_manager: référence vers l'InfoManager
+            :param p_game_state: L'état courant du jeu.
         """
+        # assert(isinstance(p_game_state, GameState))  # l'assert échoue si GameState est un singleton
         self.game_state = p_game_state
 
     def on_before(self):
