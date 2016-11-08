@@ -44,7 +44,7 @@ class Node:
     def remove_vertex(self, p_ending):
         """
         Retire un vertex du noeud, spécifié par le numéro de son noeud d'arrivé. Si le noeud courant ne possède pas de
-        vertex vers le noeud spécifé, rien ne se passe rien.
+        vertex vers le noeud spécifé, rien ne se passe.
         :param p_ending: Un entier positif représentant le numéro du noeud d'arrivé du vertex à retirer.
         """
         assert isinstance(p_ending, int)

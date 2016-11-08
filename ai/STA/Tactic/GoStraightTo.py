@@ -4,6 +4,7 @@ from .Tactic import Tactic
 from . tactic_constants import Flags
 from ai.STA.Action.MoveStraightTo import MoveStraightTo
 from RULEngine.Util.geometry import get_distance
+from RULEngine.Util.constant import POSITION_DEADZONE
 
 
 class GoStraightTo(Tactic):
@@ -24,7 +25,6 @@ class GoStraightTo(Tactic):
     def check_success(self):
         player_pose = self.game_state.get_player_pose(player_id=self.player_id)
         distance = get_distance(player_pose.position, self.target.position)
-        #FIXME thank tou
-        if distance < 50:
+        if distance < POSITION_DEADZONE:
             return True
         return False
