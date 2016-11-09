@@ -21,6 +21,7 @@ from .Communication.udp_server import GrSimCommandSender, DebugCommandSender,\
 from .Communication.serial_command_sender import SerialCommandSender
 from .Command.command import Stop, PI
 from .Util.exception import StopPlayerError
+from .Util.constant import TeamColor
 
 LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
 UI_DEBUG_MULTICAST_ADDRESS = "127.0.0.1"
@@ -45,7 +46,6 @@ class Framework(object):
         self.debug_sender = None
         self.debug_receiver = None
         self.game = None
-        self.is_team_yellow = is_team_yellow
         self.ai_coach = None
         self.referee = None
         self.running_thread = False
@@ -57,20 +57,22 @@ class Framework(object):
         self.last_cmd_time = time.time()
         self.robots_pi = [PI(), PI(), PI(), PI(), PI(), PI()]
 
+        self.ia_coach_mainloop = None
+        # callable pour mettre la couleur de l'équipe dans l'IA lors de la création de la partie (create_game)
+        self.ia_coach_initializer = None
+        self.is_team_yellow = self._sanitize_team_color(is_team_yellow)
 
-    def create_game(self, ai_coach):
+    def create_game(self):
         """
-            Créé l'arbitre et établit la stratégie de l'équipe que l'ia gère.
+            Créé l'arbitre et la Game. De plus initialize(team color) l'IA(à être refractorer out - MGL 2016/11/08).
 
-            :param ai_coach: Une référence vers une stratégie non instanciée.
             :return: Game, le **GameState**
         """
 
         self.referee = Referee()
+        self.ia_coach_initializer(self.is_team_yellow)
 
-        self.ai_coach = ai_coach(self.is_team_yellow)
-
-        self.game = Game(self.referee, self.is_team_yellow)
+        self.game = Game(self.referee, self.is_team_yellow == TeamColor.YELLOW_TEAM)
 
         return self.game
 
@@ -110,11 +112,12 @@ class Framework(object):
         # state = self.referee.command.name
         state = "NORMAL_START"
         if state == "NORMAL_START":
-            self.ai_coach.main_loop(game_state)
+            return self.ia_coach_mainloop(game_state)
 
         elif state == "STOP":
-            self.ai_coach.stop(game_state)
-
+            # TODO implement
+            pass
+            # self.ai_coach.stop(game_state)
 
     def get_game_state(self):
         """ Retourne le **GameState** actuel. *** """
@@ -129,7 +132,7 @@ class Framework(object):
             debug=self.debug_receiver.receive_command()
         )
 
-    def start_game(self, ai_coach, async=False, serial=False):
+    def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer, async=False, serial=False):
         """ Démarrage du moteur de l'IA initial. """
 
         # on peut eventuellement demarrer une autre instance du moteur
@@ -147,7 +150,9 @@ class Framework(object):
         else:
             self.stop_game()
 
-        self.create_game(ai_coach)
+        self.ia_coach_mainloop = p_ia_coach_mainloop
+        self.ia_coach_initializer = p_ia_coach_initializer
+        self.create_game()
 
         signal.signal(signal.SIGINT, self._sigint_handler)
         self.running_thread = threading.Thread(target=self.game_thread_main_loop)
@@ -169,11 +174,11 @@ class Framework(object):
             if self._is_frame_number_different(current_vision_frame):
                 self.update_game_state()
                 self.update_players_and_ball(current_vision_frame)
-                self.update_strategies()
+                robot_commands, debug_commands = self.update_strategies()
 
                 # Communication
-                self._send_robot_commands()
-                self._send_debug_commands()
+                self._send_robot_commands(robot_commands)
+                self._send_debug_commands(debug_commands)
 
     def _acquire_vision_frame(self):
         return self.vision.get_latest_frame()
@@ -186,10 +191,11 @@ class Framework(object):
         self.running_thread.join()
         self.thread_terminate.clear()
         try:
-            if self.is_team_yellow:
+            if self.is_team_yellow == TeamColor.YELLOW_TEAM:
                 team = self.game.yellow_team
             else:
                 team = self.game.blue_team
+
             for player in team.players:
                 command = Stop(player)
                 self.command_sender.send_command(command)
@@ -203,28 +209,28 @@ class Framework(object):
             time.sleep(0.01)
             print("En attente d'une image de la vision.")
 
-    def _send_robot_commands(self):
+    def _send_robot_commands(self, commands):
+        """ Envoi les commades des robots au serveur. """
         cmd_time = time.time()
         if cmd_time - self.last_cmd_time > CMD_DELTA_TIME:
             self.last_cmd_time = cmd_time
-            commands = self._get_coach_robot_commands()
 
-            for idx,command in enumerate(commands):
+            for idx, command in enumerate(commands):
                 pi_cmd = self.robots_pi[idx].update_pid_and_return_speed_command(command)
                 command.pose = pi_cmd
                 self.command_sender.send_command(command)
 
-
-    def _get_coach_robot_commands(self):
-        return self.ai_coach.robot_commands
-
-
-    def _send_debug_commands(self):
-        """ Récupère les paquets de débogages et les envoies au serveur. """
-        ai_debug_commands = self.ai_coach.get_debug_commands_and_clear()
-        if ai_debug_commands:
-            self.debug_sender.send_command(ai_debug_commands)
-
+    def _send_debug_commands(self, debug_commands):
+        """ Envoie les commandes de debug au serveur. """
+        if debug_commands:
+            self.debug_sender.send_command(debug_commands)
 
     def _sigint_handler(self, signum, frame):
         self.stop_game()
+
+    @staticmethod
+    def _sanitize_team_color(p_is_team_yellow):
+        if p_is_team_yellow:
+            return TeamColor.YELLOW_TEAM
+        else:
+            return TeamColor.BLUE_TEAM

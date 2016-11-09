@@ -1,6 +1,8 @@
 # Under MIT License, see LICENSE.txt
 """ Module définissant des constantes de programmations python pour l'IA """
 from .Position import Position
+from enum import Enum
+
 __author__ = 'RoboCupULaval'
 
 ROBOT_RADIUS = 90
@@ -53,3 +55,9 @@ SPEED_ABSOLUTE_TOLERANCE = 1e-3
 # Speed
 DEFAULT_MAX_SPEED = 1
 DEFAULT_MIN_SPEED = 0.65
+
+
+# TeamColor
+class TeamColor(Enum):
+    YELLOW_TEAM = 0
+    BLUE_TEAM = 1
