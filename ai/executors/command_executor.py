@@ -32,8 +32,7 @@ class CommandExecutor(Executor):
         return self.ws.play_state.ready_to_ship_robot_packet_list
 
     def _retrieve_commands(self):
-        cmd = self.ws.play_state.current_ai_commands
-        return cmd
+        return self.ws.play_state.current_ai_commands
 
     def _parse_ai_command(self, ai_command, player_id):
         if ai_command is not None:

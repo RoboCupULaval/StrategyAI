@@ -1,7 +1,5 @@
 # Under MIT licence, see LICENCE.txt
 
-from functools import partial
-
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.STA.Action.Idle import Idle
