@@ -8,7 +8,7 @@ from ai.states.module_state import ModuleState
 
 
 class WorldState:
-    def __init__(self, is_team_yellow=False, mode_debug_active=True):
+    def __init__(self, mode_debug_active=True):
         self.mode_debug_active = mode_debug_active
         self.module_state = ModuleState()
         self.play_state = PlayState()
@@ -23,3 +23,6 @@ class WorldState:
 
         if self.mode_debug_active:
             self.debug_state.update(game_state.debug)
+
+    def set_team_color(self, p_our_team_color):
+        self.game_state.set_team_color(p_our_team_color)

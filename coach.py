@@ -11,13 +11,13 @@ TIMESTAMP_MINIMAL_DELTA = 0.015
 
 class Coach(object):
 
-    def __init__(self, is_team_yellow, mode_debug_active=True):
+    def __init__(self, mode_debug_active=True):
         self.mode_debug_active = mode_debug_active
         # For the framework! TODO make this better!
         self.debug_commands = []
         self.robot_commands = []
 
-        self.world_state = WorldState(is_team_yellow)
+        self.world_state = WorldState()
         self.debug_executor = DebugExecutor(self.world_state)
         self.module_executor = ModuleExecutor(self.world_state)
         self.play_executor = PlayExecutor(self.world_state)
@@ -38,6 +38,11 @@ class Coach(object):
         self.robot_commands = self.world_state.play_state.ready_to_ship_robot_packet_list
         if self.mode_debug_active:
             self.debug_commands = self.world_state.debug_state.to_ui_packet_debug_cmds
+
+        return self.robot_commands, self.debug_commands
+
+    def set_team_color(self, p_our_team_colors):
+        self.world_state.set_team_color(p_our_team_colors)
 
     def get_robot_commands(self):
         return self.robot_commands
