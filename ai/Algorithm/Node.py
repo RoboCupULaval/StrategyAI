@@ -8,9 +8,9 @@ __author__ = 'RoboCupULaval'
 
 class Node:
     """
-    Node: Noeud du graphe représentant la tactique en cours. Il ne peut y avoir qu'un seul vertex entre deux noeuds
-          donnés dans un certain sens (ex: un seul vertex du noeud 1 au noeud 2, mais il peut y en avoir un du noeud 2
-          au noeud 1 aussi.
+    Node: Noeud d'un graphe simple orienté représentant la tactique en cours. Il ne peut y avoir qu'un seul vertex entre
+          deux noeuds donnés dans un certain sens (ex: un seul vertex du noeud 1 au noeud 2, mais il peut y en avoir un
+          du noeud 2 au noeud 1 aussi.
     Méthodes:
         add_vertex: Ajoute un vertex au noeud.
         remove_vertex: Retire un vertex du noeud.
