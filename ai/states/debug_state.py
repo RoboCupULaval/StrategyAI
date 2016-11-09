@@ -1,10 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.Util.singleton import singleton
+from ai.Util.singleton import Singleton
 
 
-@singleton
-class DebugState:
+class DebugState(object, metaclass=Singleton):
 
     def __init__(self):
         self.from_ui_debug_commands = None

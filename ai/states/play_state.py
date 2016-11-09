@@ -2,11 +2,10 @@
 
 from ai.STA.Strategy.StrategyBook import StrategyBook
 from ai.STA.Tactic.TacticBook import TacticBook
-from ai.Util.singleton import singleton
+from ai.Util.singleton import Singleton
 
 
-@singleton
-class PlayState(object):
+class PlayState(object, metaclass=Singleton):
 
     def __init__(self):
         self.strategy_book = StrategyBook()

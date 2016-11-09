@@ -8,11 +8,10 @@ import RULEngine.Game.Ball
 import RULEngine.Game.Field
 import RULEngine.Game.Team
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from ai.Util.singleton import singleton
+from ai.Util.singleton import Singleton
 
 
-@singleton
-class GameState:
+class GameState(object, metaclass=Singleton):
 
     def __init__(self, is_team_yellow=False):
         self.field = RULEngine.Game.Field.Field(RULEngine.Game.Ball.Ball())
