@@ -47,6 +47,9 @@ class TestNode(unittest.TestCase):
         self.node1.add_vertex(self.vertex1)
         self.assertEqual(len(self.node1.vertices), 1)  # il ne peut y avoir qu'un vertex entre deux noeuds dans un sens
 
+        self.node1.add_vertex(self.vertex2)
+        self.assertEqual(len(self.node1.vertices), 2)
+
     def test_remove_vertex(self):
         self.assertRaises(AssertionError, self.node1.remove_vertex, "not an int")
         self.assertRaises(AssertionError, self.node1.remove_vertex, -1)

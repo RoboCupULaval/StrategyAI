@@ -8,7 +8,8 @@ __author__ = 'RoboCupULaval'
 
 class Graph:
     """
-    Graph:
+    Graph: Graphe simple orienté regroupant une série de noeuds contenant des tactiques. Les transitions entre les
+           tactiques sont déterminées par des conditions associées aux vertices reliant les noeuds.
     Méthodes:
         get_current_tactic_name: Retourne le nom de la tactique en cours, sous forme d'une chaîne de caractères.
         get_current_tactic: Retourne la tactique en cours.

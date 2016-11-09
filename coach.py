@@ -7,7 +7,9 @@ from ai.executors.play_executor import PlayExecutor
 from ai.executors.command_executor import CommandExecutor
 
 # FIXME this thing!
-TIMESTAMP_MINIMAL_DELTA = 0.015
+TIMESTAMP_MINIMAL_DELTA_60_FPS = 0.017
+TIMESTAMP_MINIMAL_DELTA_30_FPS = 0.033
+
 
 class Coach(object):
 

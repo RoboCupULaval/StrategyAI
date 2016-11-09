@@ -3,6 +3,7 @@
 from ai.executors.executor import Executor
 from RULEngine.Command import command
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 
 class CommandExecutor(Executor):
@@ -25,8 +26,8 @@ class CommandExecutor(Executor):
     def _generate_command(self):
         ai_command_list = self._retrieve_commands()
 
-        # FIXME stupid range to 6 thinguy... TODO see a better way to pass playerid
-        for player_id in range(0, 6):
+        # TODO: remplacer la constante PLAYER_PER_TEAM par les clefs d'un dictionnaire contenant les robots dans le game_state
+        for player_id in range(PLAYER_PER_TEAM):
             self.ws.play_state.ready_to_ship_robot_packet_list.append(self._parse_ai_command(ai_command_list[player_id],
                                                                       player_id))
         return self.ws.play_state.ready_to_ship_robot_packet_list
@@ -62,6 +63,7 @@ class CommandExecutor(Executor):
     @staticmethod
     def _sanitize_kick_strength(p_kick_strength):
         if p_kick_strength > 1:
+            print("Warning: kick strength devrait être contenu dans l'intervale [0, 1].")
             return 1
         else:
             return p_kick_strength

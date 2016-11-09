@@ -71,7 +71,7 @@ class GoBetween(Action):
         elif delta_x == 0:  # droite verticale
             x = self.position1.x
             y = robot_position.y
-        else:  # si delta_y == 0 : droite horizontale
+        elif delta_y == 0: # droite horizontale
             x = robot_position.x
             y = self.position1.y
 

@@ -84,10 +84,9 @@ class GameState(object, metaclass=Singleton):
             Met à jour la position de la balle
             :param new_ball_position: Nouvelles position de la balle, de type Position
         """
-        # FIXME: Hack permettant de contourner la division par zéro survenant si le delta temps est nul dans move_ball
-        if self.timestamp != self.last_timestamp:
+        try:
             self.field.move_ball(new_ball_position, self.timestamp - self.last_timestamp)
-        else:
+        except ZeroDivisionError:
             self.field.ball._position = new_ball_position
 
     def _update_field(self, new_field):
