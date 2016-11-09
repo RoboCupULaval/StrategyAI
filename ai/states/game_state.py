@@ -8,13 +8,13 @@ import RULEngine.Game.Ball
 import RULEngine.Game.Field
 import RULEngine.Game.Team
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from ai.Util.singleton import singleton
+from ai.Util.singleton import Singleton
 
 
-@singleton
-class GameState:
+class GameState(object, metaclass=Singleton):
 
     def __init__(self, is_team_yellow=False):
+        self.our_team_color = is_team_yellow
         self.field = RULEngine.Game.Field.Field(RULEngine.Game.Ball.Ball())
         self.my_team = RULEngine.Game.Team.Team(is_team_yellow)
         self.other_team = RULEngine.Game.Team.Team(not is_team_yellow)
@@ -110,3 +110,6 @@ class GameState:
             :return: le timestamp de la state
         """
         return self.timestamp
+
+    def set_team_color(self, p_our_team_color):
+        self.our_team_color = p_our_team_color

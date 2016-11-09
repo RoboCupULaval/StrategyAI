@@ -1,12 +1,11 @@
 # Under MIT License, see LICENSE.txt
 
 
-def singleton(cls):
-    instances = {}
+class Singleton(type):
+    """ Implemente le pattern Singleton avec une metaclass """
+    _instances = {}
 
-    def getinstance():
-        if cls not in instances:
-            instances[cls] = cls()
-        return instances[cls]
-
-    return getinstance
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
