@@ -23,8 +23,8 @@ class GoStraightTo(Tactic):
         return next_action.exec()
 
     def check_success(self):
-        player_pose = self.game_state.get_player_pose(player_id=self.player_id)
-        distance = get_distance(player_pose.position, self.target.position)
+        player_position = self.game_state.get_player_position(player_id=self.player_id)
+        distance = get_distance(player_position, self.target.position)
         if distance < POSITION_DEADZONE:
             return True
         return False

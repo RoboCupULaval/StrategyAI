@@ -23,6 +23,62 @@ class GameState(object, metaclass=Singleton):
         self.debug_information_in = []
         self.ui_debug_commands = []
 
+    def update(self, new_game_state):
+        """
+            Met à jour le jeu
+            :param new_game_state: État du jeu, sous forme de named tuple
+            Pour le format du tuple, voir RULEngine/framework.py
+        """
+        is_my_team = True
+        self._update_timestamp(new_game_state.timestamp)
+        self._update_field(new_game_state.field)
+        self._update_team(new_game_state.friends, is_my_team)
+        self._update_team(new_game_state.enemies, not is_my_team)
+
+    def get_my_team_player(self, player_id):
+        pass
+
+    def get_player_pose(self, player_id, is_my_team=True):
+        """
+            Retourne la pose d'un joueur d'une équipe
+            :param is_my_team: Booléen avec valeur vrai par défaut, l'équipe du joueur est mon équipe
+            :param player_id: identifiant du joueur, en int
+            :return: La pose du joueur
+        """
+        if is_my_team:
+            return self.my_team.players[player_id].pose
+        else:
+            return self.other_team.players[player_id].pose
+
+    def get_player_position(self, player_id, is_my_team=True):
+        """
+            Retourne la position d'un joueur d'une équipe
+            :param is_my_team: Booléen avec valeur vrai par défaut, l'équipe du joueur est mon équipe
+            :param player_id: identifiant du joueur, en int
+            :return: La position du joueur
+        """
+        if is_my_team:
+            return self.my_team.players[player_id].pose.position
+        else:
+            return self.other_team.players[player_id].pose.position
+
+    def get_ball_position(self):
+        """
+            Retourne la position de la balle
+            :return: la position de la balle
+        """
+        return self.field.ball.position
+
+    def get_timestamp(self):
+        """
+            Retourne le timestamp de la state
+            :return: le timestamp de la state
+        """
+        return self.timestamp
+
+    def set_team_color(self, p_our_team_color):
+        self.our_team_color = p_our_team_color
+
     def _update_ball_position(self, new_ball_position):
         """
             Met à jour la position de la balle
@@ -71,46 +127,4 @@ class GameState(object, metaclass=Singleton):
         self.last_timestamp = self.timestamp
         self.timestamp = new_timestamp
 
-    def update(self, new_game_state):
-        """
-            Met à jour le jeu
-            :param new_game_state: État du jeu, sous forme de named tuple
-            Pour le format du tuple, voir RULEngine/framework.py
-        """
-        is_my_team = True
-        self._update_timestamp(new_game_state.timestamp)
-        self._update_field(new_game_state.field)
-        self._update_team(new_game_state.friends, is_my_team)
-        self._update_team(new_game_state.enemies, not is_my_team)
 
-    def get_my_team_player(self, player_id):
-        pass
-
-    def get_player_pose(self, player_id, is_my_team=True):
-        """
-            Retourne la pose d'un joueur d'une équipe
-            :param is_my_team: Booléen avec valeur vrai par défaut, l'équipe du joueur est mon équipe
-            :param player_id: identifiant du joueur, en int
-            :return: La pose du joueur
-        """
-        if is_my_team:
-            return self.my_team.players[player_id].pose
-        else:
-            return self.other_team.players[player_id].pose
-
-    def get_ball_position(self):
-        """
-            Retourne la position de la balle
-            :return: la position de la balle
-        """
-        return self.field.ball.position
-
-    def get_timestamp(self):
-        """
-            Retourne le timestamp de la state
-            :return: le timestamp de la state
-        """
-        return self.timestamp
-
-    def set_team_color(self, p_our_team_color):
-        self.our_team_color = p_our_team_color
