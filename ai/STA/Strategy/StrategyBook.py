@@ -1,10 +1,14 @@
 # Under MIT license, see LICENSE.txt
+
 """ Livre des stratégies. """
 
 from .HumanControl import HumanControl
 from .SimpleDefense import SimpleDefense
 from .SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
+from .WeirdmovementStrategy import WeirdmovementStrategy
+from ai.STA.Strategy.TestTransitions import TestTransitions
+
 
 class StrategyBook(object):
     """
@@ -13,44 +17,26 @@ class StrategyBook(object):
         charge de sélectionner la stratégie courante.
     """
 
-    def __init__(self, p_info_manager):
-        self.strategy_book = {'SimpleDefense' : SimpleDefense,
-                              'SimpleOffense' : SimpleOffense,
-                              'HumanControl' : HumanControl,
-                              'DoNothing' : DoNothing }
-        self.info_manager = p_info_manager
+    def __init__(self):
+        self.strategy_book = {'SimpleDefense': SimpleDefense,
+                              'SimpleOffense': SimpleOffense,
+                              'HumanControl': HumanControl,
+                              'DoNothing': DoNothing,
+                              'WeirdmovementStrategy': WeirdmovementStrategy,
+                              'TestTransitions': TestTransitions}
 
     def get_strategies_name_list(self):
         return list(self.strategy_book.keys())
 
-    def ball_in_offense_zone(self):
-        self.team_zone_side = "left"  # constante bidon TODO: trouver une facon de demander au InfoManager notre zone initiale
-        self.ball_x_position = self.info_manager.get_ball_position().x
-
-        if self.team_zone_side == "left":
-            return self.ball_x_position > 0
-        return self.ball_x_position < 0
-
-    def most_opponents_in_our_zone(self):
-        pass
-
     def get_optimal_strategy(self):
-
-        # simple choice
-        if self.ball_in_offense_zone():
-            self.chosen_strategy = SimpleOffense
-        else:
-            self.chosen_strategy = SimpleDefense
-
-        self.chosen_strategy = DoNothing
-
-        return self.chosen_strategy
+        return TestTransitions
 
     def get_strategy(self, strategy_name):
-        return self.strategy_book[strategy_name]
+        if self.check_existance_strategy(strategy_name):
+            return self.strategy_book[strategy_name]
+        return self.strategy_book['DoNothing']
 
-    def debug_show_all_players_tactics(self):
-        for i in range(0,6):
-            debug_string = ""
-            debug_string += "Robot:" + str(i) + str(self.info_manager.get_player_tactic(i))
-        print(debug_string)
+    def check_existance_strategy(self, strategy_name):
+        assert isinstance(strategy_name, str)
+
+        return strategy_name in self.strategy_book

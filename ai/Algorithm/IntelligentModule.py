@@ -3,6 +3,7 @@
     Contient les classes mères pour les modules intelligents.
 """
 from abc import abstractmethod, ABCMeta
+from ai.Debug.debug_interface import DebugInterface
 
 __author__ = 'RoboCupULaval'
 
@@ -12,7 +13,7 @@ class IntelligentModule(object, metaclass=ABCMeta):
         Actuellement ne défini que l'attribut *state*
     """
 
-    def __init__(self, pInfoManager):
+    def __init__(self, p_gameState):
         """
             Reçoit une référence vers InfoManager. Cette référence est rennomée
             comme étant *state*.
@@ -20,7 +21,7 @@ class IntelligentModule(object, metaclass=ABCMeta):
             :param pInfoManager: Référence vers l'InfoManager
         """
 
-        self.state = pInfoManager
+        self.state = p_gameState
 
     @abstractmethod
     def update(self):
@@ -44,11 +45,12 @@ class Pathfinder(metaclass=ABCMeta):
         La valeur associée est une liste de *Pose*.
     """
 
-    def __init__(self, info_manager):
+    def __init__(self, p_game_state):
         """
             Initialise le dictionnaire *paths*.
         """
-        self.state = info_manager
+        self.game_state = p_game_state
+        self.debug_interface = DebugInterface()
         self.paths = {}
         for i in range(6):
             self.paths[i] = []

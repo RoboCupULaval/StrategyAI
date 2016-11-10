@@ -1,69 +1,62 @@
 # Under MIT License, see LICENSE.txt
-""" Module supérieur de l'IA """
-import math
 
-from RULEngine.Command import command
-from RULEngine.Util.Position import Position
-from RULEngine.Util.Pose import Pose
+from ai.states.world_state import WorldState
+from ai.executors.debug_executor import DebugExecutor
+from ai.executors.module_executor import ModuleExecutor
+from ai.executors.play_executor import PlayExecutor
+from ai.executors.command_executor import CommandExecutor
 
-import ai.executor as executor
-from ai.InfoManager import InfoManager
-import ai.Debug.debug_manager as ui_debug
-from ai.STA.Strategy.StrategyBook import StrategyBook
-from ai.STA.Tactic.TacticBook import TacticBook
-from ai.Algorithm.PathfinderRRT import PathfinderRRT
-from ai.Algorithm.InfluenceMap import InfluenceMap
-from ai.Debug.debug_manager import DebugManager, DebugCommand
+# FIXME this thing!
+TIMESTAMP_MINIMAL_DELTA_60_FPS = 0.017
+TIMESTAMP_MINIMAL_DELTA_30_FPS = 0.033
 
-__author__ = 'RoboCupULaval'
-
-TIMESTAMP_MINIMAL_DELTA = 0.015 #15 ms de mise à jour pour la boucle de l'ia
 
 class Coach(object):
-    """
-        Niveau supérieur de l'IA, est appelé et créé par Framework.
 
-        La classe créée une partie du GameState et exécute la boucle principale
-        de la logique de l'IA.
+    def __init__(self, mode_debug_active=True):
+        self.mode_debug_active = mode_debug_active
+        # For the framework! TODO make this better!
+        self.debug_commands = []
+        self.robot_commands = []
 
-        À chaque itération, les Executors sont déclenchés et InfoManager est
-        mit à jour.
-
-        À la fin d'une itération, les commandes des robots sont récupérées de
-        l'InfoManager et finalement envoyée au serveur de communication.
-    """
-
-    def __init__(self):
-        """
-            Constructeur, réplique une grande partie du GameState pour
-            construire l'InfoManager.
-        """
-        self.info_manager = InfoManager()
-        self._init_intelligent_modules()
-        self.debug_manager = self.info_manager.debug_manager
-        self.debug_executor = executor.DebugExecutor(self.info_manager)
-        self.module_executor = executor.ModuleExecutor(self.info_manager)
-        self.strategy_executor = executor.StrategyExecutor(self.info_manager)
-        self.tatic_executor = executor.TacticExecutor(self.info_manager)
-        self.coach_command_sender = CoachCommandSender(self.info_manager)
-        self._init_ui_debug()
-
-        self.last_update_timestap = 0
-
+        self.world_state = WorldState()
+        self.debug_executor = DebugExecutor(self.world_state)
+        self.module_executor = ModuleExecutor(self.world_state)
+        self.play_executor = PlayExecutor(self.world_state)
+        self.robot_command_executor = CommandExecutor(self.world_state)
 
     def main_loop(self, p_game_state):
-        """ Interface RULEngine/StrategyIA, boucle principale de l'IA"""
-        delta_timestamp = p_game_state.timestamp - self.last_update_timestap
-        tick_log = "Tick: " + str(p_game_state.timestamp) + " (delta=" + str(delta_timestamp) + ")"
-        self.info_manager.debug_manager.add_log(1, tick_log)
+        self.robot_commands.clear()
+        self.debug_commands.clear()
 
-        if delta_timestamp > TIMESTAMP_MINIMAL_DELTA or math.isclose(delta_timestamp, TIMESTAMP_MINIMAL_DELTA, abs_tol=1e-4):
-            self.last_update_timestap = p_game_state.timestamp
-            self._update_ai(p_game_state)
-            self.coach_command_sender.generate_and_send_commands(p_game_state)
-        else:
-            pass
+        self.world_state.update(p_game_state)
 
+        self.debug_executor.exec()
+        self.module_executor.exec()
+        self.play_executor.exec()
+        self.robot_command_executor.exec()
+        self.debug_executor.exec()
+
+        self.robot_commands = self.world_state.play_state.ready_to_ship_robot_packet_list
+        if self.mode_debug_active:
+            self.debug_commands = self.world_state.debug_state.to_ui_packet_debug_cmds
+
+        return self.robot_commands, self.debug_commands
+
+    def set_team_color(self, p_our_team_colors):
+        self.world_state.set_team_color(p_our_team_colors)
+
+    def get_robot_commands(self):
+        return self.robot_commands
+
+    def get_debug_status(self):
+        return self.mode_debug_active
+
+    # FIXME only the debug command are accessed through method, the robot_commands are take straight from the variable!
+    def get_debug_commands_and_clear(self):
+        return self.debug_commands
+
+    # Throwback for the last coach! TODO see if we still need to implement them! Or HOW!
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
         pass
@@ -71,95 +64,3 @@ class Coach(object):
     def stop(self, game_state):
         """ *Devrait* déinit pour permettre un arrêt propre. """
         pass
-
-    @property
-    def robot_commands(self):
-        return self.coach_command_sender.robot_commands
-
-    def get_debug_commands_and_clear(self):
-        """ Élément de l'interface entre RULEngine/StrategyIA """
-        if self.debug_manager:
-            debug_commands = self.debug_manager.get_commands()
-            return debug_commands
-        else:
-            return []
-
-    def _init_intelligent_modules(self):
-        self.info_manager.register_module('InfluenceMap', InfluenceMap)
-        self.info_manager.register_module('Pathfinder', PathfinderRRT)
-
-
-    def _init_ui_debug(self):
-        # FIXME: exécuter uniquement sur handshake plutôt qu'à l'init du coach
-        cmd_tactics = {'strategy': StrategyBook(self.info_manager).get_strategies_name_list(),
-                       'tactic': TacticBook().get_tactics_name_list(),
-                       'action': ['None']}
-        cmd = DebugCommand(1001, cmd_tactics)
-        self.debug_manager.add_odd_command(cmd)
-
-
-    def _update_ai(self, p_game_state):
-        """ Effectue une itération de mise à jour de l'ia. """
-        self.info_manager.update(p_game_state)
-        self.debug_executor.exec()
-        self.module_executor.exec()
-        self.strategy_executor.exec()
-        self.tatic_executor.exec()
-
-class CoachCommandSender(object):
-    """
-        Construit les commandes et les places dans un champ pour que Framework
-        puissent les envoyer aux robots.
-    """
-
-    def __init__(self, p_info_manager):
-        self.game_state = None
-        self.info_manager = p_info_manager
-        self.current_player_id = None
-        self.robot_commands = []
-
-    def generate_and_send_commands(self, p_game_state):
-        self.game_state = p_game_state
-        self._clear_commands()
-        for i in range(6):
-            self.current_player_id = i
-            next_action = self.info_manager.get_player_next_action(i)
-            command = self._generate_command(next_action)
-            self.robot_commands.append(command)
-
-    def _clear_commands(self):
-        self.robot_commands = []
-
-    def _generate_command(self, p_next_action):
-        if p_next_action is not None:
-            if p_next_action.kick_strength > 0:
-                return self._generate_kick_command(p_next_action.kick_strength)
-            elif p_next_action.move_destination:
-                assert(isinstance(p_next_action.move_destination, Pose))
-                return self._generate_move_command(p_next_action.move_destination)
-            else:
-                return self._generate_empty_command()
-        else:
-            return self._generate_empty_command()
-
-    def _generate_kick_command(self, p_kick_strength):
-        kick_strength = self._sanitize_kick_strength(p_kick_strength)
-
-        return command.Kick(self._get_player(), kick_strength)
-
-    def _generate_move_command(self, p_move_destination):
-        return command.MoveToAndRotate(self._get_player(), p_move_destination)
-
-    def _generate_empty_command(self):
-        #Envoi d'une command vide qui fait l'arrêt du robot
-        return command.Stop(self._get_player())
-
-    def _get_player(self):
-        return self.game_state.friends.players[self.current_player_id]
-
-
-    def _sanitize_kick_strength(self, p_kick_strength):
-        if p_kick_strength > 1:
-            return 1
-        else:
-            return p_kick_strength

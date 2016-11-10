@@ -1,13 +1,9 @@
 # Under MIT licence, see LICENCE.txt
 
-from abc import abstractmethod
-
-from functools import wraps,partial
-from ai import InfoManager
-from ai.STA.Tactic import tactic_constants
-from ai.STA.Action.Idle import Idle
-
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.STA.Action.Idle import Idle
+from ai.STA.Tactic.tactic_constants import DEFAULT_TIME_TO_LIVE, Flags
 
 __author__ = 'RobocupULaval'
 
@@ -17,28 +13,32 @@ class Tactic:
         Classe mère de toutes les tactiques
     """
 
-    def __init__(self, p_info_manager, target=Pose(), time_to_live=tactic_constants.DEFAULT_TIME_TO_LIVE):
+    def __init__(self, p_game_state, player_id, target=Pose(),
+                 time_to_live=DEFAULT_TIME_TO_LIVE):
         """
             Initialise la tactique
 
-            :param p_info_manager: référence à la façade InfoManager
+            :param p_game_state: L'état courant du jeu.
         """
-        #assert isinstance(p_info_manager, InfoManager)
-        self.info_manager = p_info_manager
-        self.player_id = None
+        assert isinstance(player_id, int)
+        assert PLAYER_PER_TEAM >= player_id >= 0
+        assert isinstance(target, Pose), "La target devrait être une Pose"
+
+        self.game_state = p_game_state
+        self.player_id = player_id
         self.current_state = self.halt
         self.next_state = self.halt
-        self.status_flag = tactic_constants.INIT
+        self.status_flag = Flags.INIT
         self.target = target
         self.time_to_live = time_to_live
-        self.last_state_time = self.info_manager.timestamp
+        self.last_state_time = self.game_state.get_timestamp()
 
-    def halt(self, reset=False):
+    def halt(self):
         """
             S'exécute lorsque l'état courant est *Halt*
             :return: l'action Stop crée
         """
-        stop = Idle(self.info_manager, self.player_id)
+        stop = Idle(self.game_state, self.player_id)
         self.next_state = self.halt
         return stop
 
@@ -46,12 +46,24 @@ class Tactic:
         """
             Exécute une *Action* selon l'état courant
         """
-        tactic_time = self.info_manager.timestamp
+        tactic_time = self.game_state.get_timestamp()
         next_action = self.current_state()
-        if tactic_time - self.last_state_time > self.time_to_live and self.time_to_live != 0:
-            self.last_state_time = tactic_time
-            self.next_state = partial(self.halt, reset=True)
+        if tactic_time - self.last_state_time > self.time_to_live > 0:
+            self._reset_ttl()
 
         self.current_state = self.next_state
         next_ai_command = next_action.exec()
         return next_ai_command
+
+    def get_name(self):
+        return self.__class__.__name__
+
+    def __str__(self):
+        return self.__class__.__name__
+
+    def _reset_ttl(self):
+        """
+            Quand le TTL expire, on réévalue le prochain état.
+            Par défaut on ne fait rien.
+        """
+        self.last_state_time = self.game_state.timestamp

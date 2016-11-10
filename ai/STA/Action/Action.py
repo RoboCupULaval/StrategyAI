@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from abc import abstractmethod
+from ai.states.game_state import GameState
 
 __author__ = 'Robocup ULaval'
 
@@ -9,13 +10,12 @@ class Action:
     """
     Classe mère de toutes les actions
     """
-    def __init__(self, p_info_manager):
+    def __init__(self, p_game_state):
         """
-            :param p_info_manager: référence vers l'InfoManager
+            :param p_game_state: L'état courant du jeu.
         """
-        # FIXME: hack
-        # assert(isinstance(p_info_manager, InfoManager))
-        self.info_manager = p_info_manager
+        # assert(isinstance(p_game_state, GameState))  # l'assert échoue si GameState est un singleton
+        self.game_state = p_game_state
 
     def on_before(self):
         pass
@@ -31,3 +31,8 @@ class Action:
         """
         pass
 
+    def get_name(self):
+        return self.__class__.__name__
+
+    def __str__(self):
+        return self.__class__.__name__

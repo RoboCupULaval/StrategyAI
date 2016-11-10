@@ -24,16 +24,16 @@ class ProtectGoal(Action):
         minimum_distance : La distance minimale qu'il doit y avoir entre le gardien et le centre du but.
         maximum_distance : La distance maximale qu'il doit y avoir entre le gardien et le centre du but.
     """
-    def __init__(self, p_info_manager, p_player_id, p_is_right_goal=True, p_minimum_distance=FIELD_GOAL_RADIUS/2,
+    def __init__(self, p_game_state, p_player_id, p_is_right_goal=True, p_minimum_distance=FIELD_GOAL_RADIUS/2,
                  p_maximum_distance=None):
         """
-        :param p_info_manager: Une référence vers l'InfoManager.
+        :param p_game_state: L'état courant du jeu.
         :param p_player_id: L'identifiant du joueur qui est le gardien de but.
         :param p_is_right_goal: Un booléen indiquant si le but à protéger est celui de droite.
         :param p_minimum_distance: La distance minimale qu'il doit y avoir entre le gardien et le centre du but.
         :param p_maximum_distance: La distance maximale qu'il doit y avoir entre le gardien et le centre du but.
         """
-        Action.__init__(self, p_info_manager)
+        Action.__init__(self, p_game_state)
         assert isinstance(p_player_id, int)
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert isinstance(p_is_right_goal, bool)
@@ -52,8 +52,8 @@ class ProtectGoal(Action):
         Calcul la pose que doit prendre le gardien en fonction de la position de la balle.
         :return: Un tuple (Pose, kick) où Pose est la destination du gardien et kick est nul (on ne botte pas)
         """
-        goalkeeper_position = self.info_manager.get_player_position(self.player_id)
-        ball_position = self.info_manager.get_ball_position()
+        goalkeeper_position = self.game_state.get_player_pose(self.player_id).position
+        ball_position = self.game_state.get_ball_position()
         goal_x = FIELD_X_RIGHT if self.is_right_goal else FIELD_X_LEFT
         goal_position = Position(goal_x, 0)
 
