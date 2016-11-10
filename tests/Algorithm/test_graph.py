@@ -7,6 +7,7 @@ from ai.Algorithm.Vertex import Vertex
 from ai.states.game_state import GameState
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.GoToPosition import GoToPosition
+from ai.STA.Tactic.tactic_constants import Flags
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 
@@ -116,8 +117,10 @@ class TestGraph(unittest.TestCase):
         self.assertRaises(AssertionError, self.graph1.set_current_node, "not an int")
         self.assertRaises(AssertionError, self.graph1.set_current_node, -1)
         self.assertRaises(AssertionError, self.graph1.set_current_node, 420)
+        self.graph1.nodes[0].set_flag(Flags.WIP)
         self.graph1.set_current_node(1)
         self.assertEqual(self.graph1.current_node, 1)
+        self.assertEqual(self.graph1.nodes[0].tactic.status_flag, Flags.INIT)
 
     def test_str(self):
         expected_string = ""

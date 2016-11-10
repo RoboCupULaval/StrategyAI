@@ -2,6 +2,7 @@
 
 from ai.STA.Tactic.Tactic import Tactic
 from ai.Algorithm.Vertex import Vertex
+from ai.STA.Tactic.tactic_constants import Flags
 
 __author__ = 'RoboCupULaval'
 
@@ -65,6 +66,14 @@ class Node:
             if vertex.evaluate_condition():
                 return next_ai_command, vertex.next_node
         return next_ai_command, -1
+
+    def set_flag(self, status_flag):
+        """
+        Modifie l'attribut status flag de la tactique du moeud.
+        :param status_flag: Une valeur de l'enum Flags de tactic_constant
+        """
+        assert isinstance(status_flag, Flags)
+        self.tactic.status_flag = status_flag
 
     def __str__(self):
         """

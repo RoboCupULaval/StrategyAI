@@ -40,7 +40,8 @@ class GoGetBall(Tactic):
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball
 
-        self.move_action = GoToPosition(self.game_state, self.player_id, self.game_state.get_player_pose(self.player_id))
+        self.move_action = GoToPosition(self.game_state, self.player_id,
+                                        self.game_state.get_player_pose(self.player_id))
         self.move_action.status_flag = Flags.SUCCESS
         self.last_ball_position = self.game_state.get_ball_position()
 
@@ -84,10 +85,12 @@ class GoGetBall(Tactic):
         return Idle(self.game_state, self.player_id)
 
     def _get_distance_from_ball(self):
-        return get_distance(self.game_state.get_player_pose(self.player_id).position, self.game_state.get_ball_position())
+        return get_distance(self.game_state.get_player_pose(self.player_id).position,
+                            self.game_state.get_ball_position())
 
     def _generate_move_to(self):
-        go_behind = GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position(), self.target.position, DISTANCE_BEHIND)
+        go_behind = GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position(), self.target.position,
+                             DISTANCE_BEHIND)
         destination = go_behind.exec().move_destination
         return GoToPosition(self.game_state, self.player_id, destination)
 

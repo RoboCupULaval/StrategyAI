@@ -2,6 +2,7 @@
 
 from ai.Algorithm.Node import Node
 from ai.Algorithm.Vertex import Vertex
+from ai.STA.Tactic.tactic_constants import Flags
 
 __author__ = 'RoboCupULaval'
 
@@ -113,6 +114,7 @@ class Graph:
         """
         assert isinstance(node_index, int)
         assert 0 <= node_index < len(self.nodes)
+        self.nodes[self.current_node].set_flag(Flags.INIT)
         self.current_node = node_index
 
     def __str__(self):

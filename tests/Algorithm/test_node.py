@@ -7,6 +7,7 @@ from ai.states.game_state import GameState
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.Stop import Stop
+from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.types import AICommand
 
 from RULEngine.Util.Pose import Pose
@@ -80,6 +81,11 @@ class TestNode(unittest.TestCase):
         for vertex in self.node1.vertices:
             expected_string += "\n    " + str(vertex)
         self.assertEqual(str(self.node1), expected_string)
+
+    def test_set_flag(self):
+        self.assertRaises(AssertionError, self.node1.set_flag, "not a flag")
+        self.node1.set_flag(Flags.SUCCESS)
+        self.assertEqual(self.node1.tactic.status_flag, Flags.SUCCESS)
 
 if __name__ == "__main__":
     unittest.main()
