@@ -11,8 +11,17 @@ class Player():
         self.pose = Pose()
         self.velocity = Vector(0, 0)
 
-    def has_id(self, id):
-        return self.id == id
+    def has_id(self, pid):
+        return self.id == pid
 
     def update(self, pose, delta=DELTA_T):
+        old_pose = self.pose
+        delta_position = pose.position - old_pose.position
+
+        try:
+            self.velocity.x = delta_position.x / delta
+            self.velocity.y = delta_position.y / delta
+        except ZeroDivisionError:
+            self.velocity = Vector(0, 0)
+
         self.pose = pose
