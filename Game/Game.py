@@ -68,4 +68,3 @@ class Game():
             player_position = Position(player.x, player.y, player.height)
             player_pose = Pose(player_position, player.orientation)
             team.update_player(player.robot_id, player_pose, delta)
-            team.move_and_rotate_player(player.robot_id, player_pose)

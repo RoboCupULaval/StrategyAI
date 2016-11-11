@@ -26,7 +26,6 @@ class TestTeam(unittest.TestCase):
     def test_has_player_no_exists(self):
         self.assertFalse(self.team.has_player(self.no_player))
 
-    @unittest.skip("")
     def test_update_player(self):
         init_pose = self.first_player.pose
         self.assertEqual(init_pose, self.team.players[0].pose)
