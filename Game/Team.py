@@ -21,8 +21,8 @@ class Team():
 
         return has_player
 
-    def move_and_rotate_player(self, player_id, pose):
+    def update_player(self, player_id, pose, delta=0):
         try:
-            self.players[player_id].pose = pose
+            self.players[player_id].update(pose, delta)
         except KeyError as err:
             raise err
