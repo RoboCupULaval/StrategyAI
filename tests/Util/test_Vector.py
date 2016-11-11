@@ -149,7 +149,7 @@ class TestVector(unittest.TestCase):
 
     def test_str(self):
         string = str(self.vector)
-        self.assertEqual(string, "(Length = 1.0, Direction = 0.0)")
+        self.assertEqual(string, "(Length = 1, Direction = 0)")
 
     def test_dotperp(self):
         a = self.vector2.dot(self.vector5)

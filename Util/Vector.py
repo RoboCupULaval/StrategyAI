@@ -209,7 +209,7 @@ class Vector(object):
         return self
 
     def __str__(self):
-        return "(Length = {}, Direction = {})".format(self.length, self.direction)
+        return "(Length = {}, Direction = {})".format(int(self.length), int(self.direction))
 
     def __repr__(self):
         return "Vector(" + str(self.length) + ", " + str(self.direction) + ")"
