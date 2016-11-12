@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 """ Module définissant des constantes de programmations python pour l'IA """
 from .Position import Position
+from .Pose import Pose
 from enum import Enum
 
 __author__ = 'RoboCupULaval'
@@ -32,6 +33,14 @@ FIELD_GOAL_BLUE_BOTTOM_CIRCLE = Position(FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2 * 
 FIELD_GOAL_YELLOW_TOP_CIRCLE = Position(FIELD_X_RIGHT, FIELD_GOAL_SEGMENT / 2)
 FIELD_GOAL_YELLOW_BOTTOM_CIRCLE = Position(FIELD_X_RIGHT, FIELD_GOAL_SEGMENT / 2 * -1)
 
+# Legal field dimensions
+LEGAL_Y_TOP = 3000
+# LEGAL_Y_TOP = 0
+LEGAL_Y_BOTTOM = -3000
+LEGAL_X_LEFT = -4500
+LEGAL_X_RIGHT = 4500
+# LEGAL_X_RIGHT = 0
+
 # Simulation param
 DELTA_T = 17 #ms, hack, à éviter
 
@@ -61,3 +70,12 @@ DEFAULT_MIN_SPEED = 0.65
 class TeamColor(Enum):
     YELLOW_TEAM = 0
     BLUE_TEAM = 1
+
+# FIXME: hack pour limiter le terrain facilement
+def is_legal_field_pose(pose):
+    if isinstance(pose, Pose):
+        legal_x = pose.position.x < LEGAL_X_RIGHT and pose.position.x > LEGAL_X_LEFT
+        legal_y = pose.position.y < LEGAL_Y_TOP and pose.position.y > LEGAL_Y_BOTTOM
+        return legal_x and legal_y
+    else:
+        return False
