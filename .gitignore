@@ -39,6 +39,7 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
+.unittest
 nosetests.xml
 coverage.xml
 *,cover
@@ -59,3 +60,9 @@ target/
 # Pycharm idea submodule
 .idea
 .idea/*
+
+*.orig
+
+tags
+# InfluenceMap output file
+IMBoard
