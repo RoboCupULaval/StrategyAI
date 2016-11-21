@@ -8,6 +8,7 @@ from ai.Algorithm.Node import Node
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.RotateAround import RotateAround
+from ai.STA.Tactic.makePass import MakePass
 from ai.STA.Tactic.GoToPosition import GoToPosition
 from ai.STA.Tactic.GoStraightTo import GoStraightTo
 from ai.STA.Tactic.Stop import Stop
@@ -22,18 +23,28 @@ class test_rotateAround(Strategy):
 
         #TODO: modification en temps reel de la position de la balle
         self.designated_robot = 1
-        self.position_to_face = Pose(Position(1500,1500))
+        self.position_to_shoot_to = Pose(Position(1500, 1500))
 
-        # le robot désigné va chercher la balle
+        print(self.game_state.get_player_pose(1).position)
+
+        # état 1: le robot désigné va chercher la balle
         ball_position = self.game_state.get_ball_position()
         tactic = GoStraightTo(self.game_state, self.designated_robot, Pose(ball_position,0)) #TODO: ajouter pathfinder lorsque temps
         self.add_tactic(self.designated_robot, tactic)
-        # une fois rendu (condition 1), le robot désigné tourne autour de la balle
-        tactic = RotateAround(self.game_state, player_id=self.designated_robot, origin=ball_position, target=self.position_to_face)
+
+        # état 2: une fois rendu (condition 1), le robot désigné tourne autour de la balle
+        tactic = RotateAround(self.game_state, player_id=self.designated_robot, origin=ball_position, target=self.position_to_shoot_to)
         self.add_tactic(self.designated_robot, tactic)
 
         # condition 1: le robot désigné s'est rendu a la balle
-        self.add_condition(self.designated_robot, 0, 1, self.robot_reached_ball)
+        self.add_condition(self.designated_robot, 0, 1, self.tactic_flag_success)
+
+        # état 3: une fois orienté, le robot frappe la balle
+        tactic = MakePass(self.game_state,player_id=self.designated_robot,target=self.position_to_shoot_to)
+        self.add_tactic(self.designated_robot, tactic)
+
+        # condition 2: le robot désigné a tourné autour de la balle et est dans la bonne orientation
+        self.add_condition(self.designated_robot, 1, 2, self.tactic_flag_success)
 
         # le reste des robots sont a l arret
         for robot_to_stop in range(0,6):
@@ -41,7 +52,7 @@ class test_rotateAround(Strategy):
                 tactic = Stop(self.game_state, robot_to_stop)
                 self.add_tactic(robot_to_stop, tactic)
 
-    def robot_reached_ball(self):
+    def tactic_flag_success(self):
         """
         Condition pour passer du noeud présent au noeud suivant.
         :return: Un booléen indiquant si la condition pour effectuer la transition est remplie.

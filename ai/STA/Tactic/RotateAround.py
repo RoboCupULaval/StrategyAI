@@ -29,16 +29,16 @@ class RotateAround(Tactic):
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
         self.status_flag = Flags.INIT
-        self.origin = origin
+        self.origin = self.game_state.get_ball_position()#origin #hack
         self.current_state = self.check_success
         self.next_state = self.check_success
-        self.player_pos = self.game_state.get_player_pose(self.player_id).position
 
-    #TODO: implémenter le même modele architectural de fonction que dans gostraightto
-    #TODO: last modif of the type of every input pos
-    #TODO: solve problems
     def check_success(self):
+        self.origin = self.game_state.get_ball_position()  # origin #hack
+        self.player_pos = self.game_state.get_player_pose(self.player_id).position
         if angle_to_origin_then_target_is_tolerated(self.player_pos, self.origin, self.target.position, ANGLE_TO_HALT):
+            print("success")
+            print(self.origin)
             self.status_flag = Flags.SUCCESS
             self.next_state = self.halt
         else:
@@ -47,6 +47,8 @@ class RotateAround(Tactic):
         return Idle(self.game_state, self.player_id)
 
     def rotate_around(self):
+        self.origin = self.game_state.get_ball_position()  # origin #hack
+        self.player_pos = self.game_state.get_player_pose(self.player_id).position
         # check if counter clockwise
         constant_angle_increment = 1
         if get_angle(self.player_pos, self.target.position) < 0:
@@ -56,6 +58,8 @@ class RotateAround(Tactic):
         new_position = rotate_point_around_origin(self.player_pos, self.origin, constant_angle_increment)
         new_orientation = get_angle(new_position, self.target.position)
         new_pose = Pose(new_position, new_orientation)
+        #TODO: goal:print
+        #print(self.game_state.get_player_pose(1).position)
 
         # return command
         self.next_state = self.check_success
