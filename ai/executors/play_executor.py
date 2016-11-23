@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.executors.Executor import Executor
+from ai.executors.executor import Executor
+
 
 class PlayExecutor(Executor):
 
@@ -15,10 +16,10 @@ class PlayExecutor(Executor):
 
     def _execute_strategy(self):
         if self.ws.play_state.current_strategy is None:
-            self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy("DoNothing")(self.ws.game_state))
+            self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy("HumanControl")(self.ws.game_state))
         self.ws.play_state.current_ai_commands = self.ws.play_state.current_strategy.exec()
 
-            # FIXME revise this function please
+    # FIXME revise this function please
     def _send_robots_status(self):
         states = self.ws.play_state.get_current_tactical_state()
         for state in states:

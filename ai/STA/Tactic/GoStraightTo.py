@@ -3,8 +3,9 @@
 from .Tactic import Tactic
 from . tactic_constants import Flags
 from ai.STA.Action.MoveStraightTo import MoveStraightTo
-#TODO FIXME For the love of god change the place of this helper function!!!!!!!
 from RULEngine.Util.geometry import get_distance
+from RULEngine.Util.constant import POSITION_DEADZONE
+
 
 class GoStraightTo(Tactic):
     def __init__(self, p_game_state, player_id, target):
@@ -22,9 +23,8 @@ class GoStraightTo(Tactic):
         return next_action.exec()
 
     def check_success(self):
-        player_pose = self.game_state.get_player_pose(player_id=self.player_id)
-        distance = get_distance(player_pose.position, self.target.position)
-        #FIXME thank tou
-        if distance < 50:
+        player_position = self.game_state.get_player_position(player_id=self.player_id)
+        distance = get_distance(player_position, self.target.position)
+        if distance < POSITION_DEADZONE:
             return True
         return False

@@ -19,7 +19,7 @@ class CoverZone(Tactic):
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
     attributs:
-        info_manager: référence à la façade InfoManager
+        game_state: L'état courant du jeu
         player_id : Identifiant du joueur à qui la tactique est assignée
         y_top : La limite supérieur de la zone
         y_bottom : La limite inférieur de la zone
@@ -68,7 +68,7 @@ class CoverZone(Tactic):
             mean_position = mean_position + pos
         mean_position /= len(enemy_positions)
         destination = stayInsideSquare(mean_position, self.y_top, self.y_bottom, self.x_left, self.x_right)
-        return GoBetween(self.game_state, self.player_id, ball_pos, destination, 2*ROBOT_RADIUS)
+        return GoBetween(self.game_state, self.player_id, ball_pos, destination, ball_pos, 2*ROBOT_RADIUS)
 
     def support_other_zone(self):
         enemy_positions = self.get_enemy_in_zone()

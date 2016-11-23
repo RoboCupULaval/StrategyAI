@@ -2,13 +2,15 @@
 
 from ai.Algorithm.Node import Node
 from ai.Algorithm.Vertex import Vertex
+from ai.STA.Tactic.tactic_constants import Flags
 
 __author__ = 'RoboCupULaval'
 
 
 class Graph:
     """
-    Graph:
+    Graph: Graphe simple orienté regroupant une série de noeuds contenant des tactiques. Les transitions entre les
+           tactiques sont déterminées par des conditions associées aux vertices reliant les noeuds.
     Méthodes:
         get_current_tactic_name: Retourne le nom de la tactique en cours, sous forme d'une chaîne de caractères.
         get_current_tactic: Retourne la tactique en cours.
@@ -112,6 +114,7 @@ class Graph:
         """
         assert isinstance(node_index, int)
         assert 0 <= node_index < len(self.nodes)
+        self.nodes[self.current_node].set_flag(Flags.INIT)
         self.current_node = node_index
 
     def __str__(self):

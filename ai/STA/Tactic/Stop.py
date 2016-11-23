@@ -2,7 +2,6 @@
 
 from .Tactic import Tactic
 from . tactic_constants import Flags
-from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 
 class Stop(Tactic):

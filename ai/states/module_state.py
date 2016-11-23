@@ -1,14 +1,13 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.Util.singleton import singleton
+from ai.Util.singleton import Singleton
 
 """
     Ce module garde en mémoire les modules intelligents disponibles
 """
 
 
-@singleton
-class ModuleState:
+class ModuleState(object, metaclass=Singleton):
     """
         Gère les modules intelligents (par exemple, le Pathfinder) présents dans le jeu.
 
@@ -29,7 +28,6 @@ class ModuleState:
     def __init__(self):
         self.modules = {}
         self.pathfinder = None
-
 
     def register_module(self, module_name, module_ref):
         """

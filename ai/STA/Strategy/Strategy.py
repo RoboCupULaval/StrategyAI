@@ -17,12 +17,33 @@ class Strategy(metaclass=ABCMeta):
     def __init__(self, p_game_state):
         """
         Initialise la stratégie en créant un graph vide pour chaque robot de l'équipe.
-        :param p_game_state: Une référence à l'InfoManager
+        :param p_game_state: L'état courant du jeu.
         """
         self.game_state = p_game_state
         self.graphs = []
         for i in range(PLAYER_PER_TEAM):
             self.graphs.append(Graph())
+
+    def add_tactic(self, robot_id, tactic):
+        """
+        Ajoute une tactique au graph des tactiques d'un robot.
+        :param robot_id: L'id du robot auquel est assignée la tactique.
+        :param tactic: La tactique à assigner au robot.
+        """
+        assert(isinstance(robot_id, int))
+        self.graphs[robot_id].add_node(Node(tactic))
+
+    def add_condition(self, robot_id, start_node, end_node, condition):
+        """
+        Ajoute une condition permettant de gérer la transition entre deux tactiques d'un robot.
+        :param robot_id: L'id du robot.
+        :param start_node: Le noeud de départ du vertex.
+        :param end_node: Le noeud d'arrivée du vertex.
+        :param condition: Une fonction retournant un booléen permettant de déterminer si on peut effectuer la transition
+        du noeud de départ vers le noeud d'arrivé.
+        """
+        assert(isinstance(robot_id, int))
+        self.graphs[robot_id].add_vertex(start_node, end_node, condition)
 
     def get_current_state(self):
         """
@@ -35,8 +56,8 @@ class Strategy(metaclass=ABCMeta):
         state = []
         for i in range(PLAYER_PER_TEAM):
             current_tactic = self.graphs[i].get_current_tactic()
-            state.append((current_tactic.player_id, str(current_tactic), current_tactic.status_flag.name,
-                          current_tactic.target))
+            state.append((current_tactic.player_id, str(current_tactic)+" "+current_tactic.status_flag.name,
+                         current_tactic.current_state.__name__, current_tactic.target))
         return state
 
     def add_tactic(self, robot_id, tactic):

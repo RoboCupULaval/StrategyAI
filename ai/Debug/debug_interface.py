@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.Debug.DebugCommand import DebugCommand
-from ai.states.DebugState import DebugState
+from ai.Debug.debug_command import DebugCommand
+from ai.states.debug_state import DebugState
 
 
 class Color(object):

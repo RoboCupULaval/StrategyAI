@@ -1,8 +1,8 @@
 # Under MIT License, see LICENSE.txt
 
 from RULEngine.Util.Pose import Pose, Position
-from ai.Debug.UIDebugCommand import UIDebugCommand
-from ai.executors.Executor import Executor
+from ai.Debug.ui_debug_command import UIDebugCommand
+from ai.executors.executor import Executor
 from ai.STA.Strategy.HumanControl import HumanControl
 import copy
 

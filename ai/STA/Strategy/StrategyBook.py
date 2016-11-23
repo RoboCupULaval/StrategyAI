@@ -14,8 +14,8 @@ from .chTest import chTest
 
 class StrategyBook(object):
     """
-        Cette classe est capable de récupérer les stratégies enregistrés dans la
-        configuration des stratégies et de les exposer au Behavior Tree en
+        Cette classe est capable de récupérer les stratégies enregistrés dans
+        la configuration des stratégies et de les exposer au Behavior Tree en
         charge de sélectionner la stratégie courante.
     """
 
@@ -33,9 +33,6 @@ class StrategyBook(object):
     def get_strategies_name_list(self):
         return list(self.strategy_book.keys())
 
-    def get_optimal_strategy(self):
-        return TestTransitions
-
     def get_strategy(self, strategy_name):
         if self.check_existance_strategy(strategy_name):
             return self.strategy_book[strategy_name]
@@ -45,3 +42,4 @@ class StrategyBook(object):
         assert isinstance(strategy_name, str)
 
         return strategy_name in self.strategy_book
+

@@ -17,7 +17,7 @@ class MakePass(Tactic):
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
     attributs:
-        info_manager: référence à la façade InfoManager
+        game_state: L'état courant du jeu.
         player_id : Identifiant du joueur auquel est assigné la tactique
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique
@@ -46,10 +46,7 @@ class MakePass(Tactic):
             self.status_flag = Flags.WIP
             return kick_ball
 
-        else: # returns error, strategy goes back to GoGetBall
+        else:  # returns error, strategy goes back to GoGetBall
             self.next_state = self.halt
             self.status_flag = Flags.FAILURE
             return Idle(self.game_state, self.player_id)
-
-
-

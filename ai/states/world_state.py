@@ -1,15 +1,15 @@
 
 # Under MIT License, see LICENSE.txt
 
-from ai.Debug.DebugInterface import DebugInterface
-from ai.states.DebugState import DebugState
-from ai.states.GameState import GameState
-from ai.states.PlayState import PlayState
-from ai.states.ModuleState import ModuleState
+from ai.Debug.debug_interface import DebugInterface
+from ai.states.debug_state import DebugState
+from ai.states.game_state import GameState
+from ai.states.play_state import PlayState
+from ai.states.module_state import ModuleState
 
 
 class WorldState:
-    def __init__(self, is_team_yellow=False, mode_debug_active=True):
+    def __init__(self, mode_debug_active=True):
         self.mode_debug_active = mode_debug_active
         self.module_state = ModuleState()
         self.play_state = PlayState()
@@ -24,3 +24,6 @@ class WorldState:
 
         if self.mode_debug_active:
             self.debug_state.update(game_state.debug)
+
+    def set_team_color(self, p_our_team_color):
+        self.game_state.set_team_color(p_our_team_color)

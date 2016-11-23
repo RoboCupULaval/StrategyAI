@@ -2,15 +2,16 @@
 
 from ai.STA.Tactic.Tactic import Tactic
 from ai.Algorithm.Vertex import Vertex
+from ai.STA.Tactic.tactic_constants import Flags
 
 __author__ = 'RoboCupULaval'
 
 
 class Node:
     """
-    Node: Noeud du graphe représentant la tactique en cours. Il ne peut y avoir qu'un seul vertex entre deux noeuds
-          donnés dans un certain sens (ex: un seul vertex du noeud 1 au noeud 2, mais il peut y en avoir un du noeud 2
-          au noeud 1 aussi.
+    Node: Noeud d'un graphe simple orienté représentant la tactique en cours. Il ne peut y avoir qu'un seul vertex entre
+          deux noeuds donnés dans un certain sens (ex: un seul vertex du noeud 1 au noeud 2, mais il peut y en avoir un
+          du noeud 2 au noeud 1 aussi.
     Méthodes:
         add_vertex: Ajoute un vertex au noeud.
         remove_vertex: Retire un vertex du noeud.
@@ -44,7 +45,7 @@ class Node:
     def remove_vertex(self, p_ending):
         """
         Retire un vertex du noeud, spécifié par le numéro de son noeud d'arrivé. Si le noeud courant ne possède pas de
-        vertex vers le noeud spécifé, rien ne se passe rien.
+        vertex vers le noeud spécifé, rien ne se passe.
         :param p_ending: Un entier positif représentant le numéro du noeud d'arrivé du vertex à retirer.
         """
         assert isinstance(p_ending, int)
@@ -65,6 +66,14 @@ class Node:
             if vertex.evaluate_condition():
                 return next_ai_command, vertex.next_node
         return next_ai_command, -1
+
+    def set_flag(self, status_flag):
+        """
+        Modifie l'attribut status flag de la tactique du moeud.
+        :param status_flag: Une valeur de l'enum Flags de tactic_constant
+        """
+        assert isinstance(status_flag, Flags)
+        self.tactic.status_flag = status_flag
 
     def __str__(self):
         """

@@ -3,6 +3,7 @@
     Contient les classes mères pour les modules intelligents.
 """
 from abc import abstractmethod, ABCMeta
+from ai.Debug.debug_interface import DebugInterface
 
 __author__ = 'RoboCupULaval'
 
@@ -44,11 +45,12 @@ class Pathfinder(metaclass=ABCMeta):
         La valeur associée est une liste de *Pose*.
     """
 
-    def __init__(self, p_world_state):
+    def __init__(self, p_game_state):
         """
             Initialise le dictionnaire *paths*.
         """
-        self.ws = p_world_state
+        self.game_state = p_game_state
+        self.debug_interface = DebugInterface()
         self.paths = {}
         for i in range(6):
             self.paths[i] = []

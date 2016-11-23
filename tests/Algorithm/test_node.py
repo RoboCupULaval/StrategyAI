@@ -3,10 +3,11 @@
 import unittest
 from ai.Algorithm.Node import Node
 from ai.Algorithm.Vertex import Vertex
-from ai.InfoManager import InfoManager
+from ai.states.game_state import GameState
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.Stop import Stop
+from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.types import AICommand
 
 from RULEngine.Util.Pose import Pose
@@ -25,10 +26,10 @@ def foo2():
 
 class TestNode(unittest.TestCase):
     def setUp(self):
-        self.info_manager = InfoManager()
-        self.info_manager.friend['0']['position'] = Position(-4450, 0)
-        self.tactic1 = GoalKeeper(self.info_manager, 0)
-        self.tactic2 = Stop(self.info_manager, 1)
+        self.game_state = GameState()
+        self.game_state._update_player(0, Pose(Position(-4450, 0), 0))
+        self.tactic1 = GoalKeeper(self.game_state, 0)
+        self.tactic2 = Stop(self.game_state, 1)
         self.node1 = Node(self.tactic1)
         self.node2 = Node(self.tactic2)
         self.vertex1 = Vertex(0, foo)
@@ -47,6 +48,9 @@ class TestNode(unittest.TestCase):
         self.node1.add_vertex(self.vertex1)
         self.assertEqual(len(self.node1.vertices), 1)  # il ne peut y avoir qu'un vertex entre deux noeuds dans un sens
 
+        self.node1.add_vertex(self.vertex2)
+        self.assertEqual(len(self.node1.vertices), 2)
+
     def test_remove_vertex(self):
         self.assertRaises(AssertionError, self.node1.remove_vertex, "not an int")
         self.assertRaises(AssertionError, self.node1.remove_vertex, -1)
@@ -61,7 +65,7 @@ class TestNode(unittest.TestCase):
         self.node1.add_vertex(self.vertex2)
         next_ai_command, next_node = self.node1.exec()
         self.assertEqual(next_node, 0)
-        expected_aicmd = AICommand(Pose(Position(-4200, 0), 0), 0)
+        expected_aicmd = AICommand(Pose(Position(-4000, 0), 0), 0)
         self.assertEqual(next_ai_command, expected_aicmd)
 
         self.node2.add_vertex(self.vertex2)
@@ -77,6 +81,11 @@ class TestNode(unittest.TestCase):
         for vertex in self.node1.vertices:
             expected_string += "\n    " + str(vertex)
         self.assertEqual(str(self.node1), expected_string)
+
+    def test_set_flag(self):
+        self.assertRaises(AssertionError, self.node1.set_flag, "not a flag")
+        self.node1.set_flag(Flags.SUCCESS)
+        self.assertEqual(self.node1.tactic.status_flag, Flags.SUCCESS)
 
 if __name__ == "__main__":
     unittest.main()

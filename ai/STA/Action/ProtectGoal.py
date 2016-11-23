@@ -27,7 +27,7 @@ class ProtectGoal(Action):
     def __init__(self, p_game_state, p_player_id, p_is_right_goal=True, p_minimum_distance=FIELD_GOAL_RADIUS/2,
                  p_maximum_distance=None):
         """
-        :param p_info_manager: Une référence vers l'InfoManager.
+        :param p_game_state: L'état courant du jeu.
         :param p_player_id: L'identifiant du joueur qui est le gardien de but.
         :param p_is_right_goal: Un booléen indiquant si le but à protéger est celui de droite.
         :param p_minimum_distance: La distance minimale qu'il doit y avoir entre le gardien et le centre du but.

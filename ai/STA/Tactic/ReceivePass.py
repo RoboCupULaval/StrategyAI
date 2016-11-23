@@ -6,6 +6,7 @@ from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic import tactic_constants
 from RULEngine.Util.area import player_close_to_ball_facing_target
 from ai.STA.Tactic.tactic_constants import Flags
+from ai.Util.ball_possession import player_grabbed_ball
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.constant import PLAYER_PER_TEAM
@@ -19,7 +20,7 @@ class ReceivePass(Tactic):
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
     attributs:
-        info_manager: référence à la façade InfoManager
+        game_state: L'état courant du jeu.
         player_id : Identifiant du joueur auquel est assigné la tactique
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique

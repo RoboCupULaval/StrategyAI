@@ -10,7 +10,8 @@ from ai.STA.Tactic import tactic_constants
 from RULEngine.Util.area import player_can_grab_ball, player_close_to_ball_facing_target
 from ai.STA.Tactic.tactic_constants import Flags
 
-from RULEngine.Util.area import player_can_grab_ball, player_close_to_ball_facing_target
+
+from ai.Util.ball_possession import player_can_grab_ball, player_grabbed_ball
 from RULEngine.Util.geometry import get_distance
 from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS
 from RULEngine.Util.Pose import Pose
@@ -25,7 +26,7 @@ class GoGetBall(Tactic):
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
     attributs:
-        game_state: référence à la façade InfoManager
+        game_state: L'état courant du jeu.
         player_id : Identifiant du joueur auquel est assigné la tactique
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique
@@ -42,7 +43,8 @@ class GoGetBall(Tactic):
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball
 
-        self.move_action = GoToPosition(self.game_state, self.player_id, self.game_state.get_player_pose(self.player_id))
+        self.move_action = GoToPosition(self.game_state, self.player_id,
+                                        self.game_state.get_player_pose(self.player_id))
         self.move_action.status_flag = Flags.SUCCESS
         self.last_ball_position = self.game_state.get_ball_position()
 
@@ -86,10 +88,12 @@ class GoGetBall(Tactic):
         return Idle(self.game_state, self.player_id)
 
     def _get_distance_from_ball(self):
-        return get_distance(self.game_state.get_player_pose(self.player_id).position, self.game_state.get_ball_position())
+        return get_distance(self.game_state.get_player_pose(self.player_id).position,
+                            self.game_state.get_ball_position())
 
     def _generate_move_to(self):
-        go_behind = GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position(), self.target.position, DISTANCE_BEHIND)
+        go_behind = GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position(), self.target.position,
+                             DISTANCE_BEHIND)
         destination = go_behind.exec().move_destination
         return GoToPosition(self.game_state, self.player_id, destination)
 
