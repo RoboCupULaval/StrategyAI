@@ -13,7 +13,6 @@ from ..Util.Pose import Pose, Position
 from ..Game.Player import Player
 from ..Game.Team import Team
 from ..Util.area import *
-from ..Util.geometry import *
 
 DEFAULT_STATIC_GAIN = 0.00095
 DEFAULT_INTEGRAL_GAIN = 0.0009

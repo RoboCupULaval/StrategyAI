@@ -1,5 +1,7 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
+
 import math as m
+
 from .Position import Position
 from .Pose import Pose
 
@@ -7,11 +9,12 @@ from .Pose import Pose
 class Vector(object):
     def __init__(self, length=1.0, direction=0.0):
         """
-        :param length: the vector's length
-        :param direction: the vector's direction, in radians
+            Args:
+                length (float): norme du vecteur
+                direction (float): orientation en radians
         """
-        assert (isinstance(length, (int, float))), 'length should be int or float value.'
-        assert (isinstance(direction, (int, float))), 'direction should be int or float value.'
+        assert isinstance(length, (int, float)), 'length should be int or float value.'
+        assert isinstance(direction, (int, float)), 'direction should be int or float value.'
 
         x = length * m.cos(direction)
         y = length * m.sin(direction)
@@ -33,8 +36,8 @@ class Vector(object):
     def _getdirection(self):
         return self._attributes[1]
 
-    def _setdirection(self, direction):
-        assert (isinstance(direction, (int, float)))
+    def _setdirection(self, direction: float):
+        assert isinstance(direction, (int, float))
         self._attributes[1] = direction
         self._attributes[2] = self._attributes[0] * m.cos(direction)
         self._attributes[3] = self._attributes[0] * m.sin(direction)
@@ -45,8 +48,8 @@ class Vector(object):
     def _getx(self):
         return self._attributes[2]
 
-    def _setx(self, x):
-        assert (isinstance(x, (int, float))), 'value should be Position or int or float.'
+    def _setx(self, x: float):
+        assert isinstance(x, (int, float)), 'value should be Position or int or float.'
         self._attributes[2] = x
         self._attributes[0] = m.sqrt(x ** 2 + self._attributes[3] ** 2)
         self._attributes[1] = m.atan2(self._attributes[3], x)
@@ -67,15 +70,19 @@ class Vector(object):
     y = property(_gety, _sety)
 
     # *** OPERATORS ***
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """
-        The == operator
-        :param other: The comparison vector
-        :return: A boolean stating whether the two Vectors are equal
+            Deux vecteur sont égaux s'ils ont la même norme et la même
+            orientation
+            Args:
+                other (Vector): membre de droite
+            Returns:
+                True si les deux vecteur sont égaux
         """
-        assert (isinstance(other, Vector))
-        #return self.length == other.length and self.direction == other.direction
-        return round(self.length, 10) == round(other.length, 10) and round(self.direction, 10) == round(other.direction,
+        assert isinstance(other, Vector)
+        #: FIXME: on compare des floats, utilisé la lib std
+        return round(self.length, 10) == round(other.length, 10) and \
+               round(self.direction, 10) == round(other.direction,
                                                                                                         10)
 
     def __ne__(self, other):
@@ -202,10 +209,10 @@ class Vector(object):
         return self
 
     def __str__(self):
-        """
-        :return: A string containing the Vector's attribute in a readable form
-        """
-        return "(Length = {}, Direction = {})".format(self.length, self.direction)
+        return "(Length = {}, Direction = {})".format(int(self.length), int(self.direction))
+
+    def __repr__(self):
+        return "Vector(" + str(self.length) + ", " + str(self.direction) + ")"
 
     # *** GENERAL METHODS ***
     def dot(self, vector):
