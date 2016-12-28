@@ -196,7 +196,7 @@ class Framework(object):
             else:
                 team = self.game.blue_team
 
-            for player in team.players:
+            for player in team.players.values():
                 command = Stop(player)
                 self.command_sender.send_command(command)
         except:
