@@ -49,14 +49,14 @@ class GoToPosition(Tactic):
             else:
                 self.path = [self.target]
         except NonExistentModule as err:
-            print(err)
+            print("Impossible de récupérer le pathfinder\n", err)
             self.path = [self.target]
 
     def get_next_path_element(self):
         assert(isinstance(self.path, list)), "Le chemin doit être une liste"
 
         if len(self.path) > 0:
-            self.path_target = self.path.pop(0) # on récupère le premier path element
+            self.path_target = self.path.pop(0)  # on récupère le premier path element
             self.next_state = self.move_to_position
         else:
             self.status_flag = Flags.SUCCESS
