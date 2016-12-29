@@ -3,6 +3,7 @@
 from ai.Algorithm.IntelligentModule import Pathfinder
 from ai.Algorithm.Astar.AsPosition import AsPosition
 from ai.Algorithm.Astar.AsGraph import AsGraph
+from RULEngine.Util.Position import Position
 import math
 
 class AsPathManager(Pathfinder):
@@ -75,6 +76,14 @@ class AsPathManager(Pathfinder):
             :param target: LEGACY -> a etre supprimer dans versin future.
             :return: { id : [Pose, Pose, ...] } || [Pose, Pose, ...]
         """
+        asPath = self.paths[robot_id]
+        path = []
+
+        for asPos in asPath:
+            path += [Position(asPos.x, asPos.y)]
+        
+        return path
+
 
     def get_next_point(self, robot_id=None):
         """
@@ -85,5 +94,7 @@ class AsPathManager(Pathfinder):
                              l'équipe alliée
             :return: {id : Pose, ... }
         """
-
+        asPath = self.paths[robot_id]
+        
+        return Position(asPath[0].x, asPath[0].y)
 
