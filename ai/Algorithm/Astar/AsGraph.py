@@ -1,7 +1,7 @@
 #pylint: skip-file
 
-from AsPosition import AsPosition
-from AsNode import AsNode
+from ai.Algorithm.Astar.AsPosition import AsPosition
+from ai.Algorithm.Astar.AsNode import AsNode
 
 class AsGraph():
 

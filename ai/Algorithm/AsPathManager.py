@@ -1,12 +1,15 @@
 #pylint: skip-file
 
-from AsPosition import AsPosition
-from AsGraph import AsGraph
+from ai.Algorithm.IntelligentModule import Pathfinder
+from ai.Algorithm.Astar.AsPosition import AsPosition
+from ai.Algorithm.Astar.AsGraph import AsGraph
 import math
 
 class AsPathManager(Pathfinder):
 
-    def __init__(self):
+    def __init__(self, p_worldstate):
+
+        super().__init__(p_worldstate)
 
         self.TopLeftCorner = AsPosition(-4500,3000)
         self.DownRigthCorner = AsPosition(4500,-3000)
@@ -30,7 +33,7 @@ class AsPathManager(Pathfinder):
             startPos = startPosList[i]
             totalDist = startPos.getDist(endPos)
 
-            if (totalDist < self.MaxDist / 3):
+            if (totalDist < (self.MaxDist / 3)):
                 graph = self.preciseGraph
 
             if (totalDist > self.PreciseInterval * 10):
@@ -48,7 +51,39 @@ class AsPathManager(Pathfinder):
 
 
         return allAsPathList
+    
+    def update(self):
+        """
+            Prepare le pathfinder pour retourner les paths voulues. ie.
+            calcule toutes les paths activés
+        :return:
+        """
+        team = self.ws.game_state.my_team
+        commands = self.ws.play_state.current_ai_commands
+        nbRobot = len(team.players)
 
+        for i in range(0, nbRobot, 1):
+            dest, kick = commands[i]
 
+    def get_path(self, robot_id=None, target=None):
+        """
+            Si l'ID est précisé, retourne la liste des *Pose* pour le chemin
+            de ce robot. Autrement, retourne le dictionnaire.
+
+            :param robot_id: int entre 0 à 11 représentant les robots de
+                             l'équipe alliée
+            :param target: LEGACY -> a etre supprimer dans versin future.
+            :return: { id : [Pose, Pose, ...] } || [Pose, Pose, ...]
+        """
+
+    def get_next_point(self, robot_id=None):
+        """
+            Si l'ID est précisé, retourne le prochain point *Pose* pour le
+            chemin de ce robot. Autrement, retourne dictionaire des
+            prochains points avec clé l'id des robots.
+            :param robot_id: int entre 0 à 11 représentant l'id des robots de
+                             l'équipe alliée
+            :return: {id : Pose, ... }
+        """
 
 
