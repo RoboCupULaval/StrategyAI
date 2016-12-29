@@ -1,7 +1,9 @@
 # Under MIT license, see LICENSE.txt
 from .Action import Action
-from ...Util.types import AICommand
+# from ...Util.types import AICommand
 from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.Util.ai_command import AICommand, AICommandType
+
 
 
 class Idle(Action):
@@ -30,4 +32,4 @@ class Idle(Action):
         # un None pour que le coachcommandsender envoi une command vide.
         move_destination = None
         kick_strength = 0
-        return AICommand(move_destination, kick_strength)
+        return AICommand(self.player_id, AICommandType.STOP)

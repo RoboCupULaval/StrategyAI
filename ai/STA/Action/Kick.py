@@ -1,7 +1,9 @@
 # Under MIT license, see LICENSE.txt
 from .Action import Action
-from ...Util.types import AICommand
+# from ...Util.types import AICommand
 from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.Util.ai_command import AICommand, AICommandType
+
 
 
 class Kick(Action):
@@ -35,4 +37,4 @@ class Kick(Action):
         """
         position_joueur = self.game_state.get_player_pose(self.player_id)
         force_kick = self.force
-        return AICommand(position_joueur, force_kick)
+        return AICommand(self.player_id, AICommandType.KICK, **{"pose_goal": position_joueur})
