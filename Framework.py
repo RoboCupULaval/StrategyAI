@@ -7,21 +7,22 @@
     frames de la vision. Cette boucle est la boucle principale et appel le
     prochain état du **Coach**.
 """
-from collections import namedtuple
 import signal
 import threading
 import time
+from collections import namedtuple
 
+from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
+from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
+from RULEngine.Communication.sender.serial_command_sender import SerialCommandSender
+from .Command.command import Stop, PI
+from RULEngine.Communication.sender.grsim_command_sender import GrSimCommandSender
+from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
+from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from .Game.Game import Game
 from .Game.Referee import Referee
-from .Communication.vision import Vision
-from .Communication.referee import RefereeServer
-from .Communication.udp_server import GrSimCommandSender, DebugCommandSender,\
-                                      DebugCommandReceiver
-from .Communication.serial_command_sender import SerialCommandSender
-from .Command.command import Stop, PI
-from .Util.exception import StopPlayerError
 from .Util.constant import TeamColor
+from .Util.exception import StopPlayerError
 
 LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
 UI_DEBUG_MULTICAST_ADDRESS = "127.0.0.1"
@@ -61,6 +62,25 @@ class Framework(object):
         # callable pour mettre la couleur de l'équipe dans l'IA lors de la création de la partie (create_game)
         self.ia_coach_initializer = None
         self.is_team_yellow = self._sanitize_team_color(is_team_yellow)
+
+    def game_thread_main_loop(self):
+        """ Fonction exécuté et agissant comme boucle principale. """
+
+        self._wait_for_first_frame()
+
+        # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
+        while not self.thread_terminate.is_set():
+            # TODO: method extract
+            # Mise à jour
+            current_vision_frame = self._acquire_vision_frame()
+            if self._is_frame_number_different(current_vision_frame):
+                self.update_game_state()
+                self.update_players_and_ball(current_vision_frame)
+                robot_commands, debug_commands = self.update_strategies()
+
+                # Communication
+                self._send_robot_commands(robot_commands)
+                self._send_debug_commands(debug_commands)
 
     def create_game(self):
         """
@@ -143,10 +163,10 @@ class Framework(object):
             else:
                 self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
 
-            self.debug_sender = DebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS, 20021)
-            self.debug_receiver = DebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
-            self.referee = RefereeServer(LOCAL_UDP_MULTICAST_ADDRESS)
-            self.vision = Vision(LOCAL_UDP_MULTICAST_ADDRESS)
+            self.debug_sender = UIDebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS, 20021)
+            self.debug_receiver = UIDebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
+            self.referee = RefereeReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
+            self.vision = VisionReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
         else:
             self.stop_game()
 
@@ -160,25 +180,6 @@ class Framework(object):
 
         if not async:
             self.running_thread.join()
-
-    def game_thread_main_loop(self):
-        """ Fonction exécuté et agissant comme boucle principale. """
-
-        self._wait_for_first_frame()
-
-        # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
-        while not self.thread_terminate.is_set():
-            # TODO: method extract
-            # Mise à jour
-            current_vision_frame = self._acquire_vision_frame()
-            if self._is_frame_number_different(current_vision_frame):
-                self.update_game_state()
-                self.update_players_and_ball(current_vision_frame)
-                robot_commands, debug_commands = self.update_strategies()
-
-                # Communication
-                self._send_robot_commands(robot_commands)
-                self._send_debug_commands(debug_commands)
 
     def _acquire_vision_frame(self):
         return self.vision.get_latest_frame()
@@ -196,7 +197,7 @@ class Framework(object):
             else:
                 team = self.game.blue_team
 
-            for player in team.players:
+            for player in team.players.values():
                 command = Stop(player)
                 self.command_sender.send_command(command)
         except:
