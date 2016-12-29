@@ -23,6 +23,7 @@ from .Game.Game import Game
 from .Game.Referee import Referee
 from .Util.constant import TeamColor
 from .Util.exception import StopPlayerError
+from RULEngine.Util.image_transformer import ImageTransformer
 
 LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
 UI_DEBUG_MULTICAST_ADDRESS = "127.0.0.1"
@@ -57,7 +58,7 @@ class Framework(object):
         self.vision = None
         self.last_cmd_time = time.time()
         self.robots_pi = [PI(), PI(), PI(), PI(), PI(), PI()]
-
+        self.image_transformer = ImageTransformer()
         self.ia_coach_mainloop = None
         # callable pour mettre la couleur de l'équipe dans l'IA lors de la création de la partie (create_game)
         self.ia_coach_initializer = None
@@ -73,6 +74,7 @@ class Framework(object):
             # TODO: method extract
             # Mise à jour
             current_vision_frame = self._acquire_vision_frame()
+            vision_frame, new_image_packet = self.image_transformer.update(current_vision_frame)
             if self._is_frame_number_different(current_vision_frame):
                 self.update_game_state()
                 self.update_players_and_ball(current_vision_frame)
@@ -81,6 +83,35 @@ class Framework(object):
                 # Communication
                 self._send_robot_commands(robot_commands)
                 self._send_debug_commands(debug_commands)
+
+    def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer, async=False, serial=False):
+        """ Démarrage du moteur de l'IA initial. """
+
+        # on peut eventuellement demarrer une autre instance du moteur
+        # TODO: method extract -> _init_communication_serveurs()
+        if not self.running_thread:
+            if serial:
+                self.command_sender = SerialCommandSender()
+            else:
+                self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
+
+            self.debug_sender = UIDebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS, 20021)
+            self.debug_receiver = UIDebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
+            self.referee = RefereeReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
+            self.vision = VisionReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
+        else:
+            self.stop_game()
+
+        self.ia_coach_mainloop = p_ia_coach_mainloop
+        self.ia_coach_initializer = p_ia_coach_initializer
+        self.create_game()
+
+        signal.signal(signal.SIGINT, self._sigint_handler)
+        self.running_thread = threading.Thread(target=self.game_thread_main_loop)
+        self.running_thread.start()
+
+        if not async:
+            self.running_thread.join()
 
     def create_game(self):
         """
@@ -151,35 +182,6 @@ class Framework(object):
             timestamp=self.last_time,
             debug=self.debug_receiver.receive_command()
         )
-
-    def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer, async=False, serial=False):
-        """ Démarrage du moteur de l'IA initial. """
-
-        # on peut eventuellement demarrer une autre instance du moteur
-        # TODO: method extract -> _init_communication_serveurs()
-        if not self.running_thread:
-            if serial:
-                self.command_sender = SerialCommandSender()
-            else:
-                self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
-
-            self.debug_sender = UIDebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS, 20021)
-            self.debug_receiver = UIDebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
-            self.referee = RefereeReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
-            self.vision = VisionReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
-        else:
-            self.stop_game()
-
-        self.ia_coach_mainloop = p_ia_coach_mainloop
-        self.ia_coach_initializer = p_ia_coach_initializer
-        self.create_game()
-
-        signal.signal(signal.SIGINT, self._sigint_handler)
-        self.running_thread = threading.Thread(target=self.game_thread_main_loop)
-        self.running_thread.start()
-
-        if not async:
-            self.running_thread.join()
 
     def _acquire_vision_frame(self):
         return self.vision.get_latest_frame()
