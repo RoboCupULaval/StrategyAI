@@ -92,6 +92,7 @@ class PathfinderRRT(Pathfinder):
 
         # TODO mettre les buts dans les obstacles
         list_of_pid = list(range(6))
+        list_of_other_team_pid = list(range(6))
         list_of_pid.remove(pid)
         obstacleList = []
         for other_pid in list_of_pid:
@@ -102,6 +103,9 @@ class PathfinderRRT(Pathfinder):
 
         initial_position_of_main_player = self.ws.game_state.get_player_pose(pid).position
 
+        for pid in list_of_other_team_pid:
+            position = self.ws.game_state.get_player_pose(pid,False).position
+            obstacleList.append([position.x, position.y, OBSTACLE_DEAD_ZONE])
 
         target_position_of_player = target.position
         target_orientation_of_player = target.orientation
