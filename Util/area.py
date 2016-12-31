@@ -187,11 +187,10 @@ def stayOutsideGoalArea(position, is_yellow):
         return Position(position.x, position.y)
 
 
-def player_can_grab_ball(info_manager, player_id):
+def canGetBall(info_manager, player_id):
     player_position = info_manager.get_player_position(player_id)
     ball_position = info_manager.get_ball_position()
     target_position = info_manager.get_player_target(player_id)
-
     if isInsideCircle(player_position, ball_position, RADIUS_TO_GRAB_BALL):
 
         if angle_to_ball_is_tolerated(player_position, ball_position, target_position, ANGLE_TO_GRAB_BALL):
@@ -199,31 +198,19 @@ def player_can_grab_ball(info_manager, player_id):
 
     return False
 
-def player_close_to_ball(info_manager,player_id):
+def hasBall(info_manager, player_id):
     player_position = info_manager.get_player_position(player_id)
     ball_position = info_manager.get_ball_position()
     if isInsideCircle(player_position, ball_position, RADIUS_TO_HALT + POSITION_DEADZONE):
         return True
 
-def player_close_to_ball_facing_target(info_manager, player_id):
-    player_position = info_manager.get_player_position(player_id)
-    ball_position = info_manager.get_ball_position()
-    target_position = info_manager.get_player_target(player_id)
-
-    if player_close_to_ball(info_manager,player_id):
-
-        if angle_to_ball_is_tolerated(player_position, ball_position, target_position, ANGLE_TO_HALT):
-            return True
-
-    return False
-
-def player_close_to_origin_facing_target(info_manager, player_id, origin):
+def closeToPointFacingTarget(info_manager, player_id, point):
     player_position = info_manager.get_player_position(player_id)
     target_position = info_manager.get_player_target(player_id)
 
-    if player_close_to_ball(info_manager,player_id):
+    if hasBall(info_manager, player_id):
 
-        if angle_to_ball_is_tolerated(player_position, origin, target_position, ANGLE_TO_HALT):
+        if angle_to_ball_is_tolerated(player_position, point, target_position, ANGLE_TO_HALT):
             return True
 
     return False
