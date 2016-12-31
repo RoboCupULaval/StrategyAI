@@ -19,6 +19,7 @@ from .Command.command import Stop, PI
 from RULEngine.Communication.sender.grsim_command_sender import GrSimCommandSender
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
+from RULEngine.Communication.sender.uidebug_vision_sender import UIDebugVisionSender
 from .Game.Game import Game
 from .Game.Referee import Referee
 from .Util.constant import TeamColor
@@ -58,6 +59,8 @@ class Framework(object):
         self.vision = None
         self.last_cmd_time = time.time()
         self.robots_pi = [PI(), PI(), PI(), PI(), PI(), PI()]
+
+        self.debug_vision = None
         self.image_transformer = ImageTransformer()
         self.ia_coach_mainloop = None
         # callable pour mettre la couleur de l'équipe dans l'IA lors de la création de la partie (create_game)
@@ -74,7 +77,10 @@ class Framework(object):
             # TODO: method extract
             # Mise à jour
             current_vision_frame = self._acquire_vision_frame()
-            vision_frame, new_image_packet = self.image_transformer.update(current_vision_frame)
+            new_image_packet = self.image_transformer.update(current_vision_frame)
+            self.debug_vision._send_packet(new_image_packet.SerializeToString())
+
+            """
             if self._is_frame_number_different(current_vision_frame):
                 self.update_game_state()
                 self.update_players_and_ball(current_vision_frame)
@@ -83,6 +89,7 @@ class Framework(object):
                 # Communication
                 self._send_robot_commands(robot_commands)
                 self._send_debug_commands(debug_commands)
+            """
 
     def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer, async=False, serial=False):
         """ Démarrage du moteur de l'IA initial. """
@@ -99,6 +106,7 @@ class Framework(object):
             self.debug_receiver = UIDebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
             self.referee = RefereeReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
             self.vision = VisionReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
+            self.debug_vision = UIDebugVisionSender(LOCAL_UDP_MULTICAST_ADDRESS, 10022)
         else:
             self.stop_game()
 

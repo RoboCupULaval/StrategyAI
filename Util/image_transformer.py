@@ -39,13 +39,18 @@ class ImageTransformer(object):
                 self.yellow_last_position[player.robot_id] = \
                     Position(player.x, player.y)
 
+        return self.create_ssl_packet()
+
     def create_ssl_packet(self):
         self.new_protobuf_sslwrapper = ssl_wrapper.SSL_WrapperPacket()
         ssl_detection_packets = ssl_detection.SSL_DetectionFrame()
+        self.new_protobuf_sslwrapper = ssl_detection_packets.add()
         ball = ssl_detection.SSL_DetectionBall()
-        
-
-
+        ball.x = 0
+        ball.y = 0
+        ball.confidence = 0.999
+        ssl_detection_packets.ball = ball
+        return ssl_detection_packets
 
     @staticmethod
     def point_milieu(position1, position2):
