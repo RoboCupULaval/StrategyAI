@@ -3,11 +3,11 @@
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.GoToPosition import GoToPosition
 from ai.STA.Action.GoBehind import GoBehind
-from ai.STA.Action.GrabBall import GrabBall
+from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.Idle import Idle
 
 from ai.STA.Tactic import tactic_constants
-from RULEngine.Util.area import player_can_grab_ball, player_close_to_ball_facing_target
+from RULEngine.Util.area import canGetBall, player_close_to_ball_facing_target
 from ai.STA.Tactic.tactic_constants import Flags
 
 
@@ -68,12 +68,12 @@ class GoGetBall(Tactic):
         if player_grabbed_ball(self.game_state, self.player_id):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
-        elif player_can_grab_ball(self.game_state, self.player_id):
+        elif canGetBall(self.game_state, self.player_id):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.get_behind_ball  # back to go_behind; the ball has moved
 
-        grab_ball = GrabBall(self.game_state, self.player_id)
+        grab_ball = GetBall(self.game_state, self.player_id)
         return grab_ball
 
     def halt(self):

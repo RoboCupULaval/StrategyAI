@@ -1,24 +1,24 @@
 # Under MIT License, see LICENSE.txt
 
 from .GoGetBall import GoGetBall
-from .GoalKeeper import GoalKeeper
+from .ProtectGoal import GoalKeeper
 from .GoToPosition import GoToPosition
 from .RotateAround import RotateAround
 from .Stop import Stop
-from .CoverZone import CoverZone
+from .ProtectZone import ProtectZone
 from .DemoFollowBall import DemoFollowBall
-from .GoStraightTo import GoStraightTo
+from .GoToPositionNoPathfinder import GoToPositionNoPathfinder
 
 
 class TacticBook(object):
     def __init__(self):
         self.tactic_book = {'GoToPosition': GoToPosition,
                             'GoalKeeper': GoalKeeper,
-                            'CoverZone': CoverZone,
+                            'CoverZone': ProtectZone,
                             'GoGetBall': GoGetBall,
                             'DemoFollowBall': DemoFollowBall,
                             'Stop': Stop,
-                            'GoStraightTo': GoStraightTo}
+                            'GoStraightTo': GoToPositionNoPathfinder}
 
     def get_tactics_name_list(self):
         return list(self.tactic_book.keys())

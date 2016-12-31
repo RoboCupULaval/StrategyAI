@@ -2,9 +2,9 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Action.MoveTo import MoveTo
+from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
-from RULEngine.Util.area import player_close_to_ball_facing_target, angle_to_origin_then_target_is_tolerated, player_close_to_origin_facing_target
+from RULEngine.Util.area import player_close_to_ball_facing_target, angle_to_origin_then_target_is_tolerated, closeToPointFacingTarget
 from RULEngine.Util.geometry import rotate_point_around_origin, get_required_kick_force, get_distance, get_angle
 from RULEngine.Util.constant import PLAYER_PER_TEAM, ANGLE_TO_HALT
 from RULEngine.Util.Pose import Pose
@@ -63,7 +63,7 @@ class RotateAround(Tactic):
 
         # return command
         self.next_state = self.check_success
-        go_to_position = MoveTo(self.game_state, self.player_id, new_pose)
+        go_to_position = MoveToPosition(self.game_state, self.player_id, new_pose)
         return go_to_position
 
 

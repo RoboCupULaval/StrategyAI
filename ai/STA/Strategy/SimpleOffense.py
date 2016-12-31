@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 
 from ai.STA.Tactic.GoGetBall import GoGetBall
-from ai.STA.Tactic.GoalKeeper import GoalKeeper
+from ai.STA.Tactic.ProtectGoal import GoalKeeper
 from . Strategy import Strategy
 from ai.Algorithm.Node import Node
 

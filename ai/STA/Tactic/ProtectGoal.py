@@ -9,7 +9,7 @@ from ai.STA.Action.Idle import Idle
 from ai.Util.ball_possession import player_can_grab_ball, player_grabbed_ball
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.area import isInsideGoalArea, player_can_grab_ball, player_close_to_ball_facing_target
+from RULEngine.Util.area import isInsideGoalArea, canGetBall, player_close_to_ball_facing_target
 from RULEngine.Util.constant import PLAYER_PER_TEAM, DISTANCE_BEHIND
 
 __author__ = 'RoboCupULaval'

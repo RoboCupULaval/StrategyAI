@@ -2,7 +2,7 @@
 
 from ai.Algorithm.Node import Node
 from ai.STA.Strategy.Strategy import Strategy
-from ai.STA.Tactic.GoStraightTo import GoStraightTo
+from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.Stop import Stop
 from RULEngine.Util.Pose import Position, Pose
 from ai.STA.Tactic.tactic_constants import Flags
@@ -14,16 +14,16 @@ class WeirdmovementStrategy(Strategy):
         super().__init__(p_game_state)
 
         self.add_tactic(0, Stop(self.game_state, 0))
-        self.add_tactic(0, GoStraightTo(self.game_state, 0, Pose(Position(-500, -500))))
-        self.add_tactic(0, GoStraightTo(self.game_state, 0, Pose(Position(-1500, -1500))))
+        self.add_tactic(0, GoToPositionNoPathfinder(self.game_state, 0, Pose(Position(-500, -500))))
+        self.add_tactic(0, GoToPositionNoPathfinder(self.game_state, 0, Pose(Position(-1500, -1500))))
         self.add_condition(0, 0, 1, self.condition2)
         self.add_condition(0, 1, 2, self.condition)
         self.add_condition(0, 2, 0, self.condition)
 
-        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(0, 0))))
-        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(1000, 0))))
-        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(1000, 1000))))
-        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(0, 1000))))
+        self.add_tactic(1, GoToPositionNoPathfinder(self.game_state, 1, Pose(Position(0, 0))))
+        self.add_tactic(1, GoToPositionNoPathfinder(self.game_state, 1, Pose(Position(1000, 0))))
+        self.add_tactic(1, GoToPositionNoPathfinder(self.game_state, 1, Pose(Position(1000, 1000))))
+        self.add_tactic(1, GoToPositionNoPathfinder(self.game_state, 1, Pose(Position(0, 1000))))
         self.add_condition(1, 0, 1, self.condition1)
         self.add_condition(1, 1, 2, self.condition1)
         self.add_condition(1, 2, 3, self.condition1)

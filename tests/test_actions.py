@@ -7,11 +7,11 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import *
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GoBetween import GoBetween
-from ai.STA.Action.GrabBall import GrabBall
+from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
-from ai.STA.Action.MoveTo import MoveTo
-from ai.STA.Action.MoveWithBall import MoveWithBall
+from ai.STA.Action.MoveToPosition import MoveToPosition
+from ai.STA.Action.MoveDribblingBall import MoveDribblingBall
 from ai.STA.Action.ProtectGoal import ProtectGoal
 from ai.Util.types import AICommand
 from ai.states.game_state import GameState
@@ -27,13 +27,13 @@ class TestActions(unittest.TestCase):
 
     def test_move_to(self):
         self.pose = Pose(Position(0, 0, 0), orientation=0.0)
-        self.move = MoveTo(self.game_state, self.player_id, self.pose)
-        self.assertEqual(str(MoveTo.exec(self.move)),
+        self.move = MoveToPosition(self.game_state, self.player_id, self.pose)
+        self.assertEqual(str(MoveToPosition.exec(self.move)),
                          "AICommand(move_destination=[(x=0.0, y=0.0, z=0.0), theta=0.0], kick_strength=0)")
 
         self.pose = Pose(Position(0.5, 0.3, 0.2), orientation=3.2)
-        self.move = MoveTo(self.game_state, self.player_id, self.pose)
-        self.assertEqual(str(MoveTo.exec(self.move)), "AICommand(move_destination=[(x=0.5, y=0.3, z=0.2), theta=" +
+        self.move = MoveToPosition(self.game_state, self.player_id, self.pose)
+        self.assertEqual(str(MoveToPosition.exec(self.move)), "AICommand(move_destination=[(x=0.5, y=0.3, z=0.2), theta=" +
                          "-3.083185307179586], kick_strength=0)")
 
     def test_idle(self):
@@ -43,7 +43,7 @@ class TestActions(unittest.TestCase):
         self.assertEqual(str(Idle.exec(self.idle)), current_pose_string)
 
     def test_GrabBall(self):
-        self.grab_ball = GrabBall(self.game_state, self.player_id)
+        self.grab_ball = GetBall(self.game_state, self.player_id)
         self.game_state._update_ball_position(Position(5, 0))
         ai_cmd = self.grab_ball.exec()
         ai_cmd_expected = AICommand(Pose(Position(5, 0)), 0)
@@ -59,7 +59,7 @@ class TestActions(unittest.TestCase):
 
 
     def test_MoveWithBall(self):
-        self.move_with_ball = MoveWithBall(self.game_state, self.player_id, Position(100, 0))
+        self.move_with_ball = MoveDribblingBall(self.game_state, self.player_id, Position(100, 0))
         self.game_state._update_ball_position(Position(5, 0))
         ai_cmd = self.move_with_ball.exec()
         ai_cmd_expected = AICommand(Pose(Position(100, 0), 0), 0)

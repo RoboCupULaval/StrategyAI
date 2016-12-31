@@ -3,7 +3,8 @@
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.Idle import Idle
-from RULEngine.Util.area import player_close_to_ball_facing_target
+from ai.STA.Tactic.tactic_constants import Flags
+from RULEngine.Util.area import closeToPointFacingTarget
 from RULEngine.Util.geometry import get_required_kick_force
 from RULEngine.Util.constant import PLAYER_PER_TEAM, FIELD_X_LEFT, FIELD_X_RIGHT
 from RULEngine.Util.Position import Position
@@ -11,7 +12,7 @@ from RULEngine.Util.Position import Position
 __author__ = 'RoboCupULaval'
 
 
-class ShootToGoal(Tactic):
+class ShootGoal(Tactic):
     # TODO : vérifier que la balle a été bottée avant de retourner à halt
     """
     méthodes:
@@ -36,19 +37,15 @@ class ShootToGoal(Tactic):
     def kick_ball_towards_goal(self):
         goal_x = FIELD_X_RIGHT if self.score_in_right_goal else FIELD_X_LEFT
         goal_position = Position(goal_x, 0)
-        if player_close_to_ball_facing_target(self.info_manager, self.player_id):  # derniere verification avant de frapper
+        if closeToPointFacingTarget(self.info_manager, self.player_id, point=self.game_state.get_ball_position()):  # derniere verification avant de frapper
             player_position = self.info_manager.get_player_position(self.player_id)
             kick_force = get_required_kick_force(player_position, goal_position)
-            kick_force = 7
             kick_ball = Kick(self.info_manager, self.player_id, kick_force)
-
+            self.status_flag = Flags.SUCCESS
             self.next_state = self.halt
             return kick_ball
 
         else: # returns error, strategy goes back to GoGetBall
             self.next_state = self.halt
-            # TODO : Mettre flag d'état à failed
+            self.status_flag = Flags.FAILURE
             return Idle(self.info_manager, self.player_id)
-
-
-
