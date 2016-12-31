@@ -4,8 +4,8 @@
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
-from RULEngine.Util.area import angle_to_origin_then_target_is_tolerated, closeToPointFacingTarget
-from RULEngine.Util.geometry import rotate_point_around_origin, get_required_kick_force, get_distance, get_angle
+from RULEngine.Util.area import isFacingPointAndTarget
+from RULEngine.Util.geometry import rotate_point_around_origin, get_angle
 from RULEngine.Util.constant import PLAYER_PER_TEAM, ANGLE_TO_HALT
 from RULEngine.Util.Pose import Pose
 from ai.STA.Tactic.tactic_constants import Flags
@@ -36,7 +36,7 @@ class RotateAround(Tactic):
     def check_success(self):
         self.origin = self.game_state.get_ball_position()  # origin #hack
         self.player_pos = self.game_state.get_player_pose(self.player_id).position
-        if angle_to_origin_then_target_is_tolerated(self.player_pos, self.origin, self.target.position, ANGLE_TO_HALT):
+        if isFacingPointAndTarget(self.player_pos, self.origin, self.target.position, ANGLE_TO_HALT):
             self.status_flag = Flags.SUCCESS
             self.next_state = self.halt
         else:
@@ -58,8 +58,6 @@ class RotateAround(Tactic):
         print(new_position)
         print(new_orientation)
         new_pose = Pose(new_position, new_orientation)
-        #TODO: goal:print
-        #print(self.game_state.get_player_pose(1).position)
 
         # return command
         self.next_state = self.check_success

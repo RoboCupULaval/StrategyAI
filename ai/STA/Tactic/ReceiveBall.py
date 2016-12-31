@@ -4,9 +4,9 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic import tactic_constants
-from RULEngine.Util.area import closeToPointFacingTarget
+from ai.Util.ball_possession import hasBallFacingTarget
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ball_possession import player_grabbed_ball
+from ai.Util.ball_possession import hasBall
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.constant import PLAYER_PER_TEAM
@@ -37,7 +37,7 @@ class ReceiveBall(Tactic):
         self.player_id = player_id
 
     def rotate_towards_ball(self):
-        if closeToPointFacingTarget(self.game_state, self.player_id, point=self.game_state.get_ball_position()):
+        if hasBallFacingTarget(self.game_state, self.player_id, point=self.game_state.get_ball_position()):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
             return Idle(self.game_state, self.player_id)

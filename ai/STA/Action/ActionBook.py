@@ -6,7 +6,7 @@ from .GetBall import GetBall
 from .Idle import Idle
 from .Kick import Kick
 from .MoveToPosition import MoveToPosition
-from .MoveDribblingBall import MoveDribblingBall
+from .MoveToDribblingBall import MoveToDribblingBall
 from .ProtectGoal import ProtectGoal
 
 
@@ -18,7 +18,7 @@ class ActionBook(object):
                            'Idle': Idle,
                            'Kick': Kick,
                            'MoveTo': MoveToPosition,
-                           'MoveWithBall': MoveDribblingBall,
+                           'MoveWithBall': MoveToDribblingBall,
                            'ProtectGoal': ProtectGoal}
 
     def get_actions_name_list(self):

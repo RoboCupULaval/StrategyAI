@@ -4,8 +4,8 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.Idle import Idle
-from RULEngine.Util.area import closeToPointFacingTarget
-from RULEngine.Util.geometry import get_required_kick_force
+from ai.Util.ball_possession import hasBallFacingTarget
+from RULEngine.Util.kick import getRequiredKickForce
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 __author__ = 'RoboCupULaval'
@@ -35,10 +35,10 @@ class PassBall(Tactic):
         self.target = target
 
     def kick_ball_towards_target(self):
-        if closeToPointFacingTarget(self.game_state, self.player_id, point=self.game_state.get_ball_position()):  # derniere verification avant de frapper
+        if hasBallFacingTarget(self.game_state, self.player_id, point=self.game_state.get_ball_position()):  # derniere verification avant de frapper
             player_position = self.game_state.get_player_position(self.player_id)
             target_position = self.game_state.get_player_target(self.player_id)
-            kick_force = get_required_kick_force(player_position, target_position)
+            kick_force = getRequiredKickForce(player_position, target_position)
 
             kick_ball = Kick(self.game_state, self.player_id, kick_force)
 

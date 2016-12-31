@@ -9,7 +9,7 @@ from RULEngine.Util.constant import PLAYER_PER_TEAM
 __author__ = 'Robocup ULaval'
 
 
-class MoveDribblingBall(Action):
+class MoveToDribblingBall(Action):
     """
     Action MoveWithBall: Déplace le robot en tenant compte de la possession de la balle
     Méthodes :

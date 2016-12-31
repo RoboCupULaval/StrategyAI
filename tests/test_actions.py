@@ -11,7 +11,7 @@ from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.MoveToPosition import MoveToPosition
-from ai.STA.Action.MoveDribblingBall import MoveDribblingBall
+from ai.STA.Action.MoveToDribblingBall import MoveToDribblingBall
 from ai.STA.Action.ProtectGoal import ProtectGoal
 from ai.Util.types import AICommand
 from ai.states.game_state import GameState
@@ -59,7 +59,7 @@ class TestActions(unittest.TestCase):
 
 
     def test_MoveWithBall(self):
-        self.move_with_ball = MoveDribblingBall(self.game_state, self.player_id, Position(100, 0))
+        self.move_with_ball = MoveToDribblingBall(self.game_state, self.player_id, Position(100, 0))
         self.game_state._update_ball_position(Position(5, 0))
         ai_cmd = self.move_with_ball.exec()
         ai_cmd_expected = AICommand(Pose(Position(100, 0), 0), 0)
