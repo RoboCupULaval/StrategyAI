@@ -37,8 +37,6 @@ class RotateAround(Tactic):
         self.origin = self.game_state.get_ball_position()  # origin #hack
         self.player_pos = self.game_state.get_player_pose(self.player_id).position
         if angle_to_origin_then_target_is_tolerated(self.player_pos, self.origin, self.target.position, ANGLE_TO_HALT):
-            print("success")
-            print(self.origin)
             self.status_flag = Flags.SUCCESS
             self.next_state = self.halt
         else:
@@ -57,6 +55,8 @@ class RotateAround(Tactic):
         # calculate new pose
         new_position = rotate_point_around_origin(self.player_pos, self.origin, constant_angle_increment)
         new_orientation = get_angle(new_position, self.target.position)
+        print(new_position)
+        print(new_orientation)
         new_pose = Pose(new_position, new_orientation)
         #TODO: goal:print
         #print(self.game_state.get_player_pose(1).position)

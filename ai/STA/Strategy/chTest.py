@@ -4,6 +4,7 @@ from math import pi
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from RULEngine.Util.geometry import get_angle
 from ai.Algorithm.Node import Node
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Tactic.GoalKeeper import GoalKeeper

@@ -60,6 +60,7 @@ target/
 # Pycharm idea submodule
 .idea
 .idea/*
+.cs_files
 
 *.orig
 
