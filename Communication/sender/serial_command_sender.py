@@ -1,13 +1,14 @@
-#Under MIT License, see LICENSE.txt
-#!/usr/bin/python
-import serial
-from . import serial_protocol as protocol
-import math
+# Under MIT License, see LICENSE.txt
+
 import os
+import serial
+
+from RULEngine.Communication.util import serial_protocol as protocol
+
 
 class SerialCommandSender(object):
     
-    def __init__(self, port=None, baudRate=115200):
+    def __init__(self, port=None, baud_rate=115200):
         if not port:
             serial_ports = [port for port in os.listdir('/dev')
                             if port.startswith("ttyUSB") or port.startswith('ttyACM')]
@@ -16,8 +17,7 @@ class SerialCommandSender(object):
             except IndexError:
                 raise Exception('No suitable serial port found.')
             
-        self.serial = serial.Serial('/dev/' + port, baudRate)
-        
+        self.serial = serial.Serial('/dev/' + port, baud_rate)
 
     def send_command(self, command):
         x = command.pose.position.x
