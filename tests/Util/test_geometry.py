@@ -112,10 +112,10 @@ class TestGeometry(unittest.TestCase):
 
     def test_angle_to_ball_is_tolerated(self):
         ball_position = self.positionN + RULEngine.Util.Position.Position(0, 5000, 0)
-        not_tolerated = RULEngine.Util.geometry.angle_to_ball_is_tolerated(self.positionN, ball_position, self.positionS, m.pi/4)
+        not_tolerated = RULEngine.Util.geometry.isFacingPointAndTarget(self.positionN, ball_position, self.positionS, m.pi / 4)
         self.assertEqual(not_tolerated, False)
         ball_position = self.positionS + RULEngine.Util.Position.Position(0, 5000, 0)
-        tolerated = RULEngine.Util.geometry.angle_to_ball_is_tolerated(self.positionS, ball_position, self.positionN, m.pi/4)
+        tolerated = RULEngine.Util.geometry.isFacingPointAndTarget(self.positionS, ball_position, self.positionN, m.pi / 4)
         self.assertEqual(tolerated, True)
 
     # def test_get_required_kick_force(self): # simple calculation
