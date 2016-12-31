@@ -3,7 +3,7 @@
 from ai.STA.Tactic.Tactic import Tactic
 
 
-class FollowTarget(Tactic):
+class DemoFollowTarget(Tactic):
     """
     Classe mère de toutes les tactiques
     méthodes:
@@ -13,8 +13,8 @@ class FollowTarget(Tactic):
         game_state: L'état courant du jeu
         team_id : Identifiant de l'équipe
         player_id : Identifiant du joueur auquel est assigné la tactique
-        current_state : chcîne de caratères définissant l'état courant
-        next_state : chcîne de caratères définissant l'état suivant
+        current_state : chaîne de caratères définissant l'état courant
+        next_state : chaîne de caratères définissant l'état suivant
     """
 
     def __init__(self, game_state, team_id, player_id):

@@ -3,7 +3,7 @@
 from .Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ..Action.ProtectGoal import ProtectGoal
-from ai.STA.Action.GrabBall import GrabBall
+from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
 from ai.Util.ball_possession import player_can_grab_ball, player_grabbed_ball
@@ -77,4 +77,4 @@ class GoalKeeper(Tactic):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball  # back to go_behind; the ball has moved
-        return GrabBall(self.game_state, self.player_id)
+        return GetBall(self.game_state, self.player_id)

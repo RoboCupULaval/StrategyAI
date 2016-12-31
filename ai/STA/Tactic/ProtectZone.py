@@ -14,7 +14,7 @@ from RULEngine.Util.geometry import get_angle
 __author__ = 'RoboCupULaval'
 
 
-class CoverZone(Tactic):
+class ProtectZone(Tactic):
     """
     méthodes:
         exec(self) : Exécute une Action selon l'état courant

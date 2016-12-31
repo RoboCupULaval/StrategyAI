@@ -11,7 +11,7 @@ from RULEngine.Util.constant import PLAYER_PER_TEAM
 __author__ = 'RoboCupULaval'
 
 
-class MakePass(Tactic):
+class PassBall(Tactic):
     # TODO : vérifier que la balle a été bottée avant de retourner à halt
     """
     méthodes:

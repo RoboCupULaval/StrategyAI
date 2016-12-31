@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Action.MoveTo import MoveTo
+from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic import tactic_constants
 from RULEngine.Util.area import player_close_to_ball_facing_target
@@ -48,7 +48,7 @@ class ReceivePass(Tactic):
             rotation_towards_ball = get_angle(current_position, ball_position)
             pose_towards_ball = Pose(current_position, rotation_towards_ball)
 
-            move_to = MoveTo(self.game_state, self.player_id, pose_towards_ball)
+            move_to = MoveToPosition(self.game_state, self.player_id, pose_towards_ball)
             self.next_state = self.rotate_towards_ball
             self.status_flag = Flags.WIP
             return move_to
