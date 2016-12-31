@@ -7,7 +7,7 @@ from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.Idle import Idle
 
 from ai.STA.Tactic import tactic_constants
-from RULEngine.Util.area import canGetBall, player_close_to_ball_facing_target
+from RULEngine.Util.area import canGetBall
 from ai.STA.Tactic.tactic_constants import Flags
 
 

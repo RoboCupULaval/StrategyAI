@@ -4,7 +4,7 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.Idle import Idle
-from RULEngine.Util.area import player_close_to_ball_facing_target, closeToPointFacingTarget
+from RULEngine.Util.area import closeToPointFacingTarget
 from RULEngine.Util.geometry import get_required_kick_force
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
