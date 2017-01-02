@@ -6,14 +6,14 @@ from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
 from RULEngine.Util.area import isFacingPointAndTarget
 from RULEngine.Util.geometry import rotate_point_around_origin, get_angle
-from RULEngine.Util.constant import PLAYER_PER_TEAM, ANGLE_TO_HALT
+from RULEngine.Util.constant import PLAYER_PER_TEAM, ANGLE_TO_HALT, ROBOT_RADIUS
 from RULEngine.Util.Pose import Pose
 from ai.STA.Tactic.tactic_constants import Flags
 
 __author__ = 'RoboCupULaval'
 
 
-class RotateAround(Tactic):
+class RotateAroundBall(Tactic):
     """
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
@@ -24,17 +24,17 @@ class RotateAround(Tactic):
         next_state : L'état suivant de la tactique
     """
 
-    def __init__(self, game_state, player_id, origin, target):
+    def __init__(self, game_state, player_id, target):
         Tactic.__init__(self, game_state, player_id, target)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
         self.status_flag = Flags.INIT
-        self.origin = self.game_state.get_ball_position()#origin #hack
+        self.origin = self.game_state.get_ball_position()
         self.current_state = self.check_success
         self.next_state = self.check_success
 
     def check_success(self):
-        self.origin = self.game_state.get_ball_position()  # origin #hack
+        self.origin = self.game_state.get_ball_position()
         self.player_pos = self.game_state.get_player_pose(self.player_id).position
         if isFacingPointAndTarget(self.player_pos, self.origin, self.target.position, ANGLE_TO_HALT):
             self.status_flag = Flags.SUCCESS
@@ -45,15 +45,15 @@ class RotateAround(Tactic):
         return Idle(self.game_state, self.player_id)
 
     def rotate_around(self):
-        self.origin = self.game_state.get_ball_position()  # origin #hack
+        self.origin = self.game_state.get_ball_position()
         self.player_pos = self.game_state.get_player_pose(self.player_id).position
         # check if counter clockwise
-        constant_angle_increment = 1
+        constant_angle_increment = 1 # TODO: mettre dans tactic_const
         if get_angle(self.player_pos, self.target.position) < 0:
             constant_angle_increment *= -1
 
         # calculate new pose
-        new_position = rotate_point_around_origin(self.player_pos, self.origin, constant_angle_increment)
+        new_position = rotate_point_around_origin(self.player_pos, self.origin, constant_angle_increment, ROBOT_RADIUS)
         new_orientation = get_angle(new_position, self.target.position)
         print(new_position)
         print(new_orientation)
