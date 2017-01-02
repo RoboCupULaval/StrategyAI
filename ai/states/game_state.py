@@ -105,9 +105,9 @@ class GameState(object, metaclass=Singleton):
             :param player_pose: Nouvelle Pose à donner au joueur
         """
         if is_my_team:
-            self.my_team.move_and_rotate_player(player_id, player_pose)
+            self.my_team.update_player(player_id, player_pose)
         else:
-            self.other_team.move_and_rotate_player(player_id, player_pose)
+            self.other_team.update_player(player_id, player_pose)
 
     def _update_team(self, new_team_info, is_my_team=True):
         """
