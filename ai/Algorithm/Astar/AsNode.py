@@ -19,10 +19,10 @@ class AsNode():
 
     def setCost(self, parentNode, endPos):
         
-        self.gCost = self.pos.getDist(parentNode.pos) + parentNode.gCost
-        self.hCost = self.pos.getDist(endPos)
+        self.gCost = self.pos.getQuickDist(parentNode.pos) + parentNode.gCost
+        self.hCost = self.pos.getQuickDist(endPos)
         self.fCost = self.hCost + self.gCost
 
     def getNewfCost(self, parentNode, endPos):
         
-        return self.pos.getDist(endPos) + self.pos.getDist(parentNode.pos) + parentNode.gCost
+        return self.pos.getQuickDist(endPos) + self.pos.getQuickDist(parentNode.pos) + parentNode.gCost

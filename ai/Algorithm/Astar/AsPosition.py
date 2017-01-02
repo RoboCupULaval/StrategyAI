@@ -1,6 +1,6 @@
 #pylint: skip-file
 
-from math import sqrt
+from math import sqrt, fabs
 
 class AsPosition():
 
@@ -17,3 +17,9 @@ class AsPosition():
     def getDist(self, goalPos):
 
         return sqrt(((self.x - goalPos.x)**2) + ((self.y - goalPos.y)**2))
+
+    def getQuickDist(self, goalPos):
+
+        x = self.x - goalPos.x
+        y = self.y - goalPos.y
+        return x*x + y*y

@@ -16,7 +16,7 @@ paths = myGraphManager.getAllAsPath(robotStartList, endPosList, obstacleList)
 stop = timeit.default_timer()
 
 
-print("--- %s seconds ---" % (stop - start ))
+print("--- %s seconds ---" % (stop - start))
 
 print("Start All")
 print("------------------------------------------------------------------------------------------------------------------------------------------------------------------")
