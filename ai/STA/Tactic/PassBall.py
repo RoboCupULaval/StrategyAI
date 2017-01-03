@@ -35,10 +35,9 @@ class PassBall(Tactic):
         self.target = target
 
     def kick_ball_towards_target(self):
-        if hasBallFacingTarget(self.game_state, self.player_id, point=self.game_state.get_ball_position()):  # derniere verification avant de frapper
+        if hasBallFacingTarget(self.game_state, self.player_id, self.target):  # derniere verification avant de frapper
             player_position = self.game_state.get_player_position(self.player_id)
-            target_position = self.game_state.get_player_target(self.player_id)
-            kick_force = getRequiredKickForce(player_position, target_position)
+            kick_force = getRequiredKickForce(player_position, self.target.position)
 
             kick_ball = Kick(self.game_state, self.player_id, kick_force)
 

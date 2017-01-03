@@ -24,13 +24,13 @@ def hasBall(info_manager, player_id):
         return True
 
 
-def hasBallFacingTarget(info_manager, player_id, point):
+def hasBallFacingTarget(info_manager, player_id, target):
     player_position = info_manager.get_player_position(player_id)
-    target_position = info_manager.get_player_target(player_id)
+    ball_position = info_manager.get_ball_position()
 
     if hasBall(info_manager, player_id):
 
-        if isFacingPointAndTarget(player_position, point, target_position, ANGLE_TO_HALT):
+        if isFacingPointAndTarget(player_position, ball_position, target.position, ANGLE_TO_HALT):
             return True
 
     return False

@@ -7,9 +7,8 @@ from RULEngine.Util.Position import Position
 from ai.Algorithm.Node import Node
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Tactic.ProtectGoal import GoalKeeper
-from ai.STA.Tactic.RotateAround import RotateAround
+from ai.STA.Tactic.RotateAroundBall import RotateAroundBall
 from ai.STA.Tactic.PassBall import PassBall
-from ai.STA.Tactic.GoToPosition import GoToPosition
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.tactic_constants import *
@@ -25,15 +24,13 @@ class test_rotateAround(Strategy):
         self.designated_robot = 1
         self.position_to_shoot_to = Pose(Position(1500, 1500))
 
-        print(self.game_state.get_player_pose(1).position)
-
         # état 1: le robot désigné va chercher la balle
         ball_position = self.game_state.get_ball_position()
         tactic = GoToPositionNoPathfinder(self.game_state, self.designated_robot, Pose(ball_position, 0)) #TODO: ajouter pathfinder lorsque temps
         self.add_tactic(self.designated_robot, tactic)
 
         # état 2: une fois rendu (condition 1), le robot désigné tourne autour de la balle
-        tactic = RotateAround(self.game_state, player_id=self.designated_robot, origin=ball_position, target=self.position_to_shoot_to)
+        tactic = RotateAroundBall(self.game_state, player_id=self.designated_robot, target=self.position_to_shoot_to)
         self.add_tactic(self.designated_robot, tactic)
 
         # condition 1: le robot désigné s'est rendu a la balle

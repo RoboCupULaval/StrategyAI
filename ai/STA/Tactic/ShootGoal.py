@@ -37,7 +37,7 @@ class ShootGoal(Tactic):
     def kick_ball_towards_goal(self):
         goal_x = FIELD_X_RIGHT if self.score_in_right_goal else FIELD_X_LEFT
         goal_position = Position(goal_x, 0)
-        if hasBallFacingTarget(self.info_manager, self.player_id, point=self.game_state.get_ball_position()):  # derniere verification avant de frapper
+        if hasBallFacingTarget(self.info_manager, self.player_id, goal_position):  # derniere verification avant de frapper
             player_position = self.info_manager.get_player_position(self.player_id)
             kick_force = getRequiredKickForce(player_position, goal_position)
             kick_ball = Kick(self.info_manager, self.player_id, kick_force)

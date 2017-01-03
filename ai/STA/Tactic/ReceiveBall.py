@@ -37,7 +37,7 @@ class ReceiveBall(Tactic):
         self.player_id = player_id
 
     def rotate_towards_ball(self):
-        if hasBallFacingTarget(self.game_state, self.player_id, point=self.game_state.get_ball_position()):
+        if hasBall(self.game_state, self.player_id):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
             return Idle(self.game_state, self.player_id)

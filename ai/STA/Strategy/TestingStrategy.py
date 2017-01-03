@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 
 from ai.STA.Tactic.GoGetBall import GoGetBall
-from ai.STA.Tactic.RotateAround import RotateAround
+from ai.STA.Tactic.RotateAroundBall import RotateAroundBall
 from ai.STA.Tactic.Stop import Stop
 from . Strategy import Strategy
 from RULEngine.Util.Position import Position
