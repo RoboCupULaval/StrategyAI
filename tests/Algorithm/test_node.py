@@ -5,7 +5,7 @@ from ai.Algorithm.Node import Node
 from ai.Algorithm.Vertex import Vertex
 from ai.states.game_state import GameState
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.GoalKeeper import GoalKeeper
+from ai.STA.Tactic.ProtectGoal import GoalKeeper
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.types import AICommand

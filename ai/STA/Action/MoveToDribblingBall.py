@@ -11,7 +11,7 @@ from ai.Util.ai_command import AICommand, AICommandType
 __author__ = 'Robocup ULaval'
 
 
-class MoveWithBall(Action):
+class MoveToDribblingBall(Action):
     """
     Action MoveWithBall: Déplace le robot en tenant compte de la possession de la balle
     Méthodes :
@@ -40,7 +40,7 @@ class MoveWithBall(Action):
         corrections de trajectoire nécessaire.
         :return: Un tuple (Pose, kick) où Pose est la destination du joueur kick est faux (on ne botte pas)
         """
-        # TODO: Améliorer le comportement en ajoutant l'intervalle d'anle correspondant à la largeur du dribleur
+        # TODO: Améliorer le comportement en ajoutant l'intervalle d'anle correspondant à la largeur du dribbleur
         destination_orientation = get_angle(self.game_state.get_player_pose(self.player_id).position,
                                             self.game_state.get_ball_position())
         destination_pose = Pose(self.destination, destination_orientation)

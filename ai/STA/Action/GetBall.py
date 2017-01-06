@@ -10,7 +10,7 @@ from ai.Util.ai_command import AICommand, AICommandType
 __author__ = 'Robocup ULaval'
 
 
-class GrabBall(Action):
+class GetBall(Action):
     """
     Action GrabBall: Déplace le robot afin qu'il prenne contrôle de la balle
     Méthodes :

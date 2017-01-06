@@ -6,9 +6,9 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.Algorithm.Node import Node
 from ai.STA.Strategy.Strategy import Strategy
-from ai.STA.Tactic.GoalKeeper import GoalKeeper
+from ai.STA.Tactic.ProtectGoal import GoalKeeper
 from ai.STA.Tactic.GoToPosition import GoToPosition
-from ai.STA.Tactic.GoStraightTo import GoStraightTo
+from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 
@@ -26,10 +26,10 @@ class TestTransitions(Strategy):
         super().__init__(p_game_state)
 
         self.add_tactic(0, GoalKeeper(self.game_state, 0))
-        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(), 3 * pi / 2)))
-        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(1000, 0), 0)))
-        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(1000, 1000), pi / 2)))
-        self.add_tactic(1, GoStraightTo(self.game_state, 1, Pose(Position(0, 1000), pi)))
+        self.add_tactic(1, GoToPositionNoPathfinder(self.game_state, 1, Pose(Position(), 3 * pi / 2)))
+        self.add_tactic(1, GoToPositionNoPathfinder(self.game_state, 1, Pose(Position(1000, 0), 0)))
+        self.add_tactic(1, GoToPositionNoPathfinder(self.game_state, 1, Pose(Position(1000, 1000), pi / 2)))
+        self.add_tactic(1, GoToPositionNoPathfinder(self.game_state, 1, Pose(Position(0, 1000), pi)))
 
         self.add_condition(1, 0, 1, self.condition)
         self.add_condition(1, 1, 2, self.condition)

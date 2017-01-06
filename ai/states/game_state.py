@@ -125,5 +125,3 @@ class GameState(object, metaclass=Singleton):
         """
         self.last_timestamp = self.timestamp
         self.timestamp = new_timestamp
-
-
