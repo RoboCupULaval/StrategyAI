@@ -48,7 +48,7 @@ class TestGameStateManager(unittest.TestCase):
     def test_update_team(self):
         new_player_pose = Pose.Pose(Position.Position(1000, 1000, 0), 25)
         for i in range(PLAYER_PER_TEAM):
-            self.my_team.move_and_rotate_player(i, new_player_pose)
+            self.my_team.update_player(i, new_player_pose)
             new_player_pose.position += 200
         self.GameStateManager2._update_team(self.my_team, True)
         for i in range(PLAYER_PER_TEAM):
@@ -56,7 +56,7 @@ class TestGameStateManager(unittest.TestCase):
 
         new_player_pose = Pose.Pose(Position.Position(1000, 1000, 0), 25)
         for i in range(PLAYER_PER_TEAM):
-            self.other_team.move_and_rotate_player(i, new_player_pose)
+            self.other_team.update_player(i, new_player_pose)
             new_player_pose.position += 100
         self.GameStateManager2._update_team(self.other_team, False)
         for i in range(PLAYER_PER_TEAM):
@@ -74,12 +74,12 @@ class TestGameStateManager(unittest.TestCase):
 
         new_player_pose = Pose.Pose(Position.Position(1000, 1000, 0), 25)
         for i in range(PLAYER_PER_TEAM):
-            self.my_team.move_and_rotate_player(i, new_player_pose)
+            self.my_team.update_player(i, new_player_pose)
             new_player_pose.position += 200
 
         new_player_pose = Pose.Pose(Position.Position(1000, 1000, 0), 25)
         for i in range(PLAYER_PER_TEAM):
-            self.other_team.move_and_rotate_player(i, new_player_pose)
+            self.other_team.update_player(i, new_player_pose)
             new_player_pose.position += 100
 
         new_game_state = r_GameState(

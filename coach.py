@@ -32,31 +32,28 @@ class Coach(object):
         self.world_state.update(p_game_state)
 
         self.debug_executor.exec()
-        self.module_executor.exec()
         self.play_executor.exec()
+        self.module_executor.exec()
         self.robot_command_executor.exec()
         self.debug_executor.exec()
 
-        self.robot_commands = self.world_state.play_state.ready_to_ship_robot_packet_list
+        self.robot_commands = self.world_state.\
+            play_state.ready_to_ship_robot_packet_list
         if self.mode_debug_active:
-            self.debug_commands = self.world_state.debug_state.to_ui_packet_debug_cmds
+            self.debug_commands = self.world_state.\
+                debug_state.to_ui_packet_debug_cmds
 
         return self.robot_commands, self.debug_commands
 
     def set_team_color(self, p_our_team_colors):
         self.world_state.set_team_color(p_our_team_colors)
 
-    def get_robot_commands(self):
-        return self.robot_commands
-
+    # not used see if we can delete.
     def get_debug_status(self):
         return self.mode_debug_active
 
-    # FIXME only the debug command are accessed through method, the robot_commands are take straight from the variable!
-    def get_debug_commands_and_clear(self):
-        return self.debug_commands
-
-    # Throwback for the last coach! TODO see if we still need to implement them! Or HOW!
+    # Throwback for the last coach! TODO see if we still need to implement
+    # them! Or HOW!
     def halt(self):
         """ Hack pour sync les frames de vision et les itérations de l'IA """
         pass

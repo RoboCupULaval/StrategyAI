@@ -66,9 +66,9 @@ class Strategy(metaclass=ABCMeta):
         :return: Une liste des 6 AICommand à envoyer aux robots. La commande située à l'indice i de la liste doit être
         envoyée au robot i.
         """
-        commands = []
+        commands = {}
         for i in range(PLAYER_PER_TEAM):
-            commands.append(self.graphs[i].exec())
+            commands[i] = self.graphs[i].exec()
         return commands
 
     def __str__(self):

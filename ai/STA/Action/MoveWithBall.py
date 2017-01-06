@@ -1,10 +1,12 @@
 # Under MIT licence, see LICENCE.txt
 from .Action import Action
-from ...Util.types import AICommand
+#from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.Util.ai_command import AICommand, AICommandType
+
 
 __author__ = 'Robocup ULaval'
 
@@ -43,4 +45,4 @@ class MoveWithBall(Action):
                                             self.game_state.get_ball_position())
         destination_pose = Pose(self.destination, destination_orientation)
         kick_strength = 0
-        return AICommand(destination_pose, kick_strength)
+        return AICommand(self.player_id, AICommandType.MOVE, **{"pose_goal": destination_pose})
