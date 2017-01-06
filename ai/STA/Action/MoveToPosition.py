@@ -1,8 +1,9 @@
 # Under MIT license, see LICENSE.txt
 from .Action import Action
-from ...Util.types import AICommand
+# from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.Util.ai_command import AICommand, AICommandType
 
 
 class MoveToPosition(Action):
@@ -36,4 +37,4 @@ class MoveToPosition(Action):
         """
         move_destination = self.destination
         kick_strength = 0
-        return AICommand(move_destination, kick_strength)
+        return AICommand(self.player_id, AICommandType.MOVE, **{"pose_goal": move_destination})

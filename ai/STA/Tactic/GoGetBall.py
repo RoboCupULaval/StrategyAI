@@ -94,8 +94,8 @@ class GoGetBall(Tactic):
     def _generate_move_to(self):
         go_behind = GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position(), self.target.position,
                              DISTANCE_BEHIND)
-        destination = go_behind.exec().move_destination
-        return GoToPosition(self.game_state, self.player_id, destination)
+        destination = go_behind  # .move_destination
+        return destination  # GoToPosition(self.game_state, self.player_id, destination)
 
     def _reset_ttl(self):
         super()._reset_ttl()
