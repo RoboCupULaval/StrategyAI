@@ -47,6 +47,10 @@ DELTA_T = 17 #ms, hack, à éviter
 # Communication information
 DEBUG_RECEIVE_BUFFER_SIZE = 100
 
+# Deadzones
+SPEED_DEAD_ZONE_DISTANCE = 150
+POSITION_DEADZONE = SPEED_DEAD_ZONE_DISTANCE+50
+
 # Radius and angles for tactics
 DISTANCE_BEHIND = ROBOT_RADIUS + 30  # in millimeters
 ANGLE_TO_GRAB_BALL = 1  # in radians; must be large in case ball moves fast
