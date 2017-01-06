@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from .Action import Action
 from ...Util.types import AICommand
-from RULEngine.Util.constant import PLAYER_PER_TEAM
+from RULEngine.Util.constant import PLAYER_PER_TEAM, KICK_MAX_SPD
 
 
 class Kick(Action):
@@ -22,7 +22,7 @@ class Kick(Action):
         assert(isinstance(p_player_id, int))
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert(isinstance(p_force, (int, float)))
-        assert(1 >= p_force >= 0)
+        assert(KICK_MAX_SPD >= p_force >= 0)
         self.player_id = p_player_id
         self.force = p_force
 

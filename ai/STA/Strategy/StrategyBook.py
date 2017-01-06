@@ -8,6 +8,7 @@ from .SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
 from .WeirdmovementStrategy import WeirdmovementStrategy
 from ai.STA.Strategy.TestTransitions import TestTransitions
+from .test_rotateAround import test_rotateAround
 
 
 class StrategyBook(object):
@@ -22,6 +23,8 @@ class StrategyBook(object):
                               'SimpleOffense': SimpleOffense,
                               'HumanControl': HumanControl,
                               'DoNothing': DoNothing,
+                              'TestTransitions': TestTransitions,
+                              "test_rotateAround": test_rotateAround,
                               'WeirdmovementStrategy': WeirdmovementStrategy,
                               'TestTransitions': TestTransitions}
 

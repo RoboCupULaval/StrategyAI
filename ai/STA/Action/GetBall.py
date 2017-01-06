@@ -8,7 +8,7 @@ from RULEngine.Util.constant import PLAYER_PER_TEAM
 __author__ = 'Robocup ULaval'
 
 
-class GrabBall(Action):
+class GetBall(Action):
     """
     Action GrabBall: Déplace le robot afin qu'il prenne contrôle de la balle
     Méthodes :

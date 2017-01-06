@@ -5,7 +5,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 
-class MoveTo(Action):
+class MoveToPosition(Action):
     """
     Action Move_to: Déplace le robot
     Méthodes :

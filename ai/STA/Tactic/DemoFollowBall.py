@@ -2,7 +2,7 @@
 
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import DEFAULT_TIME_TO_LIVE
-from ai.STA.Action.MoveTo import MoveTo
+from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
 from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose
@@ -30,7 +30,7 @@ class DemoFollowBall(Tactic):
 
     def move_to_ball(self):
         self.target = Pose(self.game_state.get_ball_position())
-        move = MoveTo(self.game_state, self.player_id, self.target)
+        move = MoveToPosition(self.game_state, self.player_id, self.target)
 
         if get_distance(self.game_state.get_player_pose(self.player_id).position, self.target.position) < POSITION_DEADZONE + BALL_RADIUS:
             self.next_state = self.halt

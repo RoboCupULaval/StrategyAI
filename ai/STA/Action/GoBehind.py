@@ -13,7 +13,7 @@ __author__ = 'Robocup ULaval'
 
 class GoBehind(Action):
     """
-    Action GoBetween: Déplace le robot au point le plus proche sur la droite, derrière un objet dont la position
+    Action GoBehind: Déplace le robot au point le plus proche sur la droite, derrière un objet dont la position
     est passée en paramètre, de sorte que cet objet se retrouve entre le robot et la seconde position passée en paramètre
     Méthodes :
         exec(self): Retourne la pose où se rendre
@@ -50,23 +50,7 @@ class GoBehind(Action):
         delta_x = self.position2.x - self.position1.x
         delta_y = self.position2.y - self.position1.y
         theta = math.atan2(delta_y, delta_x)
-        """
-        # Calcul des coordonnées derrière la position 1 (destination) selon la position 2
-        # TODO: calculer le "point derriere" optimal au lieu d une distance egale en x et y
-        if delta_x > 0:
-            x = self.position1.x - self.distance_behind * math.cos(theta)
-        elif delta_x < 0:
-            x = self.position1.x + self.distance_behind * math.cos(theta)
-        elif delta_x == 0:
-            x = self.position1.x
 
-        if delta_y > 0:
-            y = self.position1.y - self.distance_behind * math.sin(theta)
-        elif delta_y < 0:
-            y = self.position1.y + self.distance_behind * math.sin(theta)
-        elif delta_y == 0:
-            y = self.position1.y
-        """
         x = self.position1.x - self.distance_behind * math.cos(theta)
         y = self.position1.y - self.distance_behind * math.sin(theta)
         destination_position = Position(x, y)

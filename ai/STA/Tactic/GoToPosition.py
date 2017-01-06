@@ -3,7 +3,7 @@
 import math
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags, DEFAULT_TIME_TO_LIVE
-from ai.STA.Action.MoveTo import MoveTo
+from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
 from ai.states.module_state import NonExistentModule
 from RULEngine.Util.geometry import get_distance, get_angle
@@ -76,8 +76,15 @@ class GoToPosition(Tactic):
         else:
             self.status_flag = Flags.WIP
             self.next_state = self.move_to_position
-        return MoveTo(self.game_state, self.player_id, self.path_target)
+        return MoveToPosition(self.game_state, self.player_id, self.path_target)
 
     def halt(self):
         stop = Idle(self.game_state, self.player_id)
+
+        if get_distance(self.game_state.get_player_pose(self.player_id).position, self.target.position) <= POSITION_DEADZONE:
+            self.next_state = self.halt
+        else:
+            self._init_pathfinder()
+            self.next_state = self.get_next_path_element
+
         return stop
