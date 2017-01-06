@@ -76,9 +76,9 @@ class Framework(object):
         while not self.thread_terminate.is_set():
             # TODO: method extract
             # Mise à jour
-            current_vision_frame = self._acquire_vision_frame()
-            new_image_packet = self.image_transformer.update(current_vision_frame)
-            self.debug_vision._send_packet(new_image_packet.SerializeToString())
+            vision_frame = self._acquire_vision_frame()
+            new_image_packet = self.image_transformer.update(vision_frame)
+            self.debug_vision.send_packet(new_image_packet.SerializeToString())
 
             """
             if self._is_frame_number_different(current_vision_frame):
@@ -102,11 +102,14 @@ class Framework(object):
             else:
                 self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
 
-            self.debug_sender = UIDebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS, 20021)
-            self.debug_receiver = UIDebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
+            self.debug_sender = UIDebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS,
+                                                     20021)
+            self.debug_receiver = \
+                UIDebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
             self.referee = RefereeReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
             self.vision = VisionReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
-            self.debug_vision = UIDebugVisionSender(LOCAL_UDP_MULTICAST_ADDRESS, 10022)
+            self.debug_vision = UIDebugVisionSender(LOCAL_UDP_MULTICAST_ADDRESS,
+                                                    10022)
         else:
             self.stop_game()
 
@@ -134,7 +137,6 @@ class Framework(object):
         self.game = Game(self.referee, self.is_team_yellow == TeamColor.YELLOW_TEAM)
 
         return self.game
-
 
     def update_game_state(self):
         """ Met à jour le **GameState** selon la vision et l'arbitre. """

@@ -12,7 +12,7 @@ class UIDebugVisionSender(object):
         """ Constructeur """
         self.server = udp_socket(host, port)
 
-    def _send_packet(self, p_packet):
+    def send_packet(self, p_packet):
         """ Envoi un seul paquet. """
         try:
             self.server.send(p_packet)
