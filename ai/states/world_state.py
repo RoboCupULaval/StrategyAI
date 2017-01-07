@@ -19,10 +19,13 @@ class WorldState:
             self.debug_interface = DebugInterface()
 
     def update(self, game_state):
-        self.game_state.update(game_state)
+        # self.game_state.update(game_state)
 
         if self.mode_debug_active:
             self.debug_state.update(game_state.debug)
 
     def set_team_color(self, p_our_team_color):
         self.game_state.set_team_color(p_our_team_color)
+
+    def set_reference(self, game_reference):
+        self.game_state.set_reference(game_reference)

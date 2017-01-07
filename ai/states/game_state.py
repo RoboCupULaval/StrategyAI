@@ -14,10 +14,11 @@ from ai.Util.singleton import Singleton
 class GameState(object, metaclass=Singleton):
 
     def __init__(self, is_team_yellow=False):
-        self.our_team_color = is_team_yellow
-        self.field = RULEngine.Game.Field.Field(RULEngine.Game.Ball.Ball())
-        self.my_team = RULEngine.Game.Team.Team(is_team_yellow)
-        self.other_team = RULEngine.Game.Team.Team(not is_team_yellow)
+        self.game = None
+        self.our_team_color = None
+        self.field = None
+        self.my_team = None
+        self.other_team = None
         self.timestamp = 0
         self.last_timestamp = 0
         self.debug_information_in = []
@@ -79,13 +80,20 @@ class GameState(object, metaclass=Singleton):
     def set_team_color(self, p_our_team_color):
         self.our_team_color = p_our_team_color
 
+    def set_reference(self, game_reference):
+        self.game = game_reference
+        self.field = self.game.field
+        self.my_team = self.game.friends
+        self.other_team = self.game.enemies
+
     def _update_ball_position(self, new_ball_position):
         """
             Met à jour la position de la balle
             :param new_ball_position: Nouvelles position de la balle, de type Position
         """
         try:
-            self.field.move_ball(new_ball_position, self.timestamp - self.last_timestamp)
+            self.field.move_ball(new_ball_position, self.timestamp -
+                                 self.last_timestamp)
         except ZeroDivisionError:
             self.field.ball._position = new_ball_position
 
