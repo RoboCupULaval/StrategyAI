@@ -31,6 +31,7 @@ from RULEngine.Util.constant import TeamColor
 from RULEngine.Util.exception import StopPlayerError
 from RULEngine.Util.team_color_service import TeamColorService
 from RULEngine.Util.game_world import GameWorld
+from RULEngine.Util.image_transformer import ImageTransformer
 
 # TODO inquire about those constants (move, utility)
 LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
@@ -82,6 +83,9 @@ class Framework(object):
         self.last_cmd_time = time.time()
         self.robots_pi = [PI(), PI(), PI(), PI(), PI(), PI()]
 
+        # VISION
+        self.image_transformer = ImageTransformer()
+
         # ia couplage
         self.ia_coach_mainloop = None
         self.ia_coach_initializer = None
@@ -122,7 +126,11 @@ class Framework(object):
         while not self.thread_terminate.is_set():
             # TODO: method extract
             # Mise à jour
-            current_vision_frame = self._acquire_vision_frame()
+            vision_frame = self._acquire_vision_frame()
+            new_image_packet = self.image_transformer.update(vision_frame)
+            self.debug_vision.send_packet(new_image_packet.SerializeToString())
+
+            """
             if self._is_frame_number_different(current_vision_frame):
                 self.update_game_state()
                 self.update_players_and_ball(current_vision_frame)
@@ -133,6 +141,7 @@ class Framework(object):
                 # Communication
                 self._send_robot_commands(robot_commands)
                 self._send_debug_commands(debug_commands)
+            """
 
     def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer,
                    team_color=TeamColor.BLUE_TEAM, async=False):
@@ -205,7 +214,7 @@ class Framework(object):
             self.uidebug_command_receiver.receive_command()
 
     def _acquire_vision_frame(self):
-        return self.vision.get_latest_frame()
+        return self.vision.pop_frames()
 
     def stop_game(self):
         """
