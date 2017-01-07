@@ -8,14 +8,15 @@ from .Ball import Ball
 from .Field import Field
 
 
-class Game():
-    def __init__(self, referee, is_team_yellow):
+class Game:
+    def __init__(self, referee, team_color):
         self.ball = Ball()
         self.field = Field(self.ball)
         self.referee = referee
+        self.team_color = team_color
         self.blue_team, self.yellow_team = self.create_teams()
 
-        if is_team_yellow:
+        if team_color == 0:
             self.friends = self.yellow_team
             self.enemies = self.blue_team
         else:
