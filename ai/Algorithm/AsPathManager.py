@@ -59,12 +59,36 @@ class AsPathManager(Pathfinder):
             calcule toutes les paths activés
         :return:
         """
-        team = self.ws.game_state.my_team
-        commands = self.ws.play_state.current_ai_commands
-        nbRobot = len(team.players)
 
-        for i in range(0, nbRobot, 1):
-            dest, kick = commands[i]
+        game_state = self.ws.game_state
+        commands = self.ws.play_state.current_ai_commands
+        keyToCalculate = []
+        startPosList = []
+        endPosList = []
+        obstacleList = []
+
+        for key, command in commands.items():
+            if (command.pathfinder_on):
+                keyToCalculate.append(key)
+                position = game_state.get_player_position(command.robot_id)
+                startPosList.append(AsPosition(position.x, position.y))
+                position = command.pose_goal.position
+                endPosList.append(AsPosition(position.x, position.y))
+
+        if (len(keyToCalculate) > 0):
+
+            opponentTeam = game_state.other_team.players
+            for id in opponentTeam:
+                position = game_state.get_player_position(id, False)
+                obstacleList.append(AsPosition(position.x, position.y))
+
+            allPath = self.getAllAsPath(startPosList, endPosList, obstacleList)
+
+            for i in range(0, len(keyToCalculate), 1):
+                AsPosition = allPath[i][0]
+                commands[keyToCalculate[i]].pose_goal.position.x = AsPosition.x
+                commands[keyToCalculate[i]].pose_goal.position.y = AsPosition.y
+
 
     def get_path(self, robot_id=None, target=None):
         """
