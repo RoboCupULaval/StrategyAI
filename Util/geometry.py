@@ -326,51 +326,49 @@ def get_first_to_arrive(distance1: float,
         return 1 if time1 < time2 else 2
 
 
-def angle_to_ball_is_tolerated(player_position: Position,
-                               ball_position: Position,
-                               target_position:
+def isFacingPointAndTarget(player_position: Position,
+                           point_position: Position,
+                           target_position:
                                Position,
-                               tolerated_angle: float) -> bool:
+                           tolerated_angle: float) -> bool:
     """
-        Détermine si le joueur est capable de botter la balle à la destination
-        désirée. On assume que le joueur a la balle.
+        Détermine si l'angle entre le joueur et le point est suffisamment proche
+        de celui du point à la cible. En d'autres mots, lorsqu'utilisé avec la balle
+        comme point, on détermine si le joueur va botter la balle à sa cible.
+        Dans ce cas, la stratégie doit assumer que le joueur est suffisamment
+        près de la balle.
         Args:
             player_position: La position du joueur
-            ball_position: La position de la balle
+            point_position: La position du point (possiblement la balle)
             target_position: La position où le joueur veut botter la balle
             tolerated_angle: Angle en radians pour que le botter soit possible
         Returns:
             Si le joueur est capable de faire le botté ou non.
     """
-    assert isinstance(ball_position, Position), "ball_position is not a Position"
+    assert isinstance(point_position, Position), "ball_position is not a Position"
     assert isinstance(player_position, Position), "player_position is not a Position"
     assert isinstance(target_position, Position), "target_position is not a Position"
     assert isinstance(tolerated_angle, (int, float)), "tolerated_angle is neither a int nor a float"
 
-    angle_player_to_ball = get_angle(player_position, ball_position)
-    angle_ball_to_target = get_angle(ball_position, target_position)
+    angle_player_to_ball = get_angle(player_position, point_position)
+    angle_ball_to_target = get_angle(point_position, target_position)
     angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
-
     return angle_difference < tolerated_angle
 
 
-def get_required_kick_force(position1: Position, position2: Position):
-    """
-        Calcul la force nécessaire pour que le botteur du joueur puisse envoyer
-        la balle à destination. On assume que les joueur est capable de botter
-        la balle
-        Args:
-            position1: La position du joueur
-            position2: La destination
-        Returns:
-            La force nécessaire, en mm/s.
-    """
-    assert isinstance(position1, Position)
-    assert isinstance(position2, Position)
-    distance = get_distance(position1, position2)
-    max_field_distance_possible = m.sqrt((FIELD_X_RIGHT - FIELD_X_LEFT)**2 +
-                                         (FIELD_Y_TOP - FIELD_Y_BOTTOM)**2)
+def rotate_point_around_origin(point,origin,angle):
+    sine = m.sin(angle)
+    cos = m.cos(angle)
 
-    kick_force = distance * KICK_MAX_SPD / max_field_distance_possible
-    return kick_force
+    point.x -= origin.x
+    point.y -= origin.y
 
+    new_x = point.x * cos - point.y * sine
+    new_y = point.x * sine + point.y * cos
+
+    new_x += origin.x
+    new_y += origin.y
+
+    new_point = Position(new_x,new_y)
+
+    return new_point
