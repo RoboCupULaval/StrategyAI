@@ -4,7 +4,7 @@ from ..Util.Vector import Vector
 from ..Util.constant import DELTA_T
 
 
-class Player():
+class Player:
     def __init__(self, team, id):
         self.id = id
         self.team = team
