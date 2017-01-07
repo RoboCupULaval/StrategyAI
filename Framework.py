@@ -194,7 +194,7 @@ class Framework(object):
         )
 
     def _acquire_vision_frame(self):
-        return self.vision.get_latest_frame()
+        return self.vision.pop_frames()
 
     def stop_game(self):
         """

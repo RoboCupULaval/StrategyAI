@@ -11,55 +11,50 @@ class ImageTransformer(object):
     def __init__(self):
         # dict keys=robot_id, values=array of size 2 with at pos 0 an int <=2
         # and at pos 1 the position to
-        self.blue_last_position = {}
-        self.yellow_last_position = {}
-        self.frame_number = 1
+        self.blue_position = {}
+        self.yellow_position = {}
+        self.ball_position = ()
+        self.camera_packet = {}
+        self.frame_number = 0
 
-    def update(self, packet):
+    def update(self, packets):
         
-        blue_team = packet.detection.robots_blue
-        yellow_team = packet.detection.robots_yellow
+        blue_team = packets.detection.robots_blue
+        yellow_team = packets.detection.robots_yellow
         new_image = VisionFrame()
-        new_vision_packet = self.create_ssl_packet(packet)
 
-        # pass a frame by changing the
-        for robot in self.blue_last_position.values():
-            if robot[0] > 0:
-                robot[0] -= 1
-
-        for robot in self.yellow_last_position.values():
-            if robot[0] > 0:
-                robot[0] -= 1
+        new_vision_packet = self.create_default_ssl_packet()
+        self.add_ball_info_to_packet(packets, new_vision_packet)
 
         # player in blue team position corrected
         for player in blue_team:
-            if player.robot_id in self.blue_last_position.keys():
-                last_position = self.blue_last_position[player.robot_id][1]
+            if player.robot_id in self.blue_position.keys():
+                last_position = self.blue_position[player.robot_id][1]
                 current_position = Position(player.x, player.y)
-                self.blue_last_position[player.robot_id][1] = \
+                self.blue_position[player.robot_id][1] = \
                     self.point_milieu(last_position, current_position)
-                self.blue_last_position[player.robot_id][0] = 2
+                self.blue_position[player.robot_id][0] = 2
             else:
-                self.blue_last_position[player.robot_id] = [None] * 2
-                self.blue_last_position[player.robot_id][1] = \
+                self.blue_position[player.robot_id] = [None] * 2
+                self.blue_position[player.robot_id][1] = \
                     Position(player.x, player.y)
-                self.blue_last_position[player.robot_id][0] = 2
+                self.blue_position[player.robot_id][0] = 2
 
         # player in yellow team position corrected
         for player in yellow_team:
-            if player.robot_id in self.yellow_last_position.keys():
-                last_position = self.yellow_last_position[player.robot_id][1]
+            if player.robot_id in self.yellow_position.keys():
+                last_position = self.yellow_position[player.robot_id][1]
                 current_position = Position(player.x, player.y)
-                self.yellow_last_position[player.robot_id][1] = \
+                self.yellow_position[player.robot_id][1] = \
                     self.point_milieu(last_position, current_position)
-                self.yellow_last_position[player.robot_id][0] = 2
+                self.yellow_position[player.robot_id][0] = 2
             else:
-                self.yellow_last_position[player.robot_id] = [None] * 2
-                self.yellow_last_position[player.robot_id][1] = \
+                self.yellow_position[player.robot_id] = [None] * 2
+                self.yellow_position[player.robot_id][1] = \
                     Position(player.x, player.y)
-                self.yellow_last_position[player.robot_id][0] = 2
+                self.yellow_position[player.robot_id][0] = 2
 
-        for key, player in self.blue_last_position.items():
+        for key, player in self.blue_position.items():
             if player[0] > 0:
                 packet_robot = new_vision_packet.detection.robots_blue.add()
                 packet_robot.confidence = 0.999
@@ -69,7 +64,7 @@ class ImageTransformer(object):
                 packet_robot.pixel_x = 0.
                 packet_robot.pixel_y = 0.
 
-        for key, player in self.yellow_last_position.items():
+        for key, player in self.yellow_position.items():
             if player[0] > 0:
                 packet_robot = new_vision_packet.detection.robots_yellow.add()
                 packet_robot.confidence = 0.999
@@ -81,25 +76,25 @@ class ImageTransformer(object):
 
         return new_vision_packet
 
-    def create_ssl_packet(self, packet):
+    def create_default_ssl_packet(self):
         pb_sslwrapper = ssl_wrapper.SSL_WrapperPacket()
-        # not sure if the frame_number is useful here
-        pb_sslwrapper.detection.frame_number = self.frame_number
+
+        # making sure we increment the internal frame number
         self.frame_number += 1
-        # those fields are obligatory for the vision packet
+        # those fields are obligatory for the detection part of the packet
+        pb_sslwrapper.detection.frame_number = self.frame_number
         pb_sslwrapper.detection.camera_id = 0
         pb_sslwrapper.detection.t_capture = 0
         pb_sslwrapper.detection.t_sent = 0
 
-        ball = pb_sslwrapper.detection.balls.add()
-        ball.x = 0     # packet.detection.balls[0].x
-        ball.y = 15  # packet.detection.balls[0].y
-        # i think we can ignore those values, but they are mandatory.
-        ball.confidence = 0.999
-        ball.pixel_x = 0
-        ball.pixel_y = 0
-
         return pb_sslwrapper
+
+    def add_ball_info_to_packet(self, packets_info, packet_to_add):
+        pass
+
+    def update_camera_packets(self, packets):
+        for packet in packets:
+            pass
 
     @staticmethod
     def point_milieu(position1, position2):
