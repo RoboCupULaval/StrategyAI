@@ -39,7 +39,7 @@ class Framework(object):
         mettre en place l'état du jeu.
     """
 
-    def __init__(self, is_team_yellow=False):
+    def __init__(self, team_color=TeamColor.BLUE_TEAM):
         """ Constructeur de la classe, établis les propriétés de bases. """
         # TODO: refactor pour avoir des objets qui contiennent les petits
         # détails d'implémentations (12/7 fields)
@@ -61,7 +61,7 @@ class Framework(object):
         self.ia_coach_mainloop = None
         # callable pour mettre la couleur de l'équipe dans l'IA lors de la création de la partie (create_game)
         self.ia_coach_initializer = None
-        self.is_team_yellow = self._sanitize_team_color(is_team_yellow)
+        self.team_color = team_color
 
     def game_thread_main_loop(self):
         """ Fonction exécuté et agissant comme boucle principale. """
@@ -90,9 +90,9 @@ class Framework(object):
         """
 
         self.referee = Referee()
-        self.ia_coach_initializer(self.is_team_yellow)
+        self.ia_coach_initializer(self.team_color)
 
-        self.game = Game(self.referee, self.is_team_yellow == TeamColor.YELLOW_TEAM)
+        self.game = Game(self.referee, self.team_color == TeamColor.YELLOW_TEAM)
 
         return self.game
 
@@ -158,8 +158,8 @@ class Framework(object):
         # on peut eventuellement demarrer une autre instance du moteur
         # TODO: method extract -> _init_communication_serveurs()
         if not self.running_thread:
-            if serial:
-                self.command_sender = SerialCommandSender()
+            if serial != 'disabled':
+                self.command_sender = SerialCommandSender(comm_type=serial)
             else:
                 self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
 
@@ -192,7 +192,7 @@ class Framework(object):
         self.running_thread.join()
         self.thread_terminate.clear()
         try:
-            if self.is_team_yellow == TeamColor.YELLOW_TEAM:
+            if self.team_color == TeamColor.YELLOW_TEAM:
                 team = self.game.yellow_team
             else:
                 team = self.game.blue_team
@@ -229,9 +229,3 @@ class Framework(object):
     def _sigint_handler(self, signum, frame):
         self.stop_game()
 
-    @staticmethod
-    def _sanitize_team_color(p_is_team_yellow):
-        if p_is_team_yellow:
-            return TeamColor.YELLOW_TEAM
-        else:
-            return TeamColor.BLUE_TEAM
