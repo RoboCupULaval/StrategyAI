@@ -45,8 +45,9 @@ class Coach(object):
 
         return self.robot_commands, self.debug_commands
 
-    def set_team_color(self, p_our_team_colors):
+    def set_reference(self, p_our_team_colors, game_reference):
         self.world_state.set_team_color(p_our_team_colors)
+        self.world_state.set_reference(game_reference)
 
     # not used see if we can delete.
     def get_debug_status(self):
