@@ -11,10 +11,10 @@ class TeamColorService:
 
     def __init__(self, team_color):
 
-        if team_color == 'yellow':
+        if team_color == TeamColor.YELLOW_TEAM:
             self.OUR_TEAM_COLOR = TeamColor.YELLOW_TEAM
             self.ENEMY_TEAM_COLOR = TeamColor.BLUE_TEAM
-        elif team_color == 'blue':
+        elif team_color == TeamColor.BLUE_TEAM:
             self.OUR_TEAM_COLOR = TeamColor.BLUE_TEAM
             self.ENEMY_TEAM_COLOR = TeamColor.YELLOW_TEAM
         else:

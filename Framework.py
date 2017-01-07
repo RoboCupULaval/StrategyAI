@@ -68,6 +68,7 @@ class Framework(object):
         # callable pour mettre la couleur de l'équipe dans l'IA
         # lors de la création de la partie (create_game)
         self.ia_coach_initializer = None
+        print(str(team_color) + "###DEBUG###")
         self.team_color_service = TeamColorService(team_color)
 
     def game_thread_main_loop(self):
