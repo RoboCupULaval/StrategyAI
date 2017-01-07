@@ -60,6 +60,12 @@ class Strategy(metaclass=ABCMeta):
                          current_tactic.current_state.__name__, current_tactic.target))
         return state
 
+    def add_tactic(self, robot_id, tactic):
+        self.graphs[robot_id].add_node(Node(tactic))
+
+    def add_condition(self, robot_id, start_node, end_node, condition):
+        self.graphs[robot_id].add_vertex(start_node,end_node,condition)
+
     def exec(self):
         """
         Appelle la méthode exec de chacune des Tactics assignées aux robots.

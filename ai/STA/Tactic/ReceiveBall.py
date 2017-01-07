@@ -1,10 +1,12 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Action.MoveTo import MoveTo
+from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
+from ai.STA.Tactic import tactic_constants
+from ai.Util.ball_possession import hasBallFacingTarget
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ball_possession import player_grabbed_ball
+from ai.Util.ball_possession import hasBall
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.constant import PLAYER_PER_TEAM
@@ -12,7 +14,7 @@ from RULEngine.Util.constant import PLAYER_PER_TEAM
 __author__ = 'RoboCupULaval'
 
 
-class ReceivePass(Tactic):
+class ReceiveBall(Tactic):
     # TODO : Ajouter un état permettant de faire une translation pour attraper la balle si celle-ci se dirige à côté
     """
     méthodes:
@@ -35,7 +37,7 @@ class ReceivePass(Tactic):
         self.player_id = player_id
 
     def rotate_towards_ball(self):
-        if player_grabbed_ball(self.game_state, self.player_id):
+        if hasBall(self.game_state, self.player_id):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
             return Idle(self.game_state, self.player_id)
@@ -46,7 +48,7 @@ class ReceivePass(Tactic):
             rotation_towards_ball = get_angle(current_position, ball_position)
             pose_towards_ball = Pose(current_position, rotation_towards_ball)
 
-            move_to = MoveTo(self.game_state, self.player_id, pose_towards_ball)
+            move_to = MoveToPosition(self.game_state, self.player_id, pose_towards_ball)
             self.next_state = self.rotate_towards_ball
             self.status_flag = Flags.WIP
             return move_to
