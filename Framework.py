@@ -2,7 +2,7 @@
 """
     Point de départ du moteur pour l'intelligence artificielle. Construit les
     objets nécessaires pour maintenir l'état du jeu, acquiert les frames de la
-    vision et construit la stratégie. Ensuite, la stratégie est exécutée et un
+    vision et appelle la stratégie. Ensuite, la stratégie est exécutée et un
     thread est lancé qui contient une boucle qui se charge de l'acquisition des
     frames de la vision. Cette boucle est la boucle principale et appel le
     prochain état du **Coach**.
@@ -10,8 +10,8 @@
 import signal
 import threading
 import time
-from collections import namedtuple
 
+# Communication
 from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.serial_command_sender \
@@ -23,53 +23,95 @@ from RULEngine.Communication.sender.uidebug_command_sender \
     import UIDebugCommandSender
 from RULEngine.Communication.receiver.uidebug_command_receiver \
     import UIDebugCommandReceiver
+
+# Game objects
 from RULEngine.Game.Game import Game
 from RULEngine.Game.Referee import Referee
 from RULEngine.Util.constant import TeamColor
 from RULEngine.Util.exception import StopPlayerError
 from RULEngine.Util.team_color_service import TeamColorService
+from RULEngine.Util.game_world import GameWorld
 
+# TODO inquire about those constants (move, utility)
 LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
 UI_DEBUG_MULTICAST_ADDRESS = "127.0.0.1"
 CMD_TIME_DELTA = 0.030
-
 CMD_DELTA_TIME = 0.030
-
-GameState = namedtuple('GameState', ['field', 'referee', 'friends',
-                                     'enemies', 'timestamp', 'debug'])
 
 
 class Framework(object):
     """
-        La classe contient la logique nécessaire pour démarrer une logique et
-        mettre en place l'état du jeu.
+        La classe contient la logique nécessaire pour communiquer avec
+        les différentes parties(simulation, vision, uidebug et/ou autres),
+         maintenir l'état du monde (jeu, referree, debug, etc...) et appeller
+         l'ia.
     """
 
-    def __init__(self, team_color=TeamColor.BLUE_TEAM):
-        """ Constructeur de la classe, établis les propriétés de bases. """
-        # TODO: refactor pour avoir des objets qui contiennent les petits
-        # détails d'implémentations (12/7 fields)
-        self.command_sender = None
-        self.debug_sender = None
-        self.debug_receiver = None
+    def __init__(self, serial=False, redirect=False):
+        """ Constructeur de la classe, établis les propriétés de bases et
+        construit les objets qui sont toujours necéssaire à son fonctionnement
+        correct.
+        """
+        # thread
+        self.ia_running_thread = None
+        self.thread_terminate = threading.Event()
+
+        # Communication
+        self.robot_command_sender = None
+        self.vision = None
+        self.referee_command_receiver = None
+        self.uidebug_command_sender = None
+        self.uidebug_command_receiver = None
+        self.uidebug_vision_sender = None
+
+        self._init_communication(serial=serial, redirect=redirect)
+
+        # Game elements
+        self.game_world = None
         self.game = None
         self.ai_coach = None
         self.referee = None
-        self.running_thread = False
+        self.team_color_service = None
+
+        self._create_game_world()
+
+        # time
         self.last_frame_number = 0
-        self.thread_terminate = threading.Event()
         self.times = 0
         self.last_time = 0
-        self.vision = None
         self.last_cmd_time = time.time()
         self.robots_pi = [PI(), PI(), PI(), PI(), PI(), PI()]
 
+        # ia couplage
         self.ia_coach_mainloop = None
-        # callable pour mettre la couleur de l'équipe dans l'IA
-        # lors de la création de la partie (create_game)
         self.ia_coach_initializer = None
-        print(str(team_color) + "###DEBUG###")
-        self.team_color_service = TeamColorService(team_color)
+
+    def _init_communication(self, serial=False, debug=True, redirect=False):
+        # first make sure we are not already running
+        if self.ia_running_thread is None:
+            # where do we send the robots command (serial for bluetooth and rf)
+            if serial != 'disabled':
+                self.robot_command_sender = \
+                    SerialCommandSender(comm_type=serial)
+            else:
+                self.robot_command_sender = GrSimCommandSender("127.0.0.1",
+                                                               20011)
+
+            # do we use the  UIDebug?
+            if debug:
+                self.uidebug_command_sender = \
+                    UIDebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS, 20021)
+                self.uidebug_command_receiver = \
+                    UIDebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
+                if redirect:
+                    # TODO merge cameraWork in this to make this work!
+                    self.uidebug_vision_sender = None
+
+            self.referee_command_receiver =\
+                RefereeReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
+            self.vision = VisionReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
+        else:
+            self.stop_game()
 
     def game_thread_main_loop(self):
         """ Fonction exécuté et agissant comme boucle principale. """
@@ -84,58 +126,50 @@ class Framework(object):
             if self._is_frame_number_different(current_vision_frame):
                 self.update_game_state()
                 self.update_players_and_ball(current_vision_frame)
-                robot_commands, debug_commands = self.update_strategies()
+                robot_commands, debug_commands = self.ia_coach_mainloop()
+                # TODO make method call instead
+                self.game_world.debug_info.clear()
 
                 # Communication
                 self._send_robot_commands(robot_commands)
                 self._send_debug_commands(debug_commands)
 
     def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer,
-                   async=False, serial=False):
+                   team_color=TeamColor.BLUE_TEAM, async=False):
         """ Démarrage du moteur de l'IA initial. """
 
-        # on peut eventuellement demarrer une autre instance du moteur
-        # TODO: method extract -> _init_communication_serveurs()
-        if not self.running_thread:
-            if serial != 'disabled':
-                self.command_sender = SerialCommandSender(comm_type=serial)
-            else:
-                self.command_sender = GrSimCommandSender("127.0.0.1", 20011)
-
-            self.debug_sender = UIDebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS,
-                                                     20021)
-            self.debug_receiver = UIDebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS,
-                                                         10021)
-            self.referee = RefereeReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
-            self.vision = VisionReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
-        else:
-            self.stop_game()
-
+        # IA COUPLING
         self.ia_coach_mainloop = p_ia_coach_mainloop
         self.ia_coach_initializer = p_ia_coach_initializer
-        self.create_game()
 
+        # GAME_WORLD TEAM ADJUSTMENT
+        self.game_world.game.set_our_team_color(team_color)
+        self.team_color_service = TeamColorService(team_color)
+        self.game_world.team_color_svc = self.team_color_service
+        print(str(team_color) + "###DEBUG###")
+
+        self.ia_coach_initializer(self.game_world)
+
+        # THREAD STARTING POINT
+        # TODO A quoi sert cette prochaine ligne, elle à l'air mal utilisé
+        # s.v.p. reviser
         signal.signal(signal.SIGINT, self._sigint_handler)
-        self.running_thread = threading.Thread(target=self.game_thread_main_loop)
-        self.running_thread.start()
-
+        self.ia_running_thread = \
+            threading.Thread(target=self.game_thread_main_loop)
+        self.ia_running_thread.start()
         if not async:
-            self.running_thread.join()
+            self.ia_running_thread.join()
 
-    def create_game(self):
+    def _create_game_world(self):
         """
-            Créé l'arbitre et la Game. De plus initialize(team color)
-            l'IA(à être refractorer out - MGL 2016/11/08).
-
-            :return: Game, le **GameState**
+            Créé le GameWorld pour contenir les éléments d'une partie normale:
+             l'arbitre, la Game (Field, teams, players).
         """
 
         self.referee = Referee()
-        self.game = Game(self.referee, self.team_color_service.OUR_TEAM_COLOR)
-        self.ia_coach_initializer(self.team_color_service.OUR_TEAM_COLOR,
-                                  self.game)
-
-        return self.game
+        self.game = Game()
+        self.game.set_referee(self.referee)
+        self.game_world = GameWorld(self.game)
 
     def update_game_state(self):
         """ Met à jour le **GameState** selon la vision et l'arbitre. """
@@ -164,34 +198,11 @@ class Framework(object):
         # this_time, time_delta, 1/time_delta))
         return time_delta
 
-    def update_strategies(self):
-        """ Change l'état du **Coach** """
-
-        game_state = self.get_game_state()
-
-        # FIXME: il y a probablement un refactor à faire avec ça
-        # state = self.referee.command.name
-        state = "NORMAL_START"
-        if state == "NORMAL_START":
-            return self.ia_coach_mainloop(game_state)
-
-        elif state == "STOP":
-            # TODO implement
-            pass
-            # self.ai_coach.stop(game_state)
-
     def get_game_state(self):
         """ Retourne le **GameState** actuel. *** """
 
-        game = self.game
-        return GameState(
-            field=game.field,
-            referee=game.referee,
-            friends=game.friends,
-            enemies=game.enemies,
-            timestamp=self.last_time,
-            debug=self.debug_receiver.receive_command()
-        )
+        self.game_world.debug_info += \
+            self.uidebug_command_receiver.receive_command()
 
     def _acquire_vision_frame(self):
         return self.vision.get_latest_frame()
@@ -201,17 +212,14 @@ class Framework(object):
             Nettoie les ressources acquises pour pouvoir terminer l'exécution.
         """
         self.thread_terminate.set()
-        self.running_thread.join()
+        self.ia_running_thread.join()
         self.thread_terminate.clear()
         try:
-            if self.team_color_service.OUR_TEAM_COLOR == TeamColor.YELLOW_TEAM:
-                team = self.game.yellow_team
-            else:
-                team = self.game.blue_team
+            team = self.game.friends
 
             for player in team.players.values():
                 command = Stop(player)
-                self.command_sender.send_command(command)
+                self.robot_command_sender.send_command(command)
         except:
             print("Could not stop players")
             raise StopPlayerError("Au nettoyage il a été impossible d'arrêter\
@@ -229,15 +237,15 @@ class Framework(object):
             self.last_cmd_time = cmd_time
 
             for idx, command in enumerate(commands):
-                pi_cmd = self.robots_pi[idx].update_pid_and_return_speed_command(
-                    command)
+                pi_cmd = self.robots_pi[idx].\
+                    update_pid_and_return_speed_command(command)
                 command.pose = pi_cmd
-                self.command_sender.send_command(command)
+                self.robot_command_sender.send_command(command)
 
     def _send_debug_commands(self, debug_commands):
         """ Envoie les commandes de debug au serveur. """
         if debug_commands:
-            self.debug_sender.send_command(debug_commands)
+            self.uidebug_command_sender.send_command(debug_commands)
 
     def _sigint_handler(self, signum, frame):
         self.stop_game()
