@@ -67,8 +67,10 @@ class AsPathManager(Pathfinder):
         endPosList = []
         obstacleList = []
 
+        print(str(commands))
         for key, command in commands.items():
             if (command.pathfinder_on):
+                print("PathFinder on!!!")
                 keyToCalculate.append(key)
                 position = game_state.get_player_position(command.robot_id)
                 startPosList.append(AsPosition(position.x, position.y))
@@ -85,9 +87,10 @@ class AsPathManager(Pathfinder):
             allPath = self.getAllAsPath(startPosList, endPosList, obstacleList)
 
             for i in range(0, len(keyToCalculate), 1):
-                AsPosition = allPath[i][0]
-                commands[keyToCalculate[i]].pose_goal.position.x = AsPosition.x
-                commands[keyToCalculate[i]].pose_goal.position.y = AsPosition.y
+                position = allPath[i][0]
+                commands[keyToCalculate[i]].pose_goal.position.x = position.x
+                commands[keyToCalculate[i]].pose_goal.position.y = position.y
+                print("robot : " + str(keyToCalculate[i]) + "pos changed from " + str(startPosList[i]) + "for " + str(position))
 
 
     def get_path(self, robot_id=None, target=None):

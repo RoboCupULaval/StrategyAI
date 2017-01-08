@@ -5,6 +5,7 @@ from ai.executors.debug_executor import DebugExecutor
 from ai.executors.module_executor import ModuleExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.executors.command_executor import CommandExecutor
+from ai.Algorithm.AsPathManager import AsPathManager
 
 # FIXME this thing!
 TIMESTAMP_MINIMAL_DELTA_60_FPS = 0.017
@@ -25,23 +26,48 @@ class Coach(object):
         self.play_executor = PlayExecutor(self.world_state)
         self.robot_command_executor = CommandExecutor(self.world_state)
 
+        #test!!!
+        self.AsPathFinder = AsPathManager(self.world_state)
+
     def main_loop(self, p_game_state):
         self.robot_commands.clear()
         self.debug_commands.clear()
 
+        #xxxxxxxxxxxxxx
+        print("HERE11111 " + str(self.world_state.play_state.current_ai_commands))
+
         self.world_state.update(p_game_state)
+
+        # xxxxxxxxxxxxxx
+        print("HERE22222 " + str(self.world_state.play_state.current_ai_commands))
 
         self.debug_executor.exec()
         self.play_executor.exec()
+
+        # xxxxxxxxxxxxxx
+        print("HERE33333 " + str(self.world_state.play_state.current_ai_commands))
+
         self.module_executor.exec()
+
+        # xxxxxxxxxxxxxx
+        print("HERE44444 " + str(self.world_state.play_state.current_ai_commands))
+
+        self.AsPathFinder.update()
+
         self.robot_command_executor.exec()
         self.debug_executor.exec()
+
+        # xxxxxxxxxxxxxx
+        print("HERE55555 " + str(self.world_state.play_state.current_ai_commands))
 
         self.robot_commands = self.world_state.\
             play_state.ready_to_ship_robot_packet_list
         if self.mode_debug_active:
             self.debug_commands = self.world_state.\
                 debug_state.to_ui_packet_debug_cmds
+
+        # xxxxxxxxxxxxxx
+        print("HERE66666 " + str(self.world_state.play_state.current_ai_commands))
 
         return self.robot_commands, self.debug_commands
 
