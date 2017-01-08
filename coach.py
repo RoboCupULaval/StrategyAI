@@ -26,48 +26,32 @@ class Coach(object):
         self.play_executor = PlayExecutor(self.world_state)
         self.robot_command_executor = CommandExecutor(self.world_state)
 
-        #test!!!
-        self.AsPathFinder = AsPathManager(self.world_state)
+        #Declaration du pathfinder pour l'appel dans la main loop, seulement pour tester
+        #pathfinder_on doit etre a true par default pour tester rapidement
+        #self.AsPathFinder = AsPathManager(self.world_state)
 
     def main_loop(self, p_game_state):
         self.robot_commands.clear()
         self.debug_commands.clear()
-
-        #xxxxxxxxxxxxxx
-        print("HERE11111 " + str(self.world_state.play_state.current_ai_commands))
-
         self.world_state.update(p_game_state)
-
-        # xxxxxxxxxxxxxx
-        print("HERE22222 " + str(self.world_state.play_state.current_ai_commands))
 
         self.debug_executor.exec()
         self.play_executor.exec()
-
-        # xxxxxxxxxxxxxx
-        print("HERE33333 " + str(self.world_state.play_state.current_ai_commands))
-
         self.module_executor.exec()
 
-        # xxxxxxxxxxxxxx
-        print("HERE44444 " + str(self.world_state.play_state.current_ai_commands))
-
-        self.AsPathFinder.update()
+        #recalcul les paths des commands avec pathfinder on. Remplace la position direct dans la commande
+        #cela a pour effet de mettre le flag des tactic a success sans que le robot se soit reelment rendu
+        #a la position desirer
+        #self.AsPathFinder.update()
 
         self.robot_command_executor.exec()
         self.debug_executor.exec()
-
-        # xxxxxxxxxxxxxx
-        print("HERE55555 " + str(self.world_state.play_state.current_ai_commands))
 
         self.robot_commands = self.world_state.\
             play_state.ready_to_ship_robot_packet_list
         if self.mode_debug_active:
             self.debug_commands = self.world_state.\
                 debug_state.to_ui_packet_debug_cmds
-
-        # xxxxxxxxxxxxxx
-        print("HERE66666 " + str(self.world_state.play_state.current_ai_commands))
 
         return self.robot_commands, self.debug_commands
 
