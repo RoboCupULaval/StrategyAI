@@ -23,6 +23,8 @@ from RULEngine.Communication.sender.uidebug_command_sender \
     import UIDebugCommandSender
 from RULEngine.Communication.receiver.uidebug_command_receiver \
     import UIDebugCommandReceiver
+from RULEngine.Communication.sender.uidebug_vision_sender \
+    import UIDebugVisionSender
 
 # Game objects
 from RULEngine.Game.Game import Game
@@ -64,6 +66,7 @@ class Framework(object):
         self.uidebug_command_sender = None
         self.uidebug_command_receiver = None
         self.uidebug_vision_sender = None
+        self.vision_redirect = lambda *args: None  # because this is a callable!
 
         self._init_communication(serial=serial, redirect=redirect)
 
@@ -85,6 +88,7 @@ class Framework(object):
 
         # VISION
         self.image_transformer = ImageTransformer()
+        self.vision_routine = self._normal_vision
 
         # ia couplage
         self.ia_coach_mainloop = None
@@ -107,9 +111,14 @@ class Framework(object):
                     UIDebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS, 20021)
                 self.uidebug_command_receiver = \
                     UIDebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
+                # are we redirecting the vision to the uidebug! Work in progress
                 if redirect:
                     # TODO merge cameraWork in this to make this work!
-                    self.uidebug_vision_sender = None
+                    self.uidebug_vision_sender =\
+                        UIDebugVisionSender(UI_DEBUG_MULTICAST_ADDRESS, 10022)
+                    self.vision_redirect = \
+                        self.uidebug_vision_sender.send_packet
+                    self.vision_routine = self._redirected_vision
 
             self.referee_command_receiver =\
                 RefereeReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
@@ -124,28 +133,12 @@ class Framework(object):
 
         # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
         while not self.thread_terminate.is_set():
-            # TODO: method extract
-            # Mise à jour
-            vision_frame = self._acquire_vision_frame()
-            new_image_packet = self.image_transformer.update(vision_frame)
-            self.debug_vision.send_packet(new_image_packet.SerializeToString())
-
-            """
-            if self._is_frame_number_different(current_vision_frame):
-                self.update_game_state()
-                self.update_players_and_ball(current_vision_frame)
-                robot_commands, debug_commands = self.ia_coach_mainloop()
-                # TODO make method call instead
-                self.game_world.debug_info.clear()
-
-                # Communication
-                self._send_robot_commands(robot_commands)
-                self._send_debug_commands(debug_commands)
-            """
+            self.vision_routine()
 
     def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer,
                    team_color=TeamColor.BLUE_TEAM, async=False):
-        """ Démarrage du moteur de l'IA initial. """
+        """ Démarrage du moteur de l'IA initial, ajustement de l'équipe de l'ia
+        et démarrage du/des thread/s"""
 
         # IA COUPLING
         self.ia_coach_mainloop = p_ia_coach_mainloop
@@ -180,12 +173,7 @@ class Framework(object):
         self.game.set_referee(self.referee)
         self.game_world = GameWorld(self.game)
 
-    def update_game_state(self):
-        """ Met à jour le **GameState** selon la vision et l'arbitre. """
-        # TODO: implémenter correctement la méthode
-        pass
-
-    def update_players_and_ball(self, vision_frame):
+    def _update_players_and_ball(self, vision_frame):
         """ Met à jour le GameState selon la frame de vision obtenue. """
         time_delta = self._compute_vision_time_delta(vision_frame)
         self.game.update(vision_frame, time_delta)
@@ -207,13 +195,41 @@ class Framework(object):
         # this_time, time_delta, 1/time_delta))
         return time_delta
 
-    def get_game_state(self):
+    def _update_debug_info(self):
         """ Retourne le **GameState** actuel. *** """
 
         self.game_world.debug_info += \
             self.uidebug_command_receiver.receive_command()
 
-    def _acquire_vision_frame(self):
+    def _normal_vision(self):
+        vision_frame = self._acquire_last_vision_frame()
+        if self._is_frame_number_different(vision_frame):
+            self._update_players_and_ball(vision_frame)
+            self._update_debug_info()
+            robot_commands, debug_commands = self.ia_coach_mainloop()
+
+            # Communication
+            self._send_robot_commands(robot_commands)
+            self._send_debug_commands(debug_commands)
+
+    def _redirected_vision(self):
+        vision_frames = self.vision.pop_frames()
+        new_image_packet = self.image_transformer.update(vision_frames)
+        self.vision_redirect(new_image_packet.SerializeToString())
+
+        if self.image_transformer.has_new_image():
+            self._update_players_and_ball(new_image_packet)
+            self._update_debug_info()
+            robot_commands, debug_commands = self.ia_coach_mainloop()
+
+            # Communication
+            self._send_robot_commands(robot_commands)
+            self._send_debug_commands(debug_commands)
+
+    def _acquire_last_vision_frame(self):
+        return self.vision.get_latest_frame()
+
+    def _acquire_all_vision_frames(self):
         return self.vision.pop_frames()
 
     def stop_game(self):
