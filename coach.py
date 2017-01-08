@@ -25,11 +25,11 @@ class Coach(object):
         self.play_executor = PlayExecutor(self.world_state)
         self.robot_command_executor = CommandExecutor(self.world_state)
 
-    def main_loop(self, p_game_state):
+    def main_loop(self):
         self.robot_commands.clear()
         self.debug_commands.clear()
 
-        self.world_state.update(p_game_state)
+        self.world_state.update()
 
         self.debug_executor.exec()
         self.play_executor.exec()
@@ -45,9 +45,8 @@ class Coach(object):
 
         return self.robot_commands, self.debug_commands
 
-    def set_reference(self, p_our_team_colors, game_reference):
-        self.world_state.set_team_color(p_our_team_colors)
-        self.world_state.set_reference(game_reference)
+    def set_reference(self, world_reference):
+        self.world_state.set_reference(world_reference)
 
     # not used see if we can delete.
     def get_debug_status(self):

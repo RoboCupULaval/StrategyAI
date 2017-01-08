@@ -24,18 +24,6 @@ class GameState(object, metaclass=Singleton):
         self.debug_information_in = []
         self.ui_debug_commands = []
 
-    def update(self, new_game_state):
-        """
-            Met à jour le jeu
-            :param new_game_state: État du jeu, sous forme de named tuple
-            Pour le format du tuple, voir RULEngine/framework.py
-        """
-        is_my_team = True
-        self._update_timestamp(new_game_state.timestamp)
-        self._update_field(new_game_state.field)
-        self._update_team(new_game_state.friends, is_my_team)
-        self._update_team(new_game_state.enemies, not is_my_team)
-
     def get_my_team_player(self, player_id):
         pass
 
@@ -80,11 +68,12 @@ class GameState(object, metaclass=Singleton):
     def set_team_color(self, p_our_team_color):
         self.our_team_color = p_our_team_color
 
-    def set_reference(self, game_reference):
-        self.game = game_reference
+    def set_reference(self, world_reference):
+        self.game = world_reference.game
         self.field = self.game.field
         self.my_team = self.game.friends
         self.other_team = self.game.enemies
+        self.our_team_color = world_reference.team_color_svc.OUR_TEAM_COLOR
 
     def _update_ball_position(self, new_ball_position):
         """
