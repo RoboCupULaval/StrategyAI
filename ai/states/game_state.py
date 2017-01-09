@@ -4,16 +4,14 @@
 """
     Ce module garde en mémoire l'état du jeu
 """
-import RULEngine.Game.Ball
-import RULEngine.Game.Field
-import RULEngine.Game.Team
-from RULEngine.Util.constant import PLAYER_PER_TEAM
+from RULEngine.Util.game_world import GameWorld
+
 from ai.Util.singleton import Singleton
 
 
 class GameState(object, metaclass=Singleton):
 
-    def __init__(self, is_team_yellow=False):
+    def __init__(self):
         self.game = None
         self.our_team_color = None
         self.field = None
@@ -65,60 +63,18 @@ class GameState(object, metaclass=Singleton):
         """
         return self.timestamp
 
-    def set_team_color(self, p_our_team_color):
-        self.our_team_color = p_our_team_color
-
     def set_reference(self, world_reference):
+        assert isinstance(world_reference, GameWorld), \
+            "setting reference to the gamestate require an instance of "\
+            + "RULEngine.Util.GameWorld"
+        assert world_reference.game.referee is not None, \
+            "setting the game_state reference with an invalid (None) referee!"
+        assert world_reference.team_color_svc is not None, \
+            "setting the game_state reference with an invalid (None) " \
+            + "team_color_service!"
+
         self.game = world_reference.game
         self.field = self.game.field
         self.my_team = self.game.friends
         self.other_team = self.game.enemies
         self.our_team_color = world_reference.team_color_svc.OUR_TEAM_COLOR
-
-    def _update_ball_position(self, new_ball_position):
-        """
-            Met à jour la position de la balle
-            :param new_ball_position: Nouvelles position de la balle, de type Position
-        """
-        try:
-            self.field.move_ball(new_ball_position, self.timestamp -
-                                 self.last_timestamp)
-        except ZeroDivisionError:
-            self.field.ball._position = new_ball_position
-
-    def _update_field(self, new_field):
-        """
-            Met à jour les informations du terrain
-            :param new_field: Nouvelles information du terrain, de type Field
-        """
-        new_ball_position = new_field.ball.position
-        self._update_ball_position(new_ball_position)
-
-    def _update_player(self, player_id, player_pose, is_my_team=True):
-        """
-            Met à jour les informations du joueur
-            :param is_my_team: Booléen avec valeur 1vrai par défaut, l'équipe du joueur est mon équipe
-            :param player_id: identifiant du joueur, en int
-            :param player_pose: Nouvelle Pose à donner au joueur
-        """
-        if is_my_team:
-            self.my_team.update_player(player_id, player_pose)
-        else:
-            self.other_team.update_player(player_id, player_pose)
-
-    def _update_team(self, new_team_info, is_my_team=True):
-        """
-            Met à jour une équipe
-            :param is_my_team: Booléen avec valeur vrai par défaut, l'équipe du joueur est mon équipe
-            :param new_team_info: Team, info de l'équipe à mettre à jour
-        """
-        for i in range(PLAYER_PER_TEAM):
-            self._update_player(i, new_team_info.players[i].pose, is_my_team)
-
-    def _update_timestamp(self, new_timestamp):
-        """
-            Met à jour le timestamp
-            :param new_timestamp: float, valeur du nouveau timestamp
-        """
-        self.last_timestamp = self.timestamp
-        self.timestamp = new_timestamp

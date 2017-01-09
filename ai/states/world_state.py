@@ -23,9 +23,6 @@ class WorldState:
         # ie flush les packets de debug créées avant ce tour de la boucle
         self.debug_state.update()
 
-    def set_team_color(self, p_our_team_color):
-        self.game_state.set_team_color(p_our_team_color)
-
     def set_reference(self, world_reference):
         self.game_state.set_reference(world_reference)
         self.debug_state.set_reference(world_reference)

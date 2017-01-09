@@ -11,7 +11,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 
-from ai.Util.types import AICommand
+from ai.Util.ai_command import AICommand, AICommandType
 
 __author__ = 'RoboCupULaval'
 
@@ -93,7 +93,7 @@ class TestGraph(unittest.TestCase):
 
     def test_exec(self):
         next_ai_command = self.graph1.exec()
-        expected_ai_command = AICommand(None, 0)
+        expected_ai_command = AICommand(1, AICommandType.STOP)
         self.assertEqual(self.graph1.current_node, 1)
         self.assertEqual(next_ai_command, expected_ai_command)
 
@@ -104,7 +104,8 @@ class TestGraph(unittest.TestCase):
         self.empty_graph.add_vertex(0, 1, foo2)
 
         next_ai_command = self.empty_graph.exec()
-        expected_ai_command = AICommand(None, 0)
+        expected_ai_command = AICommand(0, AICommandType.MOVE,
+                                        **{"pose_goal": Pose(Position(500, 0))})
         self.assertEqual(self.empty_graph.current_node, 0)
         self.assertEqual(next_ai_command, expected_ai_command)
 

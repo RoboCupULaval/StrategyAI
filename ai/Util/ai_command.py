@@ -18,4 +18,7 @@ class AICommand(object):
         self.kick_strength = other_args.get("kick_strength", 0)
         self.pose_goal = other_args.get("pose_goal", Pose())
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     """getter and setters goes down here!"""
