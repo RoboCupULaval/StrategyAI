@@ -15,22 +15,25 @@ class ImageTransformer(object):
         self.yellow_position = {}
         self.ball_position = None
         self.camera_packet = {}
-        self.frame_number = 0
+        self.last_t_capture = 0
         self.new_image_flag = False
-        self.last_packet = None
+        self.last_new_packet = None
+        self.frame_number = 1
 
     def update(self, packets):
 
         self._update_camera_packets(packets)
 
         if not self.new_image_flag:
-            return self.last_packet
+            return self.last_new_packet
 
         new_vision_packet = self._create_default_ssl_packet()
         self.add_ball_info_to_packet(new_vision_packet)
         self._adjust_best_robot_position()
         self._create_robot_packet(new_vision_packet)
-        self.last_packet = new_vision_packet
+        self._add_final_fields(new_vision_packet)
+        self.last_new_packet = new_vision_packet
+
         return new_vision_packet
 
     def has_new_image(self):
@@ -86,20 +89,24 @@ class ImageTransformer(object):
         pb_sslwrapper = ssl_wrapper.SSL_WrapperPacket()
 
         # making sure we increment the internal frame number
-        self.frame_number += 1
+
         # those fields are obligatory for the detection part of the packet
-        pb_sslwrapper.detection.frame_number = self.frame_number
         pb_sslwrapper.detection.camera_id = 0
-        pb_sslwrapper.detection.t_capture = 0
         pb_sslwrapper.detection.t_sent = 0
 
         return pb_sslwrapper
+
+    def _add_final_fields(self, packet_to_add):
+        self.frame_number += 1
+        packet_to_add.detection.t_capture = self.last_t_capture
+        packet_to_add.detection.frame_number = self.frame_number
+
 
     def _update_camera_packets(self, packets):
         self.new_image_flag = False
 
         if not packets:
-            return self.last_packet
+            return self.last_new_packet
 
         # change the packets of a camera if frame_number of camera is higher
         # than what we have
@@ -107,11 +114,16 @@ class ImageTransformer(object):
             if packet.HasField("detection"):
                 c_id = packet.detection.camera_id
                 f_nb = packet.detection.frame_number
+                t_cp = packet.detection.t_capture
 
                 if not self.camera_packet.get(c_id, 0):
+                    if t_cp > self.last_t_capture:
+                        self.last_t_capture = t_cp
                     self.camera_packet[c_id] = packet
                     self.new_image_flag = True
                 elif f_nb > self.camera_packet[c_id].detection.frame_number:
+                    if t_cp > self.last_t_capture:
+                        self.last_t_capture = t_cp
                     self.camera_packet[c_id] = packet
                     self.new_image_flag = True
 
@@ -146,7 +158,7 @@ class ImageTransformer(object):
             if len(packet.detection.balls) > 0:
                 for ball in packet.detection.balls:
                     if best_ball_pos[1] < ball.confidence:
-                        best_ball_pos = (Position(ball.x, ball.y),
+                        best_ball_pos = (Position(ball.x, ball.y, ball.z),
                                          ball.confidence)
         self.ball_position = best_ball_pos
 
@@ -154,10 +166,11 @@ class ImageTransformer(object):
         pck_ball = packet_to_add.detection.balls.add()
         pck_ball.x = self.ball_position[0].x
         pck_ball.y = self.ball_position[0].y
+        pck_ball.z = self.ball_position[0].z
         # required for the packet no use for us at this stage
         pck_ball.confidence = 0.999
-        pck_ball.pixel_x = 0.
-        pck_ball.pixel_y = 0.
+        pck_ball.pixel_x = self.ball_position[0].x
+        pck_ball.pixel_y = self.ball_position[0].y
 
     @staticmethod
     def point_milieu(position1, position2):

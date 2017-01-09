@@ -5,12 +5,14 @@ from RULEngine.Game.Team import Team
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.team_color_service import TeamColor
 
 
 class TestTeam(unittest.TestCase):
 
     def setUp(self):
-        self.team = Team(True)
+        self.team = Team(TeamColor.YELLOW_TEAM)
+        self.team_blue = Team(TeamColor.BLUE_TEAM)
         self.first_player = self.team.players[0]
         self.second_player = self.team.players[1]
         self.no_player = Player(self.team, 0)
@@ -18,7 +20,7 @@ class TestTeam(unittest.TestCase):
     def test_init(self):
         self.assertEqual(PLAYER_PER_TEAM, len(self.team.players))
         self.assertEqual(0, self.team.score)
-        self.assertEqual(True, self.team.is_team_yellow)
+        self.assertEqual(TeamColor.YELLOW_TEAM, self.team.team_color)
 
     def test_has_player_exists(self):
         self.assertTrue(self.team.has_player(self.first_player))
@@ -36,3 +38,7 @@ class TestTeam(unittest.TestCase):
     def test_invalid_id(self):
         uut = self.team.update_player
         self.assertRaises(KeyError, uut, 10, Pose())
+
+    def test_is_team_yellow(self):
+        self.assertTrue(self.team.is_team_yellow())
+        self.assertFalse(self.team_blue.is_team_yellow())

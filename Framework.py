@@ -14,11 +14,9 @@ import time
 # Communication
 from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
-from RULEngine.Communication.sender.serial_command_sender \
-    import SerialCommandSender
+from RULEngine.Communication.util.robot_command_sender_factory \
+    import RobotCommandSenderFactory
 from .Command.command import Stop, PI
-from RULEngine.Communication.sender.grsim_command_sender \
-    import GrSimCommandSender
 from RULEngine.Communication.sender.uidebug_command_sender \
     import UIDebugCommandSender
 from RULEngine.Communication.receiver.uidebug_command_receiver \
@@ -50,7 +48,7 @@ class Framework(object):
          l'ia.
     """
 
-    def __init__(self, serial=False, redirect=False):
+    def __init__(self, serial=False, redirect=True):
         """ Constructeur de la classe, établis les propriétés de bases et
         construit les objets qui sont toujours necéssaire à son fonctionnement
         correct.
@@ -66,7 +64,8 @@ class Framework(object):
         self.uidebug_command_sender = None
         self.uidebug_command_receiver = None
         self.uidebug_vision_sender = None
-        self.vision_redirect = lambda *args: None  # because this is a callable!
+        self.vision_redirecter = lambda *args: None  # because this is a callable!
+        self.vision_routine = self._normal_vision
 
         self._init_communication(serial=serial, redirect=redirect)
 
@@ -88,7 +87,6 @@ class Framework(object):
 
         # VISION
         self.image_transformer = ImageTransformer()
-        self.vision_routine = self._normal_vision
 
         # ia couplage
         self.ia_coach_mainloop = None
@@ -98,12 +96,8 @@ class Framework(object):
         # first make sure we are not already running
         if self.ia_running_thread is None:
             # where do we send the robots command (serial for bluetooth and rf)
-            if serial != 'disabled':
-                self.robot_command_sender = \
-                    SerialCommandSender(comm_type=serial)
-            else:
-                self.robot_command_sender = GrSimCommandSender("127.0.0.1",
-                                                               20011)
+            self.robot_command_sender = \
+                RobotCommandSenderFactory.get_sender(serial)
 
             # do we use the  UIDebug?
             if debug:
@@ -116,9 +110,12 @@ class Framework(object):
                     # TODO merge cameraWork in this to make this work!
                     self.uidebug_vision_sender =\
                         UIDebugVisionSender(UI_DEBUG_MULTICAST_ADDRESS, 10022)
-                    self.vision_redirect = \
+                    print(self.uidebug_vision_sender)
+                    self.vision_redirecter = \
                         self.uidebug_vision_sender.send_packet
+                    print(self.vision_redirecter)
                     self.vision_routine = self._redirected_vision
+                    print(self.vision_routine)
 
             self.referee_command_receiver =\
                 RefereeReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
@@ -215,7 +212,7 @@ class Framework(object):
     def _redirected_vision(self):
         vision_frames = self.vision.pop_frames()
         new_image_packet = self.image_transformer.update(vision_frames)
-        self.vision_redirect(new_image_packet.SerializeToString())
+        self.vision_redirecter(new_image_packet.SerializeToString())
 
         if self.image_transformer.has_new_image():
             self._update_players_and_ball(new_image_packet)
