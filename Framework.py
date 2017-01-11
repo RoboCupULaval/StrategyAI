@@ -48,7 +48,7 @@ class Framework(object):
          l'ia.
     """
 
-    def __init__(self, serial=False, redirect=True):
+    def __init__(self, serial=False, redirect=False):
         """ Constructeur de la classe, établis les propriétés de bases et
         construit les objets qui sont toujours necéssaire à son fonctionnement
         correct.
