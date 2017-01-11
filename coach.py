@@ -13,7 +13,7 @@ TIMESTAMP_MINIMAL_DELTA_30_FPS = 0.033
 
 class Coach(object):
 
-    def __init__(self, mode_debug_active=True):
+    def __init__(self, mode_debug_active=True, pathfinder="astar"):
         self.mode_debug_active = mode_debug_active
         # For the framework! TODO make this better!
         self.debug_commands = []
@@ -21,7 +21,7 @@ class Coach(object):
 
         self.world_state = WorldState()
         self.debug_executor = DebugExecutor(self.world_state)
-        self.module_executor = ModuleExecutor(self.world_state)
+        self.module_executor = ModuleExecutor(self.world_state, pathfinder)
         self.play_executor = PlayExecutor(self.world_state)
         self.robot_command_executor = CommandExecutor(self.world_state)
 

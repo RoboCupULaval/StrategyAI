@@ -11,6 +11,7 @@ __author__ = 'RoboCupULaval'
 
 
 def set_arg_parser():
+    # TODO add mode debug, redirect, pathfinder!
     prog_desc = "Module de l'intelligence artificielle. Les options " \
                 "permettent de manipuler la configuration de l'IA concernant " \
                 "la communication et les equipes."
