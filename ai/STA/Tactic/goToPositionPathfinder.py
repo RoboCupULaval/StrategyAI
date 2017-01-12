@@ -7,7 +7,7 @@ from RULEngine.Util.geometry import get_distance
 from RULEngine.Util.constant import POSITION_DEADZONE
 
 
-class GoToPositionNoPathfinder(Tactic):
+class GoToPositionPathfinder(Tactic):
     def __init__(self, p_game_state, player_id, target):
         super().__init__(p_game_state, player_id)
         self.target = target
@@ -19,11 +19,13 @@ class GoToPositionNoPathfinder(Tactic):
         else:
             self.status_flag = Flags.WIP
 
-        next_action = MoveToPosition(self.game_state, self.player_id, self.target)
+        next_action = MoveToPosition(self.game_state, self.player_id,
+                                     self.target)
         return next_action.exec()
 
     def check_success(self):
-        player_position = self.game_state.get_player_position(player_id=self.player_id)
+        player_position = \
+            self.game_state.get_player_position(player_id=self.player_id)
         distance = get_distance(player_position, self.target.position)
         if distance < POSITION_DEADZONE:
             return True

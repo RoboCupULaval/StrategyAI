@@ -14,29 +14,35 @@ class PathfinderModule(Executor):
         ai_commands = self._get_aicommand_that_need_path()
         self._adjust_from_last_time_of_exec(ai_commands)
         self._pathfind_ai_commands(ai_commands)
-        self._return_new_ai_commands(ai_commands)
+        # self._return_new_ai_commands(ai_commands)
 
     def _get_aicommand_that_need_path(self):
         aicommands_list = self.ws.play_state.current_ai_commands
-        path_on_aic = []
+        aic_with_pathfinding_on = []
 
         for ai_c in aicommands_list.values():
             if ai_c.pathfinder_on:
-                path_on_aic.append(ai_c)
+                aic_with_pathfinding_on.append(ai_c)
 
-        return path_on_aic
+        return aic_with_pathfinding_on
 
     def _adjust_from_last_time_of_exec(self, ai_commands_to_adjust):
         # don't do it since we did it last frame or something like that
-        for ai_c in ai_commands_to_adjust:
-            pass
+        # TODO
+        pass
 
     def _pathfind_ai_commands(self, ai_commands):
         for ai_c in ai_commands:
-            self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
+            path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
+            ai_c.path = path
 
+    """
     def _return_new_ai_commands(self, ai_commands):
-        pass
+        current_ai_c = self.ws.play_state.current_ai_commands
+        for ai_c in ai_commands:
+            if current_ai_c.get(ai_c.robot_id, 0):
+                current_ai_c[ai_c.robot_id] = ai_c
+    """
 
     def change_pathfinder(self, type_of_pathfinder):
         assert isinstance(type_of_pathfinder, str)

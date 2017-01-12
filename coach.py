@@ -5,6 +5,7 @@ from ai.executors.debug_executor import DebugExecutor
 from ai.executors.module_executor import ModuleExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.executors.command_executor import CommandExecutor
+from ai.executors.movement_executor import MovementExecutor
 
 # FIXME this thing!
 TIMESTAMP_MINIMAL_DELTA_60_FPS = 0.017
@@ -23,6 +24,7 @@ class Coach(object):
         self.debug_executor = DebugExecutor(self.world_state)
         self.module_executor = ModuleExecutor(self.world_state, pathfinder)
         self.play_executor = PlayExecutor(self.world_state)
+        self.movement_executor = MovementExecutor(self.world_state)
         self.robot_command_executor = CommandExecutor(self.world_state)
 
     def main_loop(self):
@@ -34,6 +36,7 @@ class Coach(object):
         self.debug_executor.exec()
         self.play_executor.exec()
         self.module_executor.exec()
+        self.movement_executor.exec()
         self.robot_command_executor.exec()
         self.debug_executor.exec()
 

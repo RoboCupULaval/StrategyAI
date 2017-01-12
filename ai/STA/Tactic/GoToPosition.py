@@ -29,8 +29,10 @@ class GoToPosition(Tactic):
         destination_pose : La pose de destination du robot
     """
 
-    def __init__(self, game_state, player_id, target, time_to_live=DEFAULT_TIME_TO_LIVE):
-        Tactic.__init__(self, game_state, player_id, target, time_to_live=time_to_live)
+    def __init__(self, game_state, player_id, target,
+                 time_to_live=DEFAULT_TIME_TO_LIVE):
+        Tactic.__init__(self, game_state, player_id, target,
+                        time_to_live=time_to_live)
 
         self.path_target = None
         self.module_state = ModuleState()
