@@ -64,7 +64,8 @@ class Framework(object):
         self.uidebug_command_sender = None
         self.uidebug_command_receiver = None
         self.uidebug_vision_sender = None
-        self.vision_redirecter = lambda *args: None  # because this is a callable!
+        # because this thing below is a callable!
+        self.vision_redirecter = lambda *args: None
         self.vision_routine = self._normal_vision
 
         self._init_communication(serial=serial, redirect=redirect)
