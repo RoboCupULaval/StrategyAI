@@ -1,9 +1,6 @@
 from RULEngine.Util.Position import Position
-from RULEngine.Util.vision_frame import VisionFrame
 from RULEngine.Communication.protobuf import \
     messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
-from RULEngine.Communication.protobuf import \
-    messages_robocup_ssl_detection_pb2 as ssl_detection
 
 
 class ImageTransformer(object):
