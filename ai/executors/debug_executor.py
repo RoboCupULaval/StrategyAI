@@ -21,6 +21,7 @@ class DebugExecutor(Executor):
         for command in self.ws.debug_state.from_ui_debug_commands:
             self.ws.debug_state.transformed_ui_debug_commands.\
                 append(UIDebugCommand(command))
+        self.ws.debug_state.from_ui_debug_commands.clear()
 
         self._apply_incoming_debug_command()
 

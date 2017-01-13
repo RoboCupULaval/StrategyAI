@@ -5,6 +5,7 @@ from ai.executors.debug_executor import DebugExecutor
 from ai.executors.module_executor import ModuleExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.executors.command_executor import CommandExecutor
+from ai.executors.movement_executor import MovementExecutor
 
 # FIXME this thing!
 TIMESTAMP_MINIMAL_DELTA_60_FPS = 0.017
@@ -13,7 +14,7 @@ TIMESTAMP_MINIMAL_DELTA_30_FPS = 0.033
 
 class Coach(object):
 
-    def __init__(self, mode_debug_active=True):
+    def __init__(self, mode_debug_active=True, pathfinder="astar"):
         self.mode_debug_active = mode_debug_active
         # For the framework! TODO make this better!
         self.debug_commands = []
@@ -21,19 +22,21 @@ class Coach(object):
 
         self.world_state = WorldState()
         self.debug_executor = DebugExecutor(self.world_state)
-        self.module_executor = ModuleExecutor(self.world_state)
+        self.module_executor = ModuleExecutor(self.world_state, pathfinder)
         self.play_executor = PlayExecutor(self.world_state)
+        self.movement_executor = MovementExecutor(self.world_state)
         self.robot_command_executor = CommandExecutor(self.world_state)
 
-    def main_loop(self, p_game_state):
+    def main_loop(self):
         self.robot_commands.clear()
         self.debug_commands.clear()
 
-        self.world_state.update(p_game_state)
+        self.world_state.update()
 
         self.debug_executor.exec()
         self.play_executor.exec()
         self.module_executor.exec()
+        self.movement_executor.exec()
         self.robot_command_executor.exec()
         self.debug_executor.exec()
 
@@ -45,9 +48,8 @@ class Coach(object):
 
         return self.robot_commands, self.debug_commands
 
-    def set_reference(self, p_our_team_colors, game_reference):
-        self.world_state.set_team_color(p_our_team_colors)
-        self.world_state.set_reference(game_reference)
+    def set_reference(self, world_reference):
+        self.world_state.set_reference(world_reference)
 
     # not used see if we can delete.
     def get_debug_status(self):
