@@ -1,6 +1,8 @@
 # Under MIT License, see LICENSE.txt
 
 import struct
+import time
+
 from cobs import cobs
 
 C2000_STARTBYTE = b'\x7E'
@@ -19,6 +21,8 @@ STM32_CMD_ROBOT_CRASHED_NOTIFICATION = 0x26
 STM32_ADDR_BASE_STATION = 0xFE
 STM32_ADDR_BROADCAST = 0xFF
 
+SERIAL_TIMEOUT = 0.1
+
 
 def create_speed_command(x, y, theta, id, mcu_version="stm32"):
     # FIXME: Retirer la branche quand le MCU (microcontroleur) C2000 n'est
@@ -28,11 +32,48 @@ def create_speed_command(x, y, theta, id, mcu_version="stm32"):
         packet = struct.pack('<BBfff', id, C2000_SPEEDCOMMAND_ID, x, y, theta)
         packet = bytearray(_pack_c2000_command(packet))
     elif mcu_version == "stm32":
-        packet = _pack_stm32_cmd(x, y, theta)
+        velocity = [x, y, theta]
+        packet = _stm32_pack_cmd(_stm32_pack_payload(velocity), STM32_CMD_MOVEMENT_COMMAND)
     else:
         raise Exception("La version du protocole serial devrait etre 1 ou 2")
 
     return packet
+
+
+def ping_robot(serial):
+    # ecriture de la commande de ping
+    ping = _stm32_pack_ping()
+    serial.write(ping)
+    serial.flush()
+
+    # TODO: extraire logique de lecture d'une commande
+    # lecture de la reponse avec timeout
+    start_time = time.time()
+    buf = serial.read(1)
+    while not b'\0' in buf:
+        num_bytes_to_read = serial.inWaiting()
+        if num_bytes_to_read > 0:
+            buf += serial.read(1)
+        elif (time.time() - start_time) > SERIAL_TIMEOUT:
+            raise Exception("Serial timeout (aucun robot detecte probablement)")
+
+    # decodage de la reponse
+    response = ""
+    if buf == "\0":
+        response = "\0"
+    else:
+        buf = buf[0:-1]
+        response = cobs.decode(buf)
+
+    if len(response) < len(_stm32_generate_header()):
+        raise Exception("Decodage de cobs a echoue pendant le ping d'init. (reponse invalide)")
+
+    if response[3] == STM32_CMD_HEART_BEAT_RESPOND:
+        print("Le robot a repondu au heartbeat!")
+
+
+def _stm32_pack_ping():
+    return _stm32_pack_cmd(0, STM32_CMD_HEART_BEAT_REQUEST)
 
 
 def _pack_c2000_command(command):
@@ -45,14 +86,24 @@ def _pack_c2000_command(command):
     return C2000_STARTBYTE + command + C2000_STOPBYTE
 
 
-def _pack_stm32_cmd(x, y, theta, destination_address=STM32_ADDR_BROADCAST):
-    velocity = [x, y, theta]
-    payload = struct.pack('%sf' % len(velocity), *velocity)
-    header = bytes([STM32_PROTOCOL_VERSION,
-                    STM32_ADDR_BASE_STATION,
-                    destination_address,
-                    STM32_CMD_MOVEMENT_COMMAND,
-                    0x00])
-    packet = payload + header
+def _stm32_pack_payload(data):
+    return struct.pack('%sf' % len(data), *data)
+
+
+def _stm32_pack_cmd(payload, cmd=STM32_CMD_MOVEMENT_COMMAND, destination_address=STM32_ADDR_BROADCAST):
+    header = _stm32_generate_header(cmd, destination_address)
+
+    packet = header
+
+    if payload:
+        packet += payload
 
     return cobs.encode(bytes(packet)) + b'\0'
+
+def _stm32_generate_header(cmd=STM32_CMD_HEART_BEAT_REQUEST, destination_address=STM32_ADDR_BROADCAST):
+    return bytes([STM32_PROTOCOL_VERSION,
+                  STM32_ADDR_BASE_STATION,
+                  destination_address,
+                  cmd,
+                  0x00])
+
