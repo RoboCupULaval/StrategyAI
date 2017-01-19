@@ -6,7 +6,7 @@ from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.Util.ai_command import AICommand, AICommandType
 
 
-class MoveToPosition(Action):
+class PathfindToPosition(Action):
     """
     Action Move_to: Déplace le robot
     Méthodes :
@@ -36,5 +36,7 @@ class MoveToPosition(Action):
                         kick est faux (on ne botte pas)
         """
         move_destination = self.destination
-        return AICommand(self.player_id, AICommandType.MOVE,
-                         **{"pose_goal": move_destination})
+        return AICommand(self.player_id,
+                         AICommandType.MOVE,
+                         **{"pose_goal": move_destination,
+                            "pathfinder_on": True})

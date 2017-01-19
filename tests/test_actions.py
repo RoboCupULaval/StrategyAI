@@ -22,8 +22,7 @@ class TestActions(unittest.TestCase):
         # ToDo : Use mock instead of actual objects
         self.game_state = GameState()
         self.player_id = 1  # random integer
-        self.game_state._update_player(self.player_id, Pose())
-        self.game_state._update_ball_position(Position(5, 0))
+
 
     def test_move_to(self):
         self.pose = Pose(Position(0, 0, 0), orientation=0.0)

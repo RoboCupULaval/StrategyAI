@@ -11,6 +11,7 @@ __author__ = 'RoboCupULaval'
 
 
 def set_arg_parser():
+    # TODO add mode debug, redirect, pathfinder!
     prog_desc = "Module de l'intelligence artificielle. Les options " \
                 "permettent de manipuler la configuration de l'IA concernant " \
                 "la communication et les equipes."
@@ -49,6 +50,6 @@ if __name__ == '__main__':
     color = get_color(args.color)
 
     ai_coach = Coach()
-    framework = Framework(team_color=color)
+    framework = Framework(serial=args.serial)
     framework.start_game(ai_coach.main_loop, ai_coach.set_reference,
-                         serial=args.serial, async=args.async)
+                         team_color=color, async=args.async)

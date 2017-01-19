@@ -41,7 +41,8 @@ class GoBetween(Action):
         assert(isinstance(p_position2, Position))
         assert(isinstance(p_target, Position))
         assert(isinstance(p_minimum_distance, (int, float)))
-        assert(get_distance(p_position1, p_position2) > 2*p_minimum_distance)
+        # TODO check this assert one day MGL 2017/01/13
+        # assert(get_distance(p_position1, p_position2) > 2*p_minimum_distance)
 
         self.player_id = p_player_id
         self.position1 = p_position1
