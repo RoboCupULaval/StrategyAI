@@ -13,7 +13,7 @@ class Ball():
         return self._position
 
     def set_position(self, pos, delta):
-        if pos != self._position:
+        if pos != self._position and delta != 0:
             self.velocity.x = (pos.x - self._position.x)/delta
             self.velocity.y = (pos.y - self._position.y)/delta
             # FIXME: hack

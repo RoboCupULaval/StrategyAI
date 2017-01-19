@@ -1,17 +1,21 @@
 # Under MIT License, see LICENSE.txt
-class Referee():
+
+from enum import Enum
+
+
+class RefereeCommand(Enum):
+    STOP = 0
+    HALT = 1
+
+
+class Referee:
     def __init__(self):
-        self.command = Command()
+        self.command = RefereeCommand.STOP
 
 
 class Stage():
     def __init__(self):
         pass
-
-
-class Command():
-    def __init__(self, name="HALT"):
-        self.name = name
 
 
 class Team():
