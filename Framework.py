@@ -80,7 +80,8 @@ class Framework(object):
         self.times = 0
         self.last_time = 0
         self.last_cmd_time = time.time()
-        self.robots_pi = [PI(), PI(), PI(), PI(), PI(), PI()]
+        simulation = serial == "disabled"
+        self.robots_pi = [PI(simulation_setting=simulation) for _ in range(6)]
 
         # VISION
         self.image_transformer = ImageTransformer()
@@ -240,11 +241,12 @@ class Framework(object):
     def _send_robot_commands(self, commands):
         """ Envoi les commades des robots au serveur. """
         cmd_time = time.time()
-        if cmd_time - self.last_cmd_time > CMD_DELTA_TIME:
+        delta_t = cmd_time - self.last_cmd_time
+        if delta_t > CMD_DELTA_TIME:
             self.last_cmd_time = cmd_time
 
             for idx, command in enumerate(commands):
-                pi_cmd = self.robots_pi[idx].update_pid_and_return_speed_command(command)
+                pi_cmd = self.robots_pi[idx].update_pid_and_return_speed_command(command, delta_t)
                 command.pose = pi_cmd
                 self.robot_command_sender.send_command(command)
 

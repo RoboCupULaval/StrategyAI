@@ -9,19 +9,28 @@
 """
 import math
 
-from ..Util.Pose import Pose, Position
 from ..Game.Player import Player
-from ..Game.Team import Team
 from ..Util.area import *
 
-DEFAULT_STATIC_GAIN = 0.00095
-DEFAULT_INTEGRAL_GAIN = 0.0009
-DEFAULT_THETA_GAIN = 0.01
-MAX_INTEGRAL_PART = 45000
-MAX_NAIVE_CMD = math.sqrt(2)/3
-MIN_NAIVE_CMD = -math.sqrt(2)/3
-MAX_THETA_CMD = math.pi/8
-MIN_THETA_CMD = -math.pi/8
+INTEGRAL_DECAY = 0.93  # réduit de moitié à toutes les 10 itérations
+ZERO_ACCUMULATOR_TRHESHOLD = 0.001
+
+SIMULATION_MAX_NAIVE_CMD = math.sqrt(2) / 3
+SIMULATION_MIN_NAIVE_CMD = -math.sqrt(2) / 3
+SIMULATION_MAX_THETA_CMD = math.pi / 8
+SIMULATION_MIN_THETA_CMD = -math.pi / 8
+SIMULATION_DEFAULT_STATIC_GAIN = 0.00095
+SIMULATION_DEFAULT_INTEGRAL_GAIN = 0.0009
+SIMULATION_DEFAULT_THETA_GAIN = 0.01
+
+REAL_MAX_NAIVE_CMD = 400
+REAL_MIN_NAIVE_CMD = -400
+REAL_MAX_THETA_CMD = 0
+REAL_MIN_THETA_CMD = 0
+REAL_DEFAULT_STATIC_GAIN = 0.001
+REAL_DEFAULT_INTEGRAL_GAIN = 0
+REAL_DEFAULT_THETA_GAIN = 0
+
 
 def _correct_for_referential_frame(x, y, orientation):
     cos = math.cos(-orientation)
@@ -31,9 +40,10 @@ def _correct_for_referential_frame(x, y, orientation):
     corrected_y = (y * cos + x * sin)
     return corrected_x, corrected_y
 
+
 class _Command(object):
     def __init__(self, player):
-        assert(isinstance(player, Player))
+        assert (isinstance(player, Player))
         self.player = player
         self.dribble = True
         self.dribble_speed = 10
@@ -48,7 +58,7 @@ class _Command(object):
 class MoveTo(_Command):
     def __init__(self, player, position):
         # Parameters Assertion
-        assert(isinstance(position, Position))
+        assert (isinstance(position, Position))
 
         super().__init__(player)
         self.pose.position = stayInsideSquare(position,
@@ -61,7 +71,7 @@ class MoveTo(_Command):
 
 class Rotate(_Command):
     def __init__(self, player, orientation):
-        assert(isinstance(orientation, (int, float)))
+        assert (isinstance(orientation, (int, float)))
 
         super().__init__(player)
         self.pose.orientation = orientation
@@ -74,7 +84,7 @@ class Rotate(_Command):
 
 class MoveToAndRotate(_Command):
     def __init__(self, player, pose):
-        assert(isinstance(pose, Pose))
+        assert (isinstance(pose, Pose))
 
         super().__init__(player)
         position = stayInsideSquare(pose.position,
@@ -88,9 +98,9 @@ class MoveToAndRotate(_Command):
 class Kick(_Command):
     def __init__(self, player, kick_speed=0.5):
         """ Kick speed est un float entre 0 et 1 """
-        assert(isinstance(player, Player))
-        assert(isinstance(kick_speed, (int, float)))
-        assert(0 <= kick_speed <= 1)
+        assert (isinstance(player, Player))
+        assert (isinstance(kick_speed, (int, float)))
+        assert (0 <= kick_speed <= 1)
         kick_speed = kick_speed * KICK_MAX_SPD
 
         super().__init__(player)
@@ -102,30 +112,32 @@ class Kick(_Command):
 
 class Stop(_Command):
     def __init__(self, player):
-        assert(isinstance(player, Player))
+        assert (isinstance(player, Player))
 
         super().__init__(player)
         self.is_speed_command = True
         self.pose = Pose()
         self.stop_cmd = True
 
+
 class PI(object):
     """
         Asservissement PI en position
 
-        u = up + ui
+        u = Kp * err + Sum(err) * Ki * dt
     """
 
-    def __init__(self, static_gain=DEFAULT_STATIC_GAIN, integral_gain=DEFAULT_INTEGRAL_GAIN, theta_gain=DEFAULT_THETA_GAIN):
+    def __init__(self, simulation_setting=True):
         self.accumulator_x = 0
         self.accumulator_y = 0
-        self.kp = static_gain
-        self.ki = integral_gain
-        self.ktheta = theta_gain
+        self.constants = _set_constants(simulation_setting)
+        self.kp = self.constants['default-kp']
+        self.ki = self.constants['default-ki']
+        self.ktheta = self.constants['default-ktheta']
         self.last_command_x = 0
         self.last_command_y = 0
 
-    def update_pid_and_return_speed_command(self, position_command):
+    def update_pid_and_return_speed_command(self, position_command, delta_t=0.030):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
         r_x, r_y = position_command.pose.position.x, position_command.pose.position.y
         t_x, t_y = position_command.player.pose.position.x, position_command.player.pose.position.y
@@ -136,32 +148,67 @@ class PI(object):
         up_x = self.kp * e_x
         up_y = self.kp * e_y
 
-        # composante integrale
-        ui_x = self.ki * e_x
-        ui_y = self.ki * e_y
-        self.accumulator_x = self.accumulator_x + ui_x
-        self.accumulator_y = self.accumulator_y + ui_y
-        ui_x = ui_x if ui_x < MAX_INTEGRAL_PART else MAX_INTEGRAL_PART
-        ui_y = ui_y if ui_y < MAX_INTEGRAL_PART else MAX_INTEGRAL_PART
+        # composante integrale, decay l'accumulator
+        ui_x, ui_y = self.compute_integral(delta_t, e_x, e_y)
+        self.zero_accumulator()
 
         u_x = up_x + ui_x
         u_y = up_y + ui_y
 
         # correction frame referentiel et saturation
-        x, y = _correct_for_referential_frame(u_x, u_y, position_command.player.pose.orientation)
-        x = x if x < MAX_NAIVE_CMD else MAX_NAIVE_CMD
-        x = x if x > MIN_NAIVE_CMD else MIN_NAIVE_CMD
-        y = y if y < MAX_NAIVE_CMD else MAX_NAIVE_CMD
-        y = y if y > MIN_NAIVE_CMD else MIN_NAIVE_CMD
+        x, y = self.referential_correction_saturation(position_command, u_x, u_y)
 
         # correction de theta
         e_theta = 0 - position_command.player.pose.orientation
         theta = self.ktheta * e_theta
-        theta = theta if theta < MAX_THETA_CMD else MAX_THETA_CMD
-        theta = theta if theta > MIN_THETA_CMD else MIN_THETA_CMD
+        theta = theta if theta < self.constants['max-theta-cmd'] else self.constants['max-theta-cmd']
+        theta = theta if theta > self.constants['min-theta-cmd'] else self.constants['min-theta-cmd']
 
         cmd = Pose(Position(x, y), theta)
         if position_command.stop_cmd:
             cmd = Pose(Position(0, 0))
 
         return cmd
+
+    def referential_correction_saturation(self, position_command, u_x, u_y):
+        x, y = _correct_for_referential_frame(u_x, u_y, position_command.player.pose.orientation)
+        x = x if x < self.constants['max-naive-cmd'] else self.constants['max-naive-cmd']
+        x = x if x > self.constants['min-naive-cmd'] else self.constants['min-naive-cmd']
+        y = y if y < self.constants['max-naive-cmd'] else self.constants['max-naive-cmd']
+        y = y if y > self.constants['min-naive-cmd'] else self.constants['min-naive-cmd']
+        return x, y
+
+    def compute_integral(self, delta_t, e_x, e_y):
+        ui_x = self.ki * e_x * delta_t
+        ui_y = self.ki * e_y * delta_t
+        self.accumulator_x = (self.accumulator_x * INTEGRAL_DECAY) + ui_x
+        self.accumulator_y = (self.accumulator_y * INTEGRAL_DECAY) + ui_y
+        return ui_x, ui_y
+
+    def zero_accumulator(self):
+        if self.accumulator_x < ZERO_ACCUMULATOR_TRHESHOLD:
+            self.accumulator_x = 0
+
+        if self.accumulator_y < ZERO_ACCUMULATOR_TRHESHOLD:
+            self.accumulator_y = 0
+
+def _set_constants(simulation_setting):
+    if simulation_setting:
+        return {'max-naive-cmd': SIMULATION_MAX_NAIVE_CMD,
+                'min-naive-cmd': SIMULATION_MIN_NAIVE_CMD,
+                'max-theta-cmd': SIMULATION_MAX_THETA_CMD,
+                'min-theta-cmd': SIMULATION_MIN_THETA_CMD,
+                'default-kp': SIMULATION_DEFAULT_STATIC_GAIN,
+                'default-ki': SIMULATION_DEFAULT_INTEGRAL_GAIN,
+                'default-ktheta': SIMULATION_DEFAULT_THETA_GAIN
+                }
+    else:
+        return {'max-naive-cmd': REAL_MAX_NAIVE_CMD,
+                'min-naive-cmd': REAL_MIN_NAIVE_CMD,
+                'max-theta-cmd': REAL_MAX_THETA_CMD,
+                'min-theta-cmd': REAL_MIN_THETA_CMD,
+                'default-kp': REAL_DEFAULT_STATIC_GAIN,
+                'default-ki': REAL_DEFAULT_INTEGRAL_GAIN,
+                'default-ktheta': REAL_DEFAULT_THETA_GAIN
+                }
+
