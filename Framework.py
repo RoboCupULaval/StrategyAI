@@ -14,15 +14,11 @@ import time
 # Communication
 from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
-from RULEngine.Communication.util.robot_command_sender_factory \
-    import RobotCommandSenderFactory
+from RULEngine.Communication.util.robot_command_sender_factory import RobotCommandSenderFactory
 from .Command.command import Stop, PI
-from RULEngine.Communication.sender.uidebug_command_sender \
-    import UIDebugCommandSender
-from RULEngine.Communication.receiver.uidebug_command_receiver \
-    import UIDebugCommandReceiver
-from RULEngine.Communication.sender.uidebug_vision_sender \
-    import UIDebugVisionSender
+from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
+from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
+from RULEngine.Communication.sender.uidebug_vision_sender import UIDebugVisionSender
 
 # Game objects
 from RULEngine.Game.Game import Game
@@ -65,7 +61,7 @@ class Framework(object):
         self.uidebug_command_receiver = None
         self.uidebug_vision_sender = None
         # because this thing below is a callable!
-        self.vision_redirecter = lambda *args: None
+        self.vision_redirecter = lambda *args:None
         self.vision_routine = self._normal_vision
 
         self._init_communication(serial=serial, redirect=redirect)
@@ -97,29 +93,23 @@ class Framework(object):
         # first make sure we are not already running
         if self.ia_running_thread is None:
             # where do we send the robots command (serial for bluetooth and rf)
-            self.robot_command_sender = \
-                RobotCommandSenderFactory.get_sender(serial)
+            self.robot_command_sender = RobotCommandSenderFactory.get_sender(serial)
 
             # do we use the  UIDebug?
             if debug:
-                self.uidebug_command_sender = \
-                    UIDebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS, 20021)
-                self.uidebug_command_receiver = \
-                    UIDebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
+                self.uidebug_command_sender = UIDebugCommandSender(UI_DEBUG_MULTICAST_ADDRESS, 20021)
+                self.uidebug_command_receiver = UIDebugCommandReceiver(UI_DEBUG_MULTICAST_ADDRESS, 10021)
                 # are we redirecting the vision to the uidebug! Work in progress
                 if redirect:
                     # TODO merge cameraWork in this to make this work!
-                    self.uidebug_vision_sender =\
-                        UIDebugVisionSender(UI_DEBUG_MULTICAST_ADDRESS, 10022)
+                    self.uidebug_vision_sender = UIDebugVisionSender(UI_DEBUG_MULTICAST_ADDRESS, 10022)
                     print(self.uidebug_vision_sender)
-                    self.vision_redirecter = \
-                        self.uidebug_vision_sender.send_packet
+                    self.vision_redirecter = self.uidebug_vision_sender.send_packet
                     print(self.vision_redirecter)
                     self.vision_routine = self._redirected_vision
                     print(self.vision_routine)
 
-            self.referee_command_receiver =\
-                RefereeReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
+            self.referee_command_receiver = RefereeReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
             self.vision = VisionReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
         else:
             self.stop_game()
@@ -154,8 +144,7 @@ class Framework(object):
         # TODO A quoi sert cette prochaine ligne, elle à l'air mal utilisé
         # s.v.p. reviser
         signal.signal(signal.SIGINT, self._sigint_handler)
-        self.ia_running_thread = \
-            threading.Thread(target=self.game_thread_main_loop)
+        self.ia_running_thread = threading.Thread(target=self.game_thread_main_loop)
         self.ia_running_thread.start()
         if not async:
             self.ia_running_thread.join()
@@ -188,16 +177,12 @@ class Framework(object):
         time_delta = this_time - self.last_time
         self.last_time = this_time
         # FIXME: hack
-        # print("frame: %i, time: %d, delta: %f, FPS: %d" % \
-        #        (vision_frame.detection.frame_number,
-        # this_time, time_delta, 1/time_delta))
         return time_delta
 
     def _update_debug_info(self):
         """ Retourne le **GameState** actuel. *** """
 
-        self.game_world.debug_info += \
-            self.uidebug_command_receiver.receive_command()
+        self.game_world.debug_info += self.uidebug_command_receiver.receive_command()
 
     def _normal_vision(self):
         vision_frame = self._acquire_last_vision_frame()
@@ -245,8 +230,7 @@ class Framework(object):
                 self.robot_command_sender.send_command(command)
         except:
             print("Could not stop players")
-            raise StopPlayerError("Au nettoyage il a été impossible d'arrêter\
-                                        les joueurs.")
+            raise StopPlayerError("Au nettoyage il a été impossible d'arrêter les joueurs.")
 
     def _wait_for_first_frame(self):
         while not self.vision.get_latest_frame():
@@ -260,8 +244,7 @@ class Framework(object):
             self.last_cmd_time = cmd_time
 
             for idx, command in enumerate(commands):
-                pi_cmd = self.robots_pi[idx].\
-                    update_pid_and_return_speed_command(command)
+                pi_cmd = self.robots_pi[idx].update_pid_and_return_speed_command(command)
                 command.pose = pi_cmd
                 self.robot_command_sender.send_command(command)
 
