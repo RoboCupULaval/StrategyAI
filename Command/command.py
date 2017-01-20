@@ -12,8 +12,9 @@ import math
 from ..Game.Player import Player
 from ..Util.area import *
 
-INTEGRAL_DECAY = 0.93  # réduit de moitié à toutes les 10 itérations
-ZERO_ACCUMULATOR_TRHESHOLD = 0.001
+INTEGRAL_DECAY = 0.87  # réduit de moitié à toutes les 10 itérations
+ZERO_ACCUMULATOR_TRHESHOLD = 0.5
+FILTER_LENGTH = 3
 
 SIMULATION_MAX_NAIVE_CMD = math.sqrt(2) / 3
 SIMULATION_MIN_NAIVE_CMD = -math.sqrt(2) / 3
@@ -23,12 +24,12 @@ SIMULATION_DEFAULT_STATIC_GAIN = 0.00095
 SIMULATION_DEFAULT_INTEGRAL_GAIN = 0.0009
 SIMULATION_DEFAULT_THETA_GAIN = 0.01
 
-REAL_MAX_NAIVE_CMD = 400
-REAL_MIN_NAIVE_CMD = -400
+REAL_MAX_NAIVE_CMD = 275
+REAL_MIN_NAIVE_CMD = 100
 REAL_MAX_THETA_CMD = 0
 REAL_MIN_THETA_CMD = 0
-REAL_DEFAULT_STATIC_GAIN = 0.001
-REAL_DEFAULT_INTEGRAL_GAIN = 0
+REAL_DEFAULT_STATIC_GAIN = 0.100
+REAL_DEFAULT_INTEGRAL_GAIN = 0.275
 REAL_DEFAULT_THETA_GAIN = 0
 
 
@@ -128,6 +129,7 @@ class PI(object):
     """
 
     def __init__(self, simulation_setting=True):
+        print(simulation_setting)
         self.accumulator_x = 0
         self.accumulator_y = 0
         self.constants = _set_constants(simulation_setting)
@@ -136,6 +138,7 @@ class PI(object):
         self.ktheta = self.constants['default-ktheta']
         self.last_command_x = 0
         self.last_command_y = 0
+        self.previous_cmd = []
 
     def update_pid_and_return_speed_command(self, position_command, delta_t=0.030):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
@@ -150,6 +153,8 @@ class PI(object):
 
         # composante integrale, decay l'accumulator
         ui_x, ui_y = self.compute_integral(delta_t, e_x, e_y)
+        if position_command.player.id == 4:
+            print("Valeur des accumulateurs: {} -- {}".format(self.accumulator_x, self.accumulator_y))
         self.zero_accumulator()
 
         u_x = up_x + ui_x
@@ -168,14 +173,31 @@ class PI(object):
         if position_command.stop_cmd:
             cmd = Pose(Position(0, 0))
 
+        cmd = self._filter_cmd(cmd)
+        cmd.orientation = theta
         return cmd
 
     def referential_correction_saturation(self, position_command, u_x, u_y):
         x, y = _correct_for_referential_frame(u_x, u_y, position_command.player.pose.orientation)
-        x = x if x < self.constants['max-naive-cmd'] else self.constants['max-naive-cmd']
-        x = x if x > self.constants['min-naive-cmd'] else self.constants['min-naive-cmd']
-        y = y if y < self.constants['max-naive-cmd'] else self.constants['max-naive-cmd']
-        y = y if y > self.constants['min-naive-cmd'] else self.constants['min-naive-cmd']
+
+        if abs(x) > self.constants['max-naive-cmd']:
+            if x > 0:
+                x = self.constants['max-naive-cmd']
+            else:
+                x = -self.constants['max-naive-cmd']
+
+        if abs(x) < self.constants['min-naive-cmd']:
+            x = 0
+
+        if abs(y) > self.constants['max-naive-cmd']:
+            if y > 0:
+                y = self.constants['max-naive-cmd']
+            else:
+                y = -self.constants['max-naive-cmd']
+
+        if abs(y) < self.constants['min-naive-cmd']:
+            y = 0
+
         return x, y
 
     def compute_integral(self, delta_t, e_x, e_y):
@@ -191,6 +213,20 @@ class PI(object):
 
         if self.accumulator_y < ZERO_ACCUMULATOR_TRHESHOLD:
             self.accumulator_y = 0
+
+    def _filter_cmd(self, cmd):
+        self.previous_cmd.append(cmd)
+        xsum = 0
+        ysum = 0
+        for cmd in self.previous_cmd:
+            xsum += cmd.position.x
+            ysum += cmd.position.y
+
+        xsum /= len(self.previous_cmd)
+        ysum /= len(self.previous_cmd)
+        if len(self.previous_cmd) > FILTER_LENGTH:
+            self.previous_cmd.pop(0)
+        return Pose(Position(xsum, ysum))
 
 def _set_constants(simulation_setting):
     if simulation_setting:

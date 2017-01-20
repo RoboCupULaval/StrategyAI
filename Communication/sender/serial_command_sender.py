@@ -24,12 +24,14 @@ class SerialCommandSender(object):
     def send_command(self, command):
         x = command.pose.position.x
         y = command.pose.position.y
-        x, y = x, -y
+        # TODO: mettre dans la logique propre du c2000
+        # x, y = x, -y
 
         player_idx = command.player.id
         sercommand = protocol.create_speed_command(x, y, 0, player_idx)
         # FIXME: hack bluetooth
-        if self.type == "rf" or player_idx == 3:
+        if self.type == "rf" or player_idx == 4:
+            print("({}) -- Command (x, y): {} -- {}".format(time.time(), x, y))
             self.serial.write(sercommand)
 
 

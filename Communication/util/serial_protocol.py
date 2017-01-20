@@ -45,6 +45,7 @@ def ping_robot(serial):
     ping = _stm32_pack_ping()
     serial.write(ping)
     serial.flush()
+    time.sleep(0.5)
 
     # TODO: extraire logique de lecture d'une commande
     # lecture de la reponse avec timeout

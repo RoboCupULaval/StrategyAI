@@ -32,7 +32,7 @@ from RULEngine.Util.image_transformer import ImageTransformer
 # TODO inquire about those constants (move, utility)
 LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
 UI_DEBUG_MULTICAST_ADDRESS = "127.0.0.1"
-CMD_TIME_DELTA = 0.030
+#CMD_TIME_DELTA = 0.030
 CMD_DELTA_TIME = 0.030
 
 
