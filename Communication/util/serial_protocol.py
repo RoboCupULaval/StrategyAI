@@ -2,8 +2,14 @@
 
 import struct
 import time
+from enum import Enum
 
 from cobs import cobs
+
+class MCUVersion(Enum):
+    C2000 = 1
+    STM32F407 = 2
+
 
 C2000_STARTBYTE = b'\x7E'
 C2000_STOPBYTE = b'\x7F'
@@ -24,14 +30,14 @@ STM32_ADDR_BROADCAST = 0xFF
 SERIAL_TIMEOUT = 0.1
 
 
-def create_speed_command(x, y, theta, id, mcu_version="stm32"):
+def create_speed_command(x, y, theta, id, mcu_version=MCUVersion.STM32F407):
     # FIXME: Retirer la branche quand le MCU (microcontroleur) C2000 n'est
     # plus utilise
     packet = None
-    if mcu_version == "c2000":
+    if mcu_version == MCUVersion.C2000:
         packet = struct.pack('<BBfff', id, C2000_SPEEDCOMMAND_ID, x, y, theta)
         packet = bytearray(_pack_c2000_command(packet))
-    elif mcu_version == "stm32":
+    elif mcu_version == MCUVersion.STM32F407:
         velocity = [x, y, theta]
         packet = _stm32_pack_cmd(_stm32_pack_payload(velocity), STM32_CMD_MOVEMENT_COMMAND)
     else:
