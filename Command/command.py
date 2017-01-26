@@ -12,7 +12,7 @@ import math
 from ..Game.Player import Player
 from ..Util.area import *
 
-INTEGRAL_DECAY = 0.87  # réduit de moitié à toutes les 10 itérations
+INTEGRAL_DECAY = 0.981  # réduit de moitié à toutes les 10 itérations
 ZERO_ACCUMULATOR_TRHESHOLD = 0.5
 FILTER_LENGTH = 3
 
@@ -24,13 +24,13 @@ SIMULATION_DEFAULT_STATIC_GAIN = 0.00095
 SIMULATION_DEFAULT_INTEGRAL_GAIN = 0.0009
 SIMULATION_DEFAULT_THETA_GAIN = 1
 
-REAL_MAX_NAIVE_CMD = 275
+REAL_MAX_NAIVE_CMD = 350
 REAL_MIN_NAIVE_CMD = 60
-REAL_MAX_THETA_CMD = 0.120
+REAL_MAX_THETA_CMD = 0.400
 REAL_MIN_THETA_CMD = 0
 REAL_DEFAULT_STATIC_GAIN = 0.250
 REAL_DEFAULT_INTEGRAL_GAIN = .275
-REAL_DEFAULT_THETA_GAIN = 0.010
+REAL_DEFAULT_THETA_GAIN = 0
 
 
 def _correct_for_referential_frame(x, y, orientation):
@@ -174,7 +174,7 @@ class PI(object):
             cmd = Pose(Position(0, 0))
 
         cmd = self._filter_cmd(cmd)
-        cmd.orientation = theta
+        cmd.orientation = abs(theta)
         return cmd
 
     def _saturate_orientation(self, theta):

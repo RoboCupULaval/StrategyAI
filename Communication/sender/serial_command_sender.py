@@ -32,6 +32,7 @@ class SerialCommandSender(object):
             protocol.ping_robot(self.serial)
 
         self.type = serial_type
+        self.last_time = 0
 
     def send_command(self, command):
         x = command.pose.position.x
@@ -42,8 +43,11 @@ class SerialCommandSender(object):
         player_idx = command.player.id
         sercommand = protocol.create_speed_command(x, y, 0, player_idx)
         # FIXME: hack bluetooth
-        if self.type == "bluetooth" and player_idx == 4:
-            print("({}) -- Command (x, y): {} -- {}".format(time.time(), x, y))
+        if self.type == SerialType.BLUETOOTH and player_idx == 4:
+            now = time.time()
+            delta = now - self.last_time
+            print("({}) -- Command (x, y): {} -- {} -- {}".format(delta, x, y, command.pose.orientation))
+            self.last_time = now
             self.serial.write(sercommand)
         else:
             self.serial.write(sercommand)
