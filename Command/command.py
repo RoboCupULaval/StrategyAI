@@ -25,12 +25,12 @@ SIMULATION_DEFAULT_INTEGRAL_GAIN = 0.0009
 SIMULATION_DEFAULT_THETA_GAIN = 1
 
 REAL_MAX_NAIVE_CMD = 275
-REAL_MIN_NAIVE_CMD = 45
+REAL_MIN_NAIVE_CMD = 60
 REAL_MAX_THETA_CMD = 0.120
 REAL_MIN_THETA_CMD = 0
-REAL_DEFAULT_STATIC_GAIN = 0.100
-REAL_DEFAULT_INTEGRAL_GAIN = 0.275
-REAL_DEFAULT_THETA_GAIN = 0
+REAL_DEFAULT_STATIC_GAIN = 0.250
+REAL_DEFAULT_INTEGRAL_GAIN = .275
+REAL_DEFAULT_THETA_GAIN = 0.010
 
 
 def _correct_for_referential_frame(x, y, orientation):
@@ -217,8 +217,8 @@ class PI(object):
     def _compute_integral(self, delta_t, e_x, e_y):
         ui_x = self.ki * e_x * delta_t
         ui_y = self.ki * e_y * delta_t
-        self.accumulator_x = (self.accumulator_x * INTEGRAL_DECAY) + ui_x
-        self.accumulator_y = (self.accumulator_y * INTEGRAL_DECAY) + ui_y
+        self.accumulator_x = (self.accumulator_x * INTEGRAL_DECAY * delta_t) + ui_x
+        self.accumulator_y = (self.accumulator_y * INTEGRAL_DECAY * delta_t) + ui_y
         return ui_x, ui_y
 
     def _zero_accumulator(self):

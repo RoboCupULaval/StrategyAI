@@ -52,11 +52,11 @@ class SerialCommandSender(object):
 def _get_port(serial_type):
     serial_ports = []
 
-    if serial_type == "rf":
+    if serial_type == SerialType.NRF:
         serial_ports = [port for port in os.listdir('/dev')
                         if port.startswith("ttyUSB") or port.startswith(
                 'ttyACM')]
-    elif serial_type == "bluetooth":
+    elif serial_type == SerialType.BLUETOOTH:
         serial_ports = [port for port in os.listdir('/dev')
                         if port.startswith("rfcomm")]
     try:
