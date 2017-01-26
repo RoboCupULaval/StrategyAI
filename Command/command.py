@@ -19,10 +19,10 @@ FILTER_LENGTH = 3
 SIMULATION_MAX_NAIVE_CMD = math.sqrt(2) / 3
 SIMULATION_MIN_NAIVE_CMD = -math.sqrt(2) / 3
 SIMULATION_MAX_THETA_CMD = math.pi / 8
-SIMULATION_MIN_THETA_CMD = -math.pi / 8
+SIMULATION_MIN_THETA_CMD = 0
 SIMULATION_DEFAULT_STATIC_GAIN = 0.00095
 SIMULATION_DEFAULT_INTEGRAL_GAIN = 0.0009
-SIMULATION_DEFAULT_THETA_GAIN = 0.01
+SIMULATION_DEFAULT_THETA_GAIN = 1
 
 REAL_MAX_NAIVE_CMD = 275
 REAL_MIN_NAIVE_CMD = 45
@@ -129,7 +129,6 @@ class PI(object):
     """
 
     def __init__(self, simulation_setting=True):
-        print(simulation_setting)
         self.accumulator_x = 0
         self.accumulator_y = 0
         self.constants = _set_constants(simulation_setting)
@@ -152,22 +151,23 @@ class PI(object):
         up_y = self.kp * e_y
 
         # composante integrale, decay l'accumulator
-        ui_x, ui_y = self.compute_integral(delta_t, e_x, e_y)
+        ui_x, ui_y = self._compute_integral(delta_t, e_x, e_y)
         if position_command.player.id == 4:
-            print("Valeur des accumulateurs: {} -- {}".format(self.accumulator_x, self.accumulator_y))
-        self.zero_accumulator()
+            # TODO: retirer une fois le raffinage complete
+            # print("Valeur des accumulateurs: {} -- {}".format(self.accumulator_x, self.accumulator_y))
+            pass
+        self._zero_accumulator()
 
         u_x = up_x + ui_x
         u_y = up_y + ui_y
 
-        # correction frame referentiel et saturation
-        x, y = self.referential_correction_saturation(position_command, u_x, u_y)
+        # correction frame reference et saturation
+        x, y = self._referential_correction_saturation(position_command, u_x, u_y)
 
         # correction de theta
-        e_theta = 0 - position_command.player.pose.orientation
+        e_theta = position_command.pose.orientation - position_command.player.pose.orientation
         theta = self.ktheta * e_theta
-        theta = theta if theta < self.constants['max-theta-cmd'] else self.constants['max-theta-cmd']
-        theta = theta if theta > self.constants['min-theta-cmd'] else self.constants['min-theta-cmd']
+        theta = self._saturate_orientation(theta)
 
         cmd = Pose(Position(x, y), theta)
         if position_command.stop_cmd:
@@ -177,7 +177,21 @@ class PI(object):
         cmd.orientation = theta
         return cmd
 
-    def referential_correction_saturation(self, position_command, u_x, u_y):
+    def _saturate_orientation(self, theta):
+        if abs(theta) > self.constants['max-theta-cmd']:
+            if theta > 0:
+                return self.constants['max-theta-cmd']
+            else:
+                return -self.constants['max-theta-cmd']
+        elif abs(theta) < self.constants['min-theta-cmd']:
+            if theta > 0:
+                return self.constants['min-theta-cmd']
+            else:
+                return -self.constants['min-theta-cmd']
+        else:
+            return theta
+
+    def _referential_correction_saturation(self, position_command, u_x, u_y):
         x, y = _correct_for_referential_frame(u_x, u_y, position_command.player.pose.orientation)
 
         if abs(x) > self.constants['max-naive-cmd']:
@@ -200,14 +214,14 @@ class PI(object):
 
         return x, y
 
-    def compute_integral(self, delta_t, e_x, e_y):
+    def _compute_integral(self, delta_t, e_x, e_y):
         ui_x = self.ki * e_x * delta_t
         ui_y = self.ki * e_y * delta_t
         self.accumulator_x = (self.accumulator_x * INTEGRAL_DECAY) + ui_x
         self.accumulator_y = (self.accumulator_y * INTEGRAL_DECAY) + ui_y
         return ui_x, ui_y
 
-    def zero_accumulator(self):
+    def _zero_accumulator(self):
         if self.accumulator_x < ZERO_ACCUMULATOR_TRHESHOLD:
             self.accumulator_x = 0
 
@@ -228,23 +242,23 @@ class PI(object):
             self.previous_cmd.pop(0)
         return Pose(Position(xsum, ysum))
 
+
 def _set_constants(simulation_setting):
     if simulation_setting:
-        return {'max-naive-cmd': SIMULATION_MAX_NAIVE_CMD,
-                'min-naive-cmd': SIMULATION_MIN_NAIVE_CMD,
-                'max-theta-cmd': SIMULATION_MAX_THETA_CMD,
-                'min-theta-cmd': SIMULATION_MIN_THETA_CMD,
-                'default-kp': SIMULATION_DEFAULT_STATIC_GAIN,
-                'default-ki': SIMULATION_DEFAULT_INTEGRAL_GAIN,
-                'default-ktheta': SIMULATION_DEFAULT_THETA_GAIN
+        return {'max-naive-cmd':SIMULATION_MAX_NAIVE_CMD,
+                'min-naive-cmd':SIMULATION_MIN_NAIVE_CMD,
+                'max-theta-cmd':SIMULATION_MAX_THETA_CMD,
+                'min-theta-cmd':SIMULATION_MIN_THETA_CMD,
+                'default-kp':SIMULATION_DEFAULT_STATIC_GAIN,
+                'default-ki':SIMULATION_DEFAULT_INTEGRAL_GAIN,
+                'default-ktheta':SIMULATION_DEFAULT_THETA_GAIN
                 }
     else:
-        return {'max-naive-cmd': REAL_MAX_NAIVE_CMD,
-                'min-naive-cmd': REAL_MIN_NAIVE_CMD,
-                'max-theta-cmd': REAL_MAX_THETA_CMD,
-                'min-theta-cmd': REAL_MIN_THETA_CMD,
-                'default-kp': REAL_DEFAULT_STATIC_GAIN,
-                'default-ki': REAL_DEFAULT_INTEGRAL_GAIN,
-                'default-ktheta': REAL_DEFAULT_THETA_GAIN
+        return {'max-naive-cmd':REAL_MAX_NAIVE_CMD,
+                'min-naive-cmd':REAL_MIN_NAIVE_CMD,
+                'max-theta-cmd':REAL_MAX_THETA_CMD,
+                'min-theta-cmd':REAL_MIN_THETA_CMD,
+                'default-kp':REAL_DEFAULT_STATIC_GAIN,
+                'default-ki':REAL_DEFAULT_INTEGRAL_GAIN,
+                'default-ktheta':REAL_DEFAULT_THETA_GAIN
                 }
-

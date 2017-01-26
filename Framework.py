@@ -14,7 +14,9 @@ import time
 # Communication
 from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
+from RULEngine.Communication.sender.serial_command_sender import SerialType, SERIAL_DISABLED
 from RULEngine.Communication.util.robot_command_sender_factory import RobotCommandSenderFactory
+from RULEngine.Communication.util.serial_protocol import MCUVersion
 from .Command.command import Stop, PI
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
@@ -44,7 +46,7 @@ class Framework(object):
          l'ia.
     """
 
-    def __init__(self, serial=False, redirect=False):
+    def __init__(self, serial=False, redirect=False, mcu_version=MCUVersion.STM32F407):
         """ Constructeur de la classe, établis les propriétés de bases et
         construit les objets qui sont toujours necéssaire à son fonctionnement
         correct.
@@ -64,7 +66,7 @@ class Framework(object):
         self.vision_redirecter = lambda *args:None
         self.vision_routine = self._normal_vision
 
-        self._init_communication(serial=serial, redirect=redirect)
+        self._init_communication(serial=serial, redirect=redirect, mcu_version=mcu_version)
 
         # Game elements
         self.game_world = None
@@ -80,7 +82,7 @@ class Framework(object):
         self.times = 0
         self.last_time = 0
         self.last_cmd_time = time.time()
-        simulation = serial == "disabled"
+        simulation = serial == SERIAL_DISABLED
         self.robots_pi = [PI(simulation_setting=simulation) for _ in range(6)]
 
         # VISION
@@ -90,11 +92,11 @@ class Framework(object):
         self.ia_coach_mainloop = None
         self.ia_coach_initializer = None
 
-    def _init_communication(self, serial=False, debug=True, redirect=False):
+    def _init_communication(self, serial=SERIAL_DISABLED, debug=True, redirect=False, mcu_version=MCUVersion.STM32F407):
         # first make sure we are not already running
         if self.ia_running_thread is None:
             # where do we send the robots command (serial for bluetooth and rf)
-            self.robot_command_sender = RobotCommandSenderFactory.get_sender(serial)
+            self.robot_command_sender = RobotCommandSenderFactory.get_sender(serial, mcu_version=mcu_version)
 
             # do we use the  UIDebug?
             if debug:
