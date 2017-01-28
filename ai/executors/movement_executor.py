@@ -18,7 +18,7 @@ class MovementExecutor(Executor):
         current_ai_c = self.ws.play_state.current_ai_commands
 
         for ai_c in current_ai_c.values():
-            if len(ai_c.path) > 0:
+            if len(ai_c.path) > 1:
                 next_point = ai_c.path[0]
                 r_id = ai_c.robot_id
                 current_position = self.ws.game_state.get_player_position(r_id)

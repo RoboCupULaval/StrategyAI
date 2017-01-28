@@ -36,14 +36,6 @@ class PathfinderModule(Executor):
             path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
             ai_c.path = path
 
-    """
-    def _return_new_ai_commands(self, ai_commands):
-        current_ai_c = self.ws.play_state.current_ai_commands
-        for ai_c in ai_commands:
-            if current_ai_c.get(ai_c.robot_id, 0):
-                current_ai_c[ai_c.robot_id] = ai_c
-    """
-
     def change_pathfinder(self, type_of_pathfinder):
         assert isinstance(type_of_pathfinder, str)
         assert type_of_pathfinder.lower() in ["rrt", "astar"]
