@@ -13,7 +13,6 @@ from ai.STA.Action.Kick import Kick
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.MoveToDribblingBall import MoveToDribblingBall
 from ai.STA.Action.ProtectGoal import ProtectGoal
-from ai.Util.types import AICommand
 from ai.states.game_state import GameState
 
 

@@ -8,7 +8,6 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.ProtectGoal import GoalKeeper
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.types import AICommand
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position

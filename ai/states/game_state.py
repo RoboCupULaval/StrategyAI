@@ -22,6 +22,9 @@ class GameState(object, metaclass=Singleton):
         self.debug_information_in = []
         self.ui_debug_commands = []
 
+    def get_our_team_color(self):
+        return self.our_team_color
+
     def get_my_team_player(self, player_id):
         pass
 

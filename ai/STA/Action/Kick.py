@@ -1,6 +1,5 @@
 # Under MIT license, see LICENSE.txt
 from .Action import Action
-from ...Util.types import AICommand
 from RULEngine.Util.constant import PLAYER_PER_TEAM, KICK_MAX_SPD
 from ai.Util.ai_command import AICommand, AICommandType
 
