@@ -27,8 +27,9 @@ class SerialCommandSender(object):
             port = _get_port(serial_type)
 
         self.serial = serial.Serial('/dev/' + port, baud_rate)
+        self.mcu = mcu_version
 
-        if mcu_version == MCUVersion.STM32F407:
+        if mcu_version == MCUVersion.STM32F407 and serial_type == SerialType.BLUETOOTH:
             protocol.ping_robot(self.serial)
 
         self.type = serial_type
@@ -37,19 +38,20 @@ class SerialCommandSender(object):
     def send_command(self, command):
         x = command.pose.position.x
         y = command.pose.position.y
+        theta = command.pose.orientation
         if self.mcu_version == MCUVersion.C2000:
             x, y = x, -y
+        if int(x) == int(y) and int(x) == 0:
+            theta = 0
 
         player_idx = command.player.id
-        sercommand = protocol.create_speed_command(x, y, 0, player_idx)
+        sercommand = protocol.create_speed_command(x, y, theta, player_idx)
         # FIXME: hack bluetooth
-        if self.type == SerialType.BLUETOOTH and player_idx == 4:
+        if self.type == SerialType.NRF and player_idx == 4:
             now = time.time()
             delta = now - self.last_time
-            print("({}) -- Command (x, y): {} -- {} -- {}".format(delta, x, y, command.pose.orientation))
+            print("({}) -- Command (x, y, t): {} -- {} -- {}".format(delta, x, y, theta))
             self.last_time = now
-            self.serial.write(sercommand)
-        else:
             self.serial.write(sercommand)
 
 
