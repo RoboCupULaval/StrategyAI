@@ -68,13 +68,11 @@ class GameState(object, metaclass=Singleton):
 
     def set_reference(self, world_reference):
         assert isinstance(world_reference, GameWorld), \
-            "setting reference to the gamestate require an instance of "\
-            + "RULEngine.Util.GameWorld"
+            "setting reference to the gamestate require an instance of RULEngine.Util.GameWorld"
         assert world_reference.game.referee is not None, \
             "setting the game_state reference with an invalid (None) referee!"
         assert world_reference.team_color_svc is not None, \
-            "setting the game_state reference with an invalid (None) " \
-            + "team_color_service!"
+            "setting the game_state reference with an invalid (None) team_color_service!"
 
         self.game = world_reference.game
         self.field = self.game.field

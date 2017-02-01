@@ -36,5 +36,4 @@ class GetBall(Action):
         ball_position = self.game_state.get_ball_position()
         destination_orientation = get_angle(self.game_state.get_player_pose(self.player_id).position, ball_position)
         destination_pose = {"pose_goal": Pose(ball_position, destination_orientation)}
-        kick_strength = 0
         return AICommand(self.player_id, AICommandType.MOVE, **destination_pose)
