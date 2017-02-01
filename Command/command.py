@@ -174,7 +174,7 @@ class PI(object):
             cmd = Pose(Position(0, 0))
 
         cmd = self._filter_cmd(cmd)
-        cmd.orientation = abs(theta)
+        cmd.orientation = theta
         return cmd
 
     def _saturate_orientation(self, theta):
