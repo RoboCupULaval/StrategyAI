@@ -4,6 +4,7 @@
 
 from .HumanControl import HumanControl
 from .SimpleDefense import SimpleDefense
+from .TestAstarStrategy import TestAstarStrategy
 from .SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
 from .WeirdmovementStrategy import WeirdmovementStrategy
@@ -26,7 +27,7 @@ class StrategyBook(object):
                               'TestTransitions': TestTransitions,
                               "test_rotateAround": test_rotateAround,
                               'WeirdmovementStrategy': WeirdmovementStrategy,
-                              }
+                              'TestAstarStrategy': TestAstarStrategy}
 
     def get_strategies_name_list(self):
         return list(self.strategy_book.keys())
