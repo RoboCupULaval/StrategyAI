@@ -26,7 +26,7 @@ class StrategyBook(object):
                               'TestTransitions': TestTransitions,
                               "test_rotateAround": test_rotateAround,
                               'WeirdmovementStrategy': WeirdmovementStrategy,
-                              'TestTransitions': TestTransitions}
+                              }
 
     def get_strategies_name_list(self):
         return list(self.strategy_book.keys())
