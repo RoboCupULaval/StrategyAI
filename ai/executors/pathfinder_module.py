@@ -40,7 +40,6 @@ class PathfinderModule(Executor):
     def _pathfind_ai_commands(self, ai_commands):
         for ai_c in ai_commands:
             path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
-            print(path)
             self.draw_path(path)
             ai_c.path = path
 
