@@ -103,13 +103,33 @@ class AsPathManager(Pathfinder):
             :param target: LEGACY -> a etre supprimer dans versin future.
             :return: { id : [Pose, Pose, ...] } || [Pose, Pose, ...]
         """
-        asPath = self.paths[robot_id]
-        path = []
 
-        for asPos in asPath:
-            path += [Position(asPos.x, asPos.y)]
-        
-        return path
+        game_state = self.ws.game_state
+        obstacleList = []
+        opponentTeam = game_state.other_team.players
+        ourTeam = game_state.my_team.players
+
+        for id in opponentTeam:
+            position = game_state.get_player_position(id, False)
+            obstacleList.append(AsPosition(position.x, position.y))
+
+        for id in ourTeam:
+            if (id != robot_id):
+                position = game_state.get_player_position(id, False)
+                obstacleList.append(AsPosition(position.x, position.y))
+
+        currentRobotPos = game_state.get_player_position(robot_id)
+        startAsPos = AsPosition(currentRobotPos.x, currentRobotPos.y)
+        endAsPos = AsPosition(target.position.x, target.position.y)
+
+        robotAsPath = self.getAllAsPath([startAsPos], [endAsPos], obstacleList)
+        robotPosPath = []
+
+        for i in range(0, len(robotAsPath), 1):
+            tempAsPos = robotAsPath[i]
+            robotPosPath += [Position(tempAsPos.x, tempAsPos.y)]
+
+        return robotPosPath
 
 
     def get_next_point(self, robot_id=None):
