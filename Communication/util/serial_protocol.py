@@ -6,48 +6,59 @@ from enum import Enum
 
 from cobs import cobs
 
-
-class C2000(Enum):
-    STARTBYTE = b'\x7E',
-    STOPBYTE = b'\x7F',
-    ESCAPEBYTE = b'\x7D',
-    SPEEDCOMMAND_ID = 1,
-    PIDCOMMAND_ID = 2
-
-
-class STM32(Enum):
-    PROTOCOL_VERSION = 0x01
-    CMD_HEART_BEAT_REQUEST = 0x00
-    CMD_HEART_BEAT_RESPOND = 0x01
-    CMD_MOVEMENT_COMMAND = 0x02
-    CMD_SET_REGISTER = 0x03
-    CMD_ACK = 0x04
-    CMD_ROBOT_CRASHED_NOTIFICATION = 0x26
-    ADDR_BASE_STATION = 0xFE
-    ADDR_BROADCAST = 0xFF
-
 class MCUVersion(Enum):
     C2000 = 1
     STM32F407 = 2
 
 
+C2000_STARTBYTE = b'\x7E'
+C2000_STOPBYTE = b'\x7F'
+C2000_ESCAPEBYTE = b'\x7D'
+C2000_SPEEDCOMMAND_ID = 1
+C2000_PIDCOMMAND_ID = 2
+
+STM32_PROTOCOL_VERSION = 0x01
+STM32_CMD_HEART_BEAT_REQUEST = 0x00
+STM32_CMD_HEART_BEAT_RESPOND = 0x01
+STM32_CMD_MOVEMENT_COMMAND = 0x02
+STM32_CMD_SET_REGISTER = 0x03
+STM32_CMD_ACK = 0x04
+STM32_CMD_ROBOT_CRASHED_NOTIFICATION = 0x26
+STM32_REG_KICK = 0x01
+STM32_REG_CHARGE_KICKER = 0x02
+STM32_ADDR_BASE_STATION = 0xFE
+STM32_ADDR_BROADCAST = 0xFF
+
 SERIAL_TIMEOUT = 0.1
 
 
-def create_speed_command(x, y, theta, idx, mcu_version=MCUVersion.STM32F407):
+def create_speed_command(x, y, theta, robot_idx, mcu_version=MCUVersion.STM32F407):
     # FIXME: Retirer la branche quand le MCU (microcontroleur) C2000 n'est
     # plus utilise
     packet = None
-    if mcu_version == "c2000":
-        packet = struct.pack('<BBfff', idx, C2000.SPEEDCOMMAND_ID, x, y, theta)
+    if mcu_version == MCUVersion.C2000:
+        packet = struct.pack('<BBfff', robot_idx, C2000_SPEEDCOMMAND_ID, x, y, theta)
         packet = bytearray(_pack_c2000_command(packet))
     elif mcu_version == MCUVersion.STM32F407:
         velocity = [x, y, theta]
-        packet = _stm32_pack_cmd(_stm32_pack_payload(velocity), STM32.CMD_MOVEMENT_COMMAND, robot_idx=idx)
+        packet = _stm32_pack_cmd(_stm32_pack_payload(velocity), STM32_CMD_MOVEMENT_COMMAND, robot_idx=robot_idx)
     else:
         raise Exception("La version du protocole serial devrait etre 1 ou 2")
 
     return packet
+
+
+def create_charge_command(robot_idx):
+    return _create_register_command(STM32_REG_CHARGE_KICKER, 0, robot_idx)
+
+
+def create_kick_command(robot_idx):
+    return _create_register_command(STM32_REG_KICK, 0, robot_idx)
+
+
+def _create_register_command(register, value, robot_idx):
+    payload = bytes([register, value])
+    return _stm32_pack_cmd(payload, STM32_CMD_SET_REGISTER, robot_idx)
 
 
 def ping_robot(serial):
@@ -79,29 +90,29 @@ def ping_robot(serial):
     if len(response) < len(_stm32_generate_header()):
         raise Exception("Decodage de cobs a echoue pendant le ping d'init. (reponse invalide)")
 
-    if response[3] == STM32.CMD_HEART_BEAT_RESPOND:
+    if response[3] == STM32_CMD_HEART_BEAT_RESPOND:
         print("Le robot a repondu au heartbeat!")
 
 
 def _stm32_pack_ping():
-    return _stm32_pack_cmd(0, STM32.CMD_HEART_BEAT_REQUEST)
+    return _stm32_pack_cmd(0, STM32_CMD_HEART_BEAT_REQUEST)
 
 
 def _pack_c2000_command(command):
-    command = command.replace(C2000.ESCAPEBYTE, C2000.ESCAPEBYTE +
-                              C2000.ESCAPEBYTE)
-    command = command.replace(C2000.STARTBYTE,
-                              C2000.ESCAPEBYTE + C2000.STARTBYTE)
-    command = command.replace(C2000.STOPBYTE, C2000.ESCAPEBYTE + C2000.STOPBYTE)
+    command = command.replace(C2000_ESCAPEBYTE, C2000_ESCAPEBYTE +
+                              C2000_ESCAPEBYTE)
+    command = command.replace(C2000_STARTBYTE,
+                              C2000_ESCAPEBYTE + C2000_STARTBYTE)
+    command = command.replace(C2000_STOPBYTE, C2000_ESCAPEBYTE + C2000_STOPBYTE)
 
-    return C2000.STARTBYTE + command + C2000.STOPBYTE
+    return C2000_STARTBYTE + command + C2000_STOPBYTE
 
 
 def _stm32_pack_payload(data):
     return struct.pack('%sf' % len(data), *data)
 
 
-def _stm32_pack_cmd(payload, cmd=STM32.CMD_MOVEMENT_COMMAND, robot_idx=STM32.ADDR_BROADCAST):
+def _stm32_pack_cmd(payload, cmd=STM32_CMD_MOVEMENT_COMMAND, robot_idx=STM32_ADDR_BROADCAST):
     header = _stm32_generate_header(cmd, robot_idx)
 
     packet = header
@@ -112,9 +123,9 @@ def _stm32_pack_cmd(payload, cmd=STM32.CMD_MOVEMENT_COMMAND, robot_idx=STM32.ADD
     return cobs.encode(bytes(packet)) + b'\0'
 
 
-def _stm32_generate_header(cmd=STM32.CMD_HEART_BEAT_REQUEST, robot_idx=STM32.ADDR_BROADCAST):
-    return bytes([STM32.PROTOCOL_VERSION,
-                  STM32.ADDR_BASE_STATION,
+def _stm32_generate_header(cmd=STM32_CMD_HEART_BEAT_REQUEST, robot_idx=STM32_ADDR_BROADCAST):
+    return bytes([STM32_PROTOCOL_VERSION,
+                  STM32_ADDR_BASE_STATION,
                   robot_idx,
                   cmd,
                   0x00])
