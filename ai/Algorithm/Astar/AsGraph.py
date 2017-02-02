@@ -241,7 +241,7 @@ class AsGraph():
 
             # not nearNode.pos.getDist(startPos) < (self.interval / 2) -> eviter de rester sur place,
             # oldNode == nearNode -> eviter de tourner en rond (ca marchera pas, on retourne le dernier noeud libre et on attend que les joueurs bougent)
-            if (not nearNode.pos.getDist(startPos) < (self.interval / 2) or oldNode == nearNode):
+            if (not nearNode.pos.getDist(startPos) < (self.interval * 0.75) or oldNode == nearNode):
                 found = True
             
             nodeList = nearNode.neighbors

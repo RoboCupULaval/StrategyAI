@@ -14,9 +14,9 @@ class AsPathManager(Pathfinder):
 
         self.TopLeftCorner = AsPosition(-4500,3000)
         self.DownRigthCorner = AsPosition(4500,-3000)
-        self.RobotRadius = 100 # real radius is 90, 100 help avoid collision and make it easier to find interval
-        self.PreciseInterval = 100
-        self.ImpreciseInterval = 200
+        self.RobotRadius = 125 # real radius is 90, 100 help avoid collision and make it easier to find interval
+        self.PreciseInterval = 125
+        self.ImpreciseInterval = 250
         self.MaxDist = math.sqrt((self.DownRigthCorner.x - self.TopLeftCorner.x)**2 + (self.TopLeftCorner.y - self.DownRigthCorner.y)**2)
 
         self.preciseGraph = AsGraph(self.TopLeftCorner, self.DownRigthCorner, self.RobotRadius, self.PreciseInterval)
@@ -67,10 +67,12 @@ class AsPathManager(Pathfinder):
         endPosList = []
         obstacleList = []
 
-        print(str(commands))
+        idList = []
+
         for key, command in commands.items():
             if (command.pathfinder_on):
-                print("PathFinder on!!!")
+
+                idList.append(command.robot_id)
                 keyToCalculate.append(key)
                 position = game_state.get_player_position(command.robot_id)
                 startPosList.append(AsPosition(position.x, position.y))
@@ -87,10 +89,10 @@ class AsPathManager(Pathfinder):
             allPath = self.getAllAsPath(startPosList, endPosList, obstacleList)
 
             for i in range(0, len(keyToCalculate), 1):
+                self.paths[idList[i]] = allPath[i]
                 position = allPath[i][0]
                 commands[keyToCalculate[i]].pose_goal.position.x = position.x
                 commands[keyToCalculate[i]].pose_goal.position.y = position.y
-                print("robot : " + str(keyToCalculate[i]) + "pos changed from " + str(startPosList[i]) + "for " + str(position))
 
 
     def get_path(self, robot_id=None, target=None):
