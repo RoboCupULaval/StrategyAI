@@ -26,20 +26,24 @@ class STM32(Enum):
     ADDR_BASE_STATION = 0xFE
     ADDR_BROADCAST = 0xFF
 
+class MCUVersion(Enum):
+    C2000 = 1
+    STM32F407 = 2
+
 
 SERIAL_TIMEOUT = 0.1
 
 
-def create_speed_command(x, y, theta, id, mcu_version="stm32"):
+def create_speed_command(x, y, theta, idx, mcu_version=MCUVersion.STM32F407):
     # FIXME: Retirer la branche quand le MCU (microcontroleur) C2000 n'est
     # plus utilise
     packet = None
     if mcu_version == "c2000":
-        packet = struct.pack('<BBfff', id, C2000.SPEEDCOMMAND_ID, x, y, theta)
+        packet = struct.pack('<BBfff', idx, C2000.SPEEDCOMMAND_ID, x, y, theta)
         packet = bytearray(_pack_c2000_command(packet))
-    elif mcu_version == "stm32":
+    elif mcu_version == MCUVersion.STM32F407:
         velocity = [x, y, theta]
-        packet = _stm32_pack_cmd(_stm32_pack_payload(velocity), STM32.CMD_MOVEMENT_COMMAND)
+        packet = _stm32_pack_cmd(_stm32_pack_payload(velocity), STM32.CMD_MOVEMENT_COMMAND, robot_idx=idx)
     else:
         raise Exception("La version du protocole serial devrait etre 1 ou 2")
 
@@ -51,6 +55,7 @@ def ping_robot(serial):
     ping = _stm32_pack_ping()
     serial.write(ping)
     serial.flush()
+    time.sleep(0.5)
 
     # TODO: extraire logique de lecture d'une commande
     # lecture de la reponse avec timeout
@@ -106,10 +111,11 @@ def _stm32_pack_cmd(payload, cmd=STM32.CMD_MOVEMENT_COMMAND, robot_idx=STM32.ADD
 
     return cobs.encode(bytes(packet)) + b'\0'
 
-def _stm32_generate_header(cmd=STM32_CMD_HEART_BEAT_REQUEST, destination_address=STM32_ADDR_BROADCAST):
-    return bytes([STM32_PROTOCOL_VERSION,
-                  STM32_ADDR_BASE_STATION,
-                  destination_address,
+
+def _stm32_generate_header(cmd=STM32.CMD_HEART_BEAT_REQUEST, robot_idx=STM32.ADDR_BROADCAST):
+    return bytes([STM32.PROTOCOL_VERSION,
+                  STM32.ADDR_BASE_STATION,
+                  robot_idx,
                   cmd,
                   0x00])
 
