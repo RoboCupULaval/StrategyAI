@@ -55,7 +55,7 @@ class CommandExecutor(Executor):
         return command.Kick(self._retrieve_player(player_id), kick_strength)
 
     def _generate_move_command(self, p_move_destination, player_id):
-        return command.MoveToAndRotate(self._retrieve_player(player_id), p_move_destination)
+        return command.Move(self._retrieve_player(player_id), p_move_destination)
 
     def _generate_empty_command(self, player_id):
         # Envoi d'une command vide qui fait l'arrêt du robot

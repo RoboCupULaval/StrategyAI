@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from ai.executors.regulator import PositionRegulator
 from ai.states.world_state import WorldState
 from ai.executors.debug_executor import DebugExecutor
 from ai.executors.module_executor import ModuleExecutor
@@ -13,7 +13,7 @@ TIMESTAMP_MINIMAL_DELTA_30_FPS = 0.033
 
 class Coach(object):
 
-    def __init__(self, mode_debug_active=True, pathfinder="astar"):
+    def __init__(self, mode_debug_active=True, pathfinder="astar", is_simulation=True):
         self.mode_debug_active = mode_debug_active
         # For the framework! TODO make this better!
         self.debug_commands = []
@@ -24,6 +24,7 @@ class Coach(object):
         self.module_executor = ModuleExecutor(self.world_state, pathfinder)
         self.play_executor = PlayExecutor(self.world_state)
         self.movement_executor = MovementExecutor(self.world_state)
+        self.regulator_executor = PositionRegulator(self.world_state, is_simulation)
         self.robot_command_executor = CommandExecutor(self.world_state)
 
     def main_loop(self):
@@ -36,6 +37,7 @@ class Coach(object):
         self.play_executor.exec()
         self.module_executor.exec()
         self.movement_executor.exec()
+        self.regulator_executor.exec()
         self.robot_command_executor.exec()
         self.debug_executor.exec()
 
