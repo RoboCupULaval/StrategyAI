@@ -7,54 +7,71 @@
     L'embarqué et le simulateur utilise un vecteur de vitesse (Pose) pour
     contrôler les robots.
 """
+from abc import abstractmethod
+
+import time
 
 from ..Game.Player import Player
 from ..Util.area import *
+import RULEngine.Communication.util.serial_protocol as protocol
 
 
 class _Command(object):
     def __init__(self, player):
         assert (isinstance(player, Player))
         self.player = player
-        self.dribble = True
-        self.dribble_speed = 10
-        self.kick = False
-        self.kick_speed = 0
-        self.kick_charge = False
-        self.is_speed_command = False
         self.pose = Pose()
-        self.team = player.team
-        self.stop_cmd = False
+        self.kick_speed = 0
+
+    @abstractmethod
+    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+        pass
 
 
 class Move(_Command):
-    def __init__(self, player, destination, kick_charge=False):
+    def __init__(self, player, destination):
         # Parameters Assertion
-        assert (isinstance(player, Player)), "player doit etre un Player"
         assert (isinstance(destination, Pose))
         super().__init__(player)
         self.pose = destination
-        self.kick_charge = kick_charge
+
+    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+        x = self.pose.position.x
+        y = self.pose.position.y
+        theta = self.pose.orientation
+        if self.mcu_version == protocol.MCUVersion.C2000:
+            x, y = x, -y
+
+        player_idx = self.player.id
+        packed_command = protocol.create_speed_command(x, y, theta, player_idx)
+
+        if player_idx == 4:
+            print("Command (x, y, t): {} -- {} -- {}".format(x, y, theta))
+
+        return packed_command
 
 
 class Kick(_Command):
-    def __init__(self, player, kick_speed=0.5):
+    def __init__(self, player):
         """ Kick speed est un float entre 0 et 1 """
-        assert (isinstance(player, Player))
-        assert (isinstance(kick_speed, (int, float)))
         super().__init__(player)
-        self.pose = Pose()
-        self.kick = True
-        self.kick_charge = False
+        self.kick_speed = 5
+
+    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+        return protocol.create_kick_command(self.player.id)
 
 
 class Stop(_Command):
     def __init__(self, player):
-        assert (isinstance(player, Player))
-
         super().__init__(player)
-        self.is_speed_command = True
-        self.pose = Pose()
-        self.stop_cmd = True
+
+    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+        return protocol.create_speed_command(0, 0, 0, self.player.id)
 
 
+class ChargeKick(_Command):
+    def __init__(self, player):
+        super().__init__(player)
+
+    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+        return protocol.create_charge_command(self.player.id)
