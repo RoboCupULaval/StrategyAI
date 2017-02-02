@@ -5,11 +5,12 @@ from ai.STA.Tactic.GoToPosition import GoToPosition
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.Idle import Idle
+from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
+
 
 from ai.STA.Tactic import tactic_constants
 from ai.Util.ball_possession import *
 from ai.STA.Tactic.tactic_constants import Flags
-
 
 from ai.Util.ball_possession import canGetBall, hasBall
 from RULEngine.Util.geometry import get_distance
@@ -43,20 +44,22 @@ class GoGetBall(Tactic):
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball
 
-        self.move_action = GoToPosition(self.game_state, self.player_id,
-                                        self.game_state.get_player_pose(self.player_id))
+        self.move_action = \
+            GoToPositionNoPathfinder(self.game_state,
+                                     self.player_id,
+                                     self.game_state.
+                                     get_player_pose(self.player_id))
         self.move_action.status_flag = Flags.SUCCESS
         self.last_ball_position = self.game_state.get_ball_position()
 
     def get_behind_ball(self):
 
         self.status_flag = Flags.WIP
-        move_action_status = self.move_action.status_flag
         dist = self._get_distance_from_ball()
 
-        if move_action_status == Flags.SUCCESS and dist <= POSITION_DEADZONE:
+        if dist <= POSITION_DEADZONE:
             self.next_state = self.halt
-        elif move_action_status == Flags.SUCCESS and dist > POSITION_DEADZONE:
+        elif dist > POSITION_DEADZONE:
             self.move_action = self._generate_move_to()
             self.next_state = self.get_behind_ball
         else:

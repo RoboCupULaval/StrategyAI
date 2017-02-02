@@ -1,10 +1,10 @@
 # Under MIT License, see LICENSE.txt
 import unittest
 
-from RULEngine.Framework import GameState as r_GameState
-from RULEngine.Game import Ball, Team, Field, Referee
-from RULEngine.Util import Pose, Position
-from RULEngine.Util.constant import PLAYER_PER_TEAM
+from RULEngine.Game.Game import Game
+from RULEngine.Game.Referee import Referee
+from RULEngine.Util.team_color_service import TeamColor, TeamColorService
+from RULEngine.Util.game_world import GameWorld
 from ai.states.game_state import GameState
 from ai.states.module_state import ModuleState
 
@@ -14,11 +14,17 @@ class TestGameStateManager(unittest.TestCase):
         Teste les différentes fonctionnalités du GameStateManager
     """
     def setUp(self):
-        self.field = Field.Field(Ball.Ball())
-        self.my_team = Team.Team(True)
-        self.other_team = Team.Team(False)
+        self.game = Game()
+        self.referee = Referee
+        self.game.set_referee(self.referee)
+        self.tcsvc = TeamColorService(TeamColor.YELLOW_TEAM)
+        self.game.set_our_team_color(self.tcsvc.OUR_TEAM_COLOR)
+        self.game_world_OK = GameWorld(self.game)
+        self.game_world_OK.set_team_color_svc(self.tcsvc)
+
         self.GameStateManager1 = GameState()
         self.GameStateManager2 = GameState()
+        self.GameStateManager1.set_reference(self.game_world_OK)
 
     def test_singleton(self):
         """
@@ -26,77 +32,53 @@ class TestGameStateManager(unittest.TestCase):
              i.e. s'il ne peut y avoir qu'une seule instance du manager
         """
         self.assertTrue(self.GameStateManager1 is self.GameStateManager2)
+        self.assertIs(self.GameStateManager1, self.GameStateManager2)
 
-    def test_update_ball_position(self):
-        new_ball_position = Position.Position(1500, 1500, 0)
-        self.GameStateManager2._update_ball_position(new_ball_position)
-        self.assertEqual(new_ball_position, self.GameStateManager1.get_ball_position())
+    def test_set_reference(self):
+        self.GameStateManager1.set_reference(self.game_world_OK)
+        self.assertIs(self.GameStateManager1.game.referee,
+                      self.game_world_OK.game.referee)
+        self.assertIs(self.GameStateManager1.field,
+                      self.game_world_OK.game.field)
+        self.assertIs(self.GameStateManager2.our_team_color,
+                      self.game.our_team_color)
 
-    def test_update_field(self):
-        new_ball_position = Position.Position(2500, 2500, 0)
-        self.field.move_ball(new_ball_position, 5)
-        self.GameStateManager2._update_field(self.field)
-        self.assertEqual(self.GameStateManager1.get_ball_position(), new_ball_position)
+        game_state_manager = GameState()
+        self.assertRaises(AssertionError,
+                          game_state_manager.set_reference, None)
+        game = Game()
+        game_world_nok = GameWorld(game)
+        self.assertRaises(AssertionError,
+                          game_state_manager.set_reference, game_world_nok)
+        game_world_nok.game.set_referee(self.referee)
+        self.assertRaises(AssertionError,
+                          game_state_manager.set_reference, game_world_nok)
+        game = Game()
+        game_world_nok = GameWorld(game)
+        game_world_nok.set_team_color_svc(self.tcsvc)
+        self.assertRaises(AssertionError,
+                          game_state_manager.set_reference, game_world_nok)
 
-    def test_update_player(self):
-        new_player_pose = Pose.Pose(Position.Position(1700, 1700, 0), 25)
-        self.GameStateManager2._update_player(3, new_player_pose, True)
-        self.assertEqual(new_player_pose, self.GameStateManager1.get_player_pose(3, True))
-        self.GameStateManager2._update_player(3, new_player_pose, False)
-        self.assertEqual(new_player_pose, self.GameStateManager1.get_player_pose(3, False))
+    def test_get_player_pose(self):
+        self.assertIs(self.GameStateManager1.get_player_pose(0, True),
+                      self.game.friends.players[0].pose)
+        self.assertIs(self.GameStateManager2.get_player_pose(0, False),
+                      self.game.enemies.players[0].pose)
+        self.assertIsNot(self.GameStateManager1.get_player_pose(0, True),
+                         self.game.friends.players[1].pose)
+        self.assertIsNot(self.GameStateManager2.get_player_pose(0, False),
+                         self.game.enemies.players[1].pose)
+        self.assertIsNot(self.GameStateManager1.get_player_pose(0, True),
+                         self.game.enemies.players[0].pose)
+        self.assertIsNot(self.GameStateManager2.get_player_pose(0, False),
+                         self.game.friends.players[0].pose)
 
-    def test_update_team(self):
-        new_player_pose = Pose.Pose(Position.Position(1000, 1000, 0), 25)
-        for i in range(PLAYER_PER_TEAM):
-            self.my_team.update_player(i, new_player_pose)
-            new_player_pose.position += 200
-        self.GameStateManager2._update_team(self.my_team, True)
-        for i in range(PLAYER_PER_TEAM):
-            self.assertEqual(self.GameStateManager1.get_player_pose(i, True), self.my_team.players[i].pose)
+    def test_get_player_position(self):
+        self.assertIs(self.GameStateManager1.get_player_position(0, True),
+                      self.game.friends.players[0].pose.position)
+        self.assertIs(self.GameStateManager2.get_player_position(0, False),
+                      self.game.enemies.players[0].pose.position)
 
-        new_player_pose = Pose.Pose(Position.Position(1000, 1000, 0), 25)
-        for i in range(PLAYER_PER_TEAM):
-            self.other_team.update_player(i, new_player_pose)
-            new_player_pose.position += 100
-        self.GameStateManager2._update_team(self.other_team, False)
-        for i in range(PLAYER_PER_TEAM):
-            self.assertEqual(self.GameStateManager1.get_player_pose(i, False), self.other_team.players[i].pose)
-
-    def test_update_timestamp(self):
-        new_timestamp = 123.25
-        self.GameStateManager2._update_timestamp(new_timestamp)
-        self.assertEqual(self.GameStateManager1.timestamp, new_timestamp)
-
-    def test_update(self):
-        new_timestamp = 145.36
-        new_ball_position = Position.Position(500, 500, 0)
-        self.field.move_ball(new_ball_position, 5)
-
-        new_player_pose = Pose.Pose(Position.Position(1000, 1000, 0), 25)
-        for i in range(PLAYER_PER_TEAM):
-            self.my_team.update_player(i, new_player_pose)
-            new_player_pose.position += 200
-
-        new_player_pose = Pose.Pose(Position.Position(1000, 1000, 0), 25)
-        for i in range(PLAYER_PER_TEAM):
-            self.other_team.update_player(i, new_player_pose)
-            new_player_pose.position += 100
-
-        new_game_state = r_GameState(
-            field=self.field,
-            referee=Referee.Referee(),
-            friends=self.my_team,
-            enemies=self.other_team,
-            timestamp=new_timestamp,
-            debug='Test'
-        )
-
-        self.GameStateManager2.update(new_game_state)
-        self.assertEqual(new_game_state.field.ball.position, self.GameStateManager1.get_ball_position())
-        for i in range(PLAYER_PER_TEAM):
-            self.assertEqual(self.GameStateManager1.get_player_pose(i, False), self.other_team.players[i].pose)
-            self.assertEqual(self.GameStateManager1.get_player_pose(i, False), self.other_team.players[i].pose)
-        self.assertEqual(new_game_state.timestamp, self.GameStateManager1.timestamp)
 
 
 class TestModuleManager(unittest.TestCase):

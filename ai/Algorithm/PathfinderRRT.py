@@ -44,7 +44,6 @@ class PathfinderRRT(Pathfinder):
             :param info_manager: référence sur l'InfoManager
         """
         super().__init__(p_worldstate)
-        self.last_paths_generated = [[self.ws.game_state.get_player_pose(x).position] for x in range(6)]
         self.paths = {}
         for i in range(6):
             self.paths[i] = []

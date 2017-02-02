@@ -8,6 +8,7 @@ from .Kick import Kick
 from .MoveToPosition import MoveToPosition
 from .MoveToDribblingBall import MoveToDribblingBall
 from .ProtectGoal import ProtectGoal
+from .PathfindToPosition import PathfindToPosition
 
 
 class ActionBook(object):
@@ -19,7 +20,8 @@ class ActionBook(object):
                            'Kick': Kick,
                            'MoveTo': MoveToPosition,
                            'MoveWithBall': MoveToDribblingBall,
-                           'ProtectGoal': ProtectGoal}
+                           'ProtectGoal': ProtectGoal,
+                           'PathfindToPosition': PathfindToPosition}
 
     def get_actions_name_list(self):
         return list(self.ActionBook.keys())
