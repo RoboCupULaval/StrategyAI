@@ -1,6 +1,6 @@
 
 from RULEngine.Util.constant import POSITION_DEADZONE
-from RULEngine.Util.geometry import get_distance
+from RULEngine.Util.Pose import Pose
 from ai.executors.executor import Executor
 from ai.Debug.debug_interface import DebugInterface
 
@@ -18,13 +18,14 @@ class MovementExecutor(Executor):
         current_ai_c = self.ws.play_state.current_ai_commands
 
         for ai_c in current_ai_c.values():
-            if len(ai_c.path) > 1:
+            if len(ai_c.path) > 0:
                 next_point = ai_c.path[0]
-                r_id = ai_c.robot_id
-                current_position = self.ws.game_state.get_player_position(r_id)
+                #r_id = ai_c.robot_id
+                #current_position = self.ws.game_state.get_player_position(r_id)
+                """
                 distance = get_distance(next_point.position, current_position)
                 if distance < POSITION_DEADZONE:
                     current_ai_c.pop(0)
                     next_point = ai_c.path[0]
-
-                ai_c.pose_goal = next_point
+                """
+                ai_c.pose_goal = Pose(next_point, 0)

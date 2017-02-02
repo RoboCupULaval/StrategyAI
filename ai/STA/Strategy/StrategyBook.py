@@ -4,6 +4,7 @@
 
 from .HumanControl import HumanControl
 from .SimpleDefense import SimpleDefense
+from .TestAstarStrategy import TestAstarStrategy
 from .SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
 from .WeirdmovementStrategy import WeirdmovementStrategy

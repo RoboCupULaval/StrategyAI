@@ -2,7 +2,7 @@
 
 from .Tactic import Tactic
 from . tactic_constants import Flags
-from ai.STA.Action.MoveToPosition import MoveToPosition
+from ai.STA.Action.PathfindToPosition import PathfindToPosition
 from RULEngine.Util.geometry import get_distance
 from RULEngine.Util.constant import POSITION_DEADZONE
 
@@ -19,7 +19,7 @@ class GoToPositionPathfinder(Tactic):
         else:
             self.status_flag = Flags.WIP
 
-        next_action = MoveToPosition(self.game_state, self.player_id,
+        next_action = PathfindToPosition(self.game_state, self.player_id,
                                      self.target)
         return next_action.exec()
 
