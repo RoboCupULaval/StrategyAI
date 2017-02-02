@@ -299,3 +299,30 @@ class AsGraph():
             free = free or node.free
 
         return free
+
+    def mergePointToLine(self, path):
+
+        start = 0
+        forward = 2
+        newPath = [path[0]]
+        while (forward < len(path)):
+            step1X = path[start + 1].x - path[start].x
+            step1Y = path[start + 1].y - path[start].y
+
+            forwardStepX = path[forward].x - path[start].x
+            forwardStepY = path[forward].y - path[start].y
+
+            if (step1X == forwardStepX and step1Y == forwardStepY):
+                # same direction
+                forward += 1
+            else:
+                start = forward
+                forward += 2
+
+
+
+
+
+
+
+
