@@ -26,7 +26,7 @@ class GrSimCommandSender(object):
             :param command: Command pour un robot
         """
         packet = grSim_Packet.grSim_Packet()
-        packet.commands.isteamyellow = command.team.is_team_yellow()
+        packet.commands.isteamyellow = command.player.team.is_team_yellow()
         packet.commands.timestamp = 0
         grsim_command = packet.commands.robot_commands.add()
         grsim_command.id = command.player.id
@@ -38,4 +38,6 @@ class GrSimCommandSender(object):
         grsim_command.kickspeedx = command.kick_speed
         grsim_command.kickspeedz = 0
 
+        print("Command (x, y, t): {} -- {} -- {}".format(command.pose.position.x, command.pose.position.y,
+                                                                 command.pose.orientation))
         self._send_packet(packet)

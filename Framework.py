@@ -12,12 +12,12 @@ import threading
 import time
 
 # Communication
+from RULEngine.Command.command import Stop
 from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.serial_command_sender import SerialType, SERIAL_DISABLED
 from RULEngine.Communication.util.robot_command_sender_factory import RobotCommandSenderFactory
 from RULEngine.Communication.util.serial_protocol import MCUVersion
-from .Command.command import Stop, PI
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.sender.uidebug_vision_sender import UIDebugVisionSender
@@ -81,8 +81,6 @@ class Framework(object):
         self.times = 0
         self.last_time = 0
         self.last_cmd_time = time.time()
-        simulation = serial == SERIAL_DISABLED
-        self.robots_pi = [PI(simulation_setting=simulation) for _ in range(6)]
 
         # VISION
         self.image_transformer = ImageTransformer()
@@ -241,15 +239,8 @@ class Framework(object):
 
     def _send_robot_commands(self, commands):
         """ Envoi les commades des robots au serveur. """
-        cmd_time = time.time()
-        delta_t = cmd_time - self.last_cmd_time
-        if delta_t > CMD_DELTA_TIME:
-            self.last_cmd_time = cmd_time
-
-            for idx, command in enumerate(commands):
-                pi_cmd = self.robots_pi[idx].update_pid_and_return_speed_command(command, delta_t)
-                command.pose = pi_cmd
-                self.robot_command_sender.send_command(command)
+        for command in commands:
+            self.robot_command_sender.send_command(command)
 
     def _send_debug_commands(self, debug_commands):
         """ Envoie les commandes de debug au serveur. """

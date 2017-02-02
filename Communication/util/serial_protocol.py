@@ -24,26 +24,41 @@ STM32_CMD_MOVEMENT_COMMAND = 0x02
 STM32_CMD_SET_REGISTER = 0x03
 STM32_CMD_ACK = 0x04
 STM32_CMD_ROBOT_CRASHED_NOTIFICATION = 0x26
+STM32_REG_KICK = 0x01
+STM32_REG_CHARGE_KICKER = 0x02
 STM32_ADDR_BASE_STATION = 0xFE
 STM32_ADDR_BROADCAST = 0xFF
 
 SERIAL_TIMEOUT = 0.1
 
 
-def create_speed_command(x, y, theta, id, mcu_version=MCUVersion.STM32F407):
+def create_speed_command(x, y, theta, robot_idx, mcu_version=MCUVersion.STM32F407):
     # FIXME: Retirer la branche quand le MCU (microcontroleur) C2000 n'est
     # plus utilise
     packet = None
     if mcu_version == MCUVersion.C2000:
-        packet = struct.pack('<BBfff', id, C2000_SPEEDCOMMAND_ID, x, y, theta)
+        packet = struct.pack('<BBfff', robot_idx, C2000_SPEEDCOMMAND_ID, x, y, theta)
         packet = bytearray(_pack_c2000_command(packet))
     elif mcu_version == MCUVersion.STM32F407:
         velocity = [x, y, theta]
-        packet = _stm32_pack_cmd(_stm32_pack_payload(velocity), STM32_CMD_MOVEMENT_COMMAND, id=id)
+        packet = _stm32_pack_cmd(_stm32_pack_payload(velocity), STM32_CMD_MOVEMENT_COMMAND, robot_idx=robot_idx)
     else:
         raise Exception("La version du protocole serial devrait etre 1 ou 2")
 
     return packet
+
+
+def create_charge_command(robot_idx):
+    return _create_register_command(STM32_REG_CHARGE_KICKER, 0, robot_idx)
+
+
+def create_kick_command(robot_idx):
+    return _create_register_command(STM32_REG_KICK, 0, robot_idx)
+
+
+def _create_register_command(register, value, robot_idx):
+    payload = bytes([register, value])
+    return _stm32_pack_cmd(payload, STM32_CMD_SET_REGISTER, robot_idx)
 
 
 def ping_robot(serial):
@@ -97,8 +112,8 @@ def _stm32_pack_payload(data):
     return struct.pack('%sf' % len(data), *data)
 
 
-def _stm32_pack_cmd(payload, cmd=STM32_CMD_MOVEMENT_COMMAND, id=STM32_ADDR_BROADCAST):
-    header = _stm32_generate_header(cmd, id)
+def _stm32_pack_cmd(payload, cmd=STM32_CMD_MOVEMENT_COMMAND, robot_idx=STM32_ADDR_BROADCAST):
+    header = _stm32_generate_header(cmd, robot_idx)
 
     packet = header
 
@@ -108,10 +123,10 @@ def _stm32_pack_cmd(payload, cmd=STM32_CMD_MOVEMENT_COMMAND, id=STM32_ADDR_BROAD
     return cobs.encode(bytes(packet)) + b'\0'
 
 
-def _stm32_generate_header(cmd=STM32_CMD_HEART_BEAT_REQUEST, destination_address=STM32_ADDR_BROADCAST):
+def _stm32_generate_header(cmd=STM32_CMD_HEART_BEAT_REQUEST, robot_idx=STM32_ADDR_BROADCAST):
     return bytes([STM32_PROTOCOL_VERSION,
                   STM32_ADDR_BASE_STATION,
-                  destination_address,
+                  robot_idx,
                   cmd,
                   0x00])
 

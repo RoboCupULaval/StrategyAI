@@ -8,6 +8,7 @@ import time
 
 from cobs import cobs
 
+from RULEngine.Command.command import _Command
 from RULEngine.Communication.util import serial_protocol as protocol
 from RULEngine.Communication.util.serial_protocol import MCUVersion
 
@@ -35,22 +36,9 @@ class SerialCommandSender(object):
         self.type = serial_type
         self.last_time = 0
 
-    def send_command(self, command):
-        x = command.pose.position.x
-        y = command.pose.position.y
-        theta = command.pose.orientation
-        if self.mcu_version == MCUVersion.C2000:
-            x, y = x, -y
-
-        player_idx = command.player.id
-        sercommand = protocol.create_speed_command(x, y, theta, player_idx)
-        # FIXME: hack bluetooth
-        if self.type == SerialType.NRF and player_idx == 1:
-            now = time.time()
-            delta = now - self.last_time
-            print("({}) -- Command (x, y, t): {} -- {} -- {}".format(delta, x, y, theta))
-            self.last_time = now
-            self.serial.write(sercommand)
+    def send_command(self, command : _Command):
+        packed_command = command.package_command(mcu_version=self.mcu_version)
+        self.serial.write(packed_command)
 
 
 def _get_port(serial_type):
