@@ -39,7 +39,7 @@ def create_speed_command(x, y, theta, id, mcu_version=MCUVersion.STM32F407):
         packet = bytearray(_pack_c2000_command(packet))
     elif mcu_version == MCUVersion.STM32F407:
         velocity = [x, y, theta]
-        packet = _stm32_pack_cmd(_stm32_pack_payload(velocity), STM32_CMD_MOVEMENT_COMMAND)
+        packet = _stm32_pack_cmd(_stm32_pack_payload(velocity), STM32_CMD_MOVEMENT_COMMAND, id=id)
     else:
         raise Exception("La version du protocole serial devrait etre 1 ou 2")
 
@@ -97,8 +97,8 @@ def _stm32_pack_payload(data):
     return struct.pack('%sf' % len(data), *data)
 
 
-def _stm32_pack_cmd(payload, cmd=STM32_CMD_MOVEMENT_COMMAND, destination_address=STM32_ADDR_BROADCAST):
-    header = _stm32_generate_header(cmd, destination_address)
+def _stm32_pack_cmd(payload, cmd=STM32_CMD_MOVEMENT_COMMAND, id=STM32_ADDR_BROADCAST):
+    header = _stm32_generate_header(cmd, id)
 
     packet = header
 
@@ -106,6 +106,7 @@ def _stm32_pack_cmd(payload, cmd=STM32_CMD_MOVEMENT_COMMAND, destination_address
         packet += payload
 
     return cobs.encode(bytes(packet)) + b'\0'
+
 
 def _stm32_generate_header(cmd=STM32_CMD_HEART_BEAT_REQUEST, destination_address=STM32_ADDR_BROADCAST):
     return bytes([STM32_PROTOCOL_VERSION,

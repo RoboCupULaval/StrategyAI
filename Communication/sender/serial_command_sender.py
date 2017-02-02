@@ -41,13 +41,11 @@ class SerialCommandSender(object):
         theta = command.pose.orientation
         if self.mcu_version == MCUVersion.C2000:
             x, y = x, -y
-        if int(x) == int(y) and int(x) == 0:
-            theta = 0
 
         player_idx = command.player.id
         sercommand = protocol.create_speed_command(x, y, theta, player_idx)
         # FIXME: hack bluetooth
-        if self.type == SerialType.NRF and player_idx == 4:
+        if self.type == SerialType.NRF and player_idx == 1:
             now = time.time()
             delta = now - self.last_time
             print("({}) -- Command (x, y, t): {} -- {} -- {}".format(delta, x, y, theta))
