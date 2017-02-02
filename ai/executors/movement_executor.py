@@ -20,12 +20,5 @@ class MovementExecutor(Executor):
         for ai_c in current_ai_c.values():
             if len(ai_c.path) > 0:
                 next_point = ai_c.path[0]
-                #r_id = ai_c.robot_id
-                #current_position = self.ws.game_state.get_player_position(r_id)
-                """
-                distance = get_distance(next_point.position, current_position)
-                if distance < POSITION_DEADZONE:
-                    current_ai_c.pop(0)
-                    next_point = ai_c.path[0]
-                """
+                # TODO ORIENTATION! PLEASES!
                 ai_c.pose_goal = Pose(next_point, 0)
