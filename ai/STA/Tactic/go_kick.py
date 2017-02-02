@@ -1,4 +1,5 @@
 # Under MIT licence, see LICENCE.txt
+import time
 from math import sqrt
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.GoBehind import GoBehind
@@ -6,6 +7,7 @@ from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Action.Kick import Kick
+from ai.STA.Action.AllStar import AllStar
 from ai.Debug.debug_interface import DebugInterface
 
 from RULEngine.Util.geometry import get_angle
@@ -49,6 +51,7 @@ class GoKick(Tactic):
         self.move_action = self._generate_move_to()
         self.move_action.status_flag = Flags.SUCCESS
         self.last_ball_position = self.game_state.get_ball_position()
+        self.charge_time = 0
 
     def get_behind_ball(self):
 
@@ -75,7 +78,7 @@ class GoKick(Tactic):
     def kiss_ball(self):
 
         if self._get_distance_from_ball() <= DISTANCE_TO_KICK_SIM:
-            self.next_state = self.kick
+            self.next_state = self.kick_charge
 
         # get a point between you and the ball to approach
         ball_pst = self.game_state.get_ball_position()
@@ -83,6 +86,15 @@ class GoKick(Tactic):
 
         return GoToPositionNoPathfinder(self.game_state, self.player_id,
                                         Pose(ball_pst, player_pose.orientation))
+
+    def kick_charge(self):
+        if self.charge_time == 0:
+            self.charge_time = time.time()
+
+        if time.time() - self.charge_time > 4:
+            self.next_state = self.kick
+        other_args = {"kick_charge": 0, "dribbling_on": True}
+        return AllStar(self.game_state, self.player_id, **other_args)
 
     def kick(self):
         self.next_state = self.halt
