@@ -14,9 +14,9 @@ class AsPathManager(Pathfinder):
 
         self.TopLeftCorner = AsPosition(-4500,3000)
         self.DownRigthCorner = AsPosition(4500,-3000)
-        self.RobotRadius = 125 # real radius is 90, 100 help avoid collision and make it easier to find interval
-        self.PreciseInterval = 125
-        self.ImpreciseInterval = 250
+        self.RobotRadius = 250  # real radius is 90, 100 help avoid collision and make it easier to find interval
+        self.PreciseInterval = 250
+        self.ImpreciseInterval = 500
         self.MaxDist = math.sqrt((self.DownRigthCorner.x - self.TopLeftCorner.x)**2 + (self.TopLeftCorner.y - self.DownRigthCorner.y)**2)
 
         self.preciseGraph = AsGraph(self.TopLeftCorner, self.DownRigthCorner, self.RobotRadius, self.PreciseInterval)
@@ -117,7 +117,7 @@ class AsPathManager(Pathfinder):
 
         for id in ourTeam:
             if (id != robot_id):
-                position = game_state.get_player_position(id, False)
+                position = game_state.get_player_position(id, True)
                 obstacleList.append(AsPosition(position.x, position.y))
 
         currentRobotPos = game_state.get_player_position(robot_id)
@@ -127,8 +127,8 @@ class AsPathManager(Pathfinder):
         robotAsPath = self.getAllAsPath([startAsPos], [endAsPos], obstacleList)
         robotPosPath = []
 
-        for i in range(0, len(robotAsPath), 1):
-            tempAsPos = robotAsPath[i]
+        for i in range(0, len(robotAsPath[0]), 1):
+            tempAsPos = robotAsPath[0][i]
             robotPosPath += [Position(tempAsPos.x, tempAsPos.y)]
 
         return robotPosPath
