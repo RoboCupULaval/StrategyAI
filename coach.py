@@ -6,7 +6,6 @@ from ai.executors.module_executor import ModuleExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.executors.command_executor import CommandExecutor
 from ai.executors.movement_executor import MovementExecutor
-
 # FIXME this thing!
 TIMESTAMP_MINIMAL_DELTA_60_FPS = 0.017
 TIMESTAMP_MINIMAL_DELTA_30_FPS = 0.033
