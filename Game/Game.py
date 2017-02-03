@@ -21,7 +21,7 @@ class Game:
         self.yellow_team = Team(TeamColor.YELLOW_TEAM)
         self.friends = None
         self.enemies = None
-        self.delta = None
+        self.delta_t = None
 
     def set_referee(self, p_referee):
         self.referee = p_referee
@@ -51,7 +51,7 @@ class Game:
         # self.referee.command = command
 
     def update(self, vision_frame, delta):
-        self.delta = delta
+        self.delta_t = delta
         self._update_ball(vision_frame, delta)
         self._update_players(vision_frame, delta)
 

@@ -45,7 +45,7 @@ class Move(_Command):
         player_idx = self.player.id
         packed_command = protocol.create_speed_command(x, y, theta, player_idx)
 
-        if player_idx == 1:
+        if player_idx == 4:
             print("Command (x, y, t): {} -- {} -- {}".format(x, y, theta))
 
         return packed_command
@@ -74,4 +74,5 @@ class ChargeKick(_Command):
         super().__init__(player)
 
     def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+        print("Kick charge!")
         return protocol.create_charge_command(self.player.id)
