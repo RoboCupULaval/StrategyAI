@@ -25,7 +25,7 @@ class GoToPositionNoPathfinder(Tactic):
     def check_success(self):
         player_position = self.game_state.get_player_position(player_id=self.player_id)
         distance = get_distance(player_position, self.target.position)
-        print("Distance: {}".format(distance))
+        #print("Distance: {}".format(distance))
         if distance < POSITION_DEADZONE:
             return True
         return False
