@@ -61,6 +61,7 @@ class CommandExecutor(Executor):
         return command.Move(self._retrieve_player(player_id), p_move_destination)
 
     def _generate_charge_kick_command(self, player_id):
+        print("generate kick charge command")
         return command.ChargeKick(self._retrieve_player(player_id))
 
     def _generate_empty_command(self, player_id):

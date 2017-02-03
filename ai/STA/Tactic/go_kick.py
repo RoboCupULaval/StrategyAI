@@ -21,8 +21,10 @@ from RULEngine.Util.Position import Position
 
 __author__ = 'RoboCupULaval'
 
-POSITION_DEADZONE = POSITION_DEADZONE + BALL_RADIUS + ROBOT_RADIUS
-DISTANCE_TO_KICK_REAL = ROBOT_RADIUS
+#POSITION_DEADZONE = POSITION_DEADZONE + BALL_RADIUS + ROBOT_RADIUS
+POSITION_DEADZONE = ROBOT_RADIUS * 3
+ORIENTATION_DEADZONE = 0.5
+DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 5
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
 
 
@@ -69,7 +71,7 @@ class GoKick(Tactic):
 
     def orient(self):
         player_pose = self.game_state.get_player_pose(self.player_id)
-        if get_angle(player_pose.position, self.target.position) - player_pose.orientation < 0.1:
+        if get_angle(player_pose.position, self.target.position) - player_pose.orientation < ORIENTATION_DEADZONE:
             self.next_state = self.kiss_ball
         # TODO angle check
         destination = Pose(player_pose.position, get_angle(player_pose.position, self.target.position))
@@ -77,7 +79,7 @@ class GoKick(Tactic):
 
     def kiss_ball(self):
 
-        if self._get_distance_from_ball() <= DISTANCE_TO_KICK_SIM:
+        if self._get_distance_from_ball() <= DISTANCE_TO_KICK_REAL:
             self.next_state = self.kick_charge
 
         # get a point between you and the ball to approach
@@ -93,7 +95,7 @@ class GoKick(Tactic):
 
         if time.time() - self.charge_time > 4:
             self.next_state = self.kick
-        other_args = {"kick_charge": 0, "dribbling_on": True}
+        other_args = {"charge_kick": True, "dribbling_on": True}
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def kick(self):
@@ -118,7 +120,7 @@ class GoKick(Tactic):
 
     def _generate_move_to(self):
         go_behind = GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position(), self.target.position,
-                             DISTANCE_BEHIND, pathfinding=True)
+                             DISTANCE_BEHIND, pathfinding=False)
         destination = go_behind  # .move_destination
         return destination  # GoToPosition(self.game_state, self.player_id, destination)
 
