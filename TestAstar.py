@@ -5,7 +5,7 @@ from ai.Algorithm.Astar.AsGraph import AsGraph
 from ai.Algorithm.AsPathManager import AsPathManager
 import timeit
 
-"""
+
 myGraphManager = AsPathManager(None)
 
 endPosList = [AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003)]
@@ -40,16 +40,23 @@ PreciseInterval = 100
 
 preciseGraph = AsGraph(TopLeftCorner, DownRigthCorner, RobotRadius, PreciseInterval)
 
-myPath = [AsPosition(0, 0),AsPosition(100, 100),AsPosition(200, 200),AsPosition(300, 300),AsPosition(300, 400),AsPosition(300, 500)]
 
-newPath = preciseGraph.mergePointToLine(myPath)
+myPath1 = [AsPosition(0, 0),AsPosition(100, 100),AsPosition(200, 200),AsPosition(300, 300),AsPosition(300, 400),AsPosition(300, 500),AsPosition(300, 600),AsPosition(300, 700),AsPosition(400, 700),AsPosition(400, 800)]
+myPath2 = [AsPosition(-200, 0),AsPosition(-100, 0),AsPosition(-100, 100),AsPosition(0, 100),AsPosition(100, 100),AsPosition(200, 200),AsPosition(300, 300),AsPosition(400, 400),AsPosition(500, 500),AsPosition(600, 600)]
+myPath3 = [AsPosition(0, 0),AsPosition(100, 100),AsPosition(0, 100),AsPosition(100, 200),AsPosition(200, 200),AsPosition(200, 300),AsPosition(300, 300),AsPosition(300, 200),AsPosition(400, 200),AsPosition(400, 100)]
 
-strPath = "Start  ->  "
-for pos in newPath:
-    strPath += str(pos.x) + "," + str(pos.y) + "  "
-print(strPath + "->  End")
+newPath = []
+newPath += [preciseGraph.mergePointToLine(myPath1)]
+newPath += [preciseGraph.mergePointToLine(myPath2)]
+newPath += [preciseGraph.mergePointToLine(myPath3)]
 
+for path in newPath:
+    strPath = "Start  ->  "
+    for pos in path:
+        strPath += str(pos.x) + "," + str(pos.y) + "  "
+    print(strPath + "->  End")
 
+"""
 
 
 

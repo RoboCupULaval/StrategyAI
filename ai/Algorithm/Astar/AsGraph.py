@@ -2,7 +2,7 @@
 
 from ai.Algorithm.Astar.AsPosition import AsPosition
 from ai.Algorithm.Astar.AsNode import AsNode
-from math import fabs
+from math import sqrt, acos
 
 class AsGraph():
 
@@ -162,7 +162,10 @@ class AsGraph():
                             openSet.add(node.key)
 
         self.setAllObstacle(obstacleList, True)
-        return self.getPath(goalNode, startNode, startPos, endPos, goalFree)
+        tempPath = self.getPath(goalNode, startNode, endPos, goalFree)
+        finalPath = self.mergePointToLine(tempPath)
+
+        return finalPath
 
 
 
@@ -178,7 +181,7 @@ class AsGraph():
 
         return currentNode
 
-    def getPath(self, goalNode, startNode, startPos, endPos, goalFree):
+    def getPath(self, goalNode, startNode, endPos, goalFree):
 
         path = []
         if (goalFree):
@@ -310,29 +313,46 @@ class AsGraph():
         while (forward < len(path)):
             stepX = path[start + 1].x - path[start].x
             stepY = path[start + 1].y - path[start].y
+            stepVector = (stepX, stepY)
 
             forwardStepX = path[forward].x - path[start].x
             forwardStepY = path[forward].y - path[start].y
+            forwardVector = (forwardStepX, forwardStepY)
 
-            compareStepX = stepX * forwardStepX
-            compareStepY = stepY * forwardStepY
 
-            if ((compareStepX > 0 or stepX == forwardStepX) and (compareStepY > 0 or stepY == forwardStepY)):
-                # same direction
+            if (self.vectorAngleAreSame(stepVector, forwardVector)):
                 forward += 1
                 isLine = True
             else:
                 if (isLine):
-                    newPath += [path[forward]]
+                    newPath += [path[forward - 1]]
                     isLine = False
-                    start = forward
-                    forward += 2
+                    start = forward - 1
+                    forward += 1
                 else:
                     newPath += [path[start + 1]]
                     start += 1
                     forward += 1
 
+        if (isLine):
+            newPath += [path[forward - 1]]
+        else:
+            newPath += [path[start + 1]]
+
         return newPath
+
+    def vectorAngleAreSame(self, vector1, vector2):
+
+        numerator = (vector1[0] * vector2[0]) + (vector1[1] * vector2[1])
+        denominator1 = sqrt(vector1[0]**2 + vector1[1]**2)
+        denominator2 = sqrt(vector2[0]**2 + vector2[1]**2)
+        denominator = denominator1 * denominator2
+
+        result = numerator / denominator
+
+        angle = acos(result)
+
+        return (angle < 0.01 and angle > -0.01)
 
 
 
