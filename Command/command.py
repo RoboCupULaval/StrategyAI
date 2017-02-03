@@ -39,13 +39,13 @@ class Move(_Command):
         x = self.pose.position.x
         y = self.pose.position.y
         theta = self.pose.orientation
-        if self.mcu_version == protocol.MCUVersion.C2000:
+        if mcu_version == protocol.MCUVersion.C2000:
             x, y = x, -y
 
         player_idx = self.player.id
         packed_command = protocol.create_speed_command(x, y, theta, player_idx)
 
-        if player_idx == 4:
+        if player_idx == 1:
             print("Command (x, y, t): {} -- {} -- {}".format(x, y, theta))
 
         return packed_command

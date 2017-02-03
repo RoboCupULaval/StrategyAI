@@ -28,9 +28,9 @@ class SerialCommandSender(object):
             port = _get_port(serial_type)
 
         self.serial = serial.Serial('/dev/' + port, baud_rate)
-        self.mcu = mcu_version
+        self.mcu_version = mcu_version
 
-        if mcu_version == MCUVersion.STM32F407 and serial_type == SerialType.BLUETOOTH:
+        if self.mcu_version == MCUVersion.STM32F407 and serial_type == SerialType.BLUETOOTH:
             protocol.ping_robot(self.serial)
 
         self.type = serial_type
