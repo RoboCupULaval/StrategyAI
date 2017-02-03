@@ -26,7 +26,8 @@ REAL_MAX_THETA_CMD = 300
 REAL_MIN_THETA_CMD = 45
 REAL_DEFAULT_STATIC_GAIN = 0.325
 REAL_DEFAULT_INTEGRAL_GAIN = 0.350
-REAL_DEFAULT_THETA_GAIN = 160
+#REAL_DEFAULT_THETA_GAIN = 160
+REAL_DEFAULT_THETA_GAIN = 0
 
 
 class PositionRegulator(Executor):
@@ -45,6 +46,8 @@ class PositionRegulator(Executor):
             retroaction_pose = self.ws.game_state.get_player_pose(robot_idx)
             cmd.pose_goal = self.regulators[robot_idx].\
                 update_pid_and_return_speed_command(cmd.pose_goal, retroaction_pose, delta_t)
+            #cmd.pose_goal.position.x = cmd.pose_goal.position.x / 2
+            #cmd.pose_goal.position.y = cmd.pose_goal.position.y / 2
 
 
 class PI(object):
@@ -85,10 +88,10 @@ class PI(object):
         u_y = up_y + ui_y
 
         # correction frame reference et saturation
-        x, y = self._referential_correction_saturation(pose_goal, u_x, u_y)
+        x, y = self._referential_correction_saturation(player_pose, u_x, u_y)
 
         # correction de theta
-        e_theta = pose_goal.orientation - pose_goal.orientation
+        e_theta = pose_goal.orientation - player_pose.orientation
         theta = self.ktheta * e_theta
         theta = self._saturate_orientation(theta)
 
