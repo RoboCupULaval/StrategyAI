@@ -1,10 +1,11 @@
 #pylint: skip-file
 
 from ai.Algorithm.Astar.AsPosition import AsPosition
+from ai.Algorithm.Astar.AsGraph import AsGraph
 from ai.Algorithm.AsPathManager import AsPathManager
 import timeit
 
-
+"""
 myGraphManager = AsPathManager(None)
 
 endPosList = [AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003)]
@@ -29,6 +30,24 @@ for path in paths:
     print("------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         
 print("End All")
+
+"""
+
+TopLeftCorner = AsPosition(-4500,3000)
+DownRigthCorner = AsPosition(4500,-3000)
+RobotRadius = 100  # real radius is 90, 100 help avoid collision and make it easier to find interval
+PreciseInterval = 100
+
+preciseGraph = AsGraph(TopLeftCorner, DownRigthCorner, RobotRadius, PreciseInterval)
+
+myPath = [AsPosition(0, 0),AsPosition(100, 100),AsPosition(200, 200),AsPosition(300, 300),AsPosition(300, 400),AsPosition(300, 500)]
+
+newPath = preciseGraph.mergePointToLine(myPath)
+
+strPath = "Start  ->  "
+for pos in newPath:
+    strPath += str(pos.x) + "," + str(pos.y) + "  "
+print(strPath + "->  End")
 
 
 

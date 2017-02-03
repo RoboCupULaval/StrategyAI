@@ -2,6 +2,7 @@
 
 from ai.Algorithm.Astar.AsPosition import AsPosition
 from ai.Algorithm.Astar.AsNode import AsNode
+from math import fabs
 
 class AsGraph():
 
@@ -305,19 +306,33 @@ class AsGraph():
         start = 0
         forward = 2
         newPath = [path[0]]
+        isLine = False
         while (forward < len(path)):
-            step1X = path[start + 1].x - path[start].x
-            step1Y = path[start + 1].y - path[start].y
+            stepX = path[start + 1].x - path[start].x
+            stepY = path[start + 1].y - path[start].y
 
             forwardStepX = path[forward].x - path[start].x
             forwardStepY = path[forward].y - path[start].y
 
-            if (step1X == forwardStepX and step1Y == forwardStepY):
+            compareStepX = stepX * forwardStepX
+            compareStepY = stepY * forwardStepY
+
+            if ((compareStepX > 0 or stepX == forwardStepX) and (compareStepY > 0 or stepY == forwardStepY)):
                 # same direction
                 forward += 1
+                isLine = True
             else:
-                start = forward
-                forward += 2
+                if (isLine):
+                    newPath += [path[forward]]
+                    isLine = False
+                    start = forward
+                    forward += 2
+                else:
+                    newPath += [path[start + 1]]
+                    start += 1
+                    forward += 1
+
+        return newPath
 
 
 
