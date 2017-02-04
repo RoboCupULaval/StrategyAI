@@ -25,9 +25,9 @@ from RULEngine.Util.Position import Position
 __author__ = 'RoboCupULaval'
 
 #POSITION_DEADZONE = POSITION_DEADZONE + BALL_RADIUS + ROBOT_RADIUS
-POSITION_DEADZONE = ROBOT_RADIUS * 5
+POSITION_DEADZONE = 350
 ORIENTATION_DEADZONE = 0.2
-DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.5
+DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
 
 
@@ -129,7 +129,7 @@ class GoKick(Tactic):
         player_pose = self.game_state.get_player_pose(self.player_id)
         ball_position = self.game_state.get_ball_position()
 
-        vec_dir = self.target.position - player_pose.position
+        vec_dir = self.target.position - ball_position
         mag = math.sqrt(vec_dir.x**2 + vec_dir.y**2)
         scale_coeff = ROBOT_RADIUS*3 / mag
 
