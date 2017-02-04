@@ -9,10 +9,10 @@ from RULEngine.Util.game_world import GameWorld
 from ai.Util.ai_command import AICommandType
 from ai.executors.executor import Executor
 
-INTEGRAL_DECAY = 0.125 # reduit de moitié aux 1/8 de secondes
+INTEGRAL_DECAY = 0.5 # reduit de moitié aux 1/8 de secondes
 ZERO_ACCUMULATOR_TRHESHOLD = 0.5
 FILTER_LENGTH = 1
-REGULATOR_DEADZONE = 50
+REGULATOR_DEADZONE = 120
 
 SIMULATION_MAX_NAIVE_CMD = math.sqrt(2) / 3
 SIMULATION_MIN_NAIVE_CMD = 0
@@ -23,12 +23,12 @@ SIMULATION_DEFAULT_INTEGRAL_GAIN = 0
 SIMULATION_DEFAULT_THETA_GAIN = 1
 
 REAL_MAX_NAIVE_CMD = 1200
-REAL_DEADZONE_CMD = 60
-REAL_MIN_NAIVE_CMD = 40
+REAL_DEADZONE_CMD = 110
+REAL_MIN_NAIVE_CMD = REAL_DEADZONE_CMD
 REAL_MAX_THETA_CMD = 300
 REAL_MIN_THETA_CMD = 30
 REAL_DEFAULT_STATIC_GAIN = 0.300
-REAL_DEFAULT_INTEGRAL_GAIN = 0.350
+REAL_DEFAULT_INTEGRAL_GAIN = 0.600
 REAL_DEFAULT_THETA_GAIN = 150
 REAL_DEFAUT_INTEGRAL_THETA_GAIN = 0
 #REAL_DEFAULT_THETA_GAIN = 0
@@ -74,7 +74,6 @@ class PI(object):
     def update_pid_and_return_speed_command(self, pose_goal, player_pose, delta_t=0.030, idx=4):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
         assert isinstance(pose_goal, Pose), "La consigne doit etre une Pose dans le PI"
-        delta_t = 0.030
         r_x, r_y = pose_goal.position.x, pose_goal.position.y
         t_x, t_y = player_pose.position.x, player_pose.position.y
         e_x = r_x - t_x
@@ -103,7 +102,7 @@ class PI(object):
         elif abs(u_x) < self.constants['deadzone-cmd']:
             u_x = 0
 
-        if 0 < u_y < self.constants['deadzone-cmd']:
+        if 0 < abs(u_y) < self.constants['deadzone-cmd']:
             if u_y > 0:
                 u_y = self.constants['deadzone-cmd']
             else:
@@ -129,9 +128,11 @@ class PI(object):
         cmd = Pose(Position(x, y), theta)
         cmd = self._filter_cmd(cmd)
         cmd.orientation = theta
-
-        if math.sqrt(e_x**2 + e_y**2) < REGULATOR_DEADZONE:
+        distance = math.sqrt(e_x**2 + e_y**2)
+        print(distance)
+        if distance < REGULATOR_DEADZONE:
             x, y = 0, 0
+        cmd.position = Position(x, y)
         return cmd
 
     def _saturate_orientation(self, theta):
