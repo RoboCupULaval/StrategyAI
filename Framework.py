@@ -239,13 +239,9 @@ class Framework(object):
 
     def _send_robot_commands(self, commands):
         """ Envoi les commades des robots au serveur. """
-        current_time = time.time()
-        delta_t = current_time - self.last_cmd_time
-        #if delta_t > CMD_DELTA_TIME:
         time.sleep(CMD_DELTA_TIME)
-        for command in commands:
-            self.last_cmd_time = current_time
-            if command.player.id == 4:
+        for idx, command in enumerate(commands):
+            if not isinstance(command, Stop):
                 self.robot_command_sender.send_command(command)
 
     def _send_debug_commands(self, debug_commands):
