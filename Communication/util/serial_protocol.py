@@ -26,10 +26,16 @@ STM32_CMD_ACK = 0x04
 STM32_CMD_ROBOT_CRASHED_NOTIFICATION = 0x26
 STM32_REG_KICK = 0x01
 STM32_REG_CHARGE_KICKER = 0x02
+STM32_REG_DRIBBLER = 0x03
 STM32_ADDR_BASE_STATION = 0xFE
 STM32_ADDR_BROADCAST = 0xFF
 
 SERIAL_TIMEOUT = 0.1
+
+
+class DribblerStatus(Enum):
+    DISABLED = 0
+    ENABLED = 1
 
 
 def create_speed_command(x, y, theta, robot_idx, mcu_version=MCUVersion.STM32F407):
@@ -54,6 +60,11 @@ def create_charge_command(robot_idx):
 
 def create_kick_command(robot_idx):
     return _create_register_command(STM32_REG_KICK, 0, robot_idx)
+
+
+def create_dribbler_command(robot_idx, status):
+    assert isinstance(status, DribblerStatus), "Le status du dribbler ne fait pas parti de l'enum DribblerStatus"
+    return _create_register_command(STM32_REG_DRIBBLER, status.value, robot_idx)
 
 
 def _create_register_command(register, value, robot_idx):

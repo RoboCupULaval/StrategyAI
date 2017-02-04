@@ -76,3 +76,15 @@ class ChargeKick(_Command):
     def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
         print("Kick charge!")
         return protocol.create_charge_command(self.player.id)
+
+
+class Dribbler(_Command):
+    def __init__(self, player, activate):
+        super().__init__(player)
+        self.dribbler_status = protocol.DribblerStatus.DISABLED
+        if activate:
+            self.dribbler_status = protocol.DribblerStatus.ENABLED
+
+    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+        print("Dribbler")
+        return protocol.create_dribbler_command(self.player.id, self.dribbler_status)
