@@ -63,8 +63,7 @@ def create_kick_command(robot_idx):
 
 
 def create_dribbler_command(robot_idx, status):
-    assert isinstance(status, DribblerStatus), "Le status du dribbler ne fait pas parti de l'enum DribblerStatus"
-    return _create_register_command(STM32_REG_DRIBBLER, status.value, robot_idx)
+    return _create_register_command(STM32_REG_DRIBBLER, status, robot_idx)
 
 
 def _create_register_command(register, value, robot_idx):

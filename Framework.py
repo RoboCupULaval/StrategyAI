@@ -12,7 +12,7 @@ import threading
 import time
 
 # Communication
-from RULEngine.Command.command import Stop
+from RULEngine.Command.command import Stop, Dribbler
 from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.serial_command_sender import SerialType, SERIAL_DISABLED
@@ -225,6 +225,9 @@ class Framework(object):
         try:
             team = self.game.friends
 
+            # FIXME: hack real life
+            cmd = Dribbler(team.players[4], 0)
+            self.robot_command_sender.send_command(cmd)
             for player in team.players.values():
                 command = Stop(player)
                 #self.robot_command_sender.send_command(command)

@@ -87,4 +87,8 @@ class Dribbler(_Command):
 
     def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
         print("Dribbler")
-        return protocol.create_dribbler_command(self.player.id, self.dribbler_status)
+        if self.dribbler_status == protocol.DribblerStatus.DISABLED:
+            status = 0
+        else:
+            status = 2
+        return protocol.create_dribbler_command(self.player.id, status)
