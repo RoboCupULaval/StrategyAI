@@ -13,7 +13,7 @@ class AICommand(object):
     def __init__(self, p_robot_id, p_command=AICommandType.STOP, **other_args):
         self.robot_id = p_robot_id
         self.command = p_command
-        self.dribbler_on = other_args.get("dribbler_on", False)
+        self.dribbler_on = other_args.get("dribbler_on", 0)
         self.pathfinder_on = other_args.get("pathfinder_on", False)
         self.kick_strength = other_args.get("kick_strength", 0)
         self.charge_kick = other_args.get("charge_kick", False)

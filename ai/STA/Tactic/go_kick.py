@@ -1,6 +1,8 @@
 # Under MIT licence, see LICENCE.txt
 import time
-from math import sqrt
+
+import math
+
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GetBall import GetBall
@@ -12,6 +14,7 @@ from ai.Debug.debug_interface import DebugInterface
 
 from RULEngine.Util.geometry import get_angle
 from ai.STA.Tactic.tactic_constants import Flags
+from ai.Util.ai_command import AICommand, AICommandType
 
 from ai.Util.ball_possession import canGetBall, hasBall
 from RULEngine.Util.geometry import get_distance
@@ -22,7 +25,7 @@ from RULEngine.Util.Position import Position
 __author__ = 'RoboCupULaval'
 
 #POSITION_DEADZONE = POSITION_DEADZONE + BALL_RADIUS + ROBOT_RADIUS
-POSITION_DEADZONE = ROBOT_RADIUS * 3
+POSITION_DEADZONE = ROBOT_RADIUS * 4
 ORIENTATION_DEADZONE = 0.5
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 5
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
@@ -65,17 +68,24 @@ class GoKick(Tactic):
         elif dist > POSITION_DEADZONE:
             self.move_action = self._generate_move_to()
             self.next_state = self.get_behind_ball
-        self.move_action = self._generate_move_to()
 
+        self.move_action = self._generate_move_to()
         return self.move_action
 
     def orient(self):
         player_pose = self.game_state.get_player_pose(self.player_id)
+        #vec_dir = self.target.position - player_pose.position
+        #theta = math.atan2(vec_dir.y, vec_dir.x)
         if get_angle(player_pose.position, self.target.position) - player_pose.orientation < ORIENTATION_DEADZONE:
-            self.next_state = self.kiss_ball
+            self.next_state = self.prepare_grab
         # TODO angle check
         destination = Pose(player_pose.position, get_angle(player_pose.position, self.target.position))
         return GoToPositionNoPathfinder(self.game_state, self.player_id, destination)
+
+    def prepare_grab(self):
+        self.next_state = self.kiss_ball
+        other_args = {"dribbler_on": 2}
+        return AllStar(self.game_state, self.player_id, **other_args)
 
     def kiss_ball(self):
 
@@ -95,23 +105,20 @@ class GoKick(Tactic):
 
         if time.time() - self.charge_time > 4:
             self.next_state = self.kick
-        other_args = {"charge_kick": True, "dribbling_on": True}
+        other_args = {"charge_kick": True, "dribbler_on": 1}
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def kick(self):
-        self.next_state = self.halt
-        # TODO KICKING!!!!
+        self.next_state = self.stop_dribbler
         return Kick(self.game_state, self.player_id, 7)
+
+    def stop_dribbler(self):
+        self.next_state = self.halt
+        other_args = {"pose_goal": self.game_state.get_player_pose(self.player_id), "dribbler_on": 1}
+        return AllStar(self.game_state, self.player_id, **other_args)
 
     def halt(self):
         self.status_flag = Flags.SUCCESS
-        dist = self._get_distance_from_ball()
-
-        if dist > POSITION_DEADZONE:
-            self.next_state = self.get_behind_ball
-        else:
-            self.next_state = self.halt
-
         return Idle(self.game_state, self.player_id)
 
     def _get_distance_from_ball(self):
@@ -119,10 +126,24 @@ class GoKick(Tactic):
                             self.game_state.get_ball_position())
 
     def _generate_move_to(self):
-        go_behind = GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position(), self.target.position,
-                             DISTANCE_BEHIND, pathfinding=False)
-        destination = go_behind  # .move_destination
-        return destination  # GoToPosition(self.game_state, self.player_id, destination)
+        player_pose = self.game_state.get_player_pose(self.player_id)
+        ball_position = self.game_state.get_ball_position()
+
+        vec_dir = self.target.position - player_pose.position
+        mag = math.sqrt(vec_dir.x**2 + vec_dir.y**2)
+        scale_coeff = ROBOT_RADIUS*3 / mag
+
+        dest_position = ball_position - (vec_dir*scale_coeff)
+        destination_pose = Pose(dest_position, player_pose.orientation)
+        player_id = self.player_id
+
+        class foo(object):
+            def __init__(self):
+                pass
+            def exec():
+                return AICommand(player_id, AICommandType.MOVE,
+                                 **{"pose_goal": destination_pose})
+        return foo # GoToPosition(self.game_state, self.player_id, destination)
 
     def _reset_ttl(self):
         super()._reset_ttl()

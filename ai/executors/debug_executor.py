@@ -80,7 +80,8 @@ class DebugExecutor(Executor):
         try:
             tactic = self.ws.play_state.get_new_tactic(tactic_name)\
                 (self.ws.game_state, player_id, target)
-        except:
+        except Exception as e:
+            print(e)
             print("La tactique n'a pas été appliquée par "
                   "cause de mauvais arguments.")
 

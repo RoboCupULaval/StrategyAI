@@ -28,7 +28,7 @@ class AllStar(Action):
                            "charge_kick": other_args.get("charge_kick", False),
                            "pose_goal": other_args.get("pose_goal", Pose())
                            }
-        self.ai_command_type = other_args.get("ai_command_type", AICommandType.STOP)
+        self.ai_command_type = other_args.get("ai_command_type", AICommandType.MOVE)
 
         # this is for the pathfinder only no direct assignation
         # TODO put that correctly
