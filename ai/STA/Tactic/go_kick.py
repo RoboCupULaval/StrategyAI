@@ -26,7 +26,7 @@ __author__ = 'RoboCupULaval'
 
 #POSITION_DEADZONE = POSITION_DEADZONE + BALL_RADIUS + ROBOT_RADIUS
 POSITION_DEADZONE = 350
-ORIENTATION_DEADZONE = 0.2
+ORIENTATION_DEADZONE = 0.05
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
 
@@ -61,7 +61,9 @@ class GoKick(Tactic):
     def get_behind_ball(self):
 
         self.status_flag = Flags.WIP
-        dist = self._get_distance_from_ball()
+        dest_position = self.get_behind_ball_position(self.game_state.get_ball_position())
+        player_position = self.game_state.get_player_pose(self.player_id).position
+        dist = get_distance(player_position, dest_position)
 
         if dist <= POSITION_DEADZONE:
             self.next_state = self.orient
@@ -129,11 +131,7 @@ class GoKick(Tactic):
         player_pose = self.game_state.get_player_pose(self.player_id)
         ball_position = self.game_state.get_ball_position()
 
-        vec_dir = self.target.position - ball_position
-        mag = math.sqrt(vec_dir.x**2 + vec_dir.y**2)
-        scale_coeff = ROBOT_RADIUS*3 / mag
-
-        dest_position = ball_position - (vec_dir*scale_coeff)
+        dest_position = self.get_behind_ball_position(ball_position)
         destination_pose = Pose(dest_position, player_pose.orientation)
         player_id = self.player_id
 
@@ -144,6 +142,13 @@ class GoKick(Tactic):
                 return AICommand(player_id, AICommandType.MOVE,
                                  **{"pose_goal": destination_pose})
         return foo # GoToPosition(self.game_state, self.player_id, destination)
+
+    def get_behind_ball_position(self, ball_position):
+        vec_dir = self.target.position - ball_position
+        mag = math.sqrt(vec_dir.x ** 2 + vec_dir.y ** 2)
+        scale_coeff = ROBOT_RADIUS * 3 / mag
+        dest_position = ball_position - (vec_dir * scale_coeff)
+        return dest_position
 
     def _reset_ttl(self):
         super()._reset_ttl()
