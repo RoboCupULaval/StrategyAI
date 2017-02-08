@@ -1,7 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.Util.singleton import Singleton
-from ai.executors.pathfinder_module import PathfinderModule
+from RULEngine.Util.singleton import Singleton
 
 """
     Ce module garde en mémoire les modules intelligents disponibles

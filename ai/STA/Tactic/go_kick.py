@@ -1,26 +1,19 @@
 # Under MIT licence, see LICENCE.txt
+import math
 import time
 
-import math
-
-from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Action.GoBehind import GoBehind
-from ai.STA.Action.GetBall import GetBall
-from ai.STA.Action.Idle import Idle
-from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
-from ai.STA.Action.Kick import Kick
-from ai.STA.Action.AllStar import AllStar
-from ai.Debug.debug_interface import DebugInterface
-
+from RULEngine.Debug.debug_interface import DebugInterface
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.constant import PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS, ROBOT_RADIUS
 from RULEngine.Util.geometry import get_angle
+from RULEngine.Util.geometry import get_distance
+from ai.STA.Action.AllStar import AllStar
+from ai.STA.Action.Idle import Idle
+from ai.STA.Action.Kick import Kick
+from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
+from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommand, AICommandType
-
-from ai.Util.ball_possession import canGetBall, hasBall
-from RULEngine.Util.geometry import get_distance
-from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS, ROBOT_RADIUS
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
 
 __author__ = 'RoboCupULaval'
 

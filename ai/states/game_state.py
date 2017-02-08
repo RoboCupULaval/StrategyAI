@@ -6,7 +6,7 @@
 """
 from RULEngine.Util.game_world import GameWorld
 
-from ai.Util.singleton import Singleton
+from RULEngine.Util.singleton import Singleton
 
 
 class GameState(object, metaclass=Singleton):
