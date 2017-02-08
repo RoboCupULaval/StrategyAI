@@ -12,7 +12,7 @@ import threading
 import time
 
 # Communication
-from RULEngine.Command.command import Stop
+from RULEngine.Command.command import Stop, Dribbler
 from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.serial_command_sender import SerialType, SERIAL_DISABLED
@@ -21,6 +21,8 @@ from RULEngine.Communication.util.serial_protocol import MCUVersion
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.sender.uidebug_vision_sender import UIDebugVisionSender
+# Debug
+from RULEngine.Debug.debug_interface import DebugInterface
 
 # Game objects
 from RULEngine.Game.Game import Game
@@ -64,6 +66,10 @@ class Framework(object):
         # because this thing below is a callable!
         self.vision_redirecter = lambda *args:None
         self.vision_routine = self._normal_vision
+
+        # Debug
+        self.outgoing_debug = []
+        self.debug = DebugInterface()
 
         self._init_communication(serial=serial, redirect=redirect, mcu_version=mcu_version)
 
@@ -189,11 +195,11 @@ class Framework(object):
         if self._is_frame_number_different(vision_frame):
             self._update_players_and_ball(vision_frame)
             self._update_debug_info()
-            robot_commands, debug_commands = self.ia_coach_mainloop()
+            robot_commands = self.ia_coach_mainloop()
 
             # Communication
             self._send_robot_commands(robot_commands)
-            self._send_debug_commands(debug_commands)
+            self._send_debug_commands()
 
     def _redirected_vision(self):
         vision_frames = self.vision.pop_frames()
@@ -203,11 +209,11 @@ class Framework(object):
         if self.image_transformer.has_new_image():
             self._update_players_and_ball(new_image_packet)
             self._update_debug_info()
-            robot_commands, debug_commands = self.ia_coach_mainloop()
+            robot_commands = self.ia_coach_mainloop()
 
             # Communication
             self._send_robot_commands(robot_commands)
-            self._send_debug_commands(debug_commands)
+            self._send_debug_commands()
 
     def _acquire_last_vision_frame(self):
         return self.vision.get_latest_frame()
@@ -225,9 +231,12 @@ class Framework(object):
         try:
             team = self.game.friends
 
+            # FIXME: hack real life
+            cmd = Dribbler(team.players[4], 0)
+            self.robot_command_sender.send_command(cmd)
             for player in team.players.values():
                 command = Stop(player)
-                self.robot_command_sender.send_command(command)
+                #self.robot_command_sender.send_command(command)
         except:
             print("Could not stop players")
             raise StopPlayerError("Au nettoyage il a été impossible d'arrêter les joueurs.")
@@ -239,18 +248,22 @@ class Framework(object):
 
     def _send_robot_commands(self, commands):
         """ Envoi les commades des robots au serveur. """
-        current_time = time.time()
-        delta_t = current_time - self.last_cmd_time
-        if delta_t > CMD_DELTA_TIME:
-            for command in commands:
-                self.last_cmd_time = current_time
-                if command.player.id == 1:
-                    self.robot_command_sender.send_command(command)
+        time.sleep(CMD_DELTA_TIME)
+        for idx, command in enumerate(commands):
+            if not isinstance(command, Stop):
+                self.robot_command_sender.send_command(command)
 
-    def _send_debug_commands(self, debug_commands):
+    def _send_debug_commands(self):
         """ Envoie les commandes de debug au serveur. """
-        if debug_commands:
-            self.uidebug_command_sender.send_command(debug_commands)
+        self.outgoing_debug = self.debug.debug_state
+        print(self.outgoing_debug)
+        packet_represented_commands = [c.get_packet_repr() for c in self.outgoing_debug]
+        #print(packet_represented_commands)
+        # TODO you know what
+        if 1:
+            self.uidebug_command_sender.send_command(packet_represented_commands)
+
+        self.outgoing_debug.clear()
 
     def _sigint_handler(self, signum, frame):
         self.stop_game()

@@ -45,8 +45,9 @@ class Move(_Command):
         player_idx = self.player.id
         packed_command = protocol.create_speed_command(x, y, theta, player_idx)
 
-        if player_idx == 1:
-            print("Command (x, y, t): {} -- {} -- {}".format(x, y, theta))
+        if player_idx == 4:
+            pass
+            #print("Command (x, y, t): {} -- {} -- {}".format(x, y, theta))
 
         return packed_command
 
@@ -74,4 +75,21 @@ class ChargeKick(_Command):
         super().__init__(player)
 
     def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+        print("Kick charge!")
         return protocol.create_charge_command(self.player.id)
+
+
+class Dribbler(_Command):
+    def __init__(self, player, activate):
+        super().__init__(player)
+        self.dribbler_status = protocol.DribblerStatus.DISABLED
+        if activate:
+            self.dribbler_status = protocol.DribblerStatus.ENABLED
+
+    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+        print("Dribbler")
+        if self.dribbler_status == protocol.DribblerStatus.DISABLED:
+            status = 0
+        else:
+            status = 2
+        return protocol.create_dribbler_command(self.player.id, status)
