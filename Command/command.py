@@ -46,7 +46,8 @@ class Move(_Command):
         packed_command = protocol.create_speed_command(x, y, theta, player_idx)
 
         if player_idx == 4:
-            print("Command (x, y, t): {} -- {} -- {}".format(x, y, theta))
+            pass
+            #print("Command (x, y, t): {} -- {} -- {}".format(x, y, theta))
 
         return packed_command
 

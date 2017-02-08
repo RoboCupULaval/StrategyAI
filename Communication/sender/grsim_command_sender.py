@@ -38,6 +38,6 @@ class GrSimCommandSender(object):
         grsim_command.kickspeedx = command.kick_speed
         grsim_command.kickspeedz = 0
 
-        print("Command (x, y, t): {} -- {} -- {}".format(command.pose.position.x, command.pose.position.y,
-                                                                 command.pose.orientation))
+        #print("Command (x, y, t): {} -- {} -- {}".format(command.pose.position.x, command.pose.position.y,
+        #                                                         command.pose.orientation))
         self._send_packet(packet)
