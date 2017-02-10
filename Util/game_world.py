@@ -8,5 +8,8 @@ class GameWorld:
         self.timestamp = None
         self.team_color_svc = None
 
+    def set_timestamp(self, timestamp_ref):
+        self.timestamp = timestamp_ref
+
     def set_team_color_svc(self, p_team_color_svc):
         self.team_color_svc = p_team_color_svc
