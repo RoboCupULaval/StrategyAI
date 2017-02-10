@@ -36,7 +36,7 @@ class SerialCommandSender(object):
         self.type = serial_type
         self.last_time = 0
 
-    def send_command(self, command : _Command):
+    def send_command(self, command: _Command):
         packed_command = command.package_command(mcu_version=self.mcu_version)
         self.serial.write(packed_command)
 

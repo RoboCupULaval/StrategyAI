@@ -7,3 +7,4 @@ class Field():
 
     def move_ball(self, position, delta):
         self.ball.set_position(position, delta)
+

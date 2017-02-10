@@ -256,11 +256,8 @@ class Framework(object):
     def _send_debug_commands(self):
         """ Envoie les commandes de debug au serveur. """
         self.outgoing_debug = self.debug.debug_state
-        print(self.outgoing_debug)
         packet_represented_commands = [c.get_packet_repr() for c in self.outgoing_debug]
-        #print(packet_represented_commands)
-        # TODO you know what
-        if 1:
+        if self.uidebug_command_sender is not None:
             self.uidebug_command_sender.send_command(packet_represented_commands)
 
         self.outgoing_debug.clear()
