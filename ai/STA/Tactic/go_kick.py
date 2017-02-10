@@ -126,15 +126,9 @@ class GoKick(Tactic):
 
         dest_position = self.get_behind_ball_position(ball_position)
         destination_pose = Pose(dest_position, player_pose.orientation)
-        player_id = self.player_id
 
-        class foo(object):
-            def __init__(self):
-                pass
-            def exec():
-                return AICommand(player_id, AICommandType.MOVE,
-                                 **{"pose_goal": destination_pose})
-        return foo # GoToPosition(self.game_state, self.player_id, destination)
+        return AllStar(self.game_state, self.player_id, **{"pose_goal": destination_pose,
+                                                           "ai_command_type": AICommandType.MOVE})
 
     def get_behind_ball_position(self, ball_position):
         vec_dir = self.target.position - ball_position
