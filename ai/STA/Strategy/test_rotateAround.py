@@ -6,7 +6,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.Algorithm.Node import Node
 from ai.STA.Strategy.Strategy import Strategy
-from ai.STA.Tactic.ProtectGoal import GoalKeeper
+from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.RotateAroundBall import RotateAroundBall
 from ai.STA.Tactic.PassBall import PassBall
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
