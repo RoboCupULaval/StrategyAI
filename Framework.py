@@ -21,6 +21,8 @@ from RULEngine.Communication.util.serial_protocol import MCUVersion
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.sender.uidebug_vision_sender import UIDebugVisionSender
+# Debug
+from RULEngine.Debug.debug_interface import DebugInterface
 
 # Game objects
 from RULEngine.Game.Game import Game
@@ -50,6 +52,12 @@ class Framework(object):
         construit les objets qui sont toujours necéssaire à son fonctionnement
         correct.
         """
+        # time
+        self.last_frame_number = 0
+        self.time_stamp = time.time()
+        self.last_time = 0
+        self.last_cmd_time = time.time()
+
         # thread
         self.ia_running_thread = None
         self.thread_terminate = threading.Event()
@@ -65,6 +73,10 @@ class Framework(object):
         self.vision_redirecter = lambda *args:None
         self.vision_routine = self._normal_vision
 
+        # Debug
+        self.outgoing_debug = []
+        self.debug = DebugInterface()
+
         self._init_communication(serial=serial, redirect=redirect, mcu_version=mcu_version)
 
         # Game elements
@@ -76,18 +88,14 @@ class Framework(object):
 
         self._create_game_world()
 
-        # time
-        self.last_frame_number = 0
-        self.times = 0
-        self.last_time = 0
-        self.last_cmd_time = time.time()
-
         # VISION
         self.image_transformer = ImageTransformer()
 
         # ia couplage
         self.ia_coach_mainloop = None
         self.ia_coach_initializer = None
+
+        self.debug.add_log(1, "Framework started in {} s".format(time.time() - self.time_stamp))
 
     def _init_communication(self, serial=SERIAL_DISABLED, debug=True, redirect=False, mcu_version=MCUVersion.STM32F407):
         # first make sure we are not already running
@@ -121,6 +129,7 @@ class Framework(object):
 
         # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
         while not self.thread_terminate.is_set():
+            self.time_stamp = time.time()
             self.vision_routine()
 
     def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer,
@@ -136,7 +145,7 @@ class Framework(object):
         self.game_world.game.set_our_team_color(team_color)
         self.team_color_service = TeamColorService(team_color)
         self.game_world.team_color_svc = self.team_color_service
-        print(str(team_color) + "###DEBUG###")
+        print("Framework partie avec ", str(team_color))
 
         self.ia_coach_initializer(self.game_world)
 
@@ -153,12 +162,14 @@ class Framework(object):
         """
             Créé le GameWorld pour contenir les éléments d'une partie normale:
              l'arbitre, la Game (Field, teams, players).
+             C'est un data transfer object pour les références du RULEngine vers l'IA
         """
 
         self.referee = Referee()
         self.game = Game()
         self.game.set_referee(self.referee)
         self.game_world = GameWorld(self.game)
+        self.game_world.set_timestamp(self.time_stamp)
 
     def _update_players_and_ball(self, vision_frame):
         """ Met à jour le GameState selon la frame de vision obtenue. """
@@ -189,11 +200,11 @@ class Framework(object):
         if self._is_frame_number_different(vision_frame):
             self._update_players_and_ball(vision_frame)
             self._update_debug_info()
-            robot_commands, debug_commands = self.ia_coach_mainloop()
+            robot_commands = self.ia_coach_mainloop()
 
             # Communication
             self._send_robot_commands(robot_commands)
-            self._send_debug_commands(debug_commands)
+            self._send_debug_commands()
 
     def _redirected_vision(self):
         vision_frames = self.vision.pop_frames()
@@ -203,11 +214,11 @@ class Framework(object):
         if self.image_transformer.has_new_image():
             self._update_players_and_ball(new_image_packet)
             self._update_debug_info()
-            robot_commands, debug_commands = self.ia_coach_mainloop()
+            robot_commands = self.ia_coach_mainloop()
 
             # Communication
             self._send_robot_commands(robot_commands)
-            self._send_debug_commands(debug_commands)
+            self._send_debug_commands()
 
     def _acquire_last_vision_frame(self):
         return self.vision.get_latest_frame()
@@ -230,7 +241,7 @@ class Framework(object):
             self.robot_command_sender.send_command(cmd)
             for player in team.players.values():
                 command = Stop(player)
-                #self.robot_command_sender.send_command(command)
+                self.robot_command_sender.send_command(command)
         except:
             print("Could not stop players")
             raise StopPlayerError("Au nettoyage il a été impossible d'arrêter les joueurs.")
@@ -244,13 +255,17 @@ class Framework(object):
         """ Envoi les commades des robots au serveur. """
         time.sleep(CMD_DELTA_TIME)
         for idx, command in enumerate(commands):
-            if not isinstance(command, Stop):
-                self.robot_command_sender.send_command(command)
+            self.robot_command_sender.send_command(command)
 
-    def _send_debug_commands(self, debug_commands):
+    def _send_debug_commands(self):
         """ Envoie les commandes de debug au serveur. """
-        if debug_commands:
-            self.uidebug_command_sender.send_command(debug_commands)
+        self.outgoing_debug = self.debug.debug_state
+        packet_represented_commands = [c.get_packet_repr() for c in self.outgoing_debug]
+        if self.uidebug_command_sender is not None:
+            self.uidebug_command_sender.send_command(packet_represented_commands)
+
+        self.outgoing_debug.clear()
+        self.game_world.debug_info.clear()
 
     def _sigint_handler(self, signum, frame):
         self.stop_game()
