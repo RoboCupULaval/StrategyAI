@@ -241,7 +241,7 @@ class Framework(object):
             self.robot_command_sender.send_command(cmd)
             for player in team.players.values():
                 command = Stop(player)
-                #self.robot_command_sender.send_command(command)
+                self.robot_command_sender.send_command(command)
         except:
             print("Could not stop players")
             raise StopPlayerError("Au nettoyage il a été impossible d'arrêter les joueurs.")
@@ -255,8 +255,7 @@ class Framework(object):
         """ Envoi les commades des robots au serveur. """
         time.sleep(CMD_DELTA_TIME)
         for idx, command in enumerate(commands):
-            if not isinstance(command, Stop):
-                self.robot_command_sender.send_command(command)
+            self.robot_command_sender.send_command(command)
 
     def _send_debug_commands(self):
         """ Envoie les commandes de debug au serveur. """
