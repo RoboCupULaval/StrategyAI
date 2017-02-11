@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.Util.singleton import Singleton
+from RULEngine.Util.singleton import Singleton
 
 
 class DebugState(object, metaclass=Singleton):

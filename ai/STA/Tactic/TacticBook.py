@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from .GoGetBall import GoGetBall
-from .ProtectGoal import GoalKeeper
+from .GoalKeeper import GoalKeeper
 from .GoToPosition import GoToPosition
 from .RotateAroundBall import RotateAroundBall
 from .Stop import Stop

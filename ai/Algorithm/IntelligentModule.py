@@ -3,7 +3,8 @@
     Contient les classes mères pour les modules intelligents.
 """
 from abc import abstractmethod, ABCMeta
-from ai.Debug.debug_interface import DebugInterface
+
+from RULEngine.Debug.debug_interface import DebugInterface
 
 __author__ = 'RoboCupULaval'
 

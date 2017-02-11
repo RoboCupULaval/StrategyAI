@@ -129,7 +129,7 @@ class PI(object):
         cmd = self._filter_cmd(cmd)
         cmd.orientation = theta
         distance = math.sqrt(e_x**2 + e_y**2)
-        print(distance)
+        # print(distance)
         if distance < REGULATOR_DEADZONE:
             x, y = 0, 0
         cmd.position = Position(x, y)

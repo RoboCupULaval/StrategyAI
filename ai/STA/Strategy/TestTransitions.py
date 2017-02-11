@@ -5,6 +5,7 @@ from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
+from ai.STA.Tactic.GoalKeeper import GoalKeeper
 
 __author__ = 'RoboCupULaval'
 
@@ -20,8 +21,6 @@ class TestTransitions(Strategy):
         super().__init__(p_game_state)
 
         self.add_tactic(0, GoalKeeper(self.game_state, 0))
-
-
 
         for i in range(1, PLAYER_PER_TEAM):
             self.add_tactic(i, Stop(self.game_state, i))

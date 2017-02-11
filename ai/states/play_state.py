@@ -1,8 +1,8 @@
 # Under MIT License, see LICENSE.txt
 
+from RULEngine.Util.singleton import Singleton
 from ai.STA.Strategy.StrategyBook import StrategyBook
 from ai.STA.Tactic.TacticBook import TacticBook
-from ai.Util.singleton import Singleton
 
 
 class PlayState(object, metaclass=Singleton):

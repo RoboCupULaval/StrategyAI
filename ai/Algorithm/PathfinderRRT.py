@@ -8,19 +8,15 @@
 
 """
 # FIXME IMPORT!
-import random
-import math
 import copy
+import math
+import random
 import time
-import socket
-import pickle
 
+from RULEngine.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import POSITION_DEADZONE
 from ai.Algorithm.IntelligentModule import Pathfinder
-
-from ai.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 
 OBSTACLE_DEAD_ZONE = 700
 TIME_TO_UPDATE = 1

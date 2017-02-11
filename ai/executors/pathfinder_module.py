@@ -1,8 +1,9 @@
-from ai.executors.executor import Executor
-from ai.Algorithm.PathfinderRRT import PathfinderRRT
-from ai.Algorithm.AsPathManager import AsPathManager
-from ai.Debug.debug_interface import DebugInterface,COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 import time
+
+from RULEngine.Debug.debug_interface import DebugInterface,COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
+from ai.Algorithm.AsPathManager import AsPathManager
+from ai.Algorithm.PathfinderRRT import PathfinderRRT
+from ai.executors.executor import Executor
 
 
 class PathfinderModule(Executor):

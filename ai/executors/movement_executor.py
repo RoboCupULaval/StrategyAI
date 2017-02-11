@@ -1,8 +1,6 @@
-
-from RULEngine.Util.constant import POSITION_DEADZONE
+from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Util.Pose import Pose
 from ai.executors.executor import Executor
-from ai.Debug.debug_interface import DebugInterface
 
 
 class MovementExecutor(Executor):

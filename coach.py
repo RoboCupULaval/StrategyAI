@@ -43,11 +43,8 @@ class Coach(object):
 
         self.robot_commands = self.world_state.\
             play_state.ready_to_ship_robot_packet_list
-        if self.mode_debug_active:
-            self.debug_commands = self.world_state.\
-                debug_state.to_ui_packet_debug_cmds
 
-        return self.robot_commands, self.debug_commands
+        return self.robot_commands
 
     def set_reference(self, world_reference):
         self.world_state.set_reference(world_reference)
