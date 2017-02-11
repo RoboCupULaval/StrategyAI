@@ -2,7 +2,6 @@
 
 from RULEngine.Debug.debug_command import DebugCommand
 from RULEngine.Util.singleton import Singleton
-from ai.states.debug_state import DebugState
 
 
 class Color(object):

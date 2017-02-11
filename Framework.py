@@ -265,6 +265,7 @@ class Framework(object):
             self.uidebug_command_sender.send_command(packet_represented_commands)
 
         self.outgoing_debug.clear()
+        self.game_world.debug_info.clear()
 
     def _sigint_handler(self, signum, frame):
         self.stop_game()
