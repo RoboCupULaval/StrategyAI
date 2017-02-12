@@ -4,7 +4,6 @@ from .Tactic import Tactic
 from . tactic_constants import Flags
 from ai.STA.Action.PathfindToPosition import PathfindToPosition
 from RULEngine.Util.geometry import get_distance
-from RULEngine.Util.constant import POSITION_DEADZONE
 
 
 class GoToPositionPathfinder(Tactic):
@@ -27,6 +26,6 @@ class GoToPositionPathfinder(Tactic):
         player_position = \
             self.game_state.get_player_position(player_id=self.player_id)
         distance = get_distance(player_position, self.target.position)
-        if distance < POSITION_DEADZONE:
+        if distance < self.game_state.const["POSITION_DEADZONE"]:
             return True
         return False

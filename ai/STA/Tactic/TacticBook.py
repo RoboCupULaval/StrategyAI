@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from .GoGetBall import GoGetBall
-from .ProtectGoal import GoalKeeper
+from .GoalKeeper import GoalKeeper
 from .GoToPosition import GoToPosition
 from .RotateAroundBall import RotateAroundBall
 from .Stop import Stop
@@ -9,6 +9,7 @@ from .ProtectZone import ProtectZone
 from .DemoFollowBall import DemoFollowBall
 from .GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from .goToPositionPathfinder import GoToPositionPathfinder
+from .go_kick import GoKick
 
 
 class TacticBook(object):
@@ -20,7 +21,8 @@ class TacticBook(object):
                             'DemoFollowBall': DemoFollowBall,
                             'Stop': Stop,
                             'GoToPositionNoPathfinder': GoToPositionNoPathfinder,
-                            'GoToPositionPathfinder': GoToPositionPathfinder}
+                            'GoToPositionPathfinder': GoToPositionPathfinder,
+                            'GoKick': GoKick}
 
     def get_tactics_name_list(self):
         return list(self.tactic_book.keys())

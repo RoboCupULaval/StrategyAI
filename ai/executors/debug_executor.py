@@ -1,10 +1,11 @@
 # Under MIT License, see LICENSE.txt
 
-from RULEngine.Util.Pose import Pose, Position
-from ai.Debug.ui_debug_command import UIDebugCommand
-from ai.executors.executor import Executor
-from ai.STA.Strategy.HumanControl import HumanControl
 import copy
+
+from RULEngine.Debug.ui_debug_command import UIDebugCommand
+from RULEngine.Util.Pose import Pose, Position
+from ai.STA.Strategy.HumanControl import HumanControl
+from ai.executors.executor import Executor
 
 
 class DebugExecutor(Executor):
@@ -13,9 +14,7 @@ class DebugExecutor(Executor):
         super().__init__(p_world_state)
 
     def exec(self):
-
         self._execute_incoming_debug_commands()
-        self._execute_outgoing_debug_commands()
 
     def _execute_incoming_debug_commands(self):
         for command in self.ws.debug_state.from_ui_debug_commands:
@@ -28,16 +27,6 @@ class DebugExecutor(Executor):
     def _apply_incoming_debug_command(self):
         for command in self.ws.debug_state.transformed_ui_debug_commands:
             self._parse_command(command)
-
-    def _execute_outgoing_debug_commands(self):
-        # todo make this work!
-        packet_represented_commands = \
-            [c.get_packet_repr()
-             for c in self.ws.debug_state.from_ai_raw_debug_cmds]
-
-        self.ws.debug_state.to_ui_packet_debug_cmds = \
-            copy.deepcopy(packet_represented_commands)
-        self.ws.debug_state.from_ai_raw_debug_cmds.clear()
 
     def _parse_command(self, cmd):
         if cmd.is_strategy_cmd():
@@ -80,7 +69,8 @@ class DebugExecutor(Executor):
         try:
             tactic = self.ws.play_state.get_new_tactic(tactic_name)\
                 (self.ws.game_state, player_id, target)
-        except:
+        except Exception as e:
+            print(e)
             print("La tactique n'a pas été appliquée par "
                   "cause de mauvais arguments.")
 

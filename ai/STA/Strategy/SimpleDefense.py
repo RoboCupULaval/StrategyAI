@@ -2,7 +2,7 @@
 
 from RULEngine.Util.constant import *
 from ai.STA.Tactic.GoGetBall import GoGetBall
-from ai.STA.Tactic.ProtectGoal import GoalKeeper
+from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.ProtectZone import ProtectZone
 from . Strategy import Strategy
 from ai.Algorithm.Node import Node

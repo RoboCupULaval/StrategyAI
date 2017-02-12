@@ -77,7 +77,8 @@ if __name__ == '__main__':
     mcu = get_mcu(args.mcu)
     serial = get_serial(args.serial)
 
-    ai_coach = Coach()
+    simulation = serial == SERIAL_DISABLED
+    ai_coach = Coach(is_simulation=simulation)
     framework = Framework(serial=serial, mcu_version=mcu)
     framework.start_game(ai_coach.main_loop, ai_coach.set_reference,
                          team_color=color, async=args.async)

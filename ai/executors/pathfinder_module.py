@@ -1,8 +1,9 @@
-from ai.executors.executor import Executor
-from ai.Algorithm.PathfinderRRT import PathfinderRRT
-from ai.Algorithm.AsPathManager import AsPathManager
-from ai.Debug.debug_interface import DebugInterface,COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 import time
+
+from RULEngine.Debug.debug_interface import DebugInterface,COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
+from ai.Algorithm.AsPathManager import AsPathManager
+from ai.Algorithm.PathfinderRRT import PathfinderRRT
+from ai.executors.executor import Executor
 
 
 class PathfinderModule(Executor):
@@ -40,7 +41,6 @@ class PathfinderModule(Executor):
     def _pathfind_ai_commands(self, ai_commands):
         for ai_c in ai_commands:
             path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
-            print(path)
             self.draw_path(path)
             ai_c.path = path
 

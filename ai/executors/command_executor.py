@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from RULEngine.Communication.util.serial_protocol import DribblerStatus
 from ai.executors.executor import Executor
 from RULEngine.Command import command
 from RULEngine.Util.Pose import Pose
@@ -36,10 +36,17 @@ class CommandExecutor(Executor):
     def _retrieve_commands(self):
         return self.ws.play_state.current_ai_commands
 
-    def _parse_ai_command(self, ai_command, player_id):
+    def _parse_ai_command(self, ai_command: AICommand, player_id):
+        # TODO restraindre une seul commande de mouvement par robot
+        if ai_command.charge_kick:
+            return self._generate_charge_kick_command(player_id)
+
+        if ai_command.dribbler_on > 0:
+            return self._generate_dribbler_command(player_id, ai_command.dribbler_on)
+
         if ai_command is not None:
             if ai_command.command == AICommandType.KICK:
-                return self._generate_kick_command(ai_command.kick_strength, player_id)
+                return self._generate_kick_command(player_id)
 
             elif ai_command.command == AICommandType.MOVE:
                 assert (isinstance(ai_command.pose_goal, Pose))
@@ -50,12 +57,20 @@ class CommandExecutor(Executor):
     def _retrieve_player(self, player_id):
         return self.ws.game_state.my_team.players[player_id]
 
-    def _generate_kick_command(self, p_kick_strength, player_id):
-        kick_strength = self._sanitize_kick_strength(p_kick_strength)
-        return command.Kick(self._retrieve_player(player_id), kick_strength)
+    def _generate_kick_command(self, player_id):
+        return command.Kick(self._retrieve_player(player_id))
 
     def _generate_move_command(self, p_move_destination, player_id):
-        return command.MoveToAndRotate(self._retrieve_player(player_id), p_move_destination)
+        return command.Move(self._retrieve_player(player_id), p_move_destination)
+
+    def _generate_charge_kick_command(self, player_id):
+        return command.ChargeKick(self._retrieve_player(player_id))
+
+    def _generate_dribbler_command(self, player_id, status):
+        dribbler_status = False
+        if status == 2:
+            dribbler_status = True
+        return command.Dribbler(self._retrieve_player(player_id), dribbler_status)
 
     def _generate_empty_command(self, player_id):
         # Envoi d'une command vide qui fait l'arrêt du robot
