@@ -11,9 +11,9 @@ class AsGraph():
         self.robotRadius = robotRadius
         self.interval = interval
         # topLeftCorner should be like (-100, 100)
-        self.topLeftLimit = AsPosition(topLeftCorner.x - robotRadius, topLeftCorner.y + robotRadius)
+        self.topLeftLimit = AsPosition(topLeftCorner.x, topLeftCorner.y)
         # downRigthCorner should be like (100, -100)
-        self.downRigthLimit = AsPosition(downRigthCorner.x + robotRadius, downRigthCorner.y - robotRadius)
+        self.downRigthLimit = AsPosition(downRigthCorner.x, downRigthCorner.y)
         self.graphList = []
         self.graphHash = {}
 
