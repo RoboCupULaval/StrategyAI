@@ -48,6 +48,8 @@ class Coach(object):
 
     def set_reference(self, world_reference):
         self.world_state.set_reference(world_reference)
+        self.debug_executor.set_reference(world_reference.debug_info)
+
 
     # not used see if we can delete.
     def get_debug_status(self):

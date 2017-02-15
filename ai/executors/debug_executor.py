@@ -12,23 +12,19 @@ class DebugExecutor(Executor):
 
     def __init__(self, p_world_state):
         super().__init__(p_world_state)
+        self.debug_in = []
 
     def exec(self):
         self._execute_incoming_debug_commands()
 
     def _execute_incoming_debug_commands(self):
-        for command in self.ws.debug_state.from_ui_debug_commands:
-            self.ws.debug_state.transformed_ui_debug_commands.\
-                append(UIDebugCommand(command))
-        self.ws.debug_state.from_ui_debug_commands.clear()
+        for command in self.debug_in:
+            self._parse_command(UIDebugCommand(command))
 
-        self._apply_incoming_debug_command()
+    def set_reference(self, debug_ref)->None:
+        self.debug_in = debug_ref
 
-    def _apply_incoming_debug_command(self):
-        for command in self.ws.debug_state.transformed_ui_debug_commands:
-            self._parse_command(command)
-
-    def _parse_command(self, cmd):
+    def _parse_command(self, cmd: UIDebugCommand)->None:
         if cmd.is_strategy_cmd():
             self._parse_strategy(cmd)
 
@@ -38,7 +34,7 @@ class DebugExecutor(Executor):
         else:
             pass
 
-    def _parse_strategy(self, cmd):
+    def _parse_strategy(self, cmd: UIDebugCommand)->None:
         # TODO revise this function please, thank you!
         # TODO change this once UI-Debug send correct strategy names!
 
@@ -54,7 +50,7 @@ class DebugExecutor(Executor):
                                             get_new_strategy(strategy_key)
                                             (self.ws.game_state))
 
-    def _parse_tactic(self, cmd):
+    def _parse_tactic(self, cmd: UIDebugCommand)->None:
         # TODO make implementation for other tactic packets!
         # FIXME this pid thingy is getting out of control
         player_id = self._sanitize_pid(cmd.data['id'])
@@ -83,7 +79,7 @@ class DebugExecutor(Executor):
             self.ws.play_state.set_strategy(hc)
 
     @staticmethod
-    def _sanitize_pid(pid):
+    def _sanitize_pid(pid: int)->int:
         # TODO find something better for this whole scheme
         if 0 <= pid < 6:
             return pid
