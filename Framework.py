@@ -74,6 +74,7 @@ class Framework(object):
         self.vision_routine = self._normal_vision
 
         # Debug
+        self.incoming_debug = []
         self.outgoing_debug = []
         self.debug = DebugInterface()
 
@@ -170,6 +171,7 @@ class Framework(object):
         self.game.set_referee(self.referee)
         self.game_world = GameWorld(self.game)
         self.game_world.set_timestamp(self.time_stamp)
+        self.game_world.set_debug(self.incoming_debug)
 
     def _update_players_and_ball(self, vision_frame):
         """ Met à jour le GameState selon la frame de vision obtenue. """
@@ -192,8 +194,7 @@ class Framework(object):
 
     def _update_debug_info(self):
         """ Retourne le **GameState** actuel. *** """
-
-        self.game_world.debug_info += self.uidebug_command_receiver.receive_command()
+        self.incoming_debug += self.uidebug_command_receiver.receive_command()
 
     def _normal_vision(self):
         vision_frame = self._acquire_last_vision_frame()
@@ -264,8 +265,8 @@ class Framework(object):
         if self.uidebug_command_sender is not None:
             self.uidebug_command_sender.send_command(packet_represented_commands)
 
+        self.incoming_debug.clear()
         self.outgoing_debug.clear()
-        self.game_world.debug_info.clear()
 
     def _sigint_handler(self, signum, frame):
         self.stop_game()
