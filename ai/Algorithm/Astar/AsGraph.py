@@ -11,9 +11,9 @@ class AsGraph():
         self.robotRadius = robotRadius
         self.interval = interval
         # topLeftCorner should be like (-100, 100)
-        self.topLeftLimit = AsPosition(topLeftCorner.x + robotRadius, topLeftCorner.y - robotRadius)
+        self.topLeftLimit = AsPosition(topLeftCorner.x - robotRadius, topLeftCorner.y + robotRadius)
         # downRigthCorner should be like (100, -100)
-        self.downRigthLimit = AsPosition(downRigthCorner.x - robotRadius, downRigthCorner.y + robotRadius)
+        self.downRigthLimit = AsPosition(downRigthCorner.x + robotRadius, downRigthCorner.y - robotRadius)
         self.graphList = []
         self.graphHash = {}
 
@@ -306,38 +306,42 @@ class AsGraph():
 
     def mergePointToLine(self, path):
 
-        start = 0
-        forward = 2
-        newPath = [path[0]]
-        isLine = False
-        while (forward < len(path)):
-            stepX = path[start + 1].x - path[start].x
-            stepY = path[start + 1].y - path[start].y
-            stepVector = (stepX, stepY)
+        newPath = []
 
-            forwardStepX = path[forward].x - path[start].x
-            forwardStepY = path[forward].y - path[start].y
-            forwardVector = (forwardStepX, forwardStepY)
-
-
-            if (self.vectorAngleAreSame(stepVector, forwardVector)):
-                forward += 1
-                isLine = True
-            else:
-                if (isLine):
-                    newPath += [path[forward - 1]]
-                    isLine = False
-                    start = forward - 1
-                    forward += 1
-                else:
-                    newPath += [path[start + 1]]
-                    start += 1
-                    forward += 1
-
-        if (isLine):
-            newPath += [path[forward - 1]]
+        if (len(path) < 3):
+            newPath = path
         else:
-            newPath += [path[start + 1]]
+            start = 0
+            forward = 2
+            isLine = False
+            while (forward < len(path)):
+                stepX = path[start + 1].x - path[start].x
+                stepY = path[start + 1].y - path[start].y
+                stepVector = (stepX, stepY)
+
+                forwardStepX = path[forward].x - path[start].x
+                forwardStepY = path[forward].y - path[start].y
+                forwardVector = (forwardStepX, forwardStepY)
+
+
+                if (self.vectorAngleAreSame(stepVector, forwardVector)):
+                    forward += 1
+                    isLine = True
+                else:
+                    if (isLine):
+                        newPath += [path[forward - 1]]
+                        isLine = False
+                        start = forward - 1
+                        forward += 1
+                    else:
+                        newPath += [path[start + 1]]
+                        start += 1
+                        forward += 1
+
+            if (isLine):
+                newPath += [path[forward - 1]]
+            else:
+                newPath += [path[start + 1]]
 
         return newPath
 

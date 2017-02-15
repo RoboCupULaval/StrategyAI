@@ -14,9 +14,9 @@ class AsPathManager(Pathfinder):
 
         self.TopLeftCorner = AsPosition(-4500,3000)
         self.DownRigthCorner = AsPosition(4500,-3000)
-        self.RobotRadius = 100#250  # real radius is 90, 100 help avoid collision and make it easier to find interval
-        self.PreciseInterval = 100#250
-        self.ImpreciseInterval = 200#500
+        self.RobotRadius = 250  # real radius is 90, 250 help avoid collision and make it easier to find interval
+        self.PreciseInterval = 250
+        self.ImpreciseInterval = 500
         self.MaxDist = math.sqrt((self.DownRigthCorner.x - self.TopLeftCorner.x)**2 + (self.TopLeftCorner.y - self.DownRigthCorner.y)**2)
 
         self.preciseGraph = AsGraph(self.TopLeftCorner, self.DownRigthCorner, self.RobotRadius, self.PreciseInterval)

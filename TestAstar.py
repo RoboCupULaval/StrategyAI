@@ -5,7 +5,6 @@ from ai.Algorithm.Astar.AsGraph import AsGraph
 from ai.Algorithm.AsPathManager import AsPathManager
 import timeit
 
-
 myGraphManager = AsPathManager(None)
 
 endPosList = [AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003)]
@@ -31,7 +30,6 @@ for path in paths:
         
 print("End All")
 
-"""
 
 TopLeftCorner = AsPosition(-4500,3000)
 DownRigthCorner = AsPosition(4500,-3000)
@@ -56,7 +54,7 @@ for path in newPath:
         strPath += str(pos.x) + "," + str(pos.y) + "  "
     print(strPath + "->  End")
 
-"""
+
 
 
 
