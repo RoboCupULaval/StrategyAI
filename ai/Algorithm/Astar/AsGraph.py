@@ -256,17 +256,17 @@ class AsGraph():
     def findFourNearNode(self, startPos):
 
         pos = AsPosition(startPos.x, startPos.y)
-        if (pos.x < self.topLeftLimit.x) :
-            pos.x = self.topLeftLimit.x
+        if (pos.x < (self.topLeftLimit.x + self.interval)) :
+            pos.x = (self.topLeftLimit.x + self.interval)
 
-        if (pos.x > self.downRigthLimit.x) :
-            pos.x = self.downRigthLimit.x
+        if (pos.x > (self.downRigthLimit.x - self.interval)) :
+            pos.x = (self.downRigthLimit.x - self.interval)
 
-        if (pos.y < self.downRigthLimit.y) :
-            pos.y = self.downRigthLimit.y
+        if (pos.y < (self.downRigthLimit.y + self.interval)) :
+            pos.y = (self.downRigthLimit.y + self.interval)
 
-        if (pos.y > self.topLeftLimit.y) :
-            pos.y = self.topLeftLimit.y
+        if (pos.y > (self.topLeftLimit.y - self.interval)) :
+            pos.y = (self.topLeftLimit.y - self.interval)
 
         diffX1 = ((self.downRigthLimit.x + pos.x) % self.interval)
         diffX2 = self.interval - diffX1
