@@ -2,6 +2,7 @@
 
 from ai.Algorithm.Astar.AsPosition import AsPosition
 from ai.Algorithm.Astar.AsNode import AsNode
+from math import sqrt, acos
 
 class AsGraph():
 
@@ -10,9 +11,9 @@ class AsGraph():
         self.robotRadius = robotRadius
         self.interval = interval
         # topLeftCorner should be like (-100, 100)
-        self.topLeftLimit = AsPosition(topLeftCorner.x + robotRadius, topLeftCorner.y - robotRadius)
+        self.topLeftLimit = AsPosition(topLeftCorner.x, topLeftCorner.y)
         # downRigthCorner should be like (100, -100)
-        self.downRigthLimit = AsPosition(downRigthCorner.x - robotRadius, downRigthCorner.y + robotRadius)
+        self.downRigthLimit = AsPosition(downRigthCorner.x, downRigthCorner.y)
         self.graphList = []
         self.graphHash = {}
 
@@ -161,7 +162,10 @@ class AsGraph():
                             openSet.add(node.key)
 
         self.setAllObstacle(obstacleList, True)
-        return self.getPath(goalNode, startNode, startPos, endPos, goalFree)
+        tempPath = self.getPath(goalNode, startNode, endPos, goalFree)
+        finalPath = self.mergePointToLine(tempPath)
+
+        return finalPath
 
 
 
@@ -177,7 +181,7 @@ class AsGraph():
 
         return currentNode
 
-    def getPath(self, goalNode, startNode, startPos, endPos, goalFree):
+    def getPath(self, goalNode, startNode, endPos, goalFree):
 
         path = []
         if (goalFree):
@@ -252,17 +256,17 @@ class AsGraph():
     def findFourNearNode(self, startPos):
 
         pos = AsPosition(startPos.x, startPos.y)
-        if (pos.x < self.topLeftLimit.x) :
-            pos.x = self.topLeftLimit.x
+        if (pos.x < (self.topLeftLimit.x + self.interval)) :
+            pos.x = (self.topLeftLimit.x + self.interval)
 
-        if (pos.x > self.downRigthLimit.x) :
-            pos.x = self.downRigthLimit.x
+        if (pos.x > (self.downRigthLimit.x - self.interval)) :
+            pos.x = (self.downRigthLimit.x - self.interval)
 
-        if (pos.y < self.downRigthLimit.y) :
-            pos.y = self.downRigthLimit.y
+        if (pos.y < (self.downRigthLimit.y + self.interval)) :
+            pos.y = (self.downRigthLimit.y + self.interval)
 
-        if (pos.y > self.topLeftLimit.y) :
-            pos.y = self.topLeftLimit.y
+        if (pos.y > (self.topLeftLimit.y - self.interval)) :
+            pos.y = (self.topLeftLimit.y - self.interval)
 
         diffX1 = ((self.downRigthLimit.x + pos.x) % self.interval)
         diffX2 = self.interval - diffX1
@@ -299,3 +303,65 @@ class AsGraph():
             free = free or node.free
 
         return free
+
+    def mergePointToLine(self, path):
+
+        newPath = []
+
+        if (len(path) < 3):
+            newPath = path
+        else:
+            start = 0
+            forward = 2
+            isLine = False
+            while (forward < len(path)):
+                stepX = path[start + 1].x - path[start].x
+                stepY = path[start + 1].y - path[start].y
+                stepVector = (stepX, stepY)
+
+                forwardStepX = path[forward].x - path[start].x
+                forwardStepY = path[forward].y - path[start].y
+                forwardVector = (forwardStepX, forwardStepY)
+
+
+                if (self.vectorAngleAreSame(stepVector, forwardVector)):
+                    forward += 1
+                    isLine = True
+                else:
+                    if (isLine):
+                        newPath += [path[forward - 1]]
+                        isLine = False
+                        start = forward - 1
+                        forward += 1
+                    else:
+                        newPath += [path[start + 1]]
+                        start += 1
+                        forward += 1
+
+            if (isLine):
+                newPath += [path[forward - 1]]
+            else:
+                newPath += [path[start + 1]]
+
+        return newPath
+
+    def vectorAngleAreSame(self, vector1, vector2):
+
+        numerator = (vector1[0] * vector2[0]) + (vector1[1] * vector2[1])
+        denominator1 = sqrt(vector1[0]**2 + vector1[1]**2)
+        denominator2 = sqrt(vector2[0]**2 + vector2[1]**2)
+        denominator = denominator1 * denominator2
+
+        result = numerator / denominator
+
+        angle = acos(result)
+
+        return (angle < 0.01 and angle > -0.01)
+
+
+
+
+
+
+
+
