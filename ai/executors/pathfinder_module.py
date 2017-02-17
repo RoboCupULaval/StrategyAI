@@ -1,6 +1,6 @@
 import time
 
-from RULEngine.Debug.debug_interface import DebugInterface,COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
+from RULEngine.Debug.debug_interface import DebugInterface, COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 from ai.Algorithm.AsPathManager import AsPathManager
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.executors.executor import Executor
@@ -12,7 +12,7 @@ class PathfinderModule(Executor):
         super().__init__(p_world_state)
         self.debug_interface = DebugInterface()
         self.pathfinder = self.get_pathfinder(type_of_pathfinder)
-        self.last_time_pfding_for_robot = {}
+        self.last_time_pathfinding_for_robot = {}
         self.last_frame = time.time()
 
     def exec(self):
@@ -36,7 +36,6 @@ class PathfinderModule(Executor):
         if time.time() - self.last_frame > 10:
             self.last_frame = time.time()
             ai_commands_to_adjust.clear()
-
 
     def _pathfind_ai_commands(self, ai_commands):
         for ai_c in ai_commands:

@@ -31,18 +31,12 @@ class Coach(object):
         self.robot_commands.clear()
         self.debug_commands.clear()
 
-        self.world_state.update()
-
         self.debug_executor.exec()
         self.play_executor.exec()
         self.module_executor.exec()
         self.movement_executor.exec()
         self.regulator_executor.exec()
-        self.robot_command_executor.exec()
-        self.debug_executor.exec()
-
-        self.robot_commands = self.world_state.\
-            play_state.ready_to_ship_robot_packet_list
+        self.robot_commands = self.robot_command_executor.exec()
 
         return self.robot_commands
 

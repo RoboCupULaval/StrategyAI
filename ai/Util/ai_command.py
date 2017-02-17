@@ -18,6 +18,7 @@ class AICommand(object):
         self.kick_strength = other_args.get("kick_strength", 0)
         self.charge_kick = other_args.get("charge_kick", False)
         self.pose_goal = other_args.get("pose_goal", Pose())
+        self.speed = Pose()
 
         # this is for the pathfinder only no direct assignation
         self.path = []
