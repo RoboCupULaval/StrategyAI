@@ -69,6 +69,13 @@ class GameState(object, metaclass=Singleton):
         """
         return self.field.ball.position
 
+    def get_ball_velocity(self):
+        """
+        Retourne le vecteur vélocité de la balle.
+        :return: la vélocité de la balle.
+        """
+        return self.field.ball.velocity
+
     def get_timestamp(self):
         """
             Retourne le timestamp de la state

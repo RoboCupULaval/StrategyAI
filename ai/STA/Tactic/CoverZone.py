@@ -87,7 +87,7 @@ class CoverZone(Tactic):
     def get_enemy_in_zone(self):
         enemy_list = []
         for robot in range(6):
-            pos = self.game_state.get_player_pose(robot, False).position
+            pos = self.game_state.get_player_position(robot, False)
             if isInsideSquare(pos, self.y_top, self.y_bottom, self.x_left, self.x_right):
                 enemy_list.append(pos)
         return enemy_list

@@ -7,6 +7,7 @@ from ..Tactic import tactic_constants
 from ai.Algorithm.Graph import Graph
 from ai.Algorithm.Node import Node
 from ai.Algorithm.Vertex import Vertex
+from ai.states.game_state import GameState
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 
@@ -19,6 +20,7 @@ class Strategy(metaclass=ABCMeta):
         Initialise la stratégie en créant un graph vide pour chaque robot de l'équipe.
         :param p_game_state: L'état courant du jeu.
         """
+        assert isinstance(p_game_state, GameState)
         self.game_state = p_game_state
         self.graphs = []
         for i in range(PLAYER_PER_TEAM):

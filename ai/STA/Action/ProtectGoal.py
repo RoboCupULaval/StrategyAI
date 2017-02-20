@@ -52,7 +52,7 @@ class ProtectGoal(Action):
         Calcul la pose que doit prendre le gardien en fonction de la position de la balle.
         :return: Un tuple (Pose, kick) où Pose est la destination du gardien et kick est nul (on ne botte pas)
         """
-        goalkeeper_position = self.game_state.get_player_pose(self.player_id).position
+        goalkeeper_position = self.game_state.get_player_position(self.player_id)
         ball_position = self.game_state.get_ball_position()
         goal_x = FIELD_X_RIGHT if self.is_right_goal else FIELD_X_LEFT
         goal_position = Position(goal_x, 0)
