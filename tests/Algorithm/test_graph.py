@@ -6,12 +6,18 @@ from ai.Algorithm.Node import Node
 from ai.Algorithm.Vertex import Vertex
 from ai.states.game_state import GameState
 from ai.STA.Tactic.Stop import Stop
-from ai.STA.Tactic.GoToPosition import GoToPosition
+from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from RULEngine.Util.game_world import GameWorld
+from RULEngine.Game.Referee import Referee
+from RULEngine.Util.team_color_service import TeamColorService, TeamColor
+from RULEngine.Game.Game import Game
+from RULEngine.Game.Ball import Ball
+from ai.Util.ai_command import AICommand, AICommandType
 
-from ai.Util.types import AICommand
+from ai.Util.ai_command import AICommand, AICommandType
 
 __author__ = 'RoboCupULaval'
 
@@ -27,10 +33,18 @@ def foo2():
 class TestGraph(unittest.TestCase):
     def setUp(self):
         self.game_state = GameState()
+        self.game = Game()
+        self.game.set_referee(Referee())
+        self.game.ball = Ball()
+        game_world = GameWorld(self.game)
+        game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW_TEAM))
+        self.game.set_our_team_color(TeamColor.YELLOW_TEAM)
+        self.game_state.set_reference(game_world)
+        self.game_state = GameState()
         self.empty_graph = Graph()
         self.graph1 = Graph()
         self.tactic1 = Stop(self.game_state, 1)
-        self.tactic2 = GoToPosition(self.game_state, 0, Pose(Position(500, 0), 0))
+        self.tactic2 = GoToPositionNoPathfinder(self.game_state, 0, Pose(Position(500, 0), 0))
         self.node1 = Node(self.tactic1)
         self.node2 = Node(self.tactic2)
         self.vertex1 = Vertex(1, foo)
@@ -46,13 +60,13 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(self.graph1.get_current_tactic_name(), "Stop")
         self.assertEqual(self.empty_graph.get_current_tactic_name(), None)
         self.empty_graph.add_node(self.node2)
-        self.assertEqual(self.empty_graph.get_current_tactic_name(), "GoToPosition")
+        self.assertEqual(self.empty_graph.get_current_tactic_name(), "GoToPositionNoPathfinder")
 
     def test_get_current_tactic(self):
         self.assertIsInstance(self.graph1.get_current_tactic(), Stop)
         self.assertEqual(self.empty_graph.get_current_tactic(), None)
         self.empty_graph.add_node(self.node2)
-        self.assertIsInstance(self.empty_graph.get_current_tactic(), GoToPosition)
+        self.assertIsInstance(self.empty_graph.get_current_tactic(), GoToPositionNoPathfinder)
 
     def test_add_node(self):
         self.assertEqual(len(self.graph1.nodes), 2)
@@ -93,7 +107,7 @@ class TestGraph(unittest.TestCase):
 
     def test_exec(self):
         next_ai_command = self.graph1.exec()
-        expected_ai_command = AICommand(None, 0)
+        expected_ai_command = AICommand(1, AICommandType.STOP)
         self.assertEqual(self.graph1.current_node, 1)
         self.assertEqual(next_ai_command, expected_ai_command)
 
@@ -104,12 +118,14 @@ class TestGraph(unittest.TestCase):
         self.empty_graph.add_vertex(0, 1, foo2)
 
         next_ai_command = self.empty_graph.exec()
-        expected_ai_command = AICommand(None, 0)
+        expected_ai_command = AICommand(0, AICommandType.MOVE,
+                                        **{"pose_goal": Pose(Position(500, 0))})
         self.assertEqual(self.empty_graph.current_node, 0)
         self.assertEqual(next_ai_command, expected_ai_command)
 
         next_ai_command = self.empty_graph.exec()
-        expected_ai_command = AICommand(Pose(Position(500, 0), 0), 0)
+        expected_ai_command = AICommand(0, AICommandType.MOVE,
+                                        **{"pose_goal": Pose(Position(500, 0))})
         self.assertEqual(self.empty_graph.current_node, 0)
         self.assertEqual(next_ai_command, expected_ai_command)
 

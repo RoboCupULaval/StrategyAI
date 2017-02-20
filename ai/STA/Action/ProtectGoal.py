@@ -2,12 +2,13 @@
 
 import math
 from .Action import Action
-from ...Util.types import AICommand
+# from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import FIELD_GOAL_RADIUS, PLAYER_PER_TEAM, FIELD_X_RIGHT, FIELD_X_LEFT
 from RULEngine.Util.area import stayInsideCircle, stayOutsideCircle, stayInsideGoalArea
 from RULEngine.Util.geometry import get_angle, get_closest_point_on_line
+from ai.Util.ai_command import AICommand, AICommandType
 
 __author__ = 'Robocup ULaval'
 
@@ -74,4 +75,4 @@ class ProtectGoal(Action):
 
         destination_pose = Pose(destination_position, destination_orientation)
         kick_strength = 0
-        return AICommand(destination_pose, kick_strength)
+        return AICommand(self.player_id, AICommandType.MOVE, **{"pose_goal": destination_pose})

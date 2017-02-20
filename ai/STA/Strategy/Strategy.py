@@ -62,15 +62,21 @@ class Strategy(metaclass=ABCMeta):
                          current_tactic.current_state.__name__, current_tactic.target))
         return state
 
+    def add_tactic(self, robot_id, tactic):
+        self.graphs[robot_id].add_node(Node(tactic))
+
+    def add_condition(self, robot_id, start_node, end_node, condition):
+        self.graphs[robot_id].add_vertex(start_node,end_node,condition)
+
     def exec(self):
         """
         Appelle la méthode exec de chacune des Tactics assignées aux robots.
         :return: Une liste des 6 AICommand à envoyer aux robots. La commande située à l'indice i de la liste doit être
         envoyée au robot i.
         """
-        commands = []
+        commands = {}
         for i in range(PLAYER_PER_TEAM):
-            commands.append(self.graphs[i].exec())
+            commands[i] = self.graphs[i].exec()
         return commands
 
     def __str__(self):

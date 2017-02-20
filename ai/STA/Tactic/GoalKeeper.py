@@ -1,16 +1,16 @@
 # Under MIT licence, see LICENCE.txt
 
 from .Tactic import Tactic
-from ai.STA.Tactic.tactic_constants import Flags
+from ai.STA.Tactic.tactic_constants import Flags, DEFAULT_TIME_TO_LIVE
 from ..Action.ProtectGoal import ProtectGoal
-from ai.STA.Action.GrabBall import GrabBall
+from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
-from ai.Util.ball_possession import player_can_grab_ball, player_grabbed_ball
+from ai.Util.ball_possession import canGetBall, hasBall
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.area import isInsideGoalArea
-from RULEngine.Util.constant import PLAYER_PER_TEAM, DISTANCE_BEHIND
+from RULEngine.Util.constant import PLAYER_PER_TEAM, DISTANCE_BEHIND, TeamColor
 
 __author__ = 'RoboCupULaval'
 
@@ -33,14 +33,14 @@ class GoalKeeper(Tactic):
     """
     # TODO: À complexifier pour prendre en compte la position des jouers adverses et la vitesse de la balle.
 
-    def __init__(self, p_game_state, p_player_id, p_is_yellow=False, time_to_live=0):
-        Tactic.__init__(self, p_game_state, p_player_id, time_to_live=time_to_live)
+    def __init__(self, p_game_state, p_player_id, target=Pose(),
+                 time_to_live=DEFAULT_TIME_TO_LIVE):
+        Tactic.__init__(self, p_game_state, p_player_id)
         assert isinstance(p_player_id, int)
         assert PLAYER_PER_TEAM >= p_player_id >= 0
-        assert isinstance(p_is_yellow, bool)
 
         self.player_id = p_player_id
-        self.is_yellow = p_is_yellow
+        self.is_yellow = self.game_state.get_our_team_color == TeamColor.YELLOW_TEAM
         self.current_state = self.protect_goal
         self.next_state = self.protect_goal
         self.status_flag = Flags.WIP
@@ -51,7 +51,7 @@ class GoalKeeper(Tactic):
         if not isInsideGoalArea(ball_position, self.is_yellow):
             self.next_state = self.protect_goal
         else:
-            if player_can_grab_ball(self.game_state, self.player_id, ball_position):
+            if canGetBall(self.game_state, self.player_id, ball_position):
                 self.next_state = self.grab_ball
             else:
                 self.next_state = self.go_behind_ball
@@ -61,7 +61,7 @@ class GoalKeeper(Tactic):
     def go_behind_ball(self):
         ball_position = self.game_state.get_ball_position()
 
-        if player_can_grab_ball(self.game_state, self.player_id, ball_position):
+        if canGetBall(self.game_state, self.player_id, ball_position):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -70,11 +70,11 @@ class GoalKeeper(Tactic):
 
     def grab_ball(self):
         ball_position = self.game_state.get_ball_position()
-        if player_grabbed_ball(self.game_state, self.player_id, ball_position):
+        if hasBall(self.game_state, self.player_id):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
-        elif player_can_grab_ball(self.game_state, self.player_id, ball_position):
+        elif canGetBall(self.game_state, self.player_id, ball_position):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball  # back to go_behind; the ball has moved
-        return GrabBall(self.game_state, self.player_id)
+        return GetBall(self.game_state, self.player_id)

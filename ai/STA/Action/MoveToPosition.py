@@ -1,11 +1,12 @@
 # Under MIT license, see LICENSE.txt
 from .Action import Action
-from ...Util.types import AICommand
-from RULEngine.Util.Pose import Pose, Position
+# from ...Util.types import AICommand
+from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.Util.ai_command import AICommand, AICommandType
 
 
-class MoveStraightTo(Action):
+class MoveToPosition(Action):
     """
     Action Move_to: Déplace le robot
     Méthodes :
@@ -35,6 +36,5 @@ class MoveStraightTo(Action):
                         kick est faux (on ne botte pas)
         """
         move_destination = self.destination
-        kick_strength = 0
-        cmd = AICommand(move_destination, kick_strength)
-        return cmd
+        return AICommand(self.player_id, AICommandType.MOVE,
+                         **{"pose_goal": move_destination})

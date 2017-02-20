@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.Util.singleton import Singleton
+from RULEngine.Util.singleton import Singleton
 
 
 class DebugState(object, metaclass=Singleton):
@@ -12,10 +12,10 @@ class DebugState(object, metaclass=Singleton):
         self.from_ai_raw_debug_cmds = []
         self.to_ui_packet_debug_cmds = []
 
-    def update(self, incoming_debug_information):
-        self.from_ui_debug_commands = None
+    def update(self):
         self.transformed_ui_debug_commands.clear()
         self.from_ai_raw_debug_cmds.clear()
         self.to_ui_packet_debug_cmds.clear()
 
-        self.from_ui_debug_commands = incoming_debug_information
+    def set_reference(self, world_reference):
+        self.from_ui_debug_commands = world_reference.debug_info

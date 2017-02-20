@@ -1,19 +1,20 @@
 # Under MIT licence, see LICENCE.txt
 import math
 from .Action import Action
-from ...Util.types import AICommand
+# from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.area import stayOutsideCircle
 from RULEngine.Util.geometry import get_angle, get_distance
 from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.Util.ai_command import AICommand, AICommandType
 
 __author__ = 'Robocup ULaval'
 
 
 class GoBehind(Action):
     """
-    Action GoBetween: Déplace le robot au point le plus proche sur la droite, derrière un objet dont la position
+    Action GoBehind: Déplace le robot au point le plus proche sur la droite, derrière un objet dont la position
     est passée en paramètre, de sorte que cet objet se retrouve entre le robot et la seconde position passée en paramètre
     Méthodes :
         exec(self): Retourne la pose où se rendre
@@ -22,7 +23,8 @@ class GoBehind(Action):
         position1 : La position de l'objet derrière lequel le robot doit se placer (exemple: le ballon)
         position2 : La position par rapport à laquelle le robot doit être "derrière" l'objet de la position 1 (exemple: le but)
     """
-    def __init__(self, p_game_state, p_player_id, p_position1, p_position2, p_distance_behind):
+    def __init__(self, p_game_state, p_player_id, p_position1, p_position2,
+                 p_distance_behind, pathfinding=False):
         """
             :param p_game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui doit se déplacer
@@ -40,6 +42,7 @@ class GoBehind(Action):
         self.position1 = p_position1
         self.position2 = p_position2
         self.distance_behind = p_distance_behind
+        self.pathfind = pathfinding
 
     def get_destination(self):
         """
@@ -50,23 +53,7 @@ class GoBehind(Action):
         delta_x = self.position2.x - self.position1.x
         delta_y = self.position2.y - self.position1.y
         theta = math.atan2(delta_y, delta_x)
-        """
-        # Calcul des coordonnées derrière la position 1 (destination) selon la position 2
-        # TODO: calculer le "point derriere" optimal au lieu d une distance egale en x et y
-        if delta_x > 0:
-            x = self.position1.x - self.distance_behind * math.cos(theta)
-        elif delta_x < 0:
-            x = self.position1.x + self.distance_behind * math.cos(theta)
-        elif delta_x == 0:
-            x = self.position1.x
 
-        if delta_y > 0:
-            y = self.position1.y - self.distance_behind * math.sin(theta)
-        elif delta_y < 0:
-            y = self.position1.y + self.distance_behind * math.sin(theta)
-        elif delta_y == 0:
-            y = self.position1.y
-        """
         x = self.position1.x - self.distance_behind * math.cos(theta)
         y = self.position1.y - self.distance_behind * math.sin(theta)
         destination_position = Position(x, y)
@@ -79,7 +66,8 @@ class GoBehind(Action):
         return destination_pose
 
     def exec(self):
-
-        destination_pose = self.get_destination()
-        kick_strength = 0
-        return AICommand(destination_pose, kick_strength)
+        destination_pose = {}
+        destination_pose["pose_goal"] = self.get_destination()
+        if self.pathfind:
+            destination_pose["pathfinder_on"] = True
+        return AICommand(self.player_id, AICommandType.MOVE, **destination_pose)

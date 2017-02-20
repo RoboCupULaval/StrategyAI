@@ -3,21 +3,26 @@
 from .GoGetBall import GoGetBall
 from .GoalKeeper import GoalKeeper
 from .GoToPosition import GoToPosition
+from .RotateAroundBall import RotateAroundBall
 from .Stop import Stop
-from .CoverZone import CoverZone
+from .ProtectZone import ProtectZone
 from .DemoFollowBall import DemoFollowBall
-from .GoStraightTo import GoStraightTo
+from .GoToPositionNoPathfinder import GoToPositionNoPathfinder
+from .goToPositionPathfinder import GoToPositionPathfinder
+from .go_kick import GoKick
 
 
 class TacticBook(object):
     def __init__(self):
         self.tactic_book = {'GoToPosition': GoToPosition,
                             'GoalKeeper': GoalKeeper,
-                            'CoverZone': CoverZone,
+                            'CoverZone': ProtectZone,
                             'GoGetBall': GoGetBall,
                             'DemoFollowBall': DemoFollowBall,
                             'Stop': Stop,
-                            'GoStraightTo': GoStraightTo}
+                            'GoToPositionNoPathfinder': GoToPositionNoPathfinder,
+                            'GoToPositionPathfinder': GoToPositionPathfinder,
+                            'GoKick': GoKick}
 
     def get_tactics_name_list(self):
         return list(self.tactic_book.keys())

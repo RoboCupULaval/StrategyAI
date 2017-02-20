@@ -1,12 +1,14 @@
 # Under MIT licence, see LICENCE.txt
 import math
 from ..Action.Action import Action
-from ...Util.types import AICommand
+# from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.area import stayOutsideCircle
 from RULEngine.Util.geometry import get_angle, get_distance
 from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.Util.ai_command import AICommand, AICommandType
+
 
 __author__ = 'Robocup ULaval'
 
@@ -39,7 +41,8 @@ class GoBetween(Action):
         assert(isinstance(p_position2, Position))
         assert(isinstance(p_target, Position))
         assert(isinstance(p_minimum_distance, (int, float)))
-        assert(get_distance(p_position1, p_position2) > 2*p_minimum_distance)
+        # TODO check this assert one day MGL 2017/01/13
+        # assert(get_distance(p_position1, p_position2) > 2*p_minimum_distance)
 
         self.player_id = p_player_id
         self.position1 = p_position1
@@ -102,6 +105,7 @@ class GoBetween(Action):
         # Calcul de l'orientation de la pose de destination
         destination_orientation = get_angle(destination_position, self.target)
 
-        destination_pose = Pose(destination_position, destination_orientation)
+        destination_pose = {"pose_goal": Pose(destination_position, destination_orientation)}
         kick_strength = 0
-        return AICommand(destination_pose, kick_strength)
+
+        return AICommand(self.player_id, AICommandType.MOVE, **destination_pose)

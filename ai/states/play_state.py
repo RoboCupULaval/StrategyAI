@@ -1,8 +1,8 @@
 # Under MIT License, see LICENSE.txt
 
+from RULEngine.Util.singleton import Singleton
 from ai.STA.Strategy.StrategyBook import StrategyBook
 from ai.STA.Tactic.TacticBook import TacticBook
-from ai.Util.singleton import Singleton
 
 
 class PlayState(object, metaclass=Singleton):
@@ -11,7 +11,7 @@ class PlayState(object, metaclass=Singleton):
         self.strategy_book = StrategyBook()
         self.tactic_book = TacticBook()
         self.current_strategy = None
-        self.current_ai_commands = []
+        self.current_ai_commands = {}
         self.ready_to_ship_robot_packet_list = []
 
     def set_strategy(self, strategy):

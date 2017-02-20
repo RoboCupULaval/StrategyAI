@@ -2,24 +2,26 @@
 
 from .GoBehind import GoBehind
 from .GoBetween import GoBetween
-from .GrabBall import GrabBall
+from .GetBall import GetBall
 from .Idle import Idle
 from .Kick import Kick
-from .MoveTo import MoveTo
-from .MoveWithBall import MoveWithBall
+from .MoveToPosition import MoveToPosition
+from .MoveToDribblingBall import MoveToDribblingBall
 from .ProtectGoal import ProtectGoal
+from .PathfindToPosition import PathfindToPosition
 
 
 class ActionBook(object):
     def __init__(self):
         self.ActionBook = {'GoBehind': GoBehind,
                            'GoBetween': GoBetween,
-                           'GrabBall': GrabBall,
+                           'GrabBall': GetBall,
                            'Idle': Idle,
                            'Kick': Kick,
-                           'MoveTo': MoveTo,
-                           'MoveWithBall': MoveWithBall,
-                           'ProtectGoal': ProtectGoal}
+                           'MoveTo': MoveToPosition,
+                           'MoveWithBall': MoveToDribblingBall,
+                           'ProtectGoal': ProtectGoal,
+                           'PathfindToPosition': PathfindToPosition}
 
     def get_actions_name_list(self):
         return list(self.ActionBook.keys())
