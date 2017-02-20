@@ -205,6 +205,7 @@ class Framework(object):
 
             # Communication
             self._send_robot_commands(robot_commands)
+            self.game.set_command(robot_commands)
             self._send_debug_commands()
 
     def _redirected_vision(self):

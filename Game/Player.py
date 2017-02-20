@@ -21,29 +21,30 @@ class Player:
         control_input_model = [[0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 0], [0, 0, 1]]
         observation_model = [[1, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0]]
 
-        process_covariance = 10 ** (-2) * np.eye(6)
-        observation_covariance = np.eye(3) * 100
+        process_covariance = 10 ** (3) * np.eye(6)
+        observation_covariance = np.eye(3) * 10 ** (-3)
 
         initial_state_estimation = [self.pose.position.x, self.pose.position.y, 0, 0, self.pose.orientation, 0]
         initial_state_covariance = np.eye(6) * 1000
         self.kf = Kalman(self.transition_model, control_input_model, observation_model, process_covariance,
                          observation_covariance, initial_state_estimation, initial_state_covariance)
 
-        self.velocity = Vector(0, 0)
+        self.velocity = [0, 0, 0]
         self.filtered_state_means = [self.pose.position.x, self.pose.position.y, 0, 0, self.pose.orientation, 0]
         self.filtered_state_covariances = np.eye(6)
         self.observations = [self.pose.position.x, self.pose.position.y, self.pose.orientation]
 
-        if self.id == 1:
-            self.val_unfiltered = open('unfiltered.txt', 'w')
-            self.val_filtered = open('filtered.txt', 'w')
+        # if self.id == 1:
+        #     self.val_unfiltered = open('unfiltered.txt', 'w')
+        #     self.val_filtered = open('filtered.txt', 'w')
 
     def has_id(self, pid):
         return self.id == pid
 
     def update(self, pose, delta=DELTA_T):
-        if self.id == 1 and not self.team.is_team_yellow():
-            self.val_unfiltered.write("{}, {}, {}\n".format(pose.position.x, pose.position.y, pose.orientation))
+        # if self.id == 1 and not self.team.is_team_yellow():
+        #     self.val_unfiltered.write("{}, {}, {}\n".format(pose.position.x, pose.position.y, pose.orientation))
+        old_pose=self.pose
         new_pose = pose
         #print(self.id)
         #print("#1", pose.position.x, pose.position.y, pose.orientation)
@@ -54,27 +55,30 @@ class Player:
         output = self.kf.filter(self.observations, self.cmd, self.transition_model)
         new_pose.position.x = float(output[0])
         new_pose.position.y = float(output[1])
-        #self.velocity = [output[2], output[3], output[5]]
+        self.velocity = [output[2], output[3], output[5]]
+        print(self.velocity)
+        # if np.linalg.norm(self.velocity) != 0:
+        #     print(self.velocity)
         new_pose.orientation = float(output[4])
         #print("#2", new_pose.position.x, new_pose.position.y, new_pose.orientation)
         # old_pose = self.pose
         #delta_position = new_pose.position - old_pose.position
-        if self.id == 1 and not self.team.is_team_yellow():
-            print(self.pose.position.x, self.pose.position.y)
-
+        # if self.id == 1 and not self.team.is_team_yellow():
+        #     print(self.pose.position.x, self.pose.position.y)
         # try:
-        #     self.velocity.x = delta_position.x / delta
-        #     self.velocity.y = delta_position.y / delta
+        #     self.velocity[0] = -(new_pose.position.x - old_pose.position.x) / delta / 1000
+        #     self.velocity[1] = -(new_pose.position.y - old_pose.position.y) / delta / 1000
+        #     self.velocity[2] = 0
         # except ZeroDivisionError:
-        #     self.velocity = Vector(0, 0)
+        #     self.velocity = [0, 0, 0]
 
         self.pose = new_pose
-        if self.id == 1 and not self.team.is_team_yellow():
-            self.val_filtered.write("{}, {}, {}\n".format(self.pose.position.x, self.pose.position.y,
-                                                            self.pose.orientation))
+        # if self.id == 1 and not self.team.is_team_yellow():
+        #     self.val_filtered.write("{}, {}, {}\n".format(self.pose.position.x, self.pose.position.y,
+        #                                                     self.pose.orientation))
 
     def set_command(self, cmd):
-        self.cmd = [cmd.pose.position.x, cmd.pose.position.x, cmd.pose.orientation]
+        self.cmd = [cmd.pose.position.x, cmd.pose.position.y, cmd.pose.orientation]
         #self.cmd = [0, 0, 0]
 
 class Kalman:

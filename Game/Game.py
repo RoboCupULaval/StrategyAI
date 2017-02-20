@@ -22,6 +22,11 @@ class Game:
         self.friends = None
         self.enemies = None
         self.delta_t = None
+        self.cmd = None
+
+    def set_command(self, cmd):
+        for commands in cmd:
+            self.friends.update_player_command(commands.player.id, commands)
 
     def set_referee(self, p_referee):
         self.referee = p_referee
