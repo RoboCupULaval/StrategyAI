@@ -56,7 +56,7 @@ class Player:
         new_pose.position.x = float(output[0])
         new_pose.position.y = float(output[1])
         self.velocity = [output[2], output[3], output[5]]
-        print(self.velocity)
+        #print(self.velocity)
         # if np.linalg.norm(self.velocity) != 0:
         #     print(self.velocity)
         new_pose.orientation = float(output[4])
