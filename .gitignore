@@ -67,3 +67,5 @@ target/
 tags
 # InfluenceMap output file
 IMBoard
+filtered.txt
+unfiltered.txt
