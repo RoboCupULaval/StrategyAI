@@ -36,6 +36,14 @@ REAL_DEFAUT_INTEGRAL_THETA_GAIN = 0
 #REAL_DEFAULT_THETA_GAIN = 0
 
 
+def sign(x):
+    if x > 0:
+        return 1
+    if x == 0:
+        return 0
+    return -1
+
+
 class PositionRegulator(Executor):
     def __init__(self, p_world_state: WorldState, is_simulation=False):
         super().__init__(p_world_state)
@@ -48,10 +56,10 @@ class PositionRegulator(Executor):
         for cmd in commands.values():
             if cmd.command is AICommandType.MOVE:
                 robot_idx = cmd.robot_id
-                retroaction_pose = self.ws.game_state.game.friends.players[robot_idx].pose
+                active_player = self.ws.game_state.game.friends.players[robot_idx]
                 cmd.speed = self.regulators[robot_idx].\
                     update_pid_and_return_speed_command(cmd,
-                                                        retroaction_pose,
+                                                        active_player,
                                                         delta_t,
                                                         idx=robot_idx)
 
@@ -66,6 +74,8 @@ class PI(object):
     def __init__(self, simulation_setting=True):
         self.gs = GameState()
         self.paths = {}
+        self.accel_max = 2
+        self.vit_max = 4
         # self.accumulator_x = 0
         # self.accumulator_y = 0
         # self.accumulator_t = 0
@@ -80,52 +90,106 @@ class PI(object):
         self.last_err_x = 0
         self.last_err_y = 0
 
-    def update_pid_and_return_speed_command(self, cmd, player_pose, delta_t=0.030, idx=4, robot_speed=0.75):
+    def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=4):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
         assert isinstance(cmd, AICommand), "La consigne doit etre une Pose dans le PI"
         #print("regulator_pose", [player_pose.position.x, player_pose.position.y, player_pose.orientation])
-        Kp = 1
-        Kd = 0.6
+        vit = [0, 0]
+
+        Kp = 0.5
+        Kd = 0.2
         self.paths[idx] = cmd.path
 
         # if len(self.paths[idx]) > 0 and\
         #    (cmd.pose_goal is not self.paths[idx][-1]):
         r_x, r_y = cmd.pose_goal.position.x, cmd.pose_goal.position.y
-        t_x, t_y = player_pose.position.x, player_pose.position.y
-        e_x = (r_x - t_x)/100
-        e_y = (r_y - t_y)/100
-        if self.last_err_x != 0 and delta_t != 0:
-            d_e_x = (e_x - self.last_err_x) / delta_t
-            d_e_y = (e_y - self.last_err_y) / delta_t
-        else:
-            d_e_x = 0
-            d_e_y = 0
-        self.last_err_x = e_x
-        self.last_err_y = e_y
-        vit = np.array([Kp*e_x+Kd*d_e_x, Kp*e_y+Kd*d_e_y])
-        norm = np.linalg.norm(vit)
-        if norm > 1:
-            vit /= norm
-        #elif norm < 0.5:
-        #    return Pose(Position(0, 0))
+        t_x, t_y = active_player.pose.position.x, active_player.pose.position.y
+        delta_x = (r_x - t_x)/1000
+        delta_y = (r_y - t_y)/1000
 
-        vit *= robot_speed
+        try:
+            robot_speed_x = robot_speed * delta_x / (delta_x ** 2 + delta_y ** 2) ** 0.5
+        except ZeroDivisionError:
+            robot_speed_x = 0
+        try:
+            robot_speed_y = robot_speed * delta_y / (delta_x ** 2 + delta_y ** 2) ** 0.5
+        except ZeroDivisionError:
+            robot_speed_y = 0
+
+
+
+        #accel ou decel en x ?
+        if abs(delta_x) < active_player.velocity[0]**2/(self.accel_max) and \
+                        sign(delta_x) == sign(active_player.velocity[0]):
+            #on doit ralentir
+            vit[0] = active_player.velocity[0] - sign(delta_x) * self.accel_max*delta_t
+        else:
+            #on peut encore accelerer!
+            if abs(active_player.velocity[0]) < abs(robot_speed_x):
+                vit[0] = active_player.velocity[0] + sign(delta_x) * self.accel_max * delta_t
+            else:
+                vit[0] = robot_speed_x
+        # accel ou decel en y ?
+        if abs(delta_y) < active_player.velocity[1] ** 2 / (self.accel_max) and \
+                        sign(delta_y) == sign(active_player.velocity[1]):
+            # on doit ralentir
+            vit[1] = active_player.velocity[1] - sign(delta_y) * self.accel_max * delta_t
+        else:
+            # on peut encore accelerer!
+            if abs(active_player.velocity[1]) < abs(robot_speed_y):
+                vit[1] = active_player.velocity[1] + sign(delta_y) * self.accel_max * delta_t
+            else:
+                vit[1] = robot_speed_y
+
+        vit[0], vit[1] = _correct_for_referential_frame(vit[0], vit[1], active_player.pose.orientation)
+        print("computed_velorcity", vit)
+        # if self.last_err_x != 0 and delta_t != 0:
+        #     d_e_x = (e_x - self.last_err_x) / delta_t
+        #     d_e_y = (e_y - self.last_err_y) / delta_t
+        # else:
+        #     d_e_x = 0
+        #     d_e_y = 0
+        # self.last_err_x = e_x
+        # self.last_err_y = e_y
+        # vit = np.array([Kp*e_x+Kd*d_e_x, Kp*e_y+Kd*d_e_y])
+        # norm = np.linalg.norm(vit)
+        # if norm > 1:
+        #     vit /= norm
+        # #elif norm < 0.5:
+        # #    return Pose(Position(0, 0))
+        #
+        # vit *= robot_speed
         #print('FUUUUUUUUUUUUUUUUUUUUUUU', vit)
         return Pose(Position(vit[0], vit[1]))
 
-    def path_manager(self, player_pose, idx):
-        vec_ref = np.array([[self.paths[idx][0][0] - player_pose.x], [self.paths[idx][0][1] - player_pose.y]])
-        vec_ref /= np.linalg.norm(vec_ref)
-        index = 0
-        dist_tot = 0
-        self.path_estime = self.paths[idx]
-        for index, path in enumerate(self.paths[idx]):
-            vec_compare = np.array([[path[0] - self.paths[idx][index+1][0]], [path[1] - self.paths[idx][index+1][1]]])
-            dist_tot = np.linalg.norm(vec_compare)
-            vec_compare /= np.linalg.norm(vec_compare)
-            if np.dot(np.transpose(vec_ref), vec_compare) > 0.4:
-                break
-        self.path_estime = self.paths[idx][0:index-1]
+
+def _correct_for_referential_frame(x, y, orientation):
+
+    cos = math.cos(-orientation)
+    sin = math.sin(-orientation)
+
+    corrected_x = (x * cos - y * sin)
+    corrected_y = (y * cos + x * sin)
+    return corrected_x, corrected_y
+
+    # def path_manager(self, player_pose, idx, vit_crois):
+    #     delta_x = vit_crois**2/(2*self.accel_max)
+    #     vec_ref = np.array([[self.paths[idx][0][0] - player_pose.x], [self.paths[idx][0][1] - player_pose.y]])
+    #     if delta_x > np.linalg.norm(vec_ref)/2:
+    #         # on a pas assez de temps pour accel et decel
+    #         vit_crois = (2*self.accel_max*delta_x)**0.5
+    #
+    #     vec_ref /= np.linalg.norm(vec_ref)
+    #     index = 0
+    #     dist_tot = 0
+    #     self.path_estime = self.paths[idx]
+    #     for index, path in enumerate(self.paths[idx]):
+    #         vec_compare = np.array([[path[0] - self.paths[idx][index+1][0]], [path[1] - self.paths[idx][index+1][1]]])
+    #         dist_tot = np.linalg.norm(vec_compare)
+    #         vec_compare /= np.linalg.norm(vec_compare)
+    #         if np.dot(np.transpose(vec_ref), vec_compare) > 0.4:
+    #             break
+    #     self.path_estime = self.paths[idx][0:index-1]
 
         # else:
         #     print("OLD REGULATOR")
@@ -278,10 +342,4 @@ class PI(object):
 #                 }
 #
 #
-# def _correct_for_referential_frame(x, y, orientation):
-#     cos = math.cos(-orientation)
-#     sin = math.sin(-orientation)
-#
-#     corrected_x = (x * cos - y * sin)
-#     corrected_y = (y * cos + x * sin)
-#     return corrected_x, corrected_y
+
