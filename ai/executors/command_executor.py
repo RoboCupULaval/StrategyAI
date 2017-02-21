@@ -12,29 +12,13 @@ class CommandExecutor(Executor):
         super().__init__(p_world_state)
 
     def exec(self):
-
-        self._clear_last_packet_commands()
-        self._generate_command()
-        self._clear_ai_commands()
-        return
-
-    def _clear_last_packet_commands(self):
-        self.ws.play_state.ready_to_ship_robot_packet_list.clear()
-
-    def _clear_ai_commands(self):
-        self.ws.play_state.current_ai_commands.clear()
-
-    def _generate_command(self):
-        ai_command_dict = self._retrieve_commands()
-
-        # TODO: remplacer la constante PLAYER_PER_TEAM par les clefs d'un dictionnaire contenant les robots dans le game_state
+        ai_command_dict = self.ws.play_state.current_ai_commands
+        ready_to_ship_robot_packet_list = []
         for player_id, ai_command in ai_command_dict.items():
-            self.ws.play_state.ready_to_ship_robot_packet_list.append(self._parse_ai_command(ai_command,
-                                                                      player_id))
-        return self.ws.play_state.ready_to_ship_robot_packet_list
+            ready_to_ship_robot_packet_list.append(self._parse_ai_command(ai_command,
+                                                                          player_id))
 
-    def _retrieve_commands(self):
-        return self.ws.play_state.current_ai_commands
+        return ready_to_ship_robot_packet_list
 
     def _parse_ai_command(self, ai_command: AICommand, player_id):
         # TODO restraindre une seul commande de mouvement par robot
@@ -49,8 +33,8 @@ class CommandExecutor(Executor):
                 return self._generate_kick_command(player_id)
 
             elif ai_command.command == AICommandType.MOVE:
-                assert (isinstance(ai_command.pose_goal, Pose))
-                return self._generate_move_command(ai_command.pose_goal, player_id)
+                assert (isinstance(ai_command.speed, Pose))
+                return self._generate_move_command(ai_command.speed, player_id)
 
         return self._generate_empty_command(player_id)
 

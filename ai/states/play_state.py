@@ -12,7 +12,6 @@ class PlayState(object, metaclass=Singleton):
         self.tactic_book = TacticBook()
         self.current_strategy = None
         self.current_ai_commands = {}
-        self.ready_to_ship_robot_packet_list = []
 
     def set_strategy(self, strategy):
         assert self.strategy_book.check_existance_strategy(str(strategy))
