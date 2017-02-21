@@ -4,7 +4,6 @@ from RULEngine.Game.Player import Player
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from RULEngine.Util.team_color_service import TeamColor
 
-
 class Team():
     def __init__(self, team_color):
         self.players = {}
@@ -28,5 +27,11 @@ class Team():
     def update_player(self, player_id, pose, delta=0):
         try:
             self.players[player_id].update(pose, delta)
+        except KeyError as err:
+            raise err
+
+    def update_player_command(self, player_id, cmd):
+        try:
+            self.players[player_id].set_command(cmd)
         except KeyError as err:
             raise err
