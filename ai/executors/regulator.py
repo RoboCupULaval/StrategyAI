@@ -76,6 +76,10 @@ class PI(object):
         self.paths = {}
         self.accel_max = 2
         self.vit_max = 4
+        self.last_err_x = 0
+        self.last_err_y = 0
+        # are we in a simulation?
+        self.simulation_setting = simulation_setting
         # self.accumulator_x = 0
         # self.accumulator_y = 0
         # self.accumulator_t = 0
@@ -87,8 +91,7 @@ class PI(object):
         # self.last_command_x = 0
         # self.last_command_y = 0
         # self.previous_cmd = []
-        self.last_err_x = 0
-        self.last_err_y = 0
+
 
     def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=4):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
@@ -141,8 +144,12 @@ class PI(object):
             else:
                 vit[1] = robot_speed_y
 
+        #if not self.simulation_setting:
         vit[0], vit[1] = _correct_for_referential_frame(vit[0], vit[1], active_player.pose.orientation)
-        print("computed_velorcity", vit)
+
+        #print("computed_velorcity", vit)
+
+
         # if self.last_err_x != 0 and delta_t != 0:
         #     d_e_x = (e_x - self.last_err_x) / delta_t
         #     d_e_y = (e_y - self.last_err_y) / delta_t
@@ -160,7 +167,7 @@ class PI(object):
         #
         # vit *= robot_speed
         #print('FUUUUUUUUUUUUUUUUUUUUUUU', vit)
-        return Pose(Position(vit[0], vit[1]))
+        return Pose(Position(vit[0], vit[1]), cmd.speed.orientation)
 
 
 def _correct_for_referential_frame(x, y, orientation):

@@ -20,10 +20,11 @@ class MovementExecutor(Executor):
             if len(ai_c.path) > 0:
                 next_point = ai_c.path[0]
                 # TODO ORIENTATION! PLEASES!
-                ai_c.pose_goal = Pose(next_point, 0)
-                ai_c.speed = Pose(next_point, 0)
+                ai_c.pose_goal = Pose(next_point, ai_c.pose_goal.orientation)
+                ai_c.speed = Pose(next_point, ai_c.pose_goal.orientation)
             else:
                 ai_c.speed = ai_c.pose_goal
+                print(ai_c.speed)
 
     def _sanity_check_of_speed_command(self):
         for ai_c in self.ws.play_state.current_ai_commands.values():
