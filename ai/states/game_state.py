@@ -28,8 +28,16 @@ class GameState(object, metaclass=Singleton):
     def get_our_team_color(self) -> TeamColor:
         return self.our_team_color
 
-    def get_my_team_player(self, player_id: int):
-        pass
+    def get_player(self, player_id: int, is_my_team=True):
+        """
+        :param player_id: id of the desired player
+        :param is_my_team: True for ally team, False for opponent team
+        :return: the player
+        """
+        if is_my_team:
+            return self.my_team.players[player_id]
+        else:
+            return self.other_team.players[player_id]
 
     def get_player_pose(self, player_id: int, is_my_team=True) -> Pose:
         """

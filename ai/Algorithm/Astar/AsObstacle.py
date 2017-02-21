@@ -1,17 +1,17 @@
 #pylint: skip-file
 
 from ai.Algorithm.Astar.AsPosition import AsPosition
+from RULEngine.Util.Vector import Vector
 
 class AsObstacle():
 
-    def __init__(self, position, direction=0, speed=1):
+    def __init__(self, position, vector=Vector(1,0)):
 
         self.position = position
-        self.direction = direction
-        self.speed = speed
+        self.vector = vector
 
 
-    def getPos(self, position):
+    def getPos(self):
 
         return self.position
 

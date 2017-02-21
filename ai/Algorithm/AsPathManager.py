@@ -131,13 +131,19 @@ class AsPathManager(Pathfinder):
         ourTeam = game_state.my_team.players
 
         for id in opponentTeam:
-            position = game_state.get_player_position(id, False)
-            obstacleList.append(AsObstacle(AsPosition(position.x, position.y)))
+            player = game_state.get_player(id, False)
+            position = player.pose.position
+            vector = player.velocity
+            obstacle = AsObstacle(AsPosition(position.x, position.y), vector)
+            obstacleList.append(obstacle)
 
         for id in ourTeam:
             if (id != robot_id):
-                position = game_state.get_player_position(id, True)
-                obstacleList.append(AsObstacle(AsPosition(position.x, position.y)))
+                player = game_state.get_player(id, True)
+                position = player.pose.position
+                vector = player.velocity
+                obstacle = AsObstacle(AsPosition(position.x, position.y), vector)
+                obstacleList.append(obstacle)
 
         currentRobotPos = game_state.get_player_position(robot_id)
         startAsPos = AsPosition(currentRobotPos.x, currentRobotPos.y)
