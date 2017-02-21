@@ -2,6 +2,7 @@
 
 from ai.Algorithm.IntelligentModule import Pathfinder
 from ai.Algorithm.Astar.AsPosition import AsPosition
+from ai.Algorithm.Astar.AsObstacle import AsObstacle
 from ai.Algorithm.Astar.AsGraph import AsGraph
 from RULEngine.Util.Position import Position
 import math
@@ -46,12 +47,30 @@ class AsPathManager(Pathfinder):
             updatedObstacleList = list(obstacleList)
             for j in range(0, nbPath, 1):
                 if (j != i):
-                    updatedObstacleList.append(startPosList[j])
+                    updatedObstacleList.append(AsObstacle(startPosList[j]))
 
             allAsPathList += [graph.aStarPath(startPos, endPos, updatedObstacleList)]
 
 
         return allAsPathList
+
+    def getAsPath(self, startPos, endPos, obstacleList):
+
+        graph = self.impreciseGraph
+        totalDist = startPos.getDist(endPos)
+
+        if (totalDist < (self.MaxDist / 3)):
+            graph = self.preciseGraph
+
+        if (totalDist > self.PreciseInterval * 10):
+            ratio = math.fabs((self.PreciseInterval * 10) / totalDist)
+            xPos = startPos.x + ((endPos.x - startPos.x) * ratio)
+            yPos = startPos.y + ((endPos.y - startPos.y) * ratio)
+            endPos = AsPosition(xPos, yPos)
+
+        asPath = graph.aStarPath(startPos, endPos, obstacleList)
+
+        return asPath
     
     def update(self):
         """
@@ -113,22 +132,22 @@ class AsPathManager(Pathfinder):
 
         for id in opponentTeam:
             position = game_state.get_player_position(id, False)
-            obstacleList.append(AsPosition(position.x, position.y))
+            obstacleList.append(AsObstacle(AsPosition(position.x, position.y)))
 
         for id in ourTeam:
             if (id != robot_id):
                 position = game_state.get_player_position(id, True)
-                obstacleList.append(AsPosition(position.x, position.y))
+                obstacleList.append(AsObstacle(AsPosition(position.x, position.y)))
 
         currentRobotPos = game_state.get_player_position(robot_id)
         startAsPos = AsPosition(currentRobotPos.x, currentRobotPos.y)
         endAsPos = AsPosition(target.position.x, target.position.y)
 
-        robotAsPath = self.getAllAsPath([startAsPos], [endAsPos], obstacleList)
+        robotAsPath = self.getAsPath(startAsPos, endAsPos, obstacleList)
         robotPosPath = []
 
-        for i in range(0, len(robotAsPath[0]), 1):
-            tempAsPos = robotAsPath[0][i]
+        for i in range(0, len(robotAsPath), 1):
+            tempAsPos = robotAsPath[i]
             robotPosPath += [Position(tempAsPos.x, tempAsPos.y)]
 
         return robotPosPath

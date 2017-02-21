@@ -1,6 +1,7 @@
 #pylint: skip-file
 
 from ai.Algorithm.Astar.AsPosition import AsPosition
+from ai.Algorithm.Astar.AsObstacle import AsObstacle
 from ai.Algorithm.Astar.AsNode import AsNode
 from math import sqrt, acos
 
@@ -89,9 +90,9 @@ class AsGraph():
 
         return key
 
-    def toggleObstacle(self, position, free):
+    def toggleObstacle(self, obstacle, free):
 
-        topLeftKey = self.findNearNodeKey(AsPosition(position.x - (self.robotRadius * 2), position.y + (self.robotRadius * 2)))
+        topLeftKey = self.findNearNodeKey(AsPosition(obstacle.position.x - (self.robotRadius * 2), obstacle.position.y + (self.robotRadius * 2)))
         topLeftNode = self.graphHash[topLeftKey]
 
         for x in range(0, (self.robotRadius * 4), self.interval):
@@ -99,7 +100,7 @@ class AsGraph():
                 currentKey = self.buildKey(AsPosition(topLeftNode.pos.x + x, topLeftNode.pos.y - y))
                 if (currentKey in self.graphHash):
                     currentNode = self.graphHash[currentKey]
-                    if (self.inShape(position, currentNode.pos)):
+                    if (self.inShape(obstacle.position, currentNode.pos)):
                         currentNode.free = free
 
     def inShape(self, center, position):
@@ -110,8 +111,8 @@ class AsGraph():
 
     def setAllObstacle(self, obstacleList, free):
 
-        for pos in obstacleList:
-            self.toggleObstacle(pos, free)
+        for obstacle in obstacleList:
+            self.toggleObstacle(obstacle, free)
 
     def aStarPath(self, startPos, endPos, obstacleList):
 
