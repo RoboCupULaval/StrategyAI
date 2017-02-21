@@ -5,6 +5,7 @@ import time
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from RULEngine.Util.geometry import get_distance
 from ai.Util.ai_command import AICommandType, AICommand
 from ai.executors.executor import Executor
 from ai.states.game_state import GameState
@@ -36,6 +37,12 @@ REAL_DEFAUT_INTEGRAL_THETA_GAIN = 0
 #REAL_DEFAULT_THETA_GAIN = 0
 
 
+
+ROBOT_NEAR_FORCE = 100
+ROBOT_VELOCITY_MAX = 4
+ROBOT_ACC_MAX = 2
+
+
 def sign(x):
     if x > 0:
         return 1
@@ -62,6 +69,67 @@ class PositionRegulator(Executor):
                                                         active_player,
                                                         delta_t,
                                                         idx=robot_idx)
+        self._potential_field()
+
+    def _potential_field(self):
+        current_ai_c = self.ws.play_state.current_ai_commands
+
+        for ai_c in current_ai_c.values():
+            if len(ai_c.path) > 0:
+                goal = ai_c.pose_goal
+                force = [0, 0]
+                current_robot_pos = self.ws.game_state.get_player_position(ai_c.robot_id)
+                current_robot_velocity = self.ws.game_state.game.friends.players[ai_c.robot_id].velocity
+
+                for robot in self.ws.game_state.game.friends.players.values():
+                    if robot.id != ai_c.robot_id:
+                        dist = get_distance(current_robot_pos, robot.pose.position)
+                        angle = math.atan2(current_robot_pos.y - robot.pose.position.y,
+                                           current_robot_pos.x - robot.pose.position.x)
+                        try:
+                            force[0] += 1 / dist * math.cos(angle)
+                        except:
+                            pass
+                        try:
+                            force[1] += 1 / dist * math.sin(angle)
+                        except:
+                            pass
+
+                for robot in self.ws.game_state.game.enemies.players.values():
+                    dist = get_distance(current_robot_pos, robot.pose.position)
+                    angle = math.atan2(current_robot_pos.y - robot.pose.position.y,
+                                       current_robot_pos.x - robot.pose.position.x)
+                    try:
+                        force[0] += 1 / dist * math.cos(angle)
+                    except:
+                        pass
+                    try:
+                        force[1] += 1 / dist * math.sin(angle)
+                    except:
+                        pass
+
+                # dist_goal = get_distance(current_robot_pos, ai_c.pose_goal.position)
+                angle_goal = math.atan2(current_robot_pos.y - ai_c.pose_goal.position.y,
+                                        current_robot_pos.x - ai_c.pose_goal.position.x)
+
+                dt = self.ws.game_state.game.delta_t
+
+                a = (((current_robot_velocity[0] + 0.1) * math.cos(angle_goal) - current_robot_velocity[0]) / dt)
+                b = (((current_robot_velocity[1] + 0.1) * math.cos(angle_goal) - current_robot_velocity[1]) / dt)
+                acc_goal = math.sqrt(a ** 2 + b ** 2)
+
+                angle_acc_goal = math.atan2(b, a)
+
+                c = force[0] * ROBOT_NEAR_FORCE + (acc_goal * math.cos(angle_acc_goal))
+                d = force[1] * ROBOT_NEAR_FORCE + (acc_goal * math.cos(angle_acc_goal))
+
+                acc_robot_x = min(max(c, -ROBOT_ACC_MAX), ROBOT_ACC_MAX)
+                acc_robot_y = min(max(d, -ROBOT_ACC_MAX), ROBOT_ACC_MAX)
+
+                vit_robot_x = min(max(current_robot_velocity[0] + acc_robot_x * dt, -ROBOT_VELOCITY_MAX),
+                                  ROBOT_VELOCITY_MAX)
+                vit_robot_y = min(max(current_robot_velocity[1] + acc_robot_y * dt, -ROBOT_VELOCITY_MAX),
+                                  ROBOT_VELOCITY_MAX)
 
 
 class PI(object):
