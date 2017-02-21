@@ -12,7 +12,7 @@ from ai.STA.Tactic import tactic_constants
 from ai.Util.ball_possession import *
 from ai.STA.Tactic.tactic_constants import Flags
 
-from ai.Util.ball_possession import canGetBall, hasBall
+from ai.Util.ball_possession import can_get_ball, has_ball
 from RULEngine.Util.geometry import get_distance
 from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS
 from RULEngine.Util.Pose import Pose
@@ -68,10 +68,10 @@ class GoGetBall(Tactic):
         return self.move_action
 
     def grab_ball(self):
-        if hasBall(self.game_state, self.player_id):
+        if has_ball(self.game_state, self.player_id):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
-        elif canGetBall(self.game_state, self.player_id):
+        elif can_get_ball(self.game_state, self.player_id):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.get_behind_ball  # back to go_behind; the ball has moved

@@ -6,7 +6,7 @@ from ..Action.ProtectGoal import ProtectGoal
 from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
-from ai.Util.ball_possession import canGetBall, hasBall
+from ai.Util.ball_possession import can_get_ball, has_ball
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.area import isInsideGoalArea
@@ -51,7 +51,7 @@ class GoalKeeper(Tactic):
         if not isInsideGoalArea(ball_position, self.is_yellow):
             self.next_state = self.protect_goal
         else:
-            if canGetBall(self.game_state, self.player_id, ball_position):
+            if can_get_ball(self.game_state, self.player_id, ball_position):
                 self.next_state = self.grab_ball
             else:
                 self.next_state = self.go_behind_ball
@@ -61,7 +61,7 @@ class GoalKeeper(Tactic):
     def go_behind_ball(self):
         ball_position = self.game_state.get_ball_position()
 
-        if canGetBall(self.game_state, self.player_id, ball_position):
+        if can_get_ball(self.game_state, self.player_id, ball_position):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -70,10 +70,10 @@ class GoalKeeper(Tactic):
 
     def grab_ball(self):
         ball_position = self.game_state.get_ball_position()
-        if hasBall(self.game_state, self.player_id):
+        if has_ball(self.game_state, self.player_id):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
-        elif canGetBall(self.game_state, self.player_id, ball_position):
+        elif can_get_ball(self.game_state, self.player_id, ball_position):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball  # back to go_behind; the ball has moved
