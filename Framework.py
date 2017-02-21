@@ -70,8 +70,8 @@ class Framework(object):
         self.uidebug_command_receiver = None
         self.uidebug_vision_sender = None
         # because this thing below is a callable!
-        self.vision_redirecter = lambda *args:None
-        self.vision_routine = self._normal_vision
+        self.vision_redirecter = lambda *args: None
+        self.vision_routine = self._normal_vision # self._test_vision  # self._normal_vision
 
         # Debug
         self.incoming_debug = []
@@ -207,6 +207,11 @@ class Framework(object):
             self._send_robot_commands(robot_commands)
             self.game.set_command(robot_commands)
             self._send_debug_commands()
+
+    def _test_vision(self):
+        vision_frame = self._acquire_last_vision_frame()
+        if self._is_frame_number_different(vision_frame):
+            print(self._compute_vision_time_delta(vision_frame))
 
     def _redirected_vision(self):
         vision_frames = self.vision.pop_frames()

@@ -47,7 +47,7 @@ def _get_port(serial_type):
     if serial_type == SerialType.NRF:
         serial_ports = [port for port in os.listdir('/dev')
                         if port.startswith("ttyUSB") or port.startswith(
-                'ttyACM')]
+                'ttyACM') or port.startswith("ttyBaseStation")]
     elif serial_type == SerialType.BLUETOOTH:
         serial_ports = [port for port in os.listdir('/dev')
                         if port.startswith("rfcomm")]
