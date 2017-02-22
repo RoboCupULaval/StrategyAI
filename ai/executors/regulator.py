@@ -130,7 +130,7 @@ class PI(object):
     def __init__(self, simulation_setting=True):
         self.gs = GameState()
         self.paths = {}
-        self.accel_max = 2
+        self.accel_max = 0.25
         self.vit_max = 4
         # self.accumulator_x = 0
         # self.accumulator_y = 0
@@ -147,12 +147,12 @@ class PI(object):
         self.last_err_y = 0
         #self.val_filtered = open('filtered.txt', 'w')
 
-    def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=2):
+    def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=0.2):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
         assert isinstance(cmd, AICommand), "La consigne doit etre une Pose dans le PI"
-        #print("regulator_pose", [player_pose.position.x, player_pose.position.y, player_pose.orientation])
-
-        vit = [0, 0]
+        player_pose = active_player.pose
+        print("regulator_pose", [player_pose.position.x, player_pose.position.y, player_pose.orientation])
+        vit = [0, 0, 0]
 
         Kp = 0.5
         Kd = 0.2
@@ -162,14 +162,28 @@ class PI(object):
         #    (cmd.pose_goal is not self.paths[idx][-1]):
         r_x, r_y = cmd.pose_goal.position.x, cmd.pose_goal.position.y
         t_x, t_y = active_player.pose.position.x, active_player.pose.position.y
+
+        player_local_velocity = [active_player.velocity[0], active_player.velocity[1]]
+        player_local_velocity[0], player_local_velocity[1] = _correct_for_referential_frame(player_local_velocity[0], player_local_velocity[1], -active_player.pose.orientation)
+
         delta_x = (r_x - t_x)/1000
         delta_y = (r_y - t_y)/1000
+        #quick fix pour real life
+        delta_x = delta_x - sign(delta_x) * 0.2
+        delta_y = delta_y - sign(delta_y) * 0.2
+        # print("pos before",delta_x, delta_y)
+        delta_x, delta_y = _correct_for_referential_frame(delta_x, delta_y, -active_player.pose.orientation)
+        # print("pos transform",delta_x, delta_y)
         try:
             if abs(delta_x) > abs(delta_y):
                 ratio_vit_x = 1
                 ratio_vit_y = abs(delta_y / delta_x)
+                if ratio_vit_y > 1:
+                    ratio_vit_y = 1
             else:
                 ratio_vit_x = abs(delta_x / delta_y)
+                if ratio_vit_x > 1:
+                    ratio_vit_x = 1
                 ratio_vit_y = 1
         except ZeroDivisionError:
             ratio_vit_x = 0
@@ -187,38 +201,39 @@ class PI(object):
         except ZeroDivisionError:
             robot_speed_y = 0
 
-        #accel ou decel en x ?
-        if abs(delta_x) < active_player.velocity[0]**2/(accel_x) and \
-                        sign(delta_x) == sign(active_player.velocity[0]):
-            #on doit ralentir
-            vit[0] = active_player.velocity[0] - sign(delta_x) * accel_x *delta_t
-        elif abs(delta_x) < 0.02:
+        # accel ou decel en x ?
+        if abs(delta_x) < player_local_velocity[0]**2/(accel_x / 4) and \
+                        sign(delta_x) == sign(player_local_velocity[0]):
+            # on doit ralentir
+            vit[0] = player_local_velocity[0] - sign(delta_x) * accel_x *delta_t
+        elif abs(delta_x) < 0.3:
             # on est arrive!
             vit[0] = 0
         else:
-            #on peut encore accelerer!
-            if abs(active_player.velocity[0]) < abs(robot_speed_x):
-                vit[0] = active_player.velocity[0] + sign(delta_x) * accel_x * delta_t
+            # on peut encore accelerer!
+            if abs(player_local_velocity[0]) < abs(robot_speed_x):
+                vit[0] = player_local_velocity[0] + sign(delta_x) * accel_x * delta_t
             else:
                 vit[0] = robot_speed_x
         # accel ou decel en y ?
-        if abs(delta_y) < active_player.velocity[1] ** 2 / (accel_y) and \
-                        sign(delta_y) == sign(active_player.velocity[1]):
+        if abs(delta_y) < player_local_velocity[1] ** 2 / (accel_y / 4) and \
+                        sign(delta_y) == sign(player_local_velocity[1]):
             # on doit ralentir
-            vit[1] = active_player.velocity[1] - sign(delta_y) * accel_y * delta_t
-        elif abs(delta_y) < 0.02:
+            vit[1] = player_local_velocity[1] - sign(delta_y) * accel_y * delta_t
+        elif abs(delta_y) < 0.3:
             # on est arrive!
             vit[1] = 0
         else:
             # on peut encore accelerer!
-            if abs(active_player.velocity[1]) < abs(robot_speed_y):
-                vit[1] = active_player.velocity[1] + sign(delta_y) * accel_y * delta_t
+            if abs(player_local_velocity[1]) < abs(robot_speed_y):
+                vit[1] = player_local_velocity[1] + sign(delta_y) * accel_y * delta_t
             else:
                 vit[1] = robot_speed_y
+        # print(active_player.pose.orientation)
 
-        #vit[0], vit[1] = _correct_for_referential_frame(vit[0], vit[1], active_player.pose.orientation)
-        #self.val_filtered.write("{}, {}\n".format(vit[0], vit[1]))
-        print("computed_velorcity", vit)
+        # vit[0], vit[1] = _correct_for_referential_frame(vit[0], vit[1], -active_player.pose.orientation)
+        # self.val_filtered.write("{}, {}\n".format(vit[0], vit[1]))
+        # print("computed_velocity", vit)
         # if self.last_err_x != 0 and delta_t != 0:
         #     d_e_x = (e_x - self.last_err_x) / delta_t
         #     d_e_y = (e_y - self.last_err_y) / delta_t
@@ -235,8 +250,12 @@ class PI(object):
         # #    return Pose(Position(0, 0))
         #
         # vit *= robot_speed
-        #print('FUUUUUUUUUUUUUUUUUUUUUUU', vit)
-        return Pose(Position(vit[0], vit[1]))
+        # print('FUUUUUUUUUUUUUUUUUUUUUUU', vit)
+        if abs(vit[0]) > robot_speed:
+            vit[0] = sign(vit[0]) * robot_speed
+        if abs(vit[1]) > robot_speed:
+            vit[1] = sign(vit[1]) * robot_speed
+        return Pose(Position(vit[0], vit[1]), 0)
 
 
 def _correct_for_referential_frame(x, y, orientation):
@@ -244,8 +263,8 @@ def _correct_for_referential_frame(x, y, orientation):
     cos = math.cos(orientation)
     sin = math.sin(orientation)
 
-    corrected_x = (x * cos + y * sin)
-    corrected_y = (y * cos - x * sin)
+    corrected_x = (x * cos - y * sin)
+    corrected_y = (y * cos + x * sin)
     return corrected_x, corrected_y
 
     # def path_manager(self, player_pose, idx, vit_crois):
