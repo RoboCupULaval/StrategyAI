@@ -27,7 +27,7 @@ from RULEngine.Debug.debug_interface import DebugInterface
 # Game objects
 from RULEngine.Game.Game import Game
 from RULEngine.Game.Referee import Referee
-from RULEngine.Util.constant import TeamColor
+from RULEngine.Util.constant import TeamColor, DELTA_T
 from RULEngine.Util.exception import StopPlayerError
 from RULEngine.Util.team_color_service import TeamColorService
 from RULEngine.Util.game_world import GameWorld
@@ -36,7 +36,7 @@ from RULEngine.Util.image_transformer import ImageTransformer
 # TODO inquire about those constants (move, utility)
 LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
 UI_DEBUG_MULTICAST_ADDRESS = "127.0.0.1"
-CMD_DELTA_TIME = 0.030
+CMD_DELTA_TIME = 0.020
 
 
 class Framework(object):
@@ -71,13 +71,11 @@ class Framework(object):
         self.uidebug_vision_sender = None
         # because this thing below is a callable!
         self.vision_redirecter = lambda *args: None
-        self.vision_routine = self._normal_vision # self._test_vision  # self._normal_vision
-
+        self.vision_routine = self._normal_vision  # self._normal_vision # self._test_vision
         # Debug
         self.incoming_debug = []
         self.outgoing_debug = []
         self.debug = DebugInterface()
-
         self._init_communication(serial=serial, redirect=redirect, mcu_version=mcu_version)
 
         # Game elements
@@ -178,7 +176,12 @@ class Framework(object):
         time_delta = self._compute_vision_time_delta(vision_frame)
         self.game.update(vision_frame, time_delta)
 
+    def _better_update_players_and_ball(self, vision_frame):
+        time_delta = self._better_compute_vision_time_delta(vision_frame)
+        self.game.update(vision_frame, time_delta)
+
     def _is_frame_number_different(self, vision_frame):
+        #print(vision_frame.detection.frame_number)
         if vision_frame is not None:
             return vision_frame.detection.frame_number != self.last_frame_number
         else:
@@ -186,11 +189,22 @@ class Framework(object):
 
     def _compute_vision_time_delta(self, vision_frame):
         self.last_frame_number = vision_frame.detection.frame_number
-        this_time = vision_frame.detection.t_capture
+        this_time = vision_frame.detection.t_capture  # time.time()  # vision_frame.detection.t_capture
         time_delta = this_time - self.last_time
         self.last_time = this_time
         # FIXME: hack
         return time_delta
+
+    def _better_compute_vision_time_delta(self, vision_frame):
+        self.last_frame_number = vision_frame.detection.frame_number
+        this_time = vision_frame.detection.t_capture
+        time_delta = this_time - self.last_time
+        self.last_time = this_time
+        if time_delta <= 0.0:
+           return DELTA_T*10E-4
+        # FIXME: hack
+        return time_delta
+
 
     def _update_debug_info(self):
         """ Retourne le **GameState** actuel. *** """
@@ -202,30 +216,36 @@ class Framework(object):
             self._update_players_and_ball(vision_frame)
             self._update_debug_info()
             robot_commands = self.ia_coach_mainloop()
-
             # Communication
+
             self._send_robot_commands(robot_commands)
             self.game.set_command(robot_commands)
             self._send_debug_commands()
 
     def _test_vision(self):
-        vision_frame = self._acquire_last_vision_frame()
-        if self._is_frame_number_different(vision_frame):
-            print(self._compute_vision_time_delta(vision_frame))
+        vision_frame = self.vision.pop_frames()
+        if len(vision_frame) > 0:
+            for i in vision_frame:
+                print(i)
+            print("**********************************************************")
 
     def _redirected_vision(self):
         vision_frames = self.vision.pop_frames()
         new_image_packet = self.image_transformer.update(vision_frames)
+        #print(time.time() - self.time_stamp)
         self.vision_redirecter(new_image_packet.SerializeToString())
-
-        if self.image_transformer.has_new_image():
-            self._update_players_and_ball(new_image_packet)
+        if self._is_frame_number_different(new_image_packet):
+            #print(time.time() - self.time_stamp)
+            self._better_update_players_and_ball(new_image_packet)
             self._update_debug_info()
+            #print(time.time() - self.time_stamp)
+
             robot_commands = self.ia_coach_mainloop()
 
             # Communication
             self._send_robot_commands(robot_commands)
             self._send_debug_commands()
+            #print(time.time() - self.time_stamp)
 
     def _acquire_last_vision_frame(self):
         return self.vision.get_latest_frame()

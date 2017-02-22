@@ -98,10 +98,8 @@ class ImageTransformer(object):
         packet_to_add.detection.t_capture = self.last_t_capture
         packet_to_add.detection.frame_number = self.frame_number
 
-
     def _update_camera_packets(self, packets):
         self.new_image_flag = False
-
         if not packets:
             return self.last_new_packet
 

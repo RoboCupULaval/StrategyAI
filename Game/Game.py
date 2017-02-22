@@ -57,6 +57,7 @@ class Game:
 
     def update(self, vision_frame, delta):
         self.delta_t = delta
+        # print(delta)
         self._update_ball(vision_frame, delta)
         self._update_players(vision_frame, delta)
 
