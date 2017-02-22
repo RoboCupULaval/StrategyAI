@@ -212,8 +212,8 @@ class PI(object):
             else:
                 vit[1] = robot_speed_y
 
-        #if not self.simulation_setting:
-        vit[0], vit[1] = _correct_for_referential_frame(vit[0], vit[1], active_player.pose.orientation)
+        if not self.simulation_setting:
+            vit[0], vit[1] = _correct_for_referential_frame(vit[0], vit[1], active_player.pose.orientation)
 
         #print("computed_velorcity", vit)
 
