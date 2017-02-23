@@ -36,8 +36,6 @@ REAL_DEFAULT_THETA_GAIN = 350
 REAL_DEFAUT_INTEGRAL_THETA_GAIN = 0
 #REAL_DEFAULT_THETA_GAIN = 0
 
-
-
 ROBOT_NEAR_FORCE = 100
 ROBOT_VELOCITY_MAX = 4
 ROBOT_ACC_MAX = 2
@@ -142,14 +140,17 @@ class PI(object):
     def __init__(self, simulation_setting=True):
         self.gs = GameState()
         self.paths = {}
-        self.accel_max = 1
-        self.vit_max = 0.5
-        self.kp = 0.25
-
-        self.last_err_x = 0
-        self.last_err_y = 0
         # are we in a simulation?
         self.simulation_setting = simulation_setting
+        self.constants = _set_constants(simulation_setting)
+        self.accel_max = self.constants["accel_max"]
+        self.vit_max = self.constants["vit_max"]
+        self.kp = self.constants["kp"]
+        self.last_err_x = self.constants["last_err_x"]
+        self.last_err_y = self.constants["last_err_y"]
+
+
+
         # self.accumulator_x = 0
         # self.accumulator_y = 0
         # self.accumulator_t = 0
@@ -167,7 +168,7 @@ class PI(object):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
         assert isinstance(cmd, AICommand), "La consigne doit etre une Pose dans le PI"
         player_pose = active_player.pose
-        print("regulator_pose", [player_pose.position.x, player_pose.position.y, player_pose.orientation])
+        #print("regulator_pose", [player_pose.position.x, player_pose.position.y, player_pose.orientation])
         vit = [0, 0, 0]
 
         Kp = 0.5
@@ -295,6 +296,7 @@ class PI(object):
         #     vit[0] = sign(vit[0]) * robot_speed
         # if abs(vit[1]) > robot_speed:
         #     vit[1] = sign(vit[1]) * robot_speed
+        #print(v_target_x, "    ", v_target_y)
         return Pose(Position(v_target_x, v_target_y), 0)
 
 
@@ -307,174 +309,28 @@ def _correct_for_referential_frame(x, y, orientation):
     corrected_y = (y * cos + x * sin)
     return corrected_x, corrected_y
 
-    # def path_manager(self, player_pose, idx, vit_crois):
-    #     delta_x = vit_crois**2/(2*self.accel_max)
-    #     vec_ref = np.array([[self.paths[idx][0][0] - player_pose.x], [self.paths[idx][0][1] - player_pose.y]])
-    #     if delta_x > np.linalg.norm(vec_ref)/2:
-    #         # on a pas assez de temps pour accel et decel
-    #         vit_crois = (2*self.accel_max*delta_x)**0.5
-    #
-    #     vec_ref /= np.linalg.norm(vec_ref)
-    #     index = 0
-    #     dist_tot = 0
-    #     self.path_estime = self.paths[idx]
-    #     for index, path in enumerate(self.paths[idx]):
-    #         vec_compare = np.array([[path[0] - self.paths[idx][index+1][0]], [path[1] - self.paths[idx][index+1][1]]])
-    #         dist_tot = np.linalg.norm(vec_compare)
-    #         vec_compare /= np.linalg.norm(vec_compare)
-    #         if np.dot(np.transpose(vec_ref), vec_compare) > 0.4:
-    #             break
-    #     self.path_estime = self.paths[idx][0:index-1]
 
-        # else:
-        #     print("OLD REGULATOR")
-        #     r_x, r_y = cmd.pose_goal.position.x, cmd.pose_goal.position.y
-        #     t_x, t_y = player_pose.position.x, player_pose.position.y
-        #     e_x = r_x - t_x
-        #     e_y = r_y - t_y
-        #
-        #     # composante proportionnel
-        #     up_x = self.kp * e_x
-        #     up_y = self.kp * e_y
-        #
-        #     # composante integrale, decay l'accumulator
-        #     ui_x, ui_y = self._compute_integral(delta_t, e_x, e_y)
-        #     if idx == 4:
-        #         #print("({}) accumulateur: {}, {}".format(delta_t, self.accumulator_x, self.accumulator_y))
-        #         pass
-        #     self._zero_accumulator()
-        #
-        #     u_x = up_x + ui_x
-        #     u_y = up_y + ui_y
-        #
-        #     # try relinearize
-        #     if 0 < abs(u_x) < self.constants['deadzone-cmd']:
-        #         if u_x > 0:
-        #             u_x = self.constants['deadzone-cmd']
-        #         else:
-        #             u_x = -self.constants['deadzone-cmd']
-        #     elif abs(u_x) < self.constants['deadzone-cmd']:
-        #         u_x = 0
-        #
-        #     if 0 < abs(u_y) < self.constants['deadzone-cmd']:
-        #         if u_y > 0:
-        #             u_y = self.constants['deadzone-cmd']
-        #         else:
-        #             u_y = -self.constants['deadzone-cmd']
-        #     elif abs(u_y) < self.constants['deadzone-cmd']:
-        #         u_y = 0
-        #
-        #     # correction frame reference et saturation
-        #     x, y = self._referential_correction_saturation(player_pose, u_x, u_y)
-        #
-        #     # correction de theta
-        #     # FIXME: extract PI logic
-        #     e_theta = cmd.pose_goal.orientation - player_pose.orientation
-        #     theta = self.ktheta * e_theta
-        #     self.accumulator_t += self.itheta * e_theta
-        #     theta += self.accumulator_t
-        #     if abs(self.accumulator_t) > REAL_MAX_THETA_CMD:
-        #         self.accumulator_t = 0
-        #     theta = self._saturate_orientation(theta)
-        #
-        #     #if math.sqrt(e_x**2 + e_y**2) < REGULATOR_DEADZONE:
-        #     #    x, y = 0, 0
-        #     cmd = Pose(Position(x, y), theta)
-        #     cmd = self._filter_cmd(cmd)
-        #     cmd.orientation = theta
-        #     distance = math.sqrt(e_x**2 + e_y**2)
-        #     # print(distance)
-        #     if distance < REGULATOR_DEADZONE:
-        #         x, y = 0, 0
-        #     cmd.position = Position(x, y)
-        #     return cmd
+def _set_constants(simulation_setting):
+    if simulation_setting:
+        return {"ROBOT_NEAR_FORCE": 100,
+                "ROBOT_VELOCITY_MAX": 4,
+                "ROBOT_ACC_MAX": 2,
+                "accel_max": 1,
+                "vit_max": 0.5,
+                "kp": 0.25,
+                "last_err_x": 0,
+                "last_err_y": 0
+                }
+    else:
+        return {"ROBOT_NEAR_FORCE": 100,
+                "ROBOT_VELOCITY_MAX": 4,
+                "ROBOT_ACC_MAX": 2,
+                "accel_max": 1,
+                "vit_max": 0.5,
+                "kp": 0.25,
+                "last_err_x": 0,
+                "last_err_y": 0
+                }
 
-#     def _saturate_orientation(self, theta):
-#         if abs(theta) > self.constants['max-theta-cmd']:
-#             if theta > 0:
-#                 return self.constants['max-theta-cmd']
-#             else:
-#                 return -self.constants['max-theta-cmd']
-#         elif abs(theta) < self.constants['min-theta-cmd']:
-#             return 0
-#         else:
-#             return theta
-#
-#     def _referential_correction_saturation(self, player_pose, u_x, u_y):
-#         x, y = _correct_for_referential_frame(u_x, u_y, player_pose.orientation)
-#
-#         if abs(x) > self.constants['max-naive-cmd']:
-#             if x > 0:
-#                 x = self.constants['max-naive-cmd']
-#             else:
-#                 x = -self.constants['max-naive-cmd']
-#
-#         if abs(x) < self.constants['min-naive-cmd']:
-#             x = 0
-#
-#         if abs(y) > self.constants['max-naive-cmd']:
-#             if y > 0:
-#                 y = self.constants['max-naive-cmd']
-#             else:
-#                 y = -self.constants['max-naive-cmd']
-#
-#         if abs(y) < self.constants['min-naive-cmd']:
-#             y = 0
-#
-#         return x, y
-#
-#     def _compute_integral(self, delta_t, e_x, e_y):
-#         ui_x = self.ki * e_x * delta_t
-#         ui_y = self.ki * e_y * delta_t
-#         self.accumulator_x = (self.accumulator_x * INTEGRAL_DECAY) + ui_x
-#         self.accumulator_y = (self.accumulator_y * INTEGRAL_DECAY) + ui_y
-#         return ui_x, ui_y
-#
-#     def _zero_accumulator(self):
-#         if self.accumulator_x < ZERO_ACCUMULATOR_TRHESHOLD:
-#             self.accumulator_x = 0
-#
-#         if self.accumulator_y < ZERO_ACCUMULATOR_TRHESHOLD:
-#             self.accumulator_y = 0
-#
-#     def _filter_cmd(self, cmd):
-#         self.previous_cmd.append(cmd)
-#         xsum = 0
-#         ysum = 0
-#         for cmd in self.previous_cmd:
-#             xsum += cmd.position.x
-#             ysum += cmd.position.y
-#
-#         xsum /= len(self.previous_cmd)
-#         ysum /= len(self.previous_cmd)
-#         if len(self.previous_cmd) > FILTER_LENGTH:
-#             self.previous_cmd.pop(0)
-#         return Pose(Position(xsum, ysum))
-#
-#
-# def _set_constants(simulation_setting):
-#     if simulation_setting:
-#         return {'max-naive-cmd':SIMULATION_MAX_NAIVE_CMD,
-#                 'deadzone-cmd':0,
-#                 'min-naive-cmd':SIMULATION_MIN_NAIVE_CMD,
-#                 'max-theta-cmd':SIMULATION_MAX_THETA_CMD,
-#                 'min-theta-cmd':SIMULATION_MIN_THETA_CMD,
-#                 'default-kp':SIMULATION_DEFAULT_STATIC_GAIN,
-#                 'default-ki':SIMULATION_DEFAULT_INTEGRAL_GAIN,
-#                 'default-ktheta':SIMULATION_DEFAULT_THETA_GAIN,
-#                 'default-itheta':0
-#                 }
-#     else:
-#         return {'max-naive-cmd':REAL_MAX_NAIVE_CMD,
-#                 'deadzone-cmd':REAL_DEADZONE_CMD,
-#                 'min-naive-cmd':REAL_MIN_NAIVE_CMD,
-#                 'max-theta-cmd':REAL_MAX_THETA_CMD,
-#                 'min-theta-cmd':REAL_MIN_THETA_CMD,
-#                 'default-kp':REAL_DEFAULT_STATIC_GAIN,
-#                 'default-ki':REAL_DEFAULT_INTEGRAL_GAIN,
-#                 'default-ktheta':REAL_DEFAULT_THETA_GAIN,
-#                 'default-itheta':REAL_DEFAUT_INTEGRAL_THETA_GAIN
-#                 }
-#
-#
+
 

@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+from RULEngine.Debug.debug_interface import DebugInterface
 from ai.executors.regulator import PositionRegulator
 from ai.states.world_state import WorldState
 from ai.executors.debug_executor import DebugExecutor
@@ -15,17 +16,20 @@ class Coach(object):
 
     def __init__(self, mode_debug_active=True, pathfinder="astar", is_simulation=True):
         self.mode_debug_active = mode_debug_active
+        self.is_simulation = is_simulation
         # For the framework! TODO make this better!
         self.debug_commands = []
         self.robot_commands = []
 
         self.world_state = WorldState()
         self.debug_executor = DebugExecutor(self.world_state)
-        self.module_executor = ModuleExecutor(self.world_state, pathfinder)
+        self.module_executor = ModuleExecutor(self.world_state, pathfinder, is_simulation)
         self.play_executor = PlayExecutor(self.world_state)
         self.movement_executor = MovementExecutor(self.world_state)
         self.regulator_executor = PositionRegulator(self.world_state, is_simulation)
         self.robot_command_executor = CommandExecutor(self.world_state)
+        DebugInterface().add_log(1, "\nCoach initialized with \nmode_debug_active = "+str(mode_debug_active) +
+                                 "\npathfinder = "+str(pathfinder)+"\nis_simulation = "+str(is_simulation))
 
     def main_loop(self):
         self.robot_commands.clear()

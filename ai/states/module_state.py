@@ -18,6 +18,7 @@ class ModuleState(object, metaclass=Singleton):
     def __init__(self):
         self.modules = {}
         self.pathfinder_module = None
+        self.is_simulation = False
 
     def register_module(self, module_name, module_ref):
         """
