@@ -6,11 +6,11 @@ from ai.Algorithm.Astar.AsGraph import AsGraph
 from ai.Algorithm.AsPathManager import AsPathManager
 import timeit
 
-myGraphManager = AsPathManager(None)
+myGraphManager = AsPathManager(None, False)
 
-endPosList = [AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003)]
-robotStartList = [AsPosition(-4351.5643, -2551.003),AsPosition(-1261.5643, -1261.003),AsPosition(-2571.5643, -271.003),AsPosition(-11.5643, -881.003),AsPosition(-891.5643, -1191.003),AsPosition(1550.5643, 2034.003)]
-obstacleList = [AsObstacle(AsPosition(-134.5643, -441.00006)),AsObstacle(AsPosition(-915.543, -1510.006)),AsObstacle(AsPosition(-240.9743, 90.12006)),AsObstacle(AsPosition(-2436.7643, 2340.043)),AsObstacle(AsPosition(4000.5643, -1231.216)),AsObstacle(AsPosition(3230.5643, 741.003))]
+endPosList = [AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003),AsPosition(50.5643, 51.003)]
+robotStartList = [AsPosition(-4351.5643, -2551.003),AsPosition(-1261.5643, -1261.003),AsPosition(-2571.5643, -271.003)]
+obstacleList = [AsObstacle(AsPosition(-134.5643, -441.00006)),AsObstacle(AsPosition(-915.543, -1510.006)),AsObstacle(AsPosition(-240.9743, 90.12006))]
 
 start = timeit.default_timer()
 paths = myGraphManager.getAllAsPath(robotStartList, endPosList, obstacleList)
