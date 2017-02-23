@@ -351,6 +351,12 @@ class AsGraph():
         numerator = (vector1[0] * vector2[0]) + (vector1[1] * vector2[1])
         denominator1 = sqrt(vector1[0]**2 + vector1[1]**2)
         denominator2 = sqrt(vector2[0]**2 + vector2[1]**2)
+
+        if (denominator1 == 0):
+            denominator1 = 0.000001
+        if (denominator2 == 0):
+            denominator2 = 0.000001
+
         denominator = denominator1 * denominator2
 
         result = numerator / denominator

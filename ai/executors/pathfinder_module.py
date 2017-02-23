@@ -55,7 +55,7 @@ class PathfinderModule(Executor):
 
         if type_of_pathfinder.lower() == "astar":
             # place pathfinder here
-            return AsPathManager(self.ws)
+            return AsPathManager(self.ws, True)
         elif type_of_pathfinder.lower() == "rrt":
             # place pathfinder here
             return PathfinderRRT(self.ws)
