@@ -22,7 +22,7 @@ class Player:
         observation_model = [[1, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0]]
 
         process_covariance = 10 ** (3) * np.eye(6)
-        observation_covariance = np.eye(3) * 10 ** (-5)
+        observation_covariance = np.eye(3) * 10 ** (0)
 
         initial_state_estimation = [self.pose.position.x, self.pose.position.y, 0, 0, self.pose.orientation, 0]
         initial_state_covariance = np.eye(6) * 1000

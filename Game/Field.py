@@ -125,7 +125,7 @@ real_life = {
 
     # Deadzones
     "SPEED_DEAD_ZONE_DISTANCE": 150,
-    "POSITION_DEADZONE": 135,  # ROBOT_RADIUS*1.5
+    "POSITION_DEADZONE": 200,  # ROBOT_RADIUS*1.5
 
     # Radius and angles for tactics
     "DISTANCE_BEHIND": 120,  # ROBOT_RADIUS + 30  # in millimeters
