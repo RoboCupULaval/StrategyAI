@@ -18,7 +18,7 @@ from ai.Util.ai_command import AICommand, AICommandType
 __author__ = 'RoboCupULaval'
 
 #POSITION_DEADZONE = POSITION_DEADZONE + BALL_RADIUS + ROBOT_RADIUS
-POSITION_DEADZONE = 350
+POSITION_DEADZONE = 90
 ORIENTATION_DEADZONE = 0.05
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
@@ -52,15 +52,16 @@ class GoKick(Tactic):
         self.charge_time = 0
 
     def get_behind_ball(self):
-
-        self.status_flag = Flags.WIP
+        print('GET_BEHIND_BALL')
         dest_position = self.get_behind_ball_position(self.game_state.get_ball_position())
         player_position = self.game_state.get_player_pose(self.player_id).position
         dist = get_distance(player_position, dest_position)
 
         if dist <= POSITION_DEADZONE:
+            print('LETS_ORIENT')
             self.next_state = self.orient
         elif dist > POSITION_DEADZONE:
+            print('LETS_MOVE_TO')
             self.move_action = self._generate_move_to()
             self.next_state = self.get_behind_ball
 
@@ -68,16 +69,18 @@ class GoKick(Tactic):
         return self.move_action
 
     def orient(self):
+        print('ORIENT')
         player_pose = self.game_state.get_player_pose(self.player_id)
         #vec_dir = self.target.position - player_pose.position
         #theta = math.atan2(vec_dir.y, vec_dir.x)
-        if get_angle(player_pose.position, self.target.position) - player_pose.orientation < ORIENTATION_DEADZONE:
+        if math.fabs(get_angle(player_pose.position, self.target.position)) - player_pose.orientation < ORIENTATION_DEADZONE:
             self.next_state = self.prepare_grab
         # TODO angle check
         destination = Pose(player_pose.position, get_angle(player_pose.position, self.target.position))
         return GoToPositionNoPathfinder(self.game_state, self.player_id, destination)
 
     def prepare_grab(self):
+        print('PREPARE GRAB')
         self.next_state = self.kiss_ball
         other_args = {"dribbler_on": 2}
         return AllStar(self.game_state, self.player_id, **other_args)
@@ -104,6 +107,7 @@ class GoKick(Tactic):
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def kick(self):
+        print('KICK!')
         self.next_state = self.stop_dribbler
         return Kick(self.game_state, self.player_id, 7)
 
