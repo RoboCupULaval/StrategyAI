@@ -221,6 +221,7 @@ class Framework(object):
             self._send_robot_commands(robot_commands)
             self.game.set_command(robot_commands)
             self._send_debug_commands()
+            # print(time.time() - self.time_stamp)
 
     def _test_vision(self):
         vision_frame = self.vision.pop_frames()
@@ -280,7 +281,10 @@ class Framework(object):
 
     def _send_robot_commands(self, commands):
         """ Envoi les commades des robots au serveur. """
-        time.sleep(CMD_DELTA_TIME)
+        # time.sleep(CMD_DELTA_TIME)
+        time_ellapsed = time.time() - self.time_stamp
+        if time_ellapsed < CMD_DELTA_TIME:
+            time.sleep(CMD_DELTA_TIME - time_ellapsed)
         for idx, command in enumerate(commands):
             self.robot_command_sender.send_command(command)
 
