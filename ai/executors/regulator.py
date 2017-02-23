@@ -86,15 +86,27 @@ class PositionRegulator(Executor):
                         dist = get_distance(current_robot_pos, robot.pose.position)
                         angle = math.atan2(current_robot_pos.y - robot.pose.position.y,
                                            current_robot_pos.x - robot.pose.position.x)
-                        force[0] += 1 / dist * math.cos(angle)
-                        force[1] += 1 / dist * math.sin(angle)
+                        try:
+                            force[0] += 1 / dist * math.cos(angle)
+                        except:
+                            pass
+                        try:
+                            force[1] += 1 / dist * math.sin(angle)
+                        except:
+                            pass
 
                 for robot in self.ws.game_state.game.enemies.players.values():
                     dist = get_distance(current_robot_pos, robot.pose.position)
                     angle = math.atan2(current_robot_pos.y - robot.pose.position.y,
                                        current_robot_pos.x - robot.pose.position.x)
-                    force[0] += 1 / dist * math.cos(angle)
-                    force[1] += 1 / dist * math.sin(angle)
+                    try:
+                        force[0] += 1 / dist * math.cos(angle)
+                    except:
+                        pass
+                    try:
+                        force[1] += 1 / dist * math.sin(angle)
+                    except:
+                        pass
 
                 # dist_goal = get_distance(current_robot_pos, ai_c.pose_goal.position)
                 angle_goal = math.atan2(current_robot_pos.y - ai_c.pose_goal.position.y,
@@ -163,6 +175,8 @@ class PI(object):
         self.thetaKi = 0.2
         self.thetaKiSum = 0
 
+        # are we in a simulation?
+        self.simulation_setting = simulation_setting
         # self.accumulator_x = 0
         # self.accumulator_y = 0
         # self.accumulator_t = 0
@@ -174,8 +188,6 @@ class PI(object):
         # self.last_command_x = 0
         # self.last_command_y = 0
         # self.previous_cmd = []
-        self.last_err_x = 0
-        self.last_err_y = 0
         #self.val_filtered = open('filtered.txt', 'w')
 
     def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=0.2):
