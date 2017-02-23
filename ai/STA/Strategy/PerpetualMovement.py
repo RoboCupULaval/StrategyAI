@@ -26,37 +26,63 @@ class PerpetualMovement(Strategy):
         self.add_tactic(0, GoToPositionPathfinder(self.game_state, 0, Pose(Position(1500, -1500))))
         self.add_tactic(0, GoToPositionPathfinder(self.game_state, 0, Pose(Position(-1500, -1500))))
 
+        self.add_condition(0, 0, 1, self.condition0)
+        self.add_condition(0, 1, 2, self.condition0)
+        self.add_condition(0, 2, 3, self.condition0)
+        self.add_condition(0, 3, 1, self.condition0)
+
         # Robot 1
         self.add_tactic(1, GoToPositionPathfinder(self.game_state, 0, Pose(Position(2000, -2000))))
         self.add_tactic(1, GoToPositionPathfinder(self.game_state, 0, Pose(Position(-2000, 2000))))
         self.add_tactic(1, GoToPositionPathfinder(self.game_state, 0, Pose(Position(2000, 2000))))
         self.add_tactic(1, GoToPositionPathfinder(self.game_state, 0, Pose(Position(-2000, -2000))))
 
+        self.add_condition(1, 0, 1, self.condition1)
+        self.add_condition(1, 1, 2, self.condition1)
+        self.add_condition(1, 2, 3, self.condition1)
+        self.add_condition(1, 3, 1, self.condition1)
+
         # Robot 2
         self.add_tactic(2, GoToPositionPathfinder(self.game_state, 0, Pose(Position(0, 2100))))
         self.add_tactic(2, GoToPositionPathfinder(self.game_state, 0, Pose(Position(0, 2100))))
+
+        self.add_condition(2, 0, 1, self.condition2)
+        self.add_condition(2, 1, 0, self.condition2)
 
         # Robot 3
         self.add_tactic(3, GoToPositionPathfinder(self.game_state, 0, Pose(Position(2100, 0))))
         self.add_tactic(3, GoToPositionPathfinder(self.game_state, 0, Pose(Position(-2100, 0))))
 
-        for i in range(0, 1):
-            self.add_condition(i, 0, 1, self.condition)
-            self.add_condition(i, 1, 2, self.condition)
-            self.add_condition(i, 2, 3, self.condition)
-            self.add_condition(i, 3, 1, self.condition)
+        self.add_condition(3, 0, 1, self.condition3)
+        self.add_condition(3, 1, 0, self.condition3)
 
-        for i in range(2, 3):
-            self.add_condition(i, 0, 1, self.condition)
-            self.add_condition(i, 1, 0, self.condition)
+        self.add_tactic(4, Stop(self.game_state, 4))
+        self.add_tactic(5, Stop(self.game_state, 5))
 
-
-        for i in range(4, PLAYER_PER_TEAM):
-            self.add_tactic(i, Stop(self.game_state, i))
-
-    def condition(self):
+    def condition0(self):
         """
         Condition pour passer du noeud présent au noeud suivant.
         :return: Un booléen indiquant si la condition pour effectuer la transition est remplie.
         """
         return self.graphs[0].get_current_tactic().status_flag == Flags.SUCCESS
+
+    def condition1(self):
+        """
+        Condition pour passer du noeud présent au noeud suivant.
+        :return: Un booléen indiquant si la condition pour effectuer la transition est remplie.
+        """
+        return self.graphs[1].get_current_tactic().status_flag == Flags.SUCCESS
+
+    def condition2(self):
+        """
+        Condition pour passer du noeud présent au noeud suivant.
+        :return: Un booléen indiquant si la condition pour effectuer la transition est remplie.
+        """
+        return self.graphs[2].get_current_tactic().status_flag == Flags.SUCCESS
+
+    def condition3(self):
+        """
+        Condition pour passer du noeud présent au noeud suivant.
+        :return: Un booléen indiquant si la condition pour effectuer la transition est remplie.
+        """
+        return self.graphs[3].get_current_tactic().status_flag == Flags.SUCCESS
