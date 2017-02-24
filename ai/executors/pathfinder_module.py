@@ -14,6 +14,7 @@ class PathfinderModule(Executor):
         self.pathfinder = self.get_pathfinder(type_of_pathfinder, is_simulation)
         self.last_time_pathfinding_for_robot = {}
         self.last_frame = time.time()
+        self.is_simulation = is_simulation
 
     def exec(self):
         ai_commands = self._get_aicommand_that_need_path()
@@ -47,7 +48,7 @@ class PathfinderModule(Executor):
         assert isinstance(type_of_pathfinder, str)
         assert type_of_pathfinder.lower() in ["rrt", "astar"]
 
-        self.pathfinder = self.get_pathfinder(type_of_pathfinder)
+        self.pathfinder = self.get_pathfinder(type_of_pathfinder, self.is_simulation)
 
     def get_pathfinder(self, type_of_pathfinder, is_simulation):
         assert isinstance(type_of_pathfinder, str)
@@ -55,7 +56,7 @@ class PathfinderModule(Executor):
 
         if type_of_pathfinder.lower() == "astar":
             # place pathfinder here
-            return AsPathManager(self.ws)  # is_simulation)
+            return AsPathManager(self.ws, is_simulation)  # is_simulation)
         elif type_of_pathfinder.lower() == "rrt":
             # place pathfinder here
             return PathfinderRRT(self.ws)
