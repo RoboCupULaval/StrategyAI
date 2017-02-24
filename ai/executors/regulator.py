@@ -13,7 +13,7 @@ from ai.states.world_state import WorldState
 import numpy as np
 
 
-ROBOT_NEAR_FORCE = 1000
+ROBOT_NEAR_FORCE = 100
 ROBOT_VELOCITY_MAX = 4
 ROBOT_ACC_MAX = 2
 
@@ -226,9 +226,9 @@ def _set_constants(simulation_setting):
         return {"ROBOT_NEAR_FORCE": 1000,
                 "ROBOT_VELOCITY_MAX": 4,
                 "ROBOT_ACC_MAX": 2,
-                "accel_max": 1,
-                "vit_max": 0.7,
-                "vit_min": 0.05,
+                "accel_max": 20,
+                "vit_max": 15,
+                "vit_min": 5,
                 "xyKp": 0.7,
                 "ki": 0.005,
                 "kd": 0.02,
