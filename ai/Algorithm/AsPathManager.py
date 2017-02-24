@@ -21,7 +21,7 @@ class AsPathManager(Pathfinder):
             self.PreciseInterval = 125
             self.ImpreciseInterval = 200
         else:
-            self.RobotRadius = 300
+            self.RobotRadius = 125
             self.PreciseInterval = 200
             self.ImpreciseInterval = 500
 

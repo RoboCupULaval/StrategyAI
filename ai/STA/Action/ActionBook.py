@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from ai.STA.Action.RotateArround import RotateAround
 from .GoBehind import GoBehind
 from .GoBetween import GoBetween
 from .GetBall import GetBall
@@ -21,7 +21,8 @@ class ActionBook(object):
                            'MoveTo': MoveToPosition,
                            'MoveWithBall': MoveToDribblingBall,
                            'ProtectGoal': ProtectGoal,
-                           'PathfindToPosition': PathfindToPosition}
+                           'PathfindToPosition': PathfindToPosition,
+                           'RotateAround': RotateAround}
 
     def get_actions_name_list(self):
         return list(self.ActionBook.keys())

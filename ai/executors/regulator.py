@@ -39,11 +39,16 @@ class PositionRegulator(Executor):
             if cmd.command is AICommandType.MOVE:
                 robot_idx = cmd.robot_id
                 active_player = self.ws.game_state.game.friends.players[robot_idx]
-                cmd.speed = self.regulators[robot_idx].\
-                    update_pid_and_return_speed_command(cmd,
-                                                        active_player,
-                                                        delta_t,
-                                                        idx=robot_idx)
+                if not cmd.rotate_around_flag:
+                    cmd.speed = self.regulators[robot_idx].\
+                        update_pid_and_return_speed_command(cmd,
+                                                            active_player,
+                                                            delta_t,
+                                                            idx=robot_idx)
+                else:
+                    cmd.speed = self.regulators[robot_idx].\
+                        rotate_around(cmd, active_player, delta_t)
+
         self._potential_field()
 
     def _potential_field(self):
@@ -118,6 +123,7 @@ class PID(object):
         self.ki_sum = 0
         self.last_err = 0
 
+
     def update(self, target, value, delta_t):
         error = target - value
         cmd = self.kp * error
@@ -137,8 +143,25 @@ class PI(object):
     def __init__(self, simulation_setting=True):
         self.gs = GameState()
         self.paths = {}
+        self.accel_max = 0.5
+        self.vit_max = 0.5
+        self.vit_min = 0.05
+        self.xyKp = 0.7
+        self.ki = 0.005
+        self.kiSum = 0
+        self.kd = 0.02
+        self.lastErr = 0
+        self.last_target = None
+        self.position_dead_zone = 0.03
+        self.rotation_dead_zone = 0.01 * math.pi
 
-        # are we in a simulation?
+        self.thetaKp = 0.6
+        self.thetaKi = 0.2
+        self.thetaKiSum = 0
+        self.last_theta_target = None
+
+        self.rotate_pid = [PID(0.0001, 0, 0), PID(1, 0, 0), PID(1.2, 0, 0)]
+
         self.simulation_setting = simulation_setting
         self.constants = _set_constants(simulation_setting)
         self.accel_max = self.constants["accel_max"]
@@ -158,11 +181,15 @@ class PI(object):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
         assert isinstance(cmd, AICommand), "La consigne doit etre une Pose dans le PI"
         self.paths[idx] = cmd.path
-
+        # print("delta t (regulator)   :   ", delta_t)
         delta_t = 0.03
 
         r_x, r_y, r_theta = cmd.pose_goal.position.x, cmd.pose_goal.position.y, cmd.pose_goal.orientation
         t_x, t_y, t_theta = active_player.pose.position.x, active_player.pose.position.y, active_player.pose.orientation
+
+        target = math.sqrt(r_x**2 + r_y**2)
+        if target != self.last_target:
+            self.kiSum = 0
 
         v_x = active_player.velocity[0]
         v_y = active_player.velocity[1]
@@ -180,9 +207,8 @@ class PI(object):
         angle = math.atan2(delta_y, delta_x)
 
         self.vit_min = 0.06
-        if delta <= 0.05:
+        if delta <= self.position_dead_zone:
             self.vit_min = 0
-            #print('***************************************************************************')
             delta = 0
 
         v_target = self.xyKp * delta
@@ -197,19 +223,56 @@ class PI(object):
         v_max = min(self.vit_max, v_max)
         v_target = max(self.vit_min, min(v_max, v_target))
 
+        minimal_dist = v_current / (2 * self.accel_max)
+        if minimal_dist < math.fabs(delta):
+            v_limited = delta * 2 * self.accel_max
+            v_target = min(v_target, v_limited)
+
         decoupled_angle = angle - v_theta * delta_t
 
         v_target_x = v_target * math.cos(decoupled_angle)
         v_target_y = v_target * math.sin(decoupled_angle)
 
+
+        if r_theta != self.last_theta_target:
+            self.kiSum = 0
+
         v_theta_target = self.thetaKp * delta_theta
         self.thetaKiSum += delta_theta * self.thetaKi * delta_t
         v_theta_target += self.thetaKiSum
 
-        #print('Error : ', delta)
+        # print('Error : ', delta)
+        if delta <= self.position_dead_zone:
+            v_target_x = 0
+            v_target_y = 0
+        #if math.fabs(delta_theta) <= self.rotation_dead_zone:
+            #v_theta_target = 0
 
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
 
+    def rotate_around(self, command, active_player, delta_t):
+        delta_t = 0.03
+        r = command.rotate_around_goal.radius
+        phi = command.rotate_around_goal.direction
+        theta = command.rotate_around_goal.orientation
+
+        #print(command.rotate_around_goal.center_position)
+        r_p, phi_p = _xy_to_rphi_(active_player.pose.position, command.rotate_around_goal.center_position)
+        theta_p = active_player.pose.orientation
+
+        vr = self.rotate_pid[0].update(r, r_p, delta_t)
+        vphi = self.rotate_pid[1].update(phi, phi_p, delta_t)
+        vtheta = self.rotate_pid[2].update(theta, theta_p, delta_t)
+
+        #print(vr, "  ", vphi, "  ", vtheta)
+        print(theta - theta_p)
+
+        vx, vy = _vit_rphi_to_xy(r, phi, vr, vphi)
+
+        vx, vy = _correct_for_referential_frame(vx, vy, -active_player.pose.orientation)
+
+        #print(vx, "       ", vy)
+        return Pose(Position(vx/1000, vy/1000), vtheta)
 
 def _correct_for_referential_frame(x, y, orientation):
 
@@ -247,8 +310,23 @@ def _set_constants(simulation_setting):
                 "kd": 0.02,
                 "thetaKp": 0.6,
                 "thetaKi": 0.2,
-
                 }
 
 
+def _xy_to_rphi_(robot_position, ball_position):
+    r = math.sqrt((robot_position.x - ball_position.x) ** 2 + (robot_position.y - ball_position.y) ** 2)
+    phi = math.atan2(-(robot_position.y - ball_position.y), -(robot_position.x - ball_position.x))
+    return (r, phi)
 
+
+# pas vraiment nécessaire
+def _rphi_to_xy_(r,phi, ball_position):
+    x = r * math.cos(phi) + ball_position.x
+    y = r * math.sin(phi) + ball_position.y
+    return (x,y)
+
+
+def _vit_rphi_to_xy(r, phi, vr, vphi):
+    vx = vr*math.cos(phi)-r*vphi*math.sin(phi)
+    vy = vr*math.sin(phi)+r*vphi*math.cos(phi)
+    return (vx, vy)

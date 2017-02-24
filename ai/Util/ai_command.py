@@ -1,4 +1,5 @@
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
 from enum import Enum
 
 
@@ -20,6 +21,10 @@ class AICommand(object):
         self.pose_goal = other_args.get("pose_goal", Pose())
         self.speed = Pose()
 
+        # this is for rotate around movement
+        self.rotate_around_flag = other_args.get("rotate_around_flag", False)
+        self.rotate_around_goal = other_args.get("rotate_around_goal", RotateAroundCommand())
+
         # this is for the pathfinder only no direct assignation
         self.path = []
 
@@ -27,3 +32,11 @@ class AICommand(object):
         return self.__dict__ == other.__dict__
 
     """getter and setters goes down here!"""
+
+class RotateAroundCommand(object):
+    """ Please, move me somewhere else"""
+    def __init__(self, radius=0.0, direction=0.0, orientation=0.0, center_position=Position()):
+        self.radius = radius
+        self.direction = direction
+        self.orientation = orientation
+        self.center_position = center_position
