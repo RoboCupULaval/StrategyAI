@@ -56,7 +56,7 @@ class GoalKeeper(Tactic):
             else:
                 self.next_state = self.go_behind_ball
         self.target = Pose(self.game_state.get_ball_position())
-        return ProtectGoal(self.game_state, self.player_id, self.is_yellow, p_minimum_distance=500)
+        return ProtectGoal(self.game_state, self.player_id, self.is_yellow, p_minimum_distance=250)
 
     def go_behind_ball(self):
         ball_position = self.game_state.get_ball_position()

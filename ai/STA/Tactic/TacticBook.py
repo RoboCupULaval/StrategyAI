@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
 from ai.STA.Tactic.test_turn_on_you import TestTurnOnYou
 from .GoGetBall import GoGetBall
 from .GoalKeeper import GoalKeeper
@@ -23,7 +24,8 @@ class TacticBook(object):
                             'GoToPositionNoPathfinder': GoToPositionNoPathfinder,
                             'GoToPositionPathfinder': GoToPositionPathfinder,
                             'GoKick': GoKick,
-                            "TestTurnOnYou": TestTurnOnYou}
+                            "TestTurnOnYou": TestTurnOnYou,
+                            'RotateAroundPosition': RotateAroundPosition}
 
     def get_tactics_name_list(self):
         return list(self.tactic_book.keys())

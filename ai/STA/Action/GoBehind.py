@@ -59,7 +59,7 @@ class GoBehind(Action):
         destination_position = Position(x, y)
 
         # Calcul de l'orientation de la pose de destination
-        destination_orientation = get_angle(self.position1, destination_position)
+        destination_orientation = get_angle(destination_position, self.position1)
 
         destination_pose = Pose(destination_position, destination_orientation)
 
