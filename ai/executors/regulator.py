@@ -14,8 +14,8 @@ import numpy as np
 
 
 ROBOT_NEAR_FORCE = 100
-ROBOT_VELOCITY_MAX = 4
-ROBOT_ACC_MAX = 2
+ROBOT_VELOCITY_MAX = 20
+ROBOT_ACC_MAX = 5
 
 
 def sign(x):
@@ -49,13 +49,13 @@ class PositionRegulator(Executor):
                     cmd.speed = self.regulators[robot_idx].\
                         rotate_around(cmd, active_player, delta_t)
 
-        self._potential_field()
+        #self._potential_field()
 
     def _potential_field(self):
         current_ai_c = self.ws.play_state.current_ai_commands
 
         for ai_c in current_ai_c.values():
-            if len(ai_c.path) > 0:
+            if ai_c.command == AICommandType.MOVE and len(ai_c.path) > 0:
                 goal = ai_c.pose_goal
                 force = [0, 0]
                 current_robot_pos = self.ws.game_state.get_player_position(ai_c.robot_id)
@@ -69,10 +69,12 @@ class PositionRegulator(Executor):
                         try:
                             force[0] += 1 / dist * math.cos(angle)
                         except:
+                            print("div 0 - 1")
                             pass
                         try:
                             force[1] += 1 / dist * math.sin(angle)
                         except:
+                            print("div 0 - 2")
                             pass
 
                 for robot in self.ws.game_state.game.enemies.players.values():
@@ -82,17 +84,19 @@ class PositionRegulator(Executor):
                     try:
                         force[0] += 1 / dist * math.cos(angle)
                     except:
+                        print("div 0 - 3")
                         pass
                     try:
                         force[1] += 1 / dist * math.sin(angle)
                     except:
+                        print("div 0 - 4")
                         pass
 
                 # dist_goal = get_distance(current_robot_pos, ai_c.pose_goal.position)
                 angle_goal = math.atan2(current_robot_pos.y - ai_c.pose_goal.position.y,
                                         current_robot_pos.x - ai_c.pose_goal.position.x)
 
-                dt = self.ws.game_state.game.delta_t
+                dt = 0.3  # self.ws.game_state.game.delta_t
 
                 a = (((current_robot_velocity[0] + 0.1) * math.cos(angle_goal) - current_robot_velocity[0]) / dt)
                 b = (((current_robot_velocity[1] + 0.1) * math.cos(angle_goal) - current_robot_velocity[1]) / dt)
@@ -110,6 +114,7 @@ class PositionRegulator(Executor):
                                   ROBOT_VELOCITY_MAX)
                 vit_robot_y = min(max(current_robot_velocity[1] + acc_robot_y * dt, -ROBOT_VELOCITY_MAX),
                                   ROBOT_VELOCITY_MAX)
+                ai_c.path[0] = Position(vit_robot_x, vit_robot_y)
 
 
 class PID(object):
@@ -143,22 +148,6 @@ class PI(object):
     def __init__(self, simulation_setting=True):
         self.gs = GameState()
         self.paths = {}
-        self.accel_max = 0.5
-        self.vit_max = 0.5
-        self.vit_min = 0.05
-        self.xyKp = 0.7
-        self.ki = 0.005
-        self.kiSum = 0
-        self.kd = 0.02
-        self.lastErr = 0
-        self.last_target = None
-        self.position_dead_zone = 0.03
-        self.rotation_dead_zone = 0.01 * math.pi
-
-        self.thetaKp = 0.6
-        self.thetaKi = 0.2
-        self.thetaKiSum = 0
-        self.last_theta_target = None
 
         self.rotate_pid = [PID(0.0001, 0, 0), PID(1, 0, 0), PID(1.2, 0, 0)]
 
@@ -176,6 +165,10 @@ class PI(object):
         self.kiSum = 0
         self.vit_min = 0.05
         self.thetaKiSum = 0
+        self.last_target = None
+        self.position_dead_zone = self.constants["position_dead_zone"] #0.03
+        self.rotation_dead_zone = 0.01 * math.pi
+        self.last_theta_target = None
 
     def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=0.2):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
@@ -188,6 +181,8 @@ class PI(object):
         t_x, t_y, t_theta = active_player.pose.position.x, active_player.pose.position.y, active_player.pose.orientation
 
         target = math.sqrt(r_x**2 + r_y**2)
+
+        # always true?
         if target != self.last_target:
             self.kiSum = 0
 
@@ -289,27 +284,29 @@ def _set_constants(simulation_setting):
         return {"ROBOT_NEAR_FORCE": 1000,
                 "ROBOT_VELOCITY_MAX": 4,
                 "ROBOT_ACC_MAX": 2,
-                "accel_max": 20,
-                "vit_max": 15,
-                "vit_min": 5,
+                "accel_max": 100,
+                "vit_max": 50,
+                "vit_min": 25,
                 "xyKp": 0.7,
                 "ki": 0.005,
                 "kd": 0.02,
                 "thetaKp": 0.6,
                 "thetaKi": 0.2,
+                "position_dead_zone": 0.03
                 }
     else:
         return {"ROBOT_NEAR_FORCE": 1000,
                 "ROBOT_VELOCITY_MAX": 4,
                 "ROBOT_ACC_MAX": 2,
-                "accel_max": 1,
-                "vit_max": 0.7,
+                "accel_max": 0.5,
+                "vit_max": 0.5,
                 "vit_min": 0.05,
                 "xyKp": 0.7,
                 "ki": 0.005,
                 "kd": 0.02,
                 "thetaKp": 0.6,
                 "thetaKi": 0.2,
+                "position_dead_zone": 0.03
                 }
 
 
