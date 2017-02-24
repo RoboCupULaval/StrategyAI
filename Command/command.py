@@ -87,5 +87,5 @@ class Dribbler(_Command):
         if self.dribbler_status == protocol.DribblerStatus.DISABLED:
             status = 0
         else:
-            status = 2
+            status = 3
         return protocol.create_dribbler_command(self.player.id, status)
