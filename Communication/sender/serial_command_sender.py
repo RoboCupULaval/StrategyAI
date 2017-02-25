@@ -15,7 +15,7 @@ from RULEngine.Communication.util import serial_protocol as protocol
 from RULEngine.Communication.util.serial_protocol import MCUVersion
 
 SERIAL_DISABLED = -1
-COMMUNICATION_SLEEP = 0.005
+COMMUNICATION_SLEEP = 0.001
 
 class SerialType(Enum):
     NRF = 1

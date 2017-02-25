@@ -4,6 +4,7 @@ import math as m
 import numpy as np
 
 from ..Util.Position import Position
+from ..Util.Pose import Pose
 from .constant import FIELD_X_RIGHT, FIELD_X_LEFT, FIELD_Y_TOP,\
                       FIELD_Y_BOTTOM, KICK_MAX_SPD
 
