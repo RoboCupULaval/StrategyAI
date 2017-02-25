@@ -221,7 +221,7 @@ class Framework(object):
             self._send_robot_commands(robot_commands)
             self.game.set_command(robot_commands)
             self._send_debug_commands()
-            # print(time.time() - self.time_stamp)
+            #print(time.time() - self.time_stamp)
 
     def _test_vision(self):
         vision_frame = self.vision.pop_frames()
