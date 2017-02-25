@@ -14,11 +14,11 @@ from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommand, AICommandType
+from ai.STA.Action.GoBehind import GoBehind
 
 __author__ = 'RoboCupULaval'
 
-#POSITION_DEADZONE = POSITION_DEADZONE + BALL_RADIUS + ROBOT_RADIUS
-POSITION_DEADZONE = 90
+POSITION_DEADZONE = 40
 ORIENTATION_DEADZONE = 0.05
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
@@ -54,27 +54,23 @@ class GoKick(Tactic):
         self.last_time = time.time()
 
     def get_behind_ball(self):
-        print('GET_BEHIND_BALL')
-        dest_position = self.get_behind_ball_position(self.game_state.get_ball_position())
-        player_position = self.game_state.get_player_pose(self.player_id).position
-        dist = get_distance(player_position, dest_position)
+        ball_position = self.game_state.get_ball_position()
+        player_pose = self.game_state.get_player_pose(self.player_id)
+        distance_from_ball = get_distance(ball_position, player_pose.position)
 
-        if dist <= POSITION_DEADZONE:
-            print('LETS_ORIENT')
+        if distance_from_ball < self.game_state.const["KICK_BALL_DISTANCE"] + 35:
+            DebugInterface().add_log(1, "Behind ball OK!")
             self.next_state = self.orient
-        elif dist > POSITION_DEADZONE:
-            print('LETS_MOVE_TO')
-            self.move_action = self._generate_move_to()
+        else:
+            DebugInterface().add_log(1, "distance from ball: {}".format(distance_from_ball))
             self.next_state = self.get_behind_ball
 
-        self.move_action = self._generate_move_to()
+        self.move_action = GoBehind(self.game_state, self.player_id, ball_position, self.target.position,
+                                    self.game_state.const["KICK_BALL_DISTANCE"])
         return self.move_action
 
     def orient(self):
-        print('ORIENT')
         player_pose = self.game_state.get_player_pose(self.player_id)
-        #vec_dir = self.target.position - player_pose.position
-        #theta = math.atan2(vec_dir.y, vec_dir.x)
         if math.fabs(get_angle(player_pose.position, self.target.position)) - player_pose.orientation < ORIENTATION_DEADZONE:
             self.next_state = self.prepare_grab
             self.last_time = time.time()
