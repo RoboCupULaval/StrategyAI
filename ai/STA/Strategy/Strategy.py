@@ -4,6 +4,7 @@ from abc import ABCMeta
 
 from ..Tactic.Stop import Stop
 from ..Tactic import tactic_constants
+from ..Action.GetBall import GetBall
 from ai.Algorithm.Graph import Graph
 from ai.Algorithm.Node import Node
 from ai.Algorithm.Vertex import Vertex

@@ -73,12 +73,17 @@ class GoBehind(Action):
             vecteur_perp /= np.linalg.norm(vecteur_perp)
             position_intermediaire_x = self.position1.x + vecteur_perp[0] * self.rayon_avoid
             position_intermediaire_y = self.position1.y + vecteur_perp[1] * self.rayon_avoid
-            # print("position avant:", x, y)
-            # print("position apres:", position_intermediaire_x, position_intermediaire_y)
+            if math.sqrt((player_x-position_intermediaire_x)**2+(player_y-position_intermediaire_y)**2) < 50:
+                position_intermediaire_x += vecteur_perp[0] * self.rayon_avoid * 2
+                position_intermediaire_y += vecteur_perp[1] * self.rayon_avoid * 2
 
             destination_position = Position(position_intermediaire_x, position_intermediaire_y)
         else:
+            if math.sqrt((player_x-x)**2+(player_y-y)**2) < 50:
+                x -= math.cos(theta) * 2
+                y -= math.sin(theta) * 2
             destination_position = Position(x, y)
+
         print("position target:", self.position2.x, self.position2.y)
 
         # Calcul de l'orientation de la pose de destination
