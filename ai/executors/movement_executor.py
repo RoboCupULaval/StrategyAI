@@ -1,12 +1,15 @@
+import math
+
 from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import get_distance
 from ai.executors.executor import Executor
-import math
+from ai.Util.ai_command import AICommandType
 
 ROBOT_NEAR_FORCE = 30
 ROBOT_VELOCITY_MAX = 4
 ROBOT_ACC_MAX = 2
+PATHFINDER_DEADZONE = 100
 
 
 class MovementExecutor(Executor):
@@ -21,20 +24,18 @@ class MovementExecutor(Executor):
         self._sanity_check_of_speed_command()
 
     def _simple_advance_path(self):
-        current_ai_c = self.ws.play_state.current_ai_commands
+        current_ai_cmd = self.ws.play_state.current_ai_commands
 
-        for ai_c in current_ai_c.values():
-            if len(ai_c.path) > 1:
-                next_point = ai_c.path[1]
-                ai_c.pose_goal = Pose(next_point, ai_c.pose_goal.orientation)
-                ai_c.speed = Pose(next_point, ai_c.pose_goal.orientation)
-            if len(ai_c.path) > 0:
-                next_point = ai_c.path[0]
-                ai_c.pose_goal = Pose(next_point, ai_c.pose_goal.orientation)
-                ai_c.speed = Pose(next_point, ai_c.pose_goal.orientation)
-            else:
-                ai_c.speed = ai_c.pose_goal
-                #print(ai_c.speed)
+        for ai_cmd in current_ai_cmd.values():
+            if ai_cmd.path:
+                current_pose = self.ws.game_state.get_player_pose(ai_cmd.robot_id)
+                next_position = ai_cmd.path[0]
+                distance = get_distance(current_pose.position, next_position)
+                while distance < PATHFINDER_DEADZONE and len(ai_cmd.path) > 1:
+                    ai_cmd.path = ai_cmd.path[1:]
+                    next_position = ai_cmd.path[0]
+                    distance = get_distance(current_pose.position, next_position)
+                ai_cmd.pose_goal = Pose(next_position, ai_cmd.pose_goal.orientation)
 
     def _sanity_check_of_speed_command(self):
         for ai_c in self.ws.play_state.current_ai_commands.values():
