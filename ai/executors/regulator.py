@@ -49,7 +49,7 @@ class PositionRegulator(Executor):
                     cmd.speed = self.regulators[robot_idx].\
                         rotate_around(cmd, active_player, delta_t)
 
-        #self._potential_field()
+        # self._potential_field()
 
     def _potential_field(self):
         current_ai_c = self.ws.play_state.current_ai_commands
@@ -114,7 +114,7 @@ class PositionRegulator(Executor):
                                   ROBOT_VELOCITY_MAX)
                 vit_robot_y = min(max(current_robot_velocity[1] + acc_robot_y * dt, -ROBOT_VELOCITY_MAX),
                                   ROBOT_VELOCITY_MAX)
-                ai_c.path[0] = Position(vit_robot_x, vit_robot_y)
+                ai_c.speed = Pose(Position(vit_robot_x, vit_robot_y), ai_c.speed.orientation)
 
 
 class PID(object):
