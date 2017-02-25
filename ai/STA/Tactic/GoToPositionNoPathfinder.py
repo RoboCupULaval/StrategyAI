@@ -16,7 +16,6 @@ class GoToPositionNoPathfinder(Tactic):
         self.status_flag = Flags.INIT
 
     def exec(self):
-        print(str(self.player_id) + ": GoToPosition")
         if self.check_success():
             self.status_flag = Flags.SUCCESS
         else:

@@ -10,7 +10,7 @@ from .DoNothing import DoNothing
 from .WeirdmovementStrategy import WeirdmovementStrategy
 from ai.STA.Strategy.TestTransitions import TestTransitions
 from ai.STA.Strategy.TestPasses import TestPasses
-from .test_rotateAround import test_rotateAround
+from .TestRotateAround import TestRotateAround
 
 
 class StrategyBook(object):
@@ -26,7 +26,7 @@ class StrategyBook(object):
                               'HumanControl': HumanControl,
                               'DoNothing': DoNothing,
                               'TestTransitions': TestTransitions,
-                              "test_rotateAround": test_rotateAround,
+                              "TestRotateAround": TestRotateAround,
                               'WeirdmovementStrategy': WeirdmovementStrategy,
                               'TestPasses': TestPasses,
                               }

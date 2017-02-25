@@ -39,7 +39,6 @@ class PassBall(Tactic):
         self.target_position = target_position
 
     def kick_ball_towards_target(self):
-        print(str(self.player_id) + ": Kick")
         # check alignment before kicking
         if has_ball_facing_target(self.game_state, self.player_id, self.target_position):
             player_position = self.game_state.get_player_position(self.player_id)
@@ -49,15 +48,12 @@ class PassBall(Tactic):
 
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
-            print("kick")
             return kick_ball
         elif has_ball(self.game_state, self.player_id):
-            print("needs to face target")
             self.next_state = self.halt
             self.status_flag = Flags.FAILURE
             return Idle(self.game_state, self.player_id)
         else:  # returns error, strategy goes back to GoGetBall
-            print("kick failed")
             self.next_state = self.halt
             self.status_flag = Flags.FAILURE
             return Idle(self.game_state, self.player_id)

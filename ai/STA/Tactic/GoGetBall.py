@@ -53,7 +53,6 @@ class GoGetBall(Tactic):
         self.last_ball_position = self.game_state.get_ball_position()
 
     def get_behind_ball(self):
-        print(str(self.player_id) + ": GoGetBall")
         self.status_flag = Flags.WIP
         dist = self._get_distance_from_ball()
 

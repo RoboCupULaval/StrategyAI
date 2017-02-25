@@ -66,7 +66,6 @@ class RotateAround(Tactic):
         return action
 
     def calculate_path(self):
-        print(str(self.player_id) + ": RotateAround")
         self.initial_position = self.game_state.get_player_position(self.player_id)
         self.initial_orientation = self.game_state.get_player_pose(self.player_id).orientation
         self.initial_distance = get_distance(self.origin, self.initial_position)
@@ -83,26 +82,12 @@ class RotateAround(Tactic):
         else:
             self.num_points = 1
             self.angle_increment = self.delta_angle
-        """
-        if 2 * self.initial_distance * m.sin(self.angle_increment / 2) <= MINIMUM_DISTANCE:
-            self.circle_radius = MINIMUM_DISTANCE / (2 * m.sin(self.angle_increment / 2))
-            self.initial_position.x = self.origin.x + self.circle_radius * m.cos(self.initial_angle)
-            self.initial_position.y = self.origin.y + self.circle_radius * m.sin(self.initial_angle)
-            self.pose_list.append(Pose(self.initial_position, get_angle(self.initial_position, self.origin)))
-        else:
-            self.circle_radius = self.initial_distance
-        """
+
         for i in range(self.num_points):
             pos = rotate_point_around_origin(self.initial_position, self.origin, (i + 1) * self.angle_increment)
             theta = self.initial_orientation + (i + 1) * self.angle_increment
             self.pose_list.append(Pose(pos, theta))
-        """
-        if self.initial_distance != self.circle_radius:
-            theta = get_angle(self.origin, self.target.position)
-            pos = Position(self.origin.x + self.initial_distance * m.cos(theta),
-                           self.origin.y + self.initial_distance * m.sin(theta))
-            self.pose_list.append(Pose(pos, theta))
-        """
+
         self.next_state = self.rotate_around
         return MoveToPosition(self.game_state, self.player_id, self.pose_list[self.index])
 

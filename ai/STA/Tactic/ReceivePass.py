@@ -36,7 +36,6 @@ class ReceivePass(Tactic):
         self.player_id = player_id
 
     def move_to_catch_ball(self):
-        print(str(self.player_id) + ": ReceiveBall")
         ball_position = self.game_state.get_ball_position()
         if has_ball(self.game_state, self.player_id):
             self.next_state = self.halt

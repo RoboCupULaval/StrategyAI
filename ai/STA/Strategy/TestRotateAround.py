@@ -16,11 +16,11 @@ from ai.STA.Tactic.tactic_constants import *
 __author__ = 'RoboCupULaval'
 
 
-class test_rotateAround(Strategy):
+class TestRotateAround(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-        #TODO: modification en temps reel de la position de la balle
+        # TODO: modification en temps reel de la position de la balle
         self.designated_robot = 0
         self.position_to_shoot_to = Position(0, 0)
         self.origin = self.game_state.get_ball_position()
@@ -28,28 +28,7 @@ class test_rotateAround(Strategy):
         tactic = RotateAround(self.game_state, self.designated_robot, self.origin, self.position_to_shoot_to)
         self.add_tactic(self.designated_robot, tactic)
 
-        """
-        # état 1: le robot désigné va chercher la balle
-        ball_position = self.game_state.get_ball_position()
-        tactic = GoToPositionNoPathfinder(self.game_state, self.designated_robot, Pose(ball_position, 0)) #TODO: ajouter pathfinder lorsque temps
-        self.add_tactic(self.designated_robot, tactic)
-
-        # état 2: une fois rendu (condition 1), le robot désigné tourne autour de la balle
-        tactic = RotateAround(self.game_state, player_id=self.designated_robot, target=self.position_to_shoot_to)
-        self.add_tactic(self.designated_robot, tactic)
-
-        # condition 1: le robot désigné s'est rendu a la balle
-        self.add_condition(self.designated_robot, 0, 1, self.tactic_flag_success)
-
-        # état 3: une fois orienté, le robot frappe la balle
-        tactic = PassBall(self.game_state, player_id=self.designated_robot, target=self.position_to_shoot_to)
-        self.add_tactic(self.designated_robot, tactic)
-
-        # condition 2: le robot désigné a tourné autour de la balle et est dans la bonne orientation
-        self.add_condition(self.designated_robot, 1, 2, self.tactic_flag_success)
-        """
-
-        # le reste des robots sont a l arret
+        # le reste des robots sont a l'arret
         for robot_to_stop in range(0, 6):
             if robot_to_stop != self.designated_robot:
                 self.add_tactic(robot_to_stop, Stop(self.game_state, robot_to_stop))
