@@ -28,14 +28,6 @@ class MovementExecutor(Executor):
         for ai_c in current_ai_c.values():
             if len(ai_c.path) > 0:
                 next_point = ai_c.path[0]
-                # TODO ORIENTATION! PLEASES!
-                # TODO ORIENTATION! PLEASES!
-                # TODO ORIENTATION! PLEASES!
-                # TODO ORIENTATION! PLEASES!
-                # TODO ORIENTATION! PLEASES!
-                # TODO ORIENTATION! PLEASES!
-                # TODO ORIENTATION! PLEASES!
-
                 ai_c.pose_goal = Pose(next_point, ai_c.pose_goal.orientation)
                 ai_c.speed = Pose(next_point, ai_c.pose_goal.orientation)
             else:
