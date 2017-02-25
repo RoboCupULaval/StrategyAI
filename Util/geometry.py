@@ -356,19 +356,20 @@ def isFacingPointAndTarget(player_position: Position,
     return angle_difference < tolerated_angle
 
 
-def rotate_point_around_origin(point,origin,angle):
+def rotate_point_around_origin(point, origin, angle):
+    # TODO: ajouter des unit tests
     sine = m.sin(angle)
     cos = m.cos(angle)
 
-    point.x -= origin.x
-    point.y -= origin.y
+    x = point.x - origin.x
+    y = point.y - origin.y
 
-    new_x = point.x * cos - point.y * sine
-    new_y = point.x * sine + point.y * cos
+    new_x = x * cos - y * sine
+    new_y = x * sine + y * cos
 
     new_x += origin.x
     new_y += origin.y
 
-    new_point = Position(new_x,new_y)
+    new_point = Position(new_x, new_y)
 
     return new_point
