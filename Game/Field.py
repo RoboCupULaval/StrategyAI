@@ -147,7 +147,10 @@ simulation = {
 
     # Speed
     "DEFAULT_MAX_SPEED": 1,
-    "DEFAULT_MIN_SPEED": 0.65
+    "DEFAULT_MIN_SPEED": 0.65,
+
+    # Kick tactic
+    "KICK_BALL_DISTANCE": 80
 }
 
 real_life = {
@@ -208,5 +211,8 @@ real_life = {
 
     # Speed
     "DEFAULT_MAX_SPEED": 1,
-    "DEFAULT_MIN_SPEED": 0.65
+    "DEFAULT_MIN_SPEED": 0.65,
+
+    # Kick tactic
+    "KICK_BALL_DISTANCE": 80
 }
