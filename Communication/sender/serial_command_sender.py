@@ -1,7 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
 import os
+import threading
 from enum import Enum
+from collections import deque
 
 import serial
 import time
@@ -13,6 +15,7 @@ from RULEngine.Communication.util import serial_protocol as protocol
 from RULEngine.Communication.util.serial_protocol import MCUVersion
 
 SERIAL_DISABLED = -1
+COMMUNICATION_SLEEP = 0.05
 
 class SerialType(Enum):
     NRF = 1
@@ -35,11 +38,29 @@ class SerialCommandSender(object):
 
         self.type = serial_type
         self.last_time = 0
+        self.command_queue = deque()
+        self.comm_thread = threading.Thread(target=self.send_loop())
+        self.terminate = threading.Event()
+
+    def send_loop(self):
+        while not self.terminate.is_set():
+            time.sleep(COMMUNICATION_SLEEP)
+            try:
+                next_command = deque.popleft()
+            except IndexError:
+                next_command = None
+
+            if next_command:
+                packed_command = next_command.package_command(mcu_version=self.mcu_version)
+                self.serial.write(packed_command)
 
     def send_command(self, command: _Command):
-        #print(command)
-        packed_command = command.package_command(mcu_version=self.mcu_version)
-        self.serial.write(packed_command)
+        self.command_queue.append(command)
+
+    def stop(self):
+        self.terminate.set()
+        self.comm_thread.join()
+        self.terminate.clear()
 
 
 def _get_port(serial_type):

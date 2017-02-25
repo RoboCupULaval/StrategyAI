@@ -261,6 +261,7 @@ class Framework(object):
         self.thread_terminate.set()
         self.ia_running_thread.join()
         self.thread_terminate.clear()
+        self.robot_command_sender.stop()
         try:
             team = self.game.friends
 

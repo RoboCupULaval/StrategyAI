@@ -41,3 +41,6 @@ class GrSimCommandSender(object):
         #print("Command (x, y, t): {} -- {} -- {}".format(command.pose.position.x, command.pose.position.y,
         #                                                         command.pose.orientation))
         self._send_packet(packet)
+
+    def stop(self):
+        pass
