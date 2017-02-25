@@ -54,6 +54,7 @@ class Framework(object):
         """
         # time
         self.last_frame_number = 0
+        self.last_frames = [0, 0, 0, 0]
         self.time_stamp = time.time()
         self.last_time = 0
         self.last_cmd_time = time.time()
@@ -187,6 +188,12 @@ class Framework(object):
         else:
             return False
 
+    def _better_is_frame_number_different(self, vision_frame):
+        if vision_frame is not None and vision_frame.HasField("detection"):
+            if self.last_frames[vision_frame.camera_id] < vision_frame.camera_id.frame_number:
+                return True
+        return False
+
     def _compute_vision_time_delta(self, vision_frame):
         self.last_frame_number = vision_frame.detection.frame_number
         this_time = vision_frame.detection.t_capture  # time.time()  # vision_frame.detection.t_capture
@@ -196,6 +203,11 @@ class Framework(object):
         return time_delta
 
     def _better_compute_vision_time_delta(self, vision_frame):
+        c_id = vision_frame.camera_id
+        if not self.last_frames[c_id] < vision_frame.detection.frame_number:
+            return
+        self.last_frames[vision_frame.camera_id] = vision_frame.detection.frame_number
+
         self.last_frame_number = vision_frame.detection.frame_number
         this_time = vision_frame.detection.t_capture
         time_delta = this_time - self.last_time
@@ -205,9 +217,8 @@ class Framework(object):
         # FIXME: hack
         return time_delta
 
-
     def _update_debug_info(self):
-        """ Retourne le **GameState** actuel. *** """
+        """ Retourne le **GameState** actuel. *** """  # WUT?
         self.incoming_debug += self.uidebug_command_receiver.receive_command()
 
     def _normal_vision(self):
@@ -224,11 +235,16 @@ class Framework(object):
             #print(time.time() - self.time_stamp)
 
     def _test_vision(self):
-        vision_frame = self.vision.pop_frames()
-        if len(vision_frame) > 0:
-            for i in vision_frame:
-                print(i)
-            print("**********************************************************")
+        vision_frame = self._acquire_last_vision_frame()
+        if self._better_is_frame_number_different(vision_frame):
+            self._better_update_players_and_ball(vision_frame)
+            self._update_debug_info()
+            robot_commands = self.ia_coach_mainloop()
+            # Communication
+            self._send_robot_commands(robot_commands)
+            self.game.set_command(robot_commands)
+            self._send_debug_commands()
+            #print(time.time() - self.time_stamp)
 
     def _redirected_vision(self):
         vision_frames = self.vision.pop_frames()

@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.team_color_service import TeamColor
@@ -55,7 +55,7 @@ class Game:
         # command = Referee.Command(referee_command.command.name)
         # self.referee.command = command
 
-    def update(self, vision_frame, delta):
+    def update(self, vision_frame: messages_robocup_ssl_wrapper_pb2, delta: float):
         self.delta_t = delta
         #print(delta)
         self._update_ball(vision_frame, delta)
