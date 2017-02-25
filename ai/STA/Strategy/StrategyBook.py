@@ -9,6 +9,7 @@ from .SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
 from .WeirdmovementStrategy import WeirdmovementStrategy
 from ai.STA.Strategy.TestTransitions import TestTransitions
+from ai.STA.Strategy.TestPasses import TestPasses
 from .test_rotateAround import test_rotateAround
 
 
@@ -27,6 +28,7 @@ class StrategyBook(object):
                               'TestTransitions': TestTransitions,
                               "test_rotateAround": test_rotateAround,
                               'WeirdmovementStrategy': WeirdmovementStrategy,
+                              'TestPasses': TestPasses,
                               }
 
     def get_strategies_name_list(self):
@@ -41,4 +43,3 @@ class StrategyBook(object):
         assert isinstance(strategy_name, str)
 
         return strategy_name in self.strategy_book
-

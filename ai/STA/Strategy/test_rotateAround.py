@@ -7,7 +7,7 @@ from RULEngine.Util.Position import Position
 from ai.Algorithm.Node import Node
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.RotateAroundBall import RotateAroundBall
+from ai.STA.Tactic.RotateAround import RotateAround
 from ai.STA.Tactic.PassBall import PassBall
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.Stop import Stop
@@ -21,16 +21,21 @@ class test_rotateAround(Strategy):
         super().__init__(p_game_state)
 
         #TODO: modification en temps reel de la position de la balle
-        self.designated_robot = 1
-        self.position_to_shoot_to = Pose(Position(1500, 1500))
+        self.designated_robot = 0
+        self.position_to_shoot_to = Position(0, 0)
+        self.origin = self.game_state.get_ball_position()
 
+        tactic = RotateAround(self.game_state, self.designated_robot, self.origin, self.position_to_shoot_to)
+        self.add_tactic(self.designated_robot, tactic)
+
+        """
         # état 1: le robot désigné va chercher la balle
         ball_position = self.game_state.get_ball_position()
         tactic = GoToPositionNoPathfinder(self.game_state, self.designated_robot, Pose(ball_position, 0)) #TODO: ajouter pathfinder lorsque temps
         self.add_tactic(self.designated_robot, tactic)
 
         # état 2: une fois rendu (condition 1), le robot désigné tourne autour de la balle
-        tactic = RotateAroundBall(self.game_state, player_id=self.designated_robot, target=self.position_to_shoot_to)
+        tactic = RotateAround(self.game_state, player_id=self.designated_robot, target=self.position_to_shoot_to)
         self.add_tactic(self.designated_robot, tactic)
 
         # condition 1: le robot désigné s'est rendu a la balle
@@ -42,12 +47,12 @@ class test_rotateAround(Strategy):
 
         # condition 2: le robot désigné a tourné autour de la balle et est dans la bonne orientation
         self.add_condition(self.designated_robot, 1, 2, self.tactic_flag_success)
+        """
 
         # le reste des robots sont a l arret
-        for robot_to_stop in range(0,6):
+        for robot_to_stop in range(0, 6):
             if robot_to_stop != self.designated_robot:
-                tactic = Stop(self.game_state, robot_to_stop)
-                self.add_tactic(robot_to_stop, tactic)
+                self.add_tactic(robot_to_stop, Stop(self.game_state, robot_to_stop))
 
     def tactic_flag_success(self):
         """
