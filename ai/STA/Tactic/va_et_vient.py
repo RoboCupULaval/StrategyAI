@@ -18,7 +18,6 @@ class VaEtVient(Tactic):
 
     def exec(self):
         if self.check_success():
-            self.debug.add_log(4, "check_succes true")
             self.status_flag = Flags.WIP
             self.switch_target()
         else:

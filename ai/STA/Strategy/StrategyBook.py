@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 
 """ Livre des stratégies. """
-
+from ai.STA.Strategy.obstacle_course import ObstacleCourse
 from .HumanControl import HumanControl
 from .SimpleDefense import SimpleDefense
 from .SimpleOffense import SimpleOffense
@@ -28,6 +28,7 @@ class StrategyBook(object):
                               'PerpetualMovement': PerpetualMovement,
                               "test_rotateAround": test_rotateAround,
                               'WeirdmovementStrategy': WeirdmovementStrategy,
+                              "ObstacleCourse": ObstacleCourse
                               }
 
     def get_strategies_name_list(self):
