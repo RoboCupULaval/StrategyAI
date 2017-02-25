@@ -198,7 +198,7 @@ class PI(object):
         delta_y = (r_y - t_y)/1000
         delta_theta = (r_theta - t_theta)
         if abs(delta_theta) > math.pi:
-            delta_theta = (2 * math.pi - delta_theta) * -sign(delta_theta)
+            delta_theta = (2 * math.pi - abs(delta_theta)) * -sign(delta_theta)
 
 
         delta_x, delta_y = _correct_for_referential_frame(delta_x, delta_y, -active_player.pose.orientation)
@@ -241,11 +241,11 @@ class PI(object):
 
         v_theta_target = self.thetaKp * delta_theta
         self.thetaKiSum += delta_theta * self.thetaKi * delta_t
-        v_theta_target += self.thetaKiSum
         if self.thetaKiSum > self.constants["theta-max-acc"]:
             self.thetaKiSum = self.constants["theta-max-acc"]
         elif self.thetaKiSum < -self.constants["theta-max-acc"]:
             self.thetaKiSum = -self.constants["theta-max-acc"]
+        v_theta_target += self.thetaKiSum
         if v_theta_target > self.constants["theta-max-acc"]:
             v_theta_target = self.constants["theta-max-acc"]
         elif v_theta_target < -self.constants["theta-max-acc"]:
@@ -259,6 +259,8 @@ class PI(object):
             #v_theta_target = 0
 
         DebugInterface().add_log(1, "Erreur -- commande en orientation: {} -- {}".format(delta_theta, v_theta_target))
+        DebugInterface().add_log(1, "Consigne -- actuel en orientation: {} -- {}".format(r_theta, t_theta))
+
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
 
     def rotate_around(self, command, active_player, delta_t):
@@ -321,8 +323,8 @@ def _set_constants(simulation_setting):
                 "xyKp": 0.7,
                 "ki": 0.007,
                 "kd": 0.02,
-                "thetaKp": 0.7,
-                "thetaKi": 0.5,
+                "thetaKp": 0.6,
+                "thetaKi": 0.2,
                 "theta-max-acc": 2*math.pi,
                 "position_dead_zone": 0.03
                 }
