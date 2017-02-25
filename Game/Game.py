@@ -11,9 +11,9 @@ from RULEngine.Game.Referee import Referee
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, terrain_type="sim"):
         self.ball = Ball()
-        self.field = Field(self.ball)
+        self.field = Field(self.ball, terrain_type)
         self.referee = None
         self.our_team_color = None
         self.enemy_team_color = None

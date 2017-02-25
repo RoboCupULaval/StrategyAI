@@ -85,8 +85,12 @@ class Framework(object):
         self.ai_coach = None
         self.referee = None
         self.team_color_service = None
+        if serial == False:
+            terrain_type = "sim"
+        else:
+            terrain_type = "real"
 
-        self._create_game_world()
+        self._create_game_world(terrain_type)
 
         # VISION
         self.image_transformer = ImageTransformer()
@@ -158,7 +162,7 @@ class Framework(object):
         if not async:
             self.ia_running_thread.join()
 
-    def _create_game_world(self):
+    def _create_game_world(self, terrain_type="sim"):
         """
             Créé le GameWorld pour contenir les éléments d'une partie normale:
              l'arbitre, la Game (Field, teams, players).
@@ -166,7 +170,7 @@ class Framework(object):
         """
 
         self.referee = Referee()
-        self.game = Game()
+        self.game = Game(terrain_type)
         self.game.set_referee(self.referee)
         self.game_world = GameWorld(self.game)
         self.game_world.set_timestamp(self.time_stamp)
