@@ -15,7 +15,7 @@ from RULEngine.Communication.util import serial_protocol as protocol
 from RULEngine.Communication.util.serial_protocol import MCUVersion
 
 SERIAL_DISABLED = -1
-COMMUNICATION_SLEEP = 0.05
+COMMUNICATION_SLEEP = 0.005
 
 class SerialType(Enum):
     NRF = 1
@@ -39,14 +39,15 @@ class SerialCommandSender(object):
         self.type = serial_type
         self.last_time = 0
         self.command_queue = deque()
-        self.comm_thread = threading.Thread(target=self.send_loop())
         self.terminate = threading.Event()
+        self.comm_thread = threading.Thread(target=self.send_loop)
+        self.comm_thread.start()
 
     def send_loop(self):
         while not self.terminate.is_set():
             time.sleep(COMMUNICATION_SLEEP)
             try:
-                next_command = deque.popleft()
+                next_command = self.command_queue.popleft()
             except IndexError:
                 next_command = None
 
@@ -56,6 +57,7 @@ class SerialCommandSender(object):
 
     def send_command(self, command: _Command):
         self.command_queue.append(command)
+        print("Command deque length: {}".format(len(self.command_queue)))
 
     def stop(self):
         self.terminate.set()
