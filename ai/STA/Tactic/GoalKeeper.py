@@ -6,7 +6,7 @@ from ..Action.ProtectGoal import ProtectGoal
 from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
-from ai.Util.ball_possession import canGetBall, hasBall
+from ai.Util.ball_possession import can_get_ball, has_ball
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.area import isInsideGoalArea
