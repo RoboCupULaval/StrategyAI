@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
-import math
 
+import math
 import time
 
 from RULEngine.Util.Pose import Pose
