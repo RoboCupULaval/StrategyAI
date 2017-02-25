@@ -71,7 +71,8 @@ class GoKick(Tactic):
 
     def orient(self):
         player_pose = self.game_state.get_player_pose(self.player_id)
-        if math.fabs(get_angle(player_pose.position, self.target.position)) - player_pose.orientation < ORIENTATION_DEADZONE:
+        if math.fabs(
+                get_angle(player_pose.position, self.target.position)) - player_pose.orientation < ORIENTATION_DEADZONE:
             self.next_state = self.prepare_grab
             self.last_time = time.time()
         # TODO angle check
@@ -83,7 +84,7 @@ class GoKick(Tactic):
         if now - self.last_time < COMMAND_DELAY:
             DebugInterface().add_log(1, "Dribbler on!")
             self.next_state = self.kiss_ball
-        other_args = {"dribbler_on": 2}
+        other_args = {"dribbler_on":2}
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def kiss_ball(self):
@@ -100,11 +101,11 @@ class GoKick(Tactic):
 
     def kick_charge(self):
 
-        if time.time() - self.last_time > COMMAND_DELAY*6:
+        if time.time() - self.last_time > COMMAND_DELAY * 6:
             DebugInterface().add_log(1, "Kick charge!")
             self.last_time = time.time()
             self.next_state = self.kick
-        other_args = {"charge_kick": True, "dribbler_on": 1}
+        other_args = {"charge_kick":True, "dribbler_on":1}
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def kick(self):
@@ -120,7 +121,7 @@ class GoKick(Tactic):
         if now - self.last_time > COMMAND_DELAY:
             DebugInterface().add_log(1, "Dribbler off!")
             self.next_state = self.halt
-        other_args = {"pose_goal": self.game_state.get_player_pose(self.player_id), "dribbler_on": 1}
+        other_args = {"pose_goal":self.game_state.get_player_pose(self.player_id), "dribbler_on":1}
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def halt(self):
@@ -138,8 +139,9 @@ class GoKick(Tactic):
         dest_position = self.get_behind_ball_position(ball_position)
         destination_pose = Pose(dest_position, player_pose.orientation)
 
-        return AllStar(self.game_state, self.player_id, **{"pose_goal": destination_pose,
-                                                           "ai_command_type": AICommandType.MOVE})
+        return AllStar(self.game_state, self.player_id, **{"pose_goal":destination_pose,
+                                                           "ai_command_type":AICommandType.MOVE
+                                                           })
 
     def get_behind_ball_position(self, ball_position):
         vec_dir = self.target.position - ball_position

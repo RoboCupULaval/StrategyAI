@@ -51,7 +51,7 @@ class PositionRegulator(Executor):
                     cmd.speed = self.regulators[robot_idx].\
                         rotate_around(cmd, active_player, delta_t)
 
-        self._potential_field()
+        #self._potential_field()
 
     def _potential_field(self):
         current_ai_c = self.ws.play_state.current_ai_commands
