@@ -3,6 +3,7 @@ import math
 
 import time
 
+from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_distance
@@ -196,7 +197,7 @@ class PI(object):
         delta_x = (r_x - t_x)/1000
         delta_y = (r_y - t_y)/1000
         delta_theta = (r_theta - t_theta)
-        if delta_theta > math.pi:
+        if abs(delta_theta) > math.pi:
             delta_theta = (2 * math.pi - delta_theta) * -sign(delta_theta)
 
 
@@ -241,6 +242,14 @@ class PI(object):
         v_theta_target = self.thetaKp * delta_theta
         self.thetaKiSum += delta_theta * self.thetaKi * delta_t
         v_theta_target += self.thetaKiSum
+        if self.thetaKiSum > self.constants["theta-max-acc"]:
+            self.thetaKiSum = self.constants["theta-max-acc"]
+        elif self.thetaKiSum < -self.constants["theta-max-acc"]:
+            self.thetaKiSum = -self.constants["theta-max-acc"]
+        if v_theta_target > self.constants["theta-max-acc"]:
+            v_theta_target = self.constants["theta-max-acc"]
+        elif v_theta_target < -self.constants["theta-max-acc"]:
+            v_theta_target = -self.constants["theta-max-acc"]
 
         # print('Error : ', delta)
         if delta <= self.position_dead_zone:
@@ -249,6 +258,7 @@ class PI(object):
         #if math.fabs(delta_theta) <= self.rotation_dead_zone:
             #v_theta_target = 0
 
+        DebugInterface().add_log(1, "Erreur -- commande en orientation: {} -- {}".format(delta_theta, v_theta_target))
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
 
     def rotate_around(self, command, active_player, delta_t):
@@ -298,6 +308,7 @@ def _set_constants(simulation_setting):
                 "kd": 0.02,
                 "thetaKp": 0.6,
                 "thetaKi": 0.2,
+                "theta-max-acc": 6*math.pi,
                 "position_dead_zone": 0.03
                 }
     else:
@@ -312,6 +323,7 @@ def _set_constants(simulation_setting):
                 "kd": 0.02,
                 "thetaKp": 0.7,
                 "thetaKi": 0.5,
+                "theta-max-acc": 2*math.pi,
                 "position_dead_zone": 0.03
                 }
 
