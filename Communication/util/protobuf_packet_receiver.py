@@ -8,6 +8,7 @@
 from collections import deque
 from socketserver import BaseRequestHandler
 
+from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2
 from RULEngine.Communication.util.threaded_udp_server import ThreadedUDPServer
 
 
@@ -34,13 +35,15 @@ class ProtobufPacketReceiver(object):
 
         return ThreadedUDPRequestHandler
 
-    def pop_frames(self):
+    # TODO change the typing here in case of refereeMGL 2017/02/24
+    def pop_frames(self)->messages_robocup_ssl_wrapper_pb2:
         """ Retourne une frame de la deque. """
         new_list = list(self.packet_list)
         self.packet_list.clear()
         return new_list
 
-    def get_latest_frame(self):
+    # TODO change the typing here in case of referee MGL 2017/02/24
+    def get_latest_frame(self)->messages_robocup_ssl_wrapper_pb2:
         """ Retourne sans erreur la dernière frame reçu. """
         try:
             return self.packet_list[-1]

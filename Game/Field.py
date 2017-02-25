@@ -23,7 +23,8 @@ simulation = {
     "ROBOT_RADIUS": 90,
     "BALL_RADIUS": 22,
     "PLAYER_PER_TEAM": 6,
-    "KICK_MAX_SPD": 8.0,
+    # TODO KICKSPEED
+    "KICK_MAX_SPD": 4,
 
     # Field Parameters
     "FIELD_Y_TOP": 3000,
@@ -63,7 +64,7 @@ simulation = {
 
     # Deadzones
     "SPEED_DEAD_ZONE_DISTANCE": 150,
-    "POSITION_DEADZONE": 135,  # ROBOT_RADIUS*1.5
+    "POSITION_DEADZONE": 200,  # ROBOT_RADIUS*1.5
 
     # Radius and angles for tactics
     "DISTANCE_BEHIND": 120,  # ROBOT_RADIUS + 30  # in millimeters
@@ -85,7 +86,8 @@ real_life = {
     "ROBOT_RADIUS": 90,
     "BALL_RADIUS": 22,
     "PLAYER_PER_TEAM": 6,
-    "KICK_MAX_SPD": 8.0,
+    # TODO KICKSPEED
+    "KICK_MAX_SPD": 4,
 
     # Field Parameters
     "FIELD_Y_TOP": 1090,
