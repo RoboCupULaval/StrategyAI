@@ -1,15 +1,10 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.GoToPosition import GoToPosition
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
-
-
-from ai.STA.Tactic import tactic_constants
-from ai.Util.ball_possession import *
 from ai.STA.Tactic.tactic_constants import Flags
 
 from ai.Util.ball_possession import can_get_ball, has_ball
@@ -59,13 +54,11 @@ class GoGetBall(Tactic):
         if dist <= POSITION_DEADZONE:
             self.next_state = self.grab_ball
         else:
-            print("get_behind")
             self.next_state = self.get_behind_ball
         return GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position(), self.target.position,
                         DISTANCE_BEHIND)
 
     def grab_ball(self):
-        print("grab_ball")
         if has_ball(self.game_state, self.player_id):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
@@ -78,7 +71,6 @@ class GoGetBall(Tactic):
         return grab_ball
 
     def halt(self):
-        print("halt")
         self.status_flag = Flags.SUCCESS
         dist = self._get_distance_from_ball()
 

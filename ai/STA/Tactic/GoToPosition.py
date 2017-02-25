@@ -71,8 +71,8 @@ class GoToPosition(Tactic):
         player_position = self.game_state.get_player_pose(self.player_id).position
         player_orientation = self.game_state.get_player_pose(self.player_id).orientation
 
-        if get_distance(player_position, self.path_target.position) <= POSITION_DEADZONE:
-            # and math.abs(self.path_target.orientation - player_orientation) <= ANGLE_TO_HALT:
+        if get_distance(player_position, self.path_target.position) <= POSITION_DEADZONE\
+                and math.abs(self.path_target.orientation - player_orientation) <= ANGLE_TO_HALT:
             # TODO : remettre cette condition quand l'asservissement en orientation des robots sera fonctionnel
             self.next_state = self.get_next_path_element
         else:

@@ -5,7 +5,7 @@ from ai.STA.Tactic.va_et_vient import VaEtVient
 from .GoGetBall import GoGetBall
 from .GoalKeeper import GoalKeeper
 from .GoToPosition import GoToPosition
-from .RotateAroundBall import RotateAroundBall
+from .RotateAround import RotateAround
 from .Stop import Stop
 from .ProtectZone import ProtectZone
 from .DemoFollowBall import DemoFollowBall

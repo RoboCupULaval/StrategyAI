@@ -84,8 +84,6 @@ class GoBehind(Action):
                 y -= math.sin(theta) * 2
             destination_position = Position(x, y)
 
-        print("position target:", self.position2.x, self.position2.y)
-
         # Calcul de l'orientation de la pose de destination
         destination_orientation = get_angle(destination_position, self.position1)
 
