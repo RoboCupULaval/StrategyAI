@@ -85,10 +85,10 @@ class Framework(object):
         self.ai_coach = None
         self.referee = None
         self.team_color_service = None
-        if serial == False:
-            terrain_type = "sim"
-        else:
+        if serial in SerialType:
             terrain_type = "real"
+        else:
+            terrain_type = "sim"
 
         self._create_game_world(terrain_type)
 
