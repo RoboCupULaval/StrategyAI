@@ -6,7 +6,7 @@ from .Action import Action
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import FIELD_GOAL_RADIUS, PLAYER_PER_TEAM, FIELD_X_RIGHT, FIELD_X_LEFT
-from RULEngine.Util.area import stayInsideCircle, stayOutsideCircle, stayInsideGoalArea
+from RULEngine.Util.area import stayInsideCircle, stayOutsideCircle
 from RULEngine.Util.geometry import get_angle, get_closest_point_on_line
 from ai.Util.ai_command import AICommand, AICommandType
 
@@ -66,7 +66,8 @@ class ProtectGoal(Action):
 
         # Vérification que destination_position respecte la distance maximale
         if self.maximum_distance is None:
-            destination_position = stayInsideGoalArea(destination_position, self.is_right_goal)
+            destination_position = self.game_state.game.field.stay_inside_goal_area(destination_position,
+                                                                                    self.is_right_goal)
         else:
             destination_position = stayInsideCircle(destination_position, goal_position, self.maximum_distance)
 

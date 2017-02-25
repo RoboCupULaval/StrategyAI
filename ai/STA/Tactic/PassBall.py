@@ -44,7 +44,8 @@ class PassBall(Tactic):
             player_position = self.game_state.get_player_position(self.player_id)
             kick_force = getRequiredKickForce(player_position, self.target_position)
 
-            kick_ball = Kick(self.game_state, self.player_id, kick_force)
+            #kick_ball = Kick(self.game_state, self.player_id, kick_force)
+            kick_ball = Kick(self.game_state, self.player_id, 4)
 
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
