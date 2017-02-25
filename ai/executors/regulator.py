@@ -196,6 +196,9 @@ class PI(object):
         delta_x = (r_x - t_x)/1000
         delta_y = (r_y - t_y)/1000
         delta_theta = (r_theta - t_theta)
+        if delta_theta > math.pi:
+            delta_theta = (2 * math.pi - delta_theta) * -sign(delta_theta)
+
 
         delta_x, delta_y = _correct_for_referential_frame(delta_x, delta_y, -active_player.pose.orientation)
 
@@ -232,6 +235,8 @@ class PI(object):
 
         if r_theta != self.last_theta_target:
             self.kiSum = 0
+
+
 
         v_theta_target = self.thetaKp * delta_theta
         self.thetaKiSum += delta_theta * self.thetaKi * delta_t
@@ -303,10 +308,10 @@ def _set_constants(simulation_setting):
                 "vit_max": 0.5,
                 "vit_min": 0.05,
                 "xyKp": 0.7,
-                "ki": 0.005,
+                "ki": 0.007,
                 "kd": 0.02,
-                "thetaKp": 0.6,
-                "thetaKi": 0.2,
+                "thetaKp": 0.7,
+                "thetaKi": 0.5,
                 "position_dead_zone": 0.03
                 }
 
