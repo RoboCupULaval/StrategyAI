@@ -4,7 +4,7 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.Idle import Idle
-from ai.Util.ball_possession import hasBallFacingTarget
+from ai.Util.ball_possession import has_ball_facing_target
 from RULEngine.Util.kick import getRequiredKickForce
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
