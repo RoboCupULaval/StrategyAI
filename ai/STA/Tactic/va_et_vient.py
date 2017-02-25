@@ -9,10 +9,10 @@ from ai.STA.Tactic.tactic_constants import Flags
 
 class VaEtVient(Tactic):
     def __init__(self, p_game_state, player_id, target=Pose()):
-        super().__init__(p_game_state, player_id)
+        super().__init__(p_game_state, player_id, target)
         self.status_flag = Flags.INIT
         self.start = self.game_state.get_player_pose(self.player_id)
-        self.end = Pose(self.target.position, self.target.orientation)
+        self.end = Pose(position=self.target.position, orientation=0)
         self.debug = DebugInterface()
 
     def exec(self):
@@ -27,12 +27,12 @@ class VaEtVient(Tactic):
 
     def switch_target(self):
         player_position = self.game_state.get_player_position(self.player_id)
-        distance_target = get_distance(player_position, self.end.position)
-        distance_start = get_distance(player_position, self.start)
-        if distance_target < distance_start:
-            self.target = self.end
-        else:
+        distance_end = get_distance(player_position, self.end.position)
+        distance_start = get_distance(player_position, self.start.position)
+        if distance_end < distance_start:
             self.target = self.start
+        else:
+            self.target = self.end
 
     def check_success(self):
         player_position = self.game_state.get_player_position(self.player_id)

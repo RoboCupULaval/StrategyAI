@@ -27,7 +27,7 @@ class TacticBook(object):
                             'GoKick': GoKick,
                             "TestTurnOnYou": TestTurnOnYou,
                             'RotateAroundPosition': RotateAroundPosition,
-                            #"VaEtVient": VaEtVient
+                            "VaEtVient": VaEtVient
                             }
 
     def get_tactics_name_list(self):

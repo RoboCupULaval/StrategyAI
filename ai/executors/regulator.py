@@ -138,6 +138,7 @@ class PID(object):
         self.last_err = error
         return cmd
 
+
 class PI(object):
     """
         Asservissement PI en position
