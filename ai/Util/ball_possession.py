@@ -24,7 +24,7 @@ def has_ball(game_state, player_id):
     ball_position = game_state.get_ball_position()
     if fabs(player_orientation - get_angle(player_position, ball_position)) <= ANGLE_TO_GRAB_BALL:
         # si la balle est sur le kicker
-        if isInsideCircle(player_position, ball_position, RADIUS_TO_HALT + 10):
+        if isInsideCircle(player_position, ball_position, RADIUS_TO_HALT + 3):
             # si la balle est proche du robot
             return True
         else:
