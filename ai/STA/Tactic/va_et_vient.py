@@ -1,3 +1,5 @@
+from RULEngine.Debug.debug_interface import DebugInterface
+from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_distance
 from ai.STA.Action.PathfindToPosition import PathfindToPosition
@@ -6,38 +8,36 @@ from ai.STA.Tactic.tactic_constants import Flags
 
 
 class VaEtVient(Tactic):
-    def __init__(self, p_game_state, player_id):
-        super().__init__(p_game_state, player_id)
+    def __init__(self, p_game_state, player_id, target=Pose()):
+        super().__init__(p_game_state, player_id, target)
         self.status_flag = Flags.INIT
-        self.set_closer_goal()
+        self.start = self.game_state.get_player_pose(self.player_id)
+        self.end = Pose(position=self.target.position, orientation=0)
+        self.debug = DebugInterface()
 
     def exec(self):
         if self.check_success():
-            self.status_flag = Flags.SUCCESS
+            self.status_flag = Flags.WIP
+            self.switch_target()
         else:
             self.status_flag = Flags.WIP
 
         next_action = PathfindToPosition(self.game_state, self.player_id, self.target)
         return next_action.exec()
 
-    def set_closer_goal(self):
+    def switch_target(self):
         player_position = self.game_state.get_player_position(self.player_id)
-        goal_left = Position(self.game_state.const["FIELD_GOAL_YELLOW_X_LEFT"], 0)
-        goal_right = Position(self.game_state.const["FIELD_GOAL_BLUE_X_RIGHT"], 0)
-        distance_left = get_distance(player_position, goal_left)
-        distance_right = get_distance(player_position, goal_right)
-        if distance_left < distance_right:
-            self.target = goal_left
+        distance_end = get_distance(player_position, self.end.position)
+        distance_start = get_distance(player_position, self.start.position)
+        if distance_end < distance_start:
+            self.target = self.start
         else:
-            self.target = goal_right
-
-    def set_other_goal
-
+            self.target = self.end
 
     def check_success(self):
         player_position = self.game_state.get_player_position(self.player_id)
 
-        distance = get_distance(player_position, self.target)
+        distance = get_distance(player_position, self.target.position)
         if distance < self.game_state.const["POSITION_DEADZONE"]:
             return True
         return False

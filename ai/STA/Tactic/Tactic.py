@@ -21,6 +21,7 @@ class Tactic:
 
             :param p_game_state: L'état courant du jeu.
         """
+        assert isinstance(p_game_state, GameState)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
         assert isinstance(target, Pose), "La target devrait être une Pose"

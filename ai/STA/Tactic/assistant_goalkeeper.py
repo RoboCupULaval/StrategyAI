@@ -6,15 +6,18 @@ from ..Action.ProtectGoal import ProtectGoal
 from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
-from ai.Util.ball_possession import can_get_ball, has_ball
+from ai.Util.ball_possession import canGetBall, hasBall
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.area import isInsideGoalArea
 from RULEngine.Util.constant import PLAYER_PER_TEAM, DISTANCE_BEHIND, TeamColor
+from RULEngine.Util.constant import Relative
+
 
 __author__ = 'RoboCupULaval'
 
-
-class GoalKeeper(Tactic):
+# TODO WORK IN PROGRESS
+class AssistantGoalkeeper(Tactic):
     """
     Tactique du gardien de but standard. Le gardien doit se placer entre la balle et le but, tout en restant à
     l'intérieur de son demi-cercle. Si la balle entre dans son demi-cercle, le gardien tente d'aller en prendre
@@ -34,34 +37,35 @@ class GoalKeeper(Tactic):
 
     def __init__(self, p_game_state, p_player_id, target=Pose(),
                  time_to_live=DEFAULT_TIME_TO_LIVE):
-        Tactic.__init__(self, p_game_state, p_player_id)
+        Tactic.__init__(self, p_game_state, p_player_id, target)
         assert isinstance(p_player_id, int)
         assert PLAYER_PER_TEAM >= p_player_id >= 0
 
         self.player_id = p_player_id
-        self.is_yellow = self.game_state.get_our_team_color == TeamColor.YELLOW_TEAM
         self.current_state = self.protect_goal
         self.next_state = self.protect_goal
-        self.status_flag = Flags.WIP
-        print(self.game_state.game.field.constant["FIELD_GOAL_RADIUS"])
+        self.status_flag = Flags.INIT
+        self.side = None
+        self.zone = None
+        self._check_side_and_zone()
 
     def protect_goal(self):
+        # FIXME : enlever ce hack de merde
         ball_position = self.game_state.get_ball_position()
-        if not self.game_state.game.field.is_inside_goal_area(ball_position, self.is_yellow):
+        if not isInsideGoalArea(ball_position, self.is_yellow):
             self.next_state = self.protect_goal
         else:
-            if can_get_ball(self.game_state, self.player_id, ball_position):
+            if canGetBall(self.game_state, self.player_id, ball_position):
                 self.next_state = self.grab_ball
             else:
                 self.next_state = self.go_behind_ball
         self.target = Pose(self.game_state.get_ball_position())
-        return ProtectGoal(self.game_state, self.player_id, self.is_yellow,
-                           p_minimum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"])
+        return ProtectGoal(self.game_state, self.player_id, self.is_yellow, p_minimum_distance=250)
 
     def go_behind_ball(self):
         ball_position = self.game_state.get_ball_position()
 
-        if can_get_ball(self.game_state, self.player_id, ball_position):
+        if canGetBall(self.game_state, self.player_id, ball_position):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -70,11 +74,21 @@ class GoalKeeper(Tactic):
 
     def grab_ball(self):
         ball_position = self.game_state.get_ball_position()
-        if has_ball(self.game_state, self.player_id):
+        if hasBall(self.game_state, self.player_id):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
-        elif can_get_ball(self.game_state, self.player_id, ball_position):
+        elif canGetBall(self.game_state, self.player_id, ball_position):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball  # back to go_behind; the ball has moved
         return GetBall(self.game_state, self.player_id)
+
+    def _check_zone(self):
+        # TODO change this
+        if self.target.position.y < 0:
+            self.zone = Relative.NEGATIVE
+        elif self.target.position.y > 0:
+            self.zone = Relative.POSITIVE
+        else:
+            raise TypeError("Le target d'une tactique assistant_goalkeeper doit "
+                            "avoir un position en y positive ou négative(pas 0)!")

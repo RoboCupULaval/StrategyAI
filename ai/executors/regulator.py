@@ -1,8 +1,9 @@
 # Under MIT License, see LICENSE.txt
-import math
 
+import math
 import time
 
+from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_distance
@@ -127,6 +128,7 @@ class PositionRegulator(Executor):
                 ai_c.speed.position = Position(vit_robot_x, vit_robot_y)
 
 
+
 class PID(object):
     def __init__(self, kp, ki, kd, simulation_setting=True):
         self.gs = GameState()
@@ -147,6 +149,7 @@ class PID(object):
         cmd += self.kd * ((error - self.last_err) / delta_t)
         self.last_err = error
         return cmd
+
 
 class PI(object):
     """
@@ -205,6 +208,9 @@ class PI(object):
         delta_x = (r_x - t_x)/1000
         delta_y = (r_y - t_y)/1000
         delta_theta = (r_theta - t_theta)
+        if abs(delta_theta) > math.pi:
+            delta_theta = (2 * math.pi - abs(delta_theta)) * -sign(delta_theta)
+
 
         delta_x, delta_y = _correct_for_referential_frame(delta_x, delta_y, -active_player.pose.orientation)
 
@@ -242,9 +248,19 @@ class PI(object):
         if r_theta != self.last_theta_target:
             self.kiSum = 0
 
+
+
         v_theta_target = self.thetaKp * delta_theta
         self.thetaKiSum += delta_theta * self.thetaKi * delta_t
+        if self.thetaKiSum > self.constants["theta-max-acc"]:
+            self.thetaKiSum = self.constants["theta-max-acc"]
+        elif self.thetaKiSum < -self.constants["theta-max-acc"]:
+            self.thetaKiSum = -self.constants["theta-max-acc"]
         v_theta_target += self.thetaKiSum
+        if v_theta_target > self.constants["theta-max-acc"]:
+            v_theta_target = self.constants["theta-max-acc"]
+        elif v_theta_target < -self.constants["theta-max-acc"]:
+            v_theta_target = -self.constants["theta-max-acc"]
 
         # print('Error : ', delta)
         if delta <= self.position_dead_zone:
@@ -252,6 +268,9 @@ class PI(object):
             v_target_y = 0
         #if math.fabs(delta_theta) <= self.rotation_dead_zone:
             #v_theta_target = 0
+
+        DebugInterface().add_log(1, "Erreur -- commande en orientation: {} -- {}".format(delta_theta, v_theta_target))
+        DebugInterface().add_log(1, "Consigne -- actuel en orientation: {} -- {}".format(r_theta, t_theta))
 
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
 
@@ -304,6 +323,7 @@ def _set_constants(simulation_setting):
                 "kd": 0.02,
                 "thetaKp": 0.6,
                 "thetaKi": 0.2,
+                "theta-max-acc": 6*math.pi,
                 "position_dead_zone": 0.03
                 }
     else:
@@ -314,10 +334,11 @@ def _set_constants(simulation_setting):
                 "vit_max": 0.5,
                 "vit_min": 0.05,
                 "xyKp": 0.7,
-                "ki": 0.005,
+                "ki": 0.007,
                 "kd": 0.02,
                 "thetaKp": 0.6,
                 "thetaKi": 0.2,
+                "theta-max-acc": 2*math.pi,
                 "position_dead_zone": 0.03
                 }
 

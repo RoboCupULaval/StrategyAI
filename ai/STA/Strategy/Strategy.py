@@ -2,11 +2,9 @@
 
 from abc import ABCMeta
 
-from ..Tactic.Stop import Stop
-from ..Tactic import tactic_constants
 from ai.Algorithm.Graph import Graph
 from ai.Algorithm.Node import Node
-from ai.Algorithm.Vertex import Vertex
+from ai.states.game_state import GameState
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 
@@ -19,6 +17,7 @@ class Strategy(metaclass=ABCMeta):
         Initialise la stratégie en créant un graph vide pour chaque robot de l'équipe.
         :param p_game_state: L'état courant du jeu.
         """
+        assert isinstance(p_game_state, GameState)
         self.game_state = p_game_state
         self.graphs = []
         for i in range(PLAYER_PER_TEAM):
@@ -59,12 +58,6 @@ class Strategy(metaclass=ABCMeta):
             state.append((current_tactic.player_id, str(current_tactic)+" "+current_tactic.status_flag.name,
                          current_tactic.current_state.__name__, current_tactic.target))
         return state
-
-    def add_tactic(self, robot_id, tactic):
-        self.graphs[robot_id].add_node(Node(tactic))
-
-    def add_condition(self, robot_id, start_node, end_node, condition):
-        self.graphs[robot_id].add_vertex(start_node,end_node,condition)
 
     def exec(self):
         """

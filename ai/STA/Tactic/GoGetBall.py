@@ -1,18 +1,13 @@
 # Under MIT licence, see LICENCE.txt
 
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.GoToPosition import GoToPosition
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
-
-
-from ai.STA.Tactic import tactic_constants
-from ai.Util.ball_possession import *
 from ai.STA.Tactic.tactic_constants import Flags
 
-from ai.Util.ball_possession import canGetBall, hasBall
+from ai.Util.ball_possession import can_get_ball, has_ball
 from RULEngine.Util.geometry import get_distance
 from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS
 from RULEngine.Util.Pose import Pose
@@ -53,25 +48,21 @@ class GoGetBall(Tactic):
         self.last_ball_position = self.game_state.get_ball_position()
 
     def get_behind_ball(self):
-
         self.status_flag = Flags.WIP
         dist = self._get_distance_from_ball()
 
         if dist <= POSITION_DEADZONE:
-            self.next_state = self.halt
-        elif dist > POSITION_DEADZONE:
-            self.move_action = self._generate_move_to()
-            self.next_state = self.get_behind_ball
+            self.next_state = self.grab_ball
         else:
             self.next_state = self.get_behind_ball
-
-        return self.move_action
+        return GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position(), self.target.position,
+                        DISTANCE_BEHIND)
 
     def grab_ball(self):
-        if hasBall(self.game_state, self.player_id):
+        if has_ball(self.game_state, self.player_id):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
-        elif canGetBall(self.game_state, self.player_id):
+        elif can_get_ball(self.game_state, self.player_id, self.target.position):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.get_behind_ball  # back to go_behind; the ball has moved

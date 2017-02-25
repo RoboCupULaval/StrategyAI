@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 
 """ Livre des stratégies. """
-
+from ai.STA.Strategy.obstacle_course import ObstacleCourse
 from .HumanControl import HumanControl
 from .SimpleDefense import SimpleDefense
 from .SimpleOffense import SimpleOffense
@@ -9,7 +9,8 @@ from .DoNothing import DoNothing
 from .WeirdmovementStrategy import WeirdmovementStrategy
 from ai.STA.Strategy.TestTransitions import TestTransitions
 from ai.STA.Strategy.PerpetualMovement import PerpetualMovement
-from .test_rotateAround import test_rotateAround
+from ai.STA.Strategy.TestPasses import TestPasses
+from .TestRotateAround import TestRotateAround
 
 
 class StrategyBook(object):
@@ -26,8 +27,10 @@ class StrategyBook(object):
                               'DoNothing': DoNothing,
                               'TestTransitions': TestTransitions,
                               'PerpetualMovement': PerpetualMovement,
-                              "test_rotateAround": test_rotateAround,
                               'WeirdmovementStrategy': WeirdmovementStrategy,
+                              "ObstacleCourse": ObstacleCourse,
+                              "TestRotateAround": TestRotateAround,
+                              'TestPasses': TestPasses,
                               }
 
     def get_strategies_name_list(self):
@@ -42,4 +45,3 @@ class StrategyBook(object):
         assert isinstance(strategy_name, str)
 
         return strategy_name in self.strategy_book
-
