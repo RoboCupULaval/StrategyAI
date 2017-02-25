@@ -17,7 +17,6 @@ class CommandExecutor(Executor):
         for player_id, ai_command in ai_command_dict.items():
             ready_to_ship_robot_packet_list.append(self._parse_ai_command(ai_command,
                                                                           player_id))
-
         return ready_to_ship_robot_packet_list
 
     def _parse_ai_command(self, ai_command: AICommand, player_id):

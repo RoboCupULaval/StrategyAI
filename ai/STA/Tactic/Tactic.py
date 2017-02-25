@@ -4,6 +4,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic_constants import DEFAULT_TIME_TO_LIVE, Flags
+from ai.states.game_state import GameState
 
 __author__ = 'RobocupULaval'
 
@@ -13,7 +14,7 @@ class Tactic:
         Classe mère de toutes les tactiques
     """
 
-    def __init__(self, p_game_state, player_id, target=Pose(),
+    def __init__(self, p_game_state: GameState, player_id: int, target=Pose(),
                  time_to_live=DEFAULT_TIME_TO_LIVE):
         """
             Initialise la tactique

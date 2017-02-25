@@ -4,11 +4,11 @@
 
 from .HumanControl import HumanControl
 from .SimpleDefense import SimpleDefense
-from .TestAstarStrategy import TestAstarStrategy
 from .SimpleOffense import SimpleOffense
 from .DoNothing import DoNothing
 from .WeirdmovementStrategy import WeirdmovementStrategy
 from ai.STA.Strategy.TestTransitions import TestTransitions
+from ai.STA.Strategy.PerpetualMovement import PerpetualMovement
 from .test_rotateAround import test_rotateAround
 
 
@@ -25,6 +25,7 @@ class StrategyBook(object):
                               'HumanControl': HumanControl,
                               'DoNothing': DoNothing,
                               'TestTransitions': TestTransitions,
+                              'PerpetualMovement': PerpetualMovement,
                               "test_rotateAround": test_rotateAround,
                               'WeirdmovementStrategy': WeirdmovementStrategy,
                               }

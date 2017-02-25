@@ -40,6 +40,7 @@ class MovementExecutor(Executor):
                 ai_c.speed = Pose(next_point, ai_c.pose_goal.orientation)
             else:
                 ai_c.speed = ai_c.pose_goal
+                #print(ai_c.speed)
 
     def _sanity_check_of_speed_command(self):
         for ai_c in self.ws.play_state.current_ai_commands.values():

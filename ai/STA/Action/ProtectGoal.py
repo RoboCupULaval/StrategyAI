@@ -25,7 +25,7 @@ class ProtectGoal(Action):
         minimum_distance : La distance minimale qu'il doit y avoir entre le gardien et le centre du but.
         maximum_distance : La distance maximale qu'il doit y avoir entre le gardien et le centre du but.
     """
-    def __init__(self, p_game_state, p_player_id, p_is_right_goal=True, p_minimum_distance=FIELD_GOAL_RADIUS/2,
+    def __init__(self, p_game_state, p_player_id, p_is_right_goal=True, p_minimum_distance=150/2,
                  p_maximum_distance=None):
         """
         :param p_game_state: L'état courant du jeu.
@@ -55,7 +55,7 @@ class ProtectGoal(Action):
         """
         goalkeeper_position = self.game_state.get_player_pose(self.player_id).position
         ball_position = self.game_state.get_ball_position()
-        goal_x = FIELD_X_RIGHT if self.is_right_goal else FIELD_X_LEFT
+        goal_x = self.game_state.const["FIELD_X_RIGHT"] if self.is_right_goal else self.game_state.const["FIELD_X_LEFT"]
         goal_position = Position(goal_x, 0)
 
         # Calcul de la position d'interception entre la balle et le centre du but
