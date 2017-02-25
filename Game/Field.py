@@ -1,5 +1,6 @@
 # Under MIT License, see LICENSE.txt
 from RULEngine.Util.Position import Position
+from ..Util.area import *
 
 
 class Field:
@@ -17,6 +18,73 @@ class Field:
 
     def move_ball(self, position, delta):
         self.ball.set_position(position, delta)
+
+    def is_inside_goal_area(self, position, is_yellow):
+        assert (isinstance(position, Position))
+        assert (isinstance(is_yellow, bool))
+        x_left = self.constant["FIELD_GOAL_YELLOW_X_LEFT"] if is_yellow else self.constant["FIELD_GOAL_BLUE_X_LEFT"]
+        x_right = self.constant["FIELD_GOAL_YELLOW_X_RIGHT"] if is_yellow else self.constant["FIELD_GOAL_BLUE_X_RIGHT"]
+        top_circle = self.constant["FIELD_GOAL_YELLOW_TOP_CIRCLE"] if is_yellow\
+            else self.constant["FIELD_GOAL_BLUE_TOP_CIRCLE"]
+        bot_circle = self.constant["FIELD_GOAL_YELLOW_BOTTOM_CIRCLE"] if is_yellow\
+            else self.constant["FIELD_GOAL_BLUE_BOTTOM_CIRCLE"]
+        if isInsideSquare(position, self.constant["FIELD_GOAL_Y_TOP"], self.constant["FIELD_GOAL_Y_BOTTOM"],
+                          x_left, x_right):
+            if isInsideCircle(position, top_circle, self.constant["FIELD_GOAL_RADIUS"]):
+                return True
+            elif isInsideCircle(position, bot_circle, self.constant["FIELD_GOAL_RADIUS"]):
+                return True
+            return False
+        else:
+            return False
+
+    def is_outside_goal_area(self, position, is_yellow):
+        return not self.is_inside_goal_area(position, is_yellow)
+
+    def stay_inside_goal_area(self, position, is_yellow):
+        # TODO Not tested: stayInsideGoalArea
+        if self.is_inside_goal_area(position, is_yellow):
+            return Position(position.x, position.y)
+        else:
+            x_left = self.constant["FIELD_GOAL_YELLOW_X_LEFT"] if is_yellow else self.constant["FIELD_GOAL_BLUE_X_LEFT"]
+            x_right = self.constant["FIELD_GOAL_YELLOW_X_RIGHT"] if is_yellow\
+                else self.constant["FIELD_GOAL_BLUE_X_RIGHT"]
+            position = stayInsideSquare(position, self.constant["FIELD_GOAL_Y_TOP"],
+                                        self.constant["FIELD_GOAL_Y_BOTTOM"], x_left, x_right)
+            if isInsideSquare(position, self.constant["FIELD_GOAL_Y_TOP"], self.constant["FIELD_GOAL_Y_BOTTOM"],
+                              x_left, x_right):
+                return position
+            else:
+                circle_top = self.constant["FIELD_GOAL_YELLOW_TOP_CIRCLE"] if is_yellow\
+                    else self.constant["FIELD_GOAL_BLUE_TOP_CIRCLE"]
+                circle_bot = self.constant["FIELD_GOAL_YELLOW_BOTTOM_CIRCLE"] if is_yellow\
+                    else self.constant["FIELD_GOAL_BLUE_BOTTOM_CIRCLE"]
+                dst_top = get_distance(circle_top, position)
+                dst_bot = get_distance(circle_bot, position)
+
+                if dst_top >= dst_bot:
+                    return stayInsideCircle(position, circle_top, self.constant["FIELD_GOAL_RADIUS"])
+                else:
+                    return stayInsideCircle(position, circle_bot, self.constant["FIELD_GOAL_RADIUS"])
+
+    def stay_outside_goal_area(self, position, is_yellow):
+        # TODO Not tested: stayOutsideGoalArea
+        if self.is_outside_goal_area(position, is_yellow):
+            return Position(position.x, position.y)
+        else:
+            x_left = self.constant["FIELD_GOAL_YELLOW_X_LEFT"] if is_yellow else self.constant["FIELD_GOAL_BLUE_X_LEFT"]
+            x_right = self.constant["FIELD_GOAL_YELLOW_X_RIGHT"] if is_yellow\
+                else self.constant["FIELD_GOAL_BLUE_X_RIGHT"]
+            y_top = self.constant["FIELD_GOAL_SEGMENT"] / 2
+            y_bottom = (self.constant["FIELD_GOAL_SEGMENT"] / 2) * -1
+            circle_top = self.constant["FIELD_GOAL_YELLOW_TOP_CIRCLE"] if is_yellow\
+                else self.constant["FIELD_GOAL_BLUE_TOP_CIRCLE"]
+            circle_bot = self.constant["FIELD_GOAL_YELLOW_BOTTOM_CIRCLE"] if is_yellow\
+                else self.constant["FIELD_GOAL_BLUE_BOTTOM_CIRCLE"]
+            position = stayOutsideSquare(position, y_top, y_bottom, x_left, x_right)
+            position = stayOutsideCircle(position, circle_top, self.constant["FIELD_GOAL_RADIUS"])
+            position = stayOutsideCircle(position, circle_bot, self.constant["FIELD_GOAL_RADIUS"])
+            return Position(position.x, position.y)
 
 
 simulation = {
@@ -44,7 +112,7 @@ simulation = {
 
     # Field Positions
     "FIELD_GOAL_BLUE_TOP_CIRCLE": Position(-4500, 250),  # FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2)
-    "FIELD_GOAL_BLUE_BOTTOM_CIRCLE": Position( -4500,-250),  # FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2 * -1)
+    "FIELD_GOAL_BLUE_BOTTOM_CIRCLE": Position(-4500, -250),  # FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2 * -1)
     "FIELD_GOAL_YELLOW_TOP_CIRCLE": Position(4500, 250),  # FIELD_X_RIGHT, FIELD_GOAL_SEGMENT / 2)
     "FIELD_GOAL_YELLOW_BOTTOM_CIRCLE": Position(4500, -250),  # FIELD_X_RIGHT, FIELD_GOAL_SEGMENT / 2 * -1)
 

@@ -5,8 +5,6 @@ import numpy as np
 
 from ..Util.Position import Position
 from ..Util.Pose import Pose
-from .constant import FIELD_X_RIGHT, FIELD_X_LEFT, FIELD_Y_TOP,\
-                      FIELD_Y_BOTTOM, KICK_MAX_SPD
 
 __author__ = 'RoboCupULaval'
 
@@ -141,8 +139,8 @@ def det(pos_a: Position, pos_b: Position) -> float:
         [a.x  a.y]
         [b.x  b.y]
         Args:
-            a: La première position.
-            b: La seconde position.
+            pos_a: La première position.
+            pos_b: La seconde position.
         Returns
             Le déterminant.
     """
@@ -210,8 +208,10 @@ def get_lines_intersection(position_a1: Position, position_a2: Position,
 
     scale = np.linalg.solve(a, b)
 
-    intersection1 = np.matrix([[position_a1.x], [position_a1.y]]) + scale.item((0, 0))*np.matrix([[delta_x_a], [delta_y_a]])
-    intersection2 = np.matrix([[position_b1.x], [position_b1.y]]) + scale.item((1, 0))*np.matrix([[delta_x_b], [delta_y_b]])
+    intersection1 = np.matrix([[position_a1.x], [position_a1.y]]) + scale.item((0, 0))*np.matrix([[delta_x_a],
+                                                                                                  [delta_y_a]])
+    intersection2 = np.matrix([[position_b1.x], [position_b1.y]]) + scale.item((1, 0))*np.matrix([[delta_x_b],
+                                                                                                  [delta_y_b]])
 
     assert np.allclose(intersection1, intersection2)
 
