@@ -22,6 +22,7 @@ POSITION_DEADZONE = 90
 ORIENTATION_DEADZONE = 0.05
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
+COMMAND_DELAY = 0.5
 
 
 class GoKick(Tactic):
@@ -50,6 +51,7 @@ class GoKick(Tactic):
         self.move_action.status_flag = Flags.SUCCESS
         self.last_ball_position = self.game_state.get_ball_position()
         self.charge_time = 0
+        self.last_time = time.time()
 
     def get_behind_ball(self):
         print('GET_BEHIND_BALL')
@@ -75,13 +77,16 @@ class GoKick(Tactic):
         #theta = math.atan2(vec_dir.y, vec_dir.x)
         if math.fabs(get_angle(player_pose.position, self.target.position)) - player_pose.orientation < ORIENTATION_DEADZONE:
             self.next_state = self.prepare_grab
+            self.last_time = time.time()
         # TODO angle check
         destination = Pose(player_pose.position, get_angle(player_pose.position, self.target.position))
         return GoToPositionNoPathfinder(self.game_state, self.player_id, destination)
 
     def prepare_grab(self):
-        print('PREPARE GRAB')
-        self.next_state = self.kiss_ball
+        now = time.time()
+        if now - self.last_time < COMMAND_DELAY:
+            DebugInterface().add_log(1, "Dribbler on!")
+            self.next_state = self.kiss_ball
         other_args = {"dribbler_on": 2}
         return AllStar(self.game_state, self.player_id, **other_args)
 
@@ -98,21 +103,27 @@ class GoKick(Tactic):
                                         Pose(ball_pst, player_pose.orientation))
 
     def kick_charge(self):
-        if self.charge_time == 0:
-            self.charge_time = time.time()
 
-        if time.time() - self.charge_time > 4:
+        if time.time() - self.last_time > COMMAND_DELAY*6:
+            DebugInterface().add_log(1, "Kick charge!")
+            self.last_time = time.time()
             self.next_state = self.kick
         other_args = {"charge_kick": True, "dribbler_on": 1}
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def kick(self):
-        print('KICK!')
-        self.next_state = self.stop_dribbler
+        now = time.time()
+        if now - self.last_time > COMMAND_DELAY:
+            DebugInterface().add_log(1, "Kick!")
+            self.last_time = time.time()
+            self.next_state = self.stop_dribbler
         return Kick(self.game_state, self.player_id, 7)
 
     def stop_dribbler(self):
-        self.next_state = self.halt
+        now = time.time()
+        if now - self.last_time > COMMAND_DELAY:
+            DebugInterface().add_log(1, "Dribbler off!")
+            self.next_state = self.halt
         other_args = {"pose_goal": self.game_state.get_player_pose(self.player_id), "dribbler_on": 1}
         return AllStar(self.game_state, self.player_id, **other_args)
 

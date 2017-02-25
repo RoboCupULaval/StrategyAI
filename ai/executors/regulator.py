@@ -251,15 +251,9 @@ class PI(object):
         elif v_theta_target < -self.constants["theta-max-acc"]:
             v_theta_target = -self.constants["theta-max-acc"]
 
-        # print('Error : ', delta)
         if delta <= self.position_dead_zone:
             v_target_x = 0
             v_target_y = 0
-        #if math.fabs(delta_theta) <= self.rotation_dead_zone:
-            #v_theta_target = 0
-
-        DebugInterface().add_log(1, "Erreur -- commande en orientation: {} -- {}".format(delta_theta, v_theta_target))
-        DebugInterface().add_log(1, "Consigne -- actuel en orientation: {} -- {}".format(r_theta, t_theta))
 
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
 
