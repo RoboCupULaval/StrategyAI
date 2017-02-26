@@ -15,6 +15,8 @@ import numpy as np
 
 
 ROBOT_NEAR_FORCE = 10000
+THRESHOLD_LAST_TARGET = 100
+
 
 def sign(x):
     if x > 0:
@@ -46,12 +48,13 @@ class PositionRegulator(Executor):
                         update_pid_and_return_speed_command(cmd,
                                                             active_player,
                                                             delta_t,
-                                                            idx=robot_idx)
+                                                            idx=robot_idx,
+                                                            robot_speed=cmd.robot_speed)
                 else:
                     cmd.speed = self.regulators[robot_idx].\
                         rotate_around(cmd, active_player, delta_t)
 
-        self._potential_field()
+        #self._potential_field()
 
     def _potential_field(self):
         current_ai_c = self.ws.play_state.current_ai_commands
@@ -140,7 +143,6 @@ class PID(object):
         self.ki_sum = 0
         self.last_err = 0
 
-
     def update(self, target, value, delta_t):
         error = target - value
         cmd = self.kp * error
@@ -172,32 +174,41 @@ class PI(object):
         self.ki = self.constants["ki"]
         self.kd = self.constants["kd"]
         self.thetaKp = self.constants["thetaKp"]
+        self.thetaKd = self.constants["thetaKd"]
         self.thetaKi = self.constants["thetaKi"]
         # non-constant
         self.lastErr = 0
+        self.lastErr_theta = 0
         self.kiSum = 0
         self.vit_min = 0.05
         self.thetaKiSum = 0
-        self.last_target = None
+        self.last_target = 0
         self.position_dead_zone = self.constants["position_dead_zone"] #0.03
         self.rotation_dead_zone = 0.01 * math.pi
-        self.last_theta_target = None
+        self.last_theta_target = 0
 
     def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=0.2):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
         assert isinstance(cmd, AICommand), "La consigne doit etre une Pose dans le PI"
+        if robot_speed:
+            self.vit_max = robot_speed
+        else:
+            self.vit_max = self.constants["vit_max"]
+
         self.paths[idx] = cmd.path
-        # print("delta t (regulator)   :   ", delta_t)
         delta_t = 0.03
 
         r_x, r_y, r_theta = cmd.pose_goal.position.x, cmd.pose_goal.position.y, cmd.pose_goal.orientation
         t_x, t_y, t_theta = active_player.pose.position.x, active_player.pose.position.y, active_player.pose.orientation
 
+        DebugInterface().add_log(1, "Robot angular speed : {} rad/s".format(active_player.velocity[2]))
+
         target = math.sqrt(r_x**2 + r_y**2)
 
         # always true?
-        if target != self.last_target:
+        if abs(target - self.last_target) > THRESHOLD_LAST_TARGET:
             self.kiSum = 0
+        self.last_target = target
 
         v_x = active_player.velocity[0]
         v_y = active_player.velocity[1]
@@ -211,13 +222,12 @@ class PI(object):
         if abs(delta_theta) > math.pi:
             delta_theta = (2 * math.pi - abs(delta_theta)) * -sign(delta_theta)
 
-
         delta_x, delta_y = _correct_for_referential_frame(delta_x, delta_y, -active_player.pose.orientation)
 
         delta = math.sqrt(delta_x**2 + delta_y**2)
         angle = math.atan2(delta_y, delta_x)
 
-        self.vit_min = 0.06
+        self.vit_min = 0.03
         if delta <= self.position_dead_zone:
             self.vit_min = 0
             delta = 0
@@ -227,8 +237,6 @@ class PI(object):
         v_target += math.fabs(self.kiSum)
         v_target += self.kd * ((delta - self.lastErr) / delta_t)
         self.lastErr = delta
-
-        #print('kiSum', self.kiSum)
 
         v_max = math.fabs(v_current) + self.accel_max * delta_t
         v_max = min(self.vit_max, v_max)
@@ -244,13 +252,15 @@ class PI(object):
         v_target_x = v_target * math.cos(decoupled_angle)
         v_target_y = v_target * math.sin(decoupled_angle)
 
-
-        if r_theta != self.last_theta_target:
-            self.kiSum = 0
-
-
+        if abs(r_theta - self.last_theta_target) > THRESHOLD_LAST_TARGET/100:
+            self.thetaKiSum = 0
+        self.last_theta_target = r_theta
 
         v_theta_target = self.thetaKp * delta_theta
+        v_theta_target += self.thetaKd * ((delta_theta - self.lastErr_theta) / delta_t)
+        self.lastErr_theta = delta_theta
+        # if abs(v_theta_target) < 0.1:
+        #     v_theta_target = sign(v_theta_target) * 0.1
         self.thetaKiSum += delta_theta * self.thetaKi * delta_t
         if self.thetaKiSum > self.constants["theta-max-acc"]:
             self.thetaKiSum = self.constants["theta-max-acc"]
@@ -262,16 +272,13 @@ class PI(object):
         elif v_theta_target < -self.constants["theta-max-acc"]:
             v_theta_target = -self.constants["theta-max-acc"]
 
-        # print('Error : ', delta)
         if delta <= self.position_dead_zone:
             v_target_x = 0
             v_target_y = 0
-        #if math.fabs(delta_theta) <= self.rotation_dead_zone:
-            #v_theta_target = 0
-
-        DebugInterface().add_log(1, "Erreur -- commande en orientation: {} -- {}".format(delta_theta, v_theta_target))
-        DebugInterface().add_log(1, "Consigne -- actuel en orientation: {} -- {}".format(r_theta, t_theta))
-
+        if abs(active_player.pose.orientation - r_theta) < 0.005:
+            v_theta_target = 0
+        DebugInterface().add_log(1, "Accumulateur x/y -- t: {} -- {}".format(self.kiSum, self.thetaKiSum))
+        DebugInterface().add_log(1, "commands -- x: {} -- y{} -- th{}".format(v_target_x, v_target_y, v_theta_target))
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
 
     def rotate_around(self, command, active_player, delta_t):
@@ -298,6 +305,7 @@ class PI(object):
         vx, vy = _correct_for_referential_frame(vx, vy, -active_player.pose.orientation)
 
         #print(vx, "       ", vy)
+
         return Pose(Position(vx/1000, vy/1000), vtheta)
 
 def _correct_for_referential_frame(x, y, orientation):
@@ -330,16 +338,17 @@ def _set_constants(simulation_setting):
         return {"ROBOT_NEAR_FORCE": 1000,
                 "ROBOT_VELOCITY_MAX": 4,
                 "ROBOT_ACC_MAX": 2,
-                "accel_max": 0.5,
+                "accel_max": 0.7,
                 "vit_max": 0.5,
                 "vit_min": 0.05,
-                "xyKp": 0.7,
-                "ki": 0.007,
-                "kd": 0.02,
-                "thetaKp": 0.6,
-                "thetaKi": 0.2,
-                "theta-max-acc": 2*math.pi,
-                "position_dead_zone": 0.03
+                "xyKp": 1,
+                "ki": 0.05,
+                "kd": 0.4,
+                "thetaKp": 1,
+                "thetaKd": 0.3,
+                "thetaKi": 0.7,
+                "theta-max-acc": 0.5 * math.pi,
+                "position_dead_zone": 0.04
                 }
 
 
