@@ -81,7 +81,7 @@ class GoBehind(Action):
             vecteur_perp = np.cross(vecteur_position1_2_position2, vecteur_vertical)
             vecteur_perp /= np.linalg.norm(vecteur_perp)
 
-            if np.dot(vecteur_perp, vecteur_player_2_position1) < 0:
+            if np.dot(vecteur_perp, vecteur_player_2_position1) > 0:
                 vecteur_perp = -vecteur_perp
 
             position_intermediaire_x = x + vecteur_perp[0] * self.rayon_avoid

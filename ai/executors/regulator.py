@@ -367,7 +367,7 @@ def _set_constants(simulation_setting):
                 "ki": 0.05,
                 "kd": 0.4,
                 "thetaKp": 1,
-                "thetaKd": 0.3,
+                "thetaKd": 0,
                 "thetaKi": 0.7,
                 "theta-max-acc": 0.5 * math.pi,
                 "position_dead_zone": 0.04
