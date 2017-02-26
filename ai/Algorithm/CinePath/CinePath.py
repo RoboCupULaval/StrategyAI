@@ -14,10 +14,10 @@ class CinePath:
         self.__max_acc = 2000.0 * self.__ratio
 
     def create_circle_with_tzone(self, bot_player, t_zone):
-        p1 = bot_player.velocity._getlength() * t_zone - 0.5 * self.__max_acc * t_zone ** 2
-        p2 = bot_player.velocity._getlength() * t_zone + 0.5 * self.__max_acc * t_zone ** 2
+        speed = (bot_player.velocity[0]**2 + bot_player.velocity[1]**2)**0.5
+        p1 = speed * t_zone - 0.5 * self.__max_acc * t_zone ** 2
+        p2 = speed * t_zone + 0.5 * self.__max_acc * t_zone ** 2
         p2_max_speed = self.__max_speed * t_zone
-        print(t_zone, p2, p2_max_speed)
         p2 = min([p2, p2_max_speed])
         rayon = (p2 - p1) / 2
         x = bot_player.pose.position.x + (p1 + rayon) * cos(bot_player.velocity.direction)
