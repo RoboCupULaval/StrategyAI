@@ -25,7 +25,7 @@ def isInsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
     return True
 
 
-def isInsideCircle(position, center, radius):
+def is_inside_circle(position, center, radius):
     # Parameters assertions
     assert(isinstance(position, Position))
     assert(isinstance(center, Position))
@@ -43,7 +43,7 @@ def isOutsideSquare(position, X_TOP, X_BOTTOM, Y_LEFT, Y_RIGHT):
 
 
 def isOutsideCircle(position, center, radius):
-    return not isInsideCircle(position, center, radius)
+    return not is_inside_circle(position, center, radius)
 
 
 # Reform
@@ -78,7 +78,7 @@ def stayInsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
 
 def stayInsideCircle(position, center, radius):
     # Parameters assertions
-    if isInsideCircle(position, center, radius):
+    if is_inside_circle(position, center, radius):
         return Position(position.x, position.y)
     else:
         pos_angle = get_angle(center, position)

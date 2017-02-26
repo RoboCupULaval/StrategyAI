@@ -327,11 +327,11 @@ def get_first_to_arrive(distance1: float,
         return 1 if time1 < time2 else 2
 
 
-def isFacingPointAndTarget(player_position: Position,
-                           point_position: Position,
-                           target_position:
+def is_facing_point_and_target(player_position: Position,
+                               point_position: Position,
+                               target_position:
                                Position,
-                           tolerated_angle: float) -> bool:
+                               tolerated_angle: float) -> bool:
     """
         Détermine si l'angle entre le joueur et le point est suffisamment proche
         de celui du point à la cible. En d'autres mots, lorsqu'utilisé avec la balle

@@ -30,9 +30,9 @@ class Field:
             else self.constant["FIELD_GOAL_BLUE_BOTTOM_CIRCLE"]
         if isInsideSquare(position, self.constant["FIELD_GOAL_Y_TOP"], self.constant["FIELD_GOAL_Y_BOTTOM"],
                           x_left, x_right):
-            if isInsideCircle(position, top_circle, self.constant["FIELD_GOAL_RADIUS"]):
+            if is_inside_circle(position, top_circle, self.constant["FIELD_GOAL_RADIUS"]):
                 return True
-            elif isInsideCircle(position, bot_circle, self.constant["FIELD_GOAL_RADIUS"]):
+            elif is_inside_circle(position, bot_circle, self.constant["FIELD_GOAL_RADIUS"]):
                 return True
             return False
         else:
@@ -150,7 +150,8 @@ simulation = {
     "DEFAULT_MIN_SPEED": 0.65,
 
     # Kick tactic
-    "KICK_BALL_DISTANCE": 80
+    "KICK_BALL_DISTANCE": 80,
+    "KISS_BALL_DISTANCE": 80
 }
 
 real_life = {
@@ -203,7 +204,7 @@ real_life = {
     "ANGLE_TO_GRAB_BALL": 1,  # in radians; must be large in case ball moves fast
     "RADIUS_TO_GRAB_BALL": 120,  # ROBOT_RADIUS + 30
     "ANGLE_TO_HALT": 0.09,
-    "RADIUS_TO_HALT": 102,  # ROBOT_RADIUS + BALL_RADIUS
+    "RADIUS_TO_HALT": 50,  # ROBOT_RADIUS + BALL_RADIUS
 
     # Orientation abs_tol
     "ORIENTATION_ABSOLUTE_TOLERANCE": 1e-4,
@@ -214,5 +215,6 @@ real_life = {
     "DEFAULT_MIN_SPEED": 0.65,
 
     # Kick tactic
-    "KICK_BALL_DISTANCE": 80
+    "KICK_BALL_DISTANCE": 130,
+    "KISS_BALL_DISTANCE": 100
 }
