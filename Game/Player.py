@@ -22,7 +22,8 @@ class Player:
         observation_model = [[1, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0]]
 
         process_covariance = 10 ** (1) * np.eye(6)
-        observation_covariance = np.eye(3) * 10 ** (0)
+        observation_covariance = np.eye(3) * 10 ** (-4)
+        #observation_covariance[2, 2] /= 10000
 
         initial_state_estimation = [self.pose.position.x, self.pose.position.y, 0, 0, self.pose.orientation, 0]
         initial_state_covariance = np.eye(6) * 1000
@@ -55,7 +56,7 @@ class Player:
         output = self.kf.filter(self.observations, self.cmd, self.transition_model)
         new_pose.position.x = float(output[0])
         new_pose.position.y = float(output[1])
-        #self.velocity = [output[2], output[3], output[5]]
+        self.velocity = [output[2], output[3], output[5]]
         #print(self.velocity)
         # if np.linalg.norm(self.velocity) != 0:
         #     print(self.velocity)
@@ -64,12 +65,12 @@ class Player:
         # old_pose = self.pose
         #delta_position = new_pose.position - old_pose.position
 
-        try:
-            self.velocity[0] = (new_pose.position.x - old_pose.position.x) / delta / 1000
-            self.velocity[1] = (new_pose.position.y - old_pose.position.y) / delta / 1000
-            self.velocity[2] = 0
-        except ZeroDivisionError:
-            self.velocity = [0, 0, 0]
+        # try:
+        #     self.velocity[0] = (new_pose.position.x - old_pose.position.x) / delta / 1000
+        #     self.velocity[1] = (new_pose.position.y - old_pose.position.y) / delta / 1000
+        #     self.velocity[2] = 0
+        # except ZeroDivisionError:
+        #     self.velocity = [0, 0, 0]
         # if self.id == 0 and not self.team.is_team_yellow():
         #     print(self.velocity)
         self.pose = new_pose

@@ -6,7 +6,7 @@ POSITION_DELTA_TOLERANCE_MAGNITUDE = 1e0
 
 class Position(object):
     """ Vector with [x, y, z] """
-    def __init__(self, x=0, y=0, z=0, abs_tol=POSITION_DELTA_TOLERANCE_MAGNITUDE, delta_t=0.015):
+    def __init__(self, x=0, y=0, z=0, abs_tol=POSITION_DELTA_TOLERANCE_MAGNITUDE, delta_t=0.03):
         assert(isinstance(x, (int, float))), 'x should be int or float.'
         assert(isinstance(y, (int, float))), 'y should be int or float.'
         assert(isinstance(z, (int, float))), 'z should be int or float.'
