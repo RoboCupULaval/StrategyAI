@@ -1,5 +1,8 @@
 # Under MIT licence, see LICENCE.txt
+import time
 
+from RULEngine.Debug.debug_interface import DebugInterface
+from ai.STA.Action.AllStar import AllStar
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GetBall import GetBall
@@ -8,13 +11,14 @@ from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
 
 from ai.Util.ball_possession import can_get_ball, has_ball
-from RULEngine.Util.geometry import get_distance
+from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS
 from RULEngine.Util.Pose import Pose
 
 __author__ = 'RoboCupULaval'
 
-POSITION_DEADZONE = POSITION_DEADZONE + BALL_RADIUS
+ANGLE_DEADZONE = 0.08
+COMMAND_DELAY = 1.5
 
 
 class GoGetBall(Tactic):
@@ -46,17 +50,30 @@ class GoGetBall(Tactic):
                                      get_player_pose(self.player_id))
         self.move_action.status_flag = Flags.SUCCESS
         self.last_ball_position = self.game_state.get_ball_position()
+        self.last_time = time.time()
 
     def get_behind_ball(self):
         self.status_flag = Flags.WIP
         dist = self._get_distance_from_ball()
+        angle = get_angle(self.game_state.get_player_pose(self.player_id).position, self.target.position)
 
-        if dist <= POSITION_DEADZONE:
-            self.next_state = self.grab_ball
+        if dist <= self.game_state.const["DISTANCE_BEHIND"]*1.5 and abs(self.game_state.get_player_pose(
+                self.player_id).orientation - angle) <= ANGLE_DEADZONE:
+            self.last_time = time.time()
+            self.next_state = self.start_dribbler
         else:
+            DebugInterface().add_log(4, "Distance from ball: {}".format(dist))
             self.next_state = self.get_behind_ball
         return GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position(), self.target.position,
-                        DISTANCE_BEHIND)
+                        self.game_state.const["DISTANCE_BEHIND"])
+
+    def start_dribbler(self):
+        now = time.time()
+        if now - self.last_time > COMMAND_DELAY:
+            DebugInterface().add_log(5, "Dribbler on!")
+            self.next_state = self.grab_ball
+        other_args = {"dribbler_on": 2}
+        return AllStar(self.game_state, self.player_id, **other_args)
 
     def grab_ball(self):
         if has_ball(self.game_state, self.player_id):

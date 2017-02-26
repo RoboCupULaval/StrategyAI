@@ -4,6 +4,7 @@ import time
 
 from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS, ROBOT_RADIUS
 from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.geometry import get_distance
@@ -19,10 +20,10 @@ from ai.STA.Action.GoBehind import GoBehind
 __author__ = 'RoboCupULaval'
 
 POSITION_DEADZONE = 40
-ORIENTATION_DEADZONE = 0.05
+ORIENTATION_DEADZONE = 0.2
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
-COMMAND_DELAY = 0.5
+COMMAND_DELAY = 1.5
 
 
 class GoKick(Tactic):
@@ -58,23 +59,44 @@ class GoKick(Tactic):
         player_pose = self.game_state.get_player_pose(self.player_id)
         distance_from_ball = get_distance(ball_position, player_pose.position)
 
-        if distance_from_ball < self.game_state.const["KICK_BALL_DISTANCE"] + 35:
-            DebugInterface().add_log(1, "Behind ball OK!")
-            self.next_state = self.orient
+        if distance_from_ball < self.game_state.const["KICK_BALL_DISTANCE"]*3.5:
+            DebugInterface().add_log(5, "Behind ball OK!")
+            self.next_state = self.get_close_ball
         else:
-            DebugInterface().add_log(1, "distance from ball: {}".format(distance_from_ball))
+            DebugInterface().add_log(5, "distance from ball: {}".format(distance_from_ball))
             self.next_state = self.get_behind_ball
 
         self.move_action = GoBehind(self.game_state, self.player_id, ball_position, self.target.position,
-                                    self.game_state.const["KICK_BALL_DISTANCE"])
+                                    self.game_state.const["KICK_BALL_DISTANCE"]*2, robot_speed=0.3)
+        return self.move_action
+
+    def get_close_ball(self):
+        ball_position = self.game_state.get_ball_position()
+        player_pose = self.game_state.get_player_pose(self.player_id)
+        distance_from_ball = get_distance(ball_position, player_pose.position)
+
+        if distance_from_ball < self.game_state.const["KICK_BALL_DISTANCE"]*1.2:
+            DebugInterface().add_log(5, "Close to ball, OK!")
+            self.next_state = self.orient
+        else:
+            DebugInterface().add_log(5, "distance from ball: {}".format(distance_from_ball))
+            self.next_state = self.get_close_ball
+
+        self.move_action = GoBehind(self.game_state, self.player_id, ball_position, self.target.position,
+                                    self.game_state.const["KICK_BALL_DISTANCE"], robot_speed=0.08)
+
         return self.move_action
 
     def orient(self):
         player_pose = self.game_state.get_player_pose(self.player_id)
-        if math.fabs(
-                get_angle(player_pose.position, self.target.position)) - player_pose.orientation < ORIENTATION_DEADZONE:
+        angle = get_angle(player_pose.position, self.target.position)
+        orientation_erreur = angle - player_pose.orientation
+        if math.fabs(orientation_erreur < ORIENTATION_DEADZONE):
             self.next_state = self.prepare_grab
             self.last_time = time.time()
+        else:
+            DebugInterface(4, "Erreur d'orientation: {}".format(orientation_erreur))
+            self.next_state = self.orient
         # TODO angle check
         destination = Pose(player_pose.position, get_angle(player_pose.position, self.target.position))
         return GoToPositionNoPathfinder(self.game_state, self.player_id, destination)
@@ -82,27 +104,35 @@ class GoKick(Tactic):
     def prepare_grab(self):
         now = time.time()
         if now - self.last_time < COMMAND_DELAY:
-            DebugInterface().add_log(1, "Dribbler on!")
+            DebugInterface().add_log(5, "Dribbler on!")
             self.next_state = self.kiss_ball
         other_args = {"dribbler_on":2}
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def kiss_ball(self):
 
-        if self._get_distance_from_ball() <= DISTANCE_TO_KICK_REAL:
-            self.next_state = self.kick_charge
-
         # get a point between you and the ball to approach
-        ball_pst = self.game_state.get_ball_position()
+        ball_position = self.game_state.get_ball_position()
         player_pose = self.game_state.get_player_pose(self.player_id)
+        angle = get_angle(player_pose.position, self.target.position)
+        move_vec = ball_position + Position(self.game_state.const["ROBOT_RADIUS"] * math.cos(angle),
+                                            self.game_state.const["ROBOT_RADIUS"] * math.sin(angle))
+        target_pose = Pose(move_vec, angle)
 
-        return GoToPositionNoPathfinder(self.game_state, self.player_id,
-                                        Pose(ball_pst, player_pose.orientation))
+        distance = get_distance(target_pose.position, player_pose.position)
+        if distance <= self.game_state.const["KISS_BALL_DISTANCE"]:
+            DebugInterface().add_log(5, "Ball grabbed!")
+            self.next_state = self.kick_charge
+        else:
+            DebugInterface().add_log(5, "Distance from kiss: {}".format(distance))
+            self.next_state = self.kiss_ball
+
+        return GoToPositionNoPathfinder(self.game_state, self.player_id, target_pose)
 
     def kick_charge(self):
 
         if time.time() - self.last_time > COMMAND_DELAY * 6:
-            DebugInterface().add_log(1, "Kick charge!")
+            DebugInterface().add_log(5, "Kick charge!")
             self.last_time = time.time()
             self.next_state = self.kick
         other_args = {"charge_kick":True, "dribbler_on":1}
@@ -111,7 +141,7 @@ class GoKick(Tactic):
     def kick(self):
         now = time.time()
         if now - self.last_time > COMMAND_DELAY:
-            DebugInterface().add_log(1, "Kick!")
+            DebugInterface().add_log(5, "Kick!")
             self.last_time = time.time()
             self.next_state = self.stop_dribbler
         return Kick(self.game_state, self.player_id, 7)
@@ -119,7 +149,7 @@ class GoKick(Tactic):
     def stop_dribbler(self):
         now = time.time()
         if now - self.last_time > COMMAND_DELAY:
-            DebugInterface().add_log(1, "Dribbler off!")
+            DebugInterface().add_log(5, "Dribbler off!")
             self.next_state = self.halt
         other_args = {"pose_goal":self.game_state.get_player_pose(self.player_id), "dribbler_on":1}
         return AllStar(self.game_state, self.player_id, **other_args)

@@ -20,6 +20,7 @@ class AICommand(object):
         self.charge_kick = other_args.get("charge_kick", False)
         self.pose_goal = other_args.get("pose_goal", Pose())
         self.speed = Pose()
+        self.robot_speed = None
 
         # this is for rotate around movement
         self.rotate_around_flag = other_args.get("rotate_around_flag", False)

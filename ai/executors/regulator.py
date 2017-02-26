@@ -15,6 +15,8 @@ import numpy as np
 
 
 ROBOT_NEAR_FORCE = 10000
+THRESHOLD_LAST_TARGET = 100
+
 
 def sign(x):
     if x > 0:
@@ -46,7 +48,8 @@ class PositionRegulator(Executor):
                         update_pid_and_return_speed_command(cmd,
                                                             active_player,
                                                             delta_t,
-                                                            idx=robot_idx)
+                                                            idx=robot_idx,
+                                                            robot_speed=cmd.robot_speed)
                 else:
                     cmd.speed = self.regulators[robot_idx].\
                         rotate_around(cmd, active_player, delta_t)
@@ -140,7 +143,6 @@ class PID(object):
         self.ki_sum = 0
         self.last_err = 0
 
-
     def update(self, target, value, delta_t):
         error = target - value
         cmd = self.kp * error
@@ -178,16 +180,20 @@ class PI(object):
         self.kiSum = 0
         self.vit_min = 0.05
         self.thetaKiSum = 0
-        self.last_target = None
+        self.last_target = 0
         self.position_dead_zone = self.constants["position_dead_zone"] #0.03
         self.rotation_dead_zone = 0.01 * math.pi
-        self.last_theta_target = None
+        self.last_theta_target = 0
 
-    def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=0.2):
+    def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=0.5):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
         assert isinstance(cmd, AICommand), "La consigne doit etre une Pose dans le PI"
+        if robot_speed:
+            self.vit_max = robot_speed
+        else:
+            self.vit_max = self.constants["vit_max"]
+
         self.paths[idx] = cmd.path
-        # print("delta t (regulator)   :   ", delta_t)
         delta_t = 0.03
 
         r_x, r_y, r_theta = cmd.pose_goal.position.x, cmd.pose_goal.position.y, cmd.pose_goal.orientation
@@ -196,8 +202,9 @@ class PI(object):
         target = math.sqrt(r_x**2 + r_y**2)
 
         # always true?
-        if target != self.last_target:
+        if abs(target - self.last_target) > THRESHOLD_LAST_TARGET:
             self.kiSum = 0
+        self.last_target = target
 
         v_x = active_player.velocity[0]
         v_y = active_player.velocity[1]
@@ -210,7 +217,6 @@ class PI(object):
         delta_theta = (r_theta - t_theta)
         if abs(delta_theta) > math.pi:
             delta_theta = (2 * math.pi - abs(delta_theta)) * -sign(delta_theta)
-
 
         delta_x, delta_y = _correct_for_referential_frame(delta_x, delta_y, -active_player.pose.orientation)
 
@@ -228,8 +234,6 @@ class PI(object):
         v_target += self.kd * ((delta - self.lastErr) / delta_t)
         self.lastErr = delta
 
-        #print('kiSum', self.kiSum)
-
         v_max = math.fabs(v_current) + self.accel_max * delta_t
         v_max = min(self.vit_max, v_max)
         v_target = max(self.vit_min, min(v_max, v_target))
@@ -244,11 +248,9 @@ class PI(object):
         v_target_x = v_target * math.cos(decoupled_angle)
         v_target_y = v_target * math.sin(decoupled_angle)
 
-
-        if r_theta != self.last_theta_target:
-            self.kiSum = 0
-
-
+        if abs(r_theta - self.last_theta_target) > THRESHOLD_LAST_TARGET/100:
+            self.thetaKiSum = 0
+        self.last_theta_target = r_theta
 
         v_theta_target = self.thetaKp * delta_theta
         self.thetaKiSum += delta_theta * self.thetaKi * delta_t
@@ -266,6 +268,7 @@ class PI(object):
             v_target_x = 0
             v_target_y = 0
 
+        DebugInterface().add_log(1, "Accumulateur x/y -- t: {} -- {}".format(self.kiSum, self.thetaKiSum))
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
 
     def rotate_around(self, command, active_player, delta_t):
@@ -331,7 +334,7 @@ def _set_constants(simulation_setting):
                 "ki": 0.007,
                 "kd": 0.02,
                 "thetaKp": 0.6,
-                "thetaKi": 0.2,
+                "thetaKi": 0.6,
                 "theta-max-acc": 2*math.pi,
                 "position_dead_zone": 0.03
                 }
