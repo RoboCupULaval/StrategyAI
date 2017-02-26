@@ -41,7 +41,7 @@ class GoBehind(Action):
         self.player_id = p_player_id
         self.position1 = p_position1
         self.position2 = p_position2
-        self.distance_behind = p_distance_behind
+        self.distance_behind = 300
         self.pathfind = pathfinding
         self.rayon_avoid = 300 #(mm)
 
@@ -61,18 +61,20 @@ class GoBehind(Action):
         player_x = self.p_game_state.game.friends.players[self.player_id].pose.position.x
         player_y = self.p_game_state.game.friends.players[self.player_id].pose.position.y
 
-        norm_player_2_position1 = math.sqrt((player_x - self.position1.x)**2+(player_y - self.position1.y)**2)
-        norm_player_2_destination = math.sqrt((player_x-x) ** 2 + (player_y-y) ** 2)
+        norm_player_2_position2 = math.sqrt((player_x - self.position2.x)**2+(player_y - self.position2.y)**2)
+        norm_position1_2_position2 = math.sqrt((self.position1.x-self.position2.x) ** 2 + (self.position1.y-self.position2.y) ** 2)
 
-        if norm_player_2_position1 < norm_player_2_destination:
+        if norm_player_2_position2 < norm_position1_2_position2:
+            print(norm_player_2_position2)
+            print(norm_position1_2_position2)
             #on doit contourner l'objectif
 
-            vecteur_player_2_position1 = np.array([self.position1.x-player_x, self.position1.y-player_y, 0])
+            vecteur_player_2_position2= np.array([self.position2.x-player_x, self.position2.y-player_y, 0])
             vecteur_vertical = np.array([0, 0, 1])
-            vecteur_perp = np.cross(vecteur_player_2_position1, vecteur_vertical)
+            vecteur_perp = np.cross(vecteur_player_2_position2, vecteur_vertical)
             vecteur_perp /= np.linalg.norm(vecteur_perp)
-            position_intermediaire_x = self.position1.x + vecteur_perp[0] * self.rayon_avoid
-            position_intermediaire_y = self.position1.y + vecteur_perp[1] * self.rayon_avoid
+            position_intermediaire_x = x + vecteur_perp[0] * self.rayon_avoid
+            position_intermediaire_y = y + vecteur_perp[1] * self.rayon_avoid
             if math.sqrt((player_x-position_intermediaire_x)**2+(player_y-position_intermediaire_y)**2) < 50:
                 position_intermediaire_x += vecteur_perp[0] * self.rayon_avoid * 2
                 position_intermediaire_y += vecteur_perp[1] * self.rayon_avoid * 2
