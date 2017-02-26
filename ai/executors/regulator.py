@@ -14,7 +14,7 @@ from ai.states.world_state import WorldState
 import numpy as np
 
 
-ROBOT_NEAR_FORCE = 10000
+ROBOT_NEAR_FORCE = 2000
 THRESHOLD_LAST_TARGET = 100
 
 
@@ -39,6 +39,7 @@ class PositionRegulator(Executor):
     def exec(self):
         commands = self.ws.play_state.current_ai_commands
         delta_t = self.ws.game_state.game.delta_t
+        #self._potential_field()
         for cmd in commands.values():
             if cmd.command is AICommandType.MOVE:
                 robot_idx = cmd.robot_id
@@ -50,11 +51,13 @@ class PositionRegulator(Executor):
                                                             delta_t,
                                                             idx=robot_idx,
                                                             robot_speed=cmd.robot_speed)
+                    #cmd.speed.position.x = 0
+                    #cmd.speed.position.y = 0
                 else:
                     cmd.speed = self.regulators[robot_idx].\
                         rotate_around(cmd, active_player, delta_t)
 
-        #self._potential_field()
+
 
     def _potential_field(self):
         current_ai_c = self.ws.play_state.current_ai_commands
@@ -66,22 +69,26 @@ class PositionRegulator(Executor):
                 current_robot_pos = self.ws.game_state.get_player_position(ai_c.robot_id)
                 current_robot_orientation = self.ws.game_state.get_player_pose(ai_c.robot_id).orientation
                 current_robot_velocity = self.ws.game_state.game.friends.players[ai_c.robot_id].velocity
-
-                rmax = 1000 * math.sqrt(current_robot_velocity[0] ** 2 + current_robot_velocity[1] ** 2)
-
+                current_robot_velocity_norm = math.sqrt(current_robot_velocity[0] ** 2 + current_robot_velocity[1] ** 2)
+                current_robot_velocity_angle = math.atan2(current_robot_velocity[1],current_robot_velocity[0])
+                #rmax = 1000 * current_robot_velocity_norm
+                #rmax = max(rmax, 300)
+                #rmax = 300
                 for robot in self.ws.game_state.game.friends.players.values():
                     if robot.id != ai_c.robot_id:
                         dist = get_distance(current_robot_pos, robot.pose.position)
                         angle = math.atan2(current_robot_pos.y - robot.pose.position.y,
                                            current_robot_pos.x - robot.pose.position.x)
+                        projection = current_robot_velocity_norm * math.cos(current_robot_velocity_angle - angle)
+                        rmax = projection * 1000
                         if dist < rmax:
                             try:
-                                force[0] += 1 / dist * math.cos(angle)
+                                force[0] += 1 / dist * math.cos(angle) * projection
                             except:
                                 print("div 0 - 1")
                                 pass
                             try:
-                                force[1] += 1 / dist * math.sin(angle)
+                                force[1] += 1 / dist * math.sin(angle) * projection
                             except:
                                 print("div 0 - 2")
                                 pass
@@ -90,14 +97,17 @@ class PositionRegulator(Executor):
                     dist = get_distance(current_robot_pos, robot.pose.position)
                     angle = math.atan2(current_robot_pos.y - robot.pose.position.y,
                                        current_robot_pos.x - robot.pose.position.x)
+                    projection = -current_robot_velocity_norm * math.cos(current_robot_velocity_angle - angle)
+                    projection = max(0, projection)
+                    rmax = projection * 1000
                     if dist < rmax:
                         try:
-                            force[0] += 1 / dist * math.cos(angle)
+                            force[0] += 1 / dist * math.cos(angle) * projection
                         except:
                             print("div 0 - 3")
                             pass
                         try:
-                            force[1] += 1 / dist * math.sin(angle)
+                            force[1] += 1 / dist * math.sin(angle) * projection
                         except:
                             print("div 0 - 4")
                             pass
@@ -107,28 +117,40 @@ class PositionRegulator(Executor):
                                         current_robot_pos.x - ai_c.pose_goal.position.x)
 
                 dt = self.ws.game_state.game.delta_t
+                if dt <= 0:
+                    dt = 0.03
 
-                vx, vy = _correct_for_referential_frame(ai_c.speed.position.x, ai_c.speed.position.y, -current_robot_orientation)
+                #vx, vy = _correct_for_referential_frame(ai_c.speed.position.x, ai_c.speed.position.y, -current_robot_orientation)
 
-                a = (vx - current_robot_velocity[0]) / dt
-                b = (vy - current_robot_velocity[1]) / dt
-                acc_goal = math.sqrt(a ** 2 + b ** 2)
+                #a = (vx - current_robot_velocity[0]) / dt
+                #b = (vy - current_robot_velocity[1]) / dt
+                #acc_goal = math.sqrt(a ** 2 + b ** 2)
 
-                angle_acc_goal = math.atan2(b, a)
-                print(rmax, force[0], force[1])
+                #angle_acc_goal = math.atan2(b, a)
 
                 c = force[0] * ROBOT_NEAR_FORCE #+ (acc_goal * math.cos(angle_acc_goal))
                 d = force[1] * ROBOT_NEAR_FORCE #+ (acc_goal * math.cos(angle_acc_goal))
 
-                acc_robot_x = min(max(c, -self.accel_max), self.accel_max)
-                acc_robot_y = min(max(d, -self.accel_max), self.accel_max)
+                angle_acc = math.atan2(d, c)
+                norm_acc = math.sqrt(c ** 2 + d ** 2)
 
-                vit_robot_x = min(max(vx + acc_robot_x * dt, -self.vit_max),
-                                  self.vit_max)
-                vit_robot_y = min(max(vy + acc_robot_y * dt, -self.vit_max),
-                                  self.vit_max)
-                vit_robot_x, vit_robot_y = _correct_for_referential_frame(vit_robot_x, vit_robot_y, current_robot_orientation)
-                ai_c.speed.position = Position(vit_robot_x, vit_robot_y)
+                #norm_acc = min(norm_acc, 2)
+                #acc_robot_y = min(max(d, -self.accel_max), self.accel_max)
+
+                acc_robot_x = norm_acc * math.cos(angle_acc)
+                acc_robot_y = norm_acc * math.sin(angle_acc)
+                ai_c.pose_goal.position.x += acc_robot_x * 1
+                ai_c.pose_goal.position.y += acc_robot_y * 1
+
+                #vit_robot_x = min(max(vx + acc_robot_x * dt, -self.vit_max),
+                #                  self.vit_max)
+                #vit_robot_y = min(max(vy + acc_robot_y * dt, -self.vit_max),
+                #                  self.vit_max)
+                DebugInterface().add_log(1, "Pf 1 : {} -- {}".format(ai_c.pose_goal.position.x, ai_c.pose_goal.position.y))
+                DebugInterface().add_log(1, "Pf 2 : {} -- {}".format(acc_robot_x, acc_robot_y))
+
+                #vit_robot_x, vit_robot_y = _correct_for_referential_frame(vit_robot_x, vit_robot_y, current_robot_orientation)
+                #ai_c.speed.position = Position(vit_robot_x, vit_robot_y)
 
 
 
