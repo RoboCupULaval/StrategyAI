@@ -24,7 +24,7 @@ class CinePath:
         y = bot_player.pose.position.y + (p1 + rayon) * sin(bot_player.velocity.direction)
         return Cercle(Position(x, y), rayon)
 
-    def get_path_to(self, id_bot, final_pst):
+    def get_path(self, id_bot, final_pst):
         path = []
         for i in range(1, 25):
             circle = self.create_circle_with_tzone(self.game.get_player(id_bot, True), i * self.__max_t / self.__reso)
