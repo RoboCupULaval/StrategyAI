@@ -4,6 +4,7 @@ from RULEngine.Debug.debug_interface import DebugInterface, COLOR_ID_MAP, DEFAUL
 from ai.Algorithm.AsPathManager import AsPathManager
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.executors.executor import Executor
+from ai.Util.ai_command import AICommand
 
 
 class PathfinderModule(Executor):
@@ -15,12 +16,13 @@ class PathfinderModule(Executor):
         self.last_time_pathfinding_for_robot = {}
         self.last_frame = time.time()
         self.is_simulation = is_simulation
+        # self.cinematic_pathfinder = CinematicPathfinder(p_world_state)
 
     def exec(self):
         ai_commands = self._get_aicommand_that_need_path()
         self._adjust_from_last_time_of_exec(ai_commands)
         self._pathfind_ai_commands(ai_commands)
-        # self._return_new_ai_commands(ai_commands)
+        self._modify_path_for_cinematic_constraints(ai_commands)
 
     def _get_aicommand_that_need_path(self):
         aicommands_list = self.ws.play_state.current_ai_commands
@@ -43,6 +45,11 @@ class PathfinderModule(Executor):
             path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
             self.draw_path(path)
             ai_c.path = path
+
+    def _modify_path_for_cinematic_constraints(self, ai_commandes: list[AICommand]):
+        for cmd in ai_commandes:
+            target = self._find_intermediate_target(cmd.path)
+            #cmd.path = self.cinematic_pathfinder.get_path(cmd.robot_id, target)
 
     def change_pathfinder(self, type_of_pathfinder):
         assert isinstance(type_of_pathfinder, str)
