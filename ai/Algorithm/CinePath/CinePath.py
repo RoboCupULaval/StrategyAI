@@ -20,8 +20,8 @@ class CinePath:
         p2_max_speed = self.__max_speed * t_zone
         p2 = min([p2, p2_max_speed])
         rayon = (p2 - p1) / 2
-        x = bot_player.pose.position.x + (p1 + rayon) * cos(bot_player.velocity.direction)
-        y = bot_player.pose.position.y + (p1 + rayon) * sin(bot_player.velocity.direction)
+        x = bot_player.pose.position.x + (p1 + rayon) * cos(bot_player.velocity[2])
+        y = bot_player.pose.position.y + (p1 + rayon) * sin(bot_player.velocity[2])
         return Cercle(Position(x, y), rayon)
 
     def get_path(self, id_bot, final_pst):

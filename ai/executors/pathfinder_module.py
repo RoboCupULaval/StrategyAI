@@ -27,7 +27,7 @@ class PathfinderModule(Executor):
         ai_commands = self._get_aicommand_that_need_path()
         self._adjust_from_last_time_of_exec(ai_commands)
         self._pathfind_ai_commands(ai_commands)
-        self._modify_path_for_cinematic_constraints(ai_commands)
+        #self._modify_path_for_cinematic_constraints(ai_commands)
 
     def _get_aicommand_that_need_path(self):
         aicommands_list = self.ws.play_state.current_ai_commands
