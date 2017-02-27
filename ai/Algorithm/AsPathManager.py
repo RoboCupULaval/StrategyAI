@@ -1,4 +1,5 @@
 #pylint: skip-file
+import time
 
 from ai.Algorithm.IntelligentModule import Pathfinder
 from ai.Algorithm.Astar.AsPosition import AsPosition
@@ -17,18 +18,19 @@ class AsPathManager(Pathfinder):
         self.DownRigthCorner = AsPosition(5000, -3500)
 
         if (simulation):
-            self.RobotRadius = 125  # real radius is 90, 125 help avoid collision and make it easier to find interval
-            self.PreciseInterval = 125
-            self.ImpreciseInterval = 200
+            self.robot_radius = 250 # real radius is 90, 125 help avoid collision and make it easier to find interval
+            self.precise_interval = 125
+            self.imprecise_interval = 200
         else:
-            self.RobotRadius = 125
-            self.PreciseInterval = 200
-            self.ImpreciseInterval = 500
+            self.robot_radius = 125
+            self.precise_interval = 200
+            self.imprecise_interval = 500
 
         self.MaxDist = math.sqrt((self.DownRigthCorner.x - self.TopLeftCorner.x)**2 + (self.TopLeftCorner.y - self.DownRigthCorner.y)**2)
 
-        self.preciseGraph = AsGraph(self.TopLeftCorner, self.DownRigthCorner, self.RobotRadius, self.PreciseInterval)
-        self.impreciseGraph = AsGraph(self.TopLeftCorner, self.DownRigthCorner, self.RobotRadius, self.ImpreciseInterval)
+        self.preciseGraph = AsGraph(self.TopLeftCorner, self.DownRigthCorner, self.robot_radius, self.precise_interval)
+        self.impreciseGraph = AsGraph(self.TopLeftCorner, self.DownRigthCorner, self.robot_radius, self.imprecise_interval)
+        self.last_update = time.time()
 
     def getAllAsPath(self, startPosList, endPosList, obstacleList):
 
@@ -45,8 +47,8 @@ class AsPathManager(Pathfinder):
             if (totalDist < (self.MaxDist / 3)):
                 graph = self.preciseGraph
 
-            if (totalDist > self.PreciseInterval * 10):
-                ratio = math.fabs((self.PreciseInterval * 10) / totalDist)
+            if (totalDist > self.precise_interval * 10):
+                ratio = math.fabs((self.precise_interval * 10) / totalDist)
                 xPos = startPos.x + ((endPos.x - startPos.x) * ratio)
                 yPos = startPos.y + ((endPos.y - startPos.y) * ratio)
                 endPos = AsPosition(xPos, yPos)
@@ -69,8 +71,8 @@ class AsPathManager(Pathfinder):
         if (totalDist < (self.MaxDist / 3)):
             graph = self.preciseGraph
 
-        if (totalDist > self.PreciseInterval * 10):
-            ratio = math.fabs((self.PreciseInterval * 10) / totalDist)
+        if (totalDist > self.precise_interval * 10):
+            ratio = math.fabs((self.precise_interval * 10) / totalDist)
             xPos = startPos.x + ((endPos.x - startPos.x) * ratio)
             yPos = startPos.y + ((endPos.y - startPos.y) * ratio)
             endPos = AsPosition(xPos, yPos)
@@ -85,6 +87,12 @@ class AsPathManager(Pathfinder):
             calcule toutes les paths activés
         :return:
         """
+        now = time.time()
+        delta_t = now - self.last_update
+
+        # if delta_t < 0.1:
+        #    return None
+        self.last_update = now
 
         game_state = self.ws.game_state
         commands = self.ws.play_state.current_ai_commands

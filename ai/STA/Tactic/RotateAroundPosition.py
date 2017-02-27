@@ -11,7 +11,7 @@ from RULEngine.Util.constant import POSITION_DEADZONE
 class RotateAroundPosition(Tactic):
     def __init__(self, p_game_state, player_id, target):
         super().__init__(p_game_state, player_id)
-        self.rotate_around_cmd = RotateAroundCommand(100, 0, 0, target.position)
+        self.rotate_around_cmd = RotateAroundCommand(10, 3.14/4, 3.14/4, target.position)
         self.status_flag = Flags.INIT
 
     def exec(self):

@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+import math
 
 from RULEngine.Debug.ui_debug_command import UIDebugCommand
 from RULEngine.Util.Pose import Pose, Position
@@ -57,7 +58,7 @@ class DebugExecutor(Executor):
 
         # TODO ui must send better packets back with the args.
         target = cmd.data['target']
-        target = Pose(Position(target[0], target[1]))
+        target = Pose(Position(target[0], target[1]), 3.92 - 2 * math.pi)
         tactic = self.ws.play_state.get_new_tactic('Idle')(self.ws.game_state,
                                                            player_id,
                                                            target)

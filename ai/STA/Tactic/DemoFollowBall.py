@@ -1,5 +1,6 @@
 # Under MIT licence, see LICENCE.txt
-
+from ai.STA.Action.AllStar import AllStar
+from ai.STA.Action.PathfindToPosition import PathfindToPosition
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import DEFAULT_TIME_TO_LIVE
 from ai.STA.Action.MoveToPosition import MoveToPosition
@@ -10,6 +11,9 @@ from RULEngine.Util.constant import POSITION_DEADZONE, BALL_RADIUS
 from ai.STA.Tactic.tactic_constants import Flags
 
 __author__ = 'RoboCupULaval'
+
+
+FOLLOW_SPEED = 0.7
 
 
 class DemoFollowBall(Tactic):
@@ -32,7 +36,7 @@ class DemoFollowBall(Tactic):
     def move_to_ball(self):
         self.status_flag = Flags.WIP
         self.target = Pose(self.game_state.get_ball_position())
-        move = MoveToPosition(self.game_state, self.player_id, self.target)
+        move = PathfindToPosition(self.game_state, self.player_id, self.target, FOLLOW_SPEED)
 
         if get_distance(self.game_state.get_player_pose(self.player_id).position, self.target.position) <\
            POSITION_DEADZONE + BALL_RADIUS:
