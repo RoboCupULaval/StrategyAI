@@ -13,7 +13,6 @@ class ModuleExecutor(Executor):
 
     def exec(self):
         for module in self.ws.module_state.modules.values():
-
             module.update()
         self.ws.module_state.pathfinder_module.exec()
 

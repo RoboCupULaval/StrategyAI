@@ -146,8 +146,9 @@ class PositionRegulator(Executor):
                 #                  self.vit_max)
                 #vit_robot_y = min(max(vy + acc_robot_y * dt, -self.vit_max),
                 #                  self.vit_max)
-                DebugInterface().add_log(1, "Pf 1 : {} -- {}".format(ai_c.pose_goal.position.x, ai_c.pose_goal.position.y))
-                DebugInterface().add_log(1, "Pf 2 : {} -- {}".format(acc_robot_x, acc_robot_y))
+                #DebugInterface().add_log(1, "Pf 1 : {} -- {}".format(ai_c.pose_goal.position.x,
+                # ai_c.pose_goal.position.y))
+                #DebugInterface().add_log(1, "Pf 2 : {} -- {}".format(acc_robot_x, acc_robot_y))
 
                 #vit_robot_x, vit_robot_y = _correct_for_referential_frame(vit_robot_x, vit_robot_y, current_robot_orientation)
                 #ai_c.speed.position = Position(vit_robot_x, vit_robot_y)
@@ -223,7 +224,7 @@ class PI(object):
         r_x, r_y, r_theta = cmd.pose_goal.position.x, cmd.pose_goal.position.y, cmd.pose_goal.orientation
         t_x, t_y, t_theta = active_player.pose.position.x, active_player.pose.position.y, active_player.pose.orientation
 
-        DebugInterface().add_log(1, "Robot angular speed : {} rad/s".format(active_player.velocity[2]))
+        #DebugInterface().add_log(1, "Robot angular speed : {} rad/s".format(active_player.velocity[2]))
 
         target = math.sqrt(r_x**2 + r_y**2)
 
@@ -299,8 +300,8 @@ class PI(object):
             v_target_y = 0
         if abs(active_player.pose.orientation - r_theta) < 0.005:
             v_theta_target = 0
-        DebugInterface().add_log(1, "Accumulateur x/y -- t: {} -- {}".format(self.kiSum, self.thetaKiSum))
-        DebugInterface().add_log(1, "commands -- x: {} -- y{} -- th{}".format(v_target_x, v_target_y, v_theta_target))
+        #DebugInterface().add_log(1, "Accumulateur x/y -- t: {} -- {}".format(self.kiSum, self.thetaKiSum))
+        #DebugInterface().add_log(1, "commands -- x: {} -- y{} -- th{}".format(v_target_x, v_target_y, v_theta_target))
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
 
     def rotate_around(self, command, active_player, delta_t):
@@ -353,6 +354,7 @@ def _set_constants(simulation_setting):
                 "kd": 0.02,
                 "thetaKp": 0.6,
                 "thetaKi": 0.2,
+                "thetaKd": 0.3,
                 "theta-max-acc": 6*math.pi,
                 "position_dead_zone": 0.03
                 }

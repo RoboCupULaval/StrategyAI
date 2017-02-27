@@ -32,6 +32,7 @@ class MovementExecutor(Executor):
                 next_position = ai_cmd.path[0]
                 distance = get_distance(current_pose.position, next_position)
                 while distance < PATHFINDER_DEADZONE and len(ai_cmd.path) > 1:
+                    DebugInterface().add_log(1, "Gestion path; retrait point trop rapproche.")
                     ai_cmd.path = ai_cmd.path[1:]
                     next_position = ai_cmd.path[0]
                     distance = get_distance(current_pose.position, next_position)
