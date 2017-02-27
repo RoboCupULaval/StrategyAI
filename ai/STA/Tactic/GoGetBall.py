@@ -84,20 +84,12 @@ class GoGetBall(Tactic):
                 if abs(abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation) - np.pi) < 0.1 or \
                                 abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation) < 0.1:
                     self.last_time = time.time()
-                    self.next_state = self.stay_idle
+                    self.next_state = self.start_dribbler
         else:
             DebugInterface().add_log(4, "Distance from ball: {}".format(dist))
             self.next_state = self.get_behind_ball
         return GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position()+Position(vector_player_2_ball[0]*70, vector_player_2_ball[1] * 70), self.target.position,
                         self.game_state.const["DISTANCE_BEHIND"])
-
-    def stay_idle(self):
-        self.next_state = self.start_dribbler
-        # if self.vector_norm > 150:
-        #     print("are you even real^")
-        #     self.next_state = self.get_behind_ball
-
-        return Idle(self.game_state, self.player_id)
 
     def start_dribbler(self):
         now = time.time()
@@ -110,13 +102,6 @@ class GoGetBall(Tactic):
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def grab_ball(self):
-        # if has_ball(self.game_state, self.player_id):
-        #     self.next_state = self.halt
-        #     self.status_flag = Flags.SUCCESS
-        # elif can_get_ball(self.game_state, self.player_id, self.target.position):
-        #     self.next_state = self.grab_ball
-        # else:
-        #     self.next_state = self.get_behind_ball  # back to go_behind; the ball has moved
         DebugInterface().add_log(1, "Grab ball called")
         player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
         player_y = self.game_state.game.friends.players[self.player_id].pose.position.y
@@ -128,16 +113,12 @@ class GoGetBall(Tactic):
         DebugInterface().add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
         if self.vector_norm < 100:
             self.next_state = self.halt
+            self.status_flag = Flags.SUCCESS
         DebugInterface().add_log(1, "orientation go get ball {}".format(self.last_angle))
-        #grab_ball = GetBall(self.game_state, self.player_id)
         return MoveToPosition(self.game_state, self.player_id, Pose(Position(vector_player_2_ball[0]*300, vector_player_2_ball[1] * 300), self.last_angle), 0.15)
 
     def halt(self):
         self.status_flag = Flags.SUCCESS
-        dist = self._get_distance_from_ball()
-        # else:
-        #     self.next_state = self.halt
-
         return Idle(self.game_state, self.player_id)
 
     def _get_distance_from_ball(self):

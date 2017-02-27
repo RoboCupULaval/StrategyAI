@@ -46,8 +46,8 @@ class GoKick(Tactic):
         assert PLAYER_PER_TEAM >= player_id >= 0
 
         self.player_id = player_id
-        self.current_state = self.go_get_ball
-        self.next_state = self.go_get_ball
+        self.current_state = self.kick_charge
+        self.next_state = self.kick_charge
         self.debug_interface = DebugInterface()
         self.move_action = self._generate_move_to()
         self.move_action.status_flag = Flags.SUCCESS
@@ -59,39 +59,19 @@ class GoKick(Tactic):
 
         self.go_get_ball_tactic = GoGetBall(self.game_state, self.player_id, self.target)
 
-    def go_get_ball(self):
-        if self.go_get_ball_tactic.status_flag == Flags.SUCCESS:
-            self.next_state = self.kick_charge
-        return self.go_get_ball_tactic
-
-    # def kiss_ball(self):
-    #
-    #     # get a point between you and the ball to approach
-    #     ball_position = self.game_state.get_ball_position()
-    #     player_pose = self.game_state.get_player_pose(self.player_id)
-    #     angle = get_angle(player_pose.position, self.target.position)
-    #     move_vec = ball_position + Position(self.game_state.const["ROBOT_RADIUS"] * math.cos(angle),
-    #                                         self.game_state.const["ROBOT_RADIUS"] * math.sin(angle))
-    #     target_pose = Pose(move_vec, angle)
-    #
-    #     distance = get_distance(target_pose.position, player_pose.position)
-    #     if distance <= self.game_state.const["KISS_BALL_DISTANCE"]:
-    #         DebugInterface().add_log(5, "Ball grabbed!")
-    #         self.next_state = self.kick_charge
-    #     else:
-    #         DebugInterface().add_log(5, "Distance from kiss: {}".format(distance))
-    #         self.next_state = self.kiss_ball
-    #
-    #     return GoToPositionNoPathfinder(self.game_state, self.player_id, target_pose)
-
     def kick_charge(self):
-
-        if time.time() - self.last_time > COMMAND_DELAY * 6:
+        if time.time() - self.last_time > COMMAND_DELAY:
             DebugInterface().add_log(5, "Kick charge!")
             self.last_time = time.time()
             self.next_state = self.kick
-        other_args = {"charge_kick":True, "dribbler_on":1}
+        other_args = {"charge_kick": True, "dribbler_on": 1}
         return AllStar(self.game_state, self.player_id, **other_args)
+
+    def go_get_ball(self):
+        if self.go_get_ball_tactic.status_flag == Flags.SUCCESS:
+            self.last_time = time.time()
+            self.next_state = self.kick_charge
+        return self.go_get_ball_tactic
 
     def kick(self):
         now = time.time()
@@ -106,7 +86,7 @@ class GoKick(Tactic):
         if now - self.last_time > COMMAND_DELAY:
             DebugInterface().add_log(5, "Dribbler off!")
             self.next_state = self.halt
-        other_args = {"pose_goal":self.game_state.get_player_pose(self.player_id), "dribbler_on":1}
+        other_args = {"pose_goal": self.game_state.get_player_pose(self.player_id), "dribbler_on": 1}
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def halt(self):
