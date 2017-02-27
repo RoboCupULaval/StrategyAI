@@ -5,7 +5,6 @@ from ai.STA.Tactic.tactic_constants import Flags, DEFAULT_TIME_TO_LIVE
 from ..Action.ProtectGoal import ProtectGoal
 from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.GoBehind import GoBehind
-from ai.STA.Action.Idle import Idle
 from ai.Util.ball_possession import can_get_ball, has_ball
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
@@ -47,15 +46,12 @@ class GoalKeeper(Tactic):
 
     def protect_goal(self):
         ball_position = self.game_state.get_ball_position()
-        if not self.game_state.game.field.is_inside_goal_area(ball_position, self.is_yellow):
+        if not self.game_state.game.field.is_inside_goal_area(ball_position, not self.is_yellow):
             self.next_state = self.protect_goal
         else:
-            if can_get_ball(self.game_state, self.player_id, ball_position):
-                self.next_state = self.grab_ball
-            else:
-                self.next_state = self.go_behind_ball
+            self.next_state = self.go_behind_ball
         self.target = Pose(self.game_state.get_ball_position())
-        return ProtectGoal(self.game_state, self.player_id, self.is_yellow,
+        return ProtectGoal(self.game_state, self.player_id, not self.is_yellow,
                            p_minimum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"])
 
     def go_behind_ball(self):
