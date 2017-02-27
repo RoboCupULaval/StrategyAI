@@ -218,6 +218,7 @@ class PI(object):
         else:
             self.vit_max = self.constants["vit_max"]
 
+        DebugInterface().add_log(1, "Robot speed: {}".format(self.vit_max))
         self.paths[idx] = cmd.path
         delta_t = 0.03
 
@@ -363,7 +364,7 @@ def _set_constants(simulation_setting):
                 "ROBOT_VELOCITY_MAX": 4,
                 "ROBOT_ACC_MAX": 2,
                 "accel_max": 0.7,
-                "vit_max": 0.5,
+                "vit_max": 1.0,
                 "vit_min": 0.05,
                 "xyKp": 1,
                 "ki": 0.05,

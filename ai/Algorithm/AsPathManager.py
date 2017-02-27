@@ -18,8 +18,7 @@ class AsPathManager(Pathfinder):
         self.DownRigthCorner = AsPosition(5000, -3500)
 
         if (simulation):
-            #self.RobotRadius = 125  # real radius is 90, 125 help avoid collision and make it easier to find interval
-            self.robot_radius = 150  # real radius is 90, 125 help avoid collision and make it easier to find interval
+            self.robot_radius = 250 # real radius is 90, 125 help avoid collision and make it easier to find interval
             self.precise_interval = 125
             self.imprecise_interval = 200
         else:
