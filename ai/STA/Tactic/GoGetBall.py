@@ -126,7 +126,7 @@ class GoGetBall(Tactic):
 
         self.vector_norm = np.linalg.norm(vector_player_2_ball)
         DebugInterface().add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
-        if self.vector_norm < 100:
+        if self.vector_norm < 110:
             self.next_state = self.halt
         DebugInterface().add_log(1, "orientation go get ball {}".format(self.last_angle))
         #grab_ball = GetBall(self.game_state, self.player_id)
@@ -137,7 +137,7 @@ class GoGetBall(Tactic):
         dist = self._get_distance_from_ball()
         # else:
         #     self.next_state = self.halt
-
+        DebugInterface().add_log(1, "GogetBall so sucessfull")
         return Idle(self.game_state, self.player_id)
 
     def _get_distance_from_ball(self):
