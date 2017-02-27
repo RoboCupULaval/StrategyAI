@@ -63,14 +63,14 @@ class GoKick(Tactic):
         if time.time() - self.last_time > COMMAND_DELAY:
             DebugInterface().add_log(5, "Kick charge!")
             self.last_time = time.time()
-            self.next_state = self.kick
+            self.next_state = self.go_get_ball
         other_args = {"charge_kick": True, "dribbler_on": 1}
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def go_get_ball(self):
         if self.go_get_ball_tactic.status_flag == Flags.SUCCESS:
             self.last_time = time.time()
-            self.next_state = self.kick_charge
+            self.next_state = self.kick
         return self.go_get_ball_tactic
 
     def kick(self):
