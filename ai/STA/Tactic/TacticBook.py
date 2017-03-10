@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+from ai.STA.Tactic.Joystick import Joystick
 from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
 from ai.STA.Tactic.test_turn_on_you import TestTurnOnYou
 from ai.STA.Tactic.va_et_vient import VaEtVient
@@ -27,7 +28,8 @@ class TacticBook(object):
                             'GoKick': GoKick,
                             "TestTurnOnYou": TestTurnOnYou,
                             'RotateAroundPosition': RotateAroundPosition,
-                            "VaEtVient": VaEtVient
+                            "VaEtVient": VaEtVient,
+                            'Joystick': Joystick
                             }
 
     def get_tactics_name_list(self):

@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+from ai.STA.Action.Move import Move
 from ai.STA.Action.RotateArround import RotateAround
 from .GoBehind import GoBehind
 from .GoBetween import GoBetween
@@ -18,6 +19,7 @@ class ActionBook(object):
                            'GrabBall': GetBall,
                            'Idle': Idle,
                            'Kick': Kick,
+                           'Move': Move,
                            'MoveTo': MoveToPosition,
                            'MoveWithBall': MoveToDribblingBall,
                            'ProtectGoal': ProtectGoal,
