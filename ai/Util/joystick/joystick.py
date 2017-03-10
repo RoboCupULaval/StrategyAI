@@ -3,10 +3,7 @@ import json
 import time
 from math import fabs
 
-
-with open('ai/Util/joystick/joystick_config.json') as configsFile:
-    configs = json.load(configsFile)
-
+from ai.Util.joystick.joystick_config import configs
 
 class RobotJoystick():
 
