@@ -54,7 +54,8 @@ class Joystick(Tactic):
             else:
                 dribbler = 0
 
-            speed_pose = Pose(Position(y*0.5, -x*0.5), t * -5)
+
+            speed_pose = Pose(Position(y, -x), t * -5)
 
             if kick == 0:
                 next_action = AICommand(self.player_id, AICommandType.MOVE,
