@@ -23,7 +23,8 @@ __author__ = 'RoboCupULaval'
 ANGLE_DEADZONE = 0.08
 COMMAND_DELAY = 0.5
 
-
+# TODO revise, while running I had a RuntimeWarning: line 79 invalid value encountered in true_divide
+# MGL 2017/03/16
 class GoGetBall(Tactic):
     """
     méthodes:
@@ -115,7 +116,7 @@ class GoGetBall(Tactic):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
         DebugInterface().add_log(1, "orientation go get ball {}".format(self.last_angle))
-        return MoveToPosition(self.game_state, self.player_id, Pose(Position(vector_player_2_ball[0]*300, vector_player_2_ball[1] * 300), self.last_angle), 0.15)
+        return MoveToPosition(self.game_state, self.player_id, Pose(Position(vector_player_2_ball[0]*300, vector_player_2_ball[1] * 300), self.last_angle))
 
     def halt(self):
         self.status_flag = Flags.SUCCESS

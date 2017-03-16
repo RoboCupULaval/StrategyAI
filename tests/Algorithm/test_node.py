@@ -1,23 +1,22 @@
 # Under MIT licence, see LICENCE.txt
 
 import unittest
-from ai.Algorithm.Node import Node
-from ai.Algorithm.Vertex import Vertex
-from ai.states.game_state import GameState
-from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.Stop import Stop
-from ai.STA.Tactic.tactic_constants import Flags
 
+from RULEngine.Game.Ball import Ball
+from RULEngine.Game.Game import Game
+from RULEngine.Game.Referee import Referee
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.game_world import GameWorld
-from RULEngine.Game.Referee import Referee
 from RULEngine.Util.team_color_service import TeamColorService, TeamColor
-from RULEngine.Game.Game import Game
-from RULEngine.Game.Ball import Ball
+from ai.Algorithm.Graph.Node import Node
+from ai.Algorithm.Graph.Vertex import Vertex
+from ai.STA.Tactic.GoalKeeper import GoalKeeper
+from ai.STA.Tactic.Stop import Stop
+from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommand, AICommandType
+from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
 

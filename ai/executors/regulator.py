@@ -3,7 +3,6 @@
 import math
 import time
 
-from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_distance
@@ -11,7 +10,6 @@ from ai.Util.ai_command import AICommandType, AICommand
 from ai.executors.executor import Executor
 from ai.states.game_state import GameState
 from ai.states.world_state import WorldState
-import numpy as np
 
 
 ROBOT_NEAR_FORCE = 2000
@@ -39,7 +37,7 @@ class PositionRegulator(Executor):
     def exec(self):
         commands = self.ws.play_state.current_ai_commands
         delta_t = self.ws.game_state.game.delta_t
-        #self._potential_field()
+        # self._potential_field() # TODO finish <
         for cmd in commands.values():
             if cmd.command is AICommandType.MOVE:
                 robot_idx = cmd.robot_id
@@ -51,29 +49,20 @@ class PositionRegulator(Executor):
                                                             delta_t,
                                                             idx=robot_idx,
                                                             robot_speed=cmd.robot_speed)
-                    #cmd.speed.position.x = 0
-                    #cmd.speed.position.y = 0
                 else:
                     cmd.speed = self.regulators[robot_idx].\
                         rotate_around(cmd, active_player, delta_t)
-
-
 
     def _potential_field(self):
         current_ai_c = self.ws.play_state.current_ai_commands
 
         for ai_c in current_ai_c.values():
-            if ai_c.command == AICommandType.MOVE:# and len(ai_c.path) > 0:
-                goal = ai_c.pose_goal
+            if ai_c.command == AICommandType.MOVE:  # and len(ai_c.path) > 0:
                 force = [0, 0]
                 current_robot_pos = self.ws.game_state.get_player_position(ai_c.robot_id)
-                current_robot_orientation = self.ws.game_state.get_player_pose(ai_c.robot_id).orientation
                 current_robot_velocity = self.ws.game_state.game.friends.players[ai_c.robot_id].velocity
                 current_robot_velocity_norm = math.sqrt(current_robot_velocity[0] ** 2 + current_robot_velocity[1] ** 2)
-                current_robot_velocity_angle = math.atan2(current_robot_velocity[1],current_robot_velocity[0])
-                #rmax = 1000 * current_robot_velocity_norm
-                #rmax = max(rmax, 300)
-                #rmax = 300
+                current_robot_velocity_angle = math.atan2(current_robot_velocity[1], current_robot_velocity[0])
                 for robot in self.ws.game_state.game.friends.players.values():
                     if robot.id != ai_c.robot_id:
                         dist = get_distance(current_robot_pos, robot.pose.position)
@@ -84,12 +73,12 @@ class PositionRegulator(Executor):
                         if dist < rmax:
                             try:
                                 force[0] += 1 / dist * math.cos(angle) * projection
-                            except:
+                            except ZeroDivisionError:
                                 print("div 0 - 1")
                                 pass
                             try:
                                 force[1] += 1 / dist * math.sin(angle) * projection
-                            except:
+                            except ZeroDivisionError:
                                 print("div 0 - 2")
                                 pass
 
@@ -103,56 +92,29 @@ class PositionRegulator(Executor):
                     if dist < rmax:
                         try:
                             force[0] += 1 / dist * math.cos(angle) * projection
-                        except:
+                        except ZeroDivisionError:
                             print("div 0 - 3")
                             pass
                         try:
                             force[1] += 1 / dist * math.sin(angle) * projection
-                        except:
+                        except ZeroDivisionError:
                             print("div 0 - 4")
                             pass
 
                 # dist_goal = get_distance(current_robot_pos, ai_c.pose_goal.position)
-                angle_goal = math.atan2(current_robot_pos.y - ai_c.pose_goal.position.y,
-                                        current_robot_pos.x - ai_c.pose_goal.position.x)
+                # angle_goal = math.atan2(current_robot_pos.y - ai_c.pose_goal.position.y,
+                #                         current_robot_pos.x - ai_c.pose_goal.position.x)
 
-                dt = self.ws.game_state.game.delta_t
-                if dt <= 0:
-                    dt = 0.03
-
-                #vx, vy = _correct_for_referential_frame(ai_c.speed.position.x, ai_c.speed.position.y, -current_robot_orientation)
-
-                #a = (vx - current_robot_velocity[0]) / dt
-                #b = (vy - current_robot_velocity[1]) / dt
-                #acc_goal = math.sqrt(a ** 2 + b ** 2)
-
-                #angle_acc_goal = math.atan2(b, a)
-
-                c = force[0] * ROBOT_NEAR_FORCE #+ (acc_goal * math.cos(angle_acc_goal))
-                d = force[1] * ROBOT_NEAR_FORCE #+ (acc_goal * math.cos(angle_acc_goal))
+                c = force[0] * ROBOT_NEAR_FORCE  # + (acc_goal * math.cos(angle_acc_goal))
+                d = force[1] * ROBOT_NEAR_FORCE  # + (acc_goal * math.cos(angle_acc_goal))
 
                 angle_acc = math.atan2(d, c)
                 norm_acc = math.sqrt(c ** 2 + d ** 2)
-
-                #norm_acc = min(norm_acc, 2)
-                #acc_robot_y = min(max(d, -self.accel_max), self.accel_max)
 
                 acc_robot_x = norm_acc * math.cos(angle_acc)
                 acc_robot_y = norm_acc * math.sin(angle_acc)
                 ai_c.pose_goal.position.x += acc_robot_x * 1
                 ai_c.pose_goal.position.y += acc_robot_y * 1
-
-                #vit_robot_x = min(max(vx + acc_robot_x * dt, -self.vit_max),
-                #                  self.vit_max)
-                #vit_robot_y = min(max(vy + acc_robot_y * dt, -self.vit_max),
-                #                  self.vit_max)
-                #DebugInterface().add_log(1, "Pf 1 : {} -- {}".format(ai_c.pose_goal.position.x,
-                # ai_c.pose_goal.position.y))
-                #DebugInterface().add_log(1, "Pf 2 : {} -- {}".format(acc_robot_x, acc_robot_y))
-
-                #vit_robot_x, vit_robot_y = _correct_for_referential_frame(vit_robot_x, vit_robot_y, current_robot_orientation)
-                #ai_c.speed.position = Position(vit_robot_x, vit_robot_y)
-
 
 
 class PID(object):
@@ -206,7 +168,7 @@ class PI(object):
         self.vit_min = 0.05
         self.thetaKiSum = 0
         self.last_target = 0
-        self.position_dead_zone = self.constants["position_dead_zone"] #0.03
+        self.position_dead_zone = self.constants["position_dead_zone"]  # 0.03
         self.rotation_dead_zone = 0.01 * math.pi
         self.last_theta_target = 0
 
@@ -218,14 +180,11 @@ class PI(object):
         else:
             self.vit_max = self.constants["vit_max"]
 
-        # DebugInterface().add_log(1, "Robot speed: {}".format(self.vit_max))
         self.paths[idx] = cmd.path
         delta_t = 0.03
 
         r_x, r_y, r_theta = cmd.pose_goal.position.x, cmd.pose_goal.position.y, cmd.pose_goal.orientation
         t_x, t_y, t_theta = active_player.pose.position.x, active_player.pose.position.y, active_player.pose.orientation
-
-        #DebugInterface().add_log(1, "Robot angular speed : {} rad/s".format(active_player.velocity[2]))
 
         target = math.sqrt(r_x**2 + r_y**2)
 
@@ -283,8 +242,6 @@ class PI(object):
         v_theta_target = self.thetaKp * delta_theta
         v_theta_target += self.thetaKd * ((delta_theta - self.lastErr_theta) / delta_t)
         self.lastErr_theta = delta_theta
-        # if abs(v_theta_target) < 0.1:
-        #     v_theta_target = sign(v_theta_target) * 0.1
         self.thetaKiSum += delta_theta * self.thetaKi * delta_t
         if self.thetaKiSum > self.constants["theta-max-acc"]:
             self.thetaKiSum = self.constants["theta-max-acc"]
@@ -301,17 +258,16 @@ class PI(object):
             v_target_y = 0
         if abs(active_player.pose.orientation - r_theta) < 0.005:
             v_theta_target = 0
-        #DebugInterface().add_log(1, "Accumulateur x/y -- t: {} -- {}".format(self.kiSum, self.thetaKiSum))
-        #DebugInterface().add_log(1, "commands -- x: {} -- y{} -- th{}".format(v_target_x, v_target_y, v_theta_target))
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
 
+    # todo Finish v
     def rotate_around(self, command, active_player, delta_t):
+        # TODO delta t
         delta_t = 0.03
         r = command.rotate_around_goal.radius
         phi = command.rotate_around_goal.direction
         theta = command.rotate_around_goal.orientation
 
-        #print(command.rotate_around_goal.center_position)
         r_p, phi_p = _xy_to_rphi_(active_player.pose.position, command.rotate_around_goal.center_position)
         theta_p = active_player.pose.orientation
 
@@ -319,7 +275,6 @@ class PI(object):
         vphi = self.rotate_pid[1].update(phi, phi_p, delta_t)
         vtheta = self.rotate_pid[2].update(theta, theta_p, delta_t)
 
-        #print(vr, "  ", vphi, "  ", vtheta)
         print("theta ", theta*180/3.14, theta_p*180/3.14)
         print("phi ", phi * 180 / 3.14, phi_p * 180 / 3.14)
         print("r ", r, r_p)
@@ -328,9 +283,8 @@ class PI(object):
 
         vx, vy = _correct_for_referential_frame(vx, vy, -active_player.pose.orientation)
 
-        #print(vx, "       ", vy)
-
         return Pose(Position(vx/1000, vy/1000), vtheta)
+
 
 def _correct_for_referential_frame(x, y, orientation):
 
@@ -380,17 +334,18 @@ def _set_constants(simulation_setting):
 def _xy_to_rphi_(robot_position, ball_position):
     r = math.sqrt((robot_position.x - ball_position.x) ** 2 + (robot_position.y - ball_position.y) ** 2)
     phi = math.atan2((robot_position.y - ball_position.y), (robot_position.x - ball_position.x))
-    return (r, phi)
+    return r, phi
 
 
 # pas vraiment nécessaire
-def _rphi_to_xy_(r,phi, ball_position):
+# TODO remove
+def _rphi_to_xy_(r, phi, ball_position):
     x = r * math.cos(phi) + ball_position.x
     y = r * math.sin(phi) + ball_position.y
-    return (x,y)
+    return x, y
 
 
 def _vit_rphi_to_xy(r, phi, vr, vphi):
     vx = vr*math.cos(phi)-r*vphi*math.sin(phi)
     vy = vr*math.sin(phi)+r*vphi*math.cos(phi)
-    return (vx, vy)
+    return vx, vy

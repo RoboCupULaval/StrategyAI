@@ -1,19 +1,21 @@
 # Under MIT license, see LICENSE.txt
 
 from abc import ABCMeta
-from typing import List, Tuple
+from typing import List, Tuple, Callable, Dict
 
-from ai.Algorithm.Graph import Graph
-from ai.Algorithm.Node import Node
-from ai.states.game_state import GameState
 from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.Algorithm.Graph.Graph import Graph
+from ai.Algorithm.Graph.Node import Node
+from ai.STA.Tactic.Tactic import Tactic
+from ai.Util.ai_command import AICommand
+from ai.states.game_state import GameState
 
 
 # Pour l'instant, les stratégies n'optimisent pas la gestion des ressources (ex: toujours le même robot qui va chercher
 # la balle et non le plus proche). TODO: À optimiser
 class Strategy(metaclass=ABCMeta):
     """ Définie l'interface commune aux stratégies. """
-    def __init__(self, p_game_state):
+    def __init__(self, p_game_state: GameState):
         """
         Initialise la stratégie en créant un graph vide pour chaque robot de l'équipe.
         :param p_game_state: L'état courant du jeu.
@@ -24,7 +26,7 @@ class Strategy(metaclass=ABCMeta):
         for i in range(PLAYER_PER_TEAM):
             self.graphs.append(Graph())
 
-    def add_tactic(self, robot_id, tactic):
+    def add_tactic(self, robot_id: int, tactic: Tactic) -> None:
         """
         Ajoute une tactique au graph des tactiques d'un robot.
         :param robot_id: L'id du robot auquel est assignée la tactique.
@@ -33,7 +35,7 @@ class Strategy(metaclass=ABCMeta):
         assert(isinstance(robot_id, int))
         self.graphs[robot_id].add_node(Node(tactic))
 
-    def add_condition(self, robot_id, start_node, end_node, condition):
+    def add_condition(self, robot_id: int, start_node: int, end_node: int, condition: Callable[..., bool]):
         """
         Ajoute une condition permettant de gérer la transition entre deux tactiques d'un robot.
         :param robot_id: L'id du robot.
@@ -64,10 +66,10 @@ class Strategy(metaclass=ABCMeta):
                          tactic_name, current_tactic.target))
         return state
 
-    def exec(self):
+    def exec(self) -> Dict[int, AICommand]:
         """
         Appelle la méthode exec de chacune des Tactics assignées aux robots.
-        :return: Une liste des 6 AICommand à envoyer aux robots. La commande située à l'indice i de la liste doit être
+        :return: Un dict des 6 AICommand à envoyer aux robots. La commande située à l'indice i de la liste doit être
         envoyée au robot i.
         """
         commands = {}

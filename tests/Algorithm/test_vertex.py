@@ -1,7 +1,8 @@
 # Under MIT licence, see LICENCE.txt
 
 import unittest
-from ai.Algorithm.Vertex import Vertex
+
+from ai.Algorithm.Graph.Vertex import Vertex
 
 __author__ = 'RoboCupULaval'
 

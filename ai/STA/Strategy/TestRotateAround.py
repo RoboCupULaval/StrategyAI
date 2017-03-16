@@ -1,15 +1,8 @@
 # Under MIT license, see LICENSE.txt
 
-from math import pi
-from RULEngine.Util.constant import PLAYER_PER_TEAM
-from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from ai.Algorithm.Node import Node
 from ai.STA.Strategy.Strategy import Strategy
-from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.RotateAround import RotateAround
-from ai.STA.Tactic.PassBall import PassBall
-from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.tactic_constants import *
 

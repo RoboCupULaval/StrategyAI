@@ -20,6 +20,7 @@ class MovementExecutor(Executor):
         self._sanity_check_of_speed_command()
 
     def exec(self):
+        # TODO revise and put in stone the way we do that! MGL 2017/03/16
         self._simple_advance_path()
         self._sanity_check_of_speed_command()
 
