@@ -218,7 +218,7 @@ class PI(object):
         else:
             self.vit_max = self.constants["vit_max"]
 
-        DebugInterface().add_log(1, "Robot speed: {}".format(self.vit_max))
+        # DebugInterface().add_log(1, "Robot speed: {}".format(self.vit_max))
         self.paths[idx] = cmd.path
         delta_t = 0.03
 

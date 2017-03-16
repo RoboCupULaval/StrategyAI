@@ -1,11 +1,17 @@
 # Under MIT License, see LICENSE.txt
 
 from ai.executors.executor import Executor
+from ai.states.world_state import WorldState
 
 
 class PlayExecutor(Executor):
 
-    def __init__(self, p_world_state):
+    def __init__(self, p_world_state: WorldState):
+        """
+        initialise le PlayExecutor
+
+        :param p_world_state: (WorldState) instance du worldstate
+        """
         super().__init__(p_world_state)
 
     def exec(self):
@@ -22,7 +28,6 @@ class PlayExecutor(Executor):
         self.ws.play_state.current_ai_commands = \
             self.ws.play_state.current_strategy.exec()
 
-    # FIXME revise this function please
     def _send_robots_status(self):
         states = self.ws.play_state.get_current_tactical_state()
         for state in states:

@@ -17,12 +17,12 @@ class DebugExecutor(Executor):
     def exec(self):
         self._execute_incoming_debug_commands()
 
+    def set_reference(self, debug_ref) -> None:
+        self.debug_in = debug_ref
+
     def _execute_incoming_debug_commands(self):
         for command in self.debug_in:
             self._parse_command(UIDebugCommand(command))
-
-    def set_reference(self, debug_ref)->None:
-        self.debug_in = debug_ref
 
     def _parse_command(self, cmd: UIDebugCommand)->None:
         if cmd.is_strategy_cmd():

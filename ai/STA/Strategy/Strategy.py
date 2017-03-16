@@ -1,6 +1,7 @@
 # Under MIT license, see LICENSE.txt
 
 from abc import ABCMeta
+from typing import List, Tuple
 
 from ai.Algorithm.Graph import Graph
 from ai.Algorithm.Node import Node
@@ -44,7 +45,7 @@ class Strategy(metaclass=ABCMeta):
         assert(isinstance(robot_id, int))
         self.graphs[robot_id].add_vertex(start_node, end_node, condition)
 
-    def get_current_state(self):
+    def get_current_state(self) -> List[Tuple[int, str, str, str]]:
         """
             Retourne l'état actuel de la stratégie, dans une liste de 6 tuples. Chaque tuple contient:
                 -L'id d'un robot;

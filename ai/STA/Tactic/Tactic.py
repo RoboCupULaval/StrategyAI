@@ -14,7 +14,7 @@ class Tactic:
         Classe mère de toutes les tactiques
     """
 
-    def __init__(self, p_game_state: GameState, player_id: int, target=Pose(),
+    def __init__(self, p_game_state: GameState, player_id: int, target: Pose=Pose(),
                  time_to_live=DEFAULT_TIME_TO_LIVE):
         """
             Initialise la tactique
