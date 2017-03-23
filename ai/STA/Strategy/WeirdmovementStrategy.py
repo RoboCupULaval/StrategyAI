@@ -1,10 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.Algorithm.Node import Node
+from RULEngine.Util.Pose import Position, Pose
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.Stop import Stop
-from RULEngine.Util.Pose import Position, Pose
 from ai.STA.Tactic.tactic_constants import Flags
 
 

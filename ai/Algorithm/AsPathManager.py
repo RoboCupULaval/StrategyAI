@@ -1,26 +1,36 @@
 #pylint: skip-file
+import time
 
 from ai.Algorithm.IntelligentModule import Pathfinder
 from ai.Algorithm.Astar.AsPosition import AsPosition
+from ai.Algorithm.Astar.AsObstacle import AsObstacle
 from ai.Algorithm.Astar.AsGraph import AsGraph
 from RULEngine.Util.Position import Position
 import math
 
 class AsPathManager(Pathfinder):
 
-    def __init__(self, p_worldstate):
+    def __init__(self, p_worldstate, simulation):
 
         super().__init__(p_worldstate)
 
-        self.TopLeftCorner = AsPosition(-5000,3500)
-        self.DownRigthCorner = AsPosition(5000,-3500)
-        self.RobotRadius = 125  # real radius is 90, 125 help avoid collision and make it easier to find interval
-        self.PreciseInterval = 125
-        self.ImpreciseInterval = 200
+        self.TopLeftCorner = AsPosition(-5000, 3500)
+        self.DownRigthCorner = AsPosition(5000, -3500)
+
+        if (simulation):
+            self.robot_radius = 250 # real radius is 90, 125 help avoid collision and make it easier to find interval
+            self.precise_interval = 125
+            self.imprecise_interval = 200
+        else:
+            self.robot_radius = 125
+            self.precise_interval = 200
+            self.imprecise_interval = 500
+
         self.MaxDist = math.sqrt((self.DownRigthCorner.x - self.TopLeftCorner.x)**2 + (self.TopLeftCorner.y - self.DownRigthCorner.y)**2)
 
-        self.preciseGraph = AsGraph(self.TopLeftCorner, self.DownRigthCorner, self.RobotRadius, self.PreciseInterval)
-        self.impreciseGraph = AsGraph(self.TopLeftCorner, self.DownRigthCorner, self.RobotRadius, self.ImpreciseInterval)
+        self.preciseGraph = AsGraph(self.TopLeftCorner, self.DownRigthCorner, self.robot_radius, self.precise_interval)
+        self.impreciseGraph = AsGraph(self.TopLeftCorner, self.DownRigthCorner, self.robot_radius, self.imprecise_interval)
+        self.last_update = time.time()
 
     def getAllAsPath(self, startPosList, endPosList, obstacleList):
 
@@ -37,8 +47,8 @@ class AsPathManager(Pathfinder):
             if (totalDist < (self.MaxDist / 3)):
                 graph = self.preciseGraph
 
-            if (totalDist > self.PreciseInterval * 10):
-                ratio = math.fabs((self.PreciseInterval * 10) / totalDist)
+            if (totalDist > self.precise_interval * 10):
+                ratio = math.fabs((self.precise_interval * 10) / totalDist)
                 xPos = startPos.x + ((endPos.x - startPos.x) * ratio)
                 yPos = startPos.y + ((endPos.y - startPos.y) * ratio)
                 endPos = AsPosition(xPos, yPos)
@@ -46,12 +56,30 @@ class AsPathManager(Pathfinder):
             updatedObstacleList = list(obstacleList)
             for j in range(0, nbPath, 1):
                 if (j != i):
-                    updatedObstacleList.append(startPosList[j])
+                    updatedObstacleList.append(AsObstacle(startPosList[j]))
 
             allAsPathList += [graph.aStarPath(startPos, endPos, updatedObstacleList)]
 
 
         return allAsPathList
+
+    def getAsPath(self, startPos, endPos, obstacleList):
+
+        graph = self.impreciseGraph
+        totalDist = startPos.getDist(endPos)
+
+        if (totalDist < (self.MaxDist / 3)):
+            graph = self.preciseGraph
+
+        if (totalDist > self.precise_interval * 10):
+            ratio = math.fabs((self.precise_interval * 10) / totalDist)
+            xPos = startPos.x + ((endPos.x - startPos.x) * ratio)
+            yPos = startPos.y + ((endPos.y - startPos.y) * ratio)
+            endPos = AsPosition(xPos, yPos)
+
+        asPath = graph.aStarPath(startPos, endPos, obstacleList)
+
+        return asPath
     
     def update(self):
         """
@@ -59,6 +87,12 @@ class AsPathManager(Pathfinder):
             calcule toutes les paths activés
         :return:
         """
+        now = time.time()
+        delta_t = now - self.last_update
+
+        # if delta_t < 0.1:
+        #    return None
+        self.last_update = now
 
         game_state = self.ws.game_state
         commands = self.ws.play_state.current_ai_commands
@@ -112,23 +146,29 @@ class AsPathManager(Pathfinder):
         ourTeam = game_state.my_team.players
 
         for id in opponentTeam:
-            position = game_state.get_player_position(id, False)
-            obstacleList.append(AsPosition(position.x, position.y))
+            player = game_state.get_player(id, False)
+            position = player.pose.position
+            vector = player.velocity
+            obstacle = AsObstacle(AsPosition(position.x, position.y), vector)
+            obstacleList.append(obstacle)
 
         for id in ourTeam:
             if (id != robot_id):
-                position = game_state.get_player_position(id, True)
-                obstacleList.append(AsPosition(position.x, position.y))
+                player = game_state.get_player(id, True)
+                position = player.pose.position
+                vector = player.velocity
+                obstacle = AsObstacle(AsPosition(position.x, position.y), vector)
+                obstacleList.append(obstacle)
 
         currentRobotPos = game_state.get_player_position(robot_id)
         startAsPos = AsPosition(currentRobotPos.x, currentRobotPos.y)
         endAsPos = AsPosition(target.position.x, target.position.y)
 
-        robotAsPath = self.getAllAsPath([startAsPos], [endAsPos], obstacleList)
+        robotAsPath = self.getAsPath(startAsPos, endAsPos, obstacleList)
         robotPosPath = []
 
-        for i in range(0, len(robotAsPath[0]), 1):
-            tempAsPos = robotAsPath[0][i]
+        for i in range(0, len(robotAsPath), 1):
+            tempAsPos = robotAsPath[i]
             robotPosPath += [Position(tempAsPos.x, tempAsPos.y)]
 
         return robotPosPath

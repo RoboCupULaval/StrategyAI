@@ -39,7 +39,7 @@ class TestActions(unittest.TestCase):
     def test_move_to(self):
         self.pose = Pose(Position(0, 0, 0), orientation=0.0)
         self.move = MoveToPosition(self.game_state, self.player_id, self.pose)
-        self.assertEqual(MoveToPosition.exec(self.move),
+        self.assertEqual(self.move.exec(),
                          AICommand(self.player_id, AICommandType.MOVE,
                                    **{"pose_goal": self.pose}))
 

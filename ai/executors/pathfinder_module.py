@@ -4,22 +4,29 @@ from RULEngine.Debug.debug_interface import DebugInterface, COLOR_ID_MAP, DEFAUL
 from ai.Algorithm.AsPathManager import AsPathManager
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.executors.executor import Executor
+from ai.Util.ai_command import AICommand
+from ai.Algorithm.CinePath.CinePath import CinePath
+from RULEngine.Util.geometry import get_distance
+from ai.states.world_state import WorldState
+
+INTERMEDIATE_DISTANCE_THRESHOLD = 540
 
 
 class PathfinderModule(Executor):
 
-    def __init__(self, p_world_state, type_of_pathfinder):
+    def __init__(self, p_world_state: WorldState, type_of_pathfinder: str, is_simulation: bool):
         super().__init__(p_world_state)
-        self.debug_interface = DebugInterface()
-        self.pathfinder = self.get_pathfinder(type_of_pathfinder)
+        self.pathfinder = self.get_pathfinder(type_of_pathfinder, is_simulation)
         self.last_time_pathfinding_for_robot = {}
         self.last_frame = time.time()
+        self.is_simulation = is_simulation
+        self.cinematic_pathfinder = CinePath(p_world_state)
 
     def exec(self):
         ai_commands = self._get_aicommand_that_need_path()
         self._adjust_from_last_time_of_exec(ai_commands)
         self._pathfind_ai_commands(ai_commands)
-        # self._return_new_ai_commands(ai_commands)
+        #self._modify_path_for_cinematic_constraints(ai_commands)
 
     def _get_aicommand_that_need_path(self):
         aicommands_list = self.ws.play_state.current_ai_commands
@@ -43,19 +50,33 @@ class PathfinderModule(Executor):
             self.draw_path(path)
             ai_c.path = path
 
+    def _modify_path_for_cinematic_constraints(self, ai_commandes: list):
+        for cmd in ai_commandes:
+            target = self._find_intermediate_target(cmd.robot_id, cmd.path)
+            self.ws.debug_interface.add_log(3, "Target feed in CinePath: {}".format(target))
+            cmd.path = self.cinematic_pathfinder.get_path(cmd.robot_id, target)
+
+    def _find_intermediate_target(self, robot_id, path):
+        default_target = path[0]
+        player_pst = self.ws.game_state.get_player_pose(robot_id).position
+        for target in path:
+            if get_distance(player_pst, target) > INTERMEDIATE_DISTANCE_THRESHOLD:
+                return target
+        return default_target
+
     def change_pathfinder(self, type_of_pathfinder):
         assert isinstance(type_of_pathfinder, str)
         assert type_of_pathfinder.lower() in ["rrt", "astar"]
 
-        self.pathfinder = self.get_pathfinder(type_of_pathfinder)
+        self.pathfinder = self.get_pathfinder(type_of_pathfinder, self.is_simulation)
 
-    def get_pathfinder(self, type_of_pathfinder):
+    def get_pathfinder(self, type_of_pathfinder, is_simulation):
         assert isinstance(type_of_pathfinder, str)
         assert type_of_pathfinder.lower() in ["rrt", "astar"]
 
         if type_of_pathfinder.lower() == "astar":
             # place pathfinder here
-            return AsPathManager(self.ws)
+            return AsPathManager(self.ws, is_simulation)  # is_simulation)
         elif type_of_pathfinder.lower() == "rrt":
             # place pathfinder here
             return PathfinderRRT(self.ws)
@@ -69,5 +90,5 @@ class PathfinderModule(Executor):
             x = path_element.x
             y = path_element.y
             points.append((x, y))
-        self.debug_interface.add_multiple_points(points, COLOR_ID_MAP[pid], width=5, link="path - " + str(pid),
+        self.ws.debug_interface.add_multiple_points(points, COLOR_ID_MAP[pid], width=5, link="path - " + str(pid),
                                                  timeout=DEFAULT_PATH_TIMEOUT)

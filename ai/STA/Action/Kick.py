@@ -35,4 +35,5 @@ class Kick(Action):
         """
         position_joueur = self.game_state.get_player_pose(self.player_id)
         force_kick = self.force
-        return AICommand(self.player_id, AICommandType.KICK, **{"pose_goal": position_joueur})
+        return AICommand(self.player_id, AICommandType.KICK, **{"pose_goal": position_joueur,
+                                                                "kick_strength": self.force})
