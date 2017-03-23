@@ -6,7 +6,7 @@ POSITION_DELTA_TOLERANCE_MAGNITUDE = 1e0
 
 class Position(object):
     """ Vector with [x, y, z] """
-    def __init__(self, x=0, y=0, z=0, abs_tol=POSITION_DELTA_TOLERANCE_MAGNITUDE):
+    def __init__(self, x=0, y=0, z=0, abs_tol=POSITION_DELTA_TOLERANCE_MAGNITUDE, delta_t=0.03):
         assert(isinstance(x, (int, float))), 'x should be int or float.'
         assert(isinstance(y, (int, float))), 'y should be int or float.'
         assert(isinstance(z, (int, float))), 'z should be int or float.'
@@ -15,6 +15,7 @@ class Position(object):
         self.y = float(y)
         self.z = float(z)
         self.abs_tol = abs_tol
+        self.delta_t = delta_t
 
     def copy(self):
         """
@@ -23,6 +24,9 @@ class Position(object):
         Return copy of Position.
         """
         return Position(self.x, self.y, self.z)
+
+    def get_delta_t(self):
+        return self.delta_t
 
     # *** OPERATORS ***
     def __add__(self, other):

@@ -58,8 +58,8 @@ def create_charge_command(robot_idx):
     return _create_register_command(STM32_REG_CHARGE_KICKER, 0, robot_idx)
 
 
-def create_kick_command(robot_idx):
-    return _create_register_command(STM32_REG_KICK, 0, robot_idx)
+def create_kick_command(robot_idx: int, kick_strength: int):
+    return _create_register_command(STM32_REG_KICK, kick_strength, robot_idx)
 
 
 def create_dribbler_command(robot_idx, status):

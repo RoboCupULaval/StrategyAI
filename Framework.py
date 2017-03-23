@@ -27,7 +27,7 @@ from RULEngine.Debug.debug_interface import DebugInterface
 # Game objects
 from RULEngine.Game.Game import Game
 from RULEngine.Game.Referee import Referee
-from RULEngine.Util.constant import TeamColor
+from RULEngine.Util.constant import TeamColor, DELTA_T
 from RULEngine.Util.exception import StopPlayerError
 from RULEngine.Util.team_color_service import TeamColorService
 from RULEngine.Util.game_world import GameWorld
@@ -36,7 +36,7 @@ from RULEngine.Util.image_transformer import ImageTransformer
 # TODO inquire about those constants (move, utility)
 LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
 UI_DEBUG_MULTICAST_ADDRESS = "127.0.0.1"
-CMD_DELTA_TIME = 0.030
+CMD_DELTA_TIME = 0.0
 
 
 class Framework(object):
@@ -54,6 +54,7 @@ class Framework(object):
         """
         # time
         self.last_frame_number = 0
+        self.last_frames = [0, 0, 0, 0]
         self.time_stamp = time.time()
         self.last_time = 0
         self.last_cmd_time = time.time()
@@ -70,13 +71,12 @@ class Framework(object):
         self.uidebug_command_receiver = None
         self.uidebug_vision_sender = None
         # because this thing below is a callable!
-        self.vision_redirecter = lambda *args:None
-        self.vision_routine = self._normal_vision
-
+        self.vision_redirecter = lambda *args: None
+        self.vision_routine = self._normal_vision  # self._normal_vision # self._test_vision
         # Debug
+        self.incoming_debug = []
         self.outgoing_debug = []
         self.debug = DebugInterface()
-
         self._init_communication(serial=serial, redirect=redirect, mcu_version=mcu_version)
 
         # Game elements
@@ -85,8 +85,12 @@ class Framework(object):
         self.ai_coach = None
         self.referee = None
         self.team_color_service = None
+        if serial in SerialType:
+            terrain_type = "real"
+        else:
+            terrain_type = "sim"
 
-        self._create_game_world()
+        self._create_game_world(terrain_type)
 
         # VISION
         self.image_transformer = ImageTransformer()
@@ -158,7 +162,7 @@ class Framework(object):
         if not async:
             self.ia_running_thread.join()
 
-    def _create_game_world(self):
+    def _create_game_world(self, terrain_type="sim"):
         """
             Créé le GameWorld pour contenir les éléments d'une partie normale:
              l'arbitre, la Game (Field, teams, players).
@@ -166,34 +170,60 @@ class Framework(object):
         """
 
         self.referee = Referee()
-        self.game = Game()
+        self.game = Game(terrain_type)
         self.game.set_referee(self.referee)
         self.game_world = GameWorld(self.game)
         self.game_world.set_timestamp(self.time_stamp)
+        self.game_world.set_debug(self.incoming_debug)
 
     def _update_players_and_ball(self, vision_frame):
         """ Met à jour le GameState selon la frame de vision obtenue. """
         time_delta = self._compute_vision_time_delta(vision_frame)
         self.game.update(vision_frame, time_delta)
 
+    def _better_update_players_and_ball(self, vision_frame):
+        time_delta = self._better_compute_vision_time_delta(vision_frame)
+        self.game.update(vision_frame, time_delta)
+
     def _is_frame_number_different(self, vision_frame):
+        #print(vision_frame.detection.frame_number)
         if vision_frame is not None:
             return vision_frame.detection.frame_number != self.last_frame_number
         else:
             return False
 
+    def _better_is_frame_number_different(self, vision_frame):
+        if vision_frame is not None and vision_frame.HasField("detection"):
+            if self.last_frames[vision_frame.camera_id] < vision_frame.camera_id.frame_number:
+                return True
+        return False
+
     def _compute_vision_time_delta(self, vision_frame):
         self.last_frame_number = vision_frame.detection.frame_number
-        this_time = vision_frame.detection.t_capture
+        this_time = vision_frame.detection.t_capture  # time.time()  # vision_frame.detection.t_capture
         time_delta = this_time - self.last_time
         self.last_time = this_time
         # FIXME: hack
         return time_delta
 
-    def _update_debug_info(self):
-        """ Retourne le **GameState** actuel. *** """
+    def _better_compute_vision_time_delta(self, vision_frame):
+        c_id = vision_frame.camera_id
+        if not self.last_frames[c_id] < vision_frame.detection.frame_number:
+            return
+        self.last_frames[vision_frame.camera_id] = vision_frame.detection.frame_number
 
-        self.game_world.debug_info += self.uidebug_command_receiver.receive_command()
+        self.last_frame_number = vision_frame.detection.frame_number
+        this_time = vision_frame.detection.t_capture
+        time_delta = this_time - self.last_time
+        self.last_time = this_time
+        if time_delta <= 0.0:
+           return DELTA_T*10E-4
+        # FIXME: hack
+        return time_delta
+
+    def _update_debug_info(self):
+        """ Retourne le **GameState** actuel. *** """  # WUT?
+        self.incoming_debug += self.uidebug_command_receiver.receive_command()
 
     def _normal_vision(self):
         vision_frame = self._acquire_last_vision_frame()
@@ -201,24 +231,42 @@ class Framework(object):
             self._update_players_and_ball(vision_frame)
             self._update_debug_info()
             robot_commands = self.ia_coach_mainloop()
+            # Communication
 
+            self._send_robot_commands(robot_commands)
+            self.game.set_command(robot_commands)
+            self._send_debug_commands()
+            #print(time.time() - self.time_stamp)
+
+    def _test_vision(self):
+        vision_frame = self._acquire_last_vision_frame()
+        if self._better_is_frame_number_different(vision_frame):
+            self._better_update_players_and_ball(vision_frame)
+            self._update_debug_info()
+            robot_commands = self.ia_coach_mainloop()
             # Communication
             self._send_robot_commands(robot_commands)
+            self.game.set_command(robot_commands)
             self._send_debug_commands()
+            #print(time.time() - self.time_stamp)
 
     def _redirected_vision(self):
         vision_frames = self.vision.pop_frames()
         new_image_packet = self.image_transformer.update(vision_frames)
+        #print(time.time() - self.time_stamp)
         self.vision_redirecter(new_image_packet.SerializeToString())
-
-        if self.image_transformer.has_new_image():
-            self._update_players_and_ball(new_image_packet)
+        if self._is_frame_number_different(new_image_packet):
+            #print(time.time() - self.time_stamp)
+            self._better_update_players_and_ball(new_image_packet)
             self._update_debug_info()
+            #print(time.time() - self.time_stamp)
+
             robot_commands = self.ia_coach_mainloop()
 
             # Communication
             self._send_robot_commands(robot_commands)
             self._send_debug_commands()
+            #print(time.time() - self.time_stamp)
 
     def _acquire_last_vision_frame(self):
         return self.vision.get_latest_frame()
@@ -233,6 +281,7 @@ class Framework(object):
         self.thread_terminate.set()
         self.ia_running_thread.join()
         self.thread_terminate.clear()
+        self.robot_command_sender.stop()
         try:
             team = self.game.friends
 
@@ -253,7 +302,10 @@ class Framework(object):
 
     def _send_robot_commands(self, commands):
         """ Envoi les commades des robots au serveur. """
-        time.sleep(CMD_DELTA_TIME)
+        # time.sleep(CMD_DELTA_TIME)
+        time_ellapsed = time.time() - self.time_stamp
+        if time_ellapsed < CMD_DELTA_TIME:
+            time.sleep(CMD_DELTA_TIME - time_ellapsed)
         for idx, command in enumerate(commands):
             self.robot_command_sender.send_command(command)
 
@@ -264,8 +316,8 @@ class Framework(object):
         if self.uidebug_command_sender is not None:
             self.uidebug_command_sender.send_command(packet_represented_commands)
 
+        self.incoming_debug.clear()
         self.outgoing_debug.clear()
-        self.game_world.debug_info.clear()
 
     def _sigint_handler(self, signum, frame):
         self.stop_game()

@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.team_color_service import TeamColor
@@ -11,9 +11,9 @@ from RULEngine.Game.Referee import Referee
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, terrain_type="sim"):
         self.ball = Ball()
-        self.field = Field(self.ball)
+        self.field = Field(self.ball, terrain_type)
         self.referee = None
         self.our_team_color = None
         self.enemy_team_color = None
@@ -22,6 +22,11 @@ class Game:
         self.friends = None
         self.enemies = None
         self.delta_t = None
+        self.cmd = None
+
+    def set_command(self, cmd):
+        for commands in cmd:
+            self.friends.update_player_command(commands.player.id, commands)
 
     def set_referee(self, p_referee):
         self.referee = p_referee
@@ -50,8 +55,9 @@ class Game:
         # command = Referee.Command(referee_command.command.name)
         # self.referee.command = command
 
-    def update(self, vision_frame, delta):
+    def update(self, vision_frame: messages_robocup_ssl_wrapper_pb2, delta: float):
         self.delta_t = delta
+        #print(delta)
         self._update_ball(vision_frame, delta)
         self._update_players(vision_frame, delta)
 

@@ -4,8 +4,7 @@ import math as m
 import numpy as np
 
 from ..Util.Position import Position
-from .constant import FIELD_X_RIGHT, FIELD_X_LEFT, FIELD_Y_TOP,\
-                      FIELD_Y_BOTTOM, KICK_MAX_SPD
+from ..Util.Pose import Pose
 
 __author__ = 'RoboCupULaval'
 
@@ -140,8 +139,8 @@ def det(pos_a: Position, pos_b: Position) -> float:
         [a.x  a.y]
         [b.x  b.y]
         Args:
-            a: La première position.
-            b: La seconde position.
+            pos_a: La première position.
+            pos_b: La seconde position.
         Returns
             Le déterminant.
     """
@@ -209,8 +208,10 @@ def get_lines_intersection(position_a1: Position, position_a2: Position,
 
     scale = np.linalg.solve(a, b)
 
-    intersection1 = np.matrix([[position_a1.x], [position_a1.y]]) + scale.item((0, 0))*np.matrix([[delta_x_a], [delta_y_a]])
-    intersection2 = np.matrix([[position_b1.x], [position_b1.y]]) + scale.item((1, 0))*np.matrix([[delta_x_b], [delta_y_b]])
+    intersection1 = np.matrix([[position_a1.x], [position_a1.y]]) + scale.item((0, 0))*np.matrix([[delta_x_a],
+                                                                                                  [delta_y_a]])
+    intersection2 = np.matrix([[position_b1.x], [position_b1.y]]) + scale.item((1, 0))*np.matrix([[delta_x_b],
+                                                                                                  [delta_y_b]])
 
     assert np.allclose(intersection1, intersection2)
 
@@ -326,11 +327,11 @@ def get_first_to_arrive(distance1: float,
         return 1 if time1 < time2 else 2
 
 
-def isFacingPointAndTarget(player_position: Position,
-                           point_position: Position,
-                           target_position:
+def is_facing_point_and_target(player_position: Position,
+                               point_position: Position,
+                               target_position:
                                Position,
-                           tolerated_angle: float) -> bool:
+                               tolerated_angle: float) -> bool:
     """
         Détermine si l'angle entre le joueur et le point est suffisamment proche
         de celui du point à la cible. En d'autres mots, lorsqu'utilisé avec la balle
@@ -356,19 +357,20 @@ def isFacingPointAndTarget(player_position: Position,
     return angle_difference < tolerated_angle
 
 
-def rotate_point_around_origin(point,origin,angle):
+def rotate_point_around_origin(point, origin, angle):
+    # TODO: ajouter des unit tests
     sine = m.sin(angle)
     cos = m.cos(angle)
 
-    point.x -= origin.x
-    point.y -= origin.y
+    x = point.x - origin.x
+    y = point.y - origin.y
 
-    new_x = point.x * cos - point.y * sine
-    new_y = point.x * sine + point.y * cos
+    new_x = x * cos - y * sine
+    new_y = x * sine + y * cos
 
     new_x += origin.x
     new_y += origin.y
 
-    new_point = Position(new_x,new_y)
+    new_point = Position(new_x, new_y)
 
     return new_point
