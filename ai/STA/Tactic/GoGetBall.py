@@ -57,6 +57,7 @@ class GoGetBall(Tactic):
         self.last_angle = 0
         self.last_time = time.time()
         self.vector_norm = 1000
+        self.debug = DebugInterface()
 
     def get_behind_ball(self):
         self.status_flag = Flags.WIP
@@ -87,7 +88,7 @@ class GoGetBall(Tactic):
                     self.last_time = time.time()
                     self.next_state = self.start_dribbler
         else:
-            DebugInterface().add_log(4, "Distance from ball: {}".format(dist))
+            # self.debug.add_log(4, "Distance from ball: {}".format(dist))
             self.next_state = self.get_behind_ball
         return GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position()+Position(vector_player_2_ball[0]*70, vector_player_2_ball[1] * 70), self.target.position,
                         self.game_state.const["DISTANCE_BEHIND"])
@@ -95,7 +96,7 @@ class GoGetBall(Tactic):
     def start_dribbler(self):
         now = time.time()
         if now - self.last_time > COMMAND_DELAY:
-            DebugInterface().add_log(5, "Dribbler on!")
+            # self.debug.add_log(5, "Dribbler on!")
             self.last_ball_position = self.game_state.get_ball_position()
             self.last_angle = self.game_state.game.friends.players[self.player_id].pose.orientation
             self.next_state = self.grab_ball
@@ -103,7 +104,7 @@ class GoGetBall(Tactic):
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def grab_ball(self):
-        DebugInterface().add_log(1, "Grab ball called")
+        # self.debug.add_log(1, "Grab ball called")
         player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
         player_y = self.game_state.game.friends.players[self.player_id].pose.position.y
         ball_x = self.game_state.get_ball_position().x
@@ -111,16 +112,16 @@ class GoGetBall(Tactic):
         vector_player_2_ball = np.array([ball_x - player_x, ball_y - player_y])
 
         self.vector_norm = np.linalg.norm(vector_player_2_ball)
-        DebugInterface().add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
+        # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
         if self.vector_norm < 110:
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
-        DebugInterface().add_log(1, "orientation go get ball {}".format(self.last_angle))
+        # self.debug.add_log(1, "orientation go get ball {}".format(self.last_angle))
         return MoveToPosition(self.game_state, self.player_id, Pose(Position(vector_player_2_ball[0]*300, vector_player_2_ball[1] * 300), self.last_angle))
 
     def halt(self):
         self.status_flag = Flags.SUCCESS
-        DebugInterface().add_log(1, "GogetBall so sucessfull")
+        # self.debug.add_log(1, "GogetBall so sucessfull")
 
         return Idle(self.game_state, self.player_id)
 
