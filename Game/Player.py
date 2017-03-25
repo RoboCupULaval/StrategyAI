@@ -21,7 +21,7 @@ class Player:
         control_input_model = [[0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 0], [0, 0, 1]]
         observation_model = [[1, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0]]
 
-        process_covariance = 10 ** (1) * np.eye(6)
+        process_covariance = 10 ** (-1) * np.eye(6)
         observation_covariance = np.eye(3) * 10 ** (-4)
         #observation_covariance[2, 2] /= 10000
 

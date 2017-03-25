@@ -57,7 +57,7 @@ class SerialCommandSender(object):
 
     def send_command(self, command: _Command):
         self.command_queue.append(command)
-        print("({}) Command deque length: {}".format(time.time(), len(self.command_queue)))
+        #print("({}) Command deque length: {}".format(time.time(), len(self.command_queue)))
 
     def stop(self):
         self.terminate.set()
