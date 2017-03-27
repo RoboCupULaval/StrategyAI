@@ -26,7 +26,6 @@ class Joystick(Tactic):
         pygame.init()
         pygame.joystick.init()
         joystick_count = pygame.joystick.get_count()
-
         if int(self.joy_id) < joystick_count:
             pygame.display.set_mode([1, 1])
             joystick = pygame.joystick.Joystick(self.joy_id)
