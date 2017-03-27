@@ -26,8 +26,8 @@ class ReceivePass(Tactic):
         status_flag : L'indicateur de progression de la tactique
     """
 
-    def __init__(self, game_state, player_id, target):
-        Tactic.__init__(self, game_state, player_id, target)
+    def __init__(self, game_state, player_id, target, args=None,):
+        Tactic.__init__(self, game_state, player_id, target, args)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
 

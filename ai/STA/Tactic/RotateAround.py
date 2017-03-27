@@ -26,9 +26,8 @@ class RotateAround(Tactic):
         next_state : L'état suivant de la tactique
     """
 
-    def __init__(self, game_state, player_id, center_position, target):
-        Tactic.__init__(self, game_state, player_id, Pose(target, 0))
-        assert isinstance(player_id, int)
+    def __init__(self, game_state, player_id, center_position, target, args=None,):
+        Tactic.__init__(self, game_state, player_id, target, args)
         assert PLAYER_PER_TEAM >= player_id >= 0
 
         MINIMUM_DISTANCE = 110  # TODO: à mettre dans les constantes

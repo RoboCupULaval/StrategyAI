@@ -7,8 +7,8 @@ from RULEngine.Util.geometry import get_distance
 
 
 class GoToPositionPathfinder(Tactic):
-    def __init__(self, p_game_state, player_id, target):
-        super().__init__(p_game_state, player_id)
+    def __init__(self, p_game_state, player_id, target, args=None):
+        super().__init__(p_game_state, player_id, target, args)
         self.target = target
         self.status_flag = Flags.INIT
 

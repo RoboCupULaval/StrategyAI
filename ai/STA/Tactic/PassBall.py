@@ -26,7 +26,7 @@ class PassBall(Tactic):
         target_position : La position du robot qui reçoit la passe
     """
 
-    def __init__(self, game_state, player_id, target, args):
+    def __init__(self, game_state, player_id, target=Pose(), args=None):
         Tactic.__init__(self, game_state, player_id, target, args)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0

@@ -8,8 +8,8 @@ from ai.STA.Tactic.tactic_constants import Flags
 
 
 class VaEtVient(Tactic):
-    def __init__(self, p_game_state, player_id, target=Pose()):
-        super().__init__(p_game_state, player_id, target)
+    def __init__(self, p_game_state, player_id, target=Pose(), args=None):
+        super().__init__(p_game_state, player_id, target, args)
         self.status_flag = Flags.INIT
         self.start = self.game_state.get_player_pose(self.player_id)
         self.end = Pose(position=self.target.position, orientation=0)

@@ -10,6 +10,8 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.Raycast import raycast
 
+MAX_WIDTH_TO_PASS = 100
+
 
 class StandOutWaitPass(Tactic):
 
@@ -36,8 +38,12 @@ class StandOutWaitPass(Tactic):
         distance_to_kicker = get_distance(player_pos, kicker_pos)
         angle_kicker_to_player = get_angle(kicker_pos, player_pos)
         is_standing_out = raycast(self.game_state, kicker_pos, distance_to_kicker, angle_kicker_to_player,
-                                  1, [2, 3], [], True)
+                                  MAX_WIDTH_TO_PASS, [self.player_id, self.kicker_id], [], True)
 
+        if is_standing_out:
+            self.next_state = self.am_i_standing_out
+        else:
+            self.next_state = self.wait_for_pass
         self.debug.add_log(1, str(is_standing_out))
         return True
 

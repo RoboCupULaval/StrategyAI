@@ -32,8 +32,9 @@ class ProtectZone(Tactic):
         status_flag : L'indicateur de progression de la tactique
     """
 
-    def __init__(self, p_game_state, p_player_id, p_y_top, p_y_bottom, p_x_left, p_x_right, p_is_yellow=False):
-        Tactic.__init__(self, p_game_state, p_player_id)
+    def __init__(self, p_game_state, p_player_id, target=Pose(), args=None,
+                 p_y_top=3000, p_y_bottom=-3000, p_x_left=-4500, p_x_right=4500, p_is_yellow=False):
+        Tactic.__init__(self, p_game_state, p_player_id, target, args)
         assert isinstance(p_player_id, int)
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert isinstance(p_y_top, (int, float))

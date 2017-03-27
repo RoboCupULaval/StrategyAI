@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from RULEngine.Util.Pose import Pose
 from ai.STA.Tactic.Tactic import Tactic
 
 
@@ -17,8 +17,8 @@ class DemoFollowTarget(Tactic):
         next_state : chaîne de caratères définissant l'état suivant
     """
 
-    def __init__(self, game_state, team_id, player_id):
-        Tactic.__init__(self, game_state, team_id, player_id)
+    def __init__(self, game_state, team_id, player_id, target=Pose(), args=None):
+        Tactic.__init__(self, game_state, team_id, player_id, target, args)
         self.current_state = 'halt'
         self.next_state = 'halt'
         self.dispatch.update({'follow_ball': self.follow_ball, 'follow_next_player': self.follow_next_player})

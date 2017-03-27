@@ -25,8 +25,8 @@ class DemoFollowBall(Tactic):
         game_state: état courant du jeu
         player_id : Identifiant du joueur auquel est assigné la tactique
     """
-    def __init__(self, game_state, player_id, p_target=Pose(), time_to_live=DEFAULT_TIME_TO_LIVE):
-        Tactic.__init__(self, game_state, player_id, p_target, time_to_live=time_to_live)
+    def __init__(self, game_state, player_id, p_target=Pose(), args=None, time_to_live=DEFAULT_TIME_TO_LIVE):
+        Tactic.__init__(self, game_state, player_id, p_target, args, time_to_live=time_to_live)
         assert isinstance(player_id, int)
 
         self.current_state = self.halt
