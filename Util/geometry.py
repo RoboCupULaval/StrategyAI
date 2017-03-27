@@ -374,3 +374,8 @@ def rotate_point_around_origin(point, origin, angle):
     new_point = Position(new_x, new_y)
 
     return new_point
+
+
+def conv_position_2_list(position: Position):
+    assert isinstance(position, Position)
+    return [position.x, position.y]
