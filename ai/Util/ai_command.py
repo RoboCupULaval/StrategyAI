@@ -32,6 +32,9 @@ class AICommand(object):
         self.speed = Pose()
         self.robot_speed = other_args.get("speed", 0)
 
+        # set this flag to true if you only need speed regulation (The pose_goal will be in m/s)
+        self.speed_flag = other_args.get("speed_flag", False)
+
         # this is for rotate around movement
         self.rotate_around_flag = other_args.get("rotate_around_flag", False)
         self.rotate_around_goal = other_args.get("rotate_around_goal", RotateAroundCommand())

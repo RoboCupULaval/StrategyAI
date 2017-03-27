@@ -42,13 +42,19 @@ class PositionRegulator(Executor):
             if cmd.command is AICommandType.MOVE:
                 robot_idx = cmd.robot_id
                 active_player = self.ws.game_state.game.friends.players[robot_idx]
-                if not cmd.rotate_around_flag:
+                if not cmd.rotate_around_flag and not cmd.speed_flag:
                     cmd.speed = self.regulators[robot_idx].\
                         update_pid_and_return_speed_command(cmd,
                                                             active_player,
                                                             delta_t,
                                                             idx=robot_idx,
                                                             robot_speed=cmd.robot_speed)
+                    #cmd.speed.position.x = 0
+                    #cmd.speed.position.y = 0
+                elif not cmd.rotate_around_flag and cmd.speed_flag:
+                    v_theta = cmd.pose_goal.orientation
+                    v_x, v_y =_correct_for_referential_frame(cmd.pose_goal.position.x, cmd.pose_goal.position.y, -active_player.pose.orientation)
+                    cmd.speed = Pose(Position(v_x, v_y), v_theta)
                 else:
                     cmd.speed = self.regulators[robot_idx].\
                         rotate_around(cmd, active_player, delta_t)
@@ -172,7 +178,7 @@ class PI(object):
         self.rotation_dead_zone = 0.01 * math.pi
         self.last_theta_target = 0
 
-    def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=0.2):
+    def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=1):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
         assert isinstance(cmd, AICommand), "La consigne doit etre une Pose dans le PI"
         if robot_speed:
@@ -318,9 +324,9 @@ def _set_constants(simulation_setting):
                 "ROBOT_VELOCITY_MAX": 4,
                 "ROBOT_ACC_MAX": 2,
                 "accel_max": 0.7,
-                "vit_max": 1.0,
+                "vit_max": 2.0,
                 "vit_min": 0.05,
-                "xyKp": 1,
+                "xyKp": 0.5,
                 "ki": 0.05,
                 "kd": 0.4,
                 "thetaKp": 1,

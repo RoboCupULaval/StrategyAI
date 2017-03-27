@@ -16,6 +16,7 @@ from ai.STA.Tactic.DemoFollowBall import DemoFollowBall
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.go_kick import GoKick
+from ai.STA.Tactic.Joystick import Joystick
 
 
 class TacticBook(object):
@@ -36,7 +37,8 @@ class TacticBook(object):
                             'GoKick': GoKick,
                             "TestTurnOnYou": TestTurnOnYou,
                             'RotateAroundPosition': RotateAroundPosition,
-                            "VaEtVient": VaEtVient
+                            "VaEtVient": VaEtVient,
+                            'Joystick': Joystick
                             }
 
     def get_tactics_name_list(self) -> List[str]:
