@@ -3,11 +3,13 @@ from typing import List
 
 from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
 from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.stand_out_wait_pass import StandOutWaitPass
 from ai.STA.Tactic.test_turn_on_you import TestTurnOnYou
 from ai.STA.Tactic.va_et_vient import VaEtVient
 from ai.STA.Tactic.GoGetBall import GoGetBall
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.GoToPosition import GoToPosition
+from ai.STA.Tactic.PassBall import PassBall
+from ai.STA.Tactic.ReceivePass import ReceivePass
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.ProtectZone import ProtectZone
 from ai.STA.Tactic.DemoFollowBall import DemoFollowBall
@@ -21,7 +23,9 @@ class TacticBook(object):
         """
         Initialise le dictionnaire des tactiques présentées au reste de l'IA.
         """
-        self.tactic_book = {'GoToPosition': GoToPosition,
+        self.tactic_book = {'PassBall': PassBall,
+                            'ReceivePass': ReceivePass,
+                            'StandOutWaitPass': StandOutWaitPass,
                             'GoalKeeper': GoalKeeper,
                             'CoverZone': ProtectZone,
                             'GoGetBall': GoGetBall,
