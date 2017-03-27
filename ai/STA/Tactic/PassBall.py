@@ -1,5 +1,5 @@
 # Under MIT licence, see LICENCE.txt
-
+from RULEngine.Util.Pose import Pose
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.Kick import Kick
@@ -26,17 +26,17 @@ class PassBall(Tactic):
         target_position : La position du robot qui reçoit la passe
     """
 
-    def __init__(self, game_state, player_id, target_position):
-        Tactic.__init__(self, game_state, player_id)
+    def __init__(self, game_state, player_id, target, args):
+        Tactic.__init__(self, game_state, player_id, target, args)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
-        assert isinstance(target_position, Position)
+        assert isinstance(target, Pose)
         # TODO : s'assurer de la target_position soit à l'intérieur du terrain
 
         self.current_state = self.kick_ball_towards_target
         self.next_state = self.kick_ball_towards_target
         self.player_id = player_id
-        self.target_position = target_position
+        self.target_position = target
 
     def kick_ball_towards_target(self):
         # check alignment before kicking

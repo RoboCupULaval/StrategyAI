@@ -87,10 +87,11 @@ class DebugExecutor(Executor):
         args = cmd.data.get('args', "")
         tactic = self.ws.play_state.get_new_tactic('Idle')(self.ws.game_state,
                                                            player_id,
-                                                           target)
+                                                           target,
+                                                           args)
         try:
             tactic = self.ws.play_state.get_new_tactic(tactic_name)\
-                (self.ws.game_state, player_id, target)
+                (self.ws.game_state, player_id, target, args)
         except Exception as e:
             print(e)
             print("La tactique n'a pas été appliquée par "

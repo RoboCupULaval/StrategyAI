@@ -14,17 +14,22 @@ from . tactic_constants import Flags
 
 
 class Joystick(Tactic):
-    def __init__(self, p_game_state, player_id, target):
-        super().__init__(p_game_state, player_id, target)
+    def __init__(self, p_game_state, player_id, target, args):
+        super().__init__(p_game_state, player_id, target, args)
         self.target = target
         self.status_flag = Flags.INIT
+
+        self.inv_x = int(args[0])
+        self.inv_y = int(args[1])
+        self.joy_id = int(args[2])
+
         pygame.init()
         pygame.joystick.init()
         joystick_count = pygame.joystick.get_count()
 
-        if player_id - 1 < joystick_count:
+        if int(self.joy_id) < joystick_count:
             pygame.display.set_mode([1, 1])
-            joystick = pygame.joystick.Joystick(player_id - 1)
+            joystick = pygame.joystick.Joystick(self.joy_id)
             joystick.init()
             self.joy = RobotJoystick(joystick)
         else:
@@ -54,8 +59,10 @@ class Joystick(Tactic):
             else:
                 dribbler = 0
 
+            x_speed = -y * self.inv_y
+            y_speed = x * self.inv_x
 
-            speed_pose = Pose(Position(y, -x), t * -5)
+            speed_pose = Pose(Position(x_speed, y_speed), t * -5)
 
             if kick == 0:
                 next_action = AICommand(self.player_id, AICommandType.MOVE,

@@ -36,17 +36,17 @@ class TestPasses(Strategy):
 
         self.add_tactic(0, GoalKeeper(self.game_state, 0))
 
-        self.add_tactic(self.passer_id, GoGetBall(self.game_state, self.passer_id, self.receiver_pose))
+        self.add_tactic(self.passer_id, GoGetBall(self.game_state, self.passer_id, self.receiver_pose, None))
         self.add_tactic(self.passer_id, RotateAround(self.game_state, self.passer_id, self.ball_position,
                                                      self.receiver_pose.position))
-        self.add_tactic(self.passer_id, PassBall(self.game_state, self.passer_id, self.receiver_pose.position))
+        self.add_tactic(self.passer_id, PassBall(self.game_state, self.passer_id, self.receiver_pose, None))
         self.add_condition(self.passer_id, 0, 1, self.passer_has_ball)
         self.add_condition(self.passer_id, 1, 2, self.ready_to_pass)
         self.add_condition(self.passer_id, 2, 0, self.pass_failed)
 
         p = Pose(self.receiver_pose.position, get_angle(self.receiver_pose.position, self.ball_position))
         self.add_tactic(self.receiver_id, GoToPositionNoPathfinder(self.game_state, self.receiver_id, p))
-        self.add_tactic(self.receiver_id, ReceivePass(self.game_state, self.receiver_id))
+        self.add_tactic(self.receiver_id, ReceivePass(self.game_state, self.receiver_id, p))
         self.add_condition(self.receiver_id, 0, 1, self.pass_was_made)
 
         for i in range(3, PLAYER_PER_TEAM):
