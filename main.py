@@ -71,6 +71,7 @@ def get_serial(serial):
         raise Exception("Le choix du type de port serie est invalide")
 
 if __name__ == '__main__':
+    # parser for command line arguments
     parser = set_arg_parser()
     args = parser.parse_args()
     color = get_color(args.color)
@@ -78,7 +79,10 @@ if __name__ == '__main__':
     serial = get_serial(args.serial)
 
     simulation = serial == SERIAL_DISABLED
+    # ai init
     ai_coach = Coach(is_simulation=simulation)
+    # RULEngine init
     framework = Framework(serial=serial, redirect=False, mcu_version=mcu)
+    # Starting point
     framework.start_game(ai_coach.main_loop, ai_coach.set_reference,
                          team_color=color, async=args.async)

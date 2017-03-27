@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 
-from ai.Algorithm.Node import Node
-from ai.Algorithm.Vertex import Vertex
+from ai.Algorithm.Graph.Node import Node
+from ai.Algorithm.Graph.Vertex import Vertex
 from ai.STA.Tactic.tactic_constants import Flags
 
 __author__ = 'RoboCupULaval'

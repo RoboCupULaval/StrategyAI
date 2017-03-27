@@ -1,6 +1,8 @@
 # Under MIT licence, see LICENCE.txt
 
 from abc import abstractmethod
+
+from ai.Util.ai_command import AICommand
 from ai.states.game_state import GameState
 
 __author__ = 'Robocup ULaval'
@@ -17,6 +19,7 @@ class Action:
         # assert(isinstance(p_game_state, GameState))  # l'assert échoue si GameState est un singleton
         self.game_state = p_game_state
 
+    # TODO revise these 2 next methods please! MGL 2017/03/16
     def on_before(self):
         pass
 
@@ -24,9 +27,10 @@ class Action:
         pass
 
     @abstractmethod
-    def exec(self):
+    def exec(self) -> AICommand:
         """
         Calcul la prochaine action d'un joueur
+
         :return: AICommand
         """
         pass

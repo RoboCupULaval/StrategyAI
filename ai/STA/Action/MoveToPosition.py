@@ -15,7 +15,7 @@ class MoveToPosition(Action):
         player_id : L'identifiant du joueur
         destination : La destination (pose) que le joueur doit atteindre
     """
-    def __init__(self, p_game_state, p_player_id, p_destination, speed=0.5):
+    def __init__(self, p_game_state, p_player_id, p_destination):
         """
             :param p_game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui se déplace
@@ -27,7 +27,6 @@ class MoveToPosition(Action):
         assert(isinstance(p_destination, Pose))
         self.player_id = p_player_id
         self.destination = p_destination
-        self.speed = speed
 
     def exec(self):
         """
@@ -36,6 +35,6 @@ class MoveToPosition(Action):
                      où Pose est la destination du joueur
                         kick est faux (on ne botte pas)
         """
-        move_destination = self.destination
+        self.destination
         return AICommand(self.player_id, AICommandType.MOVE,
-                         **{"pose_goal": move_destination, "speed": self.speed})
+                         **{"pose_goal": self.destination})
