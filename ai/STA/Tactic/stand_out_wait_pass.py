@@ -26,10 +26,11 @@ class StandOutWaitPass(Tactic):
 
     def stand_out(self) -> None:
         self.status_flag = Flags.WIP
+
         if self.am_i_standing_out():
             self.next_state = self.stand_out
         else:
-            self.next_state = self.stand_out
+            self.next_state = self.wait_for_pass
         return Idle(self.game_state, self.player_id)
 
     def am_i_standing_out(self) -> bool:
@@ -40,12 +41,8 @@ class StandOutWaitPass(Tactic):
         is_standing_out = raycast(self.game_state, kicker_pos, distance_to_kicker, angle_kicker_to_player,
                                   MAX_WIDTH_TO_PASS, [self.player_id, self.kicker_id], [], True)
 
-        if is_standing_out:
-            self.next_state = self.am_i_standing_out
-        else:
-            self.next_state = self.wait_for_pass
-        self.debug.add_log(1, str(is_standing_out))
-        return True
+        self.debug.add_log(1, str(not is_standing_out))
+        return not is_standing_out
 
     def wait_for_pass(self):
         self.next_state = self.wait_for_pass
