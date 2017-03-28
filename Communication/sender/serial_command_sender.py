@@ -53,7 +53,7 @@ class SerialCommandSender(object):
     def send_loop(self):
         while not self.terminate.is_set():
             if time.time() - self.last_time > MOVE_COMMAND_SLEEP:
-                print(self.command_dict)
+                # print(self.command_dict)
                 for c in self.command_dict.values():
                     packed_command = c.package_command(mcu_version=self.mcu_version)
                     self.serial.write(packed_command)
@@ -65,7 +65,7 @@ class SerialCommandSender(object):
                 except IndexError:
                     next_command = None
                 if next_command:
-                    print(next_command)
+                    # print(next_command)
                     packed_command = next_command.package_command(mcu_version=self.mcu_version)
                     self.serial.write(packed_command)
             """
