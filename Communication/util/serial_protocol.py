@@ -71,12 +71,6 @@ def _create_register_command(register, value, robot_idx):
     return _stm32_pack_cmd(payload, STM32_CMD_SET_REGISTER, robot_idx)
 
 
-def calculateAndSetChecksum(payload):
-    checksum = bytes([sum(payload) & 0xff])
-    return payload[:4] + checksum + payload[5:]
-
-
-
 def ping_robot(serial):
     # ecriture de la commande de ping
     ping = _stm32_pack_ping()
