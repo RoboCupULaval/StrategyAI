@@ -72,7 +72,7 @@ class Framework(object):
         self.uidebug_vision_sender = None
         # because this thing below is a callable!
         self.vision_redirecter = lambda *args: None
-        self.vision_routine = self._normal_vision  # self._normal_vision # self._test_vision self._redirected_vision
+        self.vision_routine = self._redirected_vision  # self._normal_vision # self._test_vision self._redirected_vision
         # Debug
         self.incoming_debug = []
         self.outgoing_debug = []
@@ -93,7 +93,7 @@ class Framework(object):
         self._create_game_world(terrain_type)
 
         # VISION
-        self.image_transformer = ImageTransformer()
+        self.image_transformer = ImageTransformer(kalman=False)
 
         # ia couplage
         self.ia_coach_mainloop = None
@@ -217,8 +217,12 @@ class Framework(object):
 
     def _test_vision(self):
         vision_frame = self._acquire_last_vision_frame()
-        if self._is_frame_number_different(vision_frame):
-            self._update_players_and_ball(vision_frame)
+        if vision_frame.detection.frame_number != self.last_frame_number:
+            self.last_frame_number = vision_frame.detection.frame_number
+            this_time = vision_frame.detection.t_capture  # time.time()  # vision_frame.detection.t_capture
+            time_delta = this_time - self.last_time
+            self.last_time = this_time
+            self.game.update(vision_frame, time_delta)
             self._update_debug_info()
             robot_commands = self.ia_coach_mainloop()
             # Communication
@@ -226,20 +230,22 @@ class Framework(object):
             self._send_robot_commands(robot_commands)
             self.game.set_command(robot_commands)
             self._send_debug_commands()
-        else:
-            time.sleep(0)
+        time.sleep(0)
+
+    def _kalman_vision(self):
+        vision_frames = self.vision.pop_frames()
+        self.image_transformer.kalman_update(vision_frames)
 
     def _redirected_vision(self):
         vision_frames = self.vision.pop_frames()
         new_image_packet = self.image_transformer.update(vision_frames)
 
-        if self.image_transformer.has_new_image():
+        if time.time() - self.last_loop > 0.05:
             self.vision_redirecter(new_image_packet.SerializeToString())
             time_delta = time.time() - self.last_time
             self.game.update(new_image_packet, time_delta)
             self.last_time = time.time()
             self.last_frame_number = new_image_packet.detection.frame_number
-        # if time.time() - self.last_loop > 0.05:
             self._update_debug_info()
             robot_commands = self.ia_coach_mainloop()
 
@@ -247,10 +253,11 @@ class Framework(object):
             self._send_robot_commands(robot_commands)
             self.game.set_command(robot_commands)
             self._send_debug_commands()
-            # self.last_loop = time.time()
+            self.last_loop = time.time()
+            # print(self.last_loop)
             # print(time.time() - self.time_stamp)
         else:
-            time.sleep(0.00001)
+            time.sleep(0)
         # print(time.time() - self.time_stamp)
 
     def _acquire_last_vision_frame(self):
