@@ -8,6 +8,8 @@
 from collections import deque
 from socketserver import BaseRequestHandler
 
+import time
+
 from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2
 from RULEngine.Communication.util.threaded_udp_server import ThreadedUDPServer
 
@@ -39,6 +41,8 @@ class ProtobufPacketReceiver(object):
     def pop_frames(self)->messages_robocup_ssl_wrapper_pb2:
         """ Retourne une frame de la deque. """
         new_list = list(self.packet_list)
+        new_list.reverse()
+
         self.packet_list.clear()
         return new_list
 
