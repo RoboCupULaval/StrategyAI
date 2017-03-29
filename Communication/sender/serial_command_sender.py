@@ -1,4 +1,6 @@
 # Under MIT License, see LICENSE.txt
+from sys import platform
+from serial.tools import list_ports
 
 import os
 import threading
@@ -32,7 +34,10 @@ class SerialCommandSender(object):
         if not port:
             port = _get_port(serial_type)
 
-        self.serial = serial.Serial('/dev/' + port, baud_rate)
+        if platform.startswith('win'):
+            self.serial = serial.Serial(port, baud_rate)
+        else:
+            self.serial = serial.Serial('/dev/' + port, baud_rate)
         self.mcu_version = mcu_version
 
         if self.mcu_version == MCUVersion.STM32F407 and serial_type == SerialType.BLUETOOTH:
@@ -100,13 +105,16 @@ class SerialCommandSender(object):
 def _get_port(serial_type):
     serial_ports = []
 
-    if serial_type == SerialType.NRF:
-        serial_ports = [port for port in os.listdir('/dev')
-                        if port.startswith("ttyUSB") or port.startswith(
-                'ttyACM') or port.startswith("ttyBaseStation")]
-    elif serial_type == SerialType.BLUETOOTH:
-        serial_ports = [port for port in os.listdir('/dev')
-                        if port.startswith("rfcomm")]
+    if platform.startswith('win'):
+        serial_ports = [port.device for port in list_ports.comports()]
+    else:
+        if serial_type == SerialType.NRF:
+            serial_ports = [port for port in os.listdir('/dev')
+                            if port.startswith("ttyUSB") or port.startswith(
+                    'ttyACM') or port.startswith("ttyBaseStation")]
+        elif serial_type == SerialType.BLUETOOTH:
+            serial_ports = [port for port in os.listdir('/dev')
+                            if port.startswith("rfcomm")]
     try:
         # serial_ports[0]
         return serial_ports[0]
