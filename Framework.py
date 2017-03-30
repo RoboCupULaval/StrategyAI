@@ -161,9 +161,6 @@ class Framework(object):
 
         self.ia_coach_initializer(self.game_world)
 
-        # THREAD STARTING POINT
-        # TODO A quoi sert cette prochaine ligne, elle à l'air mal utilisé
-        # s.v.p. reviser
         signal.signal(signal.SIGINT, self._sigint_handler)
         self.ia_running_thread = threading.Thread(target=self.game_thread_main_loop)
         self.ia_running_thread.start()
@@ -308,10 +305,11 @@ class Framework(object):
                 self.robot_command_sender.send_command(command)
         except:
             print("Could not stop players")
-            raise StopPlayerError("Au nettoyage il a été impossible d'arrêter les joueurs.")
+            print("Au nettoyage il a été impossible d'arrêter les joueurs.")
+            # raise StopPlayerError("Au nettoyage il a été impossible d'arrêter les joueurs.")
 
     def _wait_for_first_frame(self):
-        while not self.vision.get_latest_frame():
+        while not self.vision.get_latest_frame() and not self.thread_terminate.is_set():
             time.sleep(0.01)
             print("En attente d'une image de la vision.")
 
