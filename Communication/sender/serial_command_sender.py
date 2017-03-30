@@ -80,7 +80,6 @@ class SerialCommandSender(object):
             """
 
     def send_command(self, command: _Command):
-<<<<<<< HEAD
         # self.command_queue.append(command)
         # print("({}) Command deque length: {}".format(time.time(), len(self.command_queue)))
 
@@ -91,10 +90,6 @@ class SerialCommandSender(object):
             self.command_dict[command.player.id] = command
         else:
             self.command_queue.append(command)
-=======
-        self.command_queue.append(command)
-        #print("({}) Command deque length: {}".format(time.time(), len(self.command_queue)))
->>>>>>> fffe31569562fe8a6affaf2a5b9a42c3cd846270
 
     def stop(self):
         self.terminate.set()

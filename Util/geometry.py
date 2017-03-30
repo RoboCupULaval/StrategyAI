@@ -375,18 +375,11 @@ def rotate_point_around_origin(point, origin, angle):
 
     return new_point
 
-
-<<<<<<< HEAD
 def conv_position_2_list(position: Position):
-    #assert isinstance(position, Position)
-=======
-def conv_position_2_list(position):
     """
     converti les datas d'un objet position en liste
     :param position:
     :return: liste des datas de l'objet
     """
 
-    assert isinstance(position, Position)
->>>>>>> fffe31569562fe8a6affaf2a5b9a42c3cd846270
     return [position.x, position.y]
