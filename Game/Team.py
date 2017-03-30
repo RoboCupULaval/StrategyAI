@@ -5,10 +5,10 @@ from RULEngine.Util.constant import PLAYER_PER_TEAM
 from RULEngine.Util.team_color_service import TeamColor
 
 class Team():
-    def __init__(self, team_color):
+    def __init__(self, team_color, type="friend"):
         self.players = {}
         for player_id in range(PLAYER_PER_TEAM):
-            self.players[player_id] = Player(self, player_id)
+            self.players[player_id] = Player(self, player_id, True, type)
         self.team_color = team_color
         self.score = 0
 
@@ -27,6 +27,12 @@ class Team():
     def update_player(self, player_id, pose, delta=0):
         try:
             self.players[player_id].update(pose, delta)
+        except KeyError as err:
+            raise err
+
+    def kalman_update(self, player_id, pose_list, delta=0):
+        try:
+            self.players[player_id].kalman_update(pose_list, delta)
         except KeyError as err:
             raise err
 
