@@ -180,18 +180,17 @@ class ImageTransformer(object):
 
     def kalman_update(self, packets):
         self._update_camera_kalman(packets)
-
-        if not self.new_image_flag:
-            return self.last_camera_frame
         if (time.time() - self.time > 2):
             for cam in self.last_camera_frame:
                 print(cam)
             self.time = time.time()
 
+        return self.last_camera_frame
+
     def _update_camera_kalman(self, packets):
         self.new_image_flag = False
         if not packets:
-            return self.last_new_packet
+            return
 
         # change the packets of a camera if frame_number of camera is higher
         # than what we have

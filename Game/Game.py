@@ -1,4 +1,6 @@
 # Under MIT License, see LICENSE.txt
+from typing import List
+
 from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
@@ -17,8 +19,8 @@ class Game:
         self.referee = None
         self.our_team_color = None
         self.enemy_team_color = None
-        self.blue_team = Team(TeamColor.BLUE_TEAM)
-        self.yellow_team = Team(TeamColor.YELLOW_TEAM)
+        self.blue_team = Team(TeamColor.BLUE_TEAM, type="friend")
+        self.yellow_team = Team(TeamColor.YELLOW_TEAM, type="enemi")
         self.friends = None
         self.enemies = None
         self.delta_t = None
@@ -61,6 +63,11 @@ class Game:
         self._update_ball(vision_frame, delta)
         self._update_players(vision_frame, delta)
 
+    def update_kalman(self, vision_frame: List, delta: float):
+        self.delta_t = delta
+        self.kalman_update_ball(vision_frame, delta)
+        self.kalman_update_players(vision_frame, delta)
+
     def is_team_yellow(self):
         return self.our_team_color == TeamColor.YELLOW_TEAM
 
@@ -90,6 +97,24 @@ class Game:
 
         self._update_players_of_team(blue_team, self.blue_team, delta)
         self._update_players_of_team(yellow_team, self.yellow_team, delta)
+
+    def kalman_update_ball(self, vision_frame, delta):
+        kalman_list = []
+        for c in vision_frame:
+            kalman_list.append(c["ball"])
+
+    def kalman_update_players(self, vision_frame, delta):
+        kalman_blue = [[] for i in range(0, 11)]
+        kalman_yellow = [[] for i in range(0, 11)]
+        for c in vision_frame:
+            for i in range(0, 11):
+                kalman_blue[i].append(c["blues"][i])
+                kalman_yellow[i].append(c["yellows"][i])
+
+        for i in range(0, 11):
+            self.blue_team.kalman_update(i, kalman_blue[i], delta)
+            self.yellow_team.kalman_update(i, kalman_yellow[i], delta)
+
 
     @staticmethod
     def _update_players_of_team(players, team, delta):

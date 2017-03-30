@@ -72,7 +72,7 @@ class Framework(object):
         self.uidebug_vision_sender = None
         # because this thing below is a callable!
         self.vision_redirecter = lambda *args: None
-        self.vision_routine = self._redirected_vision  # self._normal_vision # self._test_vision self._redirected_vision
+        self.vision_routine = self._kalman_vision  # self._normal_vision # self._test_vision self._redirected_vision
         # Debug
         self.incoming_debug = []
         self.outgoing_debug = []
@@ -93,7 +93,7 @@ class Framework(object):
         self._create_game_world(terrain_type)
 
         # VISION
-        self.image_transformer = ImageTransformer(kalman=False)
+        self.image_transformer = ImageTransformer(kalman=True)
 
         # ia couplage
         self.ia_coach_mainloop = None
@@ -234,7 +234,13 @@ class Framework(object):
 
     def _kalman_vision(self):
         vision_frames = self.vision.pop_frames()
-        self.image_transformer.kalman_update(vision_frames)
+        new_image_packet = self.image_transformer.kalman_update(vision_frames)
+        if time.time() - self.last_loop > 0.05:
+            time_delta = time.time() - self.last_time
+            self.game.update_kalman(new_image_packet, time_delta)
+            self.game.print_state()
+
+            self.last_time = time.time()
 
     def _redirected_vision(self):
         vision_frames = self.vision.pop_frames()
@@ -294,6 +300,7 @@ class Framework(object):
 
     def _send_robot_commands(self, commands):
         """ Envoi les commades des robots au serveur. """
+        pass
         for idx, command in enumerate(commands):
             self.robot_command_sender.send_command(command)
 
