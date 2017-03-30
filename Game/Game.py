@@ -102,6 +102,7 @@ class Game:
         kalman_list = []
         for c in vision_frame:
             kalman_list.append(c["ball"])
+        self.ball.kalman_update(kalman_list, delta)
 
     def kalman_update_players(self, vision_frame, delta):
         kalman_blue = [[] for i in range(0, 5)]
