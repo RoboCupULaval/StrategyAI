@@ -3,7 +3,7 @@
 import math
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags, DEFAULT_TIME_TO_LIVE
-from ai.STA.Action.MoveTo import MoveTo
+from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
 from ai.states.module_state import NonExistentModule
 from RULEngine.Util.geometry import get_distance, get_angle
@@ -29,8 +29,10 @@ class GoToPosition(Tactic):
         destination_pose : La pose de destination du robot
     """
 
-    def __init__(self, game_state, player_id, target, time_to_live=DEFAULT_TIME_TO_LIVE):
-        Tactic.__init__(self, game_state, player_id, target, time_to_live=time_to_live)
+    def __init__(self, game_state, player_id, target,
+                 time_to_live=DEFAULT_TIME_TO_LIVE):
+        Tactic.__init__(self, game_state, player_id, target,
+                        time_to_live=time_to_live)
 
         self.path_target = None
         self.module_state = ModuleState()
@@ -49,14 +51,14 @@ class GoToPosition(Tactic):
             else:
                 self.path = [self.target]
         except NonExistentModule as err:
-            print(err)
+            print("Impossible de récupérer le pathfinder\n", err)
             self.path = [self.target]
 
     def get_next_path_element(self):
         assert(isinstance(self.path, list)), "Le chemin doit être une liste"
 
         if len(self.path) > 0:
-            self.path_target = self.path.pop(0) # on récupère le premier path element
+            self.path_target = self.path.pop(0)  # on récupère le premier path element
             self.next_state = self.move_to_position
         else:
             self.status_flag = Flags.SUCCESS
@@ -69,15 +71,22 @@ class GoToPosition(Tactic):
         player_position = self.game_state.get_player_pose(self.player_id).position
         player_orientation = self.game_state.get_player_pose(self.player_id).orientation
 
-        if get_distance(player_position, self.path_target.position) <= POSITION_DEADZONE:
-            # and math.abs(self.path_target.orientation - player_orientation) <= ANGLE_TO_HALT:
+        if get_distance(player_position, self.path_target.position) <= POSITION_DEADZONE\
+                and math.abs(self.path_target.orientation - player_orientation) <= ANGLE_TO_HALT:
             # TODO : remettre cette condition quand l'asservissement en orientation des robots sera fonctionnel
             self.next_state = self.get_next_path_element
         else:
             self.status_flag = Flags.WIP
             self.next_state = self.move_to_position
-        return MoveTo(self.game_state, self.player_id, self.path_target)
+        return MoveToPosition(self.game_state, self.player_id, self.path_target)
 
     def halt(self):
         stop = Idle(self.game_state, self.player_id)
+
+        if get_distance(self.game_state.get_player_pose(self.player_id).position, self.target.position) <= POSITION_DEADZONE:
+            self.next_state = self.halt
+        else:
+            self._init_pathfinder()
+            self.next_state = self.get_next_path_element
+
         return stop

@@ -2,12 +2,13 @@
 
 import math
 from .Action import Action
-from ...Util.types import AICommand
+# from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import FIELD_GOAL_RADIUS, PLAYER_PER_TEAM, FIELD_X_RIGHT, FIELD_X_LEFT
-from RULEngine.Util.area import stayInsideCircle, stayOutsideCircle, stayInsideGoalArea
+from RULEngine.Util.area import stayInsideCircle, stayOutsideCircle
 from RULEngine.Util.geometry import get_angle, get_closest_point_on_line
+from ai.Util.ai_command import AICommand, AICommandType
 
 __author__ = 'Robocup ULaval'
 
@@ -24,7 +25,7 @@ class ProtectGoal(Action):
         minimum_distance : La distance minimale qu'il doit y avoir entre le gardien et le centre du but.
         maximum_distance : La distance maximale qu'il doit y avoir entre le gardien et le centre du but.
     """
-    def __init__(self, p_game_state, p_player_id, p_is_right_goal=True, p_minimum_distance=FIELD_GOAL_RADIUS/2,
+    def __init__(self, p_game_state, p_player_id, p_is_right_goal=True, p_minimum_distance=150/2,
                  p_maximum_distance=None):
         """
         :param p_game_state: L'état courant du jeu.
@@ -52,9 +53,9 @@ class ProtectGoal(Action):
         Calcul la pose que doit prendre le gardien en fonction de la position de la balle.
         :return: Un tuple (Pose, kick) où Pose est la destination du gardien et kick est nul (on ne botte pas)
         """
-        goalkeeper_position = self.game_state.get_player_pose(self.player_id).position
+        goalkeeper_position = self.game_state.get_player_position(self.player_id)
         ball_position = self.game_state.get_ball_position()
-        goal_x = FIELD_X_RIGHT if self.is_right_goal else FIELD_X_LEFT
+        goal_x = self.game_state.const["FIELD_X_RIGHT"] if self.is_right_goal else self.game_state.const["FIELD_X_LEFT"]
         goal_position = Position(goal_x, 0)
 
         # Calcul de la position d'interception entre la balle et le centre du but
@@ -65,7 +66,8 @@ class ProtectGoal(Action):
 
         # Vérification que destination_position respecte la distance maximale
         if self.maximum_distance is None:
-            destination_position = stayInsideGoalArea(destination_position, self.is_right_goal)
+            destination_position = self.game_state.game.field.stay_inside_goal_area(destination_position,
+                                                                                    self.is_right_goal)
         else:
             destination_position = stayInsideCircle(destination_position, goal_position, self.maximum_distance)
 
@@ -74,4 +76,4 @@ class ProtectGoal(Action):
 
         destination_pose = Pose(destination_position, destination_orientation)
         kick_strength = 0
-        return AICommand(destination_pose, kick_strength)
+        return AICommand(self.player_id, AICommandType.MOVE, **{"pose_goal": destination_pose})

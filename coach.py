@@ -1,66 +1,68 @@
 # Under MIT License, see LICENSE.txt
+from typing import List
 
+from RULEngine.Debug.debug_interface import DebugInterface
+from RULEngine.Util.game_world import GameWorld
+from ai.executors.regulator import PositionRegulator
 from ai.states.world_state import WorldState
 from ai.executors.debug_executor import DebugExecutor
 from ai.executors.module_executor import ModuleExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.executors.command_executor import CommandExecutor
-
-# FIXME this thing!
-TIMESTAMP_MINIMAL_DELTA_60_FPS = 0.017
-TIMESTAMP_MINIMAL_DELTA_30_FPS = 0.033
+from ai.executors.movement_executor import MovementExecutor
 
 
 class Coach(object):
 
-    def __init__(self, mode_debug_active=True):
-        self.mode_debug_active = mode_debug_active
-        # For the framework! TODO make this better!
-        self.debug_commands = []
-        self.robot_commands = []
+    def __init__(self, mode_debug_active=True, pathfinder="astar", is_simulation=True):
+        """
+        Initialise le coach de l'IA.
 
+        :param mode_debug_active: (bool) indique si les commandes de debug sont actives
+        :param pathfinder:  (str) indique le nom du pathfinder par défault
+        :param is_simulation:   (bool) indique si en simulation (true) ou en vrai vie (false)
+        """
+        self.mode_debug_active = mode_debug_active
+        self.is_simulation = is_simulation
+
+        # init the states
         self.world_state = WorldState()
+
+        # init the executors
         self.debug_executor = DebugExecutor(self.world_state)
-        self.module_executor = ModuleExecutor(self.world_state)
         self.play_executor = PlayExecutor(self.world_state)
+        self.module_executor = ModuleExecutor(self.world_state, pathfinder, is_simulation)
+        self.movement_executor = MovementExecutor(self.world_state)
+        self.regulator_executor = PositionRegulator(self.world_state, is_simulation)
         self.robot_command_executor = CommandExecutor(self.world_state)
 
-    def main_loop(self, p_game_state):
-        self.robot_commands.clear()
-        self.debug_commands.clear()
+        # logging
+        DebugInterface().add_log(1, "\nCoach initialized with \nmode_debug_active = "+str(mode_debug_active) +
+                                 "\npathfinder = "+str(pathfinder)+"\nis_simulation = "+str(is_simulation))
 
-        self.world_state.update(p_game_state)
+    def main_loop(self) -> List:
+        """
+        Execute un tour de boucle de l'IA
 
+        :return: List(_Command) les commandes des robots
+        """
+        # main loop de l'IA
         self.debug_executor.exec()
-        self.module_executor.exec()
         self.play_executor.exec()
-        self.robot_command_executor.exec()
-        self.debug_executor.exec()
+        self.module_executor.exec()
+        self.movement_executor.exec()
+        self.regulator_executor.exec()
+        robot_commands = self.robot_command_executor.exec()
 
-        self.robot_commands = self.world_state.play_state.ready_to_ship_robot_packet_list
-        if self.mode_debug_active:
-            self.debug_commands = self.world_state.debug_state.to_ui_packet_debug_cmds
+        return robot_commands
 
-        return self.robot_commands, self.debug_commands
+    def set_reference(self, world_reference: GameWorld) -> None:
+        """
+        Permet de mettre les références dans le worldstate et le debugexecutor.
 
-    def set_team_color(self, p_our_team_colors):
-        self.world_state.set_team_color(p_our_team_colors)
-
-    def get_robot_commands(self):
-        return self.robot_commands
-
-    def get_debug_status(self):
-        return self.mode_debug_active
-
-    # FIXME only the debug command are accessed through method, the robot_commands are take straight from the variable!
-    def get_debug_commands_and_clear(self):
-        return self.debug_commands
-
-    # Throwback for the last coach! TODO see if we still need to implement them! Or HOW!
-    def halt(self):
-        """ Hack pour sync les frames de vision et les itérations de l'IA """
-        pass
-
-    def stop(self, game_state):
-        """ *Devrait* déinit pour permettre un arrêt propre. """
-        pass
+        :param world_reference: Objet GameWorld contenant les références des objets en jeu provenant du RULEngine.
+                                C'est un data transfert object.
+        :return: None.
+        """
+        self.world_state.set_reference(world_reference)
+        self.debug_executor.set_reference(world_reference.debug_info)

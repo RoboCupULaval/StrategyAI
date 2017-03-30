@@ -60,9 +60,12 @@ target/
 # Pycharm idea submodule
 .idea
 .idea/*
+.cs_files
 
 *.orig
 
 tags
 # InfluenceMap output file
 IMBoard
+filtered.txt
+unfiltered.txt

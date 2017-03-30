@@ -3,7 +3,7 @@
 from ai.STA.Tactic.GoGetBall import GoGetBall
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from . Strategy import Strategy
-from ai.Algorithm.Node import Node
+
 
 # stratégie: tout le monde fonce vers la balle car c'est tout ce qu'on sait faire
 

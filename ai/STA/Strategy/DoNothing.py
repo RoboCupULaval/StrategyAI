@@ -1,10 +1,7 @@
 # Under MIT License, see LICENSE.txt
-
-from . Strategy import Strategy
-from ai.STA.Tactic.Stop import Stop
-from ai.Algorithm.Node import Node
-# TODO change the way we access no player
 from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.STA.Tactic.Stop import Stop
+from . Strategy import Strategy
 
 
 class DoNothing(Strategy):

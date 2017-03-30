@@ -8,22 +8,19 @@
 
 """
 # FIXME IMPORT!
-import random
-import math
 import copy
+import math
+import random
 import time
-import socket
-import pickle
 
+from RULEngine.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import POSITION_DEADZONE
 from ai.Algorithm.IntelligentModule import Pathfinder
-
-from ai.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 
 OBSTACLE_DEAD_ZONE = 700
 TIME_TO_UPDATE = 1
+
 
 class PathfinderRRT(Pathfinder):
     """
@@ -35,20 +32,28 @@ class PathfinderRRT(Pathfinder):
         Une méthode permet de récupérer la trajectoire d'un robot spécifique.
     """
 
-    def __init__(self, p_game_state):
+    def __init__(self, p_worldstate):
         """
             Constructeur, appel le constructeur de la classe mère pour assigner
             la référence sur l'InfoManager.
 
             :param info_manager: référence sur l'InfoManager
         """
-        super().__init__(p_game_state)
-        self.last_paths_generated = [[self.game_state.get_player_pose(x).position] for x in range(6)]
+        super().__init__(p_worldstate)
         self.paths = {}
         for i in range(6):
             self.paths[i] = []
 
-        self.last_timestamp = self.game_state.get_timestamp()
+        self.last_timestamp = self.ws.game_state.get_timestamp()
+
+    # Pour être conforme à la nouvelle interface à être changé
+    # éventuellement mgl 2016/12/23
+    # TODO(mgl): change this please!
+    def get_next_point(self, robot_id=None):
+        pass
+
+    def update(self):
+        pass
 
     def draw_path(self, path, pid=0):
         points = []
@@ -82,16 +87,20 @@ class PathfinderRRT(Pathfinder):
 
         # TODO mettre les buts dans les obstacles
         list_of_pid = list(range(6))
+        list_of_other_team_pid = list(range(6))
         list_of_pid.remove(pid)
         obstacleList = []
         for other_pid in list_of_pid:
 
             # TODO info manager changer get_player_position
-            position = self.game_state.get_player_pose(other_pid).position
+            position = self.ws.game_state.get_player_pose(other_pid).position
             obstacleList.append([position.x, position.y, OBSTACLE_DEAD_ZONE])
 
-        initial_position_of_main_player = self.game_state.get_player_pose(pid).position
+        initial_position_of_main_player = self.ws.game_state.get_player_pose(pid).position
 
+        for pid in list_of_other_team_pid:
+            position = self.ws.game_state.get_player_pose(pid,False).position
+            obstacleList.append([position.x, position.y, OBSTACLE_DEAD_ZONE])
 
         target_position_of_player = target.position
         target_orientation_of_player = target.orientation
@@ -100,7 +109,7 @@ class PathfinderRRT(Pathfinder):
             target_position_of_player.x
             target_position_of_player.y
         except AttributeError:
-            target_position_of_player = self.game_state.get_player_pose(pid).position
+            target_position_of_player = self.ws.game_state.get_player_pose(pid).position
 
 
         rrt = RRT(start=[initial_position_of_main_player.x,
