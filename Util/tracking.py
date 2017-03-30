@@ -4,7 +4,7 @@ import numpy as np
 class Kalman:
     def __init__(self, type, ncameras=4, observation=None):
 
-        dt = 0.03
+        dt = 0.05
         self.type = type
 
         if self.type == 'friend':
@@ -155,10 +155,10 @@ class Kalman:
             K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
             self.x = self.x + np.dot(K, np.transpose(y))
             self.P = np.dot((np.eye(self.P.shape[0]) - np.dot(K, H)), self.P)
-            print(mask)
-            print('sta = ', self.x[[0, 1, 4]])
-            print('obs = ', observation_wmask)
-            print('vit = ', self.x[[2,3,5]])
+            # print(mask)
+            # print('sta = ', self.x[[0, 1, 4]])
+            # print('obs = ', observation_wmask)
+            # print('vit = ', self.x[[2,3,5]])
 
     def transition_model(self, dt):
         if (self.type == 'friend') or (self.type == 'enemi'):
