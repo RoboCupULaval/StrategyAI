@@ -239,6 +239,13 @@ class Framework(object):
             time_delta = time.time() - self.last_time
             self.game.update_kalman(new_image_packet, time_delta)
             #self.game.print_state()
+            self._update_debug_info()
+            robot_commands = self.ia_coach_mainloop()
+
+            # Communication
+            self._send_robot_commands(robot_commands)
+            self.game.set_command(robot_commands)
+            self._send_debug_commands()
 
             self.last_time = time.time()
             self.last_loop = time.time()
@@ -301,7 +308,6 @@ class Framework(object):
 
     def _send_robot_commands(self, commands):
         """ Envoi les commades des robots au serveur. """
-        pass
         for idx, command in enumerate(commands):
             self.robot_command_sender.send_command(command)
 
