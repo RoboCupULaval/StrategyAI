@@ -104,14 +104,14 @@ class Game:
             kalman_list.append(c["ball"])
 
     def kalman_update_players(self, vision_frame, delta):
-        kalman_blue = [[] for i in range(0, 11)]
-        kalman_yellow = [[] for i in range(0, 11)]
+        kalman_blue = [[] for i in range(0, 5)]
+        kalman_yellow = [[] for i in range(0, 5)]
         for c in vision_frame:
-            for i in range(0, 11):
+            for i in range(0, 5):
                 kalman_blue[i].append(c["blues"][i])
                 kalman_yellow[i].append(c["yellows"][i])
 
-        for i in range(0, 11):
+        for i in range(0, 5):
             self.blue_team.kalman_update(i, kalman_blue[i], delta)
             self.yellow_team.kalman_update(i, kalman_yellow[i], delta)
 

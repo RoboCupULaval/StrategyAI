@@ -11,26 +11,26 @@ class Kalman:
             # Transition model
             self.F = np.array([[1, 0, dt,  0, 0, 0], # Position x
                                [0, 1,  0, dt, 0, 0], # Position y
-                               [0, 0,  0,  0, 0, 0], # Speed x
-                               [0, 0,  0,  0, 0, 0], # Speed y
+                               [0, 0,  1,  0, 0, 0], # Speed x
+                               [0, 0,  0,  1, 0, 0], # Speed y
                                [0, 0,  0,  0, 1, dt], # Orientation
-                               [0, 0,  0,  0, 0, 0]]) # Speed w
+                               [0, 0,  0,  0, 0, 1]]) # Speed w
             # Control input model
             self.B = np.array([[0, 0, 0],
                                [0, 0, 0],
-                               [1, 0, 0], # Speed x
-                               [0, 1, 0], # Speed y
+                               [0, 0, 0], # Speed x
+                               [0, 0, 0], # Speed y
                                [0, 0, 0],
-                               [0, 0, 1]]) # Speed w
+                               [0, 0, 0]]) # Speed w
             # Observation model
             self.H = [[1, 0, 0, 0, 0, 0] for i in range(ncameras)] # Position x
             self.H += [[0, 1, 0, 0, 0, 0] for i in range(ncameras)] # Position y
             self.H += [[0, 0, 0, 0, 1, 0] for i in range(ncameras)] # Orientation
             self.H = np.array(self.H)
             # Process covariance
-            self.Q = 10 ** (1) * np.eye(6)
+            self.Q = 10 ** (-3) * np.eye(6)
             # Observation covariance
-            self.R = 10 ** (0) * np.eye(3*4) # Pose * 4 cameras
+            self.R = 10 ** (-1) * np.eye(3*4) # Pose * 4 cameras
             # Initial state covariance
             self.P = 10 ** (3) * np.eye(6)
 
@@ -46,7 +46,7 @@ class Kalman:
                 else:
                     self.x = self.x
 
-        elif self.type == 'ennemi':
+        elif self.type == 'enemi':
             # Transition model
             self.F = np.array([[1, 0, dt, 0, 0, 0],  # Position x
                                [0, 1, 0, dt, 0, 0],  # Position y
@@ -109,14 +109,14 @@ class Kalman:
                     self.x = self.x
 
     def predict(self, command):
-        if command == None:
+        if command == None or self.type == 'enemi' or self.type == 'ball':
             self.x = np.dot(self.F, self.x)
         else:
             self.x = np.dot(self.F, self.x) + np.dot(self.B, np.array(command))
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
 
     def update(self, observation):
-        if self.type == 'friend' or self.type == 'ennemi':
+        if self.type == 'friend' or self.type == 'enemi':
             obsx = []
             obsy = []
             obsth = []
@@ -145,20 +145,23 @@ class Kalman:
         observation = np.array(observation)
         mask = np.array([obs is not None for obs in observation])
         observation_wmask = observation[mask]
-        print(observation_wmask)
         if len(observation_wmask) is not 0:
             H = self.H[mask]
-            print(H)
-            print(self.P)
-            y = np.array(observation_wmask) - np.dot(H, self.x)
-            S = np.dot(np.dot(H, self.P), np.transpose(H)) + self.R
-            K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
+            R = np.transpose(self.R[mask])
+            R = np.transpose(R[mask])
 
-            self.x += np.dot(K, y)
+            y = np.array(observation_wmask) - np.dot(H, self.x)
+            S = np.dot(np.dot(H, self.P), np.transpose(H)) + R
+            K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
+            self.x = self.x + np.dot(K, np.transpose(y))
             self.P = np.dot((np.eye(self.P.shape[0]) - np.dot(K, H)), self.P)
+            print(mask)
+            print('sta = ', self.x[[0, 1, 4]])
+            print('obs = ', observation_wmask)
+            print('vit = ', self.x[[2,3,5]])
 
     def transition_model(self, dt):
-        if (self.type == 'friend') or (self.type == 'ennemi'):
+        if (self.type == 'friend') or (self.type == 'enemi'):
             self.F = np.array([[1, 0, dt, 0, 0, 0],  # Position x
                                [0, 1, 0, dt, 0, 0],  # Position y
                                [0, 0, 0, 0, 0, 0],  # Speed x
@@ -172,9 +175,9 @@ class Kalman:
                                [0, 0, 0, 0, 0, 0]])  # Speed y
 
     def filter(self, observation=None, command=None, dt=0.03):
-        print(observation)
-        self.transition_model(dt)
+        #self.transition_model(dt)
         self.predict(command)
         if observation != None:
             self.update(observation)
+
         return self.x

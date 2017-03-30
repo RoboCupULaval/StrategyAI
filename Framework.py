@@ -238,9 +238,10 @@ class Framework(object):
         if time.time() - self.last_loop > 0.05:
             time_delta = time.time() - self.last_time
             self.game.update_kalman(new_image_packet, time_delta)
-            self.game.print_state()
+            #self.game.print_state()
 
             self.last_time = time.time()
+            self.last_loop = time.time()
 
     def _redirected_vision(self):
         vision_frames = self.vision.pop_frames()
