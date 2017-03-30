@@ -57,7 +57,7 @@ class Game:
 
     def update(self, vision_frame: messages_robocup_ssl_wrapper_pb2, delta: float):
         self.delta_t = delta
-        #print(delta)
+        # print(delta)
         self._update_ball(vision_frame, delta)
         self._update_players(vision_frame, delta)
 

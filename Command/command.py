@@ -52,10 +52,10 @@ class Kick(_Command):
     def __init__(self, player, kick_strength):
         """ Kick speed est un int entre 0 et 4 """
         super().__init__(player)
-        self.kick_strength = 4
+        self.kick_speed = 4
 
     def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
-        return protocol.create_kick_command(self.player.id, self.kick_strength)
+        return protocol.create_kick_command(self.player.id, self.kick_speed)
 
 
 class Stop(_Command):

@@ -130,6 +130,8 @@ def _stm32_pack_cmd(payload, cmd=STM32_CMD_MOVEMENT_COMMAND, robot_idx=STM32_ADD
     if payload:
         packet += payload
 
+    checksum = bytes([sum(packet) & 0xff])
+    packet = packet[:4] + checksum + packet[5:]
     return cobs.encode(bytes(packet)) + b'\0'
 
 
