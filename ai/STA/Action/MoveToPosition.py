@@ -35,6 +35,5 @@ class MoveToPosition(Action):
                      où Pose est la destination du joueur
                         kick est faux (on ne botte pas)
         """
-        self.destination
         return AICommand(self.player_id, AICommandType.MOVE,
                          **{"pose_goal": self.destination})
