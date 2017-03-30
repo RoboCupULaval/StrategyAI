@@ -3,6 +3,7 @@ from typing import List
 
 from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
 from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.robot_ident import RobotIdent
 from ai.STA.Tactic.stand_out_wait_pass import StandOutWaitPass
 from ai.STA.Tactic.test_turn_on_you import TestTurnOnYou
 from ai.STA.Tactic.va_et_vient import VaEtVient
@@ -38,7 +39,8 @@ class TacticBook(object):
                             "TestTurnOnYou": TestTurnOnYou,
                             'RotateAroundPosition': RotateAroundPosition,
                             "VaEtVient": VaEtVient,
-                            'Joystick': Joystick
+                            'Joystick': Joystick,
+                            'RobotIdent': RobotIdent
                             }
 
     def get_tactics_name_list(self) -> List[str]:
