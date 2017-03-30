@@ -32,6 +32,7 @@ class Player:
         self.pose = Pose(Position(ret[0], ret[1]), ret[4])
         self.velocity = [ret[2], ret[3], ret[5]]
 
+
     def set_command(self, cmd):
         self.cmd = [cmd.pose.position.x, cmd.pose.position.y, cmd.pose.orientation]
 

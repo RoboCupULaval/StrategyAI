@@ -28,9 +28,13 @@ class Kalman:
             self.H += [[0, 0, 0, 0, 1, 0] for i in range(ncameras)] # Orientation
             self.H = np.array(self.H)
             # Process covariance
-            self.Q = 10 ** (-3) * np.eye(6)
+            values = np.array([10 ** (0), 10 ** (0), 10 ** (1), 10 ** (1), 10 ** (-2), 10 ** (-1)])
+            self.Q = np.diag(values)
             # Observation covariance
-            self.R = 10 ** (-1) * np.eye(3*4) # Pose * 4 cameras
+            values = [10 ** (0), 10 ** (0), 10 ** (-2)]
+            for i in range(ncameras-1):
+                values += values
+            self.R = np.diag(values)  # Pose * ncameras
             # Initial state covariance
             self.P = 10 ** (3) * np.eye(6)
 
@@ -60,9 +64,13 @@ class Kalman:
             self.H += [[0, 0, 0, 0, 1, 0] for i in range(ncameras)]  # Orientation
             self.H = np.array(self.H)
             # Process covariance
-            self.Q = 10 ** (1) * np.eye(6)
+            values = np.array([10 ** (0), 10 ** (0), 10 ** (0), 10 ** (0), 10 ** (-2),  10 ** (-2)])
+            self.Q = np.diag(values)
             # Observation covariance
-            self.R = 10 ** (0) * np.eye(3 * 4)  # Pose * 4 cameras
+            values = [10 ** (0), 10 ** (0), 10 ** (-2)]
+            for i in range(ncameras - 1):
+                values += values
+            self.R = np.diag(values)  # Pose * ncameras
             # Initial state covariance
             self.P = 10 ** (3) * np.eye(6)
 
@@ -89,9 +97,13 @@ class Kalman:
             self.H += [[0, 1, 0, 0] for i in range(ncameras)]  # Position y
             self.H = np.array(self.H)
             # Process covariance
-            self.Q = 10 ** (1) * np.eye(4)
+            values = np.array([10 ** (0), 10 ** (0), 10 ** (0), 10 ** (0)])
+            self.Q = np.diag(values)
             # Observation covariance
-            self.R = 10 ** (0) * np.eye(2 * 4)  # Position * 4 cameras
+            values = [10 ** (0), 10 ** (0)]
+            for i in range(ncameras - 1):
+                values += values
+            self.R = np.diag(values)  # Pose * ncameras
             # Initial state covariance
             self.P = 10 ** (3) * np.eye(4)
             # Initial state estimation
@@ -135,8 +147,8 @@ class Kalman:
             obsy = []
             for obs in observation:
                 if obs is not None:
-                    obsx.append(obs.position.x)
-                    obsy.append(obs.position.y)
+                    obsx.append(obs.x)
+                    obsy.append(obs.y)
                 if obs is None:
                     obsx.append(None)
                     obsy.append(None)
@@ -155,29 +167,27 @@ class Kalman:
             K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
             self.x = self.x + np.dot(K, np.transpose(y))
             self.P = np.dot((np.eye(self.P.shape[0]) - np.dot(K, H)), self.P)
-            # print(mask)
-            # print('sta = ', self.x[[0, 1, 4]])
-            # print('obs = ', observation_wmask)
-            # print('vit = ', self.x[[2,3,5]])
 
     def transition_model(self, dt):
         if (self.type == 'friend') or (self.type == 'enemi'):
             self.F = np.array([[1, 0, dt, 0, 0, 0],  # Position x
                                [0, 1, 0, dt, 0, 0],  # Position y
-                               [0, 0, 0, 0, 0, 0],  # Speed x
-                               [0, 0, 0, 0, 0, 0],  # Speed y
+                               [0, 0, 1, 0, 0, 0],  # Speed x
+                               [0, 0, 0, 1, 0, 0],  # Speed y
                                [0, 0, 0, 0, 1, dt],  # Orientation
-                               [0, 0, 0, 0, 0, 0]])  # Speed w
+                               [0, 0, 0, 0, 0, 1]])  # Speed w
         elif (self.type == 'ball'):
-            self.F = np.array([[1, 0, dt, 0, 0, 0],  # Position x
-                               [0, 1, 0, dt, 0, 0],  # Position y
-                               [0, 0, 0, 0, 0, 0],  # Speed x
-                               [0, 0, 0, 0, 0, 0]])  # Speed y
+            self.F = np.array([[1, 0, dt, 0],  # Position x
+                               [0, 1, 0, dt],  # Position y
+                               [0, 0, 1, 0],  # Speed x
+                               [0, 0, 0, 1]])  # Speed y
 
     def filter(self, observation=None, command=None, dt=0.03):
-        #self.transition_model(dt)
+        self.transition_model(dt)
         self.predict(command)
         if observation != None:
             self.update(observation)
-
+        #print(dt, '   ', self.x)
+        if self.type == 'friend' or self.type == 'enemi':
+            self.x[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
         return self.x

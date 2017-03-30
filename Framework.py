@@ -243,11 +243,11 @@ class Framework(object):
         if time.time() - self.last_loop > 0.05:
             time_delta = time.time() - self.last_time
             self.game.update_kalman(new_image_packet, time_delta)
-            # self.game.print_state()
             self._update_debug_info()
             robot_commands = self.ia_coach_mainloop()
 
             # Communication
+
             self._send_robot_commands(robot_commands)
             self.game.set_command(robot_commands)
             self._send_debug_commands()
