@@ -18,8 +18,8 @@ def get_distance(position_1: Position, position_2: Position) -> float:
         Returns:
             La distance en millimètres entre les deux positions
     """
-    assert isinstance(position_1, Position)
-    assert isinstance(position_2, Position)
+    # assert isinstance(position_1, Position)
+    # assert isinstance(position_2, Position)
     return m.sqrt((position_2.x - position_1.x) ** 2 +
                   (position_2.y - position_1.y) ** 2)
 
@@ -377,5 +377,5 @@ def rotate_point_around_origin(point, origin, angle):
 
 
 def conv_position_2_list(position: Position):
-    assert isinstance(position, Position)
+    #assert isinstance(position, Position)
     return [position.x, position.y]
