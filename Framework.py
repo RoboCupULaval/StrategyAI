@@ -33,6 +33,11 @@ from RULEngine.Util.team_color_service import TeamColorService
 from RULEngine.Util.game_world import GameWorld
 from RULEngine.Util.image_transformer import ImageTransformer
 
+# For testing purposes
+from RULEngine.Communication.protobuf import \
+    messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
+
+
 # TODO inquire about those constants (move, utility)
 LOCAL_UDP_MULTICAST_ADDRESS = "224.5.23.2"
 UI_DEBUG_MULTICAST_ADDRESS = "127.0.0.1"
@@ -72,7 +77,7 @@ class Framework(object):
         self.uidebug_vision_sender = None
         # because this thing below is a callable!
         self.vision_redirecter = lambda *args: None
-        self.vision_routine = self._kalman_vision  # self._normal_vision # self._test_vision self._redirected_vision
+        self.vision_routine = self._normal_vision  # self._normal_vision # self._test_vision self._redirected_vision
         # Debug
         self.incoming_debug = []
         self.outgoing_debug = []
@@ -99,6 +104,9 @@ class Framework(object):
         self.ia_coach_mainloop = None
         self.ia_coach_initializer = None
 
+        # for testing purposes
+        self.frame_number = 0
+
         self.debug.add_log(1, "Framework started in {} s".format(time.time() - self.time_stamp))
 
     def _init_communication(self, serial=SERIAL_DISABLED, debug=True, redirect=False, mcu_version=MCUVersion.STM32F407):
@@ -118,7 +126,7 @@ class Framework(object):
                     print(self.uidebug_vision_sender)
                     self.vision_redirecter = self.uidebug_vision_sender.send_packet
                     print(self.vision_redirecter)
-                    self.vision_routine = self._redirected_vision
+                    self.vision_routine = self._kalman_vision
                     print(self.vision_routine)
 
             self.referee_command_receiver = RefereeReceiver(LOCAL_UDP_MULTICAST_ADDRESS)
@@ -130,7 +138,7 @@ class Framework(object):
         """ Fonction exécuté et agissant comme boucle principale. """
 
         self._wait_for_first_frame()
-
+        print(self.vision_routine)
         # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
         while not self.thread_terminate.is_set():
             self.time_stamp = time.time()
@@ -153,9 +161,6 @@ class Framework(object):
 
         self.ia_coach_initializer(self.game_world)
 
-        # THREAD STARTING POINT
-        # TODO A quoi sert cette prochaine ligne, elle à l'air mal utilisé
-        # s.v.p. reviser
         signal.signal(signal.SIGINT, self._sigint_handler)
         self.ia_running_thread = threading.Thread(target=self.game_thread_main_loop)
         self.ia_running_thread.start()
@@ -238,17 +243,18 @@ class Framework(object):
         if time.time() - self.last_loop > 0.05:
             time_delta = time.time() - self.last_time
             self.game.update_kalman(new_image_packet, time_delta)
-            #self.game.print_state()
             self._update_debug_info()
             robot_commands = self.ia_coach_mainloop()
 
             # Communication
+
             self._send_robot_commands(robot_commands)
             self.game.set_command(robot_commands)
             self._send_debug_commands()
-
+            self._send_new_vision_packet()
             self.last_time = time.time()
             self.last_loop = time.time()
+        time.sleep(0)
 
     def _redirected_vision(self):
         vision_frames = self.vision.pop_frames()
@@ -299,10 +305,11 @@ class Framework(object):
                 self.robot_command_sender.send_command(command)
         except:
             print("Could not stop players")
-            raise StopPlayerError("Au nettoyage il a été impossible d'arrêter les joueurs.")
+            print("Au nettoyage il a été impossible d'arrêter les joueurs.")
+            # raise StopPlayerError("Au nettoyage il a été impossible d'arrêter les joueurs.")
 
     def _wait_for_first_frame(self):
-        while not self.vision.get_latest_frame():
+        while not self.vision.get_latest_frame() and not self.thread_terminate.is_set():
             time.sleep(0.01)
             print("En attente d'une image de la vision.")
 
@@ -320,6 +327,47 @@ class Framework(object):
 
         self.incoming_debug.clear()
         self.outgoing_debug.clear()
+
+    # for testing purposes
+    def _send_new_vision_packet(self):
+        pb_sslwrapper = ssl_wrapper.SSL_WrapperPacket()
+        pb_sslwrapper.detection.camera_id = 0
+        pb_sslwrapper.detection.t_sent = 0
+
+        pck_ball = pb_sslwrapper.detection.balls.add()
+        pck_ball.x = self.game.field.ball.position.x
+        pck_ball.y = self.game.field.ball.position.y
+        pck_ball.z = self.game.field.ball.position.z
+        # required for the packet no use for us at this stage
+        pck_ball.confidence = 0.999
+        pck_ball.pixel_x = self.game.field.ball.position.x
+        pck_ball.pixel_y = self.game.field.ball.position.y
+
+        for p in self.game.friends.players.values():
+            packet_robot = pb_sslwrapper.detection.robots_blue.add()
+            packet_robot.confidence = 0.999
+            packet_robot.robot_id = p.id
+            packet_robot.x = p.pose.position.x
+            packet_robot.y = p.pose.position.y
+            packet_robot.orientation = p.pose.orientation
+            packet_robot.pixel_x = 0.
+            packet_robot.pixel_y = 0.
+
+        for p in self.game.enemies.players.values():
+            packet_robot = pb_sslwrapper.detection.robots_blue.add()
+            packet_robot.confidence = 0.999
+            packet_robot.robot_id = p.id
+            packet_robot.x = p.pose.position.x
+            packet_robot.y = p.pose.position.y
+            packet_robot.orientation = p.pose.orientation
+            packet_robot.pixel_x = 0.
+            packet_robot.pixel_y = 0.
+
+        self.frame_number += 1
+        pb_sslwrapper.detection.t_capture = 0
+        pb_sslwrapper.detection.frame_number = self.frame_number
+
+        self.vision_redirecter(pb_sslwrapper.SerializeToString())
 
     def _sigint_handler(self, signum, frame):
         self.stop_game()

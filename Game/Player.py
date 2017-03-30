@@ -35,4 +35,4 @@ class Player:
 
     def set_command(self, cmd):
         self.cmd = [cmd.pose.position.x, cmd.pose.position.y, cmd.pose.orientation]
-        #self.cmd = [0, 0, 0]
+

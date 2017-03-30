@@ -5,7 +5,7 @@ import math
 
 
 class Ball():
-    def __init__(self, kalman=False, type="ball", ncameras=4):
+    def __init__(self, type="ball", ncameras=4):
         self._position = Position()
         self.velocity = Position()
         self.kf = Kalman(type, ncameras)

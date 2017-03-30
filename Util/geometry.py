@@ -11,15 +11,15 @@ __author__ = 'RoboCupULaval'
 
 def get_distance(position_1: Position, position_2: Position) -> float:
     """
-        Calcul la distance entre deux positions.
+        Calcul la distance entre deux positions (la norme du vecteur reliant les deux points).
         Args:
             position_1: Position 1.
             position_2: Position 2.
         Returns:
             La distance en millimètres entre les deux positions
     """
-    assert isinstance(position_1, Position)
-    assert isinstance(position_2, Position)
+    # assert isinstance(position_1, Position)
+    # assert isinstance(position_2, Position)
     return m.sqrt((position_2.x - position_1.x) ** 2 +
                   (position_2.y - position_1.y) ** 2)
 
@@ -374,3 +374,12 @@ def rotate_point_around_origin(point, origin, angle):
     new_point = Position(new_x, new_y)
 
     return new_point
+
+def conv_position_2_list(position: Position):
+    """
+    converti les datas d'un objet position en liste
+    :param position:
+    :return: liste des datas de l'objet
+    """
+
+    return [position.x, position.y]

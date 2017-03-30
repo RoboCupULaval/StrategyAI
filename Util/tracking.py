@@ -4,7 +4,7 @@ import numpy as np
 class Kalman:
     def __init__(self, type, ncameras=4, observation=None):
 
-        dt = 0.03
+        dt = 0.05
         self.type = type
 
         if self.type == 'friend':

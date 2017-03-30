@@ -26,8 +26,6 @@ class ImageTransformer(object):
             self.last_new_packet = None
         self.time = time.time()
 
-
-
     def update(self, packets):
 
         self._update_camera_packets(packets)
