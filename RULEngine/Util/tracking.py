@@ -185,7 +185,7 @@ class Kalman:
     def filter(self, observation=None, command=None, dt=0.03):
         self.transition_model(dt)
         self.predict(command)
-        if observation != None:
+        if observation is not None:
             self.update(observation)
         #print(dt, '   ', self.x)
         if self.type == 'friend' or self.type == 'enemi':
