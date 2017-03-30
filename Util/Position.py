@@ -32,6 +32,9 @@ class Position(object):
     def conv_2_np(self):
         return np.array([self.x, self.y])
 
+    @staticmethod
+    def from_np(array):
+        return Position(array[0], array[1])
     # *** OPERATORS ***
     def __add__(self, other):
         """ Return self + other """
