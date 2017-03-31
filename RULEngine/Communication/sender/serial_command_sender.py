@@ -17,7 +17,7 @@ from RULEngine.Game.Player import Player
 
 SERIAL_DISABLED = -1
 COMMUNICATION_SLEEP = 0.001
-MOVE_COMMAND_SLEEP = 0.1
+MOVE_COMMAND_SLEEP = 0.05
 
 
 class SerialType(Enum):
@@ -62,6 +62,7 @@ class SerialCommandSender(object):
                 for c in self.command_dict.values():
                     packed_command = c.package_command(mcu_version=self.mcu_version)
                     self.serial.write(packed_command)
+                    time.sleep(COMMUNICATION_SLEEP)
                 self.last_time = time.time()
             else:
                 time.sleep(COMMUNICATION_SLEEP)
@@ -73,16 +74,6 @@ class SerialCommandSender(object):
                     # print(next_command)
                     packed_command = next_command.package_command(mcu_version=self.mcu_version)
                     self.serial.write(packed_command)
-            """
-            try:
-                next_command = self.command_queue.popleft()
-            except IndexError:
-                next_command = None
-
-            if next_command:
-                packed_command = next_command.package_command(mcu_version=self.mcu_version)
-                self.serial.write(packed_command)
-            """
 
     def send_command(self, command: _Command):
         # self.command_queue.append(command)

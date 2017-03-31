@@ -1,13 +1,12 @@
 import time
 
-from RULEngine.Debug.debug_interface import DebugInterface, COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
-from ai.Algorithm.AsPathManager import AsPathManager
-from ai.Algorithm.PathfinderRRT import PathfinderRRT
-from ai.executors.executor import Executor
-from ai.Util.ai_command import AICommand
-from ai.Algorithm.CinePath.CinePath import CinePath
+from RULEngine.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 from RULEngine.Util.geometry import get_distance
-from ai.executors.path_partitionner import PathPartitionner
+from ai.Algorithm.AsPathManager import AsPathManager
+from ai.Algorithm.CinePath.CinePath import CinePath
+from ai.Algorithm.PathfinderRRT import PathfinderRRT
+from ai.Algorithm.path_partitionner import PathPartitionner
+from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 
 INTERMEDIATE_DISTANCE_THRESHOLD = 540
@@ -49,7 +48,7 @@ class PathfinderModule(Executor):
         for ai_c in ai_commands:
             self.time = time.time()
             path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
-            print(self.time - time.time())
+            # print(self.time - time.time())
             self.draw_path(path)
             ai_c.path = path
 
@@ -69,7 +68,7 @@ class PathfinderModule(Executor):
 
     def change_pathfinder(self, type_of_pathfinder):
         assert isinstance(type_of_pathfinder, str)
-        assert type_of_pathfinder.lower() in ["rrt", "astar"]
+        assert type_of_pathfinder.lower() in ["rrt", "astar", "path_part"]
 
         self.pathfinder = self.get_pathfinder(type_of_pathfinder, self.is_simulation)
 
