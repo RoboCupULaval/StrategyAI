@@ -14,7 +14,7 @@ from ai.executors.movement_executor import MovementExecutor
 
 class Coach(object):
 
-    def __init__(self, mode_debug_active=True, pathfinder="astar", is_simulation=True):
+    def __init__(self, mode_debug_active=True, pathfinder="path_part", is_simulation=True):
         """
         Initialise le coach de l'IA.
 
