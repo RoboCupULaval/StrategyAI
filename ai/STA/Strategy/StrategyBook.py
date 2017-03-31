@@ -4,7 +4,7 @@
 from typing import List
 
 from ai.STA.Strategy.Strategy import Strategy
-from ai.STA.Strategy.obstacle_course import ObstacleCourse
+from ai.STA.Strategy.indiana_jones import IndianaJones
 from ai.STA.Strategy.HumanControl import HumanControl
 from ai.STA.Strategy.SimpleDefense import SimpleDefense
 from ai.STA.Strategy.SimpleOffense import SimpleOffense
@@ -14,7 +14,7 @@ from ai.STA.Strategy.TestTransitions import TestTransitions
 from ai.STA.Strategy.PerpetualMovement import PerpetualMovement
 from ai.STA.Strategy.TestPasses import TestPasses
 from ai.STA.Strategy.TestRotateAround import TestRotateAround
-
+from ai.STA.Strategy.robocup_choreography import RobocupChoreography
 
 class StrategyBook(object):
     """
@@ -34,9 +34,10 @@ class StrategyBook(object):
                               'TestTransitions': TestTransitions,
                               'PerpetualMovement': PerpetualMovement,
                               'WeirdmovementStrategy': WeirdmovementStrategy,
-                              "ObstacleCourse": ObstacleCourse,
+                              "IndianaJones": IndianaJones,
                               "TestRotateAround": TestRotateAround,
                               'TestPasses': TestPasses,
+                              'RobocupChoreography': RobocupChoreography,
                               }
 
     def get_strategies_name_list(self) -> List[str]:
