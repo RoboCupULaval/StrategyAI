@@ -1,4 +1,6 @@
 import numpy as np
+import warnings
+warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
 
 class Kalman:
@@ -157,7 +159,7 @@ class Kalman:
         observation = np.array(observation)
         mask = np.array([obs is not None for obs in observation])
         observation_wmask = observation[mask]
-        if len(observation_wmask) is not 0:
+        if len(observation_wmask) != 0:
             H = self.H[mask]
             R = np.transpose(self.R[mask])
             R = np.transpose(R[mask])

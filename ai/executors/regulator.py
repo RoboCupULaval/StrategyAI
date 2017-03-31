@@ -42,85 +42,17 @@ class PositionRegulator(Executor):
             if cmd.command is AICommandType.MOVE:
                 robot_idx = cmd.robot_id
                 active_player = self.ws.game_state.game.friends.players[robot_idx]
-                if not cmd.rotate_around_flag and not cmd.speed_flag:
+                if not cmd.speed_flag:
                     cmd.speed = self.regulators[robot_idx].\
                         update_pid_and_return_speed_command(cmd,
                                                             active_player,
                                                             delta_t,
                                                             idx=robot_idx,
                                                             robot_speed=cmd.robot_speed)
-                    #cmd.speed.position.x = 0
-                    #cmd.speed.position.y = 0
-                elif not cmd.rotate_around_flag and cmd.speed_flag:
+                elif cmd.speed_flag:
                     v_theta = cmd.pose_goal.orientation
                     v_x, v_y =_correct_for_referential_frame(cmd.pose_goal.position.x, cmd.pose_goal.position.y, -active_player.pose.orientation)
                     cmd.speed = Pose(Position(v_x, v_y), v_theta)
-                else:
-                    cmd.speed = self.regulators[robot_idx].\
-                        rotate_around(cmd, active_player, delta_t)
-
-    def _potential_field(self):
-        current_ai_c = self.ws.play_state.current_ai_commands
-
-        for ai_c in current_ai_c.values():
-            if ai_c.command == AICommandType.MOVE:  # and len(ai_c.path) > 0:
-                force = [0, 0]
-                current_robot_pos = self.ws.game_state.get_player_position(ai_c.robot_id)
-                current_robot_velocity = self.ws.game_state.game.friends.players[ai_c.robot_id].velocity
-                current_robot_velocity_norm = math.sqrt(current_robot_velocity[0] ** 2 + current_robot_velocity[1] ** 2)
-                current_robot_velocity_angle = math.atan2(current_robot_velocity[1], current_robot_velocity[0])
-                for robot in self.ws.game_state.game.friends.players.values():
-                    if robot.id != ai_c.robot_id:
-                        dist = get_distance(current_robot_pos, robot.pose.position)
-                        angle = math.atan2(current_robot_pos.y - robot.pose.position.y,
-                                           current_robot_pos.x - robot.pose.position.x)
-                        projection = current_robot_velocity_norm * math.cos(current_robot_velocity_angle - angle)
-                        rmax = projection * 1000
-                        if dist < rmax:
-                            try:
-                                force[0] += 1 / dist * math.cos(angle) * projection
-                            except ZeroDivisionError:
-                                print("div 0 - 1")
-                                pass
-                            try:
-                                force[1] += 1 / dist * math.sin(angle) * projection
-                            except ZeroDivisionError:
-                                print("div 0 - 2")
-                                pass
-
-                for robot in self.ws.game_state.game.enemies.players.values():
-                    dist = get_distance(current_robot_pos, robot.pose.position)
-                    angle = math.atan2(current_robot_pos.y - robot.pose.position.y,
-                                       current_robot_pos.x - robot.pose.position.x)
-                    projection = -current_robot_velocity_norm * math.cos(current_robot_velocity_angle - angle)
-                    projection = max(0, projection)
-                    rmax = projection * 1000
-                    if dist < rmax:
-                        try:
-                            force[0] += 1 / dist * math.cos(angle) * projection
-                        except ZeroDivisionError:
-                            print("div 0 - 3")
-                            pass
-                        try:
-                            force[1] += 1 / dist * math.sin(angle) * projection
-                        except ZeroDivisionError:
-                            print("div 0 - 4")
-                            pass
-
-                # dist_goal = get_distance(current_robot_pos, ai_c.pose_goal.position)
-                # angle_goal = math.atan2(current_robot_pos.y - ai_c.pose_goal.position.y,
-                #                         current_robot_pos.x - ai_c.pose_goal.position.x)
-
-                c = force[0] * ROBOT_NEAR_FORCE  # + (acc_goal * math.cos(angle_acc_goal))
-                d = force[1] * ROBOT_NEAR_FORCE  # + (acc_goal * math.cos(angle_acc_goal))
-
-                angle_acc = math.atan2(d, c)
-                norm_acc = math.sqrt(c ** 2 + d ** 2)
-
-                acc_robot_x = norm_acc * math.cos(angle_acc)
-                acc_robot_y = norm_acc * math.sin(angle_acc)
-                ai_c.pose_goal.position.x += acc_robot_x * 1
-                ai_c.pose_goal.position.y += acc_robot_y * 1
 
 
 class PID(object):
@@ -270,31 +202,6 @@ class PI(object):
         if math.fabs(delta_theta) <= self.position_dead_zone:
             v_theta_target = 0
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
-
-    # todo Finish v
-    def rotate_around(self, command, active_player, delta_t):
-        # TODO delta t
-        delta_t = 0.03
-        r = command.rotate_around_goal.radius
-        phi = command.rotate_around_goal.direction
-        theta = command.rotate_around_goal.orientation
-
-        r_p, phi_p = _xy_to_rphi_(active_player.pose.position, command.rotate_around_goal.center_position)
-        theta_p = active_player.pose.orientation
-
-        vr = self.rotate_pid[0].update(r, r_p, delta_t)
-        vphi = self.rotate_pid[1].update(phi, phi_p, delta_t)
-        vtheta = self.rotate_pid[2].update(theta, theta_p, delta_t)
-
-        print("theta ", theta*180/3.14, theta_p*180/3.14)
-        print("phi ", phi * 180 / 3.14, phi_p * 180 / 3.14)
-        print("r ", r, r_p)
-
-        vx, vy = _vit_rphi_to_xy(r, phi, vr, vphi)
-
-        vx, vy = _correct_for_referential_frame(vx, vy, -active_player.pose.orientation)
-
-        return Pose(Position(vx/1000, vy/1000), vtheta)
 
 
 def _correct_for_referential_frame(x, y, orientation):
