@@ -30,7 +30,7 @@ class PathPartitionner(Pathfinder):
         self.game_state = self.p_worldstate.game_state
         self.path = Path(Position(0, 0), Position(0, 0))
         self.res = 100
-        self.gap_proxy = 300
+        self.gap_proxy = 250
         self.max_recurs = 3
         self.pose_obstacle = None
 
@@ -141,7 +141,7 @@ class PathPartitionner(Pathfinder):
 
                 sub_target_2 -= vec_perp * 0.01 * self.res
 
-                if abs(get_distance(path.start, Position(sub_target_1[0], sub_target_1[1])) - get_distance(path.start, Position(sub_target_2[0], sub_target_2[1]))) < 600:
+                if abs(get_distance(path.start, Position(sub_target_1[0], sub_target_1[1])) - get_distance(path.start, Position(sub_target_2[0], sub_target_2[1]))) < 300:
 
                     sub_target = sub_target_1
                     avoid_dir = -vec_perp

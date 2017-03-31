@@ -76,8 +76,8 @@ class GoGetBall(Tactic):
         vector_player_2_ball = np.array([ball_x - player_x, ball_y - player_y])
         vector_target_2_ball = np.array([ball_x - target_x, ball_y - target_y])
         angle_ball_2_target =  np.arctan2(vector_target_2_ball[1], vector_target_2_ball[0])
-
-        vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
+        dist_player_2_ball = np.linalg.norm(vector_player_2_ball)
+        vector_player_2_ball /= dist_player_2_ball
         vector_target_2_ball /= np.linalg.norm(vector_target_2_ball)
 
         if np.dot(vector_player_2_ball, vector_target_2_ball) < - 0.95:
@@ -91,7 +91,7 @@ class GoGetBall(Tactic):
             # self.debug.add_log(4, "Distance from ball: {}".format(dist))
             self.next_state = self.get_behind_ball
         return GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position()+Position(vector_player_2_ball[0]*70, vector_player_2_ball[1] * 70), self.target.position,
-                        self.game_state.const["DISTANCE_BEHIND"])
+                        self.game_state.const["DISTANCE_BEHIND"], pathfinding=True)
 
     def start_dribbler(self):
         now = time.time()
@@ -117,7 +117,7 @@ class GoGetBall(Tactic):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
         # self.debug.add_log(1, "orientation go get ball {}".format(self.last_angle))
-        return MoveToPosition(self.game_state, self.player_id, Pose(Position(vector_player_2_ball[0]*300, vector_player_2_ball[1] * 300), self.last_angle))
+        return MoveToPosition(self.game_state, self.player_id, Pose(Position(vector_player_2_ball[0], vector_player_2_ball[1]), self.last_angle))
 
     def halt(self):
         self.status_flag = Flags.SUCCESS

@@ -34,7 +34,7 @@ class Field:
                 return True
             elif is_inside_circle(position, bot_circle, self.constant["FIELD_GOAL_RADIUS"]):
                 return True
-            return False
+            return True
         else:
             return False
 
@@ -170,12 +170,12 @@ real_life = {
     "FIELD_GOAL_SEGMENT": 181,
 
     # Goal Parameters
-    "FIELD_GOAL_Y_TOP": 436,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
-    "FIELD_GOAL_Y_BOTTOM": -436,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
-    "FIELD_GOAL_BLUE_X_LEFT": -1450,  # FIELD_X_LEFT
+    "FIELD_GOAL_Y_TOP": 536,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
+    "FIELD_GOAL_Y_BOTTOM": -536,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
+    "FIELD_GOAL_BLUE_X_LEFT": -1636,  # FIELD_X_LEFT
     "FIELD_GOAL_BLUE_X_RIGHT": -1272,  # FIELD_X_LEFT + FIELD_GOAL_RADIUS
     "FIELD_GOAL_YELLOW_X_LEFT": 1272,  # FIELD_X_RIGHT - FIELD_GOAL_RADIUS
-    "FIELD_GOAL_YELLOW_X_RIGHT": 1450,  # FIELD_X_RIGHT
+    "FIELD_GOAL_YELLOW_X_RIGHT": 1636,  # FIELD_X_RIGHT
 
     # Field Positions
     "FIELD_GOAL_BLUE_TOP_CIRCLE": Position(-1636, 250),  # FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2)

@@ -250,7 +250,7 @@ class PI(object):
         # Translation
         v_max = math.fabs(v_current) + self.accel_max * delta_t  # Selon l'acceleration maximale
         v_max = min(self.vit_max, v_max)  # Selon la vitesse maximale du robot
-        # v_max = min(math.sqrt(2 * self.accel_max * delta), v_max)   # Selon la distance restante a parcourir
+        v_max = min(math.sqrt(2 * 0.5 * delta), v_max)   # Selon la distance restante a parcourir
         v_target = max(self.vit_min, min(v_max, v_target))
 
         # Rotation

@@ -36,7 +36,7 @@ class DemoFollowBall(Tactic):
     def move_to_ball(self):
         self.status_flag = Flags.WIP
         self.target = Pose(self.game_state.get_ball_position())
-        move = MoveToPosition(self.game_state, self.player_id, self.target, FOLLOW_SPEED)
+        move = PathfindToPosition(self.game_state, self.player_id, self.target)
 
         if get_distance(self.game_state.get_player_pose(self.player_id).position, self.target.position) <\
            POSITION_DEADZONE + BALL_RADIUS:
