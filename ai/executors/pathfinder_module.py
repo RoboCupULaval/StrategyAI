@@ -7,6 +7,7 @@ from ai.executors.executor import Executor
 from ai.Util.ai_command import AICommand
 from ai.Algorithm.CinePath.CinePath import CinePath
 from RULEngine.Util.geometry import get_distance
+from ai.executors.path_partitionner import PathPartitionner
 from ai.states.world_state import WorldState
 
 INTERMEDIATE_DISTANCE_THRESHOLD = 540
@@ -46,7 +47,9 @@ class PathfinderModule(Executor):
 
     def _pathfind_ai_commands(self, ai_commands):
         for ai_c in ai_commands:
+            self.time = time.time()
             path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
+            print(self.time - time.time())
             self.draw_path(path)
             ai_c.path = path
 
@@ -72,7 +75,7 @@ class PathfinderModule(Executor):
 
     def get_pathfinder(self, type_of_pathfinder, is_simulation):
         assert isinstance(type_of_pathfinder, str)
-        assert type_of_pathfinder.lower() in ["rrt", "astar"]
+        assert type_of_pathfinder.lower() in ["rrt", "astar", "path_part"]
 
         if type_of_pathfinder.lower() == "astar":
             # place pathfinder here
@@ -80,6 +83,9 @@ class PathfinderModule(Executor):
         elif type_of_pathfinder.lower() == "rrt":
             # place pathfinder here
             return PathfinderRRT(self.ws)
+        elif type_of_pathfinder.lower() == "path_part":
+            # place pathfinder here
+            return PathPartitionner(self.ws)
         else:
             raise TypeError("Couldn't init a pathfinder with the type of ",
                             type_of_pathfinder, "!")
