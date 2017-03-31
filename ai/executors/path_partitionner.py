@@ -31,7 +31,7 @@ class PathPartitionner(Pathfinder):
         self.path = Path(Position(0, 0), Position(0, 0))
         self.res = 100
         self.gap_proxy = 300
-        self.max_recurs = 3
+        self.max_recurs = 5
         self.pose_obstacle = None
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None):
@@ -51,15 +51,20 @@ class PathPartitionner(Pathfinder):
         return path
 
     def get_path(self, player_id=0, pose_target=Pose()):
-        obstacles = self.game_state.game.friends.players.values()
-
-        self.pose_obstacle = np.zeros((len(obstacles)-1, 2))
-        self.path = Path(self.game_state.get_player_pose(player_id).position, pose_target.position)
+        objects = []
         i = 0
-        for player in obstacles:
-            if player.id != player_id:
-                self.pose_obstacle[i, :] = player.pose.position.conv_2_np()
+        self.pose_obstacle = np.zeros((len(self.game_state.game.friends.players.values())+len(self.game_state.game.enemies.players.values()) - 1, 2))
+        for d1, d2 in zip(self.game_state.game.friends.players.values(), self.game_state.game.enemies.players.values()):
+            if d1.id != player_id:
+                self.pose_obstacle[i, :] = d1.pose.position.conv_2_np()
+                self.pose_obstacle[i+1, :] = d2.pose.position.conv_2_np()
+                i += 2
+            else:
+                self.pose_obstacle[i, :] = d2.pose.position.conv_2_np()
                 i += 1
+
+        self.path = Path(self.game_state.get_player_pose(player_id).position, pose_target.position)
+
         return self.fastpathplanner(self.path).points[1:]
 
     def is_path_collide(self, path):
@@ -141,7 +146,7 @@ class PathPartitionner(Pathfinder):
 
                 sub_target_2 -= vec_perp * 0.01 * self.res
 
-                if abs(get_distance(path.start, Position(sub_target_1[0], sub_target_1[1])) - get_distance(path.start, Position(sub_target_2[0], sub_target_2[1]))) < 600:
+                if abs(get_distance(path.start, Position(sub_target_1[0], sub_target_1[1])) - get_distance(path.start, Position(sub_target_2[0], sub_target_2[1]))) < 300:
 
                     sub_target = sub_target_1
                     avoid_dir = -vec_perp
