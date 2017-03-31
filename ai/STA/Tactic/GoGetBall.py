@@ -100,7 +100,7 @@ class GoGetBall(Tactic):
             self.last_ball_position = self.game_state.get_ball_position()
             self.last_angle = self.game_state.game.friends.players[self.player_id].pose.orientation
             self.next_state = self.grab_ball
-        other_args = {"dribbler_on": 3}
+        other_args = {"dribbler_on": 2}
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def grab_ball(self):

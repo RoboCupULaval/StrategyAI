@@ -28,7 +28,7 @@ class Kalman:
             self.H += [[0, 0, 0, 0, 1, 0] for i in range(ncameras)] # Orientation
             self.H = np.array(self.H)
             # Process covariance
-            values = np.array([10 ** (0), 10 ** (0), 10 ** (1), 10 ** (1), 10 ** (-2), 10 ** (-1)])
+            values = np.array([10 ** (0), 10 ** (0), 10 ** (1), 10 ** (1), 10 ** (-2), 10 ** (0)])
             self.Q = np.diag(values)
             # Observation covariance
             values = [10 ** (0), 10 ** (0), 10 ** (-2)]
@@ -64,10 +64,10 @@ class Kalman:
             self.H += [[0, 0, 0, 0, 1, 0] for i in range(ncameras)]  # Orientation
             self.H = np.array(self.H)
             # Process covariance
-            values = np.array([10 ** (0), 10 ** (0), 10 ** (0), 10 ** (0), 10 ** (-2),  10 ** (-2)])
+            values = np.array([10 ** (0), 10 ** (0), 10 ** (0), 10 ** (0), 10 ** (2),  10 ** (-1)])
             self.Q = np.diag(values)
             # Observation covariance
-            values = [10 ** (0), 10 ** (0), 10 ** (-2)]
+            values = [10 ** (0), 10 ** (0), 10 ** (-3)]
             for i in range(ncameras - 1):
                 values += values
             self.R = np.diag(values)  # Pose * ncameras
@@ -163,10 +163,16 @@ class Kalman:
             R = np.transpose(R[mask])
 
             y = np.array(observation_wmask) - np.dot(H, self.x)
+            angles_diff = y[2*len(y)/3::]
+            a = [abs(angles_diff) > np.pi]
+            angles_diff[a] = (2 * np.pi - abs(angles_diff[a])) * -np.sign(angles_diff[a])
+            y[2 * len(y) / 3::] = angles_diff
+
             S = np.dot(np.dot(H, self.P), np.transpose(H)) + R
             K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
             self.x = self.x + np.dot(K, np.transpose(y))
             self.P = np.dot((np.eye(self.P.shape[0]) - np.dot(K, H)), self.P)
+
 
     def transition_model(self, dt):
         if (self.type == 'friend') or (self.type == 'enemi'):
@@ -182,12 +188,12 @@ class Kalman:
                                [0, 0, 1, 0],  # Speed x
                                [0, 0, 0, 1]])  # Speed y
 
-    def filter(self, observation=None, command=None, dt=0.03):
-        self.transition_model(dt)
+    def filter(self, observation=None, command=None, dt=0.05):
+        #print(dt, '   ', self.x)
+        self.transition_model(0.05)
         self.predict(command)
         if observation is not None:
             self.update(observation)
-        #print(dt, '   ', self.x)
         if self.type == 'friend' or self.type == 'enemi':
             self.x[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
         return self.x

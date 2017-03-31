@@ -82,7 +82,7 @@ if __name__ == '__main__':
     # ai init
     ai_coach = Coach(is_simulation=simulation)
     # RULEngine init
-    framework = Framework(serial=serial, redirect=False, mcu_version=mcu)
+    framework = Framework(serial=serial, redirect=True, mcu_version=mcu)
     # Starting point
     framework.start_game(ai_coach.main_loop, ai_coach.set_reference,
                          team_color=color, async=args.async)

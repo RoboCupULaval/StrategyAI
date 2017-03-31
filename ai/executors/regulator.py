@@ -175,94 +175,99 @@ class PI(object):
         self.thetaKiSum = 0
         self.last_target = 0
         self.position_dead_zone = self.constants["position_dead_zone"]  # 0.03
-        self.rotation_dead_zone = 0.01 * math.pi
+        self.rotation_dead_zone = 0.005 * math.pi
         self.last_theta_target = 0
 
-    def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=1):
+    def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=1.0):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
         assert isinstance(cmd, AICommand), "La consigne doit etre une Pose dans le PI"
         if robot_speed:
             self.vit_max = robot_speed
         else:
             self.vit_max = self.constants["vit_max"]
-
         self.paths[idx] = cmd.path
-        delta_t = 0.03
+        delta_t = 0.05
 
-        r_x, r_y, r_theta = cmd.pose_goal.position.x, cmd.pose_goal.position.y, cmd.pose_goal.orientation
-        t_x, t_y, t_theta = active_player.pose.position.x, active_player.pose.position.y, active_player.pose.orientation
+        # Position de la target (en m)
+        r_x, r_y, r_theta = cmd.pose_goal.position.x / 1000, cmd.pose_goal.position.y / 1000, cmd.pose_goal.orientation
+        # Position du robot (en m)
+        t_x, t_y, t_theta = active_player.pose.position.x / 1000, active_player.pose.position.y / 1000, active_player.pose.orientation
+        # Vitesse actuelle du robot (en m/s)
+        v_x, v_y, v_theta = active_player.velocity[0] / 1000, active_player.velocity[1] / 1000, active_player.velocity[
+            2]
+        v_x, v_y = _correct_for_referential_frame(v_x, v_y, -active_player.pose.orientation)
+        v_current = math.sqrt(v_x ** 2 + v_y ** 2)
 
-        target = math.sqrt(r_x**2 + r_y**2)
-
-        # always true?
+        # Reinitialisation de l'integrateur lorsque la target change de position
+        target = math.sqrt(r_x ** 2 + r_y ** 2)
         if abs(target - self.last_target) > THRESHOLD_LAST_TARGET:
             self.kiSum = 0
         self.last_target = target
-
-        v_x = active_player.velocity[0]
-        v_y = active_player.velocity[1]
-        v_theta = active_player.velocity[2]
-        v_x, v_y = _correct_for_referential_frame(v_x, v_y, -active_player.pose.orientation)
-        v_current = math.sqrt(v_x**2 + v_y**2)
-
-        delta_x = (r_x - t_x)/1000
-        delta_y = (r_y - t_y)/1000
-        delta_theta = (r_theta - t_theta)
-        if abs(delta_theta) > math.pi:
-            delta_theta = (2 * math.pi - abs(delta_theta)) * -sign(delta_theta)
-
-        delta_x, delta_y = _correct_for_referential_frame(delta_x, delta_y, -active_player.pose.orientation)
-
-        delta = math.sqrt(delta_x**2 + delta_y**2)
-        angle = math.atan2(delta_y, delta_x)
-
-        self.vit_min = 0.03
-        if delta <= self.position_dead_zone:
-            self.vit_min = 0
-            delta = 0
-
-        v_target = self.xyKp * delta
-        self.kiSum += delta * self.ki * delta_t * sign(delta_x * v_x + delta_y * v_y)
-        v_target += math.fabs(self.kiSum)
-        v_target += self.kd * ((delta - self.lastErr) / delta_t)
-        self.lastErr = delta
-
-        v_max = math.fabs(v_current) + self.accel_max * delta_t
-        v_max = min(self.vit_max, v_max)
-        v_target = max(self.vit_min, min(v_max, v_target))
-
-        minimal_dist = v_current / (2 * self.accel_max)
-        if minimal_dist < math.fabs(delta):
-            v_limited = delta * 2 * self.accel_max
-            v_target = min(v_target, v_limited)
-
-        decoupled_angle = angle - v_theta * delta_t
-
-        v_target_x = v_target * math.cos(decoupled_angle)
-        v_target_y = v_target * math.sin(decoupled_angle)
-
-        if abs(r_theta - self.last_theta_target) > THRESHOLD_LAST_TARGET/100:
+        if abs(r_theta - self.last_theta_target) > THRESHOLD_LAST_TARGET / 100:
             self.thetaKiSum = 0
         self.last_theta_target = r_theta
 
+        # CALCUL DE L'ERREUR
+        delta_x = (r_x - t_x)
+        delta_y = (r_y - t_y)
+        delta_theta = (r_theta - t_theta)
+        if abs(delta_theta) > math.pi:
+            delta_theta = (2 * math.pi - abs(delta_theta)) * -sign(delta_theta)
+        delta_x, delta_y = _correct_for_referential_frame(delta_x, delta_y, -active_player.pose.orientation)
+        delta = math.sqrt(delta_x ** 2 + delta_y ** 2)
+        angle = math.atan2(delta_y, delta_x)
+
+        # DEAD-ZONE
+        if delta <= self.position_dead_zone:
+            self.vit_min = 0
+            delta = 0
+        if math.fabs(delta_theta) <= self.rotation_dead_zone:
+            delta_theta = 0
+
+        # PID TRANSLATION
+        # Proportionnel
+        v_target = self.xyKp * delta
+        # Intergral
+        self.kiSum += delta * self.ki * delta_t * sign(delta_x * v_x + delta_y * v_y)
+        v_target += math.fabs(self.kiSum)
+        # Derivatif
+        v_target += self.kd * ((delta - self.lastErr) / delta_t)
+        self.lastErr = delta
+
+        # PID ROTATION
+        # Proportionnel
         v_theta_target = self.thetaKp * delta_theta
+        # Intergral
+        self.thetaKiSum += delta_theta * self.thetaKi * delta_t
+        v_theta_target += self.thetaKiSum
+        # Derivatif
         v_theta_target += self.thetaKd * ((delta_theta - self.lastErr_theta) / delta_t)
         self.lastErr_theta = delta_theta
-        self.thetaKiSum += delta_theta * self.thetaKi * delta_t
-        if self.thetaKiSum > self.constants["theta-max-acc"]:
-            self.thetaKiSum = self.constants["theta-max-acc"]
-        elif self.thetaKiSum < -self.constants["theta-max-acc"]:
-            self.thetaKiSum = -self.constants["theta-max-acc"]
-        v_theta_target += self.thetaKiSum
-        if v_theta_target > self.constants["theta-max-acc"]:
-            v_theta_target = self.constants["theta-max-acc"]
-        elif v_theta_target < -self.constants["theta-max-acc"]:
-            v_theta_target = -self.constants["theta-max-acc"]
 
+        # SATURATION DE LA VITESSE
+        # Selon l'acceleration maximale ou la vitesse maximale
+
+        # Translation
+        v_max = math.fabs(v_current) + self.accel_max * delta_t  # Selon l'acceleration maximale
+        v_max = min(self.vit_max, v_max)  # Selon la vitesse maximale du robot
+        # v_max = min(math.sqrt(2 * self.accel_max * delta), v_max)   # Selon la distance restante a parcourir
+        v_target = max(self.vit_min, min(v_max, v_target))
+
+        # Rotation
+        #v_max = math.fabs(v_theta) + self.constants["theta-max-acc"] * delta_t
+        #v_max = min(self.constants["theta-max-acc"], v_max)
+        #v_theta_target = sign(v_theta_target) * min(math.fabs(v_theta_target), v_max)
+
+        # DECOUPLAGE ??
+        decoupled_angle = angle  #- v_theta * delta_t
+        v_target_x = v_target * math.cos(decoupled_angle)
+        v_target_y = v_target * math.sin(decoupled_angle)
+
+        # DEAD-ZONE
         if delta <= self.position_dead_zone:
             v_target_x = 0
             v_target_y = 0
-        if abs(active_player.pose.orientation - r_theta) < 0.005:
+        if math.fabs(delta_theta) <= self.position_dead_zone:
             v_theta_target = 0
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
 
@@ -323,16 +328,16 @@ def _set_constants(simulation_setting):
         return {"ROBOT_NEAR_FORCE": 1000,
                 "ROBOT_VELOCITY_MAX": 4,
                 "ROBOT_ACC_MAX": 2,
-                "accel_max": 0.7,
-                "vit_max": 2.0,
+                "accel_max": 4.0,
+                "vit_max": 4.0,
                 "vit_min": 0.05,
-                "xyKp": 0.5,
+                "xyKp": 2,
                 "ki": 0.05,
                 "kd": 0.4,
-                "thetaKp": 1,
+                "thetaKp": 0.7,
                 "thetaKd": 0,
-                "thetaKi": 0.7,
-                "theta-max-acc": 0.5 * math.pi,
+                "thetaKi": 0.07,
+                "theta-max-acc": 0.05 * math.pi,
                 "position_dead_zone": 0.04
                 }
 
