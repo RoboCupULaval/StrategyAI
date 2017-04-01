@@ -14,7 +14,7 @@ from . tactic_constants import Flags
 
 
 class Joystick(Tactic):
-    def __init__(self, p_game_state, player_id, target, args):
+    def __init__(self, p_game_state, player_id, target=Pose(), args=None):
         super().__init__(p_game_state, player_id, target, args)
         self.target = target
         self.status_flag = Flags.INIT

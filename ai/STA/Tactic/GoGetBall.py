@@ -80,8 +80,9 @@ class GoGetBall(Tactic):
         vector_player_2_ball /= dist_player_2_ball
         vector_target_2_ball /= np.linalg.norm(vector_target_2_ball)
 
+        print(np.dot(vector_player_2_ball, vector_target_2_ball))
         if np.dot(vector_player_2_ball, vector_target_2_ball) < - 0.95:
-            if self.game_state.game.friends.players[self.player_id].velocity[2] < 0.01:
+            if True:
                 print(abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation))
                 if abs(abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation) - np.pi) < 0.1 or \
                                 abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation) < 0.1:
@@ -117,7 +118,7 @@ class GoGetBall(Tactic):
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
         # self.debug.add_log(1, "orientation go get ball {}".format(self.last_angle))
-        return MoveToPosition(self.game_state, self.player_id, Pose(Position(vector_player_2_ball[0], vector_player_2_ball[1]), self.last_angle))
+        return MoveToPosition(self.game_state, self.player_id, Pose(Position(ball_x, ball_y), self.last_angle))
 
     def halt(self):
         self.status_flag = Flags.SUCCESS

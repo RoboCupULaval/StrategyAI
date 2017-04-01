@@ -16,10 +16,10 @@ class IndianaJones(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
         # ID Robot Indiana Jones : 0
-        indiana_ID = 0
+        indiana_ID = 4
         # ID Robot obstacles mouvants : 1 et 2
-        obs_left_ID = 1
-        obs_right_ID = 2
+        obs_left_ID = 2
+        obs_right_ID = 3
         # Positions objectifs d'Indiana Jones
         goal_left = (Pose(Position(self.game_state.const["FIELD_GOAL_YELLOW_X_LEFT"], 0), 0))
         goal_right = (Pose(Position(self.game_state.const["FIELD_GOAL_BLUE_X_RIGHT"], 0), 0))
@@ -36,13 +36,13 @@ class IndianaJones(Strategy):
         self.add_condition(indiana_ID, 0, 1, partial(self.condition, indiana_ID))
         self.add_condition(indiana_ID, 1, 0, partial(self.condition, indiana_ID))
 
-        self.add_tactic(obs_left_ID, GoToPositionNoPathfinder(self.game_state, obs_left_ID, Pose(Position(x_left/2, y_top))))
-        self.add_tactic(obs_left_ID, GoToPositionNoPathfinder(self.game_state, obs_left_ID, Pose(Position(x_left/2, y_down))))
+        self.add_tactic(obs_left_ID, GoToPositionPathfinder(self.game_state, obs_left_ID, Pose(Position(x_left/2, y_top))))
+        self.add_tactic(obs_left_ID, GoToPositionPathfinder(self.game_state, obs_left_ID, Pose(Position(x_left/2, y_down))))
         self.add_condition(obs_left_ID, 0, 1, partial(self.condition, obs_left_ID))
         self.add_condition(obs_left_ID, 1, 0, partial(self.condition, obs_left_ID))
 
-        self.add_tactic(obs_right_ID, GoToPositionNoPathfinder(self.game_state, obs_right_ID, Pose(Position(x_right/2, y_top))))
-        self.add_tactic(obs_right_ID, GoToPositionNoPathfinder(self.game_state, obs_right_ID, Pose(Position(x_right/2, y_down))))
+        self.add_tactic(obs_right_ID, GoToPositionPathfinder(self.game_state, obs_right_ID, Pose(Position(x_right/2, y_top))))
+        self.add_tactic(obs_right_ID, GoToPositionPathfinder(self.game_state, obs_right_ID, Pose(Position(x_right/2, y_down))))
         self.add_condition(obs_right_ID, 0, 1, partial(self.condition, obs_right_ID))
         self.add_condition(obs_right_ID, 1, 0, partial(self.condition, obs_right_ID))
 

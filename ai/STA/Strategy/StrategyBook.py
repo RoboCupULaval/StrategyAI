@@ -15,6 +15,7 @@ from ai.STA.Strategy.PerpetualMovement import PerpetualMovement
 from ai.STA.Strategy.TestPasses import TestPasses
 from ai.STA.Strategy.TestRotateAround import TestRotateAround
 from ai.STA.Strategy.robocup_choreography import RobocupChoreography
+from ai.STA.Strategy.bamba_follow import BambaFollow
 
 class StrategyBook(object):
     """
@@ -38,6 +39,7 @@ class StrategyBook(object):
                               "TestRotateAround": TestRotateAround,
                               'TestPasses': TestPasses,
                               'RobocupChoreography': RobocupChoreography,
+                              'BambaFollow': BambaFollow,
                               }
 
     def get_strategies_name_list(self) -> List[str]:

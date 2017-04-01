@@ -40,7 +40,7 @@ class Kalman:
             # Initial state covariance
             self.P = 10 ** (3) * np.eye(6)
 
-            self.x = np.array([0, 0, 0, 0, 0, 0])
+            self.x = np.array([9999, 9999, 9999, 9999, 9999, 9999])
             i = 0
             if observation is not None:
                 for obs in observation:
@@ -76,7 +76,7 @@ class Kalman:
             # Initial state covariance
             self.P = 10 ** (3) * np.eye(6)
 
-            self.x = np.array([0, 0, 0, 0, 0, 0])
+            self.x = np.array([9999, 9999, 9999, 9999, 9999, 9999])
             i = 0
             if observation is not None:
                 for obs in observation:
