@@ -51,6 +51,7 @@ def get_color(color_arg):
     else:
         return TeamColor.YELLOW_TEAM
 
+
 def get_mcu(mcu):
     if mcu == "c2000":
         return MCUVersion.C2000
