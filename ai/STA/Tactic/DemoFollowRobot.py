@@ -7,7 +7,7 @@ from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
 from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.constant import POSITION_DEADZONE, BALL_RADIUS, ROBOT_RADIUS
+from RULEngine.Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
 from ai.STA.Tactic.tactic_constants import Flags
 
 __author__ = 'RoboCupULaval'
@@ -16,7 +16,7 @@ __author__ = 'RoboCupULaval'
 FOLLOW_SPEED = 1.5
 
 
-class DemoFollowBall(Tactic):
+class DemoFollowRobot(Tactic):
     # TODO : Renommer la classe pour illustrer le fait qu'elle set une Pose et non juste une Position
     """
     méthodes:
@@ -29,13 +29,14 @@ class DemoFollowBall(Tactic):
         Tactic.__init__(self, game_state, player_id, p_target, args, time_to_live=time_to_live)
         assert isinstance(player_id, int)
 
+        self.robot_to_follow_id = int(args[0])
         self.current_state = self.halt
         self.next_state = self.halt
         self.player_id = player_id
 
     def move_to_ball(self):
         self.status_flag = Flags.WIP
-        self.target = Pose(self.game_state.get_ball_position())
+        self.target = self.game_state.get_player_pose(self.robot_to_follow_id)
         move = PathfindToPosition(self.game_state, self.player_id, self.target)
 
         if get_distance(self.game_state.get_player_pose(self.player_id).position, self.target.position) <\
