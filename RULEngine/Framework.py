@@ -318,6 +318,7 @@ class Framework(object):
         for idx, command in enumerate(commands):
             self.robot_command_sender.send_command(command)
 
+
     def _send_debug_commands(self):
         """ Envoie les commandes de debug au serveur. """
         self.outgoing_debug = self.debug.debug_state

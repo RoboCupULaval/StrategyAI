@@ -61,7 +61,7 @@ class Joystick(Tactic):
             x_speed = -y * self.inv_y
             y_speed = x * self.inv_x
 
-            speed_pose = Pose(Position(x_speed, y_speed), t * -5)
+            speed_pose = Pose(Position(x_speed, y_speed), t * 5)
 
             if kick == 0:
                 next_action = AICommand(self.player_id, AICommandType.MOVE,

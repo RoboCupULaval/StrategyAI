@@ -50,8 +50,8 @@ class StandOutWaitPass(Tactic):
         distance_to_kicker = get_distance(self.game_state.get_player_position(self.player_id), kicker_posi)
         increment_multiplier = 1
         clear_position = []
-        pente, ordonne
-        while
+        #pente, ordonne
+        #while
 
 
 
