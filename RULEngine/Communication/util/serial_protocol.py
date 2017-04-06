@@ -4,7 +4,8 @@ import struct
 import time
 from enum import Enum
 
-from cobs import cobs
+from RULEngine.Util.cobs import cobs
+
 
 class MCUVersion(Enum):
     C2000 = 1
