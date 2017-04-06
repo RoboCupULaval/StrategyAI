@@ -193,9 +193,10 @@ class Kalman:
     def filter(self, observation=None, command=None, dt=0.05):
         #print(dt, '   ', self.x)
         self.transition_model(0.05)
-        self.predict(command)
+
         if observation is not None:
             self.update(observation)
+        self.predict(command)
         if self.type == 'friend' or self.type == 'enemi':
             self.x[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
         return self.x
