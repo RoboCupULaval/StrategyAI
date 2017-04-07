@@ -165,10 +165,13 @@ class Kalman:
             R = np.transpose(R[mask])
 
             y = np.array(observation_wmask) - np.dot(H, self.x)
-            angles_diff = y[2*len(y)/3::]
-            a = [abs(angles_diff) > np.pi]
-            angles_diff[a] = (2 * np.pi - abs(angles_diff[a])) * -np.sign(angles_diff[a])
-            y[2 * len(y) / 3::] = angles_diff
+
+            if not self.type == 'ball':
+                idx = int(2*len(y)/3)
+                angles_diff = y[idx::]
+                a = [abs(angles_diff) > np.pi]
+                angles_diff[a] = (2 * np.pi - abs(angles_diff[a])) * -np.sign(angles_diff[a])
+                y[idx::] = angles_diff
 
             S = np.dot(np.dot(H, self.P), np.transpose(H)) + R
             K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
