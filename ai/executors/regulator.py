@@ -11,6 +11,8 @@ from ai.executors.executor import Executor
 from ai.states.game_state import GameState
 from ai.states.world_state import WorldState
 
+import numpy as np
+
 
 ROBOT_NEAR_FORCE = 2000
 THRESHOLD_LAST_TARGET = 100
@@ -27,10 +29,11 @@ def sign(x):
 class PositionRegulator(Executor):
     def __init__(self, p_world_state: WorldState, is_simulation=False):
         super().__init__(p_world_state)
-        self.regulators = [PI(simulation_setting=is_simulation) for _ in range(6)]
+        self.constants = _set_constants(simulation_setting=is_simulation)
+        self.regulators = [PI(simulation_setting=is_simulation) for _ in range(12)]
+        self.mnrc_speed = [MNRCFixedSpeed(simulation_setting=is_simulation) for _ in range(12)]
         self.last_timestamp = 0
 
-        self.constants = _set_constants(simulation_setting=is_simulation)
         self.accel_max = self.constants["accel_max"]
         self.vit_max = self.constants["vit_max"]
 
@@ -39,21 +42,52 @@ class PositionRegulator(Executor):
         delta_t = self.ws.game_state.game.delta_t
         # self._potential_field() # TODO finish <
         for cmd in commands.values():
+            robot_idx = cmd.robot_id
+            active_player = self.ws.game_state.game.friends.players[robot_idx]
             if cmd.command is AICommandType.MOVE:
-                robot_idx = cmd.robot_id
-                active_player = self.ws.game_state.game.friends.players[robot_idx]
                 if not cmd.speed_flag:
-                    cmd.speed = self.regulators[robot_idx].\
+                    speed = self.regulators[robot_idx].\
                         update_pid_and_return_speed_command(cmd,
                                                             active_player,
                                                             delta_t,
                                                             idx=robot_idx,
                                                             robot_speed=cmd.robot_speed)
-                elif cmd.speed_flag:
-                    v_theta = cmd.pose_goal.orientation
-                    v_x, v_y =_correct_for_referential_frame(cmd.pose_goal.position.x, cmd.pose_goal.position.y, -active_player.pose.orientation)
-                    cmd.speed = Pose(Position(v_x, v_y), v_theta)
+                    cmd.wheel_speed = self.mnrc_speed[robot_idx].\
+                        update(speed, active_player, delta_t)
 
+                elif cmd.speed_flag:
+                    cmd.wheel_speed = self.mnrc_speed[robot_idx]. \
+                        update(cmd.pose_goal, active_player, delta_t)
+
+            elif cmd.command is AICommandType.STOP:
+                cmd.wheel_speed = self.mnrc_speed[robot_idx].\
+                    update(Pose(Position(0,0),0), active_player, delta_t)
+
+class MNRCFixedSpeed(object):
+    def __init__(self, simulation_setting=True):
+        self.simulation_setting = simulation_setting
+        self.constants = _set_constants(simulation_setting)
+
+        self.kp = self.constants['MNRC_KP']
+        self.ki = self.constants['MNRC_KI']
+
+        self.robot_dynamic = self.constants['MNRC_ROBOT_DYNAMIC']
+        self.coupling_matrix = self.constants['MNRC_COUPLING']
+
+    @staticmethod
+    def _robot2fixed(robot_angle):
+        return np.array([[np.cos(robot_angle), -np.sin(robot_angle), 0], [np.sin(robot_angle), np.cos(robot_angle), 0], [0, 0, 1]])
+
+    def update(self, reference: Pose, active_player, delta_t):
+        """
+        Update the MNRC of the active player
+
+        :param reference: Pose containing the speed in x,y and theta
+        :param active_player: Player object of the current robot
+        :param delta_t: Time delta since last update
+        :return: Tuple containing the speed of each wheel of the robot
+        """
+        return (1,1,1,1)
 
 class PID(object):
     def __init__(self, kp, ki, kd, simulation_setting=True):
@@ -86,8 +120,6 @@ class PI(object):
     def __init__(self, simulation_setting=True):
         self.gs = GameState()
         self.paths = {}
-
-        self.rotate_pid = [PID(1, 0, 0), PID(1, 0, 0), PID(1.2, 0, 0)]
 
         self.simulation_setting = simulation_setting
         self.constants = _set_constants(simulation_setting)
@@ -229,7 +261,9 @@ def _set_constants(simulation_setting):
                 "thetaKi": 0.2,
                 "thetaKd": 0.3,
                 "theta-max-acc": 6*math.pi,
-                "position_dead_zone": 0.03
+                "position_dead_zone": 0.03,
+                "MNRC_KP": np.diag(np.array([1, 1, 1])),
+                "MNRC_KI": np.diag(np.array([1, 1, 1]))
                 }
     else:
         return {"ROBOT_NEAR_FORCE": 1000,
@@ -245,9 +279,12 @@ def _set_constants(simulation_setting):
                 "thetaKd": 0,
                 "thetaKi": 0.07,
                 "theta-max-acc": 0.05 * math.pi,
-                "position_dead_zone": 0.04
+                "position_dead_zone": 0.04,
+                "MNRC_KP": np.diag(np.array([1, 1, 1])),
+                "MNRC_KI": np.diag(np.array([1, 1, 1])),
+                "MNRC_ROBOT_DYNAMIC": np.array([],[]),
+                "MNRC_COUPLING" : np.array([],[])
                 }
-
 
 def _xy_to_rphi_(robot_position, ball_position):
     r = math.sqrt((robot_position.x - ball_position.x) ** 2 + (robot_position.y - ball_position.y) ** 2)

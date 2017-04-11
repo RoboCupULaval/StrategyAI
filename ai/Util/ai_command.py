@@ -30,6 +30,7 @@ class AICommand(object):
         self.charge_kick = other_args.get("charge_kick", False)
         self.pose_goal = other_args.get("pose_goal", Pose())
         self.speed = Pose()
+        self.wheel_speed = (0,0,0,0)
         self.robot_speed = other_args.get("speed", 0)
 
         # set this flag to true if you only need speed regulation (The pose_goal will be in m/s)
