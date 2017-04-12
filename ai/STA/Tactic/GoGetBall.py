@@ -79,15 +79,16 @@ class GoGetBall(Tactic):
         dist_player_2_ball = np.linalg.norm(vector_player_2_ball)
         vector_player_2_ball /= dist_player_2_ball
         vector_target_2_ball /= np.linalg.norm(vector_target_2_ball)
-
+        vector_player_dir = np.array([np.cos(self.game_state.game.friends.players[self.player_id].pose.orientation),
+                                      np.sin(self.game_state.game.friends.players[self.player_id].pose.orientation)])
         print(np.dot(vector_player_2_ball, vector_target_2_ball))
-        if np.dot(vector_player_2_ball, vector_target_2_ball) < - 0.95:
-            if True:
-                print(abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation))
-                if abs(abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation) - np.pi) < 0.1 or \
-                                abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation) < 0.1:
-                    self.last_time = time.time()
-                    self.next_state = self.start_dribbler
+        if np.dot(vector_player_2_ball, vector_target_2_ball) < - 0.99:
+            print(abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation))
+            # if abs(abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation) - np.pi) < 0.1 or \
+            #                 abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation) < 0.1:
+            if np.dot(vector_player_dir, vector_target_2_ball) < - 0.99:
+                self.last_time = time.time()
+                self.next_state = self.grab_ball
         else:
             # self.debug.add_log(4, "Distance from ball: {}".format(dist))
             self.next_state = self.get_behind_ball
@@ -114,9 +115,12 @@ class GoGetBall(Tactic):
 
         self.vector_norm = np.linalg.norm(vector_player_2_ball)
         # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
-        if self.vector_norm < 110:
+        print(self.vector_norm)
+        if self.vector_norm < 140:
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
+        else:
+            self.next_state = self.get_behind_ball
         # self.debug.add_log(1, "orientation go get ball {}".format(self.last_angle))
         return MoveToPosition(self.game_state, self.player_id, Pose(Position(ball_x, ball_y), self.last_angle))
 

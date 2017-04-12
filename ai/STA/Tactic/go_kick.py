@@ -75,11 +75,13 @@ class GoKick(Tactic):
 
     def kick(self):
         now = time.time()
-        if now - self.last_time > COMMAND_DELAY:
+        #if now - self.last_time > COMMAND_DELAY:
+        if self._get_distance_from_ball() > 200:
             DebugInterface().add_log(5, "Kick!")
             self.last_time = time.time()
             self.next_state = self.stop_dribbler
         return Kick(self.game_state, self.player_id, 4)
+
     def stop_dribbler(self):
         now = time.time()
         if now - self.last_time > COMMAND_DELAY:
