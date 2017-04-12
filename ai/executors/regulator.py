@@ -70,7 +70,7 @@ class MNRCFixedSpeed(object):
 
         self.kp = self.constants['MNRC_KP']
         self.ki = self.constants['MNRC_KI']
-        self.nmrc_speed_dynamic = self.constants['MNRC_SPEED_DYNAMIC']
+        self.mnrc_speed_dynamic = self.constants['MNRC_SPEED_DYNAMIC']
 
         self.robot_dynamic   = self.constants['ROBOT_DYNAMIC']
         self.coupling_matrix = self.constants['ROBOT_COUPLING']
@@ -80,6 +80,7 @@ class MNRCFixedSpeed(object):
 
         self.filtered_reference = 0
         self.error_sum = 0
+        self.robot_speed = 0
 
     @staticmethod
     def _robot2fixed(robot_angle):
@@ -95,24 +96,27 @@ class MNRCFixedSpeed(object):
         :return: Tuple containing the speed of each wheel of the robot
         """
  
-        robot_reference_speed = reference.position.conv_2_np()
-        robot_speed = np.array(active_player.velocity)
+        robot_reference_speed = reference.conv_2_np()
+        robot_speed = np.array(active_player.velocity) / 1000
 
-        self.filtered_reference = self.filtered_reference * (np.eye(3) + delta_t * self.nmrc_speed_dynamic ) \
-                                  - delta_t * self.nmrc_speed_dynamic  * robot_reference_speed
+        K1 = 1 + delta_t * np.diag(self.mnrc_speed_dynamic)
+        K2 = delta_t * np.diag(self.mnrc_speed_dynamic)
+        self.filtered_reference = K1 * self.filtered_reference - K2 * robot_reference_speed
 
         err = self.filtered_reference - self.robot_speed
-        self.errI = self.errI + err * delta_t
-        PI_action = self.Kp * err + self.Ki * self.errI
 
-        rotation_matrix = self._robot2fixed(self.active_player.pose.orientation)
+        self.error_sum = self.error_sum + err * delta_t
+        PI_action = np.dot(self.kp, err) + np.dot(self.ki, self.error_sum)
 
-        wheel_speed_reference = np.linalg.pinv(-self.robot_dynamic * rotation_matrix * self.M4) \
-                                * ( self.nmrc_dynamic * (self.filtered_reference - robot_speed_reference)  \
-                                - self.robot_dynamic * robot_speed \
-                                + PI_action )
+        rotation_matrix = self._robot2fixed(active_player.pose.orientation)
 
-        speed_command = self.coupling_matrix * wheel_speed_reference
+        wheel_speed_reference = np.dot(np.linalg.pinv(np.dot(np.dot(-self.robot_dynamic, rotation_matrix), self.M4)),\
+                                (np.dot(self.mnrc_speed_dynamic, (self.filtered_reference - robot_reference_speed)) -\
+                                 np.dot(self.robot_dynamic, robot_speed) + PI_action))
+
+        speed_command = np.dot(np.linalg.pinv(self.coupling_matrix), wheel_speed_reference) * self.robot_radius
+
+        #print(robot_reference_speed, robot_speed, wheel_speed_reference, speed_command)
 
         return Pose(Position(speed_command[0], speed_command[1]), speed_command[2])
 
@@ -291,8 +295,8 @@ def _set_constants(simulation_setting):
                 "position_dead_zone": 0.03,
                 "MNRC_KP": np.diag(np.array([14, 14, 14])),
                 "MNRC_KI": np.diag(np.array([50, 50, 50])),
-                "MNRC_SPEED_DYNAMIC": np.diag(np.array([-10, -10, -10])),
-                "ROBOT_DYNAMIC": np.diag(np.array([-5, -5, -5, -5])),
+                "MNRC_SPEED_DYNAMIC": np.diag(np.array([-5, -5, -5])),
+                "ROBOT_DYNAMIC": np.diag(np.array([-10, -10, -10])),
                 "ROBOT_COUPLING" : np.array([[-0.7071,  0.7071,  0.0850],
                                              [-0.7071, -0.7071,  0.0850],
                                              [ 0.7071, -0.7071,  0.0850],
@@ -316,8 +320,8 @@ def _set_constants(simulation_setting):
                 "position_dead_zone": 0.04,
                 "MNRC_KP": np.diag(np.array([14, 14, 14])),
                 "MNRC_KI": np.diag(np.array([50, 50, 50])),
-                "MNRC_SPEED_DYNAMIC": np.diag(np.array([-10, -10, -10])),
-                "ROBOT_DYNAMIC": np.diag(np.array([-5, -5, -5, -5])),
+                "MNRC_SPEED_DYNAMIC": np.diag(np.array([-5, -5, -5])),
+                "ROBOT_DYNAMIC": np.diag(np.array([-10, -10, -10])),
                 "ROBOT_COUPLING": np.array([[-0.7071,  0.7071,  0.0850],
                                             [-0.7071, -0.7071,  0.0850],
                                             [ 0.7071, -0.7071,  0.0850],
