@@ -4,11 +4,13 @@ from RULEngine.Game.Player import Player
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from RULEngine.Util.team_color_service import TeamColor
 
-class Team():
-    def __init__(self, team_color, type="friend"):
+
+class Team:
+    def __init__(self, team_color, kalman_type="friend"):
+        assert kalman_type in ["friend", "enemy"]
         self.players = {}
         for player_id in range(PLAYER_PER_TEAM):
-            self.players[player_id] = Player(self, player_id, True, type)
+            self.players[player_id] = Player(self, player_id, True, kalman_type)
         self.team_color = team_color
         self.score = 0
 
