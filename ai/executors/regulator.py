@@ -70,9 +70,16 @@ class MNRCFixedSpeed(object):
 
         self.kp = self.constants['MNRC_KP']
         self.ki = self.constants['MNRC_KI']
+        self.nmrc_speed_dynamic = self.constants['MNRC_SPEED_DYNAMIC']
 
-        self.robot_dynamic = self.constants['MNRC_ROBOT_DYNAMIC']
-        self.coupling_matrix = self.constants['MNRC_COUPLING']
+        self.robot_dynamic   = self.constants['ROBOT_DYNAMIC']
+        self.coupling_matrix = self.constants['ROBOT_COUPLING']
+        self.robot_radius    = self.constants['ROBOT_RADIUS']
+
+        self.M4 = np.linalg.pinv(self.coupling_matrix) * self.robot_radius
+
+        self.filtered_reference = 0
+        self.error_sum = 0
 
     @staticmethod
     def _robot2fixed(robot_angle):
@@ -87,7 +94,27 @@ class MNRCFixedSpeed(object):
         :param delta_t: Time delta since last update
         :return: Tuple containing the speed of each wheel of the robot
         """
-        return (1,1,1,1)
+ 
+        robot_reference_speed = reference.position.conv_2_np()
+        robot_speed = np.array(active_player.velocity)
+
+        self.filtered_reference = self.filtered_reference * (np.eye(3) + delta_t * self.nmrc_speed_dynamic ) \
+                                  - delta_t * self.nmrc_speed_dynamic  * robot_reference_speed
+
+        err = self.filtered_reference - self.robot_speed
+        self.errI = self.errI + err * delta_t
+        PI_action = self.Kp * err + self.Ki * self.errI
+
+        rotation_matrix = self._robot2fixed(self.active_player.pose.orientation)
+
+        wheel_speed_reference = np.linalg.pinv(-self.robot_dynamic * rotation_matrix * self.M4) \
+                                * ( self.nmrc_dynamic * (self.filtered_reference - robot_speed_reference)  \
+                                - self.robot_dynamic * robot_speed \
+                                + PI_action )
+
+        speed_command = self.coupling_matrix * wheel_speed_reference
+
+        return Pose(Position(speed_command[0], speed_command[1]), speed_command[2])
 
 class PID(object):
     def __init__(self, kp, ki, kd, simulation_setting=True):
@@ -262,8 +289,15 @@ def _set_constants(simulation_setting):
                 "thetaKd": 0.3,
                 "theta-max-acc": 6*math.pi,
                 "position_dead_zone": 0.03,
-                "MNRC_KP": np.diag(np.array([1, 1, 1])),
-                "MNRC_KI": np.diag(np.array([1, 1, 1]))
+                "MNRC_KP": np.diag(np.array([14, 14, 14])),
+                "MNRC_KI": np.diag(np.array([50, 50, 50])),
+                "MNRC_SPEED_DYNAMIC": np.diag(np.array([-10, -10, -10])),
+                "ROBOT_DYNAMIC": np.diag(np.array([-5, -5, -5, -5])),
+                "ROBOT_COUPLING" : np.array([[-0.7071,  0.7071,  0.0850],
+                                             [-0.7071, -0.7071,  0.0850],
+                                             [ 0.7071, -0.7071,  0.0850],
+                                             [ 0.7071,  0.7071,  0.0850]]),
+                "ROBOT_RADIUS": 0.025
                 }
     else:
         return {"ROBOT_NEAR_FORCE": 1000,
@@ -280,11 +314,19 @@ def _set_constants(simulation_setting):
                 "thetaKi": 0.07,
                 "theta-max-acc": 0.05 * math.pi,
                 "position_dead_zone": 0.04,
-                "MNRC_KP": np.diag(np.array([1, 1, 1])),
-                "MNRC_KI": np.diag(np.array([1, 1, 1])),
-                "MNRC_ROBOT_DYNAMIC": np.array([],[]),
-                "MNRC_COUPLING" : np.array([],[])
+                "MNRC_KP": np.diag(np.array([14, 14, 14])),
+                "MNRC_KI": np.diag(np.array([50, 50, 50])),
+                "MNRC_SPEED_DYNAMIC": np.diag(np.array([-10, -10, -10])),
+                "ROBOT_DYNAMIC": np.diag(np.array([-5, -5, -5, -5])),
+                "ROBOT_COUPLING": np.array([[-0.7071,  0.7071,  0.0850],
+                                            [-0.7071, -0.7071,  0.0850],
+                                            [ 0.7071, -0.7071,  0.0850],
+                                            [ 0.7071,  0.7071,  0.0850]]),
+                "ROBOT_RADIUS": 0.025
                 }
+
+
+
 
 def _xy_to_rphi_(robot_position, ball_position):
     r = math.sqrt((robot_position.x - ball_position.x) ** 2 + (robot_position.y - ball_position.y) ** 2)
