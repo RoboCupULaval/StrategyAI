@@ -52,15 +52,15 @@ class PositionRegulator(Executor):
                                                             delta_t,
                                                             idx=robot_idx,
                                                             robot_speed=cmd.robot_speed)
-                    cmd.wheel_speed = self.mnrc_speed[robot_idx].\
+                    cmd.speed = self.mnrc_speed[robot_idx].\
                         update(speed, active_player, delta_t)
 
                 elif cmd.speed_flag:
-                    cmd.wheel_speed = self.mnrc_speed[robot_idx]. \
+                    cmd.speed = self.mnrc_speed[robot_idx]. \
                         update(cmd.pose_goal, active_player, delta_t)
 
             elif cmd.command is AICommandType.STOP:
-                cmd.wheel_speed = self.mnrc_speed[robot_idx].\
+                cmd.speed = self.mnrc_speed[robot_idx].\
                     update(Pose(Position(0,0),0), active_player, delta_t)
 
 class MNRCFixedSpeed(object):
