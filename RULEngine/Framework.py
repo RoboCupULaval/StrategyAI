@@ -240,8 +240,10 @@ class Framework(object):
     def _kalman_vision(self):
         vision_frames = self.vision.pop_frames()
         new_image_packet = self.image_transformer.kalman_update(vision_frames)
-        if time.time() - self.last_loop > 0.05:
+        if time.time() - self.last_loop > 0.033:
             time_delta = time.time() - self.last_time
+            if time_delta > 1:
+                time_delta = 0.033
             self.game.update_kalman(new_image_packet, time_delta)
             self._update_debug_info()
             robot_commands = self.ia_coach_mainloop()

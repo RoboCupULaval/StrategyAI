@@ -60,65 +60,64 @@ class PositionRegulator(Executor):
                         update(cmd.pose_goal, active_player, delta_t)
 
             elif cmd.command is AICommandType.STOP:
-                cmd.speed = self.mnrc_speed[robot_idx].\
-                    update(Pose(Position(0,0),0), active_player, delta_t)
+                self.mnrc_speed[robot_idx].reset()
 
 class MNRCFixedSpeed(object):
     def __init__(self, simulation_setting=True):
-        self.simulation_setting = simulation_setting
         self.constants = _set_constants(simulation_setting)
 
         self.kp = self.constants['MNRC_KP']
         self.ki = self.constants['MNRC_KI']
-        self.mnrc_speed_dynamic = self.constants['MNRC_SPEED_DYNAMIC']
-
-        self.robot_dynamic   = self.constants['ROBOT_DYNAMIC']
+        self.mnrc_dynamic = self.constants['MNRC_SPEED_DYNAMIC']
+        self.robot_dynamic = self.constants['ROBOT_DYNAMIC']
         self.coupling_matrix = self.constants['ROBOT_COUPLING']
-        self.robot_radius    = self.constants['ROBOT_RADIUS']
+        self.robot_radius = self.constants['ROBOT_RADIUS']
 
-        self.M4 = np.linalg.pinv(self.coupling_matrix) * self.robot_radius
-
-        self.filtered_reference = 0
-        self.error_sum = 0
-        self.robot_speed = 0
+        self.filtered_reference = np.array([0, 0, 0])
+        self.err_sum = np.array([0, 0, 0])
 
     @staticmethod
     def _robot2fixed(robot_angle):
-        return np.array([[np.cos(robot_angle), -np.sin(robot_angle), 0], [np.sin(robot_angle), np.cos(robot_angle), 0], [0, 0, 1]])
+        return np.array(
+            [[np.cos(robot_angle), -np.sin(robot_angle), 0], [np.sin(robot_angle), np.cos(robot_angle), 0], [0, 0, 1]])
 
     def update(self, reference: Pose, active_player, delta_t):
         """
         Update the MNRC of the active player
-
-        :param reference: Pose containing the speed in x,y and theta
-        :param active_player: Player object of the current robot
-        :param delta_t: Time delta since last update
-        :return: Tuple containing the speed of each wheel of the robot
         """
- 
-        robot_reference_speed = reference.conv_2_np()
-        robot_speed = np.array(active_player.velocity) / 1000
+        robot_speed = np.array(active_player.velocity) / np.array([1000, 1000, 1])
+        orientation = active_player.pose.orientation
 
-        K1 = 1 + delta_t * np.diag(self.mnrc_speed_dynamic)
-        K2 = delta_t * np.diag(self.mnrc_speed_dynamic)
-        self.filtered_reference = K1 * self.filtered_reference - K2 * robot_reference_speed
+        ref = reference.conv_2_np()
 
-        err = self.filtered_reference - self.robot_speed
+        k1 = 1 + delta_t * self.mnrc_dynamic
+        k2 = delta_t * self.mnrc_dynamic
+        self.filtered_reference = k1 * self.filtered_reference - k2 * ref
 
-        self.error_sum = self.error_sum + err * delta_t
-        PI_action = np.dot(self.kp, err) + np.dot(self.ki, self.error_sum)
+        # Compute model error correction for zero static error
+        err = self.filtered_reference - robot_speed
 
-        rotation_matrix = self._robot2fixed(active_player.pose.orientation)
+        #err[abs(err)<0.01] = 0
+        self.err_sum = self.err_sum + err * delta_t
+        correction = self.kp * err + self.ki * self.err_sum
 
-        wheel_speed_reference = np.dot(np.linalg.pinv(np.dot(np.dot(-self.robot_dynamic, rotation_matrix), self.M4)),\
-                                (np.dot(self.mnrc_speed_dynamic, (self.filtered_reference - robot_reference_speed)) -\
-                                 np.dot(self.robot_dynamic, robot_speed) + PI_action))
+        # Compute model prediction
+        rotation_matrix = self._robot2fixed(orientation)
+        inverse_dynamic = -np.linalg.pinv(np.matmul(np.diag(self.robot_dynamic), rotation_matrix))
+        model_prediction = self.mnrc_dynamic * (self.filtered_reference - ref) - self.robot_dynamic * robot_speed
 
-        speed_command = np.dot(np.linalg.pinv(self.coupling_matrix), wheel_speed_reference) * self.robot_radius
+        # Return robot speed command
+        speed_command = np.matmul(inverse_dynamic, model_prediction + correction)
 
-        #print(robot_reference_speed, robot_speed, wheel_speed_reference, speed_command)
+        if active_player.id == 3:
+            print(ref[2], self.filtered_reference[2], robot_speed[2], err[2], self.err_sum[2], speed_command[2])
 
+        speed_command[abs(speed_command) < 0.2] = 0
         return Pose(Position(speed_command[0], speed_command[1]), speed_command[2])
+
+    def reset(self):
+        self.filtered_reference = np.array([0, 0, 0])
+        self.err_sum = np.array([0, 0, 0])
 
 class PID(object):
     def __init__(self, kp, ki, kd, simulation_setting=True):
@@ -293,14 +292,14 @@ def _set_constants(simulation_setting):
                 "thetaKd": 0.3,
                 "theta-max-acc": 6*math.pi,
                 "position_dead_zone": 0.03,
-                "MNRC_KP": np.diag(np.array([14, 14, 14])),
-                "MNRC_KI": np.diag(np.array([50, 50, 50])),
-                "MNRC_SPEED_DYNAMIC": np.diag(np.array([-5, -5, -5])),
-                "ROBOT_DYNAMIC": np.diag(np.array([-10, -10, -10])),
-                "ROBOT_COUPLING" : np.array([[-0.7071,  0.7071,  0.0850],
-                                             [-0.7071, -0.7071,  0.0850],
-                                             [ 0.7071, -0.7071,  0.0850],
-                                             [ 0.7071,  0.7071,  0.0850]]),
+                "MNRC_KP": np.array([14, 14, 14]),
+                "MNRC_KI": np.array([50, 50, 50]),
+                "MNRC_SPEED_DYNAMIC": np.array([-5, -5, -5]),
+                "ROBOT_DYNAMIC": np.array([-4, -4, -4]),
+                "ROBOT_COUPLING": np.array([[-0.7071, 0.7071, 0.0850],
+                                            [-0.7071, -0.7071, 0.0850],
+                                            [0.7071, -0.7071, 0.0850],
+                                            [0.7071, 0.7071, 0.0850]]),
                 "ROBOT_RADIUS": 0.025
                 }
     else:
@@ -318,14 +317,14 @@ def _set_constants(simulation_setting):
                 "thetaKi": 0.07,
                 "theta-max-acc": 0.05 * math.pi,
                 "position_dead_zone": 0.04,
-                "MNRC_KP": np.diag(np.array([14, 14, 14])),
-                "MNRC_KI": np.diag(np.array([50, 50, 50])),
-                "MNRC_SPEED_DYNAMIC": np.diag(np.array([-5, -5, -5])),
-                "ROBOT_DYNAMIC": np.diag(np.array([-10, -10, -10])),
-                "ROBOT_COUPLING": np.array([[-0.7071,  0.7071,  0.0850],
-                                            [-0.7071, -0.7071,  0.0850],
-                                            [ 0.7071, -0.7071,  0.0850],
-                                            [ 0.7071,  0.7071,  0.0850]]),
+                "MNRC_KP": np.array([0.1, 0.1, 0.1]),
+                "MNRC_KI": np.array([0.1, 0.1, 0.1]),
+                "MNRC_SPEED_DYNAMIC": np.array([-5, -5, -5]),
+                "ROBOT_DYNAMIC": np.array([-5, -5, -5]),
+                "ROBOT_COUPLING": np.array([[-0.7071, 0.7071, 0.0850],
+                                            [-0.7071, -0.7071, 0.0850],
+                                            [0.7071, -0.7071, 0.0850],
+                                            [0.7071, 0.7071, 0.0850]]),
                 "ROBOT_RADIUS": 0.025
                 }
 
