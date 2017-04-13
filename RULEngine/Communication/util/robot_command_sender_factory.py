@@ -13,7 +13,14 @@ class RobotCommandSenderFactory(object):
         elif type_of_connection == "serial":
             return SerialCommandSender()
         elif type_of_connection == "disabled":
-            return lambda *args: None
+            class FakeRobotCommandSender:
+                @staticmethod
+                def send_command(commands):
+                    pass
+                
+                def stop(self):
+                    pass
+            return FakeRobotCommandSender()
         else:
             raise TypeError("Tentative de création d'un RobotCommandSender de "
                             "mauvais type.")

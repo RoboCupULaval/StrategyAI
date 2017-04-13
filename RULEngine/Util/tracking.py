@@ -1,6 +1,6 @@
 import numpy as np
 import warnings
-warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
+# warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
 
 class Kalman:

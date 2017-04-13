@@ -10,7 +10,6 @@ from config.config_service import ConfigService
 __author__ = 'RoboCupULaval'
 
 
-
 def set_arg_parser():
     # TODO add mode debug, redirect, pathfinder!
     prog_desc = "Module de l'intelligence artificielle. L'option est de charger un fichier de configuration."

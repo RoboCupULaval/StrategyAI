@@ -199,8 +199,7 @@ class Framework(object):
             self._send_robot_commands(robot_commands)
             self.game.set_command(robot_commands)
             self._send_debug_commands()
-        else:
-            time.sleep(0)
+        time.sleep(0)
 
     def _test_vision(self):
         vision_frame = self._acquire_last_vision_frame()
@@ -351,7 +350,7 @@ class Framework(object):
 
         self.vision_redirection_routine(pb_sslwrapper.SerializeToString())
 
-    def _sigint_handler(self, signum, frame):
+    def _sigint_handler(self, *args):
         self.stop_game()
 
     @staticmethod
