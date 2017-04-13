@@ -11,15 +11,12 @@ class KalmanImageTransformer(ImageTransformer):
         super().__init__()
         self.last_camera_frame = [empty_camera for _ in range(0, 4)]
         self.last_new_packet = None
+        self.new_image_flag = False
         self.time = time.time()
 
     def update(self, packets):
         self._update_camera_kalman(packets)
-        #if (time.time() - self.time > 2):
-            #for cam in self.last_camera_frame:
-            #    print(cam)
-            #self.time = time.time()
-        #print(time.time())
+
         return self.last_camera_frame
 
     def _update_camera_kalman(self, packets):

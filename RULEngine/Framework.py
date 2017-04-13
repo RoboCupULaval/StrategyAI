@@ -52,7 +52,7 @@ class Framework(object):
         # time
         self.last_frame_number = 0
         self.time_stamp = time.time()
-        self.last_time = 0
+        self.last_time = time.time()
         self.last_cmd_time = time.time()
         self.last_loop = time.time()
 
@@ -70,6 +70,8 @@ class Framework(object):
         # because this thing below is a callable! can be used without being set
         self.vision_redirection_routine = lambda *args: None
         self.vision_routine = self._normal_vision  # self._normal_vision # self._test_vision self._redirected_vision
+        self._choose_vision_routines()
+
         # Debug
         self.incoming_debug = []
         self.outgoing_debug = []
@@ -96,6 +98,12 @@ class Framework(object):
         self.frame_number = 0
 
         self.debug.add_log(1, "Framework started in {} s".format(time.time() - self.time_stamp))
+
+    def _choose_vision_routines(self):
+        if self.cfg.config_dict["IMAGE"]["kalman"]:
+            self.vision_routine = self._kalman_vision
+        else:
+            self.vision_routine = self._redirected_vision
 
     def _init_communication(self):
         # first make sure we are not already running
@@ -220,13 +228,12 @@ class Framework(object):
 
     def _kalman_vision(self):
         vision_frames = self.vision.pop_frames()
-        new_image_packet = self.image_transformer.kalman_update(vision_frames)
+        new_image_packet = self.image_transformer.update(vision_frames)
         if time.time() - self.last_loop > 0.05:
             time_delta = time.time() - self.last_time
             self.game.update_kalman(new_image_packet, time_delta)
             self._update_debug_info()
             robot_commands = self.ia_coach_mainloop()
-
             # Communication
 
             self._send_robot_commands(robot_commands)
@@ -255,11 +262,8 @@ class Framework(object):
             self.game.set_command(robot_commands)
             self._send_debug_commands()
             self.last_loop = time.time()
-            # print(self.last_loop)
-            # print(time.time() - self.time_stamp)
         else:
             time.sleep(0)
-        # print(time.time() - self.time_stamp)
 
     def _acquire_last_vision_frame(self):
         return self.vision.get_latest_frame()
@@ -324,7 +328,7 @@ class Framework(object):
         pck_ball.pixel_x = self.game.field.ball.position.x
         pck_ball.pixel_y = self.game.field.ball.position.y
 
-        for p in self.game.friends.players.values():
+        for p in self.game.blue_team.players.values():
             packet_robot = pb_sslwrapper.detection.robots_blue.add()
             packet_robot.confidence = 0.999
             packet_robot.robot_id = p.id
@@ -334,8 +338,8 @@ class Framework(object):
             packet_robot.pixel_x = 0.
             packet_robot.pixel_y = 0.
 
-        for p in self.game.enemies.players.values():
-            packet_robot = pb_sslwrapper.detection.robots_blue.add()
+        for p in self.game.yellow_team.players.values():
+            packet_robot = pb_sslwrapper.detection.robots_yellow.add()
             packet_robot.confidence = 0.999
             packet_robot.robot_id = p.id
             packet_robot.x = p.pose.position.x
