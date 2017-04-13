@@ -8,18 +8,19 @@ from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Algorithm.path_partitionner import PathPartitionner
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
+from config.config_service import ConfigService
 
 INTERMEDIATE_DISTANCE_THRESHOLD = 540
 
 
 class PathfinderModule(Executor):
 
-    def __init__(self, p_world_state: WorldState, type_of_pathfinder: str, is_simulation: bool):
+    def __init__(self, p_world_state: WorldState):
         super().__init__(p_world_state)
-        self.pathfinder = self.get_pathfinder(type_of_pathfinder, is_simulation)
+        type_of_pathfinder = ConfigService().config_dict["STRATEGY"]["pathfinder"]
+        self.pathfinder = self.get_pathfinder(type_of_pathfinder)
         self.last_time_pathfinding_for_robot = {}
         self.last_frame = time.time()
-        self.is_simulation = is_simulation
         self.cinematic_pathfinder = CinePath(p_world_state)
 
     def exec(self):
@@ -70,20 +71,17 @@ class PathfinderModule(Executor):
         assert isinstance(type_of_pathfinder, str)
         assert type_of_pathfinder.lower() in ["rrt", "astar", "path_part"]
 
-        self.pathfinder = self.get_pathfinder(type_of_pathfinder, self.is_simulation)
+        self.pathfinder = self.get_pathfinder(type_of_pathfinder)
 
-    def get_pathfinder(self, type_of_pathfinder, is_simulation):
+    def get_pathfinder(self, type_of_pathfinder):
         assert isinstance(type_of_pathfinder, str)
         assert type_of_pathfinder.lower() in ["rrt", "astar", "path_part"]
 
         if type_of_pathfinder.lower() == "astar":
-            # place pathfinder here
-            return AsPathManager(self.ws, is_simulation)  # is_simulation)
+            return AsPathManager(self.ws, ConfigService().config_dict["GAME"]["type"] == "sim")
         elif type_of_pathfinder.lower() == "rrt":
-            # place pathfinder here
             return PathfinderRRT(self.ws)
         elif type_of_pathfinder.lower() == "path_part":
-            # place pathfinder here
             return PathPartitionner(self.ws)
         else:
             raise TypeError("Couldn't init a pathfinder with the type of ",
@@ -96,4 +94,4 @@ class PathfinderModule(Executor):
             y = path_element.y
             points.append((x, y))
         self.ws.debug_interface.add_multiple_points(points, COLOR_ID_MAP[pid], width=5, link="path - " + str(pid),
-                                                 timeout=DEFAULT_PATH_TIMEOUT)
+                                                    timeout=DEFAULT_PATH_TIMEOUT)

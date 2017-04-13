@@ -10,7 +10,7 @@ from ai.Util.ai_command import AICommandType, AICommand
 from ai.executors.executor import Executor
 from ai.states.game_state import GameState
 from ai.states.world_state import WorldState
-
+from config.config_service import ConfigService
 
 ROBOT_NEAR_FORCE = 2000
 THRESHOLD_LAST_TARGET = 100
@@ -25,12 +25,13 @@ def sign(x):
 
 
 class PositionRegulator(Executor):
-    def __init__(self, p_world_state: WorldState, is_simulation=False):
+    def __init__(self, p_world_state: WorldState):
         super().__init__(p_world_state)
-        self.regulators = [PI(simulation_setting=is_simulation) for _ in range(6)]
+        self.is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
+        self.regulators = [PI(simulation_setting=self.is_simulation) for _ in range(6)]
         self.last_timestamp = 0
 
-        self.constants = _set_constants(simulation_setting=is_simulation)
+        self.constants = _set_constants(simulation_setting=self.is_simulation)
         self.accel_max = self.constants["accel_max"]
         self.vit_max = self.constants["vit_max"]
 
