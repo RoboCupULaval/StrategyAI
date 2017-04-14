@@ -100,7 +100,7 @@ class Framework(object):
         self.debug.add_log(1, "Framework started in {} s".format(time.time() - self.time_stamp))
 
     def _choose_vision_routines(self):
-        if self.cfg.config_dict["IMAGE"]["kalman"]:
+        if self.cfg.config_dict["IMAGE"]["kalman"] == "true":
             self.vision_routine = self._kalman_vision
         else:
             self.vision_routine = self._redirected_vision

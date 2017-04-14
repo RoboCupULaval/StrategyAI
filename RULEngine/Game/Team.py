@@ -10,7 +10,7 @@ class Team:
         assert kalman_type in ["friend", "enemy"]
         self.players = {}
         for player_id in range(PLAYER_PER_TEAM):
-            self.players[player_id] = Player(self, player_id, True, kalman_type)
+            self.players[player_id] = Player(self, player_id, kalman_type)
         self.team_color = team_color
         self.score = 0
 

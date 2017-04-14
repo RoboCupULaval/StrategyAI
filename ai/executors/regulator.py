@@ -29,7 +29,6 @@ class PositionRegulator(Executor):
         super().__init__(p_world_state)
         self.is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
         self.regulators = [PI(simulation_setting=self.is_simulation) for _ in range(6)]
-        self.last_timestamp = 0
 
         self.constants = _set_constants(simulation_setting=self.is_simulation)
         self.accel_max = self.constants["accel_max"]
@@ -57,7 +56,7 @@ class PositionRegulator(Executor):
 
 
 class PID(object):
-    def __init__(self, kp, ki, kd, simulation_setting=True):
+    def __init__(self, kp, ki, kd):
         self.gs = GameState()
         self.paths = {}
         self.kp = kp
