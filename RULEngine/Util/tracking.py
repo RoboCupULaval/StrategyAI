@@ -168,10 +168,7 @@ class Kalman:
 
             if not self.type == 'ball':
                 idx = int(2*len(y)/3)
-                angles_diff = y[idx::]
-                a = [abs(angles_diff) > np.pi]
-                angles_diff[a] = (2 * np.pi - abs(angles_diff[a])) * -np.sign(angles_diff[a])
-                y[idx::] = angles_diff
+                y[idx::] = (y[idx::] + np.pi) % (2 * np.pi) - np.pi
 
             S = np.dot(np.dot(H, self.P), np.transpose(H)) + R
             K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
@@ -200,6 +197,7 @@ class Kalman:
         if observation is not None:
             self.update(observation)
         self.predict(command)
+        output = self.x
         if self.type == 'friend' or self.type == 'enemi':
-            self.x[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
-        return self.x
+            output[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
+        return output

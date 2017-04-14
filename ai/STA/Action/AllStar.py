@@ -26,7 +26,8 @@ class AllStar(Action):
                            "pathfinder_on": other_args.get("pathfinder_on", False),
                            "kick_strength": other_args.get("kick_strength", 0),
                            "charge_kick": other_args.get("charge_kick", False),
-                           "pose_goal": other_args.get("pose_goal", Pose())
+                           "pose_goal": other_args.get("pose_goal", Pose()),
+                           "speed_flag": other_args.get("speed_flag", False)
                            }
         self.ai_command_type = other_args.get("ai_command_type", AICommandType.STOP)
 
