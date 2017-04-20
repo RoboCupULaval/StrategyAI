@@ -26,6 +26,7 @@ class AllStar(Action):
                            "pathfinder_on": other_args.get("pathfinder_on", False),
                            "kick_strength": other_args.get("kick_strength", 0),
                            "charge_kick": other_args.get("charge_kick", False),
+                           "kick": other_args.get("kick", False),
                            "pose_goal": other_args.get("pose_goal", Pose()),
                            "speed_flag": other_args.get("speed_flag", False)
                            }

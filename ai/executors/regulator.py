@@ -51,7 +51,7 @@ class PositionRegulator(Executor):
                                                             robot_speed=cmd.robot_speed)
                 elif cmd.speed_flag:
                     v_theta = cmd.pose_goal.orientation
-                    v_x, v_y =_correct_for_referential_frame(cmd.pose_goal.position.x, cmd.pose_goal.position.y, -active_player.pose.orientation)
+                    v_x, v_y =(cmd.pose_goal.position.x, cmd.pose_goal.position.y)
                     cmd.speed = Pose(Position(v_x, v_y), v_theta)
 
 
