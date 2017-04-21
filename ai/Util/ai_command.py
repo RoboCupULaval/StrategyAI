@@ -28,6 +28,7 @@ class AICommand(object):
         self.pathfinder_on = other_args.get("pathfinder_on", False)
         self.kick_strength = other_args.get("kick_strength", 0)
         self.charge_kick = other_args.get("charge_kick", False)
+        self.kick = other_args.get("kick", False)
         self.pose_goal = other_args.get("pose_goal", Pose())
         self.speed = Pose()
         self.wheel_speed = (0,0,0,0)

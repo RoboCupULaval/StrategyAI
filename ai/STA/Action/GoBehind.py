@@ -42,7 +42,7 @@ class GoBehind(Action):
         self.player_id = p_player_id
         self.position1 = p_position1
         self.position2 = p_position2
-        self.distance_behind = 200
+        self.distance_behind = 250
         self.pathfind = pathfinding
         self.rayon_avoid = 300 #(mm)
         self.robot_speed = robot_speed

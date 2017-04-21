@@ -30,12 +30,12 @@ class Kalman:
             self.H += [[0, 0, 0, 0, 1, 0] for i in range(ncameras)] # Orientation
             self.H = np.array(self.H)
             # Process covariance
-            values = np.array([10 ** (0), 10 ** (0), 10 ** (1), 10 ** (1), 10 ** (-2), 10 ** (0)])
+            values = np.array([10 ** (0), 10 ** (0), 10 ** (1), 10 ** (1), 10 ** (-2), 10 ** (-1)])
             self.Q = np.diag(values)
             # Observation covariance
-            values = [10 ** (0), 10 ** (0), 10 ** (-2)]
-            for i in range(ncameras-1):
-                values += values
+            values = [10 ** (0) for i in range(ncameras)]
+            values += [10 ** (0) for i in range(ncameras)]
+            values += [10 ** (-3) for i in range(ncameras)]
             self.R = np.diag(values)  # Pose * ncameras
             # Initial state covariance
             self.P = 10 ** (3) * np.eye(6)
@@ -69,9 +69,9 @@ class Kalman:
             values = np.array([10 ** (0), 10 ** (0), 10 ** (0), 10 ** (0), 10 ** (2),  10 ** (-1)])
             self.Q = np.diag(values)
             # Observation covariance
-            values = [10 ** (0), 10 ** (0), 10 ** (-3)]
-            for i in range(ncameras - 1):
-                values += values
+            values = [10 ** (0) for i in range(ncameras)]
+            values += [10 ** (0) for i in range(ncameras)]
+            values += [10 ** (-3) for i in range(ncameras)]
             self.R = np.diag(values)  # Pose * ncameras
             # Initial state covariance
             self.P = 10 ** (3) * np.eye(6)
@@ -102,9 +102,8 @@ class Kalman:
             values = np.array([10 ** (0), 10 ** (0), 10 ** (0), 10 ** (0)])
             self.Q = np.diag(values)
             # Observation covariance
-            values = [10 ** (0), 10 ** (0)]
-            for i in range(ncameras - 1):
-                values += values
+            values = [10 ** (0) for i in range(ncameras)]
+            values += [10 ** (0) for i in range(ncameras)]
             self.R = np.diag(values)  # Pose * ncameras
             # Initial state covariance
             self.P = 10 ** (3) * np.eye(4)
@@ -168,10 +167,7 @@ class Kalman:
 
             if not self.type == 'ball':
                 idx = int(2*len(y)/3)
-                angles_diff = y[idx::]
-                a = [abs(angles_diff) > np.pi]
-                angles_diff[a] = (2 * np.pi - abs(angles_diff[a])) * -np.sign(angles_diff[a])
-                y[idx::] = angles_diff
+                y[idx::] = (y[idx::] + np.pi) % (2 * np.pi) - np.pi
 
             S = np.dot(np.dot(H, self.P), np.transpose(H)) + R
             K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
@@ -200,6 +196,7 @@ class Kalman:
         if observation is not None:
             self.update(observation)
         self.predict(command)
+        output = self.x
         if self.type == 'friend' or self.type == 'enemi':
-            self.x[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
-        return self.x
+            output[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
+        return output
