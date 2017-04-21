@@ -6,7 +6,7 @@ import time
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_distance
-from ai.Util.ai_command import AICommandType, AICommand
+from ai.Util.ai_command import AICommandType, AIControlLoopType, AICommand
 from ai.executors.executor import Executor
 from ai.states.game_state import GameState
 from ai.states.world_state import WorldState
@@ -45,7 +45,7 @@ class PositionRegulator(Executor):
             robot_idx = cmd.robot_id
             active_player = self.ws.game_state.game.friends.players[robot_idx]
             if cmd.command is AICommandType.MOVE:
-                if not cmd.speed_flag:
+                if cmd.control_loop_type is AIControlLoopType.POSITION:
                     speed = self.regulators[robot_idx].\
                         update_pid_and_return_speed_command(cmd,
                                                             active_player,
@@ -55,9 +55,12 @@ class PositionRegulator(Executor):
                     cmd.speed = self.mnrc_speed[robot_idx].\
                         update(speed, active_player, delta_t)
 
-                elif cmd.speed_flag:
+                elif cmd.control_loop_type is AIControlLoopType.SPEED:
                     cmd.speed = self.mnrc_speed[robot_idx]. \
                         update(cmd.pose_goal, active_player, delta_t)
+
+                elif cmd.control_loop_type is AIControlLoopType.OPEN:
+                    cmd.speed = cmd.pose_goal
 
             elif cmd.command is AICommandType.STOP:
                 self.mnrc_speed[robot_idx].reset()

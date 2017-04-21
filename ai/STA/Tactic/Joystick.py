@@ -8,7 +8,7 @@ from RULEngine.Util.Position import Position
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Move import Move
-from ai.Util.ai_command import AICommandType, AICommand
+from ai.Util.ai_command import AICommandType, AIControlLoopType, AICommand
 from ai.Util.joystick.joystick import RobotJoystick
 from .Tactic import Tactic
 from . tactic_constants import Flags
@@ -71,8 +71,9 @@ class Joystick(Tactic):
             speed_pose = Pose(Position(x_speed, y_speed), t * 5)
 
             if kick == 0:
-                next_action = AllStar(self.game_state, self.player_id, **{"ai_command_type": AICommandType.MOVE, "pose_goal": speed_pose, "speed_flag": True,
-                                "charge_kick": charge_kick, "kick_strength": kick, "dribbler_on": dribbler})
+                next_action = AllStar(self.game_state, self.player_id, **{"ai_command_type": AICommandType.MOVE, "pose_goal": speed_pose,
+                                                                          "control_loop_type": AIControlLoopType.SPEED, "charge_kick": charge_kick,
+                                                                          "kick_strength": kick, "dribbler_on": dribbler})
             else:
                 next_action = AllStar(self.game_state, self.player_id, **{"ai_command_type": AICommandType.KICK, "kick_strength" : kick})
         else:

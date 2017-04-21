@@ -8,6 +8,10 @@ class AICommandType(Enum):
     MOVE = 1
     KICK = 2
 
+class AIControlLoopType(Enum):
+    OPEN = 0
+    SPEED = 1
+    POSITION = 2
 
 class AICommand(object):
     """
@@ -34,8 +38,7 @@ class AICommand(object):
         self.wheel_speed = (0,0,0,0)
         self.robot_speed = other_args.get("speed", 0)
 
-        # set this flag to true if you only need speed regulation (The pose_goal will be in m/s)
-        self.speed_flag = other_args.get("speed_flag", False)
+        self.control_loop_type = other_args.get("control_loop_type", AIControlLoopType.POSITION)
 
         # this is for the pathfinder only no direct assignation
         self.path = []

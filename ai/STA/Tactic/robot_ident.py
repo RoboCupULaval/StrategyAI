@@ -7,7 +7,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Move import Move
-from ai.Util.ai_command import AICommandType, AICommand
+from ai.Util.ai_command import AICommandType, AICommand, AIControlLoopType
 from ai.Util.joystick.joystick import RobotJoystick
 from .Tactic import Tactic
 from . tactic_constants import Flags
@@ -62,7 +62,7 @@ class RobotIdent(Tactic):
                 f.write('{},{},{},{},{},{},{},{},{},{}\n'.format(t, cmd_vx, px, vx, cmd_vy, py, vy, cmd_vt, pt, vt))
 
             next_action = AICommand(self.player_id, AICommandType.MOVE,
-                             **{"pose_goal": speed_pose, "speed_flag": True})
+                             **{"pose_goal": speed_pose, "control_loop_type": AIControlLoopType.OPEN})
         else:
             next_action = Idle(self.game_state, self.player_id).exec()
 
