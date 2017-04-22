@@ -53,10 +53,10 @@ class CommandExecutor(Executor):
             if ai_command.dribbler_on > 0:
                 return self._generate_dribbler_command(player_id, ai_command.dribbler_on)
 
-            if ai_command.command == AICommandType.KICK:
+            if ai_command.kick:
                 return self._generate_kick_command(player_id, ai_command.kick_strength)
 
-            elif ai_command.command == AICommandType.MOVE:
+            if ai_command.command == AICommandType.MOVE:
                 assert (isinstance(ai_command.speed, Pose))
                 return self._generate_move_command(player_id, ai_command.speed)
 

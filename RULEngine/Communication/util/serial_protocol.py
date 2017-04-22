@@ -4,18 +4,8 @@ import struct
 import time
 from enum import Enum
 
-from cobs import cobs
+from RULEngine.Util.cobs import cobs
 
-class MCUVersion(Enum):
-    C2000 = 1
-    STM32F407 = 2
-
-
-C2000_STARTBYTE = b'\x7E'
-C2000_STOPBYTE = b'\x7F'
-C2000_ESCAPEBYTE = b'\x7D'
-C2000_SPEEDCOMMAND_ID = 1
-C2000_PIDCOMMAND_ID = 2
 
 STM32_PROTOCOL_VERSION = 0x01
 STM32_CMD_HEART_BEAT_REQUEST = 0x00
@@ -38,19 +28,9 @@ class DribblerStatus(Enum):
     ENABLED = 1
 
 
-def create_speed_command(x, y, theta, robot_idx, mcu_version=MCUVersion.STM32F407):
-    # FIXME: Retirer la branche quand le MCU (microcontroleur) C2000 n'est
-    # plus utilise
-    packet = None
-    if mcu_version == MCUVersion.C2000:
-        packet = struct.pack('<BBfff', robot_idx, C2000_SPEEDCOMMAND_ID, x, y, theta)
-        packet = bytearray(_pack_c2000_command(packet))
-    elif mcu_version == MCUVersion.STM32F407:
-        velocity = [x, y, theta]
-        packet = _stm32_pack_cmd(_stm32_pack_payload(velocity), STM32_CMD_MOVEMENT_COMMAND, robot_idx=robot_idx)
-    else:
-        raise Exception("La version du protocole serial devrait etre 1 ou 2")
-
+def create_speed_command(x, y, theta, robot_idx):
+    velocity = [x, y, theta]
+    packet = _stm32_pack_cmd(_stm32_pack_payload(velocity), STM32_CMD_MOVEMENT_COMMAND, robot_idx=robot_idx)
     return packet
 
 
@@ -106,16 +86,6 @@ def ping_robot(serial):
 
 def _stm32_pack_ping():
     return _stm32_pack_cmd(0, STM32_CMD_HEART_BEAT_REQUEST)
-
-
-def _pack_c2000_command(command):
-    command = command.replace(C2000_ESCAPEBYTE, C2000_ESCAPEBYTE +
-                              C2000_ESCAPEBYTE)
-    command = command.replace(C2000_STARTBYTE,
-                              C2000_ESCAPEBYTE + C2000_STARTBYTE)
-    command = command.replace(C2000_STOPBYTE, C2000_ESCAPEBYTE + C2000_STOPBYTE)
-
-    return C2000_STARTBYTE + command + C2000_STOPBYTE
 
 
 def _stm32_pack_payload(data):

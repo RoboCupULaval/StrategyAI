@@ -51,7 +51,7 @@ class RobotIdent(Tactic):
             vx = self.game_state.get_player(self.player_id).velocity[0]
             py = self.game_state.get_player(self.player_id).pose.position.y / 1000.0
             vy = self.game_state.get_player(self.player_id).velocity[1]
-            pt = self.game_state.get_player(self.player_id).pose.orientation / 1000.0
+            pt = self.game_state.get_player(self.player_id).pose.orientation
             vt = self.game_state.get_player(self.player_id).velocity[2]
 
             if self.cmd_id == 0:

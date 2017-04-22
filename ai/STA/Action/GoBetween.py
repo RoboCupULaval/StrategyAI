@@ -1,5 +1,6 @@
 # Under MIT licence, see LICENCE.txt
 import math
+import numpy as np
 from ..Action.Action import Action
 # from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
@@ -49,13 +50,39 @@ class GoBetween(Action):
         self.position2 = p_position2
         self.target = p_target
         self.minimum_distance = p_minimum_distance
+        self.pathfind = True
 
-    def exec(self):
+    def get_destination(self):
         """
         Calcul le point le plus proche du robot sur la droite entre les deux positions
         :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
         """
-        robot_position = self.game_state.get_player_pose(self.player_id).position
+        player = self.game_state.get_player_pose(self.player_id).position.conv_2_np()
+        pt1 = self.position1.conv_2_np()
+        pt2 = self.position2.conv_2_np()
+        delta = self.minimum_distance * (pt2 - pt1) / np.linalg.norm(pt2 - pt1)
+        pt1 = pt1 + delta
+        pt2 = pt2 - delta
+
+        pt1_to_player = player - pt1
+        pt2_to_player = player - pt2
+        pt1_to_pt2 = pt2 - pt1
+
+        destination = np.cross(pt1_to_player, pt1_to_pt2) / np.linalg.norm(pt1_to_pt2) + player
+        outside_x = (destination[0] > pt1[0] and destination[0] > pt2[0]) or \
+                    (destination[0] < pt1[0] and destination[0] < pt2[0])
+        outside_y = (destination[1] > pt1[1] and destination[1] > pt2[1]) or \
+                    (destination[1] < pt1[1] and destination[1] < pt2[1])
+        if outside_x or outside_y:
+            if np.linalg.norm(pt1_to_player) > np.linalg.norm(pt2_to_player):
+                destination = pt1
+            else:
+                destination = pt2
+        target = self.target.conv_2_np()
+        player_to_target = target - player
+        destination_orientation = np.arctan2(player_to_target[1], player_to_target[0])
+
+        '''
         delta_x = self.position2.x - self.position1.x
         delta_y = self.position2.y - self.position1.y
 
@@ -107,5 +134,12 @@ class GoBetween(Action):
 
         destination_pose = {"pose_goal": Pose(destination_position, destination_orientation)}
         kick_strength = 0
+        '''
+        return Pose(Position.from_np(destination), destination_orientation)
 
+    def exec(self):
+        destination_pose = {}
+        destination_pose["pose_goal"] = self.get_destination()
+        if self.pathfind:
+            destination_pose["pathfinder_on"] = True
         return AICommand(self.player_id, AICommandType.MOVE, **destination_pose)

@@ -62,8 +62,8 @@ class Strategy(metaclass=ABCMeta):
                 tactic_name = current_tactic.current_state.__name__
             except AttributeError:
                 tactic_name = "DEFAULT"
-            state.append((current_tactic.player_id, str(current_tactic)+" "+current_tactic.status_flag.name,
-                         tactic_name, current_tactic.target))
+            state.append((current_tactic.player_id, str(current_tactic)+" "+current_tactic.status_flag.name+" " +
+                          current_tactic.current_state.__name__, tactic_name, current_tactic.target))
         return state
 
     def exec(self) -> Dict[int, AICommand]:
