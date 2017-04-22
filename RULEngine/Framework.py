@@ -300,7 +300,7 @@ class Framework(object):
 
     def _send_robot_commands(self, commands):
         """ Envoi les commades des robots au serveur. """
-        for idx, command in enumerate(commands):
+        for command in commands:
             self.robot_command_sender.send_command(command)
 
     def _send_debug_commands(self):

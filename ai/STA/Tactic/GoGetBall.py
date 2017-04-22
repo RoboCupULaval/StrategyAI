@@ -60,6 +60,7 @@ class GoGetBall(Tactic):
         self.debug = DebugInterface()
 
     def get_behind_ball(self):
+        print('Etat = go_behind')
         self.status_flag = Flags.WIP
 
         player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
@@ -91,9 +92,10 @@ class GoGetBall(Tactic):
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def grab_ball(self):
+        print('Etat = grab_ball')
         # self.debug.add_log(1, "Grab ball called")
         # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
-        if self._get_distance_from_ball() < 130 and self._is_player_towards_ball_and_target():
+        if self._get_distance_from_ball() < 120 and self._is_player_towards_ball_and_target():
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
         else:
@@ -105,6 +107,7 @@ class GoGetBall(Tactic):
         return MoveToPosition(self.game_state, self.player_id, Pose(Position(ball_x, ball_y), angle_ball_2_target))
 
     def halt(self):
+        print('Etat = Halt (go_get_ball)')
         self.status_flag = Flags.SUCCESS
         # self.debug.add_log(1, "GogetBall so sucessfull")
 
