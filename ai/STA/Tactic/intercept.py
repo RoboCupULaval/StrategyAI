@@ -32,7 +32,7 @@ DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
 COMMAND_DELAY = 1.5
 
 
-class Mark(Tactic):
+class Intercept(Tactic):
     """
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
@@ -51,57 +51,49 @@ class Mark(Tactic):
         assert PLAYER_PER_TEAM >= player_id >= 0
 
         self.player_id = player_id
-        self.enemy_id = 4
-        self.current_state = self.go_between_ball_and_enemy
-        self.next_state = self.go_between_ball_and_enemy
+        self.current_state = self.go_between_ball_and_target
+        self.next_state = self.go_between_ball_and_target
         self.debug_interface = DebugInterface()
 
         self.target = target
 
-    def go_between_ball_and_enemy(self):
+    def go_between_ball_and_target(self):
         self.status_flag = Flags.WIP
 
-        enemy = self.game_state.game.friends.players[self.enemy_id].pose.position
+        target = self.target.position
         ball = self.game_state.get_ball_position()
 
-        if self._is_player_between_ball_and_enemy():
-            self.next_state = self.move_to_enemy
+        if self._is_player_between_ball_and_target():
+            self.next_state = self.grab_ball
         else:
             # self.debug.add_log(4, "Distance from ball: {}".format(dist))
-            self.next_state = self.go_between_ball_and_enemy
-        return GoBetween(self.game_state, self.player_id, ball, enemy, ball, 300)
+            self.next_state = self.go_between_ball_and_target
+        return GoBetween(self.game_state, self.player_id, ball, target, ball, 300)
 
-    def move_to_enemy(self):
+    def grab_ball(self):
         # self.debug.add_log(1, "Grab ball called")
         # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
-        if self._is_player_between_ball_and_enemy():
-            self.next_state = self.move_to_enemy
+        if self._is_player_between_ball_and_target():
+            self.next_state = self.grab_ball
             self.status_flag = Flags.SUCCESS
         else:
-            self.next_state = self.go_between_ball_and_enemy
+            self.next_state = self.go_between_ball_and_target
             self.status_flag = Flags.WIP
         # self.debug.add_log(1, "orientation go get ball {}".format(self.last_angle))
-        player = self.game_state.game.friends.players[self.player_id].pose.position.conv_2_np()
-        enemy = self.game_state.game.friends.players[self.enemy_id].pose.position.conv_2_np()
-        ball = self.game_state.get_ball_position().conv_2_np()
-        ball_to_enemy = enemy - ball
-        player_to_ball = ball - player
-        destination = enemy - 300 * ball_to_enemy / np.linalg.norm(ball_to_enemy)
-        destination_orientation = np.arctan2(player_to_ball[1], player_to_ball[0])
-        return MoveToPosition(self.game_state, self.player_id, Pose(Position.from_np(destination), destination_orientation))
+        return Grab(self.game_state, self.player_id)
 
-    def _is_player_between_ball_and_enemy(self, fact=-0.99):
+    def _is_player_between_ball_and_target(self, fact=-0.99):
         player = self.game_state.game.friends.players[self.player_id].pose.position.conv_2_np()
-        enemy = self.game_state.game.friends.players[self.enemy_id].pose.position.conv_2_np()
+        target = self.target.position.conv_2_np()
         ball = self.game_state.get_ball_position().conv_2_np()
 
         ball_to_player = player - ball
-        enemy_to_ball = ball - enemy
+        target_to_ball = ball - target
         ball_to_player /= np.linalg.norm(ball_to_player)
-        enemy_to_ball /= np.linalg.norm(enemy_to_ball)
+        target_to_ball /= np.linalg.norm(target_to_ball)
         player_dir = np.array([np.cos(self.game_state.game.friends.players[self.player_id].pose.orientation),
                                np.sin(self.game_state.game.friends.players[self.player_id].pose.orientation)])
-        if np.dot(ball_to_player, enemy_to_ball) < fact:
+        if np.dot(ball_to_player, target_to_ball) < fact:
             if np.dot(player_dir, ball_to_player) < fact:
                 return True
         return False

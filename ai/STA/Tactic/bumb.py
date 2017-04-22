@@ -12,6 +12,7 @@ from RULEngine.Util.geometry import get_distance
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
+from ai.STA.Action.Move import Move
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
@@ -30,7 +31,7 @@ DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
 COMMAND_DELAY = 1.5
 
 
-class GoKick(Tactic):
+class Bump(Tactic):
     """
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
@@ -49,8 +50,8 @@ class GoKick(Tactic):
         assert PLAYER_PER_TEAM >= player_id >= 0
 
         self.player_id = player_id
-        self.current_state = self.kick_charge
-        self.next_state = self.kick_charge
+        self.current_state = self.get_behind_ball
+        self.next_state = self.get_behind_ball
         self.debug_interface = DebugInterface()
         self.move_action = self._generate_move_to()
         self.move_action.status_flag = Flags.SUCCESS
@@ -60,16 +61,6 @@ class GoKick(Tactic):
 
         self.orientation_target = 0
         self.target = target
-
-
-    def kick_charge(self):
-        if time.time() - self.last_time > COMMAND_DELAY:
-            DebugInterface().add_log(5, "Kick charge!")
-            self.next_state = self.get_behind_ball
-            self.last_time = time.time()
-
-        other_args = {"charge_kick": True, "dribbler_on": 1}
-        return AllStar(self.game_state, self.player_id, **other_args)
 
     def get_behind_ball(self):
         self.status_flag = Flags.WIP
@@ -83,9 +74,9 @@ class GoKick(Tactic):
         vector_player_2_ball = np.array([ball_x - player_x, ball_y - player_y])
         vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
 
-        if self._is_player_towards_ball_and_target():
-            self.next_state = self.grab_ball
-            self.orientation_target = self.game_state.game.friends.players[self.player_id].pose.orientation
+        if self._is_player_opposing_ball_and_target():
+            self.next_state = self.push_ball
+            self.last_ball_position = self.game_state.get_ball_position()
         else:
             # self.debug.add_log(4, "Distance from ball: {}".format(dist))
             self.next_state = self.get_behind_ball
@@ -93,42 +84,39 @@ class GoKick(Tactic):
                         self.game_state.get_ball_position(),
                         self.target.position,
                         120,
-                        pathfinding=True)
+                        pathfinding=True,
+                        orientation='back')
 
-    def grab_ball(self):
+    def push_ball(self):
         # self.debug.add_log(1, "Grab ball called")
         # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
-        if self._get_distance_from_ball() < 120:
-            self.next_state = self.kick
+        if get_distance(self.last_ball_position, self.game_state.get_player_position(self.player_id)) < 40:
+            self.next_state = self.halt
             self.last_time = time.time()
-        elif self._is_player_towards_ball_and_target(-0.9):
-            self.next_state = self.grab_ball
+        elif self._is_player_opposing_ball_and_target(-0.9):
+            self.next_state = self.push_ball
         else:
             self.next_state = self.get_behind_ball
         # self.debug.add_log(1, "orientation go get ball {}".format(self.last_angle))
-        return Grab(self.game_state, self.player_id)
-
-
-    def kick(self):
-        if self._get_distance_from_ball() > 1000:
-            DebugInterface().add_log(5, "Kick!")
-            self.next_state = self.halt
-            self.last_time = time.time()
-        elif time.time() - self.last_time < COMMAND_DELAY:
-            self.next_state = self.kick
-        else:
-            self.next_state = self.kick_charge
-        return Kick(self.game_state, self.player_id, 4, self.target)
+        target = self.target.position.conv_2_np()
+        player = self.game_state.game.friends.players[self.player_id].pose.position.conv_2_np()
+        player_to_target = target - player
+        player_to_target = 0.5 * player_to_target / np.linalg.norm(player_to_target)
+        speed_pose = Pose(Position.from_np(player_to_target))
+        return Move(self.game_state, self.player_id, speed_pose)
 
     def halt(self):
+        self.next_state = self.halt
         self.status_flag = Flags.SUCCESS
         return Idle(self.game_state, self.player_id)
+
+
 
     def _get_distance_from_ball(self):
         return get_distance(self.game_state.get_player_pose(self.player_id).position,
                             self.game_state.get_ball_position())
 
-    def _is_player_towards_ball_and_target(self, fact=-0.99):
+    def _is_player_opposing_ball_and_target(self, fact=-0.99):
 
         player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
         player_y = self.game_state.game.friends.players[self.player_id].pose.position.y
@@ -146,24 +134,8 @@ class GoKick(Tactic):
         vector_player_dir = np.array([np.cos(self.game_state.game.friends.players[self.player_id].pose.orientation),
                                       np.sin(self.game_state.game.friends.players[self.player_id].pose.orientation)])
         if np.dot(vector_player_2_ball, vector_target_2_ball) < fact:
-            if np.dot(vector_player_dir, vector_target_2_ball) < fact:
+            if not (np.dot(vector_player_dir, vector_target_2_ball) < fact):
                 return True
-        return False
-
-    def _is_player_towards_target(self, fact=-0.99):
-
-        player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
-        player_y = self.game_state.game.friends.players[self.player_id].pose.position.y
-
-        target_x = self.target.position.x
-        target_y = self.target.position.y
-
-        vector_player_2_target = np.array([player_x - target_x,  player_y - target_y])
-        vector_player_2_target /= np.linalg.norm(vector_player_2_target)
-        vector_player_dir = np.array([np.cos(self.game_state.game.friends.players[self.player_id].pose.orientation),
-                                      np.sin(self.game_state.game.friends.players[self.player_id].pose.orientation)])
-        if np.dot(vector_player_dir, vector_player_2_target) < fact:
-            return True
         return False
 
     def _generate_move_to(self):
