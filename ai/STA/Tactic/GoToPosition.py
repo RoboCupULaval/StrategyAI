@@ -51,7 +51,7 @@ class GoToPosition(Tactic):
             else:
                 self.path = [self.target]
         except NonExistentModule as err:
-            print("Impossible de récupérer le pathfinder\n", err)
+            # print("Impossible de récupérer le pathfinder\n", err)
             self.path = [self.target]
 
     def get_next_path_element(self):

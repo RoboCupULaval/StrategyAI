@@ -10,7 +10,7 @@ from ai.Util.ai_command import AICommandType, AICommand
 from ai.executors.executor import Executor
 from ai.states.game_state import GameState
 from ai.states.world_state import WorldState
-
+from config.config_service import ConfigService
 
 ROBOT_NEAR_FORCE = 2000
 THRESHOLD_LAST_TARGET = 100
@@ -25,12 +25,12 @@ def sign(x):
 
 
 class PositionRegulator(Executor):
-    def __init__(self, p_world_state: WorldState, is_simulation=False):
+    def __init__(self, p_world_state: WorldState):
         super().__init__(p_world_state)
-        self.regulators = [PI(simulation_setting=is_simulation) for _ in range(6)]
-        self.last_timestamp = 0
+        self.is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
+        self.regulators = [PI(simulation_setting=self.is_simulation) for _ in range(6)]
 
-        self.constants = _set_constants(simulation_setting=is_simulation)
+        self.constants = _set_constants(simulation_setting=self.is_simulation)
         self.accel_max = self.constants["accel_max"]
         self.vit_max = self.constants["vit_max"]
 
@@ -51,12 +51,13 @@ class PositionRegulator(Executor):
                                                             robot_speed=cmd.robot_speed)
                 elif cmd.speed_flag:
                     v_theta = cmd.pose_goal.orientation
-                    v_x, v_y =_correct_for_referential_frame(cmd.pose_goal.position.x, cmd.pose_goal.position.y, -active_player.pose.orientation)
+                    v_x, v_y =(cmd.pose_goal.position.x, cmd.pose_goal.position.y)
+                    v_x, v_y = _correct_for_referential_frame(v_x, v_y, -active_player.pose.orientation)
                     cmd.speed = Pose(Position(v_x, v_y), v_theta)
 
 
 class PID(object):
-    def __init__(self, kp, ki, kd, simulation_setting=True):
+    def __init__(self, kp, ki, kd):
         self.gs = GameState()
         self.paths = {}
         self.kp = kp

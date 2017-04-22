@@ -60,9 +60,8 @@ class GoGetBall(Tactic):
         self.debug = DebugInterface()
 
     def get_behind_ball(self):
+        # print('Etat = go_behind')
         self.status_flag = Flags.WIP
-        dist = self._get_distance_from_ball()
-        angle = get_angle(self.game_state.get_player_pose(self.player_id).position, self.target.position)
 
         player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
         player_y = self.game_state.game.friends.players[self.player_id].pose.position.y
@@ -70,24 +69,12 @@ class GoGetBall(Tactic):
         ball_x = self.game_state.get_ball_position().x
         ball_y = self.game_state.get_ball_position().y
 
-        target_x = self.target.position.x
-        target_y = self.target.position.y
-
         vector_player_2_ball = np.array([ball_x - player_x, ball_y - player_y])
-        vector_target_2_ball = np.array([ball_x - target_x, ball_y - target_y])
-        angle_ball_2_target =  np.arctan2(vector_target_2_ball[1], vector_target_2_ball[0])
-        dist_player_2_ball = np.linalg.norm(vector_player_2_ball)
-        vector_player_2_ball /= dist_player_2_ball
-        vector_target_2_ball /= np.linalg.norm(vector_target_2_ball)
+        vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
 
-        print(np.dot(vector_player_2_ball, vector_target_2_ball))
-        if np.dot(vector_player_2_ball, vector_target_2_ball) < - 0.95:
-            if True:
-                print(abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation))
-                if abs(abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation) - np.pi) < 0.1 or \
-                                abs(angle_ball_2_target - self.game_state.game.friends.players[self.player_id].pose.orientation) < 0.1:
-                    self.last_time = time.time()
-                    self.next_state = self.start_dribbler
+        if self._is_player_towards_ball_and_target():
+                self.last_time = time.time()
+                self.next_state = self.grab_ball
         else:
             # self.debug.add_log(4, "Distance from ball: {}".format(dist))
             self.next_state = self.get_behind_ball
@@ -105,22 +92,22 @@ class GoGetBall(Tactic):
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def grab_ball(self):
+        # print('Etat = grab_ball')
         # self.debug.add_log(1, "Grab ball called")
-        player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
-        player_y = self.game_state.game.friends.players[self.player_id].pose.position.y
-        ball_x = self.game_state.get_ball_position().x
-        ball_y = self.game_state.get_ball_position().y
-        vector_player_2_ball = np.array([ball_x - player_x, ball_y - player_y])
-
-        self.vector_norm = np.linalg.norm(vector_player_2_ball)
         # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
-        if self.vector_norm < 110:
+        if self._get_distance_from_ball() < 120 and self._is_player_towards_ball_and_target():
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
+        else:
+            self.next_state = self.grab_ball
         # self.debug.add_log(1, "orientation go get ball {}".format(self.last_angle))
-        return MoveToPosition(self.game_state, self.player_id, Pose(Position(ball_x, ball_y), self.last_angle))
+        ball_x = self.game_state.get_ball_position().x
+        ball_y = self.game_state.get_ball_position().y
+        angle_ball_2_target = np.arctan2(self.target.position.y - ball_y, self.target.position.x - ball_x)
+        return MoveToPosition(self.game_state, self.player_id, Pose(Position(ball_x, ball_y), angle_ball_2_target))
 
     def halt(self):
+        # print('Etat = Halt (go_get_ball)')
         self.status_flag = Flags.SUCCESS
         # self.debug.add_log(1, "GogetBall so sucessfull")
 
@@ -129,6 +116,28 @@ class GoGetBall(Tactic):
     def _get_distance_from_ball(self):
         return get_distance(self.game_state.get_player_pose(self.player_id).position,
                             self.game_state.get_ball_position())
+    def _is_player_towards_ball_and_target(self):
+
+        player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
+        player_y = self.game_state.game.friends.players[self.player_id].pose.position.y
+
+        ball_x = self.game_state.get_ball_position().x
+        ball_y = self.game_state.get_ball_position().y
+
+        target_x = self.target.position.x
+        target_y = self.target.position.y
+
+        vector_player_2_ball = np.array([ball_x - player_x, ball_y - player_y])
+        vector_target_2_ball = np.array([ball_x - target_x, ball_y - target_y])
+        vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
+        vector_target_2_ball /= np.linalg.norm(vector_target_2_ball)
+        vector_player_dir = np.array([np.cos(self.game_state.game.friends.players[self.player_id].pose.orientation),
+                                      np.sin(self.game_state.game.friends.players[self.player_id].pose.orientation)])
+        # print(np.dot(vector_player_2_ball, vector_target_2_ball))
+        if np.dot(vector_player_2_ball, vector_target_2_ball) < - 0.99:
+            if np.dot(vector_player_dir, vector_target_2_ball) < - 0.99:
+                return True
+        return False
 
     def _generate_move_to(self):
         go_behind = GoBehind(self.game_state, self.player_id, self.game_state.get_ball_position(), self.target.position,
