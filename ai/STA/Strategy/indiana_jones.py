@@ -30,7 +30,6 @@ class IndianaJones(Strategy):
         x_left = self.game_state.const["FIELD_X_LEFT"] + 500
         x_right = self.game_state.const["FIELD_X_RIGHT"] - 500
 
-
         self.add_tactic(indiana_ID, GoToPositionPathfinder(self.game_state, indiana_ID, goal_left))
         self.add_tactic(indiana_ID, GoToPositionPathfinder(self.game_state, indiana_ID, goal_right))
         self.add_condition(indiana_ID, 0, 1, partial(self.condition, indiana_ID))
@@ -50,9 +49,9 @@ class IndianaJones(Strategy):
             if not (i == indiana_ID or i == obs_left_ID or i == obs_right_ID):
                 self.add_tactic(i, Stop(self.game_state, i))
 
-        print("{} -- {} \n {} -- {}".format(y_down, y_top, x_right, x_left))
+        # print("{} -- {} \n {} -- {}".format(y_down, y_top, x_right, x_left))
 
     def condition(self, i):
-        print(i, self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS)
+        # print(i, self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS)
         return self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS
 

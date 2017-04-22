@@ -7,10 +7,9 @@ from ai.states.world_state import WorldState
 
 class ModuleExecutor(Executor):
 
-    def __init__(self, p_world_state: WorldState, type_of_pathfinder: str, is_simulation: bool):
+    def __init__(self, p_world_state: WorldState):
         super().__init__(p_world_state)
-        self.is_simulation = is_simulation
-        self.start_initial_modules(type_of_pathfinder)
+        self.start_initial_modules()
 
     def exec(self) -> None:
         """
@@ -22,7 +21,7 @@ class ModuleExecutor(Executor):
             module.update()
         self.ws.module_state.pathfinder_module.exec()
 
-    def start_initial_modules(self, type_of_pathfinder: str) -> None:
+    def start_initial_modules(self) -> None:
         """
         Initialise les modules intelligents et le pathdfinder.
 
@@ -30,4 +29,4 @@ class ModuleExecutor(Executor):
         :return: None
         """
         self.ws.module_state.pathfinder_module = \
-            PathfinderModule(self.ws, type_of_pathfinder, self.is_simulation)
+            PathfinderModule(self.ws)
