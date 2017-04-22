@@ -59,7 +59,7 @@ class PositionForPass(Tactic):
         self.target = target
 
     def move_to_pass_position(self):
-        print('Etat = Kick_charge')
+        # print('Etat = Kick_charge')
         self.next_state = self.move_to_pass_position
         if self._is_player_towards_ball():
             self.status_flag = Flags.SUCCESS

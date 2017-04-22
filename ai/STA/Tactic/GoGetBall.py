@@ -60,7 +60,7 @@ class GoGetBall(Tactic):
         self.debug = DebugInterface()
 
     def get_behind_ball(self):
-        print('Etat = go_behind')
+        # print('Etat = go_behind')
         self.status_flag = Flags.WIP
 
         player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
@@ -92,7 +92,7 @@ class GoGetBall(Tactic):
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def grab_ball(self):
-        print('Etat = grab_ball')
+        # print('Etat = grab_ball')
         # self.debug.add_log(1, "Grab ball called")
         # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
         if self._get_distance_from_ball() < 120 and self._is_player_towards_ball_and_target():
@@ -107,7 +107,7 @@ class GoGetBall(Tactic):
         return MoveToPosition(self.game_state, self.player_id, Pose(Position(ball_x, ball_y), angle_ball_2_target))
 
     def halt(self):
-        print('Etat = Halt (go_get_ball)')
+        # print('Etat = Halt (go_get_ball)')
         self.status_flag = Flags.SUCCESS
         # self.debug.add_log(1, "GogetBall so sucessfull")
 
@@ -133,7 +133,7 @@ class GoGetBall(Tactic):
         vector_target_2_ball /= np.linalg.norm(vector_target_2_ball)
         vector_player_dir = np.array([np.cos(self.game_state.game.friends.players[self.player_id].pose.orientation),
                                       np.sin(self.game_state.game.friends.players[self.player_id].pose.orientation)])
-        print(np.dot(vector_player_2_ball, vector_target_2_ball))
+        # print(np.dot(vector_player_2_ball, vector_target_2_ball))
         if np.dot(vector_player_2_ball, vector_target_2_ball) < - 0.99:
             if np.dot(vector_player_dir, vector_target_2_ball) < - 0.99:
                 return True

@@ -63,7 +63,7 @@ class GoKick(Tactic):
 
 
     def kick_charge(self):
-        print('Etat = Kick_charge')
+        # print('Etat = Kick_charge')
         if time.time() - self.last_time > COMMAND_DELAY:
             DebugInterface().add_log(5, "Kick charge!")
             self.next_state = self.get_behind_ball
@@ -73,7 +73,7 @@ class GoKick(Tactic):
         return AllStar(self.game_state, self.player_id, **other_args)
 
     def get_behind_ball(self):
-        print('Etat = go_behind')
+        # print('Etat = go_behind')
         self.status_flag = Flags.WIP
 
         player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
@@ -98,7 +98,7 @@ class GoKick(Tactic):
                         pathfinding=True)
 
     def grab_ball(self):
-        print('Etat = grab_ball')
+        # print('Etat = grab_ball')
         # self.debug.add_log(1, "Grab ball called")
         # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
         if self._get_distance_from_ball() < 120:
@@ -121,11 +121,11 @@ class GoKick(Tactic):
             self.next_state = self.kick
         else:
             self.next_state = self.kick_charge
-        print('Etat = Kick')
+        # print('Etat = Kick')
         return Kick(self.game_state, self.player_id, 4, self.target)
 
     def halt(self):
-        print('Etat = Halt')
+        # print('Etat = Halt')
         self.status_flag = Flags.SUCCESS
         return Idle(self.game_state, self.player_id)
 

@@ -59,7 +59,7 @@ class Mark(Tactic):
         self.target = target
 
     def go_between_ball_and_enemy(self):
-        print('Etat = go_between_ball_and_enemy')
+        # print('Etat = go_between_ball_and_enemy')
         self.status_flag = Flags.WIP
 
         enemy = self.game_state.game.friends.players[self.enemy_id].pose.position
@@ -73,7 +73,7 @@ class Mark(Tactic):
         return GoBetween(self.game_state, self.player_id, ball, enemy, ball, 300)
 
     def move_to_enemy(self):
-        print('Etat = move_to_enemy')
+        # print('Etat = move_to_enemy')
         # self.debug.add_log(1, "Grab ball called")
         # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
         if self._is_player_between_ball_and_enemy():
