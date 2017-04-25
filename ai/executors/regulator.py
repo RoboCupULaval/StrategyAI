@@ -102,6 +102,7 @@ class MNRCFixedSpeed(object):
 
         #err[abs(err)<0.01] = 0
         self.err_sum = self.err_sum + err * delta_t
+        self.err_sum[self.err_sum > 1] = 1
         correction = self.kp * err + self.ki * self.err_sum
 
         # Compute model prediction
