@@ -1,0 +1,19 @@
+  _   _  ____   ____  ____    _      ____  _____  _____     _____ _    _ _____ _____  ______ 
+ | \ | |/ __ \ / __ \|  _ \  | |    / __ \|  __ \|  __ \   / ____| |  | |_   _|  __ \|  ____|
+ |  \| | |  | | |  | | |_) | | |   | |  | | |__) | |  | | | |  __| |  | | | | | |  | | |__   
+ | . ` | |  | | |  | |  _ <  | |   | |  | |  _  /| |  | | | | |_ | |  | | | | | |  | |  __|  
+ | |\  | |__| | |__| | |_) | | |___| |__| | | \ \| |__| | | |__| | |__| |_| |_| |__| | |____ 
+ |_| \_|\____/ \____/|____/  |______\____/|_|  \_\_____/   \_____|\____/|_____|_____/|______|
+
+
+
+Bon, si vous êtes ici, c'est pacre que vous êtes aussi n00b que moi!
+
+pour launch l'IA en monde simulation avec Kalaman, comme en 1337 H4XOR, voilà la commande:
+
+python main.py config/sim_kalman_redirect.cfg
+
+Pour les autres modes, faites juste remplacer le nom du ficher .cfg pour la config que vous voullez!
+
+
+				-Philippe Lebel, the not so 1337 H4XOR.
