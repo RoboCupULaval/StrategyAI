@@ -1,8 +1,10 @@
 # Under MIT license, see LICENSE.txt
+import numpy as np
 from .Action import Action
 from RULEngine.Util.constant import PLAYER_PER_TEAM, KICK_MAX_SPD
 from ai.Util.ai_command import AICommand, AICommandType
-
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
 
 class Kick(Action):
     """
@@ -12,7 +14,7 @@ class Kick(Action):
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur qui doit frapper la balle
     """
-    def __init__(self, p_game_state, p_player_id, p_force):
+    def __init__(self, p_game_state, p_player_id, p_force, target=Pose()):
         """
             :param p_game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui frappe la balle
@@ -25,6 +27,8 @@ class Kick(Action):
         assert(KICK_MAX_SPD >= p_force >= 0)
         self.player_id = p_player_id
         self.force = p_force
+        self.target = target
+        self.speed_pose = Pose()
 
     def exec(self):
         """
@@ -33,7 +37,12 @@ class Kick(Action):
                      où Pose est la destination actuelle du joueur (ne pas la modifier)
                         kick est un float entre 0 et 1 qui determine la force du kick
         """
-        position_joueur = self.game_state.get_player_pose(self.player_id)
-        force_kick = self.force
-        return AICommand(self.player_id, AICommandType.KICK, **{"pose_goal": position_joueur,
+        target = self.target.position.conv_2_np()
+        player = self.game_state.game.friends.players[self.player_id].pose.position.conv_2_np()
+        player_to_target = target - player
+        player_to_target = 0.3 * player_to_target / np.linalg.norm(player_to_target)
+        self.speed_pose = Pose(Position.from_np(player_to_target))
+        return AICommand(self.player_id, AICommandType.MOVE, **{"pose_goal": self.speed_pose,
+                                                                "speed_flag": True,
+                                                                "kick": True,
                                                                 "kick_strength": self.force})

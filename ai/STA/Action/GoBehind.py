@@ -25,7 +25,7 @@ class GoBehind(Action):
         position2 : La position par rapport à laquelle le robot doit être "derrière" l'objet de la position 1 (exemple: le but)
     """
     def __init__(self, p_game_state, p_player_id, p_position1, p_position2,
-                 p_distance_behind, robot_speed=None, pathfinding=False):
+                 p_distance_behind, robot_speed=None, pathfinding=False, orientation='front'):
         """
             :param p_game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui doit se déplacer
@@ -46,6 +46,7 @@ class GoBehind(Action):
         self.pathfind = pathfinding
         self.rayon_avoid = 300 #(mm)
         self.robot_speed = robot_speed
+        self.orientation = orientation
 
     def get_destination(self):
         """
@@ -98,7 +99,10 @@ class GoBehind(Action):
             destination_position = Position(x, y)
 
         # Calcul de l'orientation de la pose de destination
-        destination_orientation = get_angle(destination_position, self.position1)
+        if self.orientation == 'front':
+            destination_orientation = get_angle(destination_position, self.position1)
+        elif self.orientation == 'back':
+            destination_orientation = get_angle(destination_position, self.position1) + np.pi
 
         destination_pose = Pose(destination_position, destination_orientation)
         DebugInterface().add_log(1, "orientation go behind {}".format(destination_orientation))
