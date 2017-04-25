@@ -9,13 +9,14 @@ import numpy as np
 
 
 class Player:
-    def __init__(self, team, id, kalman=False, type="friends", ncameras=1):
+
+    def __init__(self, team, id, kalman_type="friend", ncameras=1):
 
         self.cmd = [0, 0, 0]
         self.id = id
 
         self.team = team
-        self.kf = Kalman(type, ncameras=4)
+        self.kf = Kalman(kalman_type, ncameras=4)
         self.pose = Pose()
 
         self.velocity = [0, 0, 0]
@@ -32,7 +33,6 @@ class Player:
         self.pose = Pose(Position(ret[0], ret[1]), ret[4])
         self.velocity = [ret[2], ret[3], ret[5]]
         print(self.velocity)
-
 
     def set_command(self, cmd):
         self.cmd = [cmd.pose.position.x, cmd.pose.position.y, cmd.pose.orientation]

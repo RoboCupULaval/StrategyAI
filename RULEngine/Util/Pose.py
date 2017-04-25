@@ -12,11 +12,12 @@ class Pose(object):
 
         self.position = position
         self.orientation = orientation
+        '''
         if self.orientation >= m.pi:
             self.orientation -= 2 * m.pi
         elif self.orientation <= -m.pi:
             self.orientation += 2*m.pi
-
+        '''
     def to_tuple(self):
         """ Retourne la position de la pose sous forme d'un tuple."""
         return self.position.x, self.position.y

@@ -24,7 +24,7 @@ class _Command(object):
         self.kick_speed = 0
 
     @abstractmethod
-    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+    def package_command(self):
         pass
 
 
@@ -35,12 +35,10 @@ class Move(_Command):
         super().__init__(player)
         self.pose = destination
 
-    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+    def package_command(self):
         x = self.pose.position.x
         y = self.pose.position.y
         theta = self.pose.orientation
-        if mcu_version == protocol.MCUVersion.C2000:
-            x, y = x, -y
 
         player_idx = self.player.id
         packed_command = protocol.create_speed_command(x, y, theta, player_idx)
@@ -51,10 +49,11 @@ class Move(_Command):
 class Kick(_Command):
     def __init__(self, player, kick_strength):
         """ Kick speed est un int entre 0 et 4 """
+        # TODO FIXME KICK SPEED OR STRENGTH
         super().__init__(player)
         self.kick_speed = 4
 
-    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+    def package_command(self):
         return protocol.create_kick_command(self.player.id, self.kick_speed)
 
 
@@ -62,7 +61,7 @@ class Stop(_Command):
     def __init__(self, player):
         super().__init__(player)
 
-    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+    def package_command(self):
         return protocol.create_speed_command(0, 0, 0, self.player.id)
 
 
@@ -70,7 +69,7 @@ class ChargeKick(_Command):
     def __init__(self, player):
         super().__init__(player)
 
-    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+    def package_command(self):
         print("Kick charge!")
         return protocol.create_charge_command(self.player.id)
 
@@ -82,7 +81,7 @@ class Dribbler(_Command):
         if activate:
             self.dribbler_status = protocol.DribblerStatus.ENABLED
 
-    def package_command(self, mcu_version=protocol.MCUVersion.STM32F407):
+    def package_command(self):
         print("Dribbler")
         if self.dribbler_status == protocol.DribblerStatus.DISABLED:
             status = 0

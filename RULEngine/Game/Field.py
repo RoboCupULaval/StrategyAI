@@ -1,20 +1,22 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.Util.Position import Position
+from config.config_service import ConfigService
 from ..Util.area import *
 
 
 class Field:
 
-    def __init__(self, ball, terrain_type="sim"):
+    def __init__(self, ball):
         self.ball = ball
 
-        if terrain_type == "sim":
-            self.constant = simulation
-        elif terrain_type == "real":
-            self.constant = real_life
+        cfg = ConfigService()
+
+        if cfg.config_dict["GAME"]["terrain_type"] == "normal":
+            self.constant = normal
+        elif cfg.config_dict["GAME"]["terrain_type"] == "small":
+            self.constant = small
         else:
-            print("ERREUR lors de la création de l'objet field\n Mauvais terrain_type passé - simulation choisi\n")
-            self.constant = simulation
+            print("ERREUR lors de la création de l'objet field\n Mauvais terrain_type en config - normal choisi\n")
+            self.constant = normal
 
     def move_ball(self, position, delta):
         self.ball.set_position(position, delta)
@@ -34,7 +36,7 @@ class Field:
                 return True
             elif is_inside_circle(position, bot_circle, self.constant["FIELD_GOAL_RADIUS"]):
                 return True
-            return False
+            return True
         else:
             return False
 
@@ -87,7 +89,7 @@ class Field:
             return Position(position.x, position.y)
 
 
-simulation = {
+normal = {
     "ROBOT_RADIUS": 90,
     "BALL_RADIUS": 22,
     "PLAYER_PER_TEAM": 6,
@@ -154,7 +156,7 @@ simulation = {
     "KISS_BALL_DISTANCE": 80
 }
 
-real_life = {
+small = {
     "ROBOT_RADIUS": 90,
     "BALL_RADIUS": 22,
     "PLAYER_PER_TEAM": 6,
@@ -170,12 +172,12 @@ real_life = {
     "FIELD_GOAL_SEGMENT": 181,
 
     # Goal Parameters
-    "FIELD_GOAL_Y_TOP": 436,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
-    "FIELD_GOAL_Y_BOTTOM": -436,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
-    "FIELD_GOAL_BLUE_X_LEFT": -1450,  # FIELD_X_LEFT
+    "FIELD_GOAL_Y_TOP": 536,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
+    "FIELD_GOAL_Y_BOTTOM": -536,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
+    "FIELD_GOAL_BLUE_X_LEFT": -1636,  # FIELD_X_LEFT
     "FIELD_GOAL_BLUE_X_RIGHT": -1272,  # FIELD_X_LEFT + FIELD_GOAL_RADIUS
     "FIELD_GOAL_YELLOW_X_LEFT": 1272,  # FIELD_X_RIGHT - FIELD_GOAL_RADIUS
-    "FIELD_GOAL_YELLOW_X_RIGHT": 1450,  # FIELD_X_RIGHT
+    "FIELD_GOAL_YELLOW_X_RIGHT": 1636,  # FIELD_X_RIGHT
 
     # Field Positions
     "FIELD_GOAL_BLUE_TOP_CIRCLE": Position(-1636, 250),  # FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2)
