@@ -133,12 +133,12 @@ class PathPartitionner(Pathfinder):
         if len_along_path > 0 and len_along_path < get_distance(pose_target, pose_robot):
             vec_perp = np.cross(np.append(direction, 0), np.array([0, 0, 1]))
             vec_perp = vec_perp[0:2]
-            print(self.player.velocity)
+            #print(self.player.velocity)
             robot_speed = np.array(self.player.velocity[0:2])
             obs_speed = np.array(closest_player.velocity[0:2])
             avoid_dir = np.dot(obs_speed-robot_speed, vec_perp)*vec_perp
-            print(robot_speed)
-            print(vec_perp)
+            #print(robot_speed)
+            #print(vec_perp)
             if avoid_dir is None:
 
                 sub_target_1 = np.array(conv_position_2_list(pose_robot)) + direction * len_along_path + vec_perp * self.res
