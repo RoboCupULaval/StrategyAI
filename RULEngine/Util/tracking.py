@@ -34,7 +34,7 @@ class Kalman:
             self.Q = np.diag(values)
             # Observation covariance
             values = [10 ** (0) for i in range(ncameras)]
-            values += [10 ** (0) for i in range(ncameras)]
+            values += [10 ** (-0) for i in range(ncameras)]
             values += [10 ** (-3) for i in range(ncameras)]
             self.R = np.diag(values)  # Pose * ncameras
             # Initial state covariance
