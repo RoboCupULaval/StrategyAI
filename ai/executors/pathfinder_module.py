@@ -47,11 +47,11 @@ class PathfinderModule(Executor):
 
     def _pathfind_ai_commands(self, ai_commands):
         for ai_c in ai_commands:
-            self.time = time.time()
+            #self.time = time.time()
             path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
-            print(self.time - time.time())
+            #print(self.time - time.time())
             self.draw_path(path)
-            ai_c.path = path
+            ai_c.path = path.points[1:]
 
     def _modify_path_for_cinematic_constraints(self, ai_commandes: list):
         for cmd in ai_commandes:
@@ -69,7 +69,7 @@ class PathfinderModule(Executor):
 
     def change_pathfinder(self, type_of_pathfinder):
         assert isinstance(type_of_pathfinder, str)
-        assert type_of_pathfinder.lower() in ["rrt", "astar"]
+        assert type_of_pathfinder.lower() in ["rrt", "astar", "path_part"]
 
         self.pathfinder = self.get_pathfinder(type_of_pathfinder, self.is_simulation)
 
@@ -92,9 +92,14 @@ class PathfinderModule(Executor):
 
     def draw_path(self, path, pid=0):
         points = []
-        for path_element in path:
+        for idx, path_element in enumerate(path.points):
             x = path_element.x
             y = path_element.y
             points.append((x, y))
-        self.ws.debug_interface.add_multiple_points(points, COLOR_ID_MAP[pid], width=5, link="path - " + str(pid),
+            if idx == 0:
+                pass
+            else:
+                self.ws.debug_interface.add_line(points[idx-1], points[idx])
+        #print(points)
+        self.ws.debug_interface.add_multiple_points(points[1:], COLOR_ID_MAP[pid], width=5, link="path - " + str(pid),
                                                  timeout=DEFAULT_PATH_TIMEOUT)
