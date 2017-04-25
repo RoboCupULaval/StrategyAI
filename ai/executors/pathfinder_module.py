@@ -17,8 +17,8 @@ class PathfinderModule(Executor):
 
     def __init__(self, p_world_state: WorldState):
         super().__init__(p_world_state)
-        type_of_pathfinder = ConfigService().config_dict["STRATEGY"]["pathfinder"]
-        self.pathfinder = self.get_pathfinder(type_of_pathfinder)
+        self.type_of_pathfinder = ConfigService().config_dict["STRATEGY"]["pathfinder"]
+        self.pathfinder = self.get_pathfinder(self.type_of_pathfinder)
         self.last_time_pathfinding_for_robot = {}
         self.last_frame = time.time()
         self.cinematic_pathfinder = CinePath(p_world_state)
@@ -50,8 +50,12 @@ class PathfinderModule(Executor):
             self.time = time.time()
             path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
             # print(self.time - time.time())
-            self.draw_path(path)
-            ai_c.path = path.points[1:]
+            if self.type_of_pathfinder.lower() == "path_part":
+
+                self.draw_path(path)
+                ai_c.path = path.points[1:]
+            else:
+                ai_c.path = path
 
     def _modify_path_for_cinematic_constraints(self, ai_commandes: list):
         for cmd in ai_commandes:
@@ -93,10 +97,12 @@ class PathfinderModule(Executor):
             x = path_element.x
             y = path_element.y
             points.append((x, y))
-            if idx == 0:
-                pass
-            else:
-                self.ws.debug_interface.add_line(points[idx - 1], points[idx])
+            if self.type_of_pathfinder.lower() == "path_part":
+                if idx == 0:
+                    pass
+                else:
+                    self.ws.debug_interface.add_line(points[idx - 1], points[idx])
+
         #    print(points)
         self.ws.debug_interface.add_multiple_points(points[1:], COLOR_ID_MAP[pid], width=5, link="path - " + str(pid),
                                                     timeout=DEFAULT_PATH_TIMEOUT)
