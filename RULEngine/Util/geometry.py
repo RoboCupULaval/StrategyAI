@@ -356,6 +356,10 @@ def is_facing_point_and_target(player_position: Position,
     angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
     return angle_difference < tolerated_angle
 
+def is_path_clear(origin: Position, target: Position, player: Position) -> bool:
+    rayon_ref = 1.1 * np.linalg.norm(origin.conv_2_np() - target.conv_2_np())
+    rayon_player = np.linalg.norm(origin.conv_2_np() - player.conv_2_np()) + np.linalg.norm(target.conv_2_np() - player.conv_2_np())
+    return rayon_player > rayon_ref
 
 def rotate_point_around_origin(point, origin, angle):
     # TODO: ajouter des unit tests
