@@ -43,11 +43,13 @@ class PassesWithDecisions(Strategy):
                 self.add_tactic(i, Stop(self.game_state, i))
 
     def condition(self, i):
+        print(self.graphs[i].get_current_tactic().status_flag)
         return self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS
 
     def is_best_receiver(self, receiver_id):
         if self.graphs[self.passing_ID].get_current_tactic().status_flag == Flags.SUCCESS:
             if self.evaluate_best_receiver(self.passing_ID) == receiver_id:
+                print('le receveur est le robot {}'.format(receiver_id))
                 return True
         return False
 
@@ -57,19 +59,36 @@ class PassesWithDecisions(Strategy):
         for i in range(PLAYER_PER_TEAM):
             score = 0
             if i == self.player_ID_no1 or i == self.player_ID_no2:
+                # Calcul du score pour passeur vers receveur
                 receiver = self.game_state.get_player_position(i, True).conv_2_np()
                 passing_to_receiver = np.linalg.norm(receiver - passing)
                 for j in range(PLAYER_PER_TEAM):
+                    # Obstacle : les players friends
                     if not (j == i or j == passing_id):
                         obstacle = self.game_state.get_player_position(j, True).conv_2_np()
                         score += np.linalg.norm(obstacle - passing) + np.linalg.norm(receiver - obstacle) - passing_to_receiver
                 for j in range(PLAYER_PER_TEAM):
+                    # Obstacle : les players ennemis
                     obstacle = self.game_state.get_player_position(j, False).conv_2_np()
                     score += np.linalg.norm(obstacle - passing) + np.linalg.norm(receiver - obstacle) - passing_to_receiver
+                # Calcul du score pour receveur vers but
+                goal = self.goal.position.conv_2_np()
+                goal_to_receiver = np.linalg.norm(receiver - goal)
+                for j in range(PLAYER_PER_TEAM):
+                    # Obstacle : les players friends
+                    if not (j == i or j == passing_id):
+                        obstacle = self.game_state.get_player_position(j, True).conv_2_np()
+                        score += np.linalg.norm(obstacle - goal) + np.linalg.norm(receiver - obstacle) - goal_to_receiver
+                for j in range(PLAYER_PER_TEAM):
+                    # Obstacle : les players ennemis
+                    obstacle = self.game_state.get_player_position(j, False).conv_2_np()
+                    score += np.linalg.norm(obstacle - goal) + np.linalg.norm(receiver - obstacle) - goal_to_receiver
                 if score_max < score:
                     score_max = score
                     receiver_id = i
+
             elif i == passing_id:
+                # Calcul du score pour passeur vers but
                 receiver = self.goal.position.conv_2_np()
                 passing_to_receiver = np.linalg.norm(receiver - passing)
                 for j in range(PLAYER_PER_TEAM):
@@ -79,6 +98,8 @@ class PassesWithDecisions(Strategy):
                 for j in range(PLAYER_PER_TEAM):
                     obstacle = self.game_state.get_player_position(j, False).conv_2_np()
                     score += np.linalg.norm(obstacle - passing) + np.linalg.norm(receiver - obstacle) - passing_to_receiver
+                # Doubler pour considerer le receveur vers but absent
+                score *= 2
                 if score_max < score:
                     score_max = score
                     receiver_id = None
