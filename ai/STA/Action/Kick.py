@@ -41,7 +41,6 @@ class Kick(Action):
         player = self.game_state.game.friends.players[self.player_id].pose.position.conv_2_np()
         player_to_target = target - player
         player_to_target = 0.3 * player_to_target / np.linalg.norm(player_to_target)
-        # print(player_to_target)
         self.speed_pose = Pose(Position.from_np(player_to_target))
         return AICommand(self.player_id, AICommandType.MOVE, **{"pose_goal": self.speed_pose,
                                                                 "speed_flag": True,
