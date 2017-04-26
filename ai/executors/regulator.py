@@ -159,7 +159,6 @@ class PI(object):
 
         # DEAD-ZONE
         if delta <= self.position_dead_zone:
-            self.vit_min = 0
             delta = 0
         if math.fabs(delta_theta) <= self.rotation_dead_zone:
             delta_theta = 0
@@ -191,8 +190,10 @@ class PI(object):
         v_max = math.fabs(v_current) + self.accel_max * delta_t  # Selon l'acceleration maximale
         v_max = min(self.vit_max, v_max)  # Selon la vitesse maximale du robot
         v_max = min(math.sqrt(2 * 0.5 * delta), v_max)   # Selon la distance restante a parcourir
+        if delta > 0.3:
+            v_target += 1
         v_target = max(self.vit_min, min(v_max, v_target))
-
+        v_theta_target = sign(v_theta_target) * min(math.pi, abs(v_theta_target))
         # Rotation
         #v_max = math.fabs(v_theta) + self.constants["theta-max-acc"] * delta_t
         #v_max = min(self.constants["theta-max-acc"], v_max)
@@ -207,7 +208,7 @@ class PI(object):
         if delta <= self.position_dead_zone:
             v_target_x = 0
             v_target_y = 0
-        if math.fabs(delta_theta) <= self.position_dead_zone:
+        if math.fabs(delta_theta) <= 0.04:
             v_theta_target = 0
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
 
@@ -247,11 +248,11 @@ def _set_constants(simulation_setting):
                 "vit_max": 4.0,
                 "vit_min": 0.05,
                 "xyKp": 2,
-                "ki": 0.05,
+                "ki": 0.02,
                 "kd": 0.4,
                 "thetaKp": 0.7,
                 "thetaKd": 0,
-                "thetaKi": 0.07,
+                "thetaKi": 0.01,
                 "theta-max-acc": 0.05 * math.pi,
                 "position_dead_zone": 0.04
                 }

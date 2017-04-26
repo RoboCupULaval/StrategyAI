@@ -3,6 +3,7 @@
 import numpy as np
 from functools import partial
 
+from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Util.Pose import Position, Pose
 from ai.STA.Strategy.Strategy import Strategy
 from RULEngine.Util.constant import PLAYER_PER_TEAM
@@ -20,16 +21,17 @@ class PassesWithDecisions(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-        self.passing_ID = 4
+        self.passing_ID = 5
         self.player_ID_no1 = 2
         self.player_ID_no2 = 3
         self.goal_ID = None
         self.goal = (Pose(Position(self.game_state.const["FIELD_GOAL_YELLOW_X_LEFT"], 0), 0))
 
-        self.add_tactic(self.passing_ID, Capture(self.game_state, self.passing_ID, self.goal))
+        self.add_tactic(self.passing_ID, Stop(self.game_state, self.passing_ID))
         self.add_tactic(self.passing_ID, PassToPlayer(self.game_state, self.passing_ID, target_id=self.player_ID_no1))
         self.add_tactic(self.passing_ID, PassToPlayer(self.game_state, self.passing_ID, target_id=self.player_ID_no2))
         self.add_tactic(self.passing_ID, GoKick(self.game_state, self.passing_ID, self.goal))
+
         self.add_condition(self.passing_ID, 0, 1, partial(self.is_best_receiver, self.player_ID_no1))
         self.add_condition(self.passing_ID, 0, 2, partial(self.is_best_receiver, self.player_ID_no2))
         self.add_condition(self.passing_ID, 0, 3, partial(self.is_best_receiver, None))
@@ -43,13 +45,13 @@ class PassesWithDecisions(Strategy):
                 self.add_tactic(i, Stop(self.game_state, i))
 
     def condition(self, i):
-        print(self.graphs[i].get_current_tactic().status_flag)
+        print(i)
+        print(self.graphs[self.passing_ID].get_current_tactic())
         return self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS
 
     def is_best_receiver(self, receiver_id):
-        if self.graphs[self.passing_ID].get_current_tactic().status_flag == Flags.SUCCESS:
+        if self.condition(receiver_id):
             if self.evaluate_best_receiver(self.passing_ID) == receiver_id:
-                print('le receveur est le robot {}'.format(receiver_id))
                 return True
         return False
 
