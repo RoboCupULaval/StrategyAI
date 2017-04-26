@@ -7,23 +7,26 @@ from sys import platform
 
 import serial
 from serial.tools import list_ports
+from pyhermes import McuCommunicator
 
-from RULEngine.Command.command import _Command, Move, Stop
+from RULEngine.Command.command import _Command, Move, Stop, Kick, ChargeKick, Dribbler
 from RULEngine.Game.Player import Player
 
 COMMUNICATION_SLEEP = 0.001
-MOVE_COMMAND_SLEEP = 0.05
 
 
 class SerialCommandSender(object):
     def __init__(self, baud_rate=115200):
+        self.McuCommunicator = McuCommunicator()
 
+        """
         port = _get_port()
 
         if platform.startswith('win'):
             self.serial = serial.Serial(port, baud_rate)
         else:
             self.serial = serial.Serial('/dev/' + port, baud_rate)
+        """
 
         self.last_time = 0
         self.command_queue = deque()
@@ -38,13 +41,11 @@ class SerialCommandSender(object):
 
     def send_loop(self):
         while not self.terminate.is_set():
-            if time.time() - self.last_time > MOVE_COMMAND_SLEEP:
-                # print(self.command_dict)
-                for c in self.command_dict.values():
-                    packed_command = c.package_command()
-                    self.serial.write(packed_command)
+            if len(self.command_dict) > 0:
+                for next_command in self.command_dict.values():
+                    # print(c)
+                    self._package_commands(next_command)
                     time.sleep(COMMUNICATION_SLEEP)
-                self.last_time = time.time()
             else:
                 time.sleep(COMMUNICATION_SLEEP)
                 try:
@@ -52,8 +53,8 @@ class SerialCommandSender(object):
                 except IndexError:
                     next_command = None
                 if next_command:
-                    packed_command = next_command.package_command()
-                    self.serial.write(packed_command)
+                    # print(next_command)
+                    self._package_commands(next_command)
 
     def send_command(self, command: _Command):
         # self.command_queue.append(command)
@@ -72,7 +73,26 @@ class SerialCommandSender(object):
         self.comm_thread.join()
         self.terminate.clear()
 
+    def _package_commands(self, command: _Command):
+        if isinstance(command, Move):
+            x = command.pose.position.x
+            y = command.pose.position.y
+            theta = command.pose.orientation
+            self.McuCommunicator.sendSpeed(command.player.id, x, y, theta)
+        elif isinstance(command, Stop):
+            self.McuCommunicator.sendSpeed(command.player.id, 0, 0, 0)
+        elif isinstance(command, Kick):
+            self.McuCommunicator.kick(command.player.id)
+        elif isinstance(command, ChargeKick):
+            self.McuCommunicator.charge(command.player.id)
+        elif isinstance(command, Dribbler):
+            if command.dribbler_status == 2:
+                self.McuCommunicator.turnOnDribbler(command.player.id)
+            else:
+                self.McuCommunicator.turnOffDribbler(command.player.id)
 
+
+"""
 def _get_port():
     serial_ports = []
 
@@ -86,3 +106,4 @@ def _get_port():
         return serial_ports[0]
     except IndexError:
         raise Exception('No suitable serial port found.')
+"""
