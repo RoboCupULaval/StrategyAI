@@ -22,6 +22,31 @@ class Path:
         new_path.goal = other.points[-1]
         return new_path
 
+    def split_path(self, idx):
+        if idx < 1:
+            path_1 = Path()
+            path_2 = self
+        else:
+            path_1 = Path()
+            path_1.start = self.start
+            path_1.goal = self.points[idx]
+            path_1.points = self.points[:idx+1]
+            path_2 = Path()
+            path_2.start = self.points[idx]
+            path_2.goal = self.goal
+            path_2.points = self.points[idx:]
+        return path_1, path_2
+
+    def generate_path_from_points(self, points):
+
+        #points étant une liste de positions
+        new_path = Path()
+        new_path.start = points[0]
+        new_path.goal = points[-1]
+        new_path.points = points
+        return new_path
+
+
 
 class PathPartitionner(Pathfinder):
     def __init__(self, p_worldstate: WorldState):
@@ -30,10 +55,11 @@ class PathPartitionner(Pathfinder):
         self.game_state = self.p_worldstate.game_state
         self.path = Path(Position(0, 0), Position(0, 0))
         self.res = 200
-        self.gap_proxy = 160
+        self.gap_proxy = 200
         self.max_recurs = 5
         self.players_obstacles = []
         self.pose_obstacle = None
+        self.reshaper = Path_reshaper(self.p_worldstate, self.path)
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None):
         if self.is_path_collide(path) and depth < self.max_recurs:
@@ -52,6 +78,31 @@ class PathPartitionner(Pathfinder):
         return path
 
     def get_path(self, player_id=0, pose_target=Pose()):
+        self.player = self.game_state.game.friends.players[player_id]
+        objects = []
+        i = 0
+
+        self.pose_obstacle = np.zeros((len(self.game_state.game.friends.players.values())+len(self.game_state.game.enemies.players.values()) - 1, 2))
+        for d1, d2 in zip(self.game_state.game.friends.players.values(), self.game_state.game.enemies.players.values()):
+            if d1.id != player_id:
+                self.players_obstacles += [d1]
+                self.players_obstacles += [d2]
+                self.pose_obstacle[i, :] = d1.pose.position.conv_2_np()
+                self.pose_obstacle[i+1, :] = d2.pose.position.conv_2_np()
+                i += 2
+            else:
+                self.players_obstacles += [d2]
+                self.pose_obstacle[i, :] = d2.pose.position.conv_2_np()
+                i += 1
+
+        self.path = Path(self.game_state.get_player_pose(player_id).position, pose_target.position)
+        self.path = self.fastpathplanner(self.path)
+        self.path = self.reshaper.reshape_path(self.path, player_id)
+
+        return self.path
+
+    def get_raw_path(self, player_id=0, pose_target=Pose()):
+        #sans path_reshaper
         self.player = self.game_state.game.friends.players[player_id]
         objects = []
         i = 0
@@ -200,3 +251,42 @@ class PathPartitionner(Pathfinder):
 
     def update(self):
         pass
+
+
+class Path_reshaper:
+    def __init__(self, p_world_state: WorldState, path: Path):
+
+        self.p_world_state = p_world_state
+        self.path = path
+        self.dist_from_path = 50 #mm
+        self.player_id = None
+        self.player = None
+        self.vel_max = None
+
+    def reshape_path(self, path, player_id, vel_cruise=1):
+        self.path = path
+        self.player_id = player_id
+        self.player = self.p_world_state.game_state.get_player(player_id)
+        self.vel_max = vel_cruise
+        point_list = [self.path.start]
+        for idx, points in enumerate(self.path.points[1:-1]):
+
+            idx = idx + 1
+            P1 = self.path.points[idx-1].conv_2_np()
+            P2 = self.path.points[idx].conv_2_np()
+            P3 = self.path.points[idx+1].conv_2_np()
+            theta = np.math.atan2(P3[1]-P2[1], P3[0]-P2[0]) - np.math.atan2(P1[1]-P2[1], P1[0]-P2[0])
+            radius = self.dist_from_path*np.sin(theta/2)/(1-np.sin(theta/2))
+
+            if np.linalg.norm(P1-P2) < 0.001 or np.linalg.norm(P2-P3) < 0.001 or np.linalg.norm(P1-P3) < 0.001:
+                # on traite tout le cas ou le problème dégènere
+                pass
+            else:
+                P4 = P2 + np.sqrt((self.dist_from_path + radius)**2 - radius**2) * (P1 - P2)/np.linalg.norm(P1-P2)
+                P5 = P2 + np.sqrt((self.dist_from_path + radius) ** 2 - radius ** 2) * (P3 - P2) / np.linalg.norm(P3 - P2)
+
+                point_list += [Position.from_np(P4), Position.from_np(P5)]
+        point_list += [self.path.goal]
+        print(point_list)
+
+        return Path().generate_path_from_points(point_list)
