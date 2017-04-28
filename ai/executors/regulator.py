@@ -123,6 +123,10 @@ class PI(object):
 
         # Position de la target (en m)
         r_x, r_y, r_theta = cmd.pose_goal.position.x / 1000, cmd.pose_goal.position.y / 1000, cmd.pose_goal.orientation
+        r_x = min(r_x, 1600 / 1000)
+        r_x = max(r_x, -1600 / 1000)
+        r_y = min(r_y, 1000 / 1000)
+        r_y = max(r_y, -1000 / 1000)
         # Position du robot (en m)
         t_x, t_y, t_theta = active_player.pose.position.x / 1000, active_player.pose.position.y / 1000, active_player.pose.orientation
         # Vitesse actuelle du robot (en m/s)
