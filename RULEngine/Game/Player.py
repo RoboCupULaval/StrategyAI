@@ -9,8 +9,8 @@ import numpy as np
 
 
 class Player:
-
-    def __init__(self, team, id, kalman_type="friend", ncameras=1):
+    kalman_type = 'enemy'
+    def __init__(self, team, id,):
 
         self.cmd = [0, 0, 0]
         self.id = id
