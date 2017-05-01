@@ -44,7 +44,8 @@ class PositionRegulator(Executor):
                 active_player = self.ws.game_state.game.friends.players[robot_idx]
                 if not cmd.speed_flag:
                     cmd.speed = self.regulators[robot_idx].\
-                        update_pid_and_return_speed_command(cmd,
+                        update_pid_and_return_speed_command(self.ws.game_state,
+                                                            cmd,
                                                             active_player,
                                                             delta_t,
                                                             idx=robot_idx,
@@ -111,7 +112,7 @@ class PI(object):
         self.rotation_dead_zone = 0.005 * math.pi
         self.last_theta_target = 0
 
-    def update_pid_and_return_speed_command(self, cmd, active_player, delta_t=0.030, idx=4, robot_speed=1.0):
+    def update_pid_and_return_speed_command(self, game_state, cmd, active_player, delta_t=0.030, idx=4, robot_speed=1.0):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
         assert isinstance(cmd, AICommand), "La consigne doit etre une Pose dans le PI"
         if robot_speed:
@@ -121,12 +122,14 @@ class PI(object):
         self.paths[idx] = cmd.path
         delta_t = 0.05
 
+        xmax = game_state.field.constant["FIELD_X_RIGHT"]
+        ymax = game_state.field.constant["FIELD_Y_TOP"]
         # Position de la target (en m)
         r_x, r_y, r_theta = cmd.pose_goal.position.x / 1000, cmd.pose_goal.position.y / 1000, cmd.pose_goal.orientation
-        r_x = min(r_x, 1600 / 1000)
-        r_x = max(r_x, -1600 / 1000)
-        r_y = min(r_y, 1000 / 1000)
-        r_y = max(r_y, -1000 / 1000)
+        r_x = min(r_x, xmax / 1000)
+        r_x = max(r_x, -xmax / 1000)
+        r_y = min(r_y, ymax / 1000)
+        r_y = max(r_y, -ymax / 1000)
         # Position du robot (en m)
         t_x, t_y, t_theta = active_player.pose.position.x / 1000, active_player.pose.position.y / 1000, active_player.pose.orientation
         # Vitesse actuelle du robot (en m/s)
@@ -156,7 +159,6 @@ class PI(object):
 
         # DEAD-ZONE
         if delta <= self.position_dead_zone:
-            self.vit_min = 0
             delta = 0
         if math.fabs(delta_theta) <= self.rotation_dead_zone:
             delta_theta = 0
@@ -188,8 +190,10 @@ class PI(object):
         v_max = math.fabs(v_current) + self.accel_max * delta_t  # Selon l'acceleration maximale
         v_max = min(self.vit_max, v_max)  # Selon la vitesse maximale du robot
         v_max = min(math.sqrt(2 * 0.5 * delta), v_max)   # Selon la distance restante a parcourir
+        if delta > 0.3:
+            v_target += 1
         v_target = max(self.vit_min, min(v_max, v_target))
-
+        v_theta_target = sign(v_theta_target) * min(math.pi, abs(v_theta_target))
         # Rotation
         #v_max = math.fabs(v_theta) + self.constants["theta-max-acc"] * delta_t
         #v_max = min(self.constants["theta-max-acc"], v_max)
@@ -204,7 +208,7 @@ class PI(object):
         if delta <= self.position_dead_zone:
             v_target_x = 0
             v_target_y = 0
-        if math.fabs(delta_theta) <= self.position_dead_zone:
+        if math.fabs(delta_theta) <= 0.04:
             v_theta_target = 0
         return Pose(Position(v_target_x, v_target_y), v_theta_target)
 
@@ -244,11 +248,11 @@ def _set_constants(simulation_setting):
                 "vit_max": 4.0,
                 "vit_min": 0.05,
                 "xyKp": 2,
-                "ki": 0.05,
+                "ki": 0.02,
                 "kd": 0.4,
                 "thetaKp": 0.7,
                 "thetaKd": 0,
-                "thetaKi": 0.07,
+                "thetaKi": 0.01,
                 "theta-max-acc": 0.05 * math.pi,
                 "position_dead_zone": 0.04
                 }
