@@ -30,7 +30,7 @@ class PathPartitionner(Pathfinder):
         self.game_state = self.p_worldstate.game_state
         self.path = Path(Position(0, 0), Position(0, 0))
         self.res = 200
-        self.gap_proxy = 160
+        self.gap_proxy = 200
         self.max_recurs = 5
         self.players_obstacles = []
         self.pose_obstacle = None
