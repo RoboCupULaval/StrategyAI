@@ -10,7 +10,7 @@ from ai.executors.module_executor import ModuleExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.executors.command_executor import CommandExecutor
 from ai.executors.movement_executor import MovementExecutor
-
+from ai.executors.motion_executor import MotionExecutor
 
 class Coach(object):
 
@@ -33,7 +33,7 @@ class Coach(object):
         self.play_executor = PlayExecutor(self.world_state)
         self.module_executor = ModuleExecutor(self.world_state, pathfinder, is_simulation)
         self.movement_executor = MovementExecutor(self.world_state)
-        self.regulator_executor = PositionRegulator(self.world_state, is_simulation)
+        self.regulator_executor = MotionExecutor(self.world_state, is_simulation)
         self.robot_command_executor = CommandExecutor(self.world_state)
 
         # logging

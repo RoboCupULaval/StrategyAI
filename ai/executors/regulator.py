@@ -97,10 +97,8 @@ class MNRCFixedSpeed(object):
         k2 = delta_t * self.mnrc_dynamic
         self.filtered_reference = k1 * self.filtered_reference - k2 * ref
 
-        # Compute model error correction for zero static error
         err = self.filtered_reference - robot_speed
 
-        #err[abs(err)<0.01] = 0
         self.err_sum = self.err_sum + err * delta_t
         self.err_sum[self.err_sum > 1] = 1
         correction = self.kp * err + self.ki * self.err_sum
@@ -125,7 +123,6 @@ class MNRCFixedSpeed(object):
 
 class PID(object):
     def __init__(self, kp, ki, kd, simulation_setting=True):
-        self.gs = GameState()
         self.paths = {}
         self.kp = kp
         self.ki = ki
@@ -248,7 +245,7 @@ class PI(object):
         # Translation
         v_max = math.fabs(v_current) + self.accel_max * delta_t  # Selon l'acceleration maximale
         v_max = min(self.vit_max, v_max)  # Selon la vitesse maximale du robot
-        v_max = min(math.sqrt(2 * 0.5 * delta), v_max)   # Selon la distance restante a parcourir
+        v_max = min(math.sqrt(2 * delta), v_max)   # Selon la distance restante a parcourir
         v_target = max(self.vit_min, min(v_max, v_target))
 
         # Rotation
