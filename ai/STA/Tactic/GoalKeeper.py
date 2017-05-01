@@ -42,11 +42,12 @@ class GoalKeeper(Tactic):
         self.current_state = self.protect_goal
         self.next_state = self.protect_goal
         self.status_flag = Flags.WIP
-        print(self.game_state.game.field.constant["FIELD_GOAL_RADIUS"])
+        # print(self.game_state.game.field.constant["FIELD_GOAL_RADIUS"])
 
     def protect_goal(self):
 
         ball_position = self.game_state.get_ball_position()
+        # print(self.game_state.game.field.is_inside_goal_area(ball_position, self.is_yellow))
         if not self.game_state.game.field.is_inside_goal_area(ball_position, self.is_yellow):
             self.next_state = self.protect_goal
         else:

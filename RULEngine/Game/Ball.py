@@ -4,11 +4,13 @@ from ..Util.Position import Position
 import math
 
 
-class Ball():
-    def __init__(self, type="ball", ncameras=4):
+class Ball:
+    kalman_type = 'ball'
+
+    def __init__(self, ncameras=4):
         self._position = Position()
         self.velocity = Position()
-        self.kf = Kalman(type, ncameras)
+        self.kf = Kalman(Ball.kalman_type, ncameras)
 
     def kalman_update(self, poses, delta):
         ret = self.kf.filter(poses, None, delta)

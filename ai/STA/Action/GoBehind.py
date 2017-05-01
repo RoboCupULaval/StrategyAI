@@ -68,8 +68,8 @@ class GoBehind(Action):
         norm_position1_2_position2 = math.sqrt((self.position1.x - self.position2.x) ** 2 + (self.position1.y - self.position2.y) ** 2)
 
         if norm_player_2_position2 < norm_position1_2_position2:
-            print(norm_player_2_position2)
-            print(norm_position1_2_position2)
+            # print(norm_player_2_position2)
+            # print(norm_position1_2_position2)
             #on doit contourner l'objectif
 
             vecteur_position1_2_position2 = np.array([self.position1.x - self.position2.x,

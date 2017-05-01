@@ -10,6 +10,7 @@ from ai.Util.ai_command import AICommandType, AIControlLoopType, AICommand
 from ai.executors.executor import Executor
 from ai.states.game_state import GameState
 from ai.states.world_state import WorldState
+from config.config_service import ConfigService
 
 import numpy as np
 
@@ -27,11 +28,14 @@ def sign(x):
 
 
 class PositionRegulator(Executor):
-    def __init__(self, p_world_state: WorldState, is_simulation=False):
+    def __init__(self, p_world_state: WorldState):
         super().__init__(p_world_state)
-        self.constants = _set_constants(simulation_setting=is_simulation)
-        self.regulators = [PI(simulation_setting=is_simulation) for _ in range(12)]
-        self.mnrc_speed = [MNRCFixedSpeed(simulation_setting=is_simulation) for _ in range(12)]
+        self.is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
+        self.regulators = [PI(simulation_setting=self.is_simulation) for _ in range(6)]
+
+        self.constants = _set_constants(simulation_setting=self.is_simulation)
+        self.regulators = [PI(simulation_setting=self.is_simulation) for _ in range(12)]
+        self.mnrc_speed = [MNRCFixedSpeed(simulation_setting=self.is_simulation) for _ in range(12)]
         self.last_timestamp = 0
 
         self.accel_max = self.constants["accel_max"]
@@ -122,7 +126,8 @@ class MNRCFixedSpeed(object):
         self.err_sum = np.array([0, 0, 0])
 
 class PID(object):
-    def __init__(self, kp, ki, kd, simulation_setting=True):
+    def __init__(self, kp, ki, kd):
+        self.gs = GameState()
         self.paths = {}
         self.kp = kp
         self.ki = ki
@@ -185,6 +190,10 @@ class PI(object):
 
         # Position de la target (en m)
         r_x, r_y, r_theta = cmd.pose_goal.position.x / 1000, cmd.pose_goal.position.y / 1000, cmd.pose_goal.orientation
+        r_x = min(r_x, 1600 / 1000)
+        r_x = max(r_x, -1600 / 1000)
+        r_y = min(r_y, 1000 / 1000)
+        r_y = max(r_y, -1000 / 1000)
         # Position du robot (en m)
         t_x, t_y, t_theta = active_player.pose.position.x / 1000, active_player.pose.position.y / 1000, active_player.pose.orientation
         # Vitesse actuelle du robot (en m/s)
@@ -245,7 +254,7 @@ class PI(object):
         # Translation
         v_max = math.fabs(v_current) + self.accel_max * delta_t  # Selon l'acceleration maximale
         v_max = min(self.vit_max, v_max)  # Selon la vitesse maximale du robot
-        v_max = min(math.sqrt(2 * delta), v_max)   # Selon la distance restante a parcourir
+        v_max = min(math.sqrt(2 * 0.5 * delta), v_max)   # Selon la distance restante a parcourir
         v_target = max(self.vit_min, min(v_max, v_target))
 
         # Rotation
@@ -328,8 +337,6 @@ def _set_constants(simulation_setting):
                                             [0.7071, 0.7071, 0.0850]]),
                 "ROBOT_RADIUS": 0.025
                 }
-
-
 
 
 def _xy_to_rphi_(robot_position, ball_position):

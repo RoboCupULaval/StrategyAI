@@ -1,2 +1,5 @@
 coverage
 numpy
+pygame
+pyserial
+git+https://github.com/RobocupUlavalEmbedded/RobotMCU@develop#egg=pyhermes&subdirectory=pyhermes

@@ -56,7 +56,7 @@ class Capture(Tactic):
         self.target = target
 
     def get_behind_ball(self):
-        print('Etat = go_behind')
+        # print('Etat = go_behind')
         self.status_flag = Flags.WIP
 
         player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
@@ -81,7 +81,7 @@ class Capture(Tactic):
                         pathfinding=True)
 
     def grab_ball(self):
-        print('Etat = grab_ball')
+        # print('Etat = grab_ball')
         # self.debug.add_log(1, "Grab ball called")
         # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
         if self._get_distance_from_ball() < 120:
@@ -94,7 +94,7 @@ class Capture(Tactic):
         return Grab(self.game_state, self.player_id)
 
     def keep(self):
-        print('Etat = keep')
+        # print('Etat = keep')
         # self.debug.add_log(1, "Grab ball called")
         # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
         if self._get_distance_from_ball() < 120:

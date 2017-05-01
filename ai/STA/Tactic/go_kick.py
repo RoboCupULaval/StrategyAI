@@ -27,7 +27,7 @@ POSITION_DEADZONE = 40
 ORIENTATION_DEADZONE = 0.2
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
-COMMAND_DELAY = 1.5
+COMMAND_DELAY = 1.0
 
 
 class GoKick(Tactic):
@@ -101,7 +101,7 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() < 120:
             self.next_state = self.kick
             self.last_time = time.time()
-        elif self._is_player_towards_ball_and_target(-0.9):
+        elif self._is_player_towards_ball_and_target(-0.95):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.get_behind_ball

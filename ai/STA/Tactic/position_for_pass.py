@@ -59,10 +59,12 @@ class PositionForPass(Tactic):
         self.target = target
 
     def move_to_pass_position(self):
-        print('Etat = Kick_charge')
+        # print('Etat = Kick_charge')
         self.next_state = self.move_to_pass_position
         if self._is_player_towards_ball():
             self.status_flag = Flags.SUCCESS
+        else:
+            self.status_flag = Flags.WIP
         other_args = {"pose_goal": self._get_destination_pose(), "ai_command_type": AICommandType.MOVE}
         return AllStar(self.game_state, self.player_id, **other_args)
 

@@ -1,29 +1,24 @@
 import time
-from copy import deepcopy
 
-from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Communication.protobuf import \
     messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
+from RULEngine.Util.image_transformer.image_transformer import ImageTransformer
 
 
-class ImageTransformer(object):
+class SingularPacketImageTransformer(ImageTransformer):
 
-    def __init__(self, kalman=False):
-        # dict keys=robot_id, values=array of size 2 with at pos 0 an int <=2
-        # and at pos 1 the position to
-        if not kalman:
-            self.blue_position = {}
-            self.yellow_position = {}
-            self.ball_position = None
-            self.camera_packet = {}
-            self.last_t_capture = 0
-            self.new_image_flag = False
-            self.last_new_packet = None
-            self.frame_number = 1
-        else:
-            self.last_camera_frame = [empty_camera for _ in range(0, 4)]
-            self.last_new_packet = None
+    def __init__(self):
+        super().__init__()
+        self.blue_position = {}
+        self.yellow_position = {}
+        self.ball_position = None
+        self.camera_packet = {}
+        self.last_t_capture = 0
+        self.new_image_flag = False
+        self.last_new_packet = None
+        self.frame_number = 1
+        self.last_new_packet = None
         self.time = time.time()
 
     def update(self, packets):
@@ -91,7 +86,8 @@ class ImageTransformer(object):
                 packet_robot.pixel_x = 0.
                 packet_robot.pixel_y = 0.
 
-    def _create_default_ssl_packet(self):
+    @staticmethod
+    def _create_default_ssl_packet():
         pb_sslwrapper = ssl_wrapper.SSL_WrapperPacket()
 
         # making sure we increment the internal frame number
@@ -176,59 +172,8 @@ class ImageTransformer(object):
         pck_ball.pixel_x = self.ball_position[0].x
         pck_ball.pixel_y = self.ball_position[0].y
 
-    def kalman_update(self, packets):
-        self._update_camera_kalman(packets)
-        #if (time.time() - self.time > 2):
-            #for cam in self.last_camera_frame:
-            #    print(cam)
-            #self.time = time.time()
-        #print(time.time())
-        return self.last_camera_frame
-
-    def _update_camera_kalman(self, packets):
-        self.new_image_flag = False
-        if not packets:
-            return
-
-        # change the packets of a camera if frame_number of camera is higher
-        # than what we have
-        for packet in packets:
-            if packet.HasField("detection"):
-                c_id = packet.detection.camera_id
-                f_nb = packet.detection.frame_number
-
-                if f_nb > self.last_camera_frame[c_id]["frame_number"]:
-                    new_camera = deepcopy(empty_camera)
-                    new_camera["camera_id"] = c_id
-                    new_camera["frame_number"] = f_nb
-                    new_camera["t_capture"] = packet.detection.t_capture
-                    new_camera["timestamp"] = time.time()
-
-                    for ball in packet.detection.balls:
-                        new_camera["ball"] = Position(ball.x, ball.y)
-
-                    for blue in packet.detection.robots_blue:
-                        new_camera["blues"][blue.robot_id] = Pose(Position(blue.x, blue.y),
-                                                                  blue.orientation)
-                    for yellow in packet.detection.robots_yellow:
-                        new_camera["yellows"][yellow.robot_id] = Pose(Position(yellow.x, yellow.y),
-                                                                      yellow.orientation)
-
-                    self.last_camera_frame[c_id] = new_camera
-                    self.new_image_flag = True
-
     @staticmethod
     def point_milieu(position1, position2):
         x = (position1.x + position2.x)/2
         y = (position1.y + position2.y)/2
         return Position(x, y)
-
-# TODO check the max numbers of bots
-empty_camera = {"frame_number": 0,
-                "t_capture": None,
-                "camera_id": None,
-                "timestamp": 0,
-                "ball": None,
-                "blues": [None for _ in range(0, 11)],
-                "yellows": [None for __ in range(0, 11)]
-                }
