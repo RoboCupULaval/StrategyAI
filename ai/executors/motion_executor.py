@@ -12,6 +12,8 @@ from enum import Enum
 import numpy as np
 import time
 
+from config.config_service import ConfigService
+
 
 class Pos(Enum):
     X = 0
@@ -26,9 +28,10 @@ class DotDict(dict):
 
 
 class MotionExecutor(Executor):
-    def __init__(self, p_world_state: WorldState, is_simulation=False):
+    def __init__(self, p_world_state: WorldState):
         super().__init__(p_world_state)
-        self.robot_motion = [RobotMotion(p_world_state, player_id, is_sim=is_simulation) for player_id in range(12)]
+        self.is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
+        self.robot_motion = [RobotMotion(p_world_state, player_id, is_sim=self.is_simulation) for player_id in range(12)]
 
     def exec(self):
         commands = self.ws.play_state.current_ai_commands
@@ -89,7 +92,7 @@ class RobotMotion(object):
 
         # Rotation control
 
-        rotation_cmd = self.angle_controller(pos_error[Pos.THETA])
+        rotation_cmd = self.angle_controller.update(pos_error[Pos.THETA])
 
         # Limit the angular speed
         if np.abs(rotation_cmd) > self.setting.rotation.maxSpeed:
@@ -103,8 +106,8 @@ class RobotMotion(object):
         next_target_velocity = np.array([0,0])
         translation_cmd = np.array(self.target_velocity[Pos.X], self.target_velocity[Pos.Y])
         translation_cmd += (next_target_velocity - self.target_velocity)
-        translation_cmd += np.array(self.x_controller.update(pos_error[Pos.X]),
-                                    self.y_controller.update(pos_error[Pos.Y]))
+        translation_cmd += np.array([self.x_controller.update(pos_error[Pos.X]),
+                                    self.y_controller.update(pos_error[Pos.Y])])
 
         # Limit the acceleration
         dt = self.ws.game_state.game.delta_t
