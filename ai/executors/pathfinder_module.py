@@ -6,12 +6,14 @@ from ai.Algorithm.AsPathManager import AsPathManager
 from ai.Algorithm.CinePath.CinePath import CinePath
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Algorithm.path_partitionner import PathPartitionner
+from ai.Util.ai_command import AICommand
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 from config.config_service import ConfigService
+from typing import List
 
 INTERMEDIATE_DISTANCE_THRESHOLD = 540
-
+AIcommands = List[AICommand]
 
 class PathfinderModule(Executor):
 
@@ -45,16 +47,18 @@ class PathfinderModule(Executor):
             self.last_frame = time.time()
             ai_commands_to_adjust.clear()
 
-    def _pathfind_ai_commands(self, ai_commands):
+    def _pathfind_ai_commands(self, ai_commands:AIcommands):
         for ai_c in ai_commands:
-            self.time = time.time()
-            path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
+
+            #self.time = time.time()
+
             # print(self.time - time.time())
             if self.type_of_pathfinder.lower() == "path_part":
-
+                path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal, ai_c.robot_speed)
                 self.draw_path(path)
                 ai_c.path = path.points[1:]
             else:
+                path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
                 ai_c.path = path
 
     def _modify_path_for_cinematic_constraints(self, ai_commandes: list):
