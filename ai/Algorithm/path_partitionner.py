@@ -4,6 +4,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_distance, conv_position_2_list
 from ai.Algorithm.IntelligentModule import Pathfinder
+from ai.Util.ai_command import AICommandType
 from ai.states.world_state import WorldState
 import numpy as np
 
@@ -263,29 +264,42 @@ class Path_reshaper:
         self.player = None
         self.vel_max = None
 
+
+
     def reshape_path(self, path, player_id, vel_cruise=1):
+        for cmd in self.p_world_state.play_state.current_ai_commands:
+            if cmd.robot_id == player_id:
+                if cmd.command is AICommandType.MOVE:
+                    self.speed_cmd = 0
         self.path = path
         self.player_id = player_id
         self.player = self.p_world_state.game_state.get_player(player_id)
         self.vel_max = vel_cruise
         point_list = [self.path.start]
-        for idx, points in enumerate(self.path.points[1:-1]):
+        speed_list = []
+        P1 = self.path.points[0].conv_2_np()
+        for idx, point in enumerate(self.path.points[1:-1]):
 
             idx = idx + 1
-            P1 = self.path.points[idx-1].conv_2_np()
-            P2 = self.path.points[idx].conv_2_np()
+            P2 = point.conv_2_np()
             P3 = self.path.points[idx+1].conv_2_np()
             theta = np.math.atan2(P3[1]-P2[1], P3[0]-P2[0]) - np.math.atan2(P1[1]-P2[1], P1[0]-P2[0])
-            radius = self.dist_from_path*np.sin(theta/2)/(1-np.sin(theta/2))
-
+            radius = abs(self.dist_from_path*np.sin(theta/2)/(1-np.sin(theta/2)))
             if np.linalg.norm(P1-P2) < 0.001 or np.linalg.norm(P2-P3) < 0.001 or np.linalg.norm(P1-P3) < 0.001:
                 # on traite tout le cas ou le problème dégènere
-                pass
+                point_list += [point]
+                speed_list += ["constant"]
             else:
                 P4 = P2 + np.sqrt((self.dist_from_path + radius)**2 - radius**2) * (P1 - P2)/np.linalg.norm(P1-P2)
                 P5 = P2 + np.sqrt((self.dist_from_path + radius) ** 2 - radius ** 2) * (P3 - P2) / np.linalg.norm(P3 - P2)
+                if np.linalg.norm(P4-P5) > np.linalg.norm(P3-P1):
+                    point_list += [point]
+                    speed_list += ["constant"]
+                else:
+                    point_list += [Position.from_np(P4), Position.from_np(P5)]
+                    speed_list += [radius]
+            P1 = point_list[-1].conv_2_np()
 
-                point_list += [Position.from_np(P4), Position.from_np(P5)]
         point_list += [self.path.goal]
         print(point_list)
 
