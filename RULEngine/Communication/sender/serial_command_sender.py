@@ -52,7 +52,6 @@ class SerialCommandSender(object):
                 except IndexError:
                     next_command = None
                 if next_command:
-                    # print(next_command)
                     packed_command = next_command.package_command()
                     self.serial.write(packed_command)
 

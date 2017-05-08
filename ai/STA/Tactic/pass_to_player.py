@@ -102,7 +102,7 @@ class PassToPlayer(Tactic):
 
 
     def kick(self):
-        if self._get_distance_from_ball() > 1000:
+        if self._get_distance_from_ball() > 300:
             DebugInterface().add_log(5, "Kick!")
             self.next_state = self.halt
             self.last_time = time.time()
@@ -113,7 +113,11 @@ class PassToPlayer(Tactic):
         return Kick(self.game_state, self.player_id, 4, self.target)
 
     def halt(self):
-        self.status_flag = Flags.SUCCESS
+
+        if self.status_flag == Flags.INIT:
+            self.next_state = self.kick_charge
+        else:
+            self.status_flag = Flags.SUCCESS
         return Idle(self.game_state, self.player_id)
 
     def _get_distance_from_ball(self):
