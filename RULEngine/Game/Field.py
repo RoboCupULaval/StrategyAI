@@ -94,7 +94,7 @@ class Field:
 
         for packet in packets:
             if packet.HasField("geometry"):
-                field = packet.geometry
+                field = packet.geometry.field
                 self._line_width = field.line_width
                 self._field_length = field.field_length
                 self._field_width = field.field_width
