@@ -57,6 +57,7 @@ class PathfinderModule(Executor):
                 path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal, ai_c.robot_speed)
                 self.draw_path(path)
                 ai_c.path = path.points[1:]
+                ai_c.path_speeds = path.speeds
             else:
                 path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
                 ai_c.path = path

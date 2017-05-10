@@ -16,6 +16,7 @@ class Path:
         self.start = start
         self.goal = end
         self.points = [start, end]
+        self.speeds = [0]
 
     def join_segments(self, other):
         new_path = Path()
@@ -39,13 +40,14 @@ class Path:
             path_2.points = self.points[idx:]
         return path_1, path_2
 
-    def generate_path_from_points(self, points):
+    def generate_path_from_points(self, points_list, speed_list=[0]):
 
         #points étant une liste de positions
         new_path = Path()
-        new_path.start = points[0]
-        new_path.goal = points[-1]
-        new_path.points = points
+        new_path.start = points_list[0]
+        new_path.goal = points_list[-1]
+        new_path.points = points_list
+        new_path.speeds = speed_list
         return new_path
 
 
@@ -63,6 +65,7 @@ class PathPartitionner(Pathfinder):
         self.pose_obstacle = None
         self.reshaper = Path_reshaper(self.p_worldstate, self.path)
         self.robot_speed = 1
+        self.player = None
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None):
         if self.is_path_collide(path) and depth < self.max_recurs:
@@ -103,7 +106,6 @@ class PathPartitionner(Pathfinder):
         self.path = Path(self.game_state.get_player_pose(player_id).position, pose_target.position)
         self.path = self.fastpathplanner(self.path)
         self.path = self.reshaper.reshape_path(self.path, player_id, self.robot_speed)
-
         return self.path
 
     def get_raw_path(self, player_id=0, pose_target=Pose()):
@@ -308,4 +310,4 @@ class Path_reshaper:
         print(point_list)
         print(speed_list)
 
-        return Path().generate_path_from_points(point_list)
+        return Path().generate_path_from_points(point_list, speed_list)

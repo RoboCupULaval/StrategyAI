@@ -42,6 +42,7 @@ class AICommand(object):
 
         # this is for the pathfinder only no direct assignation
         self.path = []
+        self.path_speeds = []
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
