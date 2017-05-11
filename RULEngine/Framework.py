@@ -29,7 +29,6 @@ from RULEngine.Util.image_transformer.image_transformer_factory import ImageTran
 from RULEngine.Util.team_color_service import TeamColorService
 from config.config_service import ConfigService
 
-
 # TODO inquire about those constants (move, utility)
 
 

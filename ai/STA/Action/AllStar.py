@@ -23,7 +23,7 @@ class AllStar(Action):
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         self.player_id = p_player_id
         self.other_args = {"dribbler_on": other_args.get("dribbler_on", False),
-                           "control_loop_type": other_args.get("speed_flag", AIControlLoopType.POSITION),
+                           "control_loop_type": other_args.get("control_loop_type", AIControlLoopType.POSITION),
                            "pathfinder_on": other_args.get("pathfinder_on", False),
                            "kick_strength": other_args.get("kick_strength", 0),
                            "charge_kick": other_args.get("charge_kick", False),

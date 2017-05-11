@@ -5,17 +5,15 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.Util.ai_command import AICommandType, AIControlLoopType, AICommand
 from ai.executors.executor import Executor
-from ai.states.game_state import GameState
 from ai.states.world_state import WorldState
 
-from enum import Enum
+from enum import IntEnum
 import numpy as np
-import time
 
 from config.config_service import ConfigService
 
 
-class Pos(Enum):
+class Pos(IntEnum):
     X = 0
     Y = 1
     THETA = 2
@@ -49,7 +47,7 @@ class MotionExecutor(Executor):
                 elif cmd.control_loop_type is AIControlLoopType.OPEN:
                     cmd.speed = cmd.pose_goal
             elif cmd.command is AICommandType.STOP:
-                cmd.speed = np.zeros(3)
+                cmd.speed = Pose(Position(0,0),0)
                 self.robot_motion[robot_idx].stop()
 
 
@@ -95,22 +93,24 @@ class RobotMotion(object):
         rotation_cmd = self.angle_controller.update(pos_error[Pos.THETA])
 
         # Limit the angular speed
-        if np.abs(rotation_cmd) > self.setting.rotation.maxSpeed:
+        if np.abs(rotation_cmd) > self.setting.rotation.max_speed:
             if rotation_cmd > 0:
-                rotation_cmd = self.setting.rotation.maxSpeed
+                rotation_cmd = self.setting.rotation.max_speed
             else:
-                rotation_cmd = -self.setting.rotation.maxSpeed
+                rotation_cmd = -self.setting.rotation.max_speed
 
         # Translation control
 
         next_target_velocity = np.array([0,0])
-        translation_cmd = np.array(self.target_velocity[Pos.X], self.target_velocity[Pos.Y])
+        translation_cmd = np.array([self.target_velocity[Pos.X], self.target_velocity[Pos.Y]])
         translation_cmd += (next_target_velocity - self.target_velocity)
+
         translation_cmd += np.array([self.x_controller.update(pos_error[Pos.X]),
                                     self.y_controller.update(pos_error[Pos.Y])])
 
         # Limit the acceleration
         dt = self.ws.game_state.game.delta_t
+
         if dt > 0:
             current_acc = (translation_cmd - self.last_translation_cmd) / dt
             np.clip(current_acc, -self.setting.translation.max_acc, self.setting.translation.max_acc, out=current_acc)
@@ -123,7 +123,7 @@ class RobotMotion(object):
         velocity_cmd = np.array([translation_cmd[Pos.X], translation_cmd[Pos.Y], rotation_cmd])
         velocity_cmd = robot2fixed(velocity_cmd, self.current_position[Pos.THETA])
 
-        return Pose(Position(velocity_cmd[Pos.X], velocity_cmd[Pos.Y]), velocity_cmd[Pos.Theta])
+        return Pose(Position(velocity_cmd[Pos.X]/1000, velocity_cmd[Pos.Y]/1000), velocity_cmd[Pos.THETA])
 
     def update_state(self, cmd):
         self.current_position = self.ws.game_state.game.friends.players[self.id].pose.conv_2_np()
@@ -188,9 +188,9 @@ def get_control_setting(is_sim):
         rotation = {"kp": 0.6, "ki": 0.2, "kd": 0.3, "antiwindup": 0,
                     "max_speed": 6, "max_acc": 4, "deadzone": 0}
     else:
-        translation = {"kp": 2, "ki": 0.05, "kd": 0.4, "antiwindup": 0,
-                       "max_speed": 2, "max_acc": 1.5, "deadzone": 0.03}
-        rotation = {"kp": 0.7, "ki": 0.07, "kd": 0, "antiwindup": 0,
+        translation = {"kp": 0.000001, "ki": 0.000005, "kd": 0, "antiwindup": 0,
+                       "max_speed": 2000, "max_acc": 1500, "deadzone": 30}
+        rotation = {"kp": 1, "ki": 0.05, "kd": 0, "antiwindup": 0,
                     "max_speed": 6, "max_acc": 4, "deadzone": 0}
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
@@ -201,7 +201,7 @@ def get_control_setting(is_sim):
 def robot2fixed(vector: np.ndarray, angle: float) -> np.ndarray:
     tform = np.array(
         [[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0], [0, 0, 1]])
-    return tform * vector
+    return np.dot(tform, vector)
 
 if __name__ == "__main__":
     pass
