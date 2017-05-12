@@ -279,7 +279,7 @@ class Path_reshaper:
         self.vel_max = vel_cruise
         point_list = [self.path.start]
         speed_list = [0]
-        radius_at_const_speed = vel_cruise ** 2 / self.player.max_acc
+        radius_at_const_speed = (vel_cruise * 1000) ** 2 / (self.player.max_acc * 1000)
         P1 = self.path.points[0].conv_2_np()
         for idx, point in enumerate(self.path.points[1:-1]):
             idx = idx + 1
@@ -302,7 +302,7 @@ class Path_reshaper:
                     speed_list += [vel_cruise]
                 else:
                     point_list += [Position.from_np(P4), Position.from_np(P5)]
-                    speed_list += [np.sqrt(radius / self.player.max_acc), np.sqrt(radius / self.player.max_acc)]
+                    speed_list += [np.sqrt(radius / (self.player.max_acc * 1000)), np.sqrt(radius / (self.player.max_acc * 1000))]
             P1 = point_list[-1].conv_2_np()
 
         speed_list += [0]
