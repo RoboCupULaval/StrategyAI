@@ -59,6 +59,7 @@ class RobotMotion(object):
         self.ws = p_world_state
 
         self.setting = get_control_setting(is_sim)
+
         self.id = player_id
 
         self.current_position = np.zeros(3)
@@ -88,6 +89,7 @@ class RobotMotion(object):
         self.update_state(cmd)
 
         pos_error = self.target_position - self.current_position
+
         # Rotation control
 
         rotation_cmd = self.angle_controller.update(pos_error[2])
@@ -102,8 +104,8 @@ class RobotMotion(object):
         # Translation control
 
         next_target_velocity = np.array([0, 0])
-        translation_cmd = np.array(self.target_velocity[0], self.target_velocity[1])
-        translation_cmd += (next_target_velocity - self.target_velocity)
+        translation_cmd = np.array([self.target_velocity[0], self.target_velocity[1]])
+        translation_cmd += np.array(next_target_velocity - self.target_velocity)
         translation_cmd += np.array([self.x_controller.update(pos_error[0]),
                                     self.y_controller.update(pos_error[1])])
 
@@ -118,10 +120,12 @@ class RobotMotion(object):
 
         self.last_translation_cmd = translation_cmd
 
-        velocity_cmd = np.array([translation_cmd[Pos.X], translation_cmd[Pos.Y], rotation_cmd])
-        velocity_cmd = robot2fixed(velocity_cmd, self.current_position[Pos.THETA])
+        velocity_cmd = np.array([translation_cmd[0], translation_cmd[1], rotation_cmd])
+        print(velocity_cmd)
+        velocity_cmd = robot2fixed(velocity_cmd, self.current_position[2])
+        print(velocity_cmd)
 
-        return Pose(Position(velocity_cmd[Pos.X], velocity_cmd[Pos.Y]), velocity_cmd[Pos.Theta])
+        return Pose(Position(velocity_cmd[0], velocity_cmd[1]), velocity_cmd[2])
 
     def update_state(self, cmd):
         self.current_position = self.ws.game_state.game.friends.players[self.id].pose.conv_2_np()
@@ -199,9 +203,10 @@ def get_control_setting(is_sim):
 
 
 def robot2fixed(vector: np.ndarray, angle: float) -> np.ndarray:
-    tform = np.array(
-        [[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0], [0, 0, 1]])
-    return tform * vector
+    tform = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    vector_rot = np.array([[vector[0]], [vector[1]]])
+    vec_rotated = np.dot(tform, vector_rot)
+    return np.array([vec_rotated[0], vec_rotated[1], vector[2]])
 
 if __name__ == "__main__":
     pass
