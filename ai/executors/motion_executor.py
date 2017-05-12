@@ -57,7 +57,7 @@ class RobotMotion(object):
         self.ws = p_world_state
 
         self.setting = get_control_setting(is_sim)
-
+        self.setting.translation.max_acc = self.ws.game_state.game.friends.players[self.id].max_acc
         self.id = player_id
 
         self.current_position = np.zeros(3)
@@ -86,7 +86,7 @@ class RobotMotion(object):
     def update(self, cmd : AICommand) -> Pose():
         self.update_state(cmd)
 
-        pos_error = self.target_position - self.current_position
+        pos_error = self.target_position - self.current_position   # TODO: limit the pos_error to the next position (actual_pos+speed*dt)
 
         # Rotation control
 
@@ -101,31 +101,29 @@ class RobotMotion(object):
 
         # Translation control
 
-        next_target_velocity = np.array([0,0])
-        translation_cmd = np.array([self.target_velocity[Pos.X], self.target_velocity[Pos.Y]])
-        translation_cmd += (next_target_velocity - self.target_velocity)
-
+        translation_cmd = self.get_next_speed()
         translation_cmd += np.array([self.x_controller.update(pos_error[Pos.X]),
                                     self.y_controller.update(pos_error[Pos.Y])])
 
-        # Limit the acceleration
-        dt = self.ws.game_state.game.delta_t
+        translation_cmd = self.limit_acceleration(translation_cmd)
 
-        if dt > 0:
-            current_acc = (translation_cmd - self.last_translation_cmd) / dt
-            np.clip(current_acc, -self.setting.translation.max_acc, self.setting.translation.max_acc, out=current_acc)
-        else:
-            current_acc = np.zeros(2)
+        translation_cmd = robot2fixed(translation_cmd, self.current_position[Pos.THETA])
+
+        return Pose(Position(translation_cmd[Pos.X]/1000, translation_cmd[Pos.Y]/1000), rotation_cmd)
+
+    def get_next_speed(self, dt):
+        return np.zeros(2)
+
+    def limit_acceleration(self, translation_cmd, dt):
+        current_acc = (translation_cmd - self.last_translation_cmd) / dt
+        np.clip(current_acc, -self.setting.translation.max_acc, self.setting.translation.max_acc, out=current_acc)
         translation_cmd = self.last_translation_cmd + current_acc * dt
-
         self.last_translation_cmd = translation_cmd
 
-        velocity_cmd = np.array([translation_cmd[Pos.X], translation_cmd[Pos.Y], rotation_cmd])
-        velocity_cmd = robot2fixed(velocity_cmd, self.current_position[Pos.THETA])
-
-        return Pose(Position(velocity_cmd[Pos.X]/1000, velocity_cmd[Pos.Y]/1000), velocity_cmd[Pos.THETA])
+        return translation_cmd
 
     def update_state(self, cmd):
+        self.dt = self.ws.game_state.game.delta_t
         self.current_position = self.ws.game_state.game.friends.players[self.id].pose.conv_2_np()
         self.current_velocity = np.array(self.ws.game_state.game.friends.players[self.id].velocity)
         self.target_position = cmd.pose_goal.conv_2_np()
@@ -200,7 +198,7 @@ def get_control_setting(is_sim):
 
 def robot2fixed(vector: np.ndarray, angle: float) -> np.ndarray:
     tform = np.array(
-        [[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0], [0, 0, 1]])
+        [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
     return np.dot(tform, vector)
 
 if __name__ == "__main__":
