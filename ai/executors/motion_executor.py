@@ -82,9 +82,11 @@ class RobotMotion(object):
                                     self.setting.rotation.antiwindup)
 
         self.last_translation_cmd = np.zeros(2)
+        self.commanded_speed = 0
 
     def update(self, cmd : AICommand) -> Pose():
         self.update_state(cmd)
+        self.commanded_speed = cmd.robot_speed
 
         pos_error = self.target_position - self.current_position   # TODO: limit the pos_error to the next position (actual_pos+speed*dt)
 
@@ -111,13 +113,131 @@ class RobotMotion(object):
 
         return Pose(Position(translation_cmd[Pos.X]/1000, translation_cmd[Pos.Y]/1000), rotation_cmd)
 
-    def get_next_speed(self, dt):
-        return np.zeros(2)
+    def get_next_speed(self):
+        next_speed = np.array([0, 0])
+        accel = self.setting.translation.max_acc * 1000 * self.target_velocity[0:2] / np.linalg.norm(self.target_velocity[0:2])
+        delta_pos_tot = robot2fixed(self.target_position - self.current_position, -self.current_position[Pos.THETA])
+        delta_pos_tot = delta_pos_tot[0: 2]
+        commanded_speed = self.commanded_speed * delta_pos_tot / np.linalg.norm(delta_pos_tot)
+        # explications dans le block comment juste en dessous
 
-    def limit_acceleration(self, translation_cmd, dt):
-        current_acc = (translation_cmd - self.last_translation_cmd) / dt
+        '''                                                                     
+        Plusieurs ca sont possibles:                                            
+        v(t) |                                                                  
+             |<----------------------->     Distance totale de parcours         
+        v_cmd|     _______________                                              
+             |    /               \ 
+             |   /                 \ 
+             |  /                   \ 
+         ____|_/_____________________\____________
+             |
+               <-->               <-->
+                 ⇑                  ⇑
+                  \_________         \______________
+                           \                        \ 
+                            \                        \ 
+        distance acceleration    distance deceleration
+
+
+        En gros, on verifie si on a assez de place pour etre capable d'accelerer et de décélérer en essayant d'arriver
+        a la vitesse demandée. Si on est pas capable, on est en présence d'un profil triangulaire.
+
+        v(t) |
+             | <------>     Distance totale de parcours
+        v_cmd|
+             |     
+             |    /\ 
+             |   /  \ 
+             |  /    \ 
+         ____|_/______\__________
+             |
+               <--><-->
+                 ⇑    |____________________________
+                  \________                        \ 
+                           \                        \ 
+                            \                        \ 
+        distance acceleration    distance deceleration
+
+        on prend la formule v_f² = vi² + 2a*delta_pos
+        on calcul le delta_pos pour accelerer a vf = v_cmd (proveneant du path finder) à partir de vi = current_vel
+        on calcul la meme chose pour la decelaration avec vf = v_terminale (provenant du pathfinder) et vi = c_cmd
+        On verifie que l'addition de ces deux delta_pos sont plus petits que la distance entre les points de départ et 
+        le point d'arrivée.
+        Si ce n'est pas le cas, on est dans un profil triangulaire.
+        On calcul la vitesse maximale atteinte:
+        v_pointe = sqrt(acc*delta_pos_total - current_vel²/2 + v_terminale²/2)
+
+        '''
+
+
+
+        # delta_position_phase_acceleration
+        delta_pos_acc = (commanded_speed ** 2 - self.current_velocity[0:2] ** 2) / (2 * accel)
+        delta_pos_decel = (commanded_speed ** 2 - self.target_velocity[0:2] ** 2)/ (2 * accel)
+        comparateur = delta_pos_acc + delta_pos_decel < delta_pos_tot
+        if all(comparateur): # profil trapezoidal en x et y
+
+            #GESTION DE LA VITESSE EN X----------------------------------------
+
+            if delta_pos_acc[0] < 0.001: # acceleration en x terminée
+                if delta_pos_decel[0] - delta_pos_tot[0]  < 0.01: # on doit rallentir
+                    next_speed[0] = self.current_velocity[0] - accel[0]*self.dt
+                else: #on continue a vitesse constante
+                    next_speed[0] = self.current_velocity[0]
+            else: # on doit continuer a accelerer
+                next_speed[0] = self.current_velocity[0] + accel[0]*self.dt
+
+            #GESTION DE LA VITESSE EN Y-----------------------------------------
+
+            if delta_pos_acc[1] < 0.001: # acceleration en y terminée
+                if delta_pos_decel[1] - delta_pos_tot[1]  < 0.01: # on doit rallentir
+                    next_speed[1] = self.current_velocity[1] - accel[1]*self.dt
+                else: #on continue a vitesse constante
+                    next_speed[1] = self.current_velocity[1]
+            else: # on doit continuer a accelerer
+                next_speed[1] = self.current_velocity[1] + accel[1]*self.dt
+        else:#on doit verifier quelle composante (x ou y) est limitée et sera en profil triangulaire.
+
+            vit_pointe = np.sqrt(accel * delta_pos_tot - self.current_velocity ** 2 / 2 + self.commanded_speed ** 2 / 2)
+            delta_pos_acc_temp = (vit_pointe ** 2 - self.current_velocity[0:2] ** 2) / (2 * accel)
+            delta_pos_decel_temp = (vit_pointe ** 2 - self.target_velocity[0:2] ** 2) / (2 * accel)
+
+            if not(comparateur[0] and comparateur[1]): # profil triangulaire en x et y
+                delta_pos_acc = delta_pos_acc_temp
+                delta_pos_decel = delta_pos_decel_temp
+            elif not(comparateur[0]): # profil triangulaire en x et trapezoidal en y
+                delta_pos_acc[0] = delta_pos_acc_temp[0]
+                delta_pos_decel[0] = delta_pos_decel_temp[0]
+            elif not(comparateur[1]): # profil trapezoidal en x et triangulaire en y
+                delta_pos_acc[1] = delta_pos_acc_temp[1]
+                delta_pos_decel[1] = delta_pos_decel_temp[1]
+
+            # GESTION DE LA VITESSE EN X----------------------------------------
+
+            if delta_pos_acc[0] < 0.001:  # acceleration en x terminée
+                if delta_pos_decel[0] - delta_pos_tot[0] < 0.01:  # on doit rallentir
+                    next_speed[0] = self.current_velocity[0] - accel[0] * self.dt
+                else:  # on continue a vitesse constante
+                    next_speed[0] = self.current_velocity[0]
+            else:  # on doit continuer a accelerer
+                next_speed[0] = self.current_velocity[0] + accel[0] * self.dt
+
+            # GESTION DE LA VITESSE EN Y-----------------------------------------
+
+            if delta_pos_acc[1] < 0.001:  # acceleration en y terminée
+                if delta_pos_decel[1] - delta_pos_tot[1] < 0.01:  # on doit rallentir
+                    next_speed[1] = self.current_velocity[1] - accel[1] * self.dt
+                else:  # on continue a vitesse constante
+                    next_speed[1] = self.current_velocity[1]
+            else:  # on doit continuer a accelerer
+                next_speed[1] = self.current_velocity[1] + accel[1] * self.dt
+
+        return next_speed / 1000 #m/s juste en translaton
+
+    def limit_acceleration(self, translation_cmd):
+        current_acc = (translation_cmd - self.last_translation_cmd) / self.dt
         np.clip(current_acc, -self.setting.translation.max_acc, self.setting.translation.max_acc, out=current_acc)
-        translation_cmd = self.last_translation_cmd + current_acc * dt
+        translation_cmd = self.last_translation_cmd + current_acc * self.dt
         self.last_translation_cmd = translation_cmd
 
         return translation_cmd
@@ -205,3 +325,11 @@ def robot2fixed(vector: np.ndarray, angle: float) -> np.ndarray:
 
 if __name__ == "__main__":
     pass
+
+
+def sign(x):
+    if x > 0:
+        return 1
+    if x == 0:
+        return 0
+    return -1

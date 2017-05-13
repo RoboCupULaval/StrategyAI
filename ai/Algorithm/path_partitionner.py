@@ -83,7 +83,7 @@ class PathPartitionner(Pathfinder):
 
         return path
 
-    def get_path(self, player_id=0, pose_target=Pose(), robot_speed = 1):
+    def get_path(self, player_id=0, pose_target=Pose(), robot_speed=1):
 
         self.robot_speed = robot_speed
         self.player = self.game_state.game.friends.players[player_id]
