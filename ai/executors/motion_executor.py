@@ -57,8 +57,9 @@ class RobotMotion(object):
         self.ws = p_world_state
 
         self.setting = get_control_setting(is_sim)
-        self.setting.translation.max_acc = self.ws.game_state.game.friends.players[self.id].max_acc
         self.id = player_id
+        self.player = None
+        self.setting.translation.max_acc =None
 
         self.current_position = np.zeros(3)
         self.current_velocity = np.zeros(3)
@@ -85,6 +86,8 @@ class RobotMotion(object):
         self.commanded_speed = 0
 
     def update(self, cmd : AICommand) -> Pose():
+        self.player = self.ws.game_state.get_player(self.id)
+        self.setting.translation.max_acc = self.player.max_acc
         self.update_state(cmd)
         self.commanded_speed = cmd.robot_speed
 
@@ -119,6 +122,8 @@ class RobotMotion(object):
         delta_pos_tot = robot2fixed(self.target_position - self.current_position, -self.current_position[Pos.THETA])
         delta_pos_tot = delta_pos_tot[0: 2]
         commanded_speed = self.commanded_speed * delta_pos_tot / np.linalg.norm(delta_pos_tot)
+        if np.linalg.norm(commanded_speed) < 0.0001:
+            return next_speed
         # explications dans le block comment juste en dessous
 
         '''                                                                     
@@ -198,10 +203,10 @@ class RobotMotion(object):
                 next_speed[1] = self.current_velocity[1] + accel[1]*self.dt
         else:#on doit verifier quelle composante (x ou y) est limitée et sera en profil triangulaire.
 
-            vit_pointe = np.sqrt(accel * delta_pos_tot - self.current_velocity ** 2 / 2 + self.commanded_speed ** 2 / 2)
+            vit_pointe = np.sqrt(accel * delta_pos_tot - self.current_velocity[0:2] ** 2 / 2 + self.commanded_speed ** 2 / 2)
             delta_pos_acc_temp = (vit_pointe ** 2 - self.current_velocity[0:2] ** 2) / (2 * accel)
             delta_pos_decel_temp = (vit_pointe ** 2 - self.target_velocity[0:2] ** 2) / (2 * accel)
-
+            print(vit_pointe, delta_pos_acc_temp, delta_pos_decel_temp)
             if not(comparateur[0] and comparateur[1]): # profil triangulaire en x et y
                 delta_pos_acc = delta_pos_acc_temp
                 delta_pos_decel = delta_pos_decel_temp
@@ -321,7 +326,8 @@ def get_control_setting(is_sim):
 def robot2fixed(vector: np.ndarray, angle: float) -> np.ndarray:
     tform = np.array(
         [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
-    return np.dot(tform, vector)
+    vector_temp = np.transpose(np.dot(tform, np.transpose(vector[0:2])))
+    return np.append(vector_temp, vector[2])
 
 if __name__ == "__main__":
     pass
