@@ -4,8 +4,6 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_distance, conv_position_2_list
 from ai.Algorithm.IntelligentModule import Pathfinder
-from ai.Util.ai_command import AICommandType, AIControlLoopType
-from ai.executors.motion_executor import RobotMotion
 from ai.states.world_state import WorldState
 import numpy as np
 
@@ -16,7 +14,7 @@ class Path:
         self.start = start
         self.goal = end
         self.points = [start, end]
-        self.speeds = [0]
+        self.speeds = [0, 0]
 
     def join_segments(self, other):
         new_path = Path()
@@ -276,10 +274,13 @@ class Path_reshaper:
         self.path = path
         self.player_id = player_id
         self.player = self.p_world_state.game_state.get_player(player_id)
+        cmd = self.p_world_state.play_state.current_ai_commands[player_id]
+        vel_cruise = cmd.robot_speed * 1000
+        #print(vel_cruise)
         self.vel_max = vel_cruise
         point_list = [self.path.start]
         speed_list = [0]
-        radius_at_const_speed = (vel_cruise * 1000) ** 2 / (self.player.max_acc * 1000)
+        radius_at_const_speed = (vel_cruise) ** 2 / (self.player.max_acc)
         P1 = self.path.points[0].conv_2_np()
         for idx, point in enumerate(self.path.points[1:-1]):
             idx = idx + 1
@@ -307,7 +308,7 @@ class Path_reshaper:
 
         speed_list += [0]
         point_list += [self.path.goal]
-        print(point_list)
-        print(speed_list)
+        #print(point_list)
+        #print(speed_list)
 
         return Path().generate_path_from_points(point_list, speed_list)

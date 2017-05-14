@@ -95,7 +95,7 @@ class RobotMotion(object):
 
         # Rotation control
 
-        rotation_cmd = self.angle_controller.update(pos_error[Pos.THETA])
+        rotation_cmd = self.angle_controller.update(pos_error[2])
 
         # Limit the angular speed
         if np.abs(rotation_cmd) > self.setting.rotation.max_speed:
@@ -107,21 +107,26 @@ class RobotMotion(object):
         # Translation control
 
         translation_cmd = self.get_next_speed()
-        translation_cmd += np.array([self.x_controller.update(pos_error[Pos.X]),
-                                    self.y_controller.update(pos_error[Pos.Y])])
+        #print(translation_cmd)
+        #print(np.array([self.x_controller.update(pos_error[0]), self.y_controller.update(pos_error[1])]))
+        translation_cmd += np.array([self.x_controller.update(pos_error[0]), self.y_controller.update(pos_error[1])])
 
         translation_cmd = self.limit_acceleration(translation_cmd)
 
-        translation_cmd = robot2fixed(translation_cmd, self.current_position[Pos.THETA])
+        translation_cmd = robot2fixed(translation_cmd, self.current_position[2])
 
-        return Pose(Position(translation_cmd[Pos.X]/1000, translation_cmd[Pos.Y]/1000), rotation_cmd)
+        return Pose(Position(translation_cmd[0]/1000, translation_cmd[1]/1000), rotation_cmd)
 
     def get_next_speed(self):
-        next_speed = np.array([0, 0])
-        accel = self.setting.translation.max_acc * 1000 * self.target_velocity[0:2] / np.linalg.norm(self.target_velocity[0:2])
-        delta_pos_tot = robot2fixed(self.target_position - self.current_position, -self.current_position[Pos.THETA])
-        delta_pos_tot = delta_pos_tot[0: 2]
+
+        next_speed = np.array([0.0, 0.0])
+
+        delta_pos_tot = robot2fixed(self.target_position - self.current_position, -self.current_position[2])
+        delta_pos_tot = abs(delta_pos_tot[0: 2])
+        accel = self.setting.translation.max_acc * 1000 * delta_pos_tot / np.linalg.norm(delta_pos_tot)
         commanded_speed = self.commanded_speed * delta_pos_tot / np.linalg.norm(delta_pos_tot)
+        target_velocity = self.target_velocity[0:2] * 1000
+        current_velocity = self.current_velocity[0:2] * np.array([1000])
         if np.linalg.norm(commanded_speed) < 0.0001:
             return next_speed
         # explications dans le block comment juste en dessous
@@ -174,70 +179,69 @@ class RobotMotion(object):
 
         '''
 
-
-
         # delta_position_phase_acceleration
-        delta_pos_acc = (commanded_speed ** 2 - self.current_velocity[0:2] ** 2) / (2 * accel)
-        delta_pos_decel = (commanded_speed ** 2 - self.target_velocity[0:2] ** 2)/ (2 * accel)
-        comparateur = delta_pos_acc + delta_pos_decel < delta_pos_tot
-        if all(comparateur): # profil trapezoidal en x et y
+        delta_pos_decel = (current_velocity ** 2 - target_velocity ** 2) / (2 * abs(accel))
+        comparateur = delta_pos_decel < delta_pos_tot
 
-            #GESTION DE LA VITESSE EN X----------------------------------------
+        #GESTION DE LA VITESSE EN X----------------------------------------
 
-            if delta_pos_acc[0] < 0.001: # acceleration en x terminée
-                if delta_pos_decel[0] - delta_pos_tot[0]  < 0.01: # on doit rallentir
-                    next_speed[0] = self.current_velocity[0] - accel[0]*self.dt
-                else: #on continue a vitesse constante
-                    next_speed[0] = self.current_velocity[0]
-            else: # on doit continuer a accelerer
-                next_speed[0] = self.current_velocity[0] + accel[0]*self.dt
+        if (current_velocity[0] - commanded_speed[0]) * sign(current_velocity[0] - commanded_speed[0]) > 0: # acceleration en x terminée
+            if delta_pos_decel[0] - delta_pos_tot[0] < 0.01: # on doit rallentir
+                next_speed[0] = current_velocity[0] - accel[0]*self.dt
+            else: #on continue a vitesse constante
+                next_speed[0] = current_velocity[0]
+        else: # on doit continuer a accelerer
+            next_speed[0] = current_velocity[0] + accel[0]*self.dt
 
-            #GESTION DE LA VITESSE EN Y-----------------------------------------
+        #GESTION DE LA VITESSE EN Y-----------------------------------------
 
-            if delta_pos_acc[1] < 0.001: # acceleration en y terminée
-                if delta_pos_decel[1] - delta_pos_tot[1]  < 0.01: # on doit rallentir
-                    next_speed[1] = self.current_velocity[1] - accel[1]*self.dt
-                else: #on continue a vitesse constante
-                    next_speed[1] = self.current_velocity[1]
-            else: # on doit continuer a accelerer
-                next_speed[1] = self.current_velocity[1] + accel[1]*self.dt
-        else:#on doit verifier quelle composante (x ou y) est limitée et sera en profil triangulaire.
+        if (current_velocity[1] - commanded_speed[1]) * sign(current_velocity[1] - commanded_speed[1]) > 0: # acceleration en y terminée
+            if delta_pos_decel[1] - delta_pos_tot[1] < 0.01: # on doit rallentir
+                next_speed[1] = current_velocity[1] - accel[1]*self.dt
+            else: #on continue a vitesse constante
+                next_speed[1] = current_velocity[1]
+        else: # on doit continuer a accelerer
+            next_speed[1] = current_velocity[1] + accel[1]*self.dt
+        # else:#on doit verifier quelle composante (x ou y) est limitée et sera en profil triangulaire.
+        #     #print(accel * delta_pos_tot - self.current_velocity[0:2] ** 2, self.commanded_speed)
+        #     vit_pointe = np.sqrt(accel * delta_pos_tot - self.current_velocity[0:2] ** 2 / 2 + self.commanded_speed ** 2 / 2)
+        #     delta_pos_acc_temp = (vit_pointe ** 2 - self.current_velocity[0:2] ** 2) / (2 * accel)
+        #     delta_pos_decel_temp = (vit_pointe ** 2 - self.target_velocity[0:2] ** 2) / (2 * accel)
+        #     #print(vit_pointe, delta_pos_acc_temp, delta_pos_decel_temp)
+        #     if not(comparateur[0] and comparateur[1]): # profil triangulaire en x et y
+        #         delta_pos_acc = delta_pos_acc_temp
+        #         delta_pos_decel = delta_pos_decel_temp
+        #     elif not(comparateur[0]): # profil triangulaire en x et trapezoidal en y
+        #         delta_pos_acc[0] = delta_pos_acc_temp[0]
+        #         delta_pos_decel[0] = delta_pos_decel_temp[0]
+        #     elif not(comparateur[1]): # profil trapezoidal en x et triangulaire en y
+        #         delta_pos_acc[1] = delta_pos_acc_temp[1]
+        #         delta_pos_decel[1] = delta_pos_decel_temp[1]
+        #
+        #     # GESTION DE LA VITESSE EN X----------------------------------------
+        #
+        #     if delta_pos_acc[0] < 0.001:  # acceleration en x terminée
+        #         if delta_pos_decel[0] - delta_pos_tot[0] < 0.01:  # on doit rallentir
+        #             next_speed[0] = self.current_velocity[0] - accel[0] * self.dt
+        #         else:  # on continue a vitesse constante
+        #             next_speed[0] = self.current_velocity[0]
+        #     else:  # on doit continuer a accelerer
+        #         next_speed[0] = self.current_velocity[0] + accel[0] * self.dt
+        #
+        #     # GESTION DE LA VITESSE EN Y-----------------------------------------
+        #
+        #     if delta_pos_acc[1] < 0.001:  # acceleration en y terminée
+        #         if delta_pos_decel[1] - delta_pos_tot[1] < 0.01:  # on doit rallentir
+        #             next_speed[1] = self.current_velocity[1] - accel[1] * self.dt
+        #         else:  # on continue a vitesse constante
+        #             next_speed[1] = self.current_velocity[1]
+        #     else:  # on doit continuer a accelerer
+        #         next_speed[1] = self.current_velocity[1] + accel[1] * self.dt
+        print(current_velocity)
+        next_speed = robot2fixed(next_speed, self.current_position[2])
+        print(next_speed)
 
-            vit_pointe = np.sqrt(accel * delta_pos_tot - self.current_velocity[0:2] ** 2 / 2 + self.commanded_speed ** 2 / 2)
-            delta_pos_acc_temp = (vit_pointe ** 2 - self.current_velocity[0:2] ** 2) / (2 * accel)
-            delta_pos_decel_temp = (vit_pointe ** 2 - self.target_velocity[0:2] ** 2) / (2 * accel)
-            print(vit_pointe, delta_pos_acc_temp, delta_pos_decel_temp)
-            if not(comparateur[0] and comparateur[1]): # profil triangulaire en x et y
-                delta_pos_acc = delta_pos_acc_temp
-                delta_pos_decel = delta_pos_decel_temp
-            elif not(comparateur[0]): # profil triangulaire en x et trapezoidal en y
-                delta_pos_acc[0] = delta_pos_acc_temp[0]
-                delta_pos_decel[0] = delta_pos_decel_temp[0]
-            elif not(comparateur[1]): # profil trapezoidal en x et triangulaire en y
-                delta_pos_acc[1] = delta_pos_acc_temp[1]
-                delta_pos_decel[1] = delta_pos_decel_temp[1]
-
-            # GESTION DE LA VITESSE EN X----------------------------------------
-
-            if delta_pos_acc[0] < 0.001:  # acceleration en x terminée
-                if delta_pos_decel[0] - delta_pos_tot[0] < 0.01:  # on doit rallentir
-                    next_speed[0] = self.current_velocity[0] - accel[0] * self.dt
-                else:  # on continue a vitesse constante
-                    next_speed[0] = self.current_velocity[0]
-            else:  # on doit continuer a accelerer
-                next_speed[0] = self.current_velocity[0] + accel[0] * self.dt
-
-            # GESTION DE LA VITESSE EN Y-----------------------------------------
-
-            if delta_pos_acc[1] < 0.001:  # acceleration en y terminée
-                if delta_pos_decel[1] - delta_pos_tot[1] < 0.01:  # on doit rallentir
-                    next_speed[1] = self.current_velocity[1] - accel[1] * self.dt
-                else:  # on continue a vitesse constante
-                    next_speed[1] = self.current_velocity[1]
-            else:  # on doit continuer a accelerer
-                next_speed[1] = self.current_velocity[1] + accel[1] * self.dt
-
-        return next_speed / 1000 #m/s juste en translaton
+        return next_speed #mm/s juste en translaton
 
     def limit_acceleration(self, translation_cmd):
         current_acc = (translation_cmd - self.last_translation_cmd) / self.dt
@@ -253,6 +257,7 @@ class RobotMotion(object):
         self.current_velocity = np.array(self.ws.game_state.game.friends.players[self.id].velocity)
         self.target_position = cmd.pose_goal.conv_2_np()
         path_speeds = cmd.path_speeds #une liste de scalaires représentant la norme max de la vitesse que doit avoir le robot
+        print(path_speeds)
         self.target_velocity = path_speeds[1] * (self.target_position[0:2] - self.current_position[0:2])\
                                / np.linalg.norm(self.target_position[0:2] - self.current_position[0:2])
 
@@ -327,7 +332,7 @@ def robot2fixed(vector: np.ndarray, angle: float) -> np.ndarray:
     tform = np.array(
         [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
     vector_temp = np.transpose(np.dot(tform, np.transpose(vector[0:2])))
-    return np.append(vector_temp, vector[2])
+    return vector_temp
 
 if __name__ == "__main__":
     pass
