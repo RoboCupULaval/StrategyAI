@@ -3,16 +3,19 @@
 from RULEngine.Game.Player import Player
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from RULEngine.Util.team_color_service import TeamColor
+from config.config_service import ConfigService
 
 
 class Team:
-    def __init__(self, team_color, kalman_type="friend"):
-        assert kalman_type in ["friend", "enemy"]
+    def __init__(self, team_color):
         self.players = {}
         for player_id in range(PLAYER_PER_TEAM):
-            self.players[player_id] = Player(self, player_id, kalman_type)
+            self.players[player_id] = Player(self, player_id)
         self.team_color = team_color
         self.score = 0
+        self.update_player = self.__update_player
+        if ConfigService().config_dict["IMAGE"]["kalman"] == "true":
+            self.update_player = self.__kalman_update
 
     def has_player(self, player):
         has_player = False
@@ -26,19 +29,19 @@ class Team:
     def is_team_yellow(self):
         return self.team_color == TeamColor.YELLOW_TEAM
 
-    def update_player(self, player_id, pose, delta=0):
+    def __update_player(self, player_id, pose, delta=0):
         try:
             self.players[player_id].update(pose, delta)
         except KeyError as err:
             raise err
 
-    def kalman_update(self, player_id, pose_list, delta=0):
+    def __kalman_update(self, player_id, pose_list, delta=0):
         try:
             self.players[player_id].kalman_update(pose_list, delta)
         except KeyError as err:
             raise err
 
-    def update_player_command(self, player_id, cmd):
+    def __update_player_command(self, player_id, cmd):
         try:
             self.players[player_id].set_command(cmd)
         except KeyError as err:

@@ -24,39 +24,23 @@ class PathfinderModule(Executor):
         self.cinematic_pathfinder = CinePath(p_world_state)
 
     def exec(self):
-        ai_commands = self._get_aicommand_that_need_path()
-        self._adjust_from_last_time_of_exec(ai_commands)
-        self._pathfind_ai_commands(ai_commands)
+        self._pathfind_ai_commands()
         #self._modify_path_for_cinematic_constraints(ai_commands)
 
-    def _get_aicommand_that_need_path(self):
-        aicommands_list = self.ws.play_state.current_ai_commands
-        aic_with_pathfinding_on = []
-
-        for ai_c in aicommands_list.values():
-            if ai_c.pathfinder_on:
-                aic_with_pathfinding_on.append(ai_c)
-
-        return aic_with_pathfinding_on
-
-    def _adjust_from_last_time_of_exec(self, ai_commands_to_adjust):
-        pass
-        if time.time() - self.last_frame > 10:
-            self.last_frame = time.time()
-            ai_commands_to_adjust.clear()
-
-    def _pathfind_ai_commands(self, ai_commands):
-        for ai_c in ai_commands:
-            self.time = time.time()
-            path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal)
-            # print(self.time - time.time())
+    def _pathfind_ai_commands(self) -> None:
+        for player in self.ws.game_state.my_team.available_players.values():
+            if player.ai_command is None:
+                continue
+            path = self.pathfinder.get_path(player.ai_command.robot_id, player.ai_command.pose_goal)
             if self.type_of_pathfinder.lower() == "path_part":
 
                 self.draw_path(path)
-                ai_c.path = path.points[1:]
+                player.ai_command.path = path.points[1:]
             else:
-                ai_c.path = path
+                player.ai_command.path = path
 
+    # TODO find what this does? MGL 2017/05/17
+    """
     def _modify_path_for_cinematic_constraints(self, ai_commandes: list):
         for cmd in ai_commandes:
             target = self._find_intermediate_target(cmd.robot_id, cmd.path)
@@ -70,6 +54,7 @@ class PathfinderModule(Executor):
             if get_distance(player_pst, target) > INTERMEDIATE_DISTANCE_THRESHOLD:
                 return target
         return default_target
+    """
 
     def change_pathfinder(self, type_of_pathfinder):
         assert isinstance(type_of_pathfinder, str)

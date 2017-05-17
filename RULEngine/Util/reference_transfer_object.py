@@ -1,6 +1,6 @@
 
 
-class GameWorld:
+class ReferenceTransferObject:
 
     def __init__(self, p_game):
         self.game = p_game

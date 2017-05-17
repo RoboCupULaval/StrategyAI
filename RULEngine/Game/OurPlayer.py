@@ -9,4 +9,5 @@ class OurPlayer(Player):
 
         self.kf = FriendKalmanFilter()
         self.ai_command = None
-
+        self.pid = None  # for the moment
+        self.in_play = False

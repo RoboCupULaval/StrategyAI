@@ -17,7 +17,7 @@ class TeamColorService(object, metaclass=Singleton):
             self.OUR_TEAM_COLOR = TeamColor.YELLOW_TEAM
             self.ENEMY_TEAM_COLOR = TeamColor.BLUE_TEAM
 
-        elif cfg.config_dict["GAME"]["our_color"] == TeamColor.BLUE_TEAM:
+        elif cfg.config_dict["GAME"]["our_color"] == "blue":
             self.OUR_TEAM_COLOR = TeamColor.BLUE_TEAM
             self.ENEMY_TEAM_COLOR = TeamColor.YELLOW_TEAM
 

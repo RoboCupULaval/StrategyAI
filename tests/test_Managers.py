@@ -4,7 +4,7 @@ import unittest
 from RULEngine.Game.Game import Game
 from RULEngine.Game.Referee import Referee
 from RULEngine.Util.team_color_service import TeamColor, TeamColorService
-from RULEngine.Util.game_world import GameWorld
+from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from ai.states.game_state import GameState
 from ai.states.module_state import ModuleState
 
@@ -19,7 +19,7 @@ class TestGameStateManager(unittest.TestCase):
         self.game.set_referee(self.referee)
         self.tcsvc = TeamColorService(TeamColor.YELLOW_TEAM)
         self.game.set_our_team_color(self.tcsvc.OUR_TEAM_COLOR)
-        self.game_world_OK = GameWorld(self.game)
+        self.game_world_OK = ReferenceTransferObject(self.game)
         self.game_world_OK.set_team_color_svc(self.tcsvc)
 
         self.GameStateManager1 = GameState()
@@ -47,14 +47,14 @@ class TestGameStateManager(unittest.TestCase):
         self.assertRaises(AssertionError,
                           game_state_manager.set_reference, None)
         game = Game()
-        game_world_nok = GameWorld(game)
+        game_world_nok = ReferenceTransferObject(game)
         self.assertRaises(AssertionError,
                           game_state_manager.set_reference, game_world_nok)
         game_world_nok.game.set_referee(self.referee)
         self.assertRaises(AssertionError,
                           game_state_manager.set_reference, game_world_nok)
         game = Game()
-        game_world_nok = GameWorld(game)
+        game_world_nok = ReferenceTransferObject(game)
         game_world_nok.set_team_color_svc(self.tcsvc)
         self.assertRaises(AssertionError,
                           game_state_manager.set_reference, game_world_nok)

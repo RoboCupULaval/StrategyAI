@@ -10,7 +10,7 @@ class EnemyKalmanFilter:
     def __init__(self):
         cfg = ConfigService()
         self.default_dt = cfg.config_dict["GAME"]["ai_timestamp"]
-        ncameras = cfg.config_dict["IMAGE"]["number_of_camera"]
+        ncameras = int(cfg.config_dict["IMAGE"]["number_of_camera"])
 
         # Transition model
         self.F = np.array([[1, 0, self.default_dt, 0, 0, 0],  # Position x

@@ -31,7 +31,7 @@ class AICommand(object):
         self.kick = other_args.get("kick", False)
         self.pose_goal = other_args.get("pose_goal", Pose())
         self.speed = Pose()
-        self.robot_speed = other_args.get("speed", 0)
+        self.robot_speed = other_args.get("robot_speed", 0)
 
         # set this flag to true if you only need speed regulation (The pose_goal will be in m/s)
         self.speed_flag = other_args.get("speed_flag", False)

@@ -15,7 +15,7 @@ class PathfindToPosition(Action):
         player_id : L'identifiant du joueur
         destination : La destination (pose) que le joueur doit atteindre
     """
-    def __init__(self, p_game_state, p_player_id, p_destination, speed = None):
+    def __init__(self, p_game_state, p_player_id, p_destination, speed=0.2):
         """
             :param p_game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui se déplace
@@ -37,8 +37,6 @@ class PathfindToPosition(Action):
                         kick est faux (on ne botte pas)
         """
         move_destination = self.destination
-        if not self.speed:
-            self.speed = 0.2
         return AICommand(self.player_id,
                          AICommandType.MOVE,
                          **{"pose_goal": move_destination,

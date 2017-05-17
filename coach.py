@@ -2,7 +2,7 @@
 from typing import List
 
 from RULEngine.Debug.debug_interface import DebugInterface
-from RULEngine.Util.game_world import GameWorld
+from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from ai.executors.regulator import PositionRegulator
 from ai.states.world_state import WorldState
 from ai.executors.debug_executor import DebugExecutor
@@ -58,7 +58,7 @@ class Coach(object):
 
         return robot_commands
 
-    def set_reference(self, world_reference: GameWorld) -> None:
+    def set_reference(self, world_reference: ReferenceTransferObject) -> None:
         """
         Permet de mettre les références dans le worldstate et le debugexecutor.
 

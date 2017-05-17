@@ -16,7 +16,7 @@ def set_arg_parser():
     arg_parser = argparse.ArgumentParser(prog="RobocupULaval's Team ULtron AI", description=prog_desc)
 
     arg_parser.add_argument('config_file', nargs='?', help="load a configuration file(.ini/cfg style)",
-                            default="config/sim_standard.cfg")
+                            default="config/sim_kalman_redirect.cfg")
 
     return arg_parser
 

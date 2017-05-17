@@ -1,15 +1,14 @@
 # Under MIT License, see LICENSE.txt
+from RULEngine.Game.Ball import Ball
 from config.config_service import ConfigService
 from ..Util.area import *
 
 
 class Field:
-
-    def __init__(self, ball):
+    def __init__(self, ball: Ball):
         self.ball = ball
 
         cfg = ConfigService()
-
         if cfg.config_dict["GAME"]["terrain_type"] == "normal":
             self.constant = normal
         elif cfg.config_dict["GAME"]["terrain_type"] == "small":
