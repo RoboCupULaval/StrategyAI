@@ -43,9 +43,10 @@ class MotionExecutor(Executor):
             if cmd.command is AICommandType.MOVE:
                 if cmd.control_loop_type is AIControlLoopType.POSITION:
                     cmd.speed = self.robot_motion[robot_idx].update(cmd)
+                    print(cmd.speed)
 
                 elif cmd.control_loop_type is AIControlLoopType.SPEED:
-                    speed = robot2fixed(cmd.pose_goal.conv_2_np(), active_player.pose.orientation)
+                    speed = fixed2robot(cmd.pose_goal.conv_2_np(), active_player.pose.orientation)
                     cmd.speed = Pose(Position(speed[Pos.X], speed[Pos.Y]), speed[Pos.THETA])
 
                 elif cmd.control_loop_type is AIControlLoopType.OPEN:
@@ -104,13 +105,15 @@ class RobotMotion(object):
         rotation_cmd = np.clip(rotation_cmd,
                                -self.setting.rotation.max_speed,
                                self.setting.rotation.max_speed)
+        rotation_cmd = self.apply_deadzone(rotation_cmd, self.setting.rotation.deadzone)
 
         translation_cmd = self.get_next_velocity()
         translation_cmd += np.array([self.x_controller.update(self.pos_error[Pos.X]),
                                      self.y_controller.update(self.pos_error[Pos.Y])])
         translation_cmd = self.limit_acceleration(translation_cmd)
-        translation_cmd = robot2fixed(translation_cmd, self.current_orientation)
-
+        translation_cmd = fixed2robot(translation_cmd, self.current_orientation)
+        translation_cmd = self.apply_deadzone(translation_cmd, self.setting.translation.deadzone)
+        print(translation_cmd)
         return Pose(Position(translation_cmd[Pos.X], translation_cmd[Pos.Y]), rotation_cmd)
 
     def get_next_velocity(self) -> np.ndarray:
@@ -134,7 +137,7 @@ class RobotMotion(object):
                 if next_speed[coord] >= self.cruise_speed:
                     next_speed[coord] = self.cruise_speed
 
-        next_velocity = next_speed * np.sign(self.pos_error)
+        next_velocity = next_speed * np.sign(self.pos_error[Pos.X:Pos.Y])
 
         return next_velocity
 
@@ -148,9 +151,13 @@ class RobotMotion(object):
 
         return translation_cmd
 
+    @staticmethod
+    def apply_deadzone(signal: np.ndarray, deadzone: float) -> np.ndarray:
+        return signal - np.clip(signal, -deadzone, deadzone)
+
     def update_states(self, cmd: AICommand):
         self.dt = self.ws.game_state.game.delta_t
-
+        np.clip(10,0,10)
         # Dynamics constraints
         self.setting.translation.max_acc = self.ws.game_state.get_player(self.id).max_acc
         self.setting.translation.max_speed = self.ws.game_state.get_player(self.id).max_speed
@@ -237,11 +244,11 @@ class PID(object):
 def get_control_setting(is_sim: bool):
 
     if is_sim:
-        translation = {"kp": 0.7, "ki": 0.005, "kd": 0.02, "antiwindup": 0, "deadzone": 0.01}
-        rotation = {"kp": 0.6, "ki": 0.2, "kd": 0.3, "antiwindup": 0, "deadzone": 0}
+        translation = {"kp": 0, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0.01}
+        rotation = {"kp": 0, "ki": 0., "kd": 0, "antiwindup": 0, "deadzone": 0.01}
     else:
         translation = {"kp": 0.7, "ki": 0.005, "kd": 0, "antiwindup": 0, "deadzone": 0.01}
-        rotation = {"kp": 1, "ki": 0.05, "kd": 0, "antiwindup": 0, "deadzone": 0}
+        rotation = {"kp": 1, "ki": 0.05, "kd": 0, "antiwindup": 0, "deadzone": 0.05}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
@@ -254,6 +261,8 @@ def robot2fixed(vector: np.ndarray, angle: float) -> np.ndarray:
     tform = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
     return np.dot(tform, vector)
 
+def fixed2robot(vector: np.ndarray, angle: float) -> np.ndarray:
+    return robot2fixed(vector, -angle)
 
 def normalized(vector: np.ndarray) -> np.ndarray:
     return vector / np.linalg.norm(vector)
