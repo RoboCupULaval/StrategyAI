@@ -113,7 +113,7 @@ class RobotMotion(object):
         translation_cmd = self.limit_acceleration(translation_cmd)
         translation_cmd = fixed2robot(translation_cmd, self.current_orientation)
         translation_cmd = self.apply_deadzone(translation_cmd, self.setting.translation.deadzone)
-        print(translation_cmd)
+
         return Pose(Position(translation_cmd[Pos.X], translation_cmd[Pos.Y]), rotation_cmd)
 
     def get_next_velocity(self) -> np.ndarray:
@@ -121,21 +121,22 @@ class RobotMotion(object):
            It try to produce a trapezoidal velocity path with the required cruising and target speed"""
 
         eps = 2 * self.setting.translation.max_acc
-        current_speed = abs(self.current_velocity)
+        current_speed = np.abs(self.current_velocity[Pos.X:Pos.Y])
 
-        distance_to_reach_speed = 0.5 * abs((self.target_speed ** 2 - current_speed ** 2) / self.target_acceleration)
+        distance_to_reach_speed = np.square(self.target_speed) - np.square(current_speed)
+        distance_to_reach_speed = 0.5 * np.abs(distance_to_reach_speed / self.target_acceleration)
 
         next_speed = np.array([0.0, 0.0])
         for coord in range(2):  # For X and Y velocity components
-            if abs(self.pos_error[coord]) - distance_to_reach_speed[coord] < eps:  # Slowing down until target speed
+            if np.abs(self.pos_error[coord]) - distance_to_reach_speed[coord] < eps:  # Slowing down until target speed
                 next_speed[coord] = current_speed[coord] - self.target_acceleration[coord] * self.dt
-                if abs(self.pos_error[coord]) < eps:
+                if np.abs(self.pos_error[coord]) < eps:
                     next_speed[coord] = self.target_speed[coord]
 
             else:  # Acceleration until cruising speed
                 next_speed[coord] = current_speed[coord] + self.target_acceleration[coord] * self.dt
-                if next_speed[coord] >= self.cruise_speed:
-                    next_speed[coord] = self.cruise_speed
+                if next_speed[coord] >= self.cruise_speed[coord]:
+                    next_speed[coord] = self.cruise_speed[coord]
 
         next_velocity = next_speed * np.sign(self.pos_error[Pos.X:Pos.Y])
 
@@ -157,7 +158,7 @@ class RobotMotion(object):
 
     def update_states(self, cmd: AICommand):
         self.dt = self.ws.game_state.game.delta_t
-        np.clip(10,0,10)
+
         # Dynamics constraints
         self.setting.translation.max_acc = self.ws.game_state.get_player(self.id).max_acc
         self.setting.translation.max_speed = self.ws.game_state.get_player(self.id).max_speed
@@ -244,8 +245,8 @@ class PID(object):
 def get_control_setting(is_sim: bool):
 
     if is_sim:
-        translation = {"kp": 0, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0.01}
-        rotation = {"kp": 0, "ki": 0., "kd": 0, "antiwindup": 0, "deadzone": 0.01}
+        translation = {"kp": 0, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0}
+        rotation = {"kp": 0, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0}
     else:
         translation = {"kp": 0.7, "ki": 0.005, "kd": 0, "antiwindup": 0, "deadzone": 0.01}
         rotation = {"kp": 1, "ki": 0.05, "kd": 0, "antiwindup": 0, "deadzone": 0.05}
@@ -261,8 +262,10 @@ def robot2fixed(vector: np.ndarray, angle: float) -> np.ndarray:
     tform = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
     return np.dot(tform, vector)
 
+
 def fixed2robot(vector: np.ndarray, angle: float) -> np.ndarray:
     return robot2fixed(vector, -angle)
+
 
 def normalized(vector: np.ndarray) -> np.ndarray:
     return vector / np.linalg.norm(vector)
