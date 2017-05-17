@@ -275,7 +275,7 @@ class Path_reshaper:
         self.player_id = player_id
         self.player = self.p_world_state.game_state.get_player(player_id)
         cmd = self.p_world_state.play_state.current_ai_commands[player_id]
-        vel_cruise = cmd.cruise_speed * 1000
+        vel_cruise = cmd.cruise_speed
         #print(vel_cruise)
         self.vel_max = vel_cruise
         point_list = [self.path.start]
@@ -296,8 +296,8 @@ class Path_reshaper:
                 point_list += [point]
                 speed_list += [vel_cruise]
             else:
-                P4 = P2 + np.sqrt((self.dist_from_path + radius) ** 2 - radius ** 2) * (P1 - P2)/np.linalg.norm(P1-P2)
-                P5 = P2 + np.sqrt((self.dist_from_path + radius) ** 2 - radius ** 2) * (P3 - P2) / np.linalg.norm(P3 - P2)
+                P4 = P2 + np.sqrt(np.square(self.dist_from_path + radius) - radius ** 2) * (P1 - P2)/np.linalg.norm(P1-P2)
+                P5 = P2 + np.sqrt(np.square(self.dist_from_path + radius) - radius ** 2) * (P3 - P2) / np.linalg.norm(P3 - P2)
                 if np.linalg.norm(P4-P5) > np.linalg.norm(P3-P1):
                     point_list += [point]
                     speed_list += [vel_cruise]
