@@ -112,7 +112,7 @@ class RobotMotion(object):
                                      self.y_controller.update(self.pos_error[Pos.Y])])
         translation_cmd = self.limit_acceleration(translation_cmd)
         translation_cmd = fixed2robot(translation_cmd, self.current_orientation)
-        #translation_cmd = self.apply_deadzone(translation_cmd, self.setting.translation.deadzone)
+        translation_cmd = self.apply_deadzone(translation_cmd, self.setting.translation.deadzone)
 
         return Pose(Position(translation_cmd[Pos.X], translation_cmd[Pos.Y]), rotation_cmd)
 
@@ -179,11 +179,11 @@ class RobotMotion(object):
         # Desired parameters
         self.target_position = cmd.pose_goal.conv_2_np()
         self.target_position = self.target_position / np.array([1000, 1000, 1])
-        self.target_speed = np.abs(cmd.path_speeds[1] * normalized(self.translation_error)) / 1000
+        self.target_speed = np.abs(cmd.path_speeds[1] * normalized(self.translation_error))
         self.target_acceleration = self.setting.translation.max_acc * normalized(self.translation_error)
         self.target_acceleration[self.target_acceleration == 0] = 10 ** (-6)  # Avoid division by zero later
         self.cruise_speed = abs(cmd.cruise_speed * normalized(self.translation_error))
-        print(cmd.path_speeds)
+
     def stop(self):
         self.angle_controller.reset()
         self.x_controller.reset()
