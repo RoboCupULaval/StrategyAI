@@ -36,7 +36,7 @@ class AICommand(object):
         self.pose_goal = other_args.get("pose_goal", Pose())
         self.speed = Pose()
         self.wheel_speed = (0, 0, 0, 0)
-        self.robot_speed = other_args.get("robot_speed", 0)
+        self.cruise_speed = other_args.get("cruise_speed", 0)
 
         self.control_loop_type = other_args.get("control_loop_type", AIControlLoopType.POSITION)
 

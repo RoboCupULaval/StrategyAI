@@ -43,4 +43,4 @@ class PathfindToPosition(Action):
                          AICommandType.MOVE,
                          **{"pose_goal": move_destination,
                             "pathfinder_on": True,
-                            "robot_speed": self.speed})
+                            "cruise_speed": self.speed})

@@ -62,7 +62,7 @@ class PathPartitionner(Pathfinder):
         self.players_obstacles = []
         self.pose_obstacle = None
         self.reshaper = Path_reshaper(self.p_worldstate, self.path)
-        self.robot_speed = 1
+        self.cruise_speed = 1
         self.player = None
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None):
@@ -81,9 +81,9 @@ class PathPartitionner(Pathfinder):
 
         return path
 
-    def get_path(self, player_id=0, pose_target=Pose(), robot_speed=1):
+    def get_path(self, player_id=0, pose_target=Pose(), cruise_speed=1):
 
-        self.robot_speed = robot_speed
+        self.cruise_speed = cruise_speed
         self.player = self.game_state.game.friends.players[player_id]
         objects = []
         i = 0
@@ -103,7 +103,7 @@ class PathPartitionner(Pathfinder):
 
         self.path = Path(self.game_state.get_player_pose(player_id).position, pose_target.position)
         self.path = self.fastpathplanner(self.path)
-        self.path = self.reshaper.reshape_path(self.path, player_id, self.robot_speed)
+        self.path = self.reshaper.reshape_path(self.path, player_id, self.cruise_speed)
         return self.path
 
     def get_raw_path(self, player_id=0, pose_target=Pose()):
@@ -190,10 +190,10 @@ class PathPartitionner(Pathfinder):
             vec_perp = np.cross(np.append(direction, 0), np.array([0, 0, 1]))
             vec_perp = vec_perp[0:2]
             #print(self.player.velocity)
-            robot_speed = np.array(self.player.velocity[0:2])
+            cruise_speed = np.array(self.player.velocity[0:2])
             obs_speed = np.array(closest_player.velocity[0:2])
-            avoid_dir = np.dot(obs_speed-robot_speed, vec_perp)*vec_perp
-            #print(robot_speed)
+            avoid_dir = np.dot(obs_speed-cruise_speed, vec_perp)*vec_perp
+            #print(cruise_speed)
             #print(vec_perp)
             if avoid_dir is None:
 
@@ -275,7 +275,7 @@ class Path_reshaper:
         self.player_id = player_id
         self.player = self.p_world_state.game_state.get_player(player_id)
         cmd = self.p_world_state.play_state.current_ai_commands[player_id]
-        vel_cruise = cmd.robot_speed * 1000
+        vel_cruise = cmd.cruise_speed * 1000
         #print(vel_cruise)
         self.vel_max = vel_cruise
         point_list = [self.path.start]

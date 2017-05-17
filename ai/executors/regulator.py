@@ -55,7 +55,7 @@ class PositionRegulator(Executor):
                                                             active_player,
                                                             delta_t,
                                                             idx=robot_idx,
-                                                            robot_speed=cmd.robot_speed)
+                                                            cruise_speed=cmd.cruise_speed)
                     cmd.speed = self.mnrc_speed[robot_idx].\
                         update(speed, active_player, delta_t)
 
@@ -92,7 +92,7 @@ class MNRCFixedSpeed(object):
         """
         Update the MNRC of the active player
         """
-        robot_speed = np.array(active_player.velocity) / np.array([1000, 1000, 1])
+        cruise_speed = np.array(active_player.velocity) / np.array([1000, 1000, 1])
         orientation = active_player.pose.orientation
 
         ref = reference.conv_2_np()
@@ -101,7 +101,7 @@ class MNRCFixedSpeed(object):
         k2 = delta_t * self.mnrc_dynamic
         self.filtered_reference = k1 * self.filtered_reference - k2 * ref
 
-        err = self.filtered_reference - robot_speed
+        err = self.filtered_reference - cruise_speed
 
         self.err_sum = self.err_sum + err * delta_t
         self.err_sum[self.err_sum > 1] = 1
@@ -110,13 +110,13 @@ class MNRCFixedSpeed(object):
         # Compute model prediction
         rotation_matrix = self._robot2fixed(orientation)
         inverse_dynamic = -np.linalg.pinv(np.matmul(np.diag(self.robot_dynamic), rotation_matrix))
-        model_prediction = self.mnrc_dynamic * (self.filtered_reference - ref) - self.robot_dynamic * robot_speed
+        model_prediction = self.mnrc_dynamic * (self.filtered_reference - ref) - self.robot_dynamic * cruise_speed
 
         # Return robot speed command
         speed_command = np.matmul(inverse_dynamic, model_prediction + correction)
 
         if active_player.id == 3:
-            print(ref[2], self.filtered_reference[2], robot_speed[2], err[2], self.err_sum[2], speed_command[2])
+            print(ref[2], self.filtered_reference[2], cruise_speed[2], err[2], self.err_sum[2], speed_command[2])
 
         speed_command[abs(speed_command) < 0.2] = 0
         return Pose(Position(speed_command[0], speed_command[1]), speed_command[2])
@@ -178,11 +178,11 @@ class PI(object):
         self.rotation_dead_zone = 0.005 * math.pi
         self.last_theta_target = 0
 
-    def update_pid_and_return_speed_command(self, game_state, cmd, active_player, delta_t=0.030, idx=4, robot_speed=1.0):
+    def update_pid_and_return_speed_command(self, game_state, cmd, active_player, delta_t=0.030, idx=4, cruise_speed=1.0):
         """ Met à jour les composants du pid et retourne une commande en vitesse. """
         assert isinstance(cmd, AICommand), "La consigne doit etre une Pose dans le PI"
-        if robot_speed:
-            self.vit_max = robot_speed
+        if cruise_speed:
+            self.vit_max = cruise_speed
         else:
             self.vit_max = self.constants["vit_max"]
         self.paths[idx] = cmd.path

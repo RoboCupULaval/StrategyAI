@@ -61,11 +61,12 @@ class RobotMotion(object):
         self.ws = p_world_state
         self.id = player_id
 
-        self.dt = 0.05
+        self.dt = None
 
         self.setting = get_control_setting(is_sim)
         self.setting.translation.max_acc = None
         self.setting.translation.max_speed = None
+        self.setting.rotation.max_speed = None
 
         self.current_position = np.zeros(3)
         self.current_orientation = 0
@@ -75,8 +76,11 @@ class RobotMotion(object):
         self.pos_error = np.zeros(3)
 
         self.target_position = np.zeros(3)
-        self.target_velocity = np.zeros(3)
+        self.target_speed = np.zeros(3)
         self.target_acceleration = np.zeros(3)
+
+        self.last_translation_cmd = np.zeros(2)
+        self.cruise_speed = np.zeros(2)
 
         self.x_controller = PID(self.setting.translation.kp,
                                 self.setting.translation.ki,
@@ -93,21 +97,14 @@ class RobotMotion(object):
                                     self.setting.rotation.kd,
                                     self.setting.rotation.antiwindup)
 
-        self.last_translation_cmd = np.zeros(2)
-        self.cruise_velocity = np.zeros(2)
-        self.cruise_speed = 0
-
     def update(self, cmd: AICommand) -> Pose():
         self.update_states(cmd)
 
-        # Rotation control
         rotation_cmd = np.array(self.angle_controller.update(self.pos_error[Pos.THETA]))
-
         rotation_cmd = np.clip(rotation_cmd,
                                -self.setting.rotation.max_speed,
                                self.setting.rotation.max_speed)
 
-        # Translation control
         translation_cmd = self.get_next_velocity()
         translation_cmd += np.array([self.x_controller.update(self.pos_error[Pos.X]),
                                      self.y_controller.update(self.pos_error[Pos.Y])])
@@ -116,28 +113,32 @@ class RobotMotion(object):
 
         return Pose(Position(translation_cmd[Pos.X], translation_cmd[Pos.Y]), rotation_cmd)
 
-    def get_next_velocity(self):
+    def get_next_velocity(self) -> np.ndarray:
         """Return the next velocity according to a constant acceleration model of a point mass.
-           It try to produce a trapezoidal velocity path"""
+           It try to produce a trapezoidal velocity path with the required cruising and target speed"""
 
-        speed_eps = 0.01 * self.setting.translation.max_speed
+        eps = 2 * self.setting.translation.max_acc
+        current_speed = abs(self.current_velocity)
 
-        distance_to_reach_velocity = (self.target_velocity ** 2 - self.current_velocity ** 2) / \
-                          (2 * abs(self.target_acceleration)) # TODO: What if the acceleration is 0 ? inf or Nan?
+        distance_to_reach_speed = 0.5 * abs((self.target_speed ** 2 - current_speed ** 2) / self.target_acceleration)
 
-        next_velocity = np.array([0.0, 0.0])
-        for coord in range(2):
-            if abs(self.current_velocity[coord] - self.cruise_velocity[coord]) < speed_eps:  # de/acceleration complete
-                if self.pos_error[coord] <= distance_to_reach_velocity[coord]:  # decceleration
-                    next_velocity[coord] = self.current_velocity[coord] - self.target_acceleration[coord] * self.dt
-                else:  # constant speed
-                    next_velocity[coord] = self.current_velocity[coord]
-            else:  # acceleration
-                next_velocity[coord] = self.current_velocity[coord] + self.target_acceleration[coord] * self.dt
+        next_speed = np.array([0.0, 0.0])
+        for coord in range(2):  # For X and Y velocity components
+            if abs(self.pos_error[coord]) - distance_to_reach_speed[coord] < eps:  # Slowing down until target speed
+                next_speed[coord] = current_speed[coord] - self.target_acceleration[coord] * self.dt
+                if abs(self.pos_error[coord]) < eps:
+                    next_speed[coord] = self.target_speed[coord]
+
+            else:  # Acceleration until cruising speed
+                next_speed[coord] = current_speed[coord] + self.target_acceleration[coord] * self.dt
+                if next_speed[coord] >= self.cruise_speed:
+                    next_speed[coord] = self.cruise_speed
+
+        next_velocity = next_speed * np.sign(self.pos_error)
 
         return next_velocity
 
-    def limit_acceleration(self, translation_cmd):
+    def limit_acceleration(self, translation_cmd: np.ndarray) -> np.ndarray:
         self.current_acceleration = (translation_cmd - self.last_translation_cmd) / self.dt
         self.current_acceleration = np.clip(self.current_acceleration,
                                             -self.setting.translation.max_acc,
@@ -147,26 +148,31 @@ class RobotMotion(object):
 
         return translation_cmd
 
-    def update_states(self, cmd):
+    def update_states(self, cmd: AICommand):
         self.dt = self.ws.game_state.game.delta_t
+
         # Dynamics constraints
         self.setting.translation.max_acc = self.ws.game_state.get_player(self.id).max_acc
         self.setting.translation.max_speed = self.ws.game_state.get_player(self.id).max_speed
+        self.setting.rotation.max_speed = self.ws.game_state.get_player(self.id).max_angular_speed
+
         # Current state of the robot
-        self.current_position = self.ws.game_state.game.friends.players[self.id].pose.conv_2_np() /\
-                                np.array([1000, 1000, 1])
+        self.current_position = self.ws.game_state.game.friends.players[self.id].pose.conv_2_np()
+        self.current_position = self.current_position / np.array([1000, 1000, 1])
         self.current_orientation = self.current_position[Pos.THETA]
-        self.current_velocity = np.array(self.ws.game_state.game.friends.players[self.id].velocity) /\
-                                np.array([1000, 1000, 1])
-        # Speed at next waypoint
-        path_speeds = cmd.path_speeds[1]
-        # Desired parameters
-        self.target_position = cmd.pose_goal.conv_2_np() / np.array([1000, 1000, 1])
-        self.target_velocity = path_speeds * normalized(self.pos_error) / np.array([1000, 1000, 1])
+        self.current_velocity = np.array(self.ws.game_state.game.friends.players[self.id].velocity)
+        self.current_velocity = self.current_velocity / np.array([1000, 1000, 1])
         self.pos_error = self.target_position - self.current_position
+        if self.pos_error[Pos.THETA] > np.pi:  # Try to minimize the rotation angle
+            self.pos_error[Pos.THETA] = 2*np.pi - self.pos_error[Pos.THETA]
+
+        # Desired parameters
+        self.target_position = cmd.pose_goal.conv_2_np()
+        self.target_position = self.target_position / np.array([1000, 1000, 1])
+        self.target_speed = cmd.path_speeds[1] * normalized(self.pos_error)
         self.target_acceleration = self.setting.translation.max_acc * normalized(self.pos_error)
-        self.cruise_speed = cmd.robot_speed
-        self.cruise_velocity = self.cruise_speed * normalized(self.pos_error)
+        self.target_acceleration[self.target_acceleration == 0] = 10 ** (-6)  # Avoid division by zero later
+        self.cruise_speed = cmd.cruise_speed * normalized(self.pos_error)
 
     def stop(self):
         self.angle_controller.reset()
@@ -179,8 +185,10 @@ class RobotMotion(object):
         self.current_acceleration = np.zeros(2)
         self.pos_error = np.zeros(3)
         self.target_position = np.zeros(3)
-        self.target_velocity = np.zeros(3)
+        self.target_speed = np.zeros(2)
         self.target_acceleration = np.zeros(3)
+        self.last_translation_cmd = np.zeros(2)
+        self.cruise_speed = np.zeros(2)
 
 
 class PID(object):
@@ -226,14 +234,14 @@ class PID(object):
         self.err_sum = 0
 
 
-def get_control_setting(is_sim):
+def get_control_setting(is_sim: bool):
 
     if is_sim:
         translation = {"kp": 0.7, "ki": 0.005, "kd": 0.02, "antiwindup": 0, "deadzone": 0.01}
-        rotation = {"kp": 0.6, "ki": 0.2, "kd": 0.3, "antiwindup": 0, "max_speed": 6, "deadzone": 0}
+        rotation = {"kp": 0.6, "ki": 0.2, "kd": 0.3, "antiwindup": 0, "deadzone": 0}
     else:
         translation = {"kp": 0.7, "ki": 0.005, "kd": 0, "antiwindup": 0, "deadzone": 0.01}
-        rotation = {"kp": 1, "ki": 0.05, "kd": 0, "antiwindup": 0, "max_speed": 6, "deadzone": 0}
+        rotation = {"kp": 1, "ki": 0.05, "kd": 0, "antiwindup": 0, "deadzone": 0}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)

@@ -54,7 +54,7 @@ class PathfinderModule(Executor):
 
             # print(self.time - time.time())
             if self.type_of_pathfinder.lower() == "path_part":
-                path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal, ai_c.robot_speed)
+                path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal, ai_c.cruise_speed)
                 self.draw_path(path)
                 ai_c.path = path.points[1:]
                 ai_c.path_speeds = path.speeds
