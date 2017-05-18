@@ -24,8 +24,13 @@ class GoBehind(Action):
         position1 : La position de l'objet derrière lequel le robot doit se placer (exemple: le ballon)
         position2 : La position par rapport à laquelle le robot doit être "derrière" l'objet de la position 1 (exemple: le but)
     """
-    def __init__(self, p_game_state, p_player_id, p_position1, p_position2,
-                 p_distance_behind, robot_speed=None, pathfinding=False, orientation='front'):
+    def __init__(self, p_game_state, p_player_id, p_position1, p_position2=None,
+                 p_distance_behind=250, cruise_speed=None, pathfinding=False, orientation='front'):
+        if p_position2 is None:
+            if p_game_state.get_our_team_color() == 0: #yellow
+                p_position2 = p_game_state.const["FIELD_GOAL_BLUE_MID_GOAL"]
+            else:
+                p_position2 = p_game_state.const["FIELD_GOAL_YELLOW_MID_GOAL"]
         """
             :param p_game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui doit se déplacer
@@ -42,11 +47,14 @@ class GoBehind(Action):
         self.player_id = p_player_id
         self.position1 = p_position1
         self.position2 = p_position2
-        self.distance_behind = 250
+        self.distance_behind = p_distance_behind
         self.pathfind = pathfinding
         self.rayon_avoid = 300 #(mm)
-        self.robot_speed = robot_speed
+        self.cruise_speed = cruise_speed
         self.orientation = orientation
+
+        if self.distance_behind is None:
+            self.distance_behind = 250
 
     def get_destination(self):
         """
@@ -111,7 +119,7 @@ class GoBehind(Action):
     def exec(self):
         destination_pose = {}
         destination_pose["pose_goal"] = self.get_destination()
-        destination_pose["robot_speed"] = self.robot_speed
+        destination_pose["cruise_speed"] = self.cruise_speed
         if self.pathfind:
             destination_pose["pathfinder_on"] = True
         return AICommand(self.player_id, AICommandType.MOVE, **destination_pose)

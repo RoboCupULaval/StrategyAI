@@ -56,8 +56,8 @@ class Strategy(metaclass=ABCMeta):
                 -Sa target, soit un objet Pose.
         """
         state = []
-        for i in range(PLAYER_PER_TEAM):
-            current_tactic = self.graphs[i].get_current_tactic()
+        for player in self.game_state.my_team.available_players.values():
+            current_tactic = self.graphs[player.id].get_current_tactic()
             try:
                 tactic_name = current_tactic.current_state.__name__
             except AttributeError:
@@ -73,8 +73,8 @@ class Strategy(metaclass=ABCMeta):
         envoyée au robot i.
         """
         commands = {}
-        for i in range(PLAYER_PER_TEAM):
-            commands[i] = self.graphs[i].exec()
+        for player in self.game_state.my_team.available_players.values():
+            commands[player.id] = self.graphs[player.id].exec()
         return commands
 
     def __str__(self):

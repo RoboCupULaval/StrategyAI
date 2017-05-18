@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
 
+from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.STA.Action.Idle import Idle
@@ -16,7 +17,7 @@ class Tactic:
         Classe mère de toutes les tactiques
     """
 
-    def __init__(self, p_game_state: GameState, player_id: int, target: Pose=Pose(), args: List[str]=None,
+    def __init__(self, p_game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None,
                  time_to_live: float=DEFAULT_TIME_TO_LIVE):
         """
         Initialise la tactic avecc des valeurs par défault
@@ -27,12 +28,12 @@ class Tactic:
         :param time_to_live: Temps de vie de la tactique avant qu'elle ne se réinitialise (pas implémenter?)
         """
         assert isinstance(p_game_state, GameState)
-        assert isinstance(player_id, int)
-        assert PLAYER_PER_TEAM >= player_id >= 0  # TODO change this please too restrictif MGL 2017/03/16
+        assert isinstance(player, Player)
         assert isinstance(target, Pose), "La target devrait être une Pose"
 
         self.game_state = p_game_state
-        self.player_id = player_id
+        self.player = player
+        self.player_id = player.id
 
         self.args = args
         if self.args is None:
@@ -69,6 +70,7 @@ class Tactic:
 
         self.current_state = self.next_state
         next_ai_command = next_action.exec()
+        self.player.ai_command = next_ai_command
         return next_ai_command
 
     def get_name(self):

@@ -18,8 +18,8 @@ class IndianaJones(Strategy):
         # ID Robot Indiana Jones : 0
         indiana_ID = 4
         # ID Robot obstacles mouvants : 1 et 2
-        obs_left_ID = 2
-        obs_right_ID = 3
+        obs_left_ID = 3
+        obs_right_ID = 5
         # Positions objectifs d'Indiana Jones
         goal_left = (Pose(Position(self.game_state.const["FIELD_GOAL_YELLOW_X_LEFT"], 0), 0))
         goal_right = (Pose(Position(self.game_state.const["FIELD_GOAL_BLUE_X_RIGHT"], 0), 0))

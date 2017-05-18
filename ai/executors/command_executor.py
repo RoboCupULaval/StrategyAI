@@ -27,12 +27,11 @@ class CommandExecutor(Executor):
         :return: List[_Command]
         """
         # Take last ai_commands
-        ai_command_dict = self.ws.play_state.current_ai_commands
         ready_to_ship_robot_packet_list = []
         # Transform to other command type
-        for player_id, ai_command in ai_command_dict.items():
-            ready_to_ship_robot_packet_list.append(self._parse_ai_command(ai_command,
-                                                                          player_id))
+        for player in self.ws.game_state.my_team.available_players.values():
+            ready_to_ship_robot_packet_list.append(self._parse_ai_command(player.ai_command,
+                                                                          player.id))
         return ready_to_ship_robot_packet_list
 
     def _parse_ai_command(self, ai_command: AICommand, player_id: int) -> _Command:

@@ -14,7 +14,7 @@ class Player:
 
         self.id = id
         self.team = team
-
+        self.pose = Pose()
         self.kf = EnemyKalmanFilter()
 
         self.pose = Pose()

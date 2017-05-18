@@ -10,8 +10,8 @@ from RULEngine.Util.constant import PLAYER_PER_TEAM
 class HumanControl(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
-        for i in range(PLAYER_PER_TEAM):
-            self.add_tactic(i, Stop(self.game_state, i))
+        for player in self.game_state.my_team.available_players.values():
+            self.add_tactic(player.id, Stop(self.game_state, player))
 
     def assign_tactic(self, tactic, robot_id):
         assert isinstance(tactic, Tactic)

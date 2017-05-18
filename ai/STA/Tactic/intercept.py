@@ -19,6 +19,7 @@ from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.GoGetBall import GoGetBall
 from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommand, AICommandType
 from ai.STA.Action.GoBehind import GoBehind
@@ -51,33 +52,115 @@ class Intercept(Tactic):
         assert PLAYER_PER_TEAM >= player_id >= 0
 
         self.player_id = player_id
+        self.player = self.game_state.game.friends.players[self.player_id]
+        self.player_position = self.player.pose.position.conv_2_np()
         self.current_state = self.go_between_ball_and_target
         self.next_state = self.go_between_ball_and_target
         self.debug_interface = DebugInterface()
 
         self.target = target
 
+    # def go_intercept_ball(self):
+    #
+    #     ball_np = self.game_state.get_ball_position().conv_2_np()
+    #     vect_ball_2_robot = self.player_position - ball_np
+    #     ball_velocity = self.game_state.get_ball_velocity().conv_2_np()
+    #     angle_robot_ball_speed = np.arctan2(-ball_velocity[0], -ball_velocity[1]) - np.arctan2(vect_ball_2_robot[0],
+    #                                                                                          vect_ball_2_robot[1])
+    #     terme_1 = 2 * self.player.max_acc * np.linalg.norm(vect_ball_2_robot) ** 2
+    #     terme_2 = 4 * self.player.max_acc * np.linalg.norm(vect_ball_2_robot) ** 2 * np.linalg.norm(
+    #         ball_velocity) ** 2 * \
+    #               np.sin(angle_robot_ball_speed) ** 2
+    #     terme_3 = 4 * self.player.max_acc * np.linalg.norm(vect_ball_2_robot) * np.linalg.norm(ball_velocity) * \
+    #               np.linalg.norm(self.player.velocity) * np.cos(angle_robot_ball_speed) + \
+    #               np.linalg.norm(self.player.velocity) ** 2
+    #     terme_4 = 2 * np.linalg.norm(vect_ball_2_robot) * np.linalg.norm(ball_velocity) * \
+    #               np.cos(angle_robot_ball_speed) + np.linalg.norm(self.player.velocity)
+    #     terme_5 = self.player.max_acc - 2 * np.linalg.norm(vect_ball_2_robot) ** 2
+    #     print(angle_robot_ball_speed)
+    #     print(terme_1)
+    #     print(terme_2)
+    #     print(terme_3)
+    #     print(terme_4)
+    #     print(terme_5)
+    #     if np.abs(terme_5) < 0.1:
+    #         t = np.linalg.norm(vect_ball_2_robot) ** 2 / terme_4
+    #     else:
+    #         t = np.abs((np.sqrt(terme_1 - terme_2 + terme_3) - terme_4) / terme_5)
+    #     print(t)
+    #     target = ball_np + ball_velocity * t
+    #     print(target)
+    #     vec_target_2_robot = self.player_position - target
+    #     if np.linalg.norm(ball_velocity) < 50 and np.linalg.norm(vect_ball_2_robot) < 1000:
+    #         #la balle va lentement et on va la pogner
+    #         self.next_state = self.grab_ball
+    #     elif np.linalg.norm(vec_target_2_robot) > 2000:
+    #         #fuck off la balle est trop loin
+    #         self.status_flag = Flags.FAILURE
+    #         self.next_state = self.halt
+    #     else:
+    #         # wouf wouf
+    #         self.next_state = self.go_intercept_ball
+    #
+    #     return GoToPositionPathfinder(self.game_state, self.player_id,
+    #                                   Pose(Position.from_np(target), np.arctan2(ball_velocity[0], ball_velocity[1])))
+
     def go_between_ball_and_target(self):
+
         self.status_flag = Flags.WIP
 
-        target = self.target.position
-        ball = self.game_state.get_ball_position()
 
-        if self._is_player_between_ball_and_target():
-            self.next_state = self.grab_ball
+        ball = self.game_state.get_ball_position()
+        ball_velocity = self.game_state.get_ball_velocity().conv_2_np()
+        if np.linalg.norm(ball_velocity) > 50:
+            self.target = Pose(Position.from_np(ball.conv_2_np() - ball_velocity), 0)
+            dist_behind = np.linalg.norm(ball_velocity) + 1/np.sqrt(np.linalg.norm(ball_velocity))
+        else:
+            self.target = None
+            dist_behind = 250
+        if self.target is None:
+            if self.game_state.get_our_team_color() == 0: #yellow
+                self.target = Pose(self.game_state.const["FIELD_GOAL_BLUE_MID_GOAL"], 0)
+            else:
+                self.target = Pose(self.game_state.const["FIELD_GOAL_YELLOW_MID_GOAL"], 0)
+        if self._is_player_towards_ball_and_target():
+                self.next_state = self.grab_ball
         else:
             # self.debug.add_log(4, "Distance from ball: {}".format(dist))
             self.next_state = self.go_between_ball_and_target
-        return GoBetween(self.game_state, self.player_id, ball, target, ball, 300)
+
+        return GoBehind(self.game_state, self.player_id, ball, self.target.position, dist_behind)
+
+    def _is_player_towards_ball_and_target(self):
+
+        player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
+        player_y = self.game_state.game.friends.players[self.player_id].pose.position.y
+
+        ball_x = self.game_state.get_ball_position().x
+        ball_y = self.game_state.get_ball_position().y
+
+        target_x = self.target.position.x
+        target_y = self.target.position.y
+
+        vector_player_2_ball = np.array([ball_x - player_x, ball_y - player_y])
+        vector_target_2_ball = np.array([ball_x - target_x, ball_y - target_y])
+        vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
+        vector_target_2_ball /= np.linalg.norm(vector_target_2_ball)
+        vector_player_dir = np.array([np.cos(self.game_state.game.friends.players[self.player_id].pose.orientation),
+                                      np.sin(self.game_state.game.friends.players[self.player_id].pose.orientation)])
+        # print(np.dot(vector_player_2_ball, vector_target_2_ball))
+        if np.dot(vector_player_2_ball, vector_target_2_ball) < - 0.99:
+            if np.dot(vector_player_dir, vector_target_2_ball) < - 0.99:
+                return True
+        return False
 
     def grab_ball(self):
         # self.debug.add_log(1, "Grab ball called")
         # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
-        if self._is_player_between_ball_and_target():
-            self.next_state = self.grab_ball
-            self.status_flag = Flags.SUCCESS
+        if self._is_player_towards_ball():
+            self.next_state = self.halt
         else:
-            self.next_state = self.go_between_ball_and_target
+            self.next_state = self.grab_ball
             self.status_flag = Flags.WIP
         # self.debug.add_log(1, "orientation go get ball {}".format(self.last_angle))
         return Grab(self.game_state, self.player_id)
@@ -116,3 +199,7 @@ class Intercept(Tactic):
         if get_distance(self.last_ball_position, self.game_state.get_ball_position()) > POSITION_DEADZONE:
             self.last_ball_position = self.game_state.get_ball_position()
             self.move_action = self._generate_move_to()
+
+    def halt(self):
+        self.status_flag = Flags.SUCCESS
+        return Idle(self.game_state, self.player_id)

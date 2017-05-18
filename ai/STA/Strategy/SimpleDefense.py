@@ -17,8 +17,8 @@ from . Strategy import Strategy
 class SimpleDefense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
-        self.robot1 = 3
-        self.robot2 = 5
+        self.robot1 = 5
+        self.robot2 = 3
         self.robot3 = 4
         goal1 = Pose(Position(-1636, 0))
         goal2 = Pose(Position(1636, 0))

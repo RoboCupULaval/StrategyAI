@@ -2,7 +2,7 @@
 from .Action import Action
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from ai.Util.ai_command import AICommand, AICommandType
+from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
 
 
 class AllStar(Action):
@@ -23,12 +23,12 @@ class AllStar(Action):
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         self.player_id = p_player_id
         self.other_args = {"dribbler_on": other_args.get("dribbler_on", False),
+                           "control_loop_type": other_args.get("control_loop_type", AIControlLoopType.POSITION),
                            "pathfinder_on": other_args.get("pathfinder_on", False),
                            "kick_strength": other_args.get("kick_strength", 0),
                            "charge_kick": other_args.get("charge_kick", False),
                            "kick": other_args.get("kick", False),
-                           "pose_goal": other_args.get("pose_goal", Pose()),
-                           "speed_flag": other_args.get("speed_flag", False)
+                           "pose_goal": other_args.get("pose_goal", Pose())
                            }
         self.ai_command_type = other_args.get("ai_command_type", AICommandType.STOP)
 

@@ -38,7 +38,16 @@ class GoGetBall(Tactic):
         target: Position à laquelle faire face après avoir pris la balle
     """
 
-    def __init__(self, p_game_state, player_id, target=Pose(), args=None):
+    def __init__(self, p_game_state, player_id, target=None, args=None):
+        if target is None:
+            if p_game_state.get_our_team_color() == 0: #yellow
+                target = Pose(p_game_state.const["FIELD_GOAL_BLUE_MID_GOAL"],
+                              get_angle(p_game_state.my_team.players[player_id].pose.position,
+                                        p_game_state.const["FIELD_GOAL_BLUE_MID_GOAL"]))
+            else:
+                target = Pose(p_game_state.const["FIELD_GOAL_YELLOW_MID_GOAL"],
+                              get_angle(p_game_state.my_team.players[player_id].pose.position,
+                                        p_game_state.const["FIELD_GOAL_YELLOW_MID_GOAL"]))
         Tactic.__init__(self, p_game_state, player_id, target, args)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0

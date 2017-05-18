@@ -6,11 +6,14 @@ from ai.Algorithm.AsPathManager import AsPathManager
 from ai.Algorithm.CinePath.CinePath import CinePath
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Algorithm.path_partitionner import PathPartitionner
+from ai.Util.ai_command import AICommand
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 from config.config_service import ConfigService
+from typing import List
 
 INTERMEDIATE_DISTANCE_THRESHOLD = 540
+AIcommands = List[AICommand]
 
 
 class PathfinderModule(Executor):
@@ -24,19 +27,24 @@ class PathfinderModule(Executor):
         self.cinematic_pathfinder = CinePath(p_world_state)
 
     def exec(self):
-        self._pathfind_ai_commands()
-        #self._modify_path_for_cinematic_constraints(ai_commands)
+        pass
+        # self._pathfind_ai_commands()
+        # self._modify_path_for_cinematic_constraints(ai_commands)
 
     def _pathfind_ai_commands(self) -> None:
         for player in self.ws.game_state.my_team.available_players.values():
             if player.ai_command is None:
                 continue
-            path = self.pathfinder.get_path(player.ai_command.robot_id, player.ai_command.pose_goal)
             if self.type_of_pathfinder.lower() == "path_part":
-
+                path = self.pathfinder.get_path(player.ai_command.robot_id,
+                                                player.ai_command.pose_goal,
+                                                player.ai_command.cruise_speed)
                 self.draw_path(path)
                 player.ai_command.path = path.points[1:]
+                player.ai_command.path_speeds = path.speeds
+
             else:
+                path = self.pathfinder.get_path(player.ai_command.robot_id, player.ai_command.pose_goal)
                 player.ai_command.path = path
 
     # TODO find what this does? MGL 2017/05/17
