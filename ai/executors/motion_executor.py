@@ -111,6 +111,7 @@ class RobotMotion(object):
         translation_cmd += np.array([self.x_controller.update(self.pos_error[Pos.X]),
                                      self.y_controller.update(self.pos_error[Pos.Y])])
         translation_cmd = self.limit_acceleration(translation_cmd)
+        translation_cmd = np.clip(translation_cmd, -self.cruise_speed, self.cruise_speed)
         translation_cmd = fixed2robot(translation_cmd, self.current_orientation)
         translation_cmd = self.apply_deadzone(translation_cmd, self.setting.translation.deadzone)
 
@@ -120,7 +121,7 @@ class RobotMotion(object):
         """Return the next velocity according to a constant acceleration model of a point mass.
            It try to produce a trapezoidal velocity path with the required cruising and target speed"""
 
-        eps = 2 * self.setting.translation.max_acc
+        eps = 1 * self.target_acceleration * self.dt
         current_speed = np.abs(self.current_velocity[0:2])
 
         distance_to_reach_speed = np.square(self.target_speed) - np.square(current_speed)
@@ -128,11 +129,12 @@ class RobotMotion(object):
 
         next_speed = np.array([0.0, 0.0])
         for coord in range(2):  # For X and Y velocity components
-            if np.abs(self.pos_error[coord]) - distance_to_reach_speed[coord] < eps:  # Slowing down until target speed
+            if np.abs(self.pos_error[coord]) - distance_to_reach_speed[coord] <= eps[coord]:  # Slowing down until target speed
                 next_speed[coord] = current_speed[coord] - self.target_acceleration[coord] * self.dt
-                if np.abs(self.pos_error[coord]) < eps:
+                if next_speed[coord] < 0:
+                    next_speed[coord] = 0
+                if np.abs(self.pos_error[coord]) < eps[coord]:
                     next_speed[coord] = self.target_speed[coord]
-
             else:  # Acceleration until cruising speed
                 next_speed[coord] = current_speed[coord] + self.target_acceleration[coord] * self.dt
                 if next_speed[coord] >= self.cruise_speed[coord]:
@@ -180,9 +182,9 @@ class RobotMotion(object):
         self.target_position = cmd.pose_goal.conv_2_np()
         self.target_position = self.target_position / np.array([1000, 1000, 1])
         self.target_speed = np.abs(cmd.path_speeds[1] * normalized(self.translation_error))
-        self.target_acceleration = self.setting.translation.max_acc * normalized(self.translation_error)
+        self.target_acceleration = np.abs(self.setting.translation.max_acc * normalized(self.translation_error))
         self.target_acceleration[self.target_acceleration == 0] = 10 ** (-6)  # Avoid division by zero later
-        self.cruise_speed = abs(cmd.cruise_speed * normalized(self.translation_error))
+        self.cruise_speed = np.abs(cmd.cruise_speed * normalized(self.translation_error))
 
     def stop(self):
         self.angle_controller.reset()
@@ -248,8 +250,8 @@ class PID(object):
 def get_control_setting(is_sim: bool):
 
     if is_sim:
-        translation = {"kp": 0, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0}
-        rotation = {"kp": 0.1, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0}
+        translation = {"kp": 0.05, "ki": 0, "kd": 0.05, "antiwindup": 10, "deadzone": 0}
+        rotation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0}
     else:
         translation = {"kp": 0.7, "ki": 0.005, "kd": 0, "antiwindup": 0, "deadzone": 0.01}
         rotation = {"kp": 1, "ki": 0.05, "kd": 0, "antiwindup": 0, "deadzone": 0.05}

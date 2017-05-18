@@ -14,10 +14,7 @@ class Player:
 
         self.id = id
         self.team = team
-        self.pose = Pose()
-        self.kf = EnemyKalmanFilter()
-
-        self.pose = Pose()
+        self.pose = Pose(Position(10000, 10000))
         self.velocity = [0, 0, 0]
         self.update = self.__update
         if ConfigService().config_dict["IMAGE"]["kalman"] == "true":

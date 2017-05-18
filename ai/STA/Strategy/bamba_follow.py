@@ -19,17 +19,17 @@ class BambaFollow(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-        robot1 = 4
-        robot2 = 2
-        robot3 = 3
+        robot1 = self.game_state.my_team.available_players[4]
+        robot2 = self.game_state.my_team.available_players[2]
+        robot3 = self.game_state.my_team.available_players[3]
         args = [-1, -1, 0]
-        self.add_tactic(robot1, DemoFollowBall(self.game_state, robot1))
-        self.add_tactic(robot2, DemoFollowRobot(self.game_state, robot2, args=[robot1]))
-        self.add_tactic(robot3, DemoFollowRobot(self.game_state, robot3, args=[robot2]))
+        self.add_tactic(robot1.id, DemoFollowBall(self.game_state, robot1))
+        self.add_tactic(robot2.id, DemoFollowRobot(self.game_state, robot2, args=[robot1]))
+        self.add_tactic(robot3.id, DemoFollowRobot(self.game_state, robot3, args=[robot2]))
 
-        for i in range(PLAYER_PER_TEAM):
-            if not (i == robot1 or i == robot2 or i == robot3):
-                self.add_tactic(i, Stop(self.game_state, i))
+        for player in self.game_state.my_team.available_players.values():
+            if not (player.id == robot1.id or player.id == robot2.id or player.id == robot3.id):
+                self.add_tactic(player.id, Stop(self.game_state, player))
 
 
 

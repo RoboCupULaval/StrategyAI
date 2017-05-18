@@ -1,4 +1,5 @@
 # Under MIT licence, see LICENCE.txt
+from RULEngine.Game.Player import Player
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.PathfindToPosition import PathfindToPosition
 from ai.STA.Tactic.Tactic import Tactic
@@ -9,6 +10,7 @@ from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
 from ai.STA.Tactic.tactic_constants import Flags
+from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
 
@@ -25,14 +27,14 @@ class DemoFollowRobot(Tactic):
         game_state: état courant du jeu
         player_id : Identifiant du joueur auquel est assigné la tactique
     """
-    def __init__(self, game_state, player_id, p_target=Pose(), args=None, time_to_live=DEFAULT_TIME_TO_LIVE):
-        Tactic.__init__(self, game_state, player_id, p_target, args, time_to_live=time_to_live)
-        assert isinstance(player_id, int)
+    def __init__(self, game_state: GameState, player: Player, p_target: Pose=Pose(), args=None,
+                 time_to_live=DEFAULT_TIME_TO_LIVE):
+        Tactic.__init__(self, game_state, player, p_target, args, time_to_live=time_to_live)
+        assert isinstance(player, Player)
 
-        self.robot_to_follow_id = int(args[0])
+        self.robot_to_follow_id = args[0].id
         self.current_state = self.halt
         self.next_state = self.halt
-        self.player_id = player_id
 
     def move_to_ball(self):
         self.status_flag = Flags.WIP

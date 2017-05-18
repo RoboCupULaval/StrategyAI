@@ -27,8 +27,7 @@ class PathfinderModule(Executor):
         self.cinematic_pathfinder = CinePath(p_world_state)
 
     def exec(self):
-        pass
-        # self._pathfind_ai_commands()
+        self._pathfind_ai_commands()
         # self._modify_path_for_cinematic_constraints(ai_commands)
 
     def _pathfind_ai_commands(self) -> None:
