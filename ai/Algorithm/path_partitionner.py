@@ -270,7 +270,7 @@ class Path_reshaper:
         self.vel_max = None
 
     def reshape_path(self, path, player_id, vel_cruise=1):
-
+        self.dist_from_path = 50  # mm
         self.path = path
         self.player_id = player_id
         self.player = self.p_world_state.game_state.get_player(player_id)
