@@ -48,6 +48,12 @@ class Path:
         new_path.speeds = speed_list
         return new_path
 
+    def get_path_length(self):
+        length = 0
+        for idx, point in enumerate(self.points[:-1]):
+            length += np.linalg.norm(point - self.points[idx+1])
+        return length
+
 
 
 class PathPartitionner(Pathfinder):
@@ -65,7 +71,12 @@ class PathPartitionner(Pathfinder):
         self.cruise_speed = 1
         self.player = None
 
-    def fastpathplanner(self, path, depth=0, avoid_dir=None):
+    def fastpathplanner(self, path, depth=0, avoid_dir=None, old_path=None):
+
+        if old_path is not None:
+            if not self.is_path_collide(old_path):
+                pass
+                # return old_path
         if self.is_path_collide(path) and depth < self.max_recurs:
 
             [sub_target, avoid_dir] = self.search_point(path, avoid_dir)
@@ -81,8 +92,7 @@ class PathPartitionner(Pathfinder):
 
         return path
 
-    def get_path(self, player_id=0, pose_target=Pose(), cruise_speed=1):
-
+    def get_path(self, player_id=0, pose_target=Pose(), cruise_speed=1, old_path=None):
         self.cruise_speed = cruise_speed
         self.player = self.game_state.game.friends.players[player_id]
         objects = []
@@ -102,7 +112,7 @@ class PathPartitionner(Pathfinder):
                 i += 1
 
         self.path = Path(self.game_state.get_player_pose(player_id).position, pose_target.position)
-        self.path = self.fastpathplanner(self.path)
+        self.path = self.fastpathplanner(self.path, old_path=old_path)
         self.path = self.remove_redundant_points()
         self.path = self.reshaper.reshape_path(self.path, player_id, self.cruise_speed)
         return self.path
@@ -131,17 +141,19 @@ class PathPartitionner(Pathfinder):
         return self.fastpathplanner(self.path)
 
     def is_path_collide(self, path):
-        dist = get_distance(path.goal, path.start)
-        if dist < 0.001:
-            return False
-        pose_start = path.start.conv_2_np()
-        direction = (path.goal.conv_2_np() - pose_start) / dist
-        for pose_obs in self.pose_obstacle:
-            vec_robot_2_obs_temp = pose_obs - pose_start
-            len_along_path_temp = np.dot(vec_robot_2_obs_temp, direction)
-            dist_from_path_temp = np.sqrt(np.linalg.norm(vec_robot_2_obs_temp)**2 - len_along_path_temp**2)
-            if self.gap_proxy > dist_from_path_temp and len_along_path_temp > 0:
-                return True
+
+        for idx, points in enumerate(path.points[:-1]):
+            dist = get_distance(path.points[idx+1], path.points[idx])
+            if dist > 0.001:
+                pose_start = path.points[idx].conv_2_np()
+                direction = (path.points[idx+1].conv_2_np() - pose_start) / dist
+                for pose_obs in self.pose_obstacle:
+                    vec_robot_2_obs_temp = pose_obs - pose_start
+                    len_along_path_temp = np.dot(vec_robot_2_obs_temp, direction)
+                    dist_from_path_temp = np.sqrt(np.linalg.norm(vec_robot_2_obs_temp)**2 - len_along_path_temp**2)
+                    if self.gap_proxy > dist_from_path_temp and len_along_path_temp > 0:
+                        return True
+
         return False
 
     def find_closest_obstacle(self, point, path):
@@ -286,10 +298,11 @@ class Path_reshaper:
         vel_cruise = cmd.cruise_speed * 1000
         #print(vel_cruise)
         self.vel_max = vel_cruise
-        point_list = [self.path.start]
+        P1 = self.path.points[0].conv_2_np()
+        point_list = [P1]
         speed_list = [0]
         radius_at_const_speed = vel_cruise ** 2 / (self.player.max_acc * 1000)
-        P1 = self.path.points[0].conv_2_np()
+
         for idx, point in enumerate(self.path.points[1:-1]):
             idx = idx + 1
             P2 = point.conv_2_np()
@@ -305,16 +318,16 @@ class Path_reshaper:
             #print(radius, radius_at_const_speed)
             if np.linalg.norm(P1-P2) < 0.001 or np.linalg.norm(P2-P3) < 0.001 or np.linalg.norm(P1-P3) < 0.001:
                 # on traite tout le cas ou le problème dégènere
-                point_list += [point]
+                point_list += [P2]
                 speed_list += [vel_cruise/1000]
             else:
                 P4 = P2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (P1 - P2) / np.linalg.norm(P1 - P2)
                 P5 = P2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (P3 - P2) / np.linalg.norm(P3 - P2)
                 if np.linalg.norm(P4-P5) > np.linalg.norm(P3-P1):
-                    point_list += [point]
+                    point_list += [P2]
                     speed_list += [vel_cruise/1000]
                 else:
-                    point_list += [Position.from_np(P4), Position.from_np(P5)]
+                    point_list += [P4, P5]
                     speed_list += [speed, speed]
             #radius = abs(self.dist_from_path*np.sin(theta/2)/(1-np.sin(theta/2)))
             #print(radius, radius_at_const_speed)
@@ -334,11 +347,27 @@ class Path_reshaper:
             #     else:
             #         point_list += [Position.from_np(P4), Position.from_np(P5)]
             #         speed_list += [np.sqrt(radius / (self.player.max_acc * 1000)), np.sqrt(radius / (self.player.max_acc * 1000))]
-            P1 = point_list[-1].conv_2_np()
+            P1 = point_list[-1]
 
         speed_list += [0]
-        point_list += [self.path.goal]
-        print(point_list)
-        print(speed_list)
+        point_list += [self.path.goal.conv_2_np()]
+        # on s'assure que le path est bel et bien réalisable par un robot et on
+        # merge les points qui sont trop proches les un des autres.
+        position_list = [Position().from_np(point_list[0])]
+        new_speed_list = [speed_list[0]]
+        for idx, point in enumerate(point_list[1:-1]):
+            if np.linalg.norm(point_list[idx] - point_list[idx+1]) < 10:
+                continue
+            min_dist = 0.5 * (np.square(speed_list[idx] - np.square(speed_list[idx + 1])) / (self.player.max_acc * 1000))
+            if min_dist > np.linalg.norm(point_list[idx] - point_list[idx+1]):
+                if speed_list[idx] > speed_list[idx + 1]:
+                    speed_list[idx] *= np.linalg.norm(point_list[idx] - point_list[idx+1]) / min_dist
+                else:
+                    speed_list[idx + 1] *= np.linalg.norm(point_list[idx] - point_list[idx + 1]) / min_dist
 
-        return Path().generate_path_from_points(point_list, speed_list)
+            position_list += [Position().from_np(point_list[idx])]
+            new_speed_list += [speed_list[idx]]
+        position_list += [Position().from_np(point_list[-1])]
+        new_speed_list += [speed_list[-1]]
+
+        return Path().generate_path_from_points(position_list, new_speed_list)

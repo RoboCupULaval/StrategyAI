@@ -35,6 +35,8 @@ class Position(object):
 
     @staticmethod
     def from_np(array):
+        if array is Position:
+            return array
         return Position(array[0], array[1])
 
     # *** OPERATORS ***
