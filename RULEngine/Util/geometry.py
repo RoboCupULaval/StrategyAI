@@ -9,6 +9,11 @@ from ..Util.Pose import Pose
 __author__ = 'RoboCupULaval'
 
 
+def remove_duplicates(seq):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]
+
 def get_distance(position_1: Position, position_2: Position) -> float:
     """
         Calcul la distance entre deux positions (la norme du vecteur reliant les deux points).

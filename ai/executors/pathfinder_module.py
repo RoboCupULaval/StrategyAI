@@ -50,11 +50,12 @@ class PathfinderModule(Executor):
     def _pathfind_ai_commands(self, ai_commands:AIcommands):
         for ai_c in ai_commands:
 
-            #self.time = time.time()
+            self.time = time.time()
 
             # print(self.time - time.time())
             if self.type_of_pathfinder.lower() == "path_part":
                 path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal, ai_c.cruise_speed)
+                print(self.time - time.time())
                 self.draw_path(path)
                 ai_c.path = path.points[1:]
                 ai_c.path_speeds = path.speeds

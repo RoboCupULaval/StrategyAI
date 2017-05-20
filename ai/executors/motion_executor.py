@@ -115,7 +115,7 @@ class RobotMotion(object):
 
         translation_cmd[np.abs(translation_cmd) < self.setting.translation.deadzone] = 0
         if abs(rotation_cmd) < self.setting.rotation.deadzone: rotation_cmd = 0
-        print(translation_cmd, rotation_cmd)
+        #print(translation_cmd, rotation_cmd)
 
         return Pose(Position(translation_cmd[Pos.X], translation_cmd[Pos.Y]), rotation_cmd)
 

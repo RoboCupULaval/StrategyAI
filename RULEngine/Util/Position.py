@@ -3,7 +3,7 @@
 import math
 import numpy as np
 
-POSITION_DELTA_TOLERANCE_MAGNITUDE = 1e0
+POSITION_DELTA_TOLERANCE_MAGNITUDE = 0.01
 
 
 class Position(object):
@@ -95,3 +95,9 @@ class Position(object):
     def __repr__(self):
         """ Return str(self) """
         return "(x={}, y={}, z={})".format(self.x, self.y, self.z)
+
+    def __str__(self):
+        return "(x={}, y={}, z={})".format(self.x, self.y, self.z)
+
+    def __hash__(self):
+        return hash(str(self))
