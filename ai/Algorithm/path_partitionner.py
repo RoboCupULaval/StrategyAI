@@ -81,7 +81,7 @@ class PathPartitionner(Pathfinder):
         self.p_worldstate = p_worldstate
         self.game_state = self.p_worldstate.game_state
         self.path = Path(Position(0, 0), Position(0, 0))
-        self.res = 50
+        self.res = 200
         self.gap_proxy = 200
         self.max_recurs = 5
         self.players_obstacles = []
@@ -93,20 +93,20 @@ class PathPartitionner(Pathfinder):
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None, old_path=None):
 
-        # #tentative de code pour ne pas recalculer le path a toutes les ittérations (marche un peu mais introduit un bug)
-        # if old_path is None:
-        #     pass
-        # else:
-        #     print(self.is_path_collide(old_path))
-        #     #print(old_path)
-        #     if not self.is_path_collide(old_path) and path.goal == old_path.goal:
-        #         # old_path.points[0] = self.player.pose.position
-        #         # old_path.start = self.player.pose.position
-        #         # #print(old_path.points)
-        #         # old_path.remove_close_points(10)
-        #         # #print(old_path.points)
-        #         print(old_path.quick_update_path(self.player))
-        #         return old_path.quick_update_path(self.player)
+        #tentative de code pour ne pas recalculer le path a toutes les ittérations (marche un peu mais introduit un bug)
+        if old_path is None:
+            pass
+        else:
+            #print(self.is_path_collide(old_path))
+            #print(old_path)
+            if not self.is_path_collide(old_path) and path.goal == old_path.goal:
+                # old_path.points[0] = self.player.pose.position
+                # old_path.start = self.player.pose.position
+                # #print(old_path.points)
+                # old_path.remove_close_points(10)
+                # #print(old_path.points)
+                #print(old_path.quick_update_path(self.player))
+                return old_path.quick_update_path(self.player)
 
 
         if self.is_path_collide(path) and depth < self.max_recurs:
@@ -290,8 +290,8 @@ class PathPartitionner(Pathfinder):
                 #         avoid_dir = vec_perp
                 if np.linalg.norm(cruise_speed) < 0.1:
                     sub_target = sub_target_1
-                elif abs(np.dot(cruise_speed/np.linalg.norm(cruise_speed), (sub_target_1 - path.start.conv_2_np())/np.linalg.norm(sub_target_1 - path.start.conv_2_np()))) > \
-                        abs(np.dot(cruise_speed/np.linalg.norm(cruise_speed), (sub_target_2 - path.start.conv_2_np()) / np.linalg.norm(sub_target_2 - path.start.conv_2_np()))):
+                elif abs(np.dot(direction, (sub_target_1 - path.start.conv_2_np())/np.linalg.norm(sub_target_1 - path.start.conv_2_np()))) > \
+                        abs(np.dot(direction, (sub_target_2 - path.start.conv_2_np()) / np.linalg.norm(sub_target_2 - path.start.conv_2_np()))):
                     sub_target = sub_target_1
                 else:
                     sub_target = sub_target_2
@@ -341,7 +341,7 @@ class Path_reshaper:
 
         self.p_world_state = p_world_state
         self.path = path
-        self.dist_from_path = 50 #mm
+        self.dist_from_path = 25 #mm
         self.player_id = None
         self.player = None
         self.vel_max = None
