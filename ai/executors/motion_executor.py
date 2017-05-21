@@ -125,14 +125,19 @@ class RobotMotion(object):
         alpha = 1.4
         eps = 0.5 * self.target_acceleration * self.dt
         current_speed = np.abs(self.current_velocity[0:2])
-
-        distance_to_reach_speed = np.square(self.target_speed) - np.square(current_speed)
-        distance_to_reach_speed = 0.5 * np.abs(distance_to_reach_speed / self.target_acceleration)
+        distance_to_reach_cruise_speed = np.square(self.cruise_speed) - np.square(current_speed)
+        distance_to_reach_cruise_speed = 0.5 * np.abs(distance_to_reach_cruise_speed / self.target_acceleration)
+        distance_to_reach_target_speed = np.square(self.target_speed) - np.square(current_speed)
+        distance_to_reach_target_speed = 0.5 * np.abs(distance_to_reach_target_speed / self.target_acceleration)
 
         next_speed = np.array([0.0, 0.0])
         for coord in range(2):  # For X and Y velocity components
-            if np.abs(self.pos_error[coord]) - distance_to_reach_speed[coord] < eps[coord]:  # Slowing down until target speed
-                next_speed[coord] = current_speed[coord] - alpha * self.target_acceleration[coord] * self.dt
+            if np.abs(self.pos_error[coord]) - distance_to_reach_target_speed[coord] < eps[coord]:  # Target_speed pas atteignable
+                if (self.target_speed[coord]-current_speed[coord]) / self.target_acceleration[coord] > 0:
+                    #il faut accelerer vers la target speed
+                    next_speed[coord] = current_speed[coord] + alpha * self.target_acceleration[coord] * self.dt
+                else:#on est overspeed
+                    next_speed[coord] = current_speed[coord] - alpha * self.target_acceleration[coord] * self.dt
                 if next_speed[coord] < 0:
                     next_speed[coord] = 0
                 if np.abs(self.pos_error[coord]) < eps[coord]:
@@ -179,7 +184,7 @@ class RobotMotion(object):
         # Desired parameters
         self.target_position = cmd.pose_goal.conv_2_np()
         self.target_position = self.target_position / np.array([1000, 1000, 1])
-        self.target_speed = np.abs(cmd.path_speeds[1] * normalized(self.translation_error))
+        self.target_speed = np.abs(cmd.path_speeds[1]/1000 * normalized(self.translation_error))
         self.target_acceleration = np.abs(self.setting.translation.max_acc * normalized(self.translation_error))
         self.target_acceleration[self.target_acceleration == 0] = 10 ** (-6)  # Avoid division by zero later
         self.cruise_speed = np.abs(cmd.cruise_speed * normalized(self.translation_error))
