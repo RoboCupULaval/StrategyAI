@@ -25,7 +25,7 @@ class GoBehind(Action):
         position2 : La position par rapport à laquelle le robot doit être "derrière" l'objet de la position 1 (exemple: le but)
     """
     def __init__(self, p_game_state, p_player_id, p_position1, p_position2=None,
-                 p_distance_behind=250, cruise_speed=None, pathfinding=False, orientation='front'):
+                 p_distance_behind=250, cruise_speed=1, pathfinding=False, orientation='front'):
         if p_position2 is None:
             if p_game_state.get_our_team_color() == 0: #yellow
                 p_position2 = p_game_state.const["FIELD_GOAL_BLUE_MID_GOAL"]

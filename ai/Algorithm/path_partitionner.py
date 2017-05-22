@@ -94,19 +94,19 @@ class PathPartitionner(Pathfinder):
     def fastpathplanner(self, path, depth=0, avoid_dir=None, old_path=None):
 
         #tentative de code pour ne pas recalculer le path a toutes les ittérations (marche un peu mais introduit un bug)
-        if old_path is None:
-            pass
-        else:
-            #print(self.is_path_collide(old_path))
-            #print(old_path)
-            if not self.is_path_collide(old_path) and path.goal == old_path.goal:
-                # old_path.points[0] = self.player.pose.position
-                # old_path.start = self.player.pose.position
-                # #print(old_path.points)
-                # old_path.remove_close_points(10)
-                # #print(old_path.points)
-                #print(old_path.quick_update_path(self.player))
-                return old_path.quick_update_path(self.player)
+        # if old_path is None:
+        #     pass
+        # else:
+        #     #print(self.is_path_collide(old_path))
+        #     #print(old_path)
+        #     if not self.is_path_collide(old_path) and path.goal == old_path.goal:
+        #         # old_path.points[0] = self.player.pose.position
+        #         # old_path.start = self.player.pose.position
+        #         # #print(old_path.points)
+        #         # old_path.remove_close_points(10)
+        #         # #print(old_path.points)
+        #         #print(old_path.quick_update_path(self.player))
+        #         return old_path.quick_update_path(self.player)
 
 
         if self.is_path_collide(path) and depth < self.max_recurs:
@@ -148,6 +148,7 @@ class PathPartitionner(Pathfinder):
         self.path = self.fastpathplanner(self.path, old_path=old_path)
         self.path = self.remove_redundant_points()
         self.path = self.reshaper.reshape_path(self.path, player_id, self.cruise_speed)
+
         return self.path
 
     def get_raw_path(self, player_id=0, pose_target=Pose()):
@@ -329,12 +330,6 @@ class PathPartitionner(Pathfinder):
         return Path().generate_path_from_points(remove_duplicates(self.path.points), speed_list=[0, 0])
 
 
-
-
-
-
-
-
 class Path_reshaper:
 
     def __init__(self, p_world_state: WorldState, path: Path):
@@ -352,7 +347,8 @@ class Path_reshaper:
         self.player_id = player_id
         self.player = self.p_world_state.game_state.get_player(player_id)
         cmd = self.p_world_state.play_state.current_ai_commands[player_id]
-        vel_cruise = cmd.cruise_speed * 1000
+        if cmd.cruise_speed:
+            vel_cruise = cmd.cruise_speed * 1000
         #print(vel_cruise)
         self.vel_max = vel_cruise
         P1 = self.path.points[0].conv_2_np()

@@ -20,7 +20,7 @@ class Player:
         self.pose = Pose()
         self.max_speed = 2
         self.max_angular_speed = 6.2
-        self.max_acc = 2
+        self.max_acc = 1
 
         self.velocity = [0, 0, 0]
 

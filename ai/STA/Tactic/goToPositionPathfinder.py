@@ -23,7 +23,7 @@ class GoToPositionPathfinder(Tactic):
             self.status_flag = Flags.WIP
 
         next_action = PathfindToPosition(self.game_state, self.player_id,
-                                         self.target, speed=self.cruise_speed)
+                                         self.target, cruise_speed=self.cruise_speed)
         return next_action.exec()
 
     def check_success(self):

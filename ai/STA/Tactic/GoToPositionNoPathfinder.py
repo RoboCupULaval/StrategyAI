@@ -14,6 +14,10 @@ class GoToPositionNoPathfinder(Tactic):
         super().__init__(p_game_state, player_id, target, args)
         self.target = target
         self.status_flag = Flags.INIT
+        if args is None:
+            self.cruise_speed = 1
+        else:
+            self.cruise_speed = float(args[0])
 
     def exec(self):
         if self.check_success():
@@ -21,7 +25,7 @@ class GoToPositionNoPathfinder(Tactic):
         else:
             self.status_flag = Flags.WIP
 
-        next_action = MoveToPosition(self.game_state, self.player_id, self.target)
+        next_action = MoveToPosition(self.game_state, self.player_id, self.target, cruise_speed=self.cruise_speed)
         return next_action.exec()
 
     def check_success(self):
