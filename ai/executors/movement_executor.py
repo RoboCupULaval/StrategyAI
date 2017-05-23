@@ -6,10 +6,7 @@ from RULEngine.Util.geometry import get_distance
 from ai.executors.executor import Executor
 from ai.Util.ai_command import AICommandType
 
-ROBOT_NEAR_FORCE = 30
-ROBOT_VELOCITY_MAX = 4
-ROBOT_ACC_MAX = 2
-PATHFINDER_DEADZONE = 100
+PATHFINDER_DEADZONE = 10
 
 
 class MovementExecutor(Executor):

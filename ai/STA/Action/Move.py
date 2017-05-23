@@ -15,13 +15,13 @@ class Move(Action):
         player_id : L'identifiant du joueur
         speed_pose : Pose representant le vecteur vitesse x,y et la vitesse en orientation du robot
     """
-    def __init__(self, p_game_state, p_player_id, p_speed_pose):
+    def __init__(self, game_state, p_player_id, p_speed_pose):
         """
-            :param p_game_state: L'etat courant du jeu.
+            :param game_state: L'etat courant du jeu.
             :param p_player_id: Identifiant du joueur qui se deplace
             :param p_destination: destination (pose) que le joueur doit atteindre
         """
-        Action.__init__(self, p_game_state)
+        Action.__init__(self, game_state)
         assert(isinstance(p_player_id, int))
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert(isinstance(p_speed_pose, Pose))

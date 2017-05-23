@@ -25,16 +25,16 @@ class ProtectGoal(Action):
         minimum_distance : La distance minimale qu'il doit y avoir entre le gardien et le centre du but.
         maximum_distance : La distance maximale qu'il doit y avoir entre le gardien et le centre du but.
     """
-    def __init__(self, p_game_state, p_player_id, p_is_right_goal=True, p_minimum_distance=150/2,
+    def __init__(self, game_state, p_player_id, p_is_right_goal=True, p_minimum_distance=150 / 2,
                  p_maximum_distance=None):
         """
-        :param p_game_state: L'état courant du jeu.
+        :param game_state: L'état courant du jeu.
         :param p_player_id: L'identifiant du joueur qui est le gardien de but.
         :param p_is_right_goal: Un booléen indiquant si le but à protéger est celui de droite.
         :param p_minimum_distance: La distance minimale qu'il doit y avoir entre le gardien et le centre du but.
         :param p_maximum_distance: La distance maximale qu'il doit y avoir entre le gardien et le centre du but.
         """
-        Action.__init__(self, p_game_state)
+        Action.__init__(self, game_state)
         assert isinstance(p_player_id, int)
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert isinstance(p_is_right_goal, bool)

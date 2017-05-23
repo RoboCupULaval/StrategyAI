@@ -1,11 +1,10 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
 
-from RULEngine.Game.Player import Player
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.STA.Action.Idle import Idle
-from ai.STA.Tactic.tactic_constants import DEFAULT_TIME_TO_LIVE, Flags
+from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommand
 from ai.states.game_state import GameState
 
@@ -16,34 +15,31 @@ class Tactic:
     """
         Classe mère de toutes les tactiques
     """
-
-    def __init__(self, p_game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None,
-                 time_to_live: float=DEFAULT_TIME_TO_LIVE):
+    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None):
         """
-        Initialise la tactic avecc des valeurs par défault
+        Initialise la tactic avec des valeurs
 
-        :param p_game_state: L'état du monde pour le jeu en cours
-        :param player_id: L'identifiant du robot
+        :param game_state: L'état du monde pour le jeu en cours
+        :param player: Le joueur executant la tactic
         :param target: Pose général pouvant être utilisé par les classes enfants comme elles veulent
-        :param time_to_live: Temps de vie de la tactique avant qu'elle ne se réinitialise (pas implémenter?)
         """
-        assert isinstance(p_game_state, GameState)
-        assert isinstance(player, Player)
+        assert isinstance(game_state, GameState), "Le game_state doit être un GameState"
+        assert isinstance(player, OurPlayer), "Le player doit être un OurPlayer"
         assert isinstance(target, Pose), "La target devrait être une Pose"
+        assert isinstance(args, List), "Le paramètre args doit être une liste"
 
-        self.game_state = p_game_state
+        self.game_state = game_state
         self.player = player
         self.player_id = player.id
-
-        self.args = args
         if self.args is None:
             self.args = []
+        else:
+            self.args = args
 
         self.current_state = self.halt
         self.next_state = self.halt
         self.status_flag = Flags.INIT
         self.target = target
-        self.time_to_live = time_to_live
         self.last_state_time = self.game_state.get_timestamp()
 
     def halt(self) -> Idle:
@@ -53,9 +49,8 @@ class Tactic:
 
             :return: un nouvelle instance de l'action Idle pour le robot
         """
-        stop = Idle(self.game_state, self.player_id)
         self.next_state = self.halt
-        return stop
+        return Idle(self.game_state, self.player)
 
     def exec(self) -> AICommand:
         """
@@ -63,14 +58,11 @@ class Tactic:
 
             :return: un AICommand
         """
-        tactic_time = self.game_state.get_timestamp()
         next_action = self.current_state()
-        if tactic_time - self.last_state_time > self.time_to_live > 0:
-            self._reset_ttl()
-
         self.current_state = self.next_state
         next_ai_command = next_action.exec()
         self.player.ai_command = next_ai_command
+        # return deprecated TODO remove with all others as well MGL 2017/05/22
         return next_ai_command
 
     def get_name(self):
@@ -78,11 +70,3 @@ class Tactic:
 
     def __str__(self):
         return self.__class__.__name__
-
-    def _reset_ttl(self):
-        """
-            Quand le TTL expire, on réévalue le prochain état.
-            Par défaut on ne fait rien.
-        """
-        # TODO revise please MGL 2017/03/16
-        self.last_state_time = self.game_state.timestamp

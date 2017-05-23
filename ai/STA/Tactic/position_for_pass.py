@@ -1,28 +1,23 @@
 # Under MIT licence, see LICENCE.txt
 import math
+from typing import Dict
+
 import numpy as np
 import time
 
 from RULEngine.Debug.debug_interface import DebugInterface
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS, ROBOT_RADIUS
-from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.geometry import get_distance
 from ai.STA.Action.AllStar import AllStar
-from ai.STA.Action.Idle import Idle
-from ai.STA.Action.Kick import Kick
-from ai.STA.Action.MoveToPosition import MoveToPosition
-from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
-from ai.STA.Tactic.GoGetBall import GoGetBall
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ai_command import AICommand, AICommandType
-from ai.STA.Action.GoBehind import GoBehind
+from ai.Util.ai_command import AICommandType
+from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
 
-POSITION_DEADZONE = 40
 ORIENTATION_DEADZONE = 0.2
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
@@ -42,10 +37,8 @@ class PositionForPass(Tactic):
         target: Position à laquelle faire face après avoir pris la balle
     """
 
-    def __init__(self, p_game_state, player_id, target=Pose(), args=None):
-        Tactic.__init__(self, p_game_state, player_id, target, args)
-        assert isinstance(player_id, int)
-        assert PLAYER_PER_TEAM >= player_id >= 0
+    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: Dict=None):
+        Tactic.__init__(self, game_state, player, target, args)
 
         self.player_id = player_id
         self.current_state = self.move_to_pass_position

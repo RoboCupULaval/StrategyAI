@@ -12,19 +12,19 @@ class RotateAround(Action):
     """
 
     """
-    def __init__(self, p_game_state, p_player_id, target, rayon):
+    def __init__(self, game_state, p_player_id, target, rayon):
         """
-            :param p_game_state: L'état courant du jeu.
+            :param game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui se déplace
             :param target: Pose du centre de rotation
             :param rayon: Distance entre le centre du robot et le centre de rotation
         """
-        Action.__init__(self, p_game_state)
+        Action.__init__(self, game_state)
         assert(isinstance(p_player_id, int))
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         self.player_id = p_player_id
         self.target = target
-        self.game_state = p_game_state
+        self.game_state = game_state
         self.rayon = rayon
 
     def generate_destination(self):

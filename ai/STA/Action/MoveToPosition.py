@@ -15,18 +15,19 @@ class MoveToPosition(Action):
         player_id : L'identifiant du joueur
         destination : La destination (pose) que le joueur doit atteindre
     """
-    def __init__(self, p_game_state, p_player_id, p_destination):
+    def __init__(self, game_state, p_player_id, p_destination, cruise_speed=1):
         """
-            :param p_game_state: L'état courant du jeu.
+            :param game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui se déplace
             :param p_destination: destination (pose) que le joueur doit atteindre
         """
-        Action.__init__(self, p_game_state)
+        Action.__init__(self, game_state)
         assert(isinstance(p_player_id, int))
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert(isinstance(p_destination, Pose))
         self.player_id = p_player_id
         self.destination = p_destination
+        self.cruise_speed = cruise_speed
 
     def exec(self):
         """
@@ -36,4 +37,6 @@ class MoveToPosition(Action):
                         kick est faux (on ne botte pas)
         """
         return AICommand(self.player_id, AICommandType.MOVE,
-                         **{"pose_goal": self.destination})
+                         **{"pose_goal": self.destination,
+                            "pathfinder_on": False,
+                            "cruise_speed": self.cruise_speed})

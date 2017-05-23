@@ -17,18 +17,18 @@ class PathfindToPosition(Action):
         player_id : L'identifiant du joueur
         destination : La destination (pose) que le joueur doit atteindre
     """
-    def __init__(self, p_game_state: GameState, player: Player, p_destination, speed=0.2):
+    def __init__(self, game_state: GameState, player: Player, p_destination, cruise_speed=0.2):
         """
-            :param p_game_state: L'état courant du jeu.
+            :param game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui se déplace
             :param p_destination: destination (pose) que le joueur doit atteindre
         """
-        Action.__init__(self, p_game_state)
+        Action.__init__(self, game_state)
         assert(isinstance(player, Player))
         assert(isinstance(p_destination, Pose))
         self.player_id = player.id
         self.destination = p_destination
-        self.speed = speed
+        self.cruise_speed = cruise_speed
 
     def exec(self):
         """
@@ -42,4 +42,4 @@ class PathfindToPosition(Action):
                          AICommandType.MOVE,
                          **{"pose_goal": move_destination,
                             "pathfinder_on": True,
-                            "cruise_speed": self.speed})
+                            "cruise_speed": self.cruise_speed})

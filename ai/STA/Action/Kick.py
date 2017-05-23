@@ -14,13 +14,13 @@ class Kick(Action):
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur qui doit frapper la balle
     """
-    def __init__(self, p_game_state, p_player_id, p_force, target=Pose()):
+    def __init__(self, game_state, p_player_id, p_force, target=Pose()):
         """
-            :param p_game_state: L'état courant du jeu.
+            :param game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui frappe la balle
             :param p_force: force du kicker (float entre 0 et 1)
         """
-        Action.__init__(self, p_game_state)
+        Action.__init__(self, game_state)
         assert(isinstance(p_player_id, int))
         assert PLAYER_PER_TEAM >= p_player_id >= 0
         assert(isinstance(p_force, (int, float)))

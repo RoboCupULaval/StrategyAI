@@ -14,8 +14,8 @@ from . tactic_constants import Flags
 
 
 class RobotIdent(Tactic):
-    def __init__(self, p_game_state, player_id, target, args):
-        super().__init__(p_game_state, player_id, target, args)
+    def __init__(self, game_state, player_id, target, args):
+        super().__init__(game_state, player_id, target, args)
         self.target = target
         self.status_flag = Flags.INIT
 

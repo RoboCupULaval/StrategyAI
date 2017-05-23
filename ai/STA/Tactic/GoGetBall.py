@@ -38,24 +38,24 @@ class GoGetBall(Tactic):
         target: Position à laquelle faire face après avoir pris la balle
     """
 
-    def __init__(self, p_game_state, player_id, target=None, args=None):
+    def __init__(self, game_state, player_id, target=None, args=None):
         if target is None:
-            if p_game_state.get_our_team_color() == 0: #yellow
-                target = Pose(p_game_state.const["FIELD_GOAL_BLUE_MID_GOAL"],
-                              get_angle(p_game_state.my_team.players[player_id].pose.position,
-                                        p_game_state.const["FIELD_GOAL_BLUE_MID_GOAL"]))
+            if game_state.get_our_team_color() == 0: #yellow
+                target = Pose(game_state.const["FIELD_GOAL_BLUE_MID_GOAL"],
+                              get_angle(game_state.my_team.players[player_id].pose.position,
+                                        game_state.const["FIELD_GOAL_BLUE_MID_GOAL"]))
             else:
-                target = Pose(p_game_state.const["FIELD_GOAL_YELLOW_MID_GOAL"],
-                              get_angle(p_game_state.my_team.players[player_id].pose.position,
-                                        p_game_state.const["FIELD_GOAL_YELLOW_MID_GOAL"]))
-        Tactic.__init__(self, p_game_state, player_id, target, args)
+                target = Pose(game_state.const["FIELD_GOAL_YELLOW_MID_GOAL"],
+                              get_angle(game_state.my_team.players[player_id].pose.position,
+                                        game_state.const["FIELD_GOAL_YELLOW_MID_GOAL"]))
+        Tactic.__init__(self, game_state, player_id, target, args)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
 
         self.player_id = player_id
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball
-        self.p_game_state = p_game_state
+        self.p_game_state = game_state
         self.move_action = \
             GoToPositionNoPathfinder(self.game_state,
                                      self.player_id,

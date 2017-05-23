@@ -43,8 +43,8 @@ class GoKick(Tactic):
         target: Position à laquelle faire face après avoir pris la balle
     """
 
-    def __init__(self, p_game_state, player_id, target=Pose(), args=None):
-        Tactic.__init__(self, p_game_state, player_id, target, args)
+    def __init__(self, game_state, player_id, target=Pose(), args=None):
+        Tactic.__init__(self, game_state, player_id, target, args)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
 
