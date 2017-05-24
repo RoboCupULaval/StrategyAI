@@ -1,9 +1,9 @@
 # Under MIT license, see LICENSE.txt
-from .Action import Action
-# from ...Util.types import AICommand
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
+from ai.states.game_state import GameState
 
 
 class MoveToPosition(Action):
@@ -12,31 +12,27 @@ class MoveToPosition(Action):
     Méthodes :
         exec(self): Retourne la pose où se rendre
     Attributs (en plus de ceux de Action):
-        player_id : L'identifiant du joueur
         destination : La destination (pose) que le joueur doit atteindre
     """
-    def __init__(self, game_state, p_player_id, p_destination, cruise_speed=1):
+    def __init__(self, game_state: GameState, player: OurPlayer, p_destination: Pose, cruise_speed: [int, float]=1):
         """
             :param game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui se déplace
             :param p_destination: destination (pose) que le joueur doit atteindre
+            :param cruise_speed
         """
-        Action.__init__(self, game_state)
-        assert(isinstance(p_player_id, int))
-        assert PLAYER_PER_TEAM >= p_player_id >= 0
-        assert(isinstance(p_destination, Pose))
-        self.player_id = p_player_id
+        Action.__init__(self, game_state, player)
+        assert isinstance(p_destination, Pose)
+        assert isinstance(cruise_speed, [int, float])
         self.destination = p_destination
         self.cruise_speed = cruise_speed
 
     def exec(self):
         """
         Exécute le déplacement
-        :return: Un tuple (Pose, kick)
-                     où Pose est la destination du joueur
-                        kick est faux (on ne botte pas)
+        :return:
         """
-        return AICommand(self.player_id, AICommandType.MOVE,
-                         **{"pose_goal": self.destination,
-                            "pathfinder_on": False,
-                            "cruise_speed": self.cruise_speed})
+        self.player.ai_command = AICommand(self.player, AICommandType.MOVE,**{"pose_goal": self.destination,
+                                                                              "pathfinder_on": False,
+                                                                              "cruise_speed": self.cruise_speed})
+        return self.player.ai_command

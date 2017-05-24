@@ -1,14 +1,12 @@
 # Under MIT licence, see LICENCE.txt
-import math
 import numpy as np
 
 from RULEngine.Game.OurPlayer import OurPlayer
-from ai.states.game_state import GameState
-from ai.STA.Action.Action import Action
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from ai.states.game_state import GameState
+from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
-
 
 __author__ = 'Robocup ULaval'
 
@@ -76,6 +74,7 @@ class GoBetween(Action):
         player_to_target = target - player
         destination_orientation = np.arctan2(player_to_target[1], player_to_target[0])
 
+        # TODO remove MGL 2017/05/23
         '''
         delta_x = self.position2.x - self.position1.x
         delta_y = self.position2.y - self.position1.y

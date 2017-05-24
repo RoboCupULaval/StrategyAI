@@ -1,12 +1,11 @@
 # Under MIT licence, see LICENCE.txt
-from .Action import Action
-#from ...Util.types import AICommand
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_angle
-from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
-
+from ai.states.game_state import GameState
 
 __author__ = 'Robocup ULaval'
 
@@ -17,20 +16,16 @@ class MoveToDribblingBall(Action):
     Méthodes :
         exec(self): Retourne la pose où se rendre
     Attributs (en plus de ceux de Action):
-        player_id : L'identifiant du joueur
         destination : La position où on souhaite déplacer le robot
     """
-    def __init__(self, game_state, p_player_id, p_destination):
+    def __init__(self, game_state: GameState, player: OurPlayer, p_destination: Position):
         """
             :param game_state: L'état courant du jeu.
-            :param p_player_id: Identifiant du joueur qui se déplace avec la balle
+            :param player: Instance du joueur qui se déplace avec la balle
             :param p_destination: La position où on souhaite déplacer le robot
         """
-        Action.__init__(self, game_state)
-        assert(isinstance(p_player_id, int))
-        assert PLAYER_PER_TEAM >= p_player_id >= 0
+        Action.__init__(self, game_state, player)
         assert(isinstance(p_destination, Position))
-        self.player_id = p_player_id
         self.destination = p_destination
 
     def exec(self):
@@ -38,11 +33,11 @@ class MoveToDribblingBall(Action):
         Exécute le déplacement en tenant compte de la possession de la balle. Le robot se déplace vers la destination,
         mais s'oriente de façon à garder la balle sur le dribleur. C'est la responsabilité de la Tactique de faire les
         corrections de trajectoire nécessaire.
-        :return: Un tuple (Pose, kick) où Pose est la destination du joueur kick est faux (on ne botte pas)
+        :return:
         """
         # TODO: Améliorer le comportement en ajoutant l'intervalle d'anle correspondant à la largeur du dribbleur
-        destination_orientation = get_angle(self.game_state.get_player_pose(self.player_id).position,
+        destination_orientation = get_angle(self.player.pose.position,
                                             self.game_state.get_ball_position())
         destination_pose = Pose(self.destination, destination_orientation)
-        kick_strength = 0
-        return AICommand(self.player_id, AICommandType.MOVE, **{"pose_goal": destination_pose})
+        self.player.ai_command = AICommand(self.player, AICommandType.MOVE, **{"pose_goal": destination_pose})
+        return self.player.ai_command

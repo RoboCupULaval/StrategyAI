@@ -9,9 +9,7 @@ class Idle(Action):
     """
     Action Stop: Arrête le robot
     Méthodes :
-        exec(self): Retourne la position du joueur qui l'a appelé
-    Attributs (en plus de ceux de Action):
-        player_id : L'identifiant du joueur
+        exec(self): Retourne une ai_command STOP
     """
     def __init__(self, game_state: GameState, player: OurPlayer):
         """
@@ -23,7 +21,6 @@ class Idle(Action):
     def exec(self):
         """
         Exécute l'arrêt
-        :return: Un tuple (None, kick) où None pour activer une commande de stop et kick est nul (on ne botte pas)
         """
         # un None pour que le coachcommandsender envoi une command vide.
         self.player.ai_command = AICommand(self.player, AICommandType.STOP)

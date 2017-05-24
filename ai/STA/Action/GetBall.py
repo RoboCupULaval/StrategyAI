@@ -1,13 +1,10 @@
 # Under MIT licence, see LICENCE.txt
 from RULEngine.Game.OurPlayer import OurPlayer
-from ai.states.game_state import GameState
-from .Action import Action
-#from ...Util.types import AICommand
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import get_angle
-from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.states.game_state import GameState
+from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
-
 
 __author__ = 'Robocup ULaval'
 

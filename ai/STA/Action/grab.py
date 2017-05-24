@@ -2,22 +2,16 @@
 import numpy as np
 
 from RULEngine.Game.OurPlayer import OurPlayer
-from ai.STA.Action.Action import Action
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
 from ai.states.game_state import GameState
 
+__author__ = 'Robocup ULaval'
+
 
 class Grab(Action):
-    """
-    Action Move_to: Deplace le robot en vitesse
-    Methodes :
-        exec(self): Retourne la vitesse en pose
-    Attributs (en plus de ceux de Action):
-        player_id : L'identifiant du joueur
-        speed_pose : Pose representant le vecteur vitesse x,y et la vitesse en orientation du robot
-    """
     def __init__(self, game_state: GameState, player: OurPlayer):
         """
             :param game_state: L'etat courant du jeu.
@@ -26,12 +20,6 @@ class Grab(Action):
         Action.__init__(self, game_state, player)
 
     def exec(self):
-        """
-        Execute le deplacement
-        :return: Un tuple (Pose, kick)
-                     ou Pose est la destination du joueur
-                        kick est faux (on ne botte pas)
-        """
         ball = self.game_state.get_ball_position().conv_2_np()
         player = self.player.pose.position.conv_2_np()
         player_to_ball = ball - player

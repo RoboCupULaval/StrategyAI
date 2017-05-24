@@ -8,7 +8,6 @@ from ai.STA.Strategy.Strategy import Strategy
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.STA.Tactic.DemoFollowBall import DemoFollowBall
 from ai.STA.Tactic.DemoFollowRobot import DemoFollowRobot
-from ai.STA.Tactic.DemoFollowTarget import DemoFollowTarget
 from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.Joystick import Joystick
@@ -24,8 +23,8 @@ class BambaFollow(Strategy):
         robot3 = self.game_state.my_team.available_players[3]
         args = [-1, -1, 0]
         self.add_tactic(robot1.id, DemoFollowBall(self.game_state, robot1))
-        self.add_tactic(robot2.id, DemoFollowRobot(self.game_state, robot2, args=[robot1]))
-        self.add_tactic(robot3.id, DemoFollowRobot(self.game_state, robot3, args=[robot2]))
+        self.add_tactic(robot2.id, DemoFollowRobot(self.game_state, robot2, args=[robot1.id]))
+        self.add_tactic(robot3.id, DemoFollowRobot(self.game_state, robot3, args=[robot2.id]))
 
         for player in self.game_state.my_team.available_players.values():
             if not (player.id == robot1.id or player.id == robot2.id or player.id == robot3.id):

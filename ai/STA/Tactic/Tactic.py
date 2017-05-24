@@ -40,7 +40,6 @@ class Tactic:
         self.next_state = self.halt
         self.status_flag = Flags.INIT
         self.target = target
-        self.last_state_time = self.game_state.get_timestamp()
 
     def halt(self) -> Idle:
         """

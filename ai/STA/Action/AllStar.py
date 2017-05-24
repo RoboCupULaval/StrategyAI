@@ -1,9 +1,13 @@
 # Under MIT license, see LICENSE.txt
+from typing import Dict
+
 from RULEngine.Game.OurPlayer import OurPlayer
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
 from RULEngine.Util.Pose import Pose
 from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
+
+__author__ = 'Robocup ULaval'
 
 
 class AllStar(Action):
@@ -14,7 +18,7 @@ class AllStar(Action):
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur
     """
-    def __init__(self, game_state: GameState, player: OurPlayer, **other_args):
+    def __init__(self, game_state: GameState, player: OurPlayer, **other_args: Dict):
         """
             :param game_state: L'état courant du jeu.
             :param player: Identifiant du joueur qui s'arrête

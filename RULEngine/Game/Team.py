@@ -7,7 +7,8 @@ from config.config_service import ConfigService
 
 
 class Team:
-    def __init__(self, team_color):
+    def __init__(self, team_color: TeamColor):
+        assert isinstance(team_color, TeamColor)
         self.players = {}
         for player_id in range(PLAYER_PER_TEAM):
             self.players[player_id] = Player(self, player_id)

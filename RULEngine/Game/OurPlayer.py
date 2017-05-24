@@ -1,3 +1,4 @@
+from RULEngine.Game.OurTeam import OurTeam
 from RULEngine.Game.Player import Player
 from RULEngine.Util.kalman_filter.friend_kalman_filter import FriendKalmanFilter
 
@@ -7,7 +8,7 @@ class OurPlayer(Player):
     max_angular_speed = 6.2
     max_acc = 1
 
-    def __init__(self, team, id):
+    def __init__(self, team: OurTeam, id: int):
         super().__init__(team=team, id=id)
 
         self.kf = FriendKalmanFilter()

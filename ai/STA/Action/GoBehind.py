@@ -3,13 +3,14 @@ import math
 import numpy as np
 
 from RULEngine.Game.OurPlayer import OurPlayer
-from ai.states.game_state import GameState
-from ai.STA.Action import Action
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.constant import TeamColor
+from ai.states.game_state import GameState
+from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
+
 __author__ = 'Robocup ULaval'
 
 
@@ -26,22 +27,22 @@ class GoBehind(Action):
         position2 : La position par rapport à laquelle le robot doit être "derrière" l'objet de la position 1
                     (exemple: le but)
     """
-    def __init__(self, game_state: GameState, player: OurPlayer, p_position1: Position, p_position2: Position=None,
-                 p_distance_behind: int=250, cruise_speed: int=1, pathfinding: bool=False, orientation: str='front'):
+    def __init__(self, game_state: GameState, player: OurPlayer, position1: Position, position2: Position=None,
+                 distance_behind: int=250, cruise_speed: int=1, pathfinding: bool=False, orientation: str= 'front'):
         """
             :param game_state: L'état courant du jeu.
             :param player: Instance du joueur qui doit se déplacer
-            :param p_position1: La position de l'objet derrière lequel le robot doit se placer (exemple: le ballon)
-            :param p_position2: La position par rapport à laquelle le robot doit être "derrière" l'objet
+            :param position1: La position de l'objet derrière lequel le robot doit se placer (exemple: le ballon)
+            :param position2: La position par rapport à laquelle le robot doit être "derrière" l'objet
                                 de la position 1 (exemple: le but)
-            :param p_distance_behind: La distance a atteindre derriere la position 1
+            :param distance_behind: La distance a atteindre derriere la position 1
         """
         Action.__init__(self, game_state, player)
-        assert(isinstance(p_position1, Position))
-        assert(isinstance(p_position2, Position))
-        self.position1 = p_position1
-        self.position2 = p_position2
-        self.distance_behind = p_distance_behind
+        assert(isinstance(position1, Position))
+        assert(isinstance(position2, Position))
+        self.position1 = position1
+        self.position2 = position2
+        self.distance_behind = distance_behind
         self.pathfind = pathfinding
         self.rayon_avoid = 300  # (mm)
         self.cruise_speed = cruise_speed
