@@ -131,6 +131,5 @@ class GoBetween(Action):
         return Pose(Position.from_np(destination), destination_orientation)
 
     def exec(self):
-        destination_pose = {"pose_goal": self.get_destination(), "pathfinder_on": self.pathfind}
-        self.player.ai_command = AICommand(self.player, AICommandType.MOVE, **destination_pose)
-        return self.player.ai_command
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.get_destination(),
+                                                             "pathfinder_on": self.pathfind})

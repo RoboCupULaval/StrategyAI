@@ -21,7 +21,6 @@ class BambaFollow(Strategy):
         robot1 = self.game_state.my_team.available_players[4]
         robot2 = self.game_state.my_team.available_players[2]
         robot3 = self.game_state.my_team.available_players[3]
-        args = [-1, -1, 0]
         self.add_tactic(robot1.id, DemoFollowBall(self.game_state, robot1))
         self.add_tactic(robot2.id, DemoFollowRobot(self.game_state, robot2, args=[robot1.id]))
         self.add_tactic(robot3.id, DemoFollowRobot(self.game_state, robot3, args=[robot2.id]))

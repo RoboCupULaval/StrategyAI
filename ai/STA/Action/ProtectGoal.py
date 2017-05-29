@@ -73,5 +73,4 @@ class ProtectGoal(Action):
         destination_orientation = get_angle(destination_position, ball_position)
 
         destination_pose = Pose(destination_position, destination_orientation)
-        self.player.ai_command = AICommand(self.player, AICommandType.MOVE, **{"pose_goal": destination_pose})
-        return self.player.ai_command
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": destination_pose})

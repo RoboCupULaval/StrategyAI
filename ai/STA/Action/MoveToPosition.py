@@ -32,7 +32,6 @@ class MoveToPosition(Action):
         Exécute le déplacement
         :return:
         """
-        self.player.ai_command = AICommand(self.player, AICommandType.MOVE,**{"pose_goal": self.destination,
-                                                                              "pathfinder_on": False,
-                                                                              "cruise_speed": self.cruise_speed})
-        return self.player.ai_command
+        return AICommand(self.player, AICommandType.MOVE,**{"pose_goal": self.destination,
+                                                            "pathfinder_on": False,
+                                                            "cruise_speed": self.cruise_speed})

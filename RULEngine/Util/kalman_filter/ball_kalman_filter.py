@@ -73,12 +73,12 @@ class BallKalmanFilter:
                            [0, 0, 1, 0],  # Speed x
                            [0, 0, 0, 1]])  # Speed y
 
-    def filter(self, observation=None, command=None, dt=0.05):
+    def filter(self, observation=None, dt=0.05):
         if not dt:
             dt = self.default_dt
         self.transition_model(dt)
         if observation is not None:
             self.update(observation)
-        self.predict(command)
+        self.predict()
         output_state = self.x
         return output_state

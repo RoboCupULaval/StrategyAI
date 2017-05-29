@@ -39,5 +39,4 @@ class MoveToDribblingBall(Action):
         destination_orientation = get_angle(self.player.pose.position,
                                             self.game_state.get_ball_position())
         destination_pose = Pose(self.destination, destination_orientation)
-        self.player.ai_command = AICommand(self.player, AICommandType.MOVE, **{"pose_goal": destination_pose})
-        return self.player.ai_command
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": destination_pose})

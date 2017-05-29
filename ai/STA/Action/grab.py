@@ -25,6 +25,4 @@ class Grab(Action):
         player_to_ball = ball - player
         player_to_ball = 0.3 * player_to_ball / np.linalg.norm(player_to_ball)
         speed_pose = Pose(Position.from_np(player_to_ball))
-        self.player.ai_command = AICommand(self.player, AICommandType.MOVE,
-                                           **{"pose_goal": speed_pose, "speed_flag": True})
-        return self.player.ai_command
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": speed_pose, "speed_flag": True})

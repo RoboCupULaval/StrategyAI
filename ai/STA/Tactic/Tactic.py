@@ -26,12 +26,12 @@ class Tactic:
         assert isinstance(game_state, GameState), "Le game_state doit être un GameState"
         assert isinstance(player, OurPlayer), "Le player doit être un OurPlayer"
         assert isinstance(target, Pose), "La target devrait être une Pose"
-        assert isinstance(args, List), "Le paramètre args doit être une liste"
+        # assert isinstance(args, list) or isinstance(args, None), "Le paramètre args doit être une liste"
 
         self.game_state = game_state
         self.player = player
         self.player_id = player.id
-        if self.args is None:
+        if args is None:
             self.args = []
         else:
             self.args = args

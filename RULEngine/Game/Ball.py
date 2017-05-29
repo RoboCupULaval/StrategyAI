@@ -12,7 +12,8 @@ class Ball:
         self.kf = BallKalmanFilter()
 
     def kalman_update(self, poses, delta):
-        ret = self.kf.filter(poses, None, delta)
+        print(poses)
+        ret = self.kf.filter(poses, delta)
         self._position = Position(ret[0], ret[1])
         self.velocity = Position(ret[2], ret[3])
 

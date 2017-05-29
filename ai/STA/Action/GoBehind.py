@@ -116,12 +116,9 @@ class GoBehind(Action):
             destination_orientation = get_angle(destination_position, self.position1) + np.pi
 
         destination_pose = Pose(destination_position, destination_orientation)
-        # non pertinent
-        # DebugInterface().add_log(1, "orientation go behind {}".format(destination_orientation))
         return destination_pose
 
     def exec(self):
-        destination_pose = {"pose_goal": self.get_destination(), "cruise_speed": self.cruise_speed,
-                            "pathfinder_on": self.pathfind}
-        self.player.ai_command = AICommand(self.player, AICommandType.MOVE, **destination_pose)
-        return self.player.ai_command
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.get_destination(),
+                                                             "cruise_speed": self.cruise_speed,
+                                                             "pathfinder_on": self.pathfind})

@@ -44,5 +44,4 @@ class AllStar(Action):
         :return: Un tuple (None, kick) où None pour activer une commande de stop et kick est nul (on ne botte pas)
         """
         # un None pour que le coachcommandsender envoi une command vide.
-        self.player.ai_command = AICommand(self.player, self.ai_command_type, **self.other_args)
         return AICommand(self.player, self.ai_command_type, **self.other_args)

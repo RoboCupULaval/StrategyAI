@@ -85,6 +85,7 @@ class PathfinderModule(Executor):
 
     def draw_path(self, path, pid=0):
         points = []
+        print(path)
         for idx, path_element in enumerate(path.points):
             x = path_element.x
             y = path_element.y

@@ -42,8 +42,7 @@ class Kick(Action):
         player_to_target = target - player
         player_to_target = 0.3 * player_to_target / np.linalg.norm(player_to_target)
         self.speed_pose = Pose(Position.from_np(player_to_target))
-        self.player.ai_command = AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.speed_pose,
-                                                                               "speed_flag": True,
-                                                                               "kick": True,
-                                                                               "kick_strength": self.force})
-        return self.player.ai_command
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.speed_pose,
+                                                             "speed_flag": True,
+                                                             "kick": True,
+                                                             "kick_strength": self.force})

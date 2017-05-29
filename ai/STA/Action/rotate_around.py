@@ -41,6 +41,4 @@ class RotateAround(Action):
         """
         Exécute le déplacement
         """
-        self.player.ai_command = AICommand(self.player, AICommandType.MOVE,
-                                           **{"pose_goal": self.generate_destination()})
-        return self.player.ai_command
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.generate_destination()})

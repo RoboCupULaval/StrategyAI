@@ -22,6 +22,4 @@ class Idle(Action):
         """
         Exécute l'arrêt
         """
-        # un None pour que le coachcommandsender envoi une command vide.
-        self.player.ai_command = AICommand(self.player, AICommandType.STOP)
-        return self.player.ai_command
+        return AICommand(self.player, AICommandType.STOP)

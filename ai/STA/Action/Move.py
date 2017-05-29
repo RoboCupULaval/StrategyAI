@@ -29,6 +29,4 @@ class Move(Action):
         """
         Execute le deplacement
         """
-        self.player.ai_command = AICommand(self.player, AICommandType.MOVE,
-                                           **{"pose_goal": self.speed_pose, "speed_flag": True})
-        return self.player.ai_command
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.speed_pose, "speed_flag": True})

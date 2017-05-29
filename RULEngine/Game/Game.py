@@ -114,8 +114,8 @@ class Game:
                 kalman_yellow[i].append(c["yellows"][i])
 
         for i in range(0, 6):
-            self.blue_team.kalman_update(i, kalman_blue[i], delta)
-            self.yellow_team.kalman_update(i, kalman_yellow[i], delta)
+            self.blue_team.update_player(i, kalman_blue[i], delta)
+            self.yellow_team.update_player(i, kalman_yellow[i], delta)
 
     @staticmethod
     def _update_players_of_team(players, team, delta):

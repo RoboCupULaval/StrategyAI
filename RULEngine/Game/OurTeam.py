@@ -8,9 +8,14 @@ class OurTeam(Team):
     def __init__(self, team_color: TeamColor):
         super().__init__(team_color)
         # It is our team so we use our player!
-        self.available_players = {}
         for player_id in range(PLAYER_PER_TEAM):
             self.players[player_id] = OurPlayer(self, player_id)
             if player_id < 6:
                 self.players[player_id].in_play = True
                 self.available_players[player_id] = self.players[player_id]
+
+    def _kalman_update(self, player_id, pose_list, delta=0):
+        try:
+            self.players[player_id].update(pose_list, delta)
+        except KeyError as err:
+            raise err

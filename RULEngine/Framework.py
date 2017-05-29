@@ -49,7 +49,8 @@ class Framework(object):
         self.last_frame_number = 0
         self.time_stamp = time.time()
         self.last_camera_time = time.time()
-        self.ai_timestamp = self.cfg.config_dict["GAME"]["ai_timestamp"]
+        self.time_of_last_loop = time.time()
+        self.ai_timestamp = float(self.cfg.config_dict["GAME"]["ai_timestamp"])
 
         # thread
         self.ia_running_thread = None
@@ -204,7 +205,7 @@ class Framework(object):
     def _kalman_vision(self):
         vision_frames = self.vision.pop_frames()
         new_image_packet = self.image_transformer.update(vision_frames)
-        if time.time() - self.time_stamp > self.ai_timestamp:
+        if time.time() - self.time_of_last_loop > self.ai_timestamp:
             time_delta = time.time() - self.time_stamp
             self.game.update(new_image_packet, time_delta)
             self._update_debug_info()
@@ -215,6 +216,7 @@ class Framework(object):
             self.game.set_command(robot_commands)
             self._send_debug_commands()
             self._send_new_vision_packet()
+            self.time_of_last_loop = time.time()
         time.sleep(0)
 
     """

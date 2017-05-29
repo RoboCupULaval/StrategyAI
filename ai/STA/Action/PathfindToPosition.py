@@ -33,7 +33,6 @@ class PathfindToPosition(Action):
                         kick est faux (on ne botte pas)
         """
         move_destination = self.destination
-        self.player.ai_command = AICommand(self.player, AICommandType.MOVE, **{"pose_goal": move_destination,
-                                                                               "pathfinder_on": True,
-                                                                               "cruise_speed": self.cruise_speed})
-        return self.player.ai_command
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": move_destination,
+                                                             "pathfinder_on": True,
+                                                             "cruise_speed": self.cruise_speed})
