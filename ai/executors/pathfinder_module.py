@@ -52,7 +52,7 @@ class PathfinderModule(Executor):
     def _pathfind_ai_commands(self, ai_commands:AIcommands):
         for ai_c in ai_commands:
 
-            #self.time = time.time()
+            self.time = time.time()
 
             # print(self.time - time.time())
             if self.type_of_pathfinder.lower() == "path_part":
