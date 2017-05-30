@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from RULEngine.Game.Referee import RefereeCommand
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 
@@ -23,9 +23,26 @@ class PlayExecutor(Executor):
         # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
         self._send_books()
 
+        if self.ws.play_state.autonomous_flag:
+            self._select_strategy()
+
         self._execute_strategy()
         # TODO reduce the frequency at which we send it maybe? MGL 2017/03/16
         self._send_robots_status()
+
+    def _select_strategy(self) -> None:
+        self.ws.play_state.set_strategy(self.ws.play_state.
+                                        get_new_strategy("DoNothing")
+                                        (self.ws.game_state))
+
+        referee_command = self.ws.game_state.game.referee.command
+
+        if referee_command == RefereeCommand.STOP:
+            print("Stop robots!")
+        elif referee_command == RefereeCommand.HALT:
+            print("Halt robots!")
+        else:
+            print("Unknown command")
 
     def _execute_strategy(self) -> None:
         """

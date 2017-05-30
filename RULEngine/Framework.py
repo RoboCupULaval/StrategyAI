@@ -231,6 +231,9 @@ class Framework(object):
         new_image_packet = self.image_transformer.update(vision_frames)
         self.game.field.update_field_dimensions(vision_frames)
 
+        referee_frames = self.referee_command_receiver.pop_frames()
+        self.game.referee.update(referee_frames)
+
         if time.time() - self.last_loop > 0.05:
             time_delta = time.time() - self.last_time
             self.game.update_kalman(new_image_packet, time_delta)
