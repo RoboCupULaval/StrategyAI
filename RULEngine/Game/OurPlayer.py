@@ -19,6 +19,10 @@ class OurPlayer(Player):
         self.update = self._friend_kalman_update
 
     def _friend_kalman_update(self, poses, delta):
-        ret = self.kf.filter(poses, self.ai_command, delta)
+        ret = self.kf.filter(poses, self.cmd, delta)
         self.pose = Pose(Position(ret[0], ret[1]), ret[4])
         self.velocity = [ret[2], ret[3], ret[5]]
+
+    def set_command(self, cmd):
+        self.cmd = [cmd.cmd_repr.position.x, cmd.cmd_repr.position.y, cmd.cmd_repr.orientation]
+

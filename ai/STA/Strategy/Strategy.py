@@ -75,6 +75,7 @@ class Strategy(metaclass=ABCMeta):
         commands = {}
         for player in self.game_state.my_team.available_players.values():
             commands[player.id] = self.graphs[player.id].exec()
+            player.ai_command = commands[player.id]
         return commands
 
     def __str__(self):

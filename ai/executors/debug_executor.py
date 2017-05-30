@@ -76,9 +76,9 @@ class DebugExecutor(Executor):
         # TODO make implementation for other tactic packets!
         # FIXME this pid thingy is getting out of control
         # find the player id in question
-        player_id = self._sanitize_pid(cmd.data['id'])
         # get the player if applicable!
-        this_player = self.ws.game_state.get_player(player_id)
+        this_player = self.ws.game_state.get_player(cmd.data['id'])
+        player_id = this_player.id
         tactic_name = cmd.data['tactic']
         # TODO ui must send better packets back with the args.
         target = cmd.data['target']
@@ -94,6 +94,7 @@ class DebugExecutor(Executor):
             print(e)
             print("La tactique n'a pas été appliquée par "
                   "cause de mauvais arguments.")
+            raise e
 
         if isinstance(self.ws.play_state.current_strategy, HumanControl):
             hc = self.ws.play_state.current_strategy

@@ -19,3 +19,10 @@ class OurTeam(Team):
             self.players[player_id].update(pose_list, delta)
         except KeyError as err:
             raise err
+
+    # todo change this MGL 2017/05/29
+    def update_player_command(self, player_id, cmd):
+        try:
+            self.players[player_id].set_command(cmd)
+        except KeyError as err:
+            raise err

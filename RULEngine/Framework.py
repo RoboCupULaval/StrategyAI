@@ -255,14 +255,16 @@ class Framework(object):
             team = self.game.friends
 
             # FIXME: hack real life
-            cmd = Dribbler(team.players[4], 0)
-            self.robot_command_sender.send_command(cmd)
-            for player in team.players.values():
-                command = Stop(player)
-                self.robot_command_sender.send_command(command)
-        except:
+            for player in team.available_players.values():
+                if player.ai_command is not None:
+                    command = Stop(player)
+                    self.robot_command_sender.send_command(command)
+                    command = Dribbler(player, False)
+                    self.robot_command_sender.send_command(command)
+        except Exception as e:
             print("Could not stop players")
             print("Au nettoyage il a été impossible d'arrêter les joueurs.")
+            raise e
             # raise StopPlayerError("Au nettoyage il a été impossible d'arrêter les joueurs.")
 
     def _wait_for_first_frame(self):

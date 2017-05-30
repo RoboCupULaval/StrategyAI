@@ -96,7 +96,6 @@ class PathPartitionner(Pathfinder):
         self.closest_obs_speed = np.array([0, 0])
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None, old_path=None, old_raw_path=None):
-
         # tentative de code pour ne pas recalculer le path a
         # toutes les ittérations (marche un peu mais introduit un bug)
         if old_path is None:
@@ -337,7 +336,6 @@ class PathPartitionner(Pathfinder):
         pass
 
     def remove_redundant_points(self):
-
         return Path().generate_path_from_points(remove_duplicates(self.path.points), self.path.speeds)
 
 

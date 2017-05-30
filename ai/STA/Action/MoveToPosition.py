@@ -23,7 +23,7 @@ class MoveToPosition(Action):
         """
         Action.__init__(self, game_state, player)
         assert isinstance(p_destination, Pose)
-        assert isinstance(cruise_speed, [int, float])
+        assert isinstance(cruise_speed, (int, float))
         self.destination = p_destination
         self.cruise_speed = cruise_speed
 
@@ -32,6 +32,6 @@ class MoveToPosition(Action):
         Exécute le déplacement
         :return:
         """
-        return AICommand(self.player, AICommandType.MOVE,**{"pose_goal": self.destination,
-                                                            "pathfinder_on": False,
-                                                            "cruise_speed": self.cruise_speed})
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.destination,
+                                                             "pathfinder_on": False,
+                                                             "cruise_speed": self.cruise_speed})

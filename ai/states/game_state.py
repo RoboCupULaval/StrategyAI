@@ -43,10 +43,14 @@ class GameState(object, metaclass=Singleton):
         :param is_my_team: True for ally team, False for opponent team
         :return: the player instance
         """
-        if is_my_team:
-            return self.my_team.available_players[player_id]
-        else:
-            return self.other_team.available_players[player_id]
+        try:
+            if is_my_team:
+                return self.my_team.available_players[player_id]
+            else:
+                return self.other_team.available_players[player_id]
+        except Exception as e:
+            print(e)
+            raise e
 
     def get_player_pose(self, player_id: int, is_my_team=True) -> Pose:
         """

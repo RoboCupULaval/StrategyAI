@@ -14,7 +14,7 @@ class Player:
 
         self.id = id
         self.team = team
-        self.pose = Pose(Position(10000, 10000))
+        self.pose = Pose()
         self.velocity = [0, 0, 0]
         self.kf = EnemyKalmanFilter()
         self.update = self._update
@@ -33,6 +33,5 @@ class Player:
         self.pose = Pose(Position(ret[0], ret[1]), ret[4])
         self.velocity = [ret[2], ret[3], ret[5]]
 
-    def set_command(self, cmd):
-        self.cmd = [cmd.pose.position.x, cmd.pose.position.y, cmd.pose.orientation]
-
+    def __str__(self):
+        return str(self.team.team_color)+" id: "+str(self.id)

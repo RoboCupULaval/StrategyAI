@@ -267,7 +267,7 @@ class PID(object):
 def get_control_setting(is_sim: bool):
 
     if is_sim:
-        translation = {"kp": 0.01, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0}
+        translation = {"kp": 0.1, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0}
         rotation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0}
     else:
         translation = {"kp": 0.06, "ki": 0.01, "kd": 0, "antiwindup": 10, "deadzone": 0.005}

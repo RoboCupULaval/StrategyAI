@@ -1,7 +1,6 @@
 import time
 
 from RULEngine.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
-from RULEngine.Util.geometry import get_distance
 from ai.Algorithm.AsPathManager import AsPathManager
 from ai.Algorithm.CinePath.CinePath import CinePath
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
@@ -26,6 +25,7 @@ class PathfinderModule(Executor):
         self.last_frame = time.time()
         self.cinematic_pathfinder = CinePath(p_world_state)
         self.last_path = None
+        self.last_raw_path = None
 
     def exec(self):
         self._pathfind_ai_commands()
@@ -33,15 +33,20 @@ class PathfinderModule(Executor):
 
     def _pathfind_ai_commands(self) -> None:
         for player in self.ws.game_state.my_team.available_players.values():
-            if player.ai_command is None:
+            if player.ai_command is None or not player.ai_command.pathfinder_on:
                 continue
             if self.type_of_pathfinder.lower() == "path_part":
-                path = self.pathfinder.get_path(player,
-                                                player.ai_command.pose_goal,
-                                                player.ai_command.cruise_speed)
+                path, raw_path = self.pathfinder.get_path(player,
+                                                          player.ai_command.pose_goal,
+                                                          player.ai_command.cruise_speed)
                 self.draw_path(path)
+                # self.draw_path(raw_path, 1)
+                self.last_path = path
+                self.last_raw_path = raw_path
+
                 player.ai_command.path = path.points[1:]
                 player.ai_command.path_speeds = path.speeds
+
             else:
                 path = self.pathfinder.get_path(player.ai_command.robot_id, player.ai_command.pose_goal)
                 player.ai_command.path = path
@@ -85,7 +90,6 @@ class PathfinderModule(Executor):
 
     def draw_path(self, path, pid=0):
         points = []
-        print(path)
         for idx, path_element in enumerate(path.points):
             x = path_element.x
             y = path_element.y

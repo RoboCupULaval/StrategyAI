@@ -17,5 +17,5 @@ class TestTurnOnYou(Tactic):
     def exec(self):
         self.status_flag = Flags.WIP
         return MoveToPosition(self.game_state, self.player,
-                              Pose(self.game_state.get_player_position(self.player_id), 3.14))
+                              self.player.pose, 1)
 

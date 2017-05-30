@@ -11,9 +11,8 @@ PATHFINDER_DEADZONE = 10
 
 class MovementExecutor(Executor):
 
-    def __init__(self, p_world_state):
-        super().__init__(p_world_state)
-        self.debug_interface = DebugInterface()
+    def __init__(self, world_state):
+        super().__init__(world_state)
 
     def exec(self):
         # TODO revise and put in stone the way we do that! MGL 2017/03/16

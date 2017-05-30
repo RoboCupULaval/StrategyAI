@@ -49,4 +49,4 @@ class DemoFollowRobot(Tactic):
             self.next_state = self.halt
         else:
             self.next_state = self.move_to_ball
-        return Idle(self.game_state, self.player_id)
+        return Idle(self.game_state, self.player)
