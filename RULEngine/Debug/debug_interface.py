@@ -60,6 +60,7 @@ class DebugInterface(metaclass=Singleton):
 
     def __init__(self):
         self.debug_state = []
+        self.team_color = str(ConfigService().config_dict["GAME"]["our_color"])
         self.send_team_color(str(ConfigService().config_dict["GAME"]["our_color"]))
 
     def add_log(self, level, message):
