@@ -116,7 +116,7 @@ class RobotMotion(object):
         translation_cmd = self.limit_acceleration(translation_cmd)
         translation_cmd = np.clip(translation_cmd, -self.cruise_speed, self.cruise_speed)
         translation_cmd = fixed2robot(translation_cmd, self.current_orientation)
-
+        print(translation_cmd)
         translation_cmd[np.abs(translation_cmd) < self.setting.translation.deadzone] = 0
         if abs(rotation_cmd) < self.setting.rotation.deadzone: rotation_cmd = 0
 
@@ -267,7 +267,7 @@ class PID(object):
 def get_control_setting(is_sim: bool):
 
     if is_sim:
-        translation = {"kp": 0.1, "ki": 0.05, "kd": 1, "antiwindup": 10, "deadzone": 0}
+        translation = {"kp": 1, "ki": 0, "kd": 1, "antiwindup": 0, "deadzone": 0}
         rotation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0}
     else:
         translation = {"kp": 0.06, "ki": 0.01, "kd": 0, "antiwindup": 10, "deadzone": 0.005}

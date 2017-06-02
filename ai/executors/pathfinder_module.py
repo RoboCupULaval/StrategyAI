@@ -26,6 +26,7 @@ class PathfinderModule(Executor):
         self.cinematic_pathfinder = CinePath(p_world_state)
         self.last_path = None
         self.last_raw_path = None
+        self.last_pose_goal = None
 
     def exec(self):
         ai_commands = self._get_aicommand_that_need_path()
@@ -53,14 +54,20 @@ class PathfinderModule(Executor):
         for ai_c in ai_commands:
 
             self.time = time.time()
-
+            if not self.last_pose_goal == ai_c.pose_goal:
+                self.last_pose_goal = ai_c.pose_goal
+                self.last_path = None
+                self.last_raw_path = None
             # print(self.time - time.time())
             if self.type_of_pathfinder.lower() == "path_part":
                 path, raw_path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal,
                                                           ai_c.cruise_speed, self.last_path, self.last_raw_path)
                 self.draw_path(path)
                 #self.draw_path(raw_path, 1)
-                self.last_path = path
+                if path.get_path_length() < 100:
+                    self.last_path = None
+                else:
+                    self.last_path = path
                 self.last_raw_path = raw_path
                 ai_c.path = path.points[1:]
                 ai_c.path_speeds = path.speeds
