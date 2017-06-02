@@ -1,18 +1,16 @@
 # Under MIT License, see LICENSE.txt
-
+from enum import IntEnum
+import numpy as np
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.Util.ai_command import AICommandType, AIControlLoopType, AICommand
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
-
-from enum import IntEnum
-import numpy as np
-
 from config.config_service import ConfigService
 
 TARGET_TRESHOLD = 0.1
+
 
 class Pos(IntEnum):
     X = 0
@@ -29,8 +27,8 @@ class DotDict(dict):
 class MotionExecutor(Executor):
     def __init__(self, p_world_state: WorldState):
         super().__init__(p_world_state)
-        self.is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
-        self.robot_motion = [RobotMotion(p_world_state, player_id, is_sim=self.is_simulation) for player_id in
+        is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
+        self.robot_motion = [RobotMotion(p_world_state, player_id, is_sim=is_simulation) for player_id in
                              range(12)]
 
     def exec(self):
@@ -58,8 +56,8 @@ class MotionExecutor(Executor):
 
 
 class RobotMotion(object):
-    def __init__(self, p_world_state: WorldState, robot_id, is_sim=True):
-        self.ws = p_world_state
+    def __init__(self, world_state: WorldState, robot_id, is_sim=True):
+        self.ws = world_state
         self.id = robot_id
 
         self.dt = None
@@ -291,7 +289,3 @@ def fixed2robot(vector: np.ndarray, angle: float) -> np.ndarray:
 
 def normalized(vector: np.ndarray) -> np.ndarray:
     return vector / np.linalg.norm(vector)
-
-
-if __name__ == "__main__":
-    pass

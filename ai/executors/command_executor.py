@@ -28,11 +28,11 @@ class CommandExecutor(Executor):
         ready_to_ship_robot_packet_list = []
         # Transform to other command type
         for player in self.ws.game_state.my_team.available_players.values():
-            ready_to_ship_robot_packet_list.append(self._parse_ai_command(player))
+            ready_to_ship_robot_packet_list += (self._parse_ai_command(player))
         return ready_to_ship_robot_packet_list
 
     @staticmethod
-    def _parse_ai_command(player: OurPlayer) -> Command:
+    def _parse_ai_command(player: OurPlayer) -> List[Command]:
         """
         Transforme une ai_command en command d'envoi du RULEngine d'après certaines de ses caractéristiques
         :param player: (OurPlayer) instance du joueur
@@ -41,18 +41,19 @@ class CommandExecutor(Executor):
 
         # TODO add a way to stop the dribbler! MGL 2017/03/14
         # TODO restraindre une seul commande de mouvement par robot
+        temp = []
         if player.ai_command is not None:
             if player.ai_command.charge_kick:
-                return StartChargingKick(player)
+                temp.append(StartChargingKick(player))
 
             if player.ai_command.dribbler_on > 0:
-                return Dribbler(player)
+                temp.append(Dribbler(player))
 
             if player.ai_command.kick:
-                return Kick(player, player.ai_command.kick_strength)
+                temp.append(Kick(player))
 
             if player.ai_command.command == AICommandType.MOVE:
                 assert (isinstance(player.ai_command.speed, Pose))
-                return Move(player)
-
-        return Stop(player)
+                temp.append(Move(player))
+            return temp
+        return [Stop(player)]

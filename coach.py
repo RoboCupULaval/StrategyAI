@@ -8,7 +8,6 @@ from ai.executors.debug_executor import DebugExecutor
 from ai.executors.module_executor import ModuleExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.executors.command_executor import CommandExecutor
-from ai.executors.movement_executor import MovementExecutor
 from ai.executors.motion_executor import MotionExecutor
 from config.config_service import ConfigService
 
@@ -34,9 +33,9 @@ class Coach(object):
         self.debug_executor = DebugExecutor(self.world_state)
         self.play_executor = PlayExecutor(self.world_state)
         self.module_executor = ModuleExecutor(self.world_state)
-        self.movement_executor = MovementExecutor(self.world_state)
         self.motion_executor = MotionExecutor(self.world_state)
         self.robot_command_executor = CommandExecutor(self.world_state)
+
 
         # logging
         DebugInterface().add_log(1, "\nCoach initialized with \nmode_debug_active = "+str(self.mode_debug_active) +
@@ -52,7 +51,6 @@ class Coach(object):
         self.debug_executor.exec()
         self.play_executor.exec()
         self.module_executor.exec()
-        self.movement_executor.exec()
         self.motion_executor.exec()
         robot_commands = self.robot_command_executor.exec()
 

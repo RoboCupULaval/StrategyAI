@@ -1,15 +1,14 @@
 import time
+from typing import List
 
 from RULEngine.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 from ai.Algorithm.AsPathManager import AsPathManager
-from ai.Algorithm.CinePath.CinePath import CinePath
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Algorithm.path_partitionner import PathPartitionner
 from ai.Util.ai_command import AICommand
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 from config.config_service import ConfigService
-from typing import List
 
 INTERMEDIATE_DISTANCE_THRESHOLD = 540
 AIcommands = List[AICommand]
@@ -17,13 +16,12 @@ AIcommands = List[AICommand]
 
 class PathfinderModule(Executor):
 
-    def __init__(self, p_world_state: WorldState):
-        super().__init__(p_world_state)
+    def __init__(self, world_state: WorldState):
+        super().__init__(world_state)
         self.type_of_pathfinder = ConfigService().config_dict["STRATEGY"]["pathfinder"]
         self.pathfinder = self.get_pathfinder(self.type_of_pathfinder)
         self.last_time_pathfinding_for_robot = {}
         self.last_frame = time.time()
-        self.cinematic_pathfinder = CinePath(p_world_state)
         self.last_path = None
         self.last_raw_path = None
 
@@ -48,7 +46,9 @@ class PathfinderModule(Executor):
                 player.ai_command.path_speeds = path.speeds
 
             else:
-                path = self.pathfinder.get_path(player.ai_command.robot_id, player.ai_command.pose_goal)
+                path = self.pathfinder.get_path(player,
+                                                player.ai_command.pose_goal,
+                                                player.ai_command.cruise_speed)
                 player.ai_command.path = path
 
     # TODO find what this does? MGL 2017/05/17

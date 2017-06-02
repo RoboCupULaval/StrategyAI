@@ -55,6 +55,9 @@ class AICommand(object):
 
     # Getter and setter here?
 
+    def __str__(self):
+        return str(self.player.id)+"  " + str(self.player.team.team_color) + "  ->  "+str(id(self))
+
 
 class RotateAroundCommand(object):
     """ Please, move me somewhere else"""

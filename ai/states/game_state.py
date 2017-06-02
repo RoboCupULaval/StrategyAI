@@ -24,7 +24,6 @@ class GameState(object, metaclass=Singleton):
         self.my_team = None
         self.other_team = None
         self.timestamp = 0
-        self.last_timestamp = 0
         self.const = None
 
     def get_our_team_color(self) -> TeamColor:
@@ -94,13 +93,13 @@ class GameState(object, metaclass=Singleton):
         """
         return self.field.ball.velocity
 
-    def get_timestamp(self) -> float:
+    def get_delta_t(self) -> float:
         """
-            Retourne le timestamp de la state
+            Retourne le delta_t de la state
 
             :return: float: le timestamp
         """
-        return self.timestamp
+        return self.game.delta_t
 
     def set_reference(self, reference_transfer_object: ReferenceTransferObject) -> None:
         """
@@ -122,4 +121,3 @@ class GameState(object, metaclass=Singleton):
         self.other_team = self.game.enemies
         self.our_team_color = reference_transfer_object.team_color_svc.OUR_TEAM_COLOR
         self.const = self.game.field.constant
-        self.timestamp = reference_transfer_object.timestamp

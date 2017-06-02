@@ -47,7 +47,7 @@ class Framework(object):
 
         # time
         self.last_frame_number = 0
-        self.time_stamp = time.time()
+        self.time_stamp = None  #  time.time()
         self.last_camera_time = time.time()
         self.time_of_last_loop = time.time()
         self.ai_timestamp = float(self.cfg.config_dict["GAME"]["ai_timestamp"])
@@ -93,7 +93,7 @@ class Framework(object):
         # for testing purposes
         self.frame_number = 0
 
-        self.debug.add_log(1, "Framework started in {} s".format(time.time() - self.time_stamp))
+        # self.debug.add_log(1, "Framework started in {} s".format(time.time() - self.time_stamp))
 
     def _choose_vision_routines(self):
         if self.cfg.config_dict["IMAGE"]["kalman"] == "true":
@@ -128,8 +128,9 @@ class Framework(object):
         print(self.vision_routine)
         # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
         while not self.thread_terminate.is_set():
-            self.vision_routine()
             self.time_stamp = time.time()
+            self.vision_routine()
+            time.sleep(0)
 
     def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer):
         """ Démarrage du moteur de l'IA initial, ajustement de l'équipe de l'ia
@@ -142,7 +143,7 @@ class Framework(object):
         # GAME_WORLD TEAM ADJUSTMENT
         self.team_color_service = TeamColorService()
         self.reference_transfer_object.team_color_svc = self.team_color_service
-        print("Framework partie avec ", self.cfg.config_dict["GAME"]["our_color"])
+        print("Framework partie avec équipe", self.cfg.config_dict["GAME"]["our_color"])
 
         self.ia_coach_initializer(self.reference_transfer_object)
 
@@ -162,7 +163,6 @@ class Framework(object):
         self.game = Game()
         self.game.set_referee(self.referee)
         self.reference_transfer_object = ReferenceTransferObject(self.game)
-        self.reference_transfer_object.set_timestamp(self.time_stamp)
         self.reference_transfer_object.set_debug(self.incoming_debug)
 
     def _update_players_and_ball(self, vision_frame):
@@ -200,7 +200,6 @@ class Framework(object):
             # Communication
             self._send_robot_commands(robot_commands)
             self._send_debug_commands()
-        time.sleep(0)
 
     def _kalman_vision(self):
         vision_frames = self.vision.pop_frames()
@@ -217,7 +216,6 @@ class Framework(object):
             self._send_debug_commands()
             self._send_new_vision_packet()
             self.time_of_last_loop = time.time()
-        time.sleep(0)
 
     """
     def _test_vision(self):

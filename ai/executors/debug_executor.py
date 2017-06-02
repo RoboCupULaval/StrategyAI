@@ -103,14 +103,3 @@ class DebugExecutor(Executor):
             hc = HumanControl(self.ws.game_state)
             hc.assign_tactic(tactic, player_id)
             self.ws.play_state.set_strategy(hc)
-
-    # TODO REMOVE in the near future! MGL 2017/05/17
-    @staticmethod
-    def _sanitize_pid(pid: int)->int:
-        # TODO find something better for this whole scheme
-        if 0 <= pid < 6:
-            return pid
-        elif 6 <= pid < 12:
-            return pid - 6
-        else:
-            return 0
