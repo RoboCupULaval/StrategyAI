@@ -54,10 +54,11 @@ class PathfinderModule(Executor):
         for ai_c in ai_commands:
 
             self.time = time.time()
-            if not self.last_pose_goal == ai_c.pose_goal:
-                self.last_pose_goal = ai_c.pose_goal
-                self.last_path = None
-                self.last_raw_path = None
+            if self.last_pose_goal is not None:
+                if not self.last_pose_goal == ai_c.pose_goal:
+                    self.last_pose_goal = ai_c.pose_goal
+                    self.last_path = None
+                    self.last_raw_path = None
             # print(self.time - time.time())
             if self.type_of_pathfinder.lower() == "path_part":
                 path, raw_path = self.pathfinder.get_path(ai_c.robot_id, ai_c.pose_goal,
