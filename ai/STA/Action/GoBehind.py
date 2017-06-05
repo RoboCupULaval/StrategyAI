@@ -25,7 +25,7 @@ class GoBehind(Action):
         position2 : La position par rapport à laquelle le robot doit être "derrière" l'objet de la position 1 (exemple: le but)
     """
     def __init__(self, p_game_state, p_player_id, p_position1, p_position2,
-                 p_distance_behind, robot_speed=None, pathfinding=False, orientation='front'):
+                 p_distance_behind=250, robot_speed=None, pathfinding=False, orientation='front'):
         """
             :param p_game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui doit se déplacer
@@ -42,7 +42,7 @@ class GoBehind(Action):
         self.player_id = p_player_id
         self.position1 = p_position1
         self.position2 = p_position2
-        self.distance_behind = 250
+        self.distance_behind = p_distance_behind
         self.pathfind = pathfinding
         self.rayon_avoid = 300 #(mm)
         self.robot_speed = robot_speed
@@ -67,6 +67,7 @@ class GoBehind(Action):
         norm_player_2_position2 = math.sqrt((player_x - self.position2.x) ** 2+(player_y - self.position2.y) ** 2)
         norm_position1_2_position2 = math.sqrt((self.position1.x - self.position2.x) ** 2 + (self.position1.y - self.position2.y) ** 2)
 
+        # TODO: Remove this part of the logic, since we have a pathfinder to do all of that...
         if norm_player_2_position2 < norm_position1_2_position2:
             # print(norm_player_2_position2)
             # print(norm_position1_2_position2)

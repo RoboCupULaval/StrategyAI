@@ -33,14 +33,14 @@ class Kick(Action):
     def exec(self):
         """
         Execute le kick
-        :return: Un tuple (Pose, kick)
-                     où Pose est la destination actuelle du joueur (ne pas la modifier)
-                        kick est un float entre 0 et 1 qui determine la force du kick
+        :return: Un IAcommand
         """
         target = self.target.position.conv_2_np()
         player = self.game_state.game.friends.players[self.player_id].pose.position.conv_2_np()
         player_to_target = target - player
-        player_to_target = 0.3 * player_to_target / np.linalg.norm(player_to_target)
+        norm_player_2_target = np.linalg.norm(player_to_target)
+        norm_player_2_target = norm_player_2_target if norm_player_2_target != 0 else 1
+        player_to_target = 0.3 * player_to_target / norm_player_2_target
         self.speed_pose = Pose(Position.from_np(player_to_target))
         return AICommand(self.player_id, AICommandType.MOVE, **{"pose_goal": self.speed_pose,
                                                                 "speed_flag": True,
