@@ -19,15 +19,6 @@ class SerialCommandSender(object):
     def __init__(self, baud_rate=115200):
         self.McuCommunicator = McuCommunicator()
 
-        """
-        port = _get_port()
-
-        if platform.startswith('win'):
-            self.serial = serial.Serial(port, baud_rate)
-        else:
-            self.serial = serial.Serial('/dev/' + port, baud_rate)
-        """
-
         self.last_time = 0
         self.command_queue = deque()
 
