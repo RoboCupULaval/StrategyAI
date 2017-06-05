@@ -27,10 +27,10 @@ POSITION_DEADZONE = 40
 ORIENTATION_DEADZONE = 0.2
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
-COMMAND_DELAY = 1.0
+COMMAND_DELAY = 1.5
 
 
-class GoKick(Tactic):
+class PassToPlayer(Tactic):
     """
     méthodes:
         exec(self) : Exécute une Action selon l'état courant
@@ -43,7 +43,7 @@ class GoKick(Tactic):
         target: Position à laquelle faire face après avoir pris la balle
     """
 
-    def __init__(self, p_game_state, player_id, target=Pose(), args=None):
+    def __init__(self, p_game_state, player_id, target=Pose(), target_id=1, args=None):
         Tactic.__init__(self, p_game_state, player_id, target, args)
         assert isinstance(player_id, int)
         assert PLAYER_PER_TEAM >= player_id >= 0
@@ -52,14 +52,9 @@ class GoKick(Tactic):
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge
         self.debug_interface = DebugInterface()
-        self.move_action = self._generate_move_to()
-        self.move_action.status_flag = Flags.SUCCESS
         self.last_ball_position = self.game_state.get_ball_position()
-        self.charge_time = 0
         self.last_time = time.time()
-
-        self.orientation_target = 0
-        self.target = target
+        self.target_id = target_id
 
 
     def kick_charge(self):
@@ -74,24 +69,21 @@ class GoKick(Tactic):
     def get_behind_ball(self):
         self.status_flag = Flags.WIP
 
-        player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
-        player_y = self.game_state.game.friends.players[self.player_id].pose.position.y
+        player = self.game_state.game.friends.players[self.player_id].pose.position.conv_2_np()
+        ball = self.game_state.get_ball_position().conv_2_np()
+        target = self.game_state.game.friends.players[self.target_id].pose.position.conv_2_np()
 
-        ball_x = self.game_state.get_ball_position().x
-        ball_y = self.game_state.get_ball_position().y
-
-        vector_player_2_ball = np.array([ball_x - player_x, ball_y - player_y])
+        vector_player_2_ball = ball - player
         vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
 
         if self._is_player_towards_ball_and_target():
             self.next_state = self.grab_ball
-            self.orientation_target = self.game_state.game.friends.players[self.player_id].pose.orientation
         else:
             # self.debug.add_log(4, "Distance from ball: {}".format(dist))
             self.next_state = self.get_behind_ball
         return GoBehind(self.game_state, self.player_id,
                         self.game_state.get_ball_position(),
-                        self.target.position,
+                        Position.from_np(target),
                         120,
                         pathfinding=True)
 
@@ -101,7 +93,7 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() < 120:
             self.next_state = self.kick
             self.last_time = time.time()
-        elif self._is_player_towards_ball_and_target(-0.95):
+        elif self._is_player_towards_ball_and_target(-0.9):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.get_behind_ball
@@ -110,7 +102,7 @@ class GoKick(Tactic):
 
 
     def kick(self):
-        if self._get_distance_from_ball() > 1000:
+        if self._get_distance_from_ball() > 300:
             DebugInterface().add_log(5, "Kick!")
             self.next_state = self.halt
             self.last_time = time.time()
@@ -121,7 +113,11 @@ class GoKick(Tactic):
         return Kick(self.game_state, self.player_id, 4, self.target)
 
     def halt(self):
-        self.status_flag = Flags.SUCCESS
+
+        if self.status_flag == Flags.INIT:
+            self.next_state = self.kick_charge
+        else:
+            self.status_flag = Flags.SUCCESS
         return Idle(self.game_state, self.player_id)
 
     def _get_distance_from_ball(self):
@@ -130,17 +126,12 @@ class GoKick(Tactic):
 
     def _is_player_towards_ball_and_target(self, fact=-0.99):
 
-        player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
-        player_y = self.game_state.game.friends.players[self.player_id].pose.position.y
+        player = self.game_state.game.friends.players[self.player_id].pose.position.conv_2_np()
+        ball = self.game_state.get_ball_position().conv_2_np()
+        target = self.game_state.game.friends.players[self.target_id].pose.position.conv_2_np()
 
-        ball_x = self.game_state.get_ball_position().x
-        ball_y = self.game_state.get_ball_position().y
-
-        target_x = self.target.position.x
-        target_y = self.target.position.y
-
-        vector_player_2_ball = np.array([ball_x - player_x, ball_y - player_y])
-        vector_target_2_ball = np.array([ball_x - target_x, ball_y - target_y])
+        vector_player_2_ball = ball - player
+        vector_target_2_ball = ball - target
         vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
         vector_target_2_ball /= np.linalg.norm(vector_target_2_ball)
         vector_player_dir = np.array([np.cos(self.game_state.game.friends.players[self.player_id].pose.orientation),
@@ -152,13 +143,10 @@ class GoKick(Tactic):
 
     def _is_player_towards_target(self, fact=-0.99):
 
-        player_x = self.game_state.game.friends.players[self.player_id].pose.position.x
-        player_y = self.game_state.game.friends.players[self.player_id].pose.position.y
+        player = self.game_state.game.friends.players[self.player_id].pose.position.conv_2_np()
+        target = self.game_state.game.friends.players[self.target_id].pose.position.conv_2_np()
 
-        target_x = self.target.position.x
-        target_y = self.target.position.y
-
-        vector_player_2_target = np.array([player_x - target_x,  player_y - target_y])
+        vector_player_2_target = player - target
         vector_player_2_target /= np.linalg.norm(vector_player_2_target)
         vector_player_dir = np.array([np.cos(self.game_state.game.friends.players[self.player_id].pose.orientation),
                                       np.sin(self.game_state.game.friends.players[self.player_id].pose.orientation)])
@@ -173,8 +161,8 @@ class GoKick(Tactic):
         dest_position = self.get_behind_ball_position(ball_position)
         destination_pose = Pose(dest_position, player_pose.orientation)
 
-        return AllStar(self.game_state, self.player_id, **{"pose_goal":destination_pose,
-                                                           "ai_command_type":AICommandType.MOVE
+        return AllStar(self.game_state, self.player_id, **{"pose_goal": destination_pose,
+                                                           "ai_command_type": AICommandType.MOVE
                                                            })
 
     def get_behind_ball_position(self, ball_position):

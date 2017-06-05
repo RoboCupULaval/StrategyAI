@@ -72,7 +72,6 @@ class Capture(Tactic):
             self.next_state = self.grab_ball
             self.orientation_target = self.game_state.game.friends.players[self.player_id].pose.orientation
         else:
-            # self.debug.add_log(4, "Distance from ball: {}".format(dist))
             self.next_state = self.get_behind_ball
         return GoBehind(self.game_state, self.player_id,
                         self.game_state.get_ball_position(),
@@ -114,14 +113,16 @@ class Capture(Tactic):
                             self.game_state.get_ball_position())
 
     def _is_player_towards_ball_and_target(self, fact=-0.99):
-        player = self.game_state.game.friends.players[self.player_id].pose.position.conv_2_np()
+        player = self.game_state.get_player_position(self.player_id).conv_2_np()
         ball = self.game_state.get_ball_position().conv_2_np()
         target = self.target.position.conv_2_np()
 
         vector_player_2_ball = ball - player
         vector_target_2_ball = ball - target
-        vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
-        vector_target_2_ball /= np.linalg.norm(vector_target_2_ball)
+        if not (np.linalg.norm(vector_player_2_ball) == 0):
+            vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
+        if not (np.linalg.norm(vector_target_2_ball) == 0):
+            vector_target_2_ball /= np.linalg.norm(vector_target_2_ball)
         vector_player_dir = np.array([np.cos(self.game_state.game.friends.players[self.player_id].pose.orientation),
                                       np.sin(self.game_state.game.friends.players[self.player_id].pose.orientation)])
         if np.dot(vector_player_2_ball, vector_target_2_ball) < fact:
