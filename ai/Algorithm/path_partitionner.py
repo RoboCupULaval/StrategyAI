@@ -96,7 +96,7 @@ class PathPartitionner(Pathfinder):
         if self.is_path_collide(path) and depth < self.max_recurs:
 
             sub_target, avoid_dir = self.search_point(path, avoid_dir)
-
+            #print(sub_target)
             path_1 = Path(path.start, sub_target)
 
             path_1 = self.fastpathplanner(path_1, depth + 1, avoid_dir)
@@ -105,12 +105,14 @@ class PathPartitionner(Pathfinder):
             path_2 = self.fastpathplanner(path_2, depth + 1, avoid_dir)
 
             path = path_1.join_segments(path_2)
+
         return path
 
     def get_path(self, player: OurPlayer, pose_target: Pose=Pose(), cruise_speed: [int, float]=1,
-                 old_path: List=None, old_raw_path=Path(99999, 99999)):
+                 old_path=None, old_raw_path=Path(Position(99999, 99999), Position(99999, -99999))):
         self.cruise_speed = cruise_speed
         self.player = player
+
         i = 0
 
         self.pose_obstacle = np.zeros((len(self.game_state.my_team.available_players) +
@@ -133,19 +135,19 @@ class PathPartitionner(Pathfinder):
             self.path = old_path
             self.path = self.remove_redundant_points()
             self.raw_path = old_raw_path
-
         else:
-            self.path = Path(player.pose.position, pose_target.position)
+            self.path = Path(self.player.pose.position, pose_target.position)
             self.closest_obs_speed = self.find_closest_obstacle(self.player.pose.position, self.path)
             self.path = self.fastpathplanner(self.path)
             self.path = self.remove_redundant_points()
 
             self.raw_path = self.path
             self.path = self.reshaper.reshape_path(self.path, self.player, self.cruise_speed)
+
         if self.is_path_collide(self.raw_path):
             self.path.speeds[1] = 0
-        print("points", self.path.points)
-        print("speeds", self.path.speeds)
+        #print("points", self.path.points)
+        #print("speeds", self.path.speeds)
         return self.path, self.raw_path
 
     def get_raw_path(self, pose_target=Pose()):
@@ -202,6 +204,7 @@ class PathPartitionner(Pathfinder):
         dist_point_obs = np.inf
         closest_obs = None
         closest_player = self.players_obstacles[0].pose.position.conv_2_np()
+        #print(get_distance(path.start, path.goal))
         if get_distance(path.start, path.goal) < 0.001:
             return [closest_obs, dist_point_obs, closest_player]
         if point == path.start:
@@ -231,6 +234,7 @@ class PathPartitionner(Pathfinder):
     def search_point(self, path, avoid_dir=None):
 
         pose_robot = path.start
+        #print(pose_robot)
         pose_target = path.goal
         pose_obstacle_closest, dist_point_obs, closest_player = self.find_closest_obstacle(pose_target, path)
         if pose_obstacle_closest is None:
@@ -357,14 +361,14 @@ class PathReshaper:
             speed = vel_cruise
             radius = radius_at_const_speed
             while dist_deviation > self.dist_from_path:
-                speed *= 0.8
+                speed *= 0.4
                 radius = speed ** 2 / (OurPlayer.max_acc * 1000)
                 dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
             # print(radius, radius_at_const_speed)
             if np.linalg.norm(p1-p2) < 0.001 or np.linalg.norm(p2-p3) < 0.001 or np.linalg.norm(p1-p3) < 0.001:
                 # on traite tout le cas ou le problème dégènere
                 point_list += [p2]
-                speed_list += [vel_cruise/1000]
+                speed_list += [vel_cruise]
             else:
                 p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) *\
                           (p1 - p2) / np.linalg.norm(p1 - p2)
@@ -372,7 +376,7 @@ class PathReshaper:
                     (p3 - p2) / np.linalg.norm(p3 - p2)
                 if np.linalg.norm(p4-p5) > np.linalg.norm(p3-p1):
                     point_list += [p2]
-                    speed_list += [vel_cruise/1000]
+                    speed_list += [vel_cruise]
                 elif np.linalg.norm(p1 - p2) < np.linalg.norm(p4 - p2):
                     radius *= np.linalg.norm(p1 - p2) / np.linalg.norm(p4 - p2)
                     dist_deviation = (radius / (np.math.sin(theta / 2))) - radius

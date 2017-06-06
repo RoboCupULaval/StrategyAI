@@ -153,7 +153,6 @@ class RobotMotion(object):
                     next_speed[coord] = self.cruise_speed[coord]
 
         next_velocity = next_speed * np.sign(self.translation_error)
-
         return next_velocity
 
     def limit_acceleration(self, translation_cmd: np.ndarray) -> np.ndarray:
@@ -163,7 +162,6 @@ class RobotMotion(object):
                                             np.abs(self.target_acceleration))
         translation_cmd = self.last_translation_cmd + self.current_acceleration * self.dt
         self.last_translation_cmd = translation_cmd
-
         return translation_cmd
 
     def target_is_reached(self):
@@ -196,6 +194,7 @@ class RobotMotion(object):
         self.target_position = cmd.pose_goal.conv_2_np()
         self.target_position = self.target_position / np.array([1000, 1000, 1])
         self.target_speed = np.abs(cmd.path_speeds[1]/1000 * normalized(self.translation_error))
+        #print(self.target_speed)
         self.target_acceleration = np.abs(self.setting.translation.max_acc * normalized(self.translation_error))
         self.target_acceleration[self.target_acceleration == 0] = 10 ** (-6)  # Avoid division by zero later
         self.cruise_speed = np.abs(cmd.cruise_speed * normalized(self.translation_error))
