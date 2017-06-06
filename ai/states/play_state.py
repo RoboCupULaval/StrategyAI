@@ -9,6 +9,7 @@ from ai.STA.Strategy.StrategyBook import StrategyBook
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.TacticBook import TacticBook
 from ai.states.game_state import GameState
+from config.config_service import ConfigService
 
 
 class PlayState(object, metaclass=Singleton):
@@ -22,7 +23,11 @@ class PlayState(object, metaclass=Singleton):
         # Livres
         self.strategy_book = StrategyBook()
         self.tactic_book = TacticBook()
-        self.autonomous_flag = True
+
+        cfg = ConfigService()
+        self.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
+        self.our_color = cfg.config_dict["GAME"]["our_color"]
+
         self.current_strategy = None
         self.current_ai_commands = {}
 

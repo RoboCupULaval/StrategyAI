@@ -1,7 +1,38 @@
 # Under MIT License, see LICENSE.txt
+from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Game.Referee import RefereeCommand
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
+
+
+autonomousStrategies = {
+    # Robots must be stopped
+    'HALT' : 'DoNothing',
+
+    # Robots must stay 50 cm from the ball
+    'STOP' : 'DoNothing',
+    'GOAL_US' : 'DoNothing',
+    'GOAL_THEM' : 'DoNothing',
+    'BALL_PLACEMENT_THEM' : 'DoNothing',
+
+    # Place the ball to the designated position
+    'BALL_PLACEMENT_US' : 'DoNothing',
+
+    # The ball is free to take
+    'FORCE_START' : 'DoNothing',
+
+    'TIMEOUT' : 'DoNothing',
+
+    'PREPARE_OFFENSIVE_KICKOFF' : 'DoNothing',
+    'PREPARE_DEFENSIVE_KICKOFF' : 'DoNothing',
+    'OFFENSIVE_KICKOFF' : 'DoNothing',
+    'DEFENSIVE_KICKOFF' : 'DoNothing',
+
+    'PREPARE_OFFENSIVE_PENALTY' : 'DoNothing',
+    'PREPARE_DEFENSIVE_PENALTY' : 'DoNothing',
+    'OFFENSIVE_PENALTY' : 'DoNothing',
+    'DEFENSIVE_PENALTY' : 'DoNothing'
+}
 
 
 class PlayExecutor(Executor):
@@ -13,6 +44,9 @@ class PlayExecutor(Executor):
         :param p_world_state: (WorldState) instance du worldstate
         """
         super().__init__(p_world_state)
+
+        self.ws.play_state.set_strategy(self._get_new_strategy('HALT'))
+        self.last_ref_command = RefereeCommand.HALT
 
     def exec(self) -> None:
         """
@@ -31,18 +65,75 @@ class PlayExecutor(Executor):
         self._send_robots_status()
 
     def _select_strategy(self) -> None:
-        self.ws.play_state.set_strategy(self.ws.play_state.
-                                        get_new_strategy("DoNothing")
-                                        (self.ws.game_state))
 
-        referee_command = self.ws.game_state.game.referee.command
+        play_state = self.ws.play_state
+        referee = self.ws.game_state.game.referee
 
-        if referee_command == RefereeCommand.STOP:
-            print("Stop robots!")
-        elif referee_command == RefereeCommand.HALT:
-            print("Halt robots!")
-        else:
-            print("Unknown command")
+        if self.last_ref_command != referee.command:
+            if referee.command == RefereeCommand.HALT:
+                DebugInterface().add_log(1, "Halt robots!")
+                play_state.set_strategy(self._get_new_strategy('HALT'))
+
+            elif referee.command == RefereeCommand.STOP or\
+                    referee.command == RefereeCommand.GOAL_US or\
+                    referee.command == RefereeCommand.GOAL_THEM or\
+                    referee.command == RefereeCommand.BALL_PLACEMENT_THEM:
+                DebugInterface().add_log(1, "Game stopped : Robots must keep 50 cm from the ball")
+                play_state.set_strategy(self._get_new_strategy('STOP'))
+
+            elif referee.command == RefereeCommand.BALL_PLACEMENT_US:
+                DebugInterface().add_log(1, "Ball placement : we need to place the ball at : " + str(referee.ball_placement_point))
+                play_state.set_strategy(self._get_new_strategy('HALT')) #TODO send ball new position to strategy...
+
+            elif referee.command == RefereeCommand.FORCE_START:
+                DebugInterface().add_log(1, "Force start : ball is free!")
+                play_state.set_strategy(self._get_new_strategy('FORCE_START'))
+
+            elif referee.command == RefereeCommand.NORMAL_START:
+                DebugInterface().add_log(1, "Normal start")
+                if self.last_ref_command == RefereeCommand.PREPARE_KICKOFF_US:
+                    play_state.set_strategy(self._get_new_strategy('OFFENSE_KICKOFF'))
+                elif self.last_ref_command == RefereeCommand.PREPARE_KICKOFF_THEM:
+                    play_state.set_strategy(self._get_new_strategy('DEFENSE_KICKOFF'))
+                elif self.last_ref_command == RefereeCommand.PREPARE_PENALTY_US:
+                    play_state.set_strategy(self._get_new_strategy('OFFENSE_PENALTY'))
+                elif self.last_ref_command == RefereeCommand.PREPARE_PENALTY_THEM:
+                    play_state.set_strategy(self._get_new_strategy('DEFENSE_PENALTY'))
+
+            elif referee.command == RefereeCommand.TIMEOUT_BLUE or\
+                referee.command == RefereeCommand.TIMEOUT_YELLOW:
+                DebugInterface().add_log(1, "Timeout!")
+                play_state.set_strategy(self._get_new_strategy('TIMEOUT'))
+
+            elif referee.command == RefereeCommand.PREPARE_KICKOFF_US:
+                DebugInterface().add_log(1, "Prepare kickoff offense!")
+                play_state.set_strategy(self._get_new_strategy('PREPARE_KICKOFF_OFFENSE'))
+
+            elif referee.command == RefereeCommand.PREPARE_KICKOFF_THEM:
+                DebugInterface().add_log(1, "Prepare kickoff defense!")
+                play_state.set_strategy(self._get_new_strategy('PREPARE_KICKOFF_DEFENSE'))
+
+            elif referee.command == RefereeCommand.PREPARE_PENALTY_US:
+                DebugInterface().add_log(1, "Prepare penalty offense!")
+                play_state.set_strategy(self._get_new_strategy('PREPARE_PENALTY_OFFENSE'))
+
+            elif referee.command == RefereeCommand.PREPARE_PENALTY_THEM:
+                DebugInterface().add_log(1, "Prepare penalty defense!")
+                play_state.set_strategy(self._get_new_strategy('PREPARE_PENALTY_DEFENSE'))
+
+            else:
+                DebugInterface().add_log(1, "Unknown command... halting all the robots")
+                play_state.set_strategy(self._get_new_strategy('HALT'))
+
+        self.last_ref_command = referee.command
+
+    def _get_new_strategy(self, state):
+        try:
+            name = autonomousStrategies[state]
+        except:
+            name = autonomousStrategies['HALT']
+
+        return self.ws.play_state.get_new_strategy(name)(self.ws.game_state)
 
     def _execute_strategy(self) -> None:
         """
