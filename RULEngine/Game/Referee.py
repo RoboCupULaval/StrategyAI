@@ -71,22 +71,22 @@ class Referee:
 
     def update(self, frames):
         if frames != []:
-            self.stage = frames[-1].stage
-            raw_command = frames[-1].command
+            self.stage = Stage(frames[-1].stage)
+            raw_command = RefereeCommand(frames[-1].command)
             self.command = self._parse_command(raw_command)
             if self.command == RefereeCommand.BALL_PLACEMENT_US or self.command == RefereeCommand.BALL_PLACEMENT_THEM:
                 self.ball_placement_point = (frames[-1].point.x, frames[-1].point.y)
 
     def _parse_command(self, command):
         # Color wise commands
+        parsed_cmd = command
         if command >= RefereeCommand.PREPARE_KICKOFF_YELLOW:
             if self._is_our_team_command(command):
-                return self._convert_raw_to_us(command)
+                parsed_cmd = self._convert_raw_to_us(command)
             else:
-                return self._convert_raw_to_them(command)
+                parsed_cmd = self._convert_raw_to_them(command)
         # None color wise commands
-        else:
-            return command
+        return RefereeCommand(parsed_cmd)
 
     def _convert_raw_to_us(self, command):
         if self.our_color == 'yellow':

@@ -3,7 +3,7 @@ from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Game.Referee import RefereeCommand
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
-
+from config.config_service import ConfigService
 
 autonomousStrategies = {
     # Robots must be stopped
@@ -56,9 +56,13 @@ class PlayExecutor(Executor):
         """
         # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
         self._send_books()
+        self.ws.debug_interface.send_team_color()
+        #
+        # DebugInterface().send_team_color(str(ConfigService().config_dict["GAME"]["our_color"]))
 
         if self.ws.play_state.autonomous_flag:
             self._select_strategy()
+        self._send_auto_state()
 
         self._execute_strategy()
         # TODO reduce the frequency at which we send it maybe? MGL 2017/03/16
@@ -72,58 +76,61 @@ class PlayExecutor(Executor):
         if self.last_ref_command != referee.command:
             if referee.command == RefereeCommand.HALT:
                 DebugInterface().add_log(1, "Halt robots!")
-                play_state.set_strategy(self._get_new_strategy('HALT'))
+                play_state.autonomous_state = 'HALT'
 
             elif referee.command == RefereeCommand.STOP or\
                     referee.command == RefereeCommand.GOAL_US or\
                     referee.command == RefereeCommand.GOAL_THEM or\
                     referee.command == RefereeCommand.BALL_PLACEMENT_THEM:
                 DebugInterface().add_log(1, "Game stopped : Robots must keep 50 cm from the ball")
-                play_state.set_strategy(self._get_new_strategy('STOP'))
+                play_state.autonomous_state = 'STOP'
 
             elif referee.command == RefereeCommand.BALL_PLACEMENT_US:
                 DebugInterface().add_log(1, "Ball placement : we need to place the ball at : " + str(referee.ball_placement_point))
-                play_state.set_strategy(self._get_new_strategy('HALT')) #TODO send ball new position to strategy...
+                play_state.autonomous_state = 'HALT' #TODO send ball new position to strategy...
 
             elif referee.command == RefereeCommand.FORCE_START:
                 DebugInterface().add_log(1, "Force start : ball is free!")
-                play_state.set_strategy(self._get_new_strategy('FORCE_START'))
+                play_state.autonomous_state = 'FORCE_START'
 
             elif referee.command == RefereeCommand.NORMAL_START:
                 DebugInterface().add_log(1, "Normal start")
                 if self.last_ref_command == RefereeCommand.PREPARE_KICKOFF_US:
-                    play_state.set_strategy(self._get_new_strategy('OFFENSE_KICKOFF'))
+                    play_state.autonomous_state = 'OFFENSE_KICKOFF'
                 elif self.last_ref_command == RefereeCommand.PREPARE_KICKOFF_THEM:
-                    play_state.set_strategy(self._get_new_strategy('DEFENSE_KICKOFF'))
+                    play_state.autonomous_state = 'DEFENSE_KICKOFF'
                 elif self.last_ref_command == RefereeCommand.PREPARE_PENALTY_US:
-                    play_state.set_strategy(self._get_new_strategy('OFFENSE_PENALTY'))
+                    play_state.autonomous_state = 'OFFENSE_PENALTY'
                 elif self.last_ref_command == RefereeCommand.PREPARE_PENALTY_THEM:
-                    play_state.set_strategy(self._get_new_strategy('DEFENSE_PENALTY'))
+                    play_state.autonomous_state = 'DEFENSE_PENALTY'
 
             elif referee.command == RefereeCommand.TIMEOUT_BLUE or\
                 referee.command == RefereeCommand.TIMEOUT_YELLOW:
                 DebugInterface().add_log(1, "Timeout!")
-                play_state.set_strategy(self._get_new_strategy('TIMEOUT'))
+                play_state.autonomous_state = 'TIMEOUT'
 
             elif referee.command == RefereeCommand.PREPARE_KICKOFF_US:
                 DebugInterface().add_log(1, "Prepare kickoff offense!")
-                play_state.set_strategy(self._get_new_strategy('PREPARE_KICKOFF_OFFENSE'))
+                play_state.autonomous_state = 'PREPARE_KICKOFF_OFFENSE'
 
             elif referee.command == RefereeCommand.PREPARE_KICKOFF_THEM:
                 DebugInterface().add_log(1, "Prepare kickoff defense!")
-                play_state.set_strategy(self._get_new_strategy('PREPARE_KICKOFF_DEFENSE'))
+                play_state.autonomous_state = 'PREPARE_KICKOFF_DEFENSE'
 
             elif referee.command == RefereeCommand.PREPARE_PENALTY_US:
                 DebugInterface().add_log(1, "Prepare penalty offense!")
-                play_state.set_strategy(self._get_new_strategy('PREPARE_PENALTY_OFFENSE'))
+                play_state.autonomous_state = 'PREPARE_PENALTY_OFFENSE'
 
             elif referee.command == RefereeCommand.PREPARE_PENALTY_THEM:
                 DebugInterface().add_log(1, "Prepare penalty defense!")
-                play_state.set_strategy(self._get_new_strategy('PREPARE_PENALTY_DEFENSE'))
+                play_state.autonomous_state = 'PREPARE_PENALTY_DEFENSE'
 
             else:
                 DebugInterface().add_log(1, "Unknown command... halting all the robots")
-                play_state.set_strategy(self._get_new_strategy('HALT'))
+                play_state.autonomous_state = 'HALT'
+
+            play_state.set_strategy(self._get_new_strategy(play_state.autonomous_state))
+
 
         self.last_ref_command = referee.command
 
@@ -167,6 +174,13 @@ class PlayExecutor(Executor):
                                                       tactic_name,
                                                       action_name,
                                                       target)
+
+    def _send_auto_state(self) -> None:
+        self.ws.debug_interface.send_auto_state(str(self.ws.game_state.game.referee.command.name),
+                                                str(self.ws.game_state.game.referee.stage.name),
+                                                str(self.ws.play_state.current_strategy),
+                                                self.ws.play_state.autonomous_state,
+                                                self.ws.play_state.autonomous_flag)
 
     def _send_books(self) -> None:
         """

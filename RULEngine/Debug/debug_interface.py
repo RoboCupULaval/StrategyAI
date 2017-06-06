@@ -61,7 +61,7 @@ class DebugInterface(metaclass=Singleton):
     def __init__(self):
         self.debug_state = []
         self.team_color = str(ConfigService().config_dict["GAME"]["our_color"])
-        self.send_team_color(str(ConfigService().config_dict["GAME"]["our_color"]))
+        self.send_team_color()
 
     def add_log(self, level, message):
         log = DebugCommand(2, {'level': level, 'message': message})
@@ -155,7 +155,15 @@ class DebugInterface(metaclass=Singleton):
         cmd = DebugCommand(1002, data)
         self.debug_state.append(cmd)
 
-    def send_team_color(self, team_color):
-        cmd = DebugCommand(1003, {'team_color': team_color})
+    def send_team_color(self):
+        cmd = DebugCommand(1004, {'team_color': self.team_color})
+        self.debug_state.append(cmd)
+
+    def send_auto_state(self, referee_cmd, game_stage, current_strategy, state, status):
+        cmd = DebugCommand(1005, {'referee_cmd': referee_cmd,
+                                  'game_stage': game_stage,
+                                  'current_strategy': current_strategy,
+                                  'state': state,
+                                  'status' : status})
         self.debug_state.append(cmd)
 

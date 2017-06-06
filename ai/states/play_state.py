@@ -26,6 +26,7 @@ class PlayState(object, metaclass=Singleton):
 
         cfg = ConfigService()
         self.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
+        self.autonomous_state = 'HALT'
         self.our_color = cfg.config_dict["GAME"]["our_color"]
 
         self.current_strategy = None
