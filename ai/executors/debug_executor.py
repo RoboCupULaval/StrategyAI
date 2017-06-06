@@ -45,6 +45,9 @@ class DebugExecutor(Executor):
         elif cmd.is_tactic_cmd():
             self._parse_tactic(cmd)
 
+        elif cmd.is_auto_play_cmd():
+            self.ws.play_state.autonomous_flag = cmd.data['status']
+
         else:
             pass
 
