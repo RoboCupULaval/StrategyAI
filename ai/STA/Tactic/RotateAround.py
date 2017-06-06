@@ -1,14 +1,16 @@
 # Under MIT licence, see LICENCE.txt
-
 import math as m
+from typing import List
 
+from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.Util.geometry import rotate_point_around_origin, get_angle, get_distance
+from RULEngine.Util.constant import ANGLE_TO_HALT, POSITION_DEADZONE
+from RULEngine.Util.Pose import Pose
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
-from RULEngine.Util.geometry import rotate_point_around_origin, get_angle, get_distance
-from RULEngine.Util.constant import PLAYER_PER_TEAM, ANGLE_TO_HALT, POSITION_DEADZONE
-from RULEngine.Util.Pose import Pose
 from ai.STA.Tactic.tactic_constants import Flags
+from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
 
@@ -19,20 +21,16 @@ class RotateAround(Tactic):
         exec(self) : Exécute une Action selon l'état courant
     attributs:
         game_state: état courant du jeu
-        player_id : Identifiant du joueur auquel est assigné la tactique
+        player: Instance du joueur auquel est assigné la tactique
         center_position : Position autour de laquelle le robot doit effectuer une révolution
         target : Position à laquelle le robot doit faire face à la fin de sa révolution
         current_state : L'état courant de la tactique
         next_state : L'état suivant de la tactique
     """
 
-    def __init__(self, game_state, player_id, center_position, target, args=None,):
-        Tactic.__init__(self, game_state, player_id, target, args)
-        assert PLAYER_PER_TEAM >= player_id >= 0
-
-        MINIMUM_DISTANCE = 110  # TODO: à mettre dans les constantes
+    def __init__(self, game_state: GameState, player: OurPlayer, center_position, target: Pose, args: List[str]=None):
+        Tactic.__init__(self, game_state, player, target, args)
         self.ANGLE_INCREMENT = m.pi/8
-
         self.pose_list = []
         self.index = 0
         self.origin = center_position
@@ -55,18 +53,18 @@ class RotateAround(Tactic):
             if self.index == len(self.pose_list):   # position finale atteinte
                 self.status_flag = Flags.SUCCESS
                 self.next_state = self.halt
-                action = Idle(self.game_state, self.player_id)
+                action = Idle(self.game_state, self.player)
             else:                                   # position intermédiaire atteinte
                 self.status_flag = Flags.WIP
-                action = MoveToPosition(self.game_state, self.player_id, self.pose_list[self.index])
+                action = MoveToPosition(self.game_state, self.player, self.pose_list[self.index])
         else:
             self.status_flag = Flags.WIP
-            action = MoveToPosition(self.game_state, self.player_id, self.pose_list[self.index])
+            action = MoveToPosition(self.game_state, self.player, self.pose_list[self.index])
         return action
 
     def calculate_path(self):
-        self.initial_position = self.game_state.get_player_position(self.player_id)
-        self.initial_orientation = self.game_state.get_player_pose(self.player_id).orientation
+        self.initial_position = self.player.pose.position
+        self.initial_orientation = self.player.pose.orientation
         self.initial_distance = get_distance(self.origin, self.initial_position)
         self.initial_angle = get_angle(self.origin, self.initial_position)
         self.target_angle = get_angle(self.origin, self.target.position)
@@ -88,11 +86,9 @@ class RotateAround(Tactic):
             self.pose_list.append(Pose(pos, theta))
 
         self.next_state = self.rotate_around
-        return MoveToPosition(self.game_state, self.player_id, self.pose_list[self.index])
+        return MoveToPosition(self.game_state, self.player, self.pose_list[self.index])
 
     def _has_reached_pose(self, pose):
-        same_position = get_distance(self.game_state.get_player_pose(self.player_id).position, pose.position)\
-            <= POSITION_DEADZONE
-        same_orientation = m.fabs(self.game_state.get_player_pose(self.player_id).orientation - pose.orientation)\
-            <= ANGLE_TO_HALT
+        same_position = get_distance(self.player.pose.position, pose.position) <= POSITION_DEADZONE
+        same_orientation = m.fabs(self.player.pose.orientation - pose.orientation) <= ANGLE_TO_HALT
         return same_position and same_orientation

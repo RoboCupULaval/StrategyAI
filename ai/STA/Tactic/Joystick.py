@@ -1,23 +1,22 @@
 # Under MIT license, see LICENSE.txt
-
-import math as m
+from typing import List
 import pygame
 
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
-from ai.STA.Action.Move import Move
-from ai.Util.ai_command import AICommandType, AIControlLoopType, AICommand
+from ai.Util.ai_command import AICommandType, AIControlLoopType
 from ai.Util.joystick.joystick import RobotJoystick
-from .Tactic import Tactic
-from . tactic_constants import Flags
+from ai.states.game_state import GameState
+from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.tactic_constants import Flags
 
 
 class Joystick(Tactic):
-    def __init__(self, p_game_state, player_id, target=Pose(), args=None):
-        super().__init__(p_game_state, player_id, target, args)
-        self.target = target
+    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None):
+        super().__init__(game_state, player, target, args)
         self.status_flag = Flags.INIT
 
         self.inv_x = int(args[0])
@@ -37,7 +36,6 @@ class Joystick(Tactic):
             self.joy = RobotJoystick(joystick)
         else:
             self.status_flag = Flags.FAILURE
-
 
     def handle_joystick(self):
         if self.status_flag is not Flags.FAILURE:
@@ -71,13 +69,18 @@ class Joystick(Tactic):
             speed_pose = Pose(Position(x_speed, y_speed), t * 5)
 
             if kick == 0:
-                next_action = AllStar(self.game_state, self.player_id, **{"ai_command_type": AICommandType.MOVE, "pose_goal": speed_pose,
-                                                                          "control_loop_type": AIControlLoopType.SPEED, "charge_kick": charge_kick,
-                                                                          "kick_strength": kick, "dribbler_on": dribbler})
+                next_action = AllStar(self.game_state, self.player,
+                                      **{"ai_command_type": AICommandType.MOVE,
+                                         "pose_goal": speed_pose,
+                                         "control_loop_type": AIControlLoopType.SPEED,
+                                         "charge_kick": charge_kick,
+                                         "kick_strength": kick,
+                                         "dribbler_on": dribbler})
             else:
-                next_action = AllStar(self.game_state, self.player_id, **{"ai_command_type": AICommandType.KICK, "kick_strength" : kick})
+                next_action = AllStar(self.game_state, self.player, **{"ai_command_type": AICommandType.KICK,
+                                                                       "kick_strength": kick})
         else:
-            next_action = Idle(self.game_state, self.player_id)
+            next_action = Idle(self.game_state, self.player)
 
         return next_action
 

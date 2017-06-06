@@ -2,6 +2,8 @@
 from functools import partial
 
 import numpy as np
+
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.constant import *
 from ai.STA.Tactic.GoGetBall import GoGetBall
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
@@ -11,41 +13,42 @@ from ai.STA.Tactic.capture import Capture
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.intercept import Intercept
 from ai.STA.Tactic.mark import Mark
+from ai.states.game_state import GameState
 from . Strategy import Strategy
 
 
 class SimpleDefense(Strategy):
-    def __init__(self, p_game_state):
-        super().__init__(p_game_state)
-        self.robot1 = 5
-        self.robot2 = 3
-        self.robot3 = 4
+    def __init__(self, game_state: GameState):
+        super().__init__(game_state)
+        robot1 = self.game_state.my_team.available_players[5]
+        robot2 = self.game_state.my_team.available_players[3]
+        robot3 = self.game_state.my_team.available_players[4]
         goal1 = Pose(Position(-1636, 0))
         goal2 = Pose(Position(1636, 0))
-        self.add_tactic(self.robot1, GoalKeeper(self.game_state, self.robot1))
+        self.add_tactic(robot1.id, GoalKeeper(self.game_state, robot1))
 
-        self.add_tactic(self.robot2, Intercept(self.game_state, self.robot2))
-        self.add_tactic(self.robot2, GoKick(self.game_state, self.robot2, goal2))
-        self.add_condition(self.robot2, 0, 1, partial(self.is_ball_closest_to_player, self.robot2))
-        self.add_condition(self.robot2, 1, 0, partial(self.is_ball_closest_to_player, self.robot3))
+        self.add_tactic(robot2.id, Intercept(self.game_state, robot2))
+        self.add_tactic(robot2.id, GoKick(self.game_state, robot2, goal2))
+        self.add_condition(robot2.id, 0, 1, partial(self.is_ball_closest_to_player, robot2))
+        self.add_condition(robot2.id, 1, 0, partial(self.is_ball_closest_to_player, robot3))
 
-        self.add_tactic(self.robot3, GoKick(self.game_state, self.robot3, goal1))
-        self.add_tactic(self.robot3, Intercept(self.game_state, self.robot3, goal2))
-        self.add_condition(self.robot3, 0, 1, partial(self.is_ball_closest_to_player, self.robot2))
-        self.add_condition(self.robot3, 1, 0, partial(self.is_ball_closest_to_player, self.robot3))
+        self.add_tactic(robot3.id, GoKick(self.game_state, robot3, goal1))
+        self.add_tactic(robot3.id, Intercept(self.game_state, robot3, goal2))
+        self.add_condition(robot3.id, 0, 1, partial(self.is_ball_closest_to_player, robot2))
+        self.add_condition(robot3.id, 1, 0, partial(self.is_ball_closest_to_player, robot3))
 
-        for i in range(PLAYER_PER_TEAM):
-            if not (i == self.robot1 or i == self.robot2 or i == self.robot3):
-                self.add_tactic(i, Stop(self.game_state, i))
+        for player in self.game_state.my_team.available_players.values():
+            if not (player.id == robot1.id or player.id == robot2.id or player.id == robot3.id):
+                self.add_tactic(player.id, Stop(self.game_state, player))
 
-    def is_ball_closest_to_player(self, player_id):
-        player = self.game_state.get_player_position(player_id).conv_2_np()
+    def is_ball_closest_to_player(self, player: OurPlayer):
+        player_pos = player.pose.position.conv_2_np()
         ball = self.game_state.get_ball_position().conv_2_np()
-        dist_ref = np.linalg.norm(player - ball)
+        dist_ref = np.linalg.norm(player_pos - ball)
 
-        for i in range(PLAYER_PER_TEAM):
-            if not i == player_id:
-                dist = np.linalg.norm(self.game_state.get_player_position(i).conv_2_np() - ball)
+        for p in self.game_state.my_team.available_players.values():
+            if not p == player.id:
+                dist = np.linalg.norm(p.pose.position.conv_2_np() - ball)
                 if dist < dist_ref:
                     return False
         return True

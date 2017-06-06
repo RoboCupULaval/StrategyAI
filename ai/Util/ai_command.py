@@ -1,3 +1,4 @@
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from enum import Enum
@@ -6,28 +7,33 @@ from enum import Enum
 class AICommandType(Enum):
     STOP = 0
     MOVE = 1
-    KICK = 2
+    MULTI = 2
+
 
 class AIControlLoopType(Enum):
     OPEN = 0
     SPEED = 1
     POSITION = 2
 
+
 class AICommand(object):
     """
     Sert a emmagasiner les états demandés par l'IA
     avant transformation en commandes d'envoie aux robots
     """
-    def __init__(self, p_robot_id: int, p_command=AICommandType.STOP, **other_args):
+    def __init__(self, player: OurPlayer, command_type=AICommandType.STOP, **other_args):
         """
         Initialise.
 
-        :param p_robot_id: (int) l'identifiant du robot
+        :param player: (OurPlayer) l'instance de notre player à qui appartient cette ai_commande
         :param p_command: (AICommandType) le type de AICommand
         :param other_args: (Dict) les flags et arguments à passer
         """
-        self.robot_id = p_robot_id
-        self.command = p_command
+        assert isinstance(player, OurPlayer), "Création d'un ai_command sans passer une instance de OurPlayer."
+        assert isinstance(command_type, AICommandType), "Besoin d'une AiCommandType!"
+        self.player = player
+        self.robot_id = player.id
+        self.command = command_type
         self.dribbler_on = other_args.get("dribbler_on", 0)
         self.pathfinder_on = other_args.get("pathfinder_on", False)
         self.kick_strength = other_args.get("kick_strength", 0)
@@ -48,6 +54,9 @@ class AICommand(object):
         return self.__dict__ == other.__dict__
 
     # Getter and setter here?
+
+    def __str__(self):
+        return str(self.player.id)+"  " + str(self.player.team.team_color) + "  ->  "+str(id(self))
 
 
 class RotateAroundCommand(object):

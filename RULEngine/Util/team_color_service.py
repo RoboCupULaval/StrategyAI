@@ -1,21 +1,26 @@
 from RULEngine.Util.constant import TeamColor
+from RULEngine.Util.exception import WrongRobotColorError
+from RULEngine.Util.singleton import Singleton
+from config.config_service import ConfigService
 
 
-class TeamColorService:
-    _instances = {}
+class TeamColorService(object, metaclass=Singleton):
 
-    def __call__(self, *args, **kwargs):
-        if self not in self._instances:
-            self._instances[self] = self.__init__(*args, **kwargs)
-        return self._instances[self]
-
-    def __init__(self, team_color):
-
-        if team_color == TeamColor.YELLOW_TEAM:
+    def __init__(self):
+        cfg = ConfigService()
+        if cfg.config_dict["GAME"]["our_color"] == "yellow":
+            try:
+                assert cfg.config_dict["GAME"]["their_color"] == "blue"
+            except AssertionError:
+                raise WrongRobotColorError("The enemies robot color is wrong please check "
+                                           "the config file")
             self.OUR_TEAM_COLOR = TeamColor.YELLOW_TEAM
             self.ENEMY_TEAM_COLOR = TeamColor.BLUE_TEAM
-        elif team_color == TeamColor.BLUE_TEAM:
+
+        elif cfg.config_dict["GAME"]["our_color"] == "blue":
             self.OUR_TEAM_COLOR = TeamColor.BLUE_TEAM
             self.ENEMY_TEAM_COLOR = TeamColor.YELLOW_TEAM
+
         else:
-            raise Exception("Couleur non defini")
+            raise WrongRobotColorError("")
+

@@ -47,10 +47,9 @@ class Path:
         if len(points_list) < 3:
             pass
         else:
-            if (threshold is not None) and len(speed_list) > 2:
-                if np.linalg.norm(points_list[0].conv_2_np() - points_list[1].conv_2_np()) < threshold:
+            if threshold is not None:
+                if np.linalg.norm(points_list[0].conv_2_np() - points_list[1].conv_2_np()) > threshold:
                     del points_list[1]
-                    del speed_list[1]
                 # print(position_list)
                 # print(new_speed_list)
 
@@ -66,12 +65,12 @@ class Path:
     def get_path_length(self):
         length = 0
         for idx, point in enumerate(self.points[:-1]):
-            length += np.linalg.norm(point.conv_2_np() - self.points[idx+1].conv_2_np())
+            length += np.linalg.norm(point - self.points[idx+1])
         return length
 
     def quick_update_path(self, player):
         self.points[0] = player.pose.position
-        return self.generate_path_from_points(self.points, self.speeds, 80)
+        return self.generate_path_from_points(self.points, threshold=80)
 
 
 class PathPartitionner(Pathfinder):
@@ -129,23 +128,17 @@ class PathPartitionner(Pathfinder):
         # tentative de code pour ne pas recalculer le path a toutes les ittérations (marche un peu mais pas parfait)
         if (old_path is not None) and (not self.is_path_collide(old_raw_path)) and self.path.goal == old_raw_path.goal:
             old_raw_path.quick_update_path(self.player)
-            old_path.quick_update_path(self.player)
-            self.path = old_path
-            self.path = self.remove_redundant_points()
-            self.raw_path = old_raw_path
+            self.path = old_raw_path
 
         else:
             self.path = Path(player.pose.position, pose_target.position)
             self.closest_obs_speed = self.find_closest_obstacle(self.player.pose.position, self.path)
             self.path = self.fastpathplanner(self.path)
             self.path = self.remove_redundant_points()
-
-            self.raw_path = self.path
-            self.path = self.reshaper.reshape_path(self.path, self.player, self.cruise_speed)
+        self.raw_path = self.path
+        self.path = self.reshaper.reshape_path(self.path, self.player, self.cruise_speed)
         if self.is_path_collide(self.raw_path):
             self.path.speeds[1] = 0
-        print("points", self.path.points)
-        print("speeds", self.path.speeds)
         return self.path, self.raw_path
 
     def get_raw_path(self, pose_target=Pose()):
@@ -178,7 +171,7 @@ class PathPartitionner(Pathfinder):
             if np.linalg.norm(direction) < 0.00001:
                 return False
             else:
-                direction = direction / np.linalg.norm(direction)
+                direction /= np.linalg.norm(direction)
             distance_sub_path = np.linalg.norm(pose_start - pose_target)
             if distance_sub_path > 0.01:
                 for pose_obs in obstacles:
@@ -272,9 +265,9 @@ class PathPartitionner(Pathfinder):
                 sub_target_2 -= vec_perp * 0.01 * self.res
                 if np.linalg.norm(cruise_speed) < 0.1:
                     sub_target = sub_target_1
-                elif np.abs(np.dot(direction, (sub_target_1 - path.start.conv_2_np()) /
+                elif abs(np.dot(direction, (sub_target_1 - path.start.conv_2_np()) /
                          np.linalg.norm(sub_target_1 - path.start.conv_2_np()))) > \
-                        np.abs(np.dot(direction, (sub_target_2 - path.start.conv_2_np()) /
+                        abs(np.dot(direction, (sub_target_2 - path.start.conv_2_np()) /
                             np.linalg.norm(sub_target_2 - path.start.conv_2_np()))):
                     sub_target = sub_target_1
                 else:
@@ -311,11 +304,7 @@ class PathPartitionner(Pathfinder):
         pass
 
     def remove_redundant_points(self):
-        if len(self.path.points) > 2:
-            points, speeds = remove_duplicates(self.path.points, self.path.speeds, 10)
-            return Path().generate_path_from_points(points, speeds)
-        else:
-            return Path().generate_path_from_points(self.path.points, self.path.speeds)
+        return Path().generate_path_from_points(remove_duplicates(self.path.points), self.path.speeds)
 
 
 class PathReshaper:
@@ -350,10 +339,7 @@ class PathReshaper:
             # else:
             radius_at_const_speed = vel_cruise ** 2 / (OurPlayer.max_acc * 1000)
             theta = np.math.atan2(p3[1]-p2[1], p3[0]-p2[0]) - np.math.atan2(p1[1]-p2[1], p1[0]-p2[0])
-            try:
-                dist_deviation = (radius_at_const_speed/(np.math.sin(theta/2)))-radius_at_const_speed
-            except ZeroDivisionError:
-                dist_deviation = 0
+            dist_deviation = (radius_at_const_speed/(np.math.sin(theta/2)))-radius_at_const_speed
             speed = vel_cruise
             radius = radius_at_const_speed
             while dist_deviation > self.dist_from_path:

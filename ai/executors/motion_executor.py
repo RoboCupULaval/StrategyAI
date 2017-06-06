@@ -1,18 +1,16 @@
 # Under MIT License, see LICENSE.txt
-
+from enum import IntEnum
+import numpy as np
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.Util.ai_command import AICommandType, AIControlLoopType, AICommand
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
-
-from enum import IntEnum
-import numpy as np
-
 from config.config_service import ConfigService
 
 TARGET_TRESHOLD = 0.1
+
 
 class Pos(IntEnum):
     X = 0
@@ -29,24 +27,24 @@ class DotDict(dict):
 class MotionExecutor(Executor):
     def __init__(self, p_world_state: WorldState):
         super().__init__(p_world_state)
-        self.is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
-        self.robot_motion = [RobotMotion(p_world_state, player_id, is_sim=self.is_simulation) for player_id in
+        is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
+        self.robot_motion = [RobotMotion(p_world_state, player_id, is_sim=is_simulation) for player_id in
                              range(12)]
 
     def exec(self):
-        commands = self.ws.play_state.current_ai_commands
+        for player in self.ws.game_state.my_team.available_players.values():
+            if player.ai_command is None:
+                continue
 
-        for cmd in commands.values():
-
-            robot_id = cmd.robot_id
-            active_player = self.ws.game_state.game.friends.players[robot_id]
+            cmd = player.ai_command
+            r_id = player.id
 
             if cmd.command is AICommandType.MOVE:
                 if cmd.control_loop_type is AIControlLoopType.POSITION:
-                    cmd.speed = self.robot_motion[robot_id].update(cmd)
+                    cmd.speed = self.robot_motion[r_id].update(cmd)
 
                 elif cmd.control_loop_type is AIControlLoopType.SPEED:
-                    speed = fixed2robot(cmd.pose_goal.conv_2_np(), active_player.pose.orientation)
+                    speed = fixed2robot(cmd.pose_goal.conv_2_np(), player.pose.orientation)
                     cmd.speed = Pose(Position(speed[Pos.X], speed[Pos.Y]), speed[Pos.THETA])
 
                 elif cmd.control_loop_type is AIControlLoopType.OPEN:
@@ -54,12 +52,12 @@ class MotionExecutor(Executor):
 
             elif cmd.command is AICommandType.STOP:
                 cmd.speed = Pose(Position(0, 0), 0)
-                self.robot_motion[robot_id].stop()
+                self.robot_motion[r_id].stop()
 
 
 class RobotMotion(object):
-    def __init__(self, p_world_state: WorldState, robot_id, is_sim=True):
-        self.ws = p_world_state
+    def __init__(self, world_state: WorldState, robot_id, is_sim=True):
+        self.ws = world_state
         self.id = robot_id
 
         self.dt = None
@@ -292,7 +290,3 @@ def normalized(vector: np.ndarray) -> np.ndarray:
     if np.linalg.norm(vector) > 0.01:
         vector /= np.linalg.norm(vector)
     return vector
-
-
-if __name__ == "__main__":
-    pass

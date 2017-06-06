@@ -5,6 +5,7 @@ import numpy as np
 
 ORIENTATION_DELTA_TOLERANCE_MAGNITUDE = 1e4
 
+
 class Pose(object):
     """  Container of position and orientation """
     def __init__(self, position=Position(), orientation=0.0):
