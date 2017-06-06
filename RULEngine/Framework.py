@@ -205,7 +205,7 @@ class Framework(object):
         vision_frames = self.vision.pop_frames()
         new_image_packet = self.image_transformer.update(vision_frames)
         if time.time() - self.time_of_last_loop > self.ai_timestamp:
-            time_delta = time.time() - self.time_stamp
+            time_delta = time.time() - self.time_of_last_loop
             self.game.update(new_image_packet, time_delta)
             self._update_debug_info()
             robot_commands = self.ia_coach_mainloop()
