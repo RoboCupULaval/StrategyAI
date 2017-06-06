@@ -90,34 +90,6 @@ class TestGeometry(unittest.TestCase):
         close_point = RULEngine.Util.geometry.get_closest_point_on_line(self.positionNE, self.position, self.positionN)
         self.assertEqual(close_point, self.positionN)
 
-    def test_get_time_to_travel(self):
-        null_time = RULEngine.Util.geometry.get_time_to_travel(0, 3, 2)
-        self.assertEqual(null_time, 0)
-        time_stop = RULEngine.Util.geometry.get_time_to_travel(10, 0, 0)
-        self.assertEqual(time_stop, m.inf)
-        time_constant = RULEngine.Util.geometry.get_time_to_travel(10, 3, 0)
-        self.assertEqual(time_constant, 10/3)
-        time_start = RULEngine.Util.geometry.get_time_to_travel(10, 0, 3)
-        self.assertEqual(time_start, m.sqrt(120)/6)
-        time = RULEngine.Util.geometry.get_time_to_travel(100, 5, 2)
-        self.assertEqual(time, (m.sqrt(825)-5)/4)
-
-    def test_get_first_to_arrive(self):
-        neither = RULEngine.Util.geometry.get_first_to_arrive(120, 2, 3, 120, 2, 3)
-        self.assertEqual(neither, 0)
-        first = RULEngine.Util.geometry.get_first_to_arrive(20, 2, 3, 120, 2, 3)
-        self.assertEqual(first, 1)
-        second = RULEngine.Util.geometry.get_first_to_arrive(120, 2, 3, 20, 2, 3)
-        self.assertEqual(second, 2)
-
-    def test_angle_to_ball_is_tolerated(self):
-        ball_position = self.positionN + RULEngine.Util.Position.Position(0, 5000, 0)
-        not_tolerated = RULEngine.Util.geometry.is_facing_point_and_target(self.positionN, ball_position, self.positionS, m.pi / 4)
-        self.assertEqual(not_tolerated, False)
-        ball_position = self.positionS + RULEngine.Util.Position.Position(0, 5000, 0)
-        tolerated = RULEngine.Util.geometry.is_facing_point_and_target(self.positionS, ball_position, self.positionN, m.pi / 4)
-        self.assertEqual(tolerated, True)
-
     # def test_get_required_kick_force(self): # simple calculation
 
 if __name__ == '__main__':

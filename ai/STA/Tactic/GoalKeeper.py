@@ -1,5 +1,4 @@
 # Under MIT licence, see LICENCE.txt
-from RULEngine.Util.geometry import is_path_clear
 from .Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags, DEFAULT_TIME_TO_LIVE
 from ..Action.ProtectGoal import ProtectGoal

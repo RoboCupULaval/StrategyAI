@@ -266,118 +266,17 @@ def get_closest_point_on_line(reference: Position,
     return Position(pos_x, pos_y)
 
 
-def get_time_to_travel(dist: float, speed: float, accel: float) -> float:
-    """
-        Calcul le temps nécessaire pour parcourir la distance, en fonction de
-        la vitesse et de l'accélération actuelles.
-        Args:
-            dist: La distance à parcourir.
-            speed: La vitesse actuelle.
-            accel: L'accélération actuelle.
-        Returns:
-            Le temps nécessaire pour parcourir la distance.
-    """
-    assert isinstance(dist, (int, float))
-    assert isinstance(speed, (int, float))
-    assert isinstance(accel, (int, float))
+def get_angle_between_three_points(pointA : Position, pointO : Position, pointB : Position):
+    A = pointA.conv_2_np()
+    B = pointB.conv_2_np()
+    O = pointO.conv_2_np()
+    AO = O - A
+    OB = B - O
+    if np.linalg.norm(AO) != 0 and np.linalg.norm(OB) != 0 :
+        AO /= np.linalg.norm(AO)
+        OB /= np.linalg.norm(OB)
+    return np.arccos(np.linalg.dot(AO, OB))
 
-    if accel == 0:
-        if speed == 0:
-            return m.inf
-        else:
-            return dist / speed
-    else:
-        time1 = (-speed + m.sqrt(speed ** 2 + 4 * accel * dist)) / (2 * accel)
-        time2 = (-speed - m.sqrt(speed ** 2 + 4 * accel * dist)) / (2 * accel)
-
-        return time2 if time1 < time2 else time1
-
-
-def get_first_to_arrive(distance1: float,
-                        speed1: float,
-                        acceleration1: float,
-                        distance2: float,
-                        speed2: float,
-                        acceleration2: float):
-    """
-        Détermine quel objet va arriver en premier à sa destination.
-        Args:
-            distance1: La distance que l'objet 1 doit franchir.
-            speed1: La vitesse actuelle de l'objet 1.
-            acceleration1: L'accélération actuelle de l'objet 1.
-            distance2: La distance que l'objet 2 doit franchir.
-            speed2: La vitesse actuelle de l'objet 2.
-            acceleration2: L'accélération actuelle de l'objet 2.
-        Returns:
-            1 si l'objet 1 va arriver en premier à sa destination, 2 sinon.
-    """
-    assert isinstance(distance1, (int, float))
-    assert isinstance(speed1, (int, float))
-    assert isinstance(acceleration1, (int, float))
-    assert isinstance(distance2, (int, float))
-    assert isinstance(speed2, (int, float))
-    assert isinstance(acceleration2, (int, float))
-
-    time1 = get_time_to_travel(distance1, speed1, acceleration1)
-    time2 = get_time_to_travel(distance2, speed2, acceleration2)
-
-    if time1 == time2:
-        return 0
-    else:
-        return 1 if time1 < time2 else 2
-
-
-def is_facing_point_and_target(player_position: Position,
-                               point_position: Position,
-                               target_position:
-                               Position,
-                               tolerated_angle: float) -> bool:
-    """
-        Détermine si l'angle entre le joueur et le point est suffisamment proche
-        de celui du point à la cible. En d'autres mots, lorsqu'utilisé avec la balle
-        comme point, on détermine si le joueur va botter la balle à sa cible.
-        Dans ce cas, la stratégie doit assumer que le joueur est suffisamment
-        près de la balle.
-        Args:
-            player_position: La position du joueur
-            point_position: La position du point (possiblement la balle)
-            target_position: La position où le joueur veut botter la balle
-            tolerated_angle: Angle en radians pour que le botter soit possible
-        Returns:
-            Si le joueur est capable de faire le botté ou non.
-    """
-    assert isinstance(point_position, Position), "ball_position is not a Position"
-    assert isinstance(player_position, Position), "player_position is not a Position"
-    assert isinstance(target_position, Position), "target_position is not a Position"
-    assert isinstance(tolerated_angle, (int, float)), "tolerated_angle is neither a int nor a float"
-
-    angle_player_to_ball = get_angle(player_position, point_position)
-    angle_ball_to_target = get_angle(point_position, target_position)
-    angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
-    return angle_difference < tolerated_angle
-
-def is_path_clear(origin: Position, target: Position, player: Position) -> bool:
-    rayon_ref = 1.1 * np.linalg.norm(origin.conv_2_np() - target.conv_2_np())
-    rayon_player = np.linalg.norm(origin.conv_2_np() - player.conv_2_np()) + np.linalg.norm(target.conv_2_np() - player.conv_2_np())
-    return rayon_player > rayon_ref
-
-def rotate_point_around_origin(point, origin, angle):
-    # TODO: ajouter des unit tests
-    sine = m.sin(angle)
-    cos = m.cos(angle)
-
-    x = point.x - origin.x
-    y = point.y - origin.y
-
-    new_x = x * cos - y * sine
-    new_y = x * sine + y * cos
-
-    new_x += origin.x
-    new_y += origin.y
-
-    new_point = Position(new_x, new_y)
-
-    return new_point
 
 def conv_position_2_list(position: Position):
     """

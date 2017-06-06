@@ -5,7 +5,7 @@ from .Action import Action
 # from ...Util.types import AICommand
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from ai.Util.ai_command import AICommand, AICommandType, RotateAroundCommand
+from ai.Util.ai_command import AICommand, AICommandType
 
 
 class RotateAround(Action):

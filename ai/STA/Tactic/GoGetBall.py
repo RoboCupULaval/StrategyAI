@@ -5,13 +5,11 @@ from RULEngine.Debug.debug_interface import DebugInterface
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.GoBehind import GoBehind
-from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.MoveToPosition import MoveToPosition
 
-from ai.Util.ball_possession import can_get_ball, has_ball
 from RULEngine.Util.geometry import get_distance, get_angle
 from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS
 from RULEngine.Util.Pose import Pose
