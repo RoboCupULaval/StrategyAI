@@ -159,11 +159,12 @@ class DebugInterface(metaclass=Singleton):
         cmd = DebugCommand(1004, {'team_color': self.team_color})
         self.debug_state.append(cmd)
 
-    def send_auto_state(self, referee_cmd, game_stage, current_strategy, state, status):
+    def send_auto_state(self, referee_cmd, game_stage, current_strategy, state, status, referee_team_info):
         cmd = DebugCommand(1005, {'referee_cmd': referee_cmd,
                                   'game_stage': game_stage,
                                   'current_strategy': current_strategy,
                                   'state': state,
-                                  'status' : status})
+                                  'status' : status,
+                                  'referee_team_info': referee_team_info})
         self.debug_state.append(cmd)
 

@@ -68,14 +68,37 @@ class Referee:
         self.stage = Stage.NORMAL_FIRST_HALF_PRE
         self.ball_placement_point = (0,0)
         self.our_color = ConfigService().config_dict["GAME"]["our_color"]
+        self.team_info = {"ours": {
+                            "name": "",
+                            "score": 0,
+                            "red_cards": 0,
+                            "yellow_cards": 0,
+                            "yellow_card_times": [],
+                            "timeouts": 4,
+                            "timeout_time": 0,
+                            "goalie": 0
+                        },
+                        "theirs": {
+                            "name": "",
+                            "score": 0,
+                            "red_cards": 0,
+                            "yellow_cards": 0,
+                            "yellow_card_times": [],
+                            "timeouts": 4,
+                            "timeout_time": 0,
+                            "goalie": 0
+                        }}
 
     def update(self, frames):
         if frames != []:
             self.stage = Stage(frames[-1].stage)
+
             raw_command = RefereeCommand(frames[-1].command)
             self.command = self._parse_command(raw_command)
             if self.command == RefereeCommand.BALL_PLACEMENT_US or self.command == RefereeCommand.BALL_PLACEMENT_THEM:
                 self.ball_placement_point = (frames[-1].point.x, frames[-1].point.y)
+
+            self._parse_team_info(frames[-1])
 
     def _parse_command(self, command):
         # Color wise commands
@@ -87,6 +110,27 @@ class Referee:
                 parsed_cmd = self._convert_raw_to_them(command)
         # None color wise commands
         return RefereeCommand(parsed_cmd)
+
+    def _parse_team_info(self, frame):
+        info = {}
+        if self.our_color == 'yellow':
+            info['ours'] = frame.yellow
+            info['theirs'] = frame.blue
+        else:
+            info['ours']  = frame.blue
+            info['theirs'] = frame.yellow
+
+        for key in info.keys():
+            self.team_info[key]['name'] = info[key].name
+            self.team_info[key]['score'] = info[key].score
+            self.team_info[key]['red_cards'] = info[key].red_cards
+            self.team_info[key]['yellow_cards'] = info[key].yellow_cards
+            self.team_info[key]['yellow_card_times'].clear()
+            for time in info[key].yellow_card_times:
+                self.team_info[key]['yellow_card_times'].append(time)
+            self.team_info[key]['timeouts'] = info[key].timeouts
+            self.team_info[key]['timeout_time'] = info[key].timeout_time
+            self.team_info[key]['goalie'] = info[key].goalie
 
     def _convert_raw_to_us(self, command):
         if self.our_color == 'yellow':

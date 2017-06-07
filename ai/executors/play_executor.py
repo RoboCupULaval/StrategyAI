@@ -80,7 +80,8 @@ class PlayExecutor(Executor):
                                                 str(self.ws.game_state.game.referee.stage.name),
                                                 str(self.ws.play_state.current_strategy),
                                                 str(self.auto_play.current_state),
-                                                self.ws.play_state.autonomous_flag)
+                                                self.ws.play_state.autonomous_flag,
+                                                self.ws.game_state.game.referee.team_info)
 
     def _send_books(self) -> None:
         """
