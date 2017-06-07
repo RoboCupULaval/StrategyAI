@@ -111,7 +111,7 @@ class RobotMotion(object):
         rotation_cmd = self.apply_rotation_constraints(rotation_cmd)
 
         # Translation control
-        if self.target_reached and self.target_speed < self.setting.translation.deadzone:
+        if self.target_reached and self.target_speed <= self.setting.translation.deadzone:
             translation_cmd = np.array([self.x_controller.update(self.pos_error[Pos.X]),
                                         self.y_controller.update(self.pos_error[Pos.Y])])
             self.next_speed = 0
@@ -236,7 +236,7 @@ class RobotMotion(object):
 def get_control_setting(is_sim: bool):
 
     if is_sim:
-        translation = {"kp": 0.1, "ki": 0, "kd": 1, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        translation = {"kp": 0.8, "ki": 0.01, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
         rotation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
         translation = {"kp": 0.8, "ki": 0.01, "kd": 0, "antiwindup": 20, "deadzone": 0.08, "sensibility": 0.02}
