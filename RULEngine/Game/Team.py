@@ -9,6 +9,9 @@ from config.config_service import ConfigService
 class Team:
     def __init__(self, team_color: TeamColor):
         assert isinstance(team_color, TeamColor)
+        self.team_color = team_color
+        self.score = 0
+
         self.players = {}
         self.available_players = {}
         for player_id in range(PLAYER_PER_TEAM):
@@ -17,8 +20,6 @@ class Team:
                 self.players[player_id].in_play = True
                 self.available_players[player_id] = self.players[player_id]
 
-        self.team_color = team_color
-        self.score = 0
         self.update_player = self._update_player
         if ConfigService().config_dict["IMAGE"]["kalman"] == "true":
             self.update_player = self._kalman_update
