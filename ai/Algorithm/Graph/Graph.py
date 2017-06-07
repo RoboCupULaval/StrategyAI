@@ -102,7 +102,6 @@ class Graph:
             next_ai_command, next_node = self.nodes[self.current_node].exec()
             if next_node != -1:
                 self.set_current_node(next_node)
-
             return next_ai_command
         else:
             raise EmptyGraphException("Le graph ne contient aucun noeud.")
