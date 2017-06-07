@@ -9,6 +9,27 @@ from ..Util.Pose import Pose
 __author__ = 'RoboCupULaval'
 
 
+def remove_duplicates(seq, concurent_list=None, round_up_threshold=1):
+    seen = set()
+    seen2 = set()
+    seen_add = seen.add
+    seen2_add = seen2.add
+    seq_rounded = round_position_to_number(seq, round_up_threshold)
+    if concurent_list is None:
+        return [x for idx, x in enumerate(seq) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])]
+    else:
+        return [x for idx, x in enumerate(seq) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])], \
+               [y for idx, y in enumerate(concurent_list) if not seq[idx] in seen2 or seen2_add(seq[idx])]
+
+
+def round_position_to_number(positions, base=5):
+
+    for position in positions:
+        position.x = int(base * round(float(position.x)/base))
+        position.y = int(base * round(float(position.y)/base))
+    return positions
+
+
 def get_distance(position_1: Position, position_2: Position) -> float:
     """
         Calcul la distance entre deux positions (la norme du vecteur reliant les deux points).

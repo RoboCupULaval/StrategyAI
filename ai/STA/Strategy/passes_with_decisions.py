@@ -46,8 +46,8 @@ class PassesWithDecisions(Strategy):
                 self.add_tactic(i, Stop(self.game_state, i))
 
     def condition(self, i):
-        print(i)
-        print(self.graphs[self.passing_ID].get_current_tactic())
+        # print(i)
+        # print(self.graphs[self.passing_ID].get_current_tactic())
         return self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS
 
     def is_best_receiver(self, receiver_id):

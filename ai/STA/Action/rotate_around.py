@@ -1,34 +1,30 @@
 # Under MIT license, see LICENSE.txt
 import numpy as np
+
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
-from .Action import Action
-# from ...Util.types import AICommand
 from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import PLAYER_PER_TEAM
+
+from ai.states.game_state import GameState
+from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
 
 
 class RotateAround(Action):
-    """
-
-    """
-    def __init__(self, p_game_state, p_player_id, target, rayon):
+    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose, rayon: [int, float]):
         """
-            :param p_game_state: L'état courant du jeu.
-            :param p_player_id: Identifiant du joueur qui se déplace
+            :param game_state: L'état courant du jeu.
+            :param player: Instance du joueur qui se déplace
             :param target: Pose du centre de rotation
             :param rayon: Distance entre le centre du robot et le centre de rotation
         """
-        Action.__init__(self, p_game_state)
-        assert(isinstance(p_player_id, int))
-        assert PLAYER_PER_TEAM >= p_player_id >= 0
-        self.player_id = p_player_id
+        Action.__init__(self, game_state, player)
         self.target = target
-        self.game_state = p_game_state
+        self.game_state = game_state
         self.rayon = rayon
 
     def generate_destination(self):
-        player = self.game_state.game.friends.players[self.player_id].pose.position.conv_2_np()
+        player = self.player.pose.position.conv_2_np()
         target = self.target.position.conv_2_np()
         player_to_target_orientation = np.arctan2(target[1] - player[1], target[0] - player[0])
         target_orientation = self.target.orientation
@@ -45,5 +41,4 @@ class RotateAround(Action):
         """
         Exécute le déplacement
         """
-        destination = self.generate_destination()
-        return AICommand(self.player_id, AICommandType.MOVE, **{"pose_goal": destination})
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.generate_destination()})

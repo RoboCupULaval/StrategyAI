@@ -1,14 +1,15 @@
 # Under MIT License, see LICENSE.txt
 from typing import List
 
+from ai.STA.Tactic.DemoFollowRobot import DemoFollowRobot
 from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.bumb import Bump
 from ai.STA.Tactic.capture import Capture
+from ai.STA.Tactic.intercept import Intercept
 from ai.STA.Tactic.mark import Mark
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.robot_ident import RobotIdent
-from ai.STA.Tactic.stand_out_wait_pass import StandOutWaitPass
 from ai.STA.Tactic.test_turn_on_you import TestTurnOnYou
 from ai.STA.Tactic.va_et_vient import VaEtVient
 from ai.STA.Tactic.GoGetBall import GoGetBall
@@ -31,11 +32,11 @@ class TacticBook(object):
         """
         self.tactic_book = {'PassBall': PassBall,
                             'ReceivePass': ReceivePass,
-                            'StandOutWaitPass': StandOutWaitPass,
                             'GoalKeeper': GoalKeeper,
                             'CoverZone': ProtectZone,
                             'GoGetBall': GoGetBall,
                             'DemoFollowBall': DemoFollowBall,
+                            'DemoFollowRobot': DemoFollowRobot,
                             'Stop': Stop,
                             'GoToPositionNoPathfinder': GoToPositionNoPathfinder,
                             'GoToPositionPathfinder': GoToPositionPathfinder,
@@ -48,7 +49,8 @@ class TacticBook(object):
                             'PositionForPass': PositionForPass,
                             'Capture': Capture,
                             'Mark': Mark,
-                            'Bump': Bump
+                            'Bump': Bump,
+                            'Intercept': Intercept
                             }
 
     def get_tactics_name_list(self) -> List[str]:
@@ -80,4 +82,3 @@ class TacticBook(object):
         if self.check_existance_tactic(tactic_name):
             return self.tactic_book[tactic_name]
         return self.tactic_book['Stop']
-

@@ -8,7 +8,7 @@ __author__ = 'RoboCupULaval'
 
 ROBOT_RADIUS = 90
 BALL_RADIUS = 22
-PLAYER_PER_TEAM = 6
+PLAYER_PER_TEAM = 11
 KICK_MAX_SPD = 8.0
 
 # Field Parameters
