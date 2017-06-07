@@ -2,6 +2,7 @@
 
 from typing import List, Tuple, Callable, Any
 
+from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.singleton import Singleton
 from ai.Algorithm.auto_play import SimpleAutoPlay
@@ -28,7 +29,6 @@ class PlayState(object, metaclass=Singleton):
         self.autonomous_flag = False
 
         self.current_strategy = None
-        self.current_ai_commands = {}
 
     def set_strategy(self, strategy: Strategy) -> None:
         """
@@ -61,7 +61,7 @@ class PlayState(object, metaclass=Singleton):
         """
         return self.strategy_book.get_strategy(strategy_name)
 
-    def get_new_tactic(self, tactic_name: str) -> Callable[[GameState, int, Pose, Any], Tactic]:
+    def get_new_tactic(self, tactic_name: str) -> Callable[[GameState, Player, Pose, Any], Tactic]:
         """
         Retourne un callable sur la tactic spécifiée par le tactic_name.
 

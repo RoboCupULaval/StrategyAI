@@ -64,14 +64,9 @@ class DebugExecutor(Executor):
         strategy_key = cmd.data['strategy']
 
         if strategy_key == 'pStop':
-            self.ws.play_state.set_strategy(self.ws.play_state.
-                                            get_new_strategy("DoNothing")
-                                            (self.ws.game_state))
-
+            self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy("DoNothing")(self.ws.game_state))
         else:
-            self.ws.play_state.set_strategy(self.ws.play_state.
-                                            get_new_strategy(strategy_key)
-                                            (self.ws.game_state))
+            self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy(strategy_key)(self.ws.game_state))
 
     def _parse_tactic(self, cmd: UIDebugCommand)->None:
         """
@@ -80,25 +75,29 @@ class DebugExecutor(Executor):
         :param cmd: (UIDebugCommand) la commande envoyée de l'UI
         :return: None
         """
+        assert isinstance(cmd, UIDebugCommand), "debug_executor->_parse_tactic is not the correct object!"
         # TODO make implementation for other tactic packets!
         # FIXME this pid thingy is getting out of control
-        player_id = self._sanitize_pid(cmd.data['id'])
+        # find the player id in question
+        # get the player if applicable!
+        this_player = self.ws.game_state.get_player(cmd.data['id'])
+        player_id = this_player.id
         tactic_name = cmd.data['tactic']
         # TODO ui must send better packets back with the args.
         target = cmd.data['target']
-        target = Pose(Position(target[0], target[1]), 3.92 - 2 * math.pi)
+        target = Pose(Position(target[0], target[1]), this_player.pose.orientation)  # 3.92 - 2 * math.pi)
         args = cmd.data.get('args', "")
         tactic = self.ws.play_state.get_new_tactic('Idle')(self.ws.game_state,
-                                                           player_id,
+                                                           this_player,
                                                            target,
                                                            args)
         try:
-            tactic = self.ws.play_state.get_new_tactic(tactic_name)\
-                (self.ws.game_state, player_id, target, args)
+            tactic = self.ws.play_state.get_new_tactic(tactic_name)(self.ws.game_state, this_player, target, args)
         except Exception as e:
             print(e)
             print("La tactique n'a pas été appliquée par "
                   "cause de mauvais arguments.")
+            raise e
 
         if isinstance(self.ws.play_state.current_strategy, HumanControl):
             hc = self.ws.play_state.current_strategy
@@ -107,13 +106,3 @@ class DebugExecutor(Executor):
             hc = HumanControl(self.ws.game_state)
             hc.assign_tactic(tactic, player_id)
             self.ws.play_state.set_strategy(hc)
-
-    @staticmethod
-    def _sanitize_pid(pid: int)->int:
-        # TODO find something better for this whole scheme
-        if 0 <= pid < 6:
-            return pid
-        elif 6 <= pid < 12:
-            return pid - 6
-        else:
-            return 0

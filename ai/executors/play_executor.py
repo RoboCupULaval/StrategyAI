@@ -49,13 +49,12 @@ class PlayExecutor(Executor):
         :return: None
         """
         # Applique un stratégie par défault s'il n'en a pas (lors du démarage par exemple)
+        # TODO change this so we don't send humancontrol when nothing is set/ Donothing would be better
         if self.ws.play_state.current_strategy is None:
-            self.ws.play_state.set_strategy(self.ws.play_state.
-                                            get_new_strategy("HumanControl")
-                                            (self.ws.game_state))
+            self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy("HumanControl")(self.ws.game_state))
         # L'éxécution en tant que telle
-        self.ws.play_state.current_ai_commands = \
-            self.ws.play_state.current_strategy.exec()
+        self.ws.play_state.current_strategy.exec()
+        # self.ws.play_state.current_ai_commands = self.ws.play_state.current_strategy.exec()
 
     def _send_robots_status(self) -> None:
         """

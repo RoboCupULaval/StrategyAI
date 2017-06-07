@@ -1,22 +1,19 @@
 # Under MIT license, see LICENSE.txt
+from typing import List
 import numpy as np
 
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
-from .Tactic import Tactic
-from . tactic_constants import Flags
+from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.rotate_around import RotateAround
-from ai.Util.ai_command import RotateAroundCommand
-from RULEngine.Util.geometry import get_distance
-from RULEngine.Util.constant import POSITION_DEADZONE
+from ai.states.game_state import GameState
 
 
 class RotateAroundPosition(Tactic):
-    def __init__(self, p_game_state, player_id, target, args):
-        super().__init__(p_game_state, player_id, target, args)
-        self.status_flag = Flags.INIT
-        self.target = target
-        self.player_id = player_id
+    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose, args: List[str]=None):
+        super().__init__(game_state, player, target, args)
 
     def exec(self):
         if self.check_success():
@@ -27,7 +24,7 @@ class RotateAroundPosition(Tactic):
         target = self.target.position.conv_2_np()
         ball_to_target = target - ball
         orientation = np.arctan2(ball_to_target[1], ball_to_target[0])
-        next_action = RotateAround(self.game_state, self.player_id, Pose(Position.from_np(ball), orientation), 90)
+        next_action = RotateAround(self.game_state, self.player, Pose(Position.from_np(ball), orientation), 90)
         return next_action.exec()
 
     def check_success(self):

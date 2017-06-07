@@ -1,15 +1,14 @@
 # Under MIT License, see LICENSE.txt
+from RULEngine.Game.Ball import Ball
 from config.config_service import ConfigService
 from ..Util.area import *
 
 
 class Field:
-
-    def __init__(self, ball):
+    def __init__(self, ball: Ball):
         self.ball = ball
 
         cfg = ConfigService()
-
         if cfg.config_dict["GAME"]["terrain_type"] == "normal":
             self.constant = normal
         elif cfg.config_dict["GAME"]["terrain_type"] == "small":
@@ -157,8 +156,10 @@ normal = {
     # Field Positions
     "FIELD_GOAL_BLUE_TOP_CIRCLE": Position(-4500, 250),  # FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2)
     "FIELD_GOAL_BLUE_BOTTOM_CIRCLE": Position(-4500, -250),  # FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2 * -1)
+    "FIELD_GOAL_BLUE_MID_GOAL": Position(-4500, 0),
     "FIELD_GOAL_YELLOW_TOP_CIRCLE": Position(4500, 250),  # FIELD_X_RIGHT, FIELD_GOAL_SEGMENT / 2)
     "FIELD_GOAL_YELLOW_BOTTOM_CIRCLE": Position(4500, -250),  # FIELD_X_RIGHT, FIELD_GOAL_SEGMENT / 2 * -1)
+    "FIELD_GOAL_YELLOW_MID_GOAL": Position(4500, 0),
 
     # Legal field dimensions
     "LEGAL_Y_TOP": 3000,
@@ -176,7 +177,7 @@ normal = {
 
     # Deadzones
     "SPEED_DEAD_ZONE_DISTANCE": 150,
-    "POSITION_DEADZONE": 200,  # ROBOT_RADIUS*1.5
+    "POSITION_DEADZONE": 20,  # ROBOT_RADIUS*1.5
 
     # Radius and angles for tactics
     "DISTANCE_BEHIND": 120,  # ROBOT_RADIUS + 30  # in millimeters
@@ -224,8 +225,10 @@ small = {
     # Field Positions
     "FIELD_GOAL_BLUE_TOP_CIRCLE": Position(-1636, 250),  # FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2)
     "FIELD_GOAL_BLUE_BOTTOM_CIRCLE": Position(-1636, -250),  # FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2 * -1)
+    "FIELD_GOAL_BLUE_MID_GOAL": Position(-1636, 0),
     "FIELD_GOAL_YELLOW_TOP_CIRCLE": Position(1636, 250),  # FIELD_X_RIGHT, FIELD_GOAL_SEGMENT / 2)
     "FIELD_GOAL_YELLOW_BOTTOM_CIRCLE": Position(1636, -250),  # FIELD_X_RIGHT, FIELD_GOAL_SEGMENT / 2 * -1)
+    "FIELD_GOAL_YELLOW_MID_GOAL": Position(1636, 0),
 
     # Legal field dimensions
     "LEGAL_Y_TOP": 1090,
