@@ -4,6 +4,7 @@ from typing import List, Tuple, Callable, Any
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.singleton import Singleton
+from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Strategy.StrategyBook import StrategyBook
 from ai.STA.Tactic.Tactic import Tactic
@@ -24,10 +25,7 @@ class PlayState(object, metaclass=Singleton):
         self.strategy_book = StrategyBook()
         self.tactic_book = TacticBook()
 
-        cfg = ConfigService()
-        self.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
-        self.autonomous_state = 'HALT'
-        self.our_color = cfg.config_dict["GAME"]["our_color"]
+        self.autonomous_flag = False
 
         self.current_strategy = None
         self.current_ai_commands = {}
