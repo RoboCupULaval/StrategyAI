@@ -47,7 +47,7 @@ class Framework(object):
 
         # time
         self.last_frame_number = 0
-        self.time_stamp = None  #  time.time()
+        self.time_stamp = None  # time.time()
         self.last_camera_time = time.time()
         self.time_of_last_loop = time.time()
         self.ai_timestamp = float(self.cfg.config_dict["GAME"]["ai_timestamp"])
@@ -207,6 +207,8 @@ class Framework(object):
         if time.time() - self.time_of_last_loop > self.ai_timestamp:
             time_delta = time.time() - self.time_of_last_loop
             self.game.update(new_image_packet, time_delta)
+            self.game.field.update_field_dimensions(vision_frames)
+
             self._update_debug_info()
             robot_commands = self.ia_coach_mainloop()
 

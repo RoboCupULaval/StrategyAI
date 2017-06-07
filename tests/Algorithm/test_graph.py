@@ -17,6 +17,7 @@ from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommand, AICommandType
 from ai.states.game_state import GameState
+from config.config_service import ConfigService
 
 __author__ = 'RoboCupULaval'
 
@@ -31,13 +32,13 @@ def foo2():
 
 class TestGraph(unittest.TestCase):
     def setUp(self):
+        config_service = ConfigService().load_file("config/sim_standard.cfg")
         self.game_state = GameState()
         self.game = Game()
         self.game.set_referee(Referee())
         self.game.ball = Ball()
         game_world = ReferenceTransferObject(self.game)
         game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW_TEAM))
-        self.game.set_our_team_color(TeamColor.YELLOW_TEAM)
         self.game_state.set_reference(game_world)
         self.game_state = GameState()
         self.empty_graph = Graph()

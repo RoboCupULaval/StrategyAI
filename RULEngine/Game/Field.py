@@ -87,6 +87,48 @@ class Field:
             position = stayOutsideCircle(position, circle_bot, self.constant["FIELD_GOAL_RADIUS"])
             return Position(position.x, position.y)
 
+    def update_field_dimensions(self, packets):
+        if not packets:
+            return
+
+        for packet in packets:
+            if packet.HasField("geometry"):
+                field = packet.geometry.field
+                self._line_width = field.line_width
+                self._field_length = field.field_length
+                self._field_width = field.field_width
+                self._boundary_width = field.boundary_width
+                self._referee_width = field.referee_width
+                self._goal_width = field.goal_width
+                self._goal_depth = field.goal_depth
+                self._goal_wall_width = field.goal_wall_width
+                self._center_circle_radius = field.center_circle_radius
+                self._defense_radius = field.defense_radius
+                self._defense_stretch = field.defense_stretch
+                self._free_kick_from_defense_dist = field.free_kick_from_defense_dist
+                self._penalty_spot_from_field_line_dist = field.penalty_spot_from_field_line_dist
+                self._penalty_line_from_spot_dist = field.penalty_line_from_spot_dist
+
+                self.constant["FIELD_Y_TOP"] = self._field_width / 2
+                self.constant["FIELD_Y_BOTTOM"] = -self._field_width / 2
+                self.constant["FIELD_X_LEFT"] = -self._field_length / 2
+                self.constant["FIELD_X_RIGHT"] = self._field_length / 2
+                self.constant["FIELD_GOAL_RADIUS"] = self._defense_radius
+                self.constant["FIELD_GOAL_SEGMENT"] = self._defense_stretch
+
+                self.constant["FIELD_GOAL_Y_TOP"] = self._defense_radius + (self._defense_stretch / 2)
+                self.constant["FIELD_GOAL_Y_BOTTOM"] = -self.constant["FIELD_GOAL_Y_TOP"]
+                self.constant["FIELD_GOAL_BLUE_X_LEFT"] = self.constant["FIELD_X_LEFT"]
+                self.constant["FIELD_GOAL_BLUE_X_RIGHT"] = self.constant["FIELD_X_LEFT"] + self.constant["FIELD_GOAL_RADIUS"]
+                self.constant["FIELD_GOAL_YELLOW_X_LEFT"] = self.constant["FIELD_X_RIGHT"] - self.constant["FIELD_GOAL_RADIUS"]
+                self.constant["FIELD_GOAL_YELLOW_X_RIGHT"] = self.constant["FIELD_X_RIGHT"]
+
+                self.constant["FIELD_GOAL_BLUE_TOP_CIRCLE"] = Position(self.constant["FIELD_X_LEFT"], self.constant["FIELD_GOAL_SEGMENT"] / 2)
+                self.constant["FIELD_GOAL_BLUE_BOTTOM_CIRCLE"] = Position(self.constant["FIELD_X_LEFT"], -self.constant["FIELD_GOAL_SEGMENT"] / 2)
+                self.constant["FIELD_GOAL_YELLOW_TOP_CIRCLE"] = Position(self.constant["FIELD_X_RIGHT"], self.constant["FIELD_GOAL_SEGMENT"] / 2)
+                self.constant["FIELD_GOAL_YELLOW_BOTTOM_CIRCLE"] = Position(self.constant["FIELD_X_RIGHT"], -self.constant["FIELD_GOAL_SEGMENT"] / 2)
+
+
 
 normal = {
     "ROBOT_RADIUS": 90,
