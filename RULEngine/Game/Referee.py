@@ -66,6 +66,7 @@ class Referee:
         self.command = RefereeCommand.STOP
         self.prepare_command = None
         self.stage = Stage.NORMAL_FIRST_HALF_PRE
+        self.stage_time_left = 0
         self.ball_placement_point = (0,0)
         self.our_color = ConfigService().config_dict["GAME"]["our_color"]
         self.team_info = {"ours": {
@@ -92,6 +93,7 @@ class Referee:
     def update(self, frames):
         if frames != []:
             self.stage = Stage(frames[-1].stage)
+            self.stage_time_left = frames[-1].stage_time_left
 
             raw_command = RefereeCommand(frames[-1].command)
             self.command = self._parse_command(raw_command)

@@ -78,6 +78,7 @@ class PlayExecutor(Executor):
     def _send_auto_state(self) -> None:
         self.ws.debug_interface.send_auto_state(str(self.ws.game_state.game.referee.command.name),
                                                 str(self.ws.game_state.game.referee.stage.name),
+                                                self.ws.game_state.game.referee.stage_time_left,
                                                 str(self.ws.play_state.current_strategy),
                                                 str(self.auto_play.current_state),
                                                 self.ws.play_state.autonomous_flag,
