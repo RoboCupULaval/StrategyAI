@@ -41,8 +41,8 @@ class CommandExecutor(Executor):
 
         # TODO add a way to stop the dribbler! MGL 2017/03/14
         # TODO restraindre une seul commande de mouvement par robot
-        temp = []
         if player.ai_command is not None:
+            temp = []
             if player.ai_command.charge_kick:
                 temp.append(StartChargingKick(player))
 
@@ -55,5 +55,7 @@ class CommandExecutor(Executor):
             if player.ai_command.command == AICommandType.MOVE:
                 assert (isinstance(player.ai_command.speed, Pose))
                 temp.append(Move(player))
+            elif player.ai_command.command == AICommandType.STOP:
+                temp.append(Stop(player))
             return temp
         return [Stop(player)]

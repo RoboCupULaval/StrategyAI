@@ -7,6 +7,7 @@ from RULEngine.Util.team_color_service import TeamColor, TeamColorService
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from ai.states.game_state import GameState
 from ai.states.module_state import ModuleState
+from config.config_service import ConfigService
 
 
 class TestGameStateManager(unittest.TestCase):
@@ -14,10 +15,11 @@ class TestGameStateManager(unittest.TestCase):
         Teste les différentes fonctionnalités du GameStateManager
     """
     def setUp(self):
+        config_service = ConfigService().load_file("config/sim_standard.cfg")
         self.game = Game()
         self.referee = Referee
         self.game.set_referee(self.referee)
-        self.tcsvc = TeamColorService(TeamColor.YELLOW_TEAM)
+        self.tcsvc = TeamColorService(TeamColor.BLUE_TEAM)
         self.game.set_our_team_color(self.tcsvc.OUR_TEAM_COLOR)
         self.game_world_OK = ReferenceTransferObject(self.game)
         self.game_world_OK.set_team_color_svc(self.tcsvc)
@@ -40,7 +42,7 @@ class TestGameStateManager(unittest.TestCase):
                       self.game_world_OK.game.referee)
         self.assertIs(self.GameStateManager1.field,
                       self.game_world_OK.game.field)
-        self.assertIs(self.GameStateManager2.our_team_color,
+        self.assertIs(self.GameStateManager1.game.our_team_color,
                       self.game.our_team_color)
 
         game_state_manager = GameState()
