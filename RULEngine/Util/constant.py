@@ -8,7 +8,7 @@ __author__ = 'RoboCupULaval'
 
 ROBOT_RADIUS = 90
 BALL_RADIUS = 22
-PLAYER_PER_TEAM = 6
+PLAYER_PER_TEAM = 11
 KICK_MAX_SPD = 8.0
 
 # Field Parameters
@@ -74,6 +74,8 @@ DEFAULT_MIN_SPEED = 0.65
 class TeamColor(Enum):
     YELLOW_TEAM = 0
     BLUE_TEAM = 1
+    def __str__(self):
+        return 'blue' if self == TeamColor.BLUE_TEAM else 'yellow'
 
 # FIXME: hack pour limiter le terrain facilement
 def is_legal_field_pose(pose):

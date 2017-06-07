@@ -6,10 +6,6 @@ from RULEngine.Util.geometry import get_distance
 from ai.executors.executor import Executor
 from ai.Util.ai_command import AICommandType
 
-ROBOT_NEAR_FORCE = 30
-ROBOT_VELOCITY_MAX = 4
-ROBOT_ACC_MAX = 2
-PATHFINDER_DEADZONE = 100
 
 
 class MovementExecutor(Executor):
@@ -32,9 +28,13 @@ class MovementExecutor(Executor):
                 current_pose = self.ws.game_state.get_player_pose(ai_cmd.robot_id)
                 next_position = ai_cmd.path[0]
                 distance = get_distance(current_pose.position, next_position)
-                while distance < PATHFINDER_DEADZONE and len(ai_cmd.path) > 1:
+                # if ai_cmd.path[-1] == next_position:
+                #     pathfinder_dead_zone = 10
+                # else:
+                #     pathfinder_dead_zone = 150
+                while distance < 10 and len(ai_cmd.path) > 1:
                     self.ws.debug_interface.add_log(1, "Gestion path; retrait point trop rapproche.")
-                    ai_cmd.path = ai_cmd.path[1:]
+                    ai_cmd.path = ai_cmd.path
                     next_position = ai_cmd.path[0]
                     distance = get_distance(current_pose.position, next_position)
                 ai_cmd.pose_goal = Pose(next_position, ai_cmd.pose_goal.orientation)

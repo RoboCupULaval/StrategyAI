@@ -1,31 +1,34 @@
 # Under MIT license, see LICENSE.txt
 import numpy as np
-from .Action import Action
-from RULEngine.Util.constant import PLAYER_PER_TEAM, KICK_MAX_SPD
-from ai.Util.ai_command import AICommand, AICommandType
+
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+# FIXME Dubious constant kick max speed
+from RULEngine.Util.constant import KICK_MAX_SPD
+from ai.states.game_state import GameState
+from ai.STA.Action.Action import Action
+from ai.Util.ai_command import AICommand, AICommandType
+
 
 class Kick(Action):
     """
-    Action Kick: Actionne le kick du robot
+    Action Kick: Actionne le kick du robot avec un mouvement en avant?
     Méthodes :
-        exec(self): Retourne la position actuelle et une force de kick
+        exec(self):
     Attributs (en plus de ceux de Action):
-        player_id : L'identifiant du joueur qui doit frapper la balle
+
     """
-    def __init__(self, p_game_state, p_player_id, p_force, target=Pose()):
+    def __init__(self, game_state: GameState, player: OurPlayer, p_force: [int, float], target: Pose=Pose()):
         """
-            :param p_game_state: L'état courant du jeu.
-            :param p_player_id: Identifiant du joueur qui frappe la balle
+            :param game_state: L'état courant du jeu.
+            :param player: Instance du joueur qui frappe la balle
             :param p_force: force du kicker (float entre 0 et 1)
         """
-        Action.__init__(self, p_game_state)
-        assert(isinstance(p_player_id, int))
-        assert PLAYER_PER_TEAM >= p_player_id >= 0
+        # TODO check the force not used by the new interface! MGL 2017/05/23
+        Action.__init__(self, game_state, player)
         assert(isinstance(p_force, (int, float)))
         assert(KICK_MAX_SPD >= p_force >= 0)
-        self.player_id = p_player_id
         self.force = p_force
         self.target = target
         self.speed_pose = Pose()
@@ -36,13 +39,13 @@ class Kick(Action):
         :return: Un IAcommand
         """
         target = self.target.position.conv_2_np()
-        player = self.game_state.game.friends.players[self.player_id].pose.position.conv_2_np()
+        player = self.player.pose.position.conv_2_np()
         player_to_target = target - player
         norm_player_2_target = np.linalg.norm(player_to_target)
         norm_player_2_target = norm_player_2_target if norm_player_2_target != 0 else 1
         player_to_target = 0.3 * player_to_target / norm_player_2_target
         self.speed_pose = Pose(Position.from_np(player_to_target))
-        return AICommand(self.player_id, AICommandType.MOVE, **{"pose_goal": self.speed_pose,
-                                                                "speed_flag": True,
-                                                                "kick": True,
-                                                                "kick_strength": self.force})
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.speed_pose,
+                                                             "speed_flag": True,
+                                                             "kick": True,
+                                                             "kick_strength": self.force})

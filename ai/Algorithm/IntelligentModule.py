@@ -6,6 +6,8 @@ from abc import abstractmethod, ABCMeta
 from typing import List
 
 from RULEngine.Debug.debug_interface import DebugInterface
+from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose
 
 __author__ = 'RoboCupULaval'
@@ -75,14 +77,14 @@ class Pathfinder(IntelligentModule, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_path(self, robot_id: int=None, target=None) -> List[Pose]:
+    def get_path(self, player: OurPlayer, target=Pose(), cruise_speed=1) -> List[Pose]:
         """
             Si l'ID est précisé, retourne la liste des *Pose* pour le chemin
             de ce robot. Autrement, retourne le dictionnaire.
 
-            :param robot_id: int entre 0 à 11 représentant les robots de
-                             l'équipe alliée
+            :param player: Player une instance de robot de notre équipe
             :param target: LEGACY -> a etre supprimer dans versin future.
+            :param cruise_speed: asdf->dsf
             :return: [Pose, Pose, ...]
         """
 

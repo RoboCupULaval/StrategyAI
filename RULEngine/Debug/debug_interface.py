@@ -2,6 +2,7 @@
 
 from RULEngine.Debug.debug_command import DebugCommand
 from RULEngine.Util.singleton import Singleton
+from RULEngine.Game.OurPlayer import OurPlayer
 
 
 class Color(object):
@@ -147,7 +148,8 @@ class DebugInterface(metaclass=Singleton):
         self.debug_state.append(cmd)
 
     def send_robot_strategic_state(self, player: OurPlayer, tactic, action, target="not implemented"):
-        data = {'blue': {player.: {'tactic': tactic,
+        teamcolor_str = player.team.team_color.__str__()
+        data = {teamcolor_str: {player.id: {'tactic': tactic,
                                      'action': action,
                                      'target': target}}}
         cmd = DebugCommand(1002, data)

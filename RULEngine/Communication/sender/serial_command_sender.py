@@ -1,15 +1,10 @@
 # Under MIT License, see LICENSE.txt
-import os
 import threading
 import time
 from collections import deque
-from sys import platform
-
-import serial
-from serial.tools import list_ports
 from pyhermes import McuCommunicator
 
-from RULEngine.Command.command import _Command, _ResponseCommand
+from RULEngine.Command.command import Command, ResponseCommand
 from RULEngine.Command.command import *
 from RULEngine.Game.Player import Player
 
@@ -19,7 +14,7 @@ MOVE_COMMAND_SLEEP = 0.05
 
 class SerialCommandSender(object):
     def __init__(self, baud_rate=115200):
-        self.McuCommunicator = McuCommunicator()
+        self.mcu_com = McuCommunicator()
 
         self.last_time = 0
         self.command_queue = deque()
@@ -48,7 +43,7 @@ class SerialCommandSender(object):
                 if next_command:
                     self._package_commands(next_command)
 
-    def send_command(self, command: _Command):
+    def send_command(self, command: Command):
         # self.command_queue.append(command)
         # print("({}) Command deque length: {}".format(time.time(), len(self.command_queue)))
 
@@ -57,7 +52,7 @@ class SerialCommandSender(object):
         else:
             self.command_queue.append(command)
 
-    def send_responding_command(self, command: _ResponseCommand):
+    def send_responding_command(self, command: ResponseCommand):
         """
         Pause le thread appelant jusqu'à qu'une réponse est reçu
         """
@@ -71,28 +66,10 @@ class SerialCommandSender(object):
     def stop(self):
         self.terminate.set()
         self.comm_thread.join()
-        self.terminate.clear()
 
-    def _package_commands(self, command: _Command,):
-        if isinstance(command, Move):
-            x = command.pose.position.x
-            y = command.pose.position.y
-            theta = command.pose.orientation
-            self.McuCommunicator.sendSpeed(command.player.id, x, y, theta)
-        elif isinstance(command, Stop):
-            self.McuCommunicator.sendSpeed(command.player.id, 0, 0, 0)
-        elif isinstance(command, Kick):
-            self.McuCommunicator.kick(command.player.id)
-        elif isinstance(command, ChargeKick):
-            self.McuCommunicator.charge(command.player.id)
-        elif isinstance(command, Dribbler):
-            if command.dribbler_status == 2:
-                self.McuCommunicator.turnOnDribbler(command.player.id)
-            else:
-                self.McuCommunicator.turnOffDribbler(command.player.id)
-        elif isinstance(command, GetBattery):
-            response = self.McuCommunicator.getBatterie(command.player.id)
+    def _package_commands(self, command: Command):
+        response = command.package_command(self.mcu_com)
 
-        if isinstance(command, _ResponseCommand):
+        if isinstance(command, ResponseCommand):
             command.response = response
             command.wakeup_thread()

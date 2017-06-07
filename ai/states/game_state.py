@@ -5,7 +5,7 @@
     Ce module garde en mémoire l'état du jeu
 """
 from RULEngine.Game.Player import Player
-from RULEngine.Util.game_world import GameWorld
+from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Util.constant import TeamColor
 from RULEngine.Util.singleton import Singleton
 from RULEngine.Util.Pose import Pose
@@ -24,7 +24,6 @@ class GameState(object, metaclass=Singleton):
         self.my_team = None
         self.other_team = None
         self.timestamp = 0
-        self.last_timestamp = 0
         self.const = None
 
     def get_our_team_color(self) -> TeamColor:
@@ -43,10 +42,14 @@ class GameState(object, metaclass=Singleton):
         :param is_my_team: True for ally team, False for opponent team
         :return: the player instance
         """
-        if is_my_team:
-            return self.my_team.players[player_id]
-        else:
-            return self.other_team.players[player_id]
+        try:
+            if is_my_team:
+                return self.my_team.available_players[player_id]
+            else:
+                return self.other_team.available_players[player_id]
+        except Exception as e:
+            print(e)
+            raise e
 
     def get_player_pose(self, player_id: int, is_my_team=True) -> Pose:
         """
@@ -57,9 +60,9 @@ class GameState(object, metaclass=Singleton):
             :return: L'instance Pose de la pose du joueur
         """
         if is_my_team:
-            return self.my_team.players[player_id].pose
+            return self.my_team.available_players[player_id].pose
         else:
-            return self.other_team.players[player_id].pose
+            return self.other_team.available_players[player_id].pose
 
     def get_player_position(self, player_id: int, is_my_team=True) -> Position:
         """
@@ -70,9 +73,9 @@ class GameState(object, metaclass=Singleton):
             :return: L'instance Position de la position du joueur
         """
         if is_my_team:
-            return self.my_team.players[player_id].pose.position
+            return self.my_team.available_players[player_id].pose.position
         else:
-            return self.other_team.players[player_id].pose.position
+            return self.other_team.available_players[player_id].pose.position
 
     def get_ball_position(self) -> Position:
         """
@@ -84,7 +87,7 @@ class GameState(object, metaclass=Singleton):
     def set_ball_position(self, newPosition : Position, delta_t) -> None:
         self.field.ball.set_position(newPosition, delta_t)
 
-    def get_ball_velocity(self):
+    def get_ball_velocity(self) -> Position:
         """
         Retourne le vecteur vélocité de la balle.
         Use with care, probably not implemented correctly
@@ -93,32 +96,31 @@ class GameState(object, metaclass=Singleton):
         """
         return self.field.ball.velocity
 
-    def get_timestamp(self) -> float:
+    def get_delta_t(self) -> float:
         """
-            Retourne le timestamp de la state
+            Retourne le delta_t de la state
 
             :return: float: le timestamp
         """
-        return self.timestamp
+        return self.game.delta_t
 
-    def set_reference(self, world_reference: GameWorld) -> None:
+    def set_reference(self, reference_transfer_object: ReferenceTransferObject) -> None:
         """
         Ajoute les références des objets du monde.
 
-        :param world_reference: GameWorld instance avec les références mise dedans
+        :param reference_transfer_object: reference_transfer_object instance avec les références mise dedans
         :return: None.
         """
-        assert isinstance(world_reference, GameWorld), \
+        assert isinstance(reference_transfer_object, ReferenceTransferObject), \
             "setting reference to the gamestate require an instance of RULEngine.Util.GameWorld"
-        assert world_reference.game.referee is not None, \
+        assert reference_transfer_object.game.referee is not None, \
             "setting the game_state reference with an invalid (None) referee!"
-        assert world_reference.team_color_svc is not None, \
+        assert reference_transfer_object.team_color_svc is not None, \
             "setting the game_state reference with an invalid (None) team_color_service!"
 
-        self.game = world_reference.game
+        self.game = reference_transfer_object.game
         self.field = self.game.field
         self.my_team = self.game.friends
         self.other_team = self.game.enemies
-        self.our_team_color = world_reference.team_color_svc.OUR_TEAM_COLOR
+        self.our_team_color = reference_transfer_object.team_color_svc.OUR_TEAM_COLOR
         self.const = self.game.field.constant
-        self.timestamp = world_reference.timestamp

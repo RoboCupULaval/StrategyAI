@@ -4,12 +4,14 @@ from copy import deepcopy
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.image_transformer.image_transformer import ImageTransformer
+from config.config_service import ConfigService
 
 
 class KalmanImageTransformer(ImageTransformer):
     def __init__(self):
         super().__init__()
-        self.last_camera_frame = [empty_camera for _ in range(0, 4)]
+        nb_cameras = int(ConfigService().config_dict["IMAGE"]["number_of_camera"])
+        self.last_camera_frame = [empty_camera for _ in range(nb_cameras)]
         self.last_new_packet = None
         self.new_image_flag = False
         self.time = time.time()
