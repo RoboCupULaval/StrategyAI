@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from RULEngine.Command.command import _ResponseCommand, GetBattery
 from RULEngine.Communication.protobuf import grSim_Packet_pb2 as grSim_Packet
 from RULEngine.Communication.util.udp_socket import udp_socket
 
@@ -39,6 +39,13 @@ class GrSimCommandSender(object):
         grsim_command.kickspeedz = 0
 
         self._send_packet(packet)
+
+    def send_responding_command(self, command: _ResponseCommand):
+        if isinstance(command, GetBattery):
+            FAKE_VOLTAGE = 14.42
+            return FAKE_VOLTAGE
+
+        raise NotImplementedError("Only GetBattery is supported by grsim_command_sender.")
 
     def stop(self):
         pass

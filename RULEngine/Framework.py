@@ -11,6 +11,7 @@ import signal
 import threading
 import time
 
+from RULEngine.Communication.sender.uidebug_robot_monitor import UIDebugRobotMonitor
 from RULEngine.Command.command import Stop, Dribbler
 from RULEngine.Communication.protobuf import \
     messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
@@ -67,6 +68,7 @@ class Framework(object):
         self.uidebug_command_sender = None
         self.uidebug_command_receiver = None
         self.uidebug_vision_sender = None
+        self.uidebug_robot_monitor = None
         # because this thing below is a callable! can be used without being set
         self.vision_redirection_routine = lambda *args: None
         self.vision_routine = self._normal_vision  # self._normal_vision # self._test_vision self._redirected_vision
@@ -119,6 +121,9 @@ class Framework(object):
             if self.cfg.config_dict["DEBUG"]["using_debug"] == "true":
                 self.uidebug_command_sender = UIDebugCommandSender()
                 self.uidebug_command_receiver = UIDebugCommandReceiver()
+                # Monitor robot if we are communicating with an actual robot
+                self.uidebug_robot_monitor = UIDebugRobotMonitor(self.robot_command_sender,
+                                                                 self.debug)
                 # are we redirecting the vision to the uidebug!
                 if self.cfg.config_dict["COMMUNICATION"]["redirect"] == "true":
                     self.uidebug_vision_sender = UIDebugVisionSender()
@@ -281,12 +286,11 @@ class Framework(object):
         self.ia_running_thread.join()
         self.thread_terminate.clear()
         self.robot_command_sender.stop()
+        if self.uidebug_robot_monitor:
+            self.uidebug_robot_monitor.stop()
         try:
             team = self.game.friends
 
-            # FIXME: hack real life
-            cmd = Dribbler(team.players[4], 0)
-            self.robot_command_sender.send_command(cmd)
             for player in team.players.values():
                 command = Stop(player)
                 self.robot_command_sender.send_command(command)

@@ -153,4 +153,11 @@ class DebugInterface(metaclass=Singleton):
         cmd = DebugCommand(1002, data)
         self.debug_state.append(cmd)
 
+    def send_robot_monitor(self, player_id, battery_lvl, time_since_last_response):
+        data = {'blue': {player_id: {'battery_lvl': battery_lvl,
+                                     'time_since_last_response': time_since_last_response
+                                     }}}
+        cmd = DebugCommand(1003, data)
+        self.debug_state.append(cmd)
+
 
