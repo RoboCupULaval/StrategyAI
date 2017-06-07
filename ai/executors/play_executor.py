@@ -55,10 +55,10 @@ class PlayExecutor(Executor):
             tactic_name = state[1]
             action_name = state[2]
             target = (int(state[3].position.x), int(state[3].position.y))
-            self.ws.debug_interface.send_robot_status(player_id,
-                                                      tactic_name,
-                                                      action_name,
-                                                      target)
+            self.ws.debug_interface.send_robot_strategic_state(player_id,
+                                                               tactic_name,
+                                                               action_name,
+                                                               target)
 
     def _send_books(self) -> None:
         """

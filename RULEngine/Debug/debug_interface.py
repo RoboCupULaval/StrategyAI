@@ -146,14 +146,14 @@ class DebugInterface(metaclass=Singleton):
         cmd = DebugCommand(1001, cmd_tactics_dict)
         self.debug_state.append(cmd)
 
-    def send_robot_status(self, player_id, tactic, action, target="not implemented"):
-        data = {'blue': {player_id: {'tactic': tactic,
+    def send_robot_strategic_state(self, player: OurPlayer, tactic, action, target="not implemented"):
+        data = {'blue': {player.: {'tactic': tactic,
                                      'action': action,
                                      'target': target}}}
         cmd = DebugCommand(1002, data)
         self.debug_state.append(cmd)
 
-    def send_robot_monitor(self, player_id, battery_lvl, time_since_last_response):
+    def send_robot_state(self, player_id, battery_lvl, time_since_last_response):
         data = {'blue': {player_id: {'battery_lvl': battery_lvl,
                                      'time_since_last_response': time_since_last_response
                                      }}}
