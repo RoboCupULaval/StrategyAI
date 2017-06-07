@@ -1,15 +1,12 @@
 # Under MIT licence, see LICENCE.txt
-import math
 import numpy as np
-from ..Action.Action import Action
-# from ...Util.types import AICommand
+
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.area import stayOutsideCircle
-from RULEngine.Util.geometry import get_angle, get_distance
-from RULEngine.Util.constant import PLAYER_PER_TEAM
+from ai.states.game_state import GameState
+from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
-
 
 __author__ = 'Robocup ULaval'
 
@@ -26,40 +23,33 @@ class GoBetween(Action):
         target : La position vers laquelle le robot devrait s'orienter
         minimum_distance : La distance minimale qu'il doit y avoir entre le robot et chacun des points
     """
-    def __init__(self, p_game_state, p_player_id, p_position1, p_position2, p_target, p_minimum_distance=0):
+    def __init__(self, game_state: GameState, player: OurPlayer, position1: Position, position2: Position,
+                 target: Position, p_minimum_distance: [int, float]=0):
         """
-            :param p_game_state: L'état courant du jeu.
-            :param p_player_id: Identifiant du joueur qui doit se déplacer
-            :param p_position1: La première position formant la droite
-            :param p_position2: La deuxième position formant la droite
-            :param p_target: La position vers laquelle le robot devrait s'orienter
+            :param game_state: L'état courant du jeu.
+            :param player: Instance du joueur qui doit se déplacer
+            :param position1: La première position formant la droite
+            :param position2: La deuxième position formant la droite
+            :param target: La position vers laquelle le robot devrait s'orienter
             :param p_minimum_distance: La distance minimale qu'il doit y avoir entre le robot et chacun des points
         """
-        Action.__init__(self, p_game_state)
-        assert(isinstance(p_player_id, int))
-        assert PLAYER_PER_TEAM >= p_player_id >= 0
-        assert(isinstance(p_position1, Position))
-        assert(isinstance(p_position2, Position))
-        assert(isinstance(p_target, Position))
+        Action.__init__(self, game_state, player)
+        assert(isinstance(position1, Position))
+        assert(isinstance(position2, Position))
+        assert(isinstance(target, Position))
         assert(isinstance(p_minimum_distance, (int, float)))
-        # TODO check this assert one day MGL 2017/01/13
-        # assert(get_distance(p_position1, p_position2) > 2*p_minimum_distance)
-
-        self.player_id = p_player_id
-        self.position1 = p_position1
-        self.position2 = p_position2
-        self.target = p_target
+        self.position1 = position1
+        self.position2 = position2
+        self.target = target
         self.minimum_distance = p_minimum_distance
         self.pathfind = True
 
-    # This code does not do what it suppose to do
-    # It does not compute the position closest on the line.
-    def get_destination(self):
+    def get_destination(self) -> Pose:
         """
         Calcul le point le plus proche du robot sur la droite entre les deux positions
         :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
         """
-        player = self.game_state.get_player_pose(self.player_id).position.conv_2_np()
+        player = self.player.pose.position.conv_2_np()
         pt1 = self.position1.conv_2_np()
         pt2 = self.position2.conv_2_np()
         delta = self.minimum_distance * (pt2 - pt1) / np.linalg.norm(pt2 - pt1)
@@ -85,6 +75,7 @@ class GoBetween(Action):
         player_to_target = target - player
         destination_orientation = np.arctan2(player_to_target[1], player_to_target[0])
 
+        # TODO remove MGL 2017/05/23
         '''
         delta_x = self.position2.x - self.position1.x
         delta_y = self.position2.y - self.position1.y
@@ -141,8 +132,5 @@ class GoBetween(Action):
         return Pose(Position.from_np(destination), destination_orientation)
 
     def exec(self):
-        destination_pose = {}
-        destination_pose["pose_goal"] = self.get_destination()
-        if self.pathfind:
-            destination_pose["pathfinder_on"] = True
-        return AICommand(self.player_id, AICommandType.MOVE, **destination_pose)
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.get_destination(),
+                                                             "pathfinder_on": self.pathfind})

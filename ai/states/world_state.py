@@ -2,7 +2,7 @@
 # Under MIT License, see LICENSE.txt
 
 from RULEngine.Debug.debug_interface import DebugInterface
-from RULEngine.Util.game_world import GameWorld
+from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from ai.states.game_state import GameState
 from ai.states.module_state import ModuleState
 from ai.states.play_state import PlayState
@@ -22,7 +22,7 @@ class WorldState:
         # pour passer une interface de debug deja recuperer
         self.debug_interface = DebugInterface()
 
-    def set_reference(self, world_reference: GameWorld) -> None:
+    def set_reference(self, world_reference: ReferenceTransferObject) -> None:
         """
         Passe le data transfert object GameWorld au game state pour qu'il prenne ses références.
 

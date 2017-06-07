@@ -7,7 +7,7 @@ from RULEngine.Game.Game import Game
 from RULEngine.Game.Referee import Referee
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.game_world import GameWorld
+from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Util.team_color_service import TeamColorService, TeamColor
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
@@ -37,7 +37,7 @@ class TestGraph(unittest.TestCase):
         self.game = Game()
         self.game.set_referee(Referee())
         self.game.ball = Ball()
-        game_world = GameWorld(self.game)
+        game_world = ReferenceTransferObject(self.game)
         game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW_TEAM))
         self.game_state.set_reference(game_world)
         self.game_state = GameState()
