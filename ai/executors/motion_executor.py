@@ -157,16 +157,18 @@ class RobotMotion(object):
         next_speed = np.clip(next_speed, 0, self.cruise_speed)  # We don't want to go faster than cruise speed
 
         next_velocity = next_speed * self.target_direction
+        print(next_speed)
+        print(next_velocity)
         return next_velocity
 
     def apply_deadzone(self, translation_cmd):
-        if self.setting.translation.sensibility < np.abs(translation_cmd[Pos.X]) < self.setting.translation.deadzone:
+        if np.abs(translation_cmd[Pos.X]) < self.setting.translation.deadzone:
             translation_cmd[Pos.X] = self.setting.translation.deadzone
-        else:
+        if np.abs(translation_cmd[Pos.X]) < self.setting.translation.sensibility:
             translation_cmd[Pos.X] = 0
-        if self.setting.translation.sensibility < np.abs(translation_cmd[Pos.Y]) < self.setting.translation.deadzone:
+        if np.abs(translation_cmd[Pos.Y]) < self.setting.translation.deadzone:
             translation_cmd[Pos.Y] = self.setting.translation.deadzone
-        else:
+        if np.abs(translation_cmd[Pos.Y]) < self.setting.translation.sensibility :
             translation_cmd[Pos.Y] = 0
 
         return translation_cmd
@@ -284,8 +286,8 @@ def get_control_setting(is_sim: bool):
         translation = {"kp": 0.1, "ki": 0, "kd": 1, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
         rotation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
-        translation = {"kp": 0.06, "ki": 0.01, "kd": 0, "antiwindup": 10, "deadzone": 0.005, "sensibility": 0.001}
-        rotation = {"kp": 0.1, "ki": 0.01, "kd": 0, "antiwindup": 10, "deadzone": 0.1, "sensibility": 0.01}
+        translation = {"kp": 0, "ki": 0, "kd": 0, "antiwindup": 10, "deadzone": 0.001, "sensibility": 0.0001}
+        rotation = {"kp": 0.1, "ki": 0.01, "kd": 0, "antiwindup": 10, "deadzone": 0.01, "sensibility": 0.001}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
