@@ -7,7 +7,7 @@ from RULEngine.Game.Game import Game
 from RULEngine.Game.Referee import Referee
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.game_world import GameWorld
+from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Util.team_color_service import TeamColorService, TeamColor
 from ai.Algorithm.Graph.Node import Node
 from ai.Algorithm.Graph.Vertex import Vertex
@@ -17,6 +17,7 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommand, AICommandType
 from ai.states.game_state import GameState
+from config.config_service import ConfigService
 
 __author__ = 'RoboCupULaval'
 
@@ -31,13 +32,13 @@ def foo2():
 
 class TestNode(unittest.TestCase):
     def setUp(self):
+        config_service = ConfigService().load_file("config/sim_standard.cfg")
         self.game_state = GameState()
         self.game = Game()
         self.game.set_referee(Referee())
         self.game.ball = Ball()
-        game_world = GameWorld(self.game)
+        game_world = ReferenceTransferObject(self.game)
         game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW_TEAM))
-        self.game.set_our_team_color(TeamColor.YELLOW_TEAM)
         self.game_state.set_reference(game_world)
         self.game_state.game.friends.players[0].update(Pose(Position(-4450, 0), 0))
         self.tactic1 = GoalKeeper(self.game_state, 0)

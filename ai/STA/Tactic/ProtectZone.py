@@ -1,15 +1,18 @@
 # Under MIT licence, see LICENCE.txt
+from typing import List
 
+from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.Util.area import isInsideSquare, stayInsideSquare
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
+from RULEngine.Util.constant import ROBOT_RADIUS
+from RULEngine.Util.geometry import get_angle
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
-from RULEngine.Util.area import isInsideSquare, stayInsideSquare
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import PLAYER_PER_TEAM, ROBOT_RADIUS
-from RULEngine.Util.geometry import get_angle
+from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
 
@@ -20,7 +23,7 @@ class ProtectZone(Tactic):
         exec(self) : Exécute une Action selon l'état courant
     attributs:
         game_state: L'état courant du jeu
-        player_id : Identifiant du joueur à qui la tactique est assignée
+        player: Instance du joueur à qui la tactique est assignée
         y_top : La limite supérieur de la zone
         y_bottom : La limite inférieur de la zone
         x_left : La limite de gauche de la zone
@@ -32,18 +35,15 @@ class ProtectZone(Tactic):
         status_flag : L'indicateur de progression de la tactique
     """
 
-    def __init__(self, p_game_state, p_player_id, target=Pose(), args=None,
-                 p_y_top=3000, p_y_bottom=-3000, p_x_left=-4500, p_x_right=4500, p_is_yellow=False):
-        Tactic.__init__(self, p_game_state, p_player_id, target, args)
-        assert isinstance(p_player_id, int)
-        assert PLAYER_PER_TEAM >= p_player_id >= 0
+    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None,
+                 p_y_top: [int, float]=3000, p_y_bottom: [int, float]=-3000, p_x_left: [int, float]=-4500,
+                 p_x_right: [int, float]=4500, p_is_yellow: bool=False):
+        Tactic.__init__(self, game_state, player, target, args)
         assert isinstance(p_y_top, (int, float))
         assert isinstance(p_y_bottom, (int, float))
         assert isinstance(p_x_left, (int, float))
         assert isinstance(p_x_right, (int, float))
         assert isinstance(p_is_yellow, bool)
-
-        self.player_id = p_player_id
         self.y_top = p_y_top
         self.y_bottom = p_y_bottom
         self.x_left = p_x_left
@@ -60,7 +60,7 @@ class ProtectZone(Tactic):
 
         if len(enemy_positions) == 0:
             self.next_state = self.support_other_zone
-            return Idle(self.game_state, self.player_id)
+            return Idle(self.game_state, self.player)
         else:
             self.next_state = self.cover_zone
 
@@ -69,7 +69,7 @@ class ProtectZone(Tactic):
             mean_position = mean_position + pos
         mean_position /= len(enemy_positions)
         destination = stayInsideSquare(mean_position, self.y_top, self.y_bottom, self.x_left, self.x_right)
-        return GoBetween(self.game_state, self.player_id, ball_pos, destination, ball_pos, 2*ROBOT_RADIUS)
+        return GoBetween(self.game_state, self.player, ball_pos, destination, ball_pos, 2*ROBOT_RADIUS)
 
     def support_other_zone(self):
         enemy_positions = self.get_enemy_in_zone()
@@ -83,11 +83,11 @@ class ProtectZone(Tactic):
                                        self.x_right)
         destination = self.game_state.game.field.stay_outside_goal_area(destination, self.is_yellow)
         orientation = get_angle(destination, self.game_state.get_ball_position())
-        return MoveToPosition(self.game_state, self.player_id, Pose(destination, orientation))
+        return MoveToPosition(self.game_state, self.player, Pose(destination, orientation))
 
     def get_enemy_in_zone(self):
         enemy_list = []
-        for robot in range(6):
+        for robot in self.game_state.game.enemies.values():
             pos = self.game_state.get_player_position(robot, False)
             if isInsideSquare(pos, self.y_top, self.y_bottom, self.x_left, self.x_right):
                 enemy_list.append(pos)

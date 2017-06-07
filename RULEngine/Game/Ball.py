@@ -1,17 +1,19 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.Util.tracking import Kalman
+from RULEngine.Util.kalman_filter.ball_kalman_filter import BallKalmanFilter
 from ..Util.Position import Position
-import math
 
 
-class Ball():
-    def __init__(self, type="ball", ncameras=4):
+class Ball:
+    kalman_type = 'ball'
+
+    def __init__(self):
         self._position = Position()
         self.velocity = Position()
-        self.kf = Kalman(type, ncameras)
+        self.kf = BallKalmanFilter()
 
     def kalman_update(self, poses, delta):
-        ret = self.kf.filter(poses, None, delta)
+        # print(poses)
+        ret = self.kf.filter(poses, delta)
         self._position = Position(ret[0], ret[1])
         self.velocity = Position(ret[2], ret[3])
 

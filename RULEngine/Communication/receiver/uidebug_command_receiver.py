@@ -6,6 +6,7 @@ from socketserver import BaseRequestHandler
 
 from RULEngine.Communication.util.threaded_udp_server import ThreadedUDPServer
 from RULEngine.Util.constant import DEBUG_RECEIVE_BUFFER_SIZE
+from config.config_service import ConfigService
 
 
 class UIDebugCommandReceiver(object):
@@ -13,7 +14,10 @@ class UIDebugCommandReceiver(object):
         Service capable d'écouter un port multicast UDP, de reçevoir et de
         traiter les paquets brutes envoyer par le serveur de débogage.
     """
-    def __init__(self, host, port):
+    def __init__(self):
+        cfg = ConfigService()
+        host = cfg.config_dict["COMMUNICATION"]["ui_debug_address"]
+        port = int(cfg.config_dict["COMMUNICATION"]["ui_cmd_receiver_port"])
         self.packet_list = deque(maxlen=DEBUG_RECEIVE_BUFFER_SIZE)
         handler = self.get_udp_handler(self.packet_list)
         self.server = ThreadedUDPServer(host, port, handler)

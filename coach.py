@@ -2,19 +2,19 @@
 from typing import List
 
 from RULEngine.Debug.debug_interface import DebugInterface
-from RULEngine.Util.game_world import GameWorld
-from ai.executors.regulator import PositionRegulator
+from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from ai.states.world_state import WorldState
 from ai.executors.debug_executor import DebugExecutor
 from ai.executors.module_executor import ModuleExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.executors.command_executor import CommandExecutor
-from ai.executors.movement_executor import MovementExecutor
+from ai.executors.motion_executor import MotionExecutor
+from config.config_service import ConfigService
 
 
 class Coach(object):
 
-    def __init__(self, mode_debug_active=True, pathfinder="astar", is_simulation=True):
+    def __init__(self):
         """
         Initialise le coach de l'IA.
 
@@ -22,8 +22,9 @@ class Coach(object):
         :param pathfinder:  (str) indique le nom du pathfinder par défault
         :param is_simulation:   (bool) indique si en simulation (true) ou en vrai vie (false)
         """
-        self.mode_debug_active = mode_debug_active
-        self.is_simulation = is_simulation
+        cfg = ConfigService()
+        self.mode_debug_active = cfg.config_dict["DEBUG"]["using_debug"] == "true"
+        self.is_simulation = cfg.config_dict["GAME"]["type"] == "sim"
 
         # init the states
         self.world_state = WorldState()
@@ -31,14 +32,14 @@ class Coach(object):
         # init the executors
         self.debug_executor = DebugExecutor(self.world_state)
         self.play_executor = PlayExecutor(self.world_state)
-        self.module_executor = ModuleExecutor(self.world_state, pathfinder, is_simulation)
-        self.movement_executor = MovementExecutor(self.world_state)
-        self.regulator_executor = PositionRegulator(self.world_state, is_simulation)
+        self.module_executor = ModuleExecutor(self.world_state)
+        self.motion_executor = MotionExecutor(self.world_state)
         self.robot_command_executor = CommandExecutor(self.world_state)
 
+
         # logging
-        DebugInterface().add_log(1, "\nCoach initialized with \nmode_debug_active = "+str(mode_debug_active) +
-                                 "\npathfinder = "+str(pathfinder)+"\nis_simulation = "+str(is_simulation))
+        DebugInterface().add_log(1, "\nCoach initialized with \nmode_debug_active = "+str(self.mode_debug_active) +
+                                 "\nis_simulation = "+str(self.is_simulation))
 
     def main_loop(self) -> List:
         """
@@ -50,13 +51,12 @@ class Coach(object):
         self.debug_executor.exec()
         self.play_executor.exec()
         self.module_executor.exec()
-        self.movement_executor.exec()
-        self.regulator_executor.exec()
+        self.motion_executor.exec()
         robot_commands = self.robot_command_executor.exec()
 
         return robot_commands
 
-    def set_reference(self, world_reference: GameWorld) -> None:
+    def set_reference(self, world_reference: ReferenceTransferObject) -> None:
         """
         Permet de mettre les références dans le worldstate et le debugexecutor.
 

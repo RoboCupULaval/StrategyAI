@@ -3,6 +3,7 @@
 import pickle
 
 from RULEngine.Communication.util.udp_socket import udp_socket
+from config.config_service import ConfigService
 
 
 class UIDebugCommandSender(object):
@@ -10,8 +11,11 @@ class UIDebugCommandSender(object):
         Définition du service capable d'envoyer des paquets de débogages au
         serveur et à l'interface de débogage. S'occupe de la sérialisation.
     """
-    def __init__(self, host, port):
+    def __init__(self):
         """ Constructeur """
+        cfg = ConfigService()
+        host = cfg.config_dict["COMMUNICATION"]["ui_debug_address"]
+        port = int(cfg.config_dict["COMMUNICATION"]["ui_cmd_sender_port"])
         self.server = udp_socket(host, port)
 
     def _send_packet(self, p_packet):

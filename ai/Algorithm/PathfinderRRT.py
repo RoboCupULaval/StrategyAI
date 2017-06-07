@@ -44,7 +44,7 @@ class PathfinderRRT(Pathfinder):
         for i in range(6):
             self.paths[i] = []
 
-        self.last_timestamp = self.ws.game_state.get_timestamp()
+        # self.last_timestamp = self.ws.game_state.get_timestamp()
 
     # Pour être conforme à la nouvelle interface à être changé
     # éventuellement mgl 2016/12/23

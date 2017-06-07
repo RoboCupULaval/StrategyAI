@@ -67,7 +67,7 @@ class InfluenceMap(IntelligentModule):
 
         if self.state is not None:
             self.have_it_executed = have_it_executed
-            self._last_updated = self.state.get_timestamp()
+            # self._last_updated = self.state.get_timestamp()
 
         self._adjust_effect_radius()
 
@@ -85,6 +85,8 @@ class InfluenceMap(IntelligentModule):
             self._create_static_board()
 
     def update(self):
+        pass
+        """
         if self.have_it_executed:
             if self.state.get_timestamp() - self._last_updated > 1:
                 # purge the board with a new one (static or not)
@@ -97,6 +99,7 @@ class InfluenceMap(IntelligentModule):
                 self._update_ball_position()
                 self.state.debug_manager.add_influence_map(self.export_board())
                 self._last_updated = self.state.timestamp
+        """
 
     def export_board(self):
         return self._board.tolist()

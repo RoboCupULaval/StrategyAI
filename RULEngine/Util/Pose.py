@@ -1,8 +1,10 @@
 #Under MIT License, see LICENSE.txt
 from .Position import Position
-import math as m
+import numpy as np
+
 
 ORIENTATION_DELTA_TOLERANCE_MAGNITUDE = 1e4
+
 
 class Pose(object):
     """  Container of position and orientation """
@@ -12,14 +14,18 @@ class Pose(object):
 
         self.position = position
         self.orientation = orientation
+        '''
         if self.orientation >= m.pi:
             self.orientation -= 2 * m.pi
         elif self.orientation <= -m.pi:
             self.orientation += 2*m.pi
-
+        '''
     def to_tuple(self):
         """ Retourne la position de la pose sous forme d'un tuple."""
         return self.position.x, self.position.y
+
+    def conv_2_np(self):
+        return np.array([self.position.x, self.position.y, self.orientation])
 
     def __str__(self):
         return '[{}, theta={}]'.format(self.position, self.orientation)
