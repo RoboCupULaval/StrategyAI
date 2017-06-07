@@ -34,7 +34,7 @@ class MovementExecutor(Executor):
                 #     pathfinder_dead_zone = 150
                 while distance < 10 and len(ai_cmd.path) > 1:
                     self.ws.debug_interface.add_log(1, "Gestion path; retrait point trop rapproche.")
-                    ai_cmd.path = ai_cmd.path[1:]
+                    ai_cmd.path = ai_cmd.path
                     next_position = ai_cmd.path[0]
                     distance = get_distance(current_pose.position, next_position)
                 ai_cmd.pose_goal = Pose(next_position, ai_cmd.pose_goal.orientation)

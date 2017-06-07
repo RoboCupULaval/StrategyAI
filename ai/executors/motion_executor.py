@@ -120,7 +120,7 @@ class RobotMotion(object):
 
         translation_cmd = self.limit_acceleration(translation_cmd)
         translation_cmd = np.clip(translation_cmd, -self.cruise_speed, self.cruise_speed)
-        translation_cmd = self.apply_deadzone(translation_cmd)
+        #translation_cmd = self.apply_deadzone(translation_cmd)
 
         # Send new command to robot
         translation_cmd = fixed2robot(translation_cmd, self.current_orientation)
@@ -210,7 +210,8 @@ class RobotMotion(object):
 
         # Desired parameters
         self.target_direction = normalized(self.translation_error)
-        self.target_position = cmd.pose_goal.conv_2_np()
+        #self.target_position = cmd.pose_goal.conv_2_np()
+        self.target_position = Pose(cmd.path[0], self.current_orientation).conv_2_np()
         self.target_position = self.target_position / np.array([1000, 1000, 1])
         self.target_speed = cmd.path_speeds[1]/1000
         self.target_acceleration = np.abs(self.setting.translation.max_acc * self.target_direction)
