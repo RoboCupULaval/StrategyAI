@@ -8,20 +8,46 @@ from RULEngine.Util.geometry import *
 from ai.states.game_state import GameState
 
 
-def player_with_ball():
+def player_with_ball(min_dist_from_ball):
     # Retourne le joueur qui possède la balle, NONE si balle libre
-    pass
+    closest_player = closest_player_to_point(GameState().get_ball_position())
+    if closest_player[2] < min_dist_from_ball:
+        return closest_player
+    else:
+        return None
 
-def closest_player_to_ball():
-    # Retourne le joueur le plus près de la balle,
-    pass
+
+def closest_player_to_point(point: Position):
+    # Retourne le joueur le plus près d'un point ou de la balle,
+    list_player = []
+    for i in range(PLAYER_PER_TEAM):
+        # les players friends
+        player_position = GameState().get_player_position(i, True)
+        player_distance = get_distance(player_position, point)
+        list_player.append(i, 'blue' if GameState().our_team_color else 'yellow', player_distance)
+    for i in range(PLAYER_PER_TEAM):
+        # les players ennemis
+        player_position = GameState().get_player_position(i, False)
+        player_distance = get_distance(player_position, point)
+        list_player.append(i, 'blue' if not GameState().our_team_color else 'yellow', player_distance)
+
+    list_player = sorted(list_player, key=lambda listPlayer: listPlayer[2])
+
+    return list_player[0] # TODO (pturgeon) : Revoir si on retourne un tuple ou autre
+
 
 def is_ball_moving(min_speed=0.1):
-    pass
+    return GameState().get_ball_velocity() > min_speed
+
 
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
-    pass
+    pass # TODO :
+
+
+def is_target_reached(player_id, target: Position, min_dist=0.01):
+    # Retourne TRUE si dans un rayon de l'objectif
+    return get_distance(target, GameState().get_player_position(player_id)) < min_dist
 
 
 def best_passing_option(passing_id):
@@ -95,10 +121,7 @@ def is_player_facing_target(player_ID, target_position: Position, tolerated_angl
     return get_angle_between_three_points(player_front, player_position, target_position)< tolerated_angle
 
 
-
-
-
 def ballDirection(self):
-    pass
+    pass # TODO :
 
 

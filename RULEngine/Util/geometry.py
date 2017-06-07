@@ -280,9 +280,19 @@ def get_angle_between_three_points(pointA : Position, pointO : Position, pointB 
 
 def conv_position_2_list(position: Position):
     """
-    converti les datas d'un objet position en liste
+    convertit les datas d'un objet position en liste
     :param position:
     :return: liste des datas de l'objet
     """
 
     return [position.x, position.y]
+
+
+def normalized(vector: np.ndarray) -> np.ndarray:
+    if np.linalg.norm(vector) > 0:
+        vector /= np.linalg.norm(vector)
+    return vector
+
+
+def orientation(vector: np.ndarray) -> np.ndarray:
+    return np.arctan2(vector[1], vector[0])
