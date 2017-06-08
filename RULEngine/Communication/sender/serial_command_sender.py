@@ -13,14 +13,14 @@ MOVE_COMMAND_SLEEP = 0.05
 
 
 class SerialCommandSender(object):
-    def __init__(self, baud_rate=115200):
-        self.mcu_com = McuCommunicator()
+    def __init__(self):
+        self.mcu_com = McuCommunicator(timeout=0.1)
 
         self.last_time = 0
         self.command_queue = deque()
 
-        self.command_dict = {0: Stop(Player(None, 0)), 1: Stop(Player(None, 1)), 2: Stop(Player(None, 2)),
-                             3: Stop(Player(None, 3)), 4: Stop(Player(None, 4)), 5: Stop(Player(None, 5))}
+        self.command_dict = {0: Stop(OurPlayer(None, 0)), 1: Stop(OurPlayer(None, 1)), 2: Stop(OurPlayer(None, 2)),
+                             3: Stop(OurPlayer(None, 3)), 4: Stop(OurPlayer(None, 4)), 5: Stop(OurPlayer(None, 5))}
 
         self.terminate = threading.Event()
         self.comm_thread = threading.Thread(target=self.send_loop)

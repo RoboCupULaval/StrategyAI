@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+import time
 
 from RULEngine.Debug.debug_command import DebugCommand
 from RULEngine.Util.singleton import Singleton
@@ -155,11 +156,17 @@ class DebugInterface(metaclass=Singleton):
         cmd = DebugCommand(1002, data)
         self.debug_state.append(cmd)
 
-    def send_robot_state(self, player_id, battery_lvl, time_since_last_response):
+    def send_robot_state(self, player_id, battery_volt, time_last_response):
+        MAX_BAT = 16.4
+        MIN_BAT = 12.0
+        battery_lvl = (battery_volt - MIN_BAT) / (MAX_BAT - MIN_BAT) * 100
+        time_since_last_response = time.time() - time_last_response
+        if time_since_last_response > 5.0:
+            battery_lvl = 0
         data = {'blue': {player_id: {'battery_lvl': battery_lvl,
                                      'time_since_last_response': time_since_last_response
                                      }}}
-        cmd = DebugCommand(1003, data)
+        cmd = DebugCommand(1006, data)
         self.debug_state.append(cmd)
 
 

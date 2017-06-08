@@ -54,8 +54,8 @@ class GetBattery(ResponseCommand):
     def __init__(self, player, pause_cond: threading.Condition):
         super().__init__(player, pause_cond)
 
-    def package_command(self, mcu_communicator: McuCommunicator) -> None:
-        self.McuCommunicator.getBatterie(command.player.id)
+    def package_command(self, mcu_communicator: McuCommunicator):
+        return mcu_communicator.getBatterie(self.player.id)
 
 class Move(Command):
     def __init__(self, player: OurPlayer):

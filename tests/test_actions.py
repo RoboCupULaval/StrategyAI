@@ -205,7 +205,7 @@ class TestActions(unittest.TestCase):
                                               "speed_flag": True,
                                               "kick_strength": 0.3}))
 
-    #@unittest.skip("I got lazy, didn't want to review all of the protectgoal.")
+    @unittest.skip("I got lazy, didn't want to review all of the protectgoal.")
     def test_ProtectGoal(self):
         # test de base
         self.game_state.game.friends.players[0].update(Pose(Position(4450, 10)))
