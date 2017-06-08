@@ -50,14 +50,15 @@ def is_target_reached(player_id, target: Position, min_dist=0.01):
     return get_distance(target, GameState().get_player_position(player_id)) < min_dist
 
 
-def best_passing_option(passing_id):
+def best_passing_option(passing_player):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si aucune possibilité
     passing = GameState().get_player_position(passing_id).conv_2_np()
+
     score_max = 0
     if not GameState().our_team_color :# YELLOW_TEAM
-        goal = (Pose(Position(GameState().const["FIELD_GOAL_YELLOW_X_LEFT"], 0), 0))
-    else:
         goal = (Pose(Position(GameState().const["FIELD_GOAL_BLUE_X_LEFT"], 0), 0))
+    else:
+        goal = (Pose(Position(GameState().const["FIELD_GOAL_YELLOW_X_LEFT"], 0), 0))
 
     for i in range(PLAYER_PER_TEAM):
         # Calcul du score pour passeur vers receveur
@@ -77,19 +78,17 @@ def best_passing_option(passing_id):
     return receiver_id
 
 
-def line_of_sight_clearance(player_ID, target: Position):
+def line_of_sight_clearance(player, target: Position):
     # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est grand),
     # NONE si obstacle dans l'ellipse
     score = 0
-    for j in range(PLAYER_PER_TEAM):
+    for j in GameState().my_team.available_players.values():
         # Obstacle : les players friends
-        if not j == player_ID:
-            obstacle = GameState().get_player_position(j, True)
-            score += trajectory_ellipse_score(GameState().get_player_position(player_ID), target, obstacle)
-    for j in range(PLAYER_PER_TEAM):
+        if not j.id == player.id:
+            score += trajectory_ellipse_score(player.pose.position, target, j.pose.position)
+    for j in GameState().other_team.available_players.values():
         # Obstacle : les players ennemis
-        obstacle = GameState().get_player_position(j, False)
-        score += trajectory_ellipse_score(GameState().get_player_position(player_ID), target, obstacle)
+        score += trajectory_ellipse_score(player.pose.position, target, j.pose.position)
     return score
 
 

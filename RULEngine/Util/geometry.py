@@ -311,9 +311,19 @@ def conv_position_2_list(position: Position):
 
 def normalized(vector: np.ndarray) -> np.ndarray:
     if np.linalg.norm(vector) > 0:
-        vector /= np.linalg.norm(vector)
-    return vector
+        return vector / np.linalg.norm(vector)
+    else:
+        return vector
 
 
 def orientation(vector: np.ndarray) -> np.ndarray:
     return np.arctan2(vector[1], vector[0])
+
+
+def robot2fixed(vector: np.ndarray, angle: float) -> np.ndarray:
+    tform = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    return np.dot(tform, vector)
+
+
+def fixed2robot(vector: np.ndarray, angle: float) -> np.ndarray:
+    return robot2fixed(vector, -angle)
