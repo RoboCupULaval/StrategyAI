@@ -4,7 +4,6 @@ import math as m
 import numpy as np
 
 from ..Util.Position import Position
-from ..Util.Pose import Pose
 
 __author__ = 'RoboCupULaval'
 
@@ -63,51 +62,6 @@ def get_angle(main_position: Position, other: Position) -> float:
     return m.atan2(position_y, position_x)
 
 
-def cvt_angle_360(orientation: float) -> float:
-    """
-        Convertit un angle en radians en degrés 0-359.
-        Args:
-            orientation: L'angle à convertir, en radians.
-        Returns:
-            L'angle entre 0 et 359 degrés.
-    """
-    assert isinstance(orientation, (int, float)), "TypeError orientation"
-    orientation = m.degrees(orientation)
-
-    if orientation < 0:
-        while True:
-            if orientation >= 0:
-                break
-            else:
-                orientation += 360
-    elif orientation > 359:
-        while True:
-            if orientation < 360:
-                break
-            else:
-                orientation -= 360
-    return orientation
-
-
-def cvt_angle_180(orientation):
-    """
-        Convertit un angle en radians en degrés [-180, 180].
-        Args:
-            orientation: L'angle en radians.
-        Returns:
-            L'angle entre  -179 et 180 degrés.
-    """
-    assert isinstance(orientation, (int, float)), "TypeError orientation"
-
-    orientation = cvt_angle_360(orientation)
-    if orientation > 180:
-        return orientation-360
-    elif orientation <= -180:
-        return orientation+360
-    else:
-        return orientation
-
-
 def get_nearest(ref_position: Position, list_of_position: list, number=1):
     """
         Classe une liste de positions en ordre croissant de distance par
@@ -139,35 +93,6 @@ def get_nearest(ref_position: Position, list_of_position: list, number=1):
             list_sorted.append(dict_position_distance[bot_dst])
         else:
             return list_sorted
-
-
-def get_milliseconds(time_sec: float) -> int:
-    """
-        Convertit un temps en secondes sous forme de float en millisecondes
-        sous forme d'un int.
-        Args:
-            time_sec: Le temps en secondes.
-        Returns:
-            Le temps en millisecondes.
-    """
-    assert isinstance(time_sec, float)
-    return int(round(time_sec * 1000))
-
-
-def det(pos_a: Position, pos_b: Position) -> float:
-    """
-        Calcul le déterminant de la matrice
-        [a.x  a.y]
-        [b.x  b.y]
-        Args:
-            pos_a: La première position.
-            pos_b: La seconde position.
-        Returns
-            Le déterminant.
-    """
-    assert isinstance(pos_a, Position)
-    assert isinstance(pos_b, Position)
-    return pos_a.x * pos_b.y - pos_a.y * pos_b.x
 
 
 def get_line_equation(position1: Position, position2: Position) -> tuple:
