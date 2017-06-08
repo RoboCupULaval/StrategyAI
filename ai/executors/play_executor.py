@@ -78,13 +78,10 @@ class PlayExecutor(Executor):
                                                       target)
 
     def _send_auto_state(self) -> None:
-        self.ws.debug_interface.send_auto_state(str(self.ws.game_state.game.referee.command.name),
-                                                str(self.ws.game_state.game.referee.stage.name),
-                                                self.ws.game_state.game.referee.stage_time_left,
-                                                str(self.ws.play_state.current_strategy),
-                                                str(self.auto_play.current_state),
-                                                self.ws.play_state.autonomous_flag,
-                                                self.ws.game_state.game.referee.team_info)
+        self.ws.debug_interface.send_play_info(self.ws.game_state.game.referee.info,
+                                                self.ws.game_state.game.referee.team_info,
+                                                self.auto_play.info,
+                                                self.ws.play_state.autonomous_flag)
 
     def _send_books(self) -> None:
         """

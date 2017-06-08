@@ -90,6 +90,14 @@ class Referee:
                             "goalie": 0
                         }}
 
+    @property
+    def info(self):
+        return  {
+            "command": str(self.command),
+            "stage": str(self.stage),
+            "stage_time_left": self.stage_time_left
+        }
+
     def update(self, frames):
         if frames != []:
             self.stage = Stage(frames[-1].stage)

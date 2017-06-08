@@ -20,6 +20,13 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
     def get_selected_strategy(self):
         return self.selected_strategy
 
+    @property
+    def info(self):
+        return {
+            "selected_strategy": str(self.selected_strategy),
+            "current_state": str(self.current_state)
+        }
+
     @abstractmethod
     def update(self):
         """ Effectue la mise à jour du module """
