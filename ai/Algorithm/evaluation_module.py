@@ -17,23 +17,24 @@ def player_with_ball(min_dist_from_ball):
         return None
 
 
-def closest_player_to_point(point: Position):
-    # Retourne le joueur le plus près d'un point ou de la balle,
+def closest_player_to_point(point: Position, our_team = None):
+    # Retourne une liste de tuples (player, distance) en ordre croissant de distance,
+    # our_team pour obtenir une liste contenant une équipe en particulier
     list_player = []
-    for i in range(PLAYER_PER_TEAM):
-        # les players friends
-        player_position = GameState().get_player_position(i, True)
-        player_distance = get_distance(player_position, point)
-        list_player.append(i, 'blue' if GameState().our_team_color else 'yellow', player_distance)
-    for i in range(PLAYER_PER_TEAM):
-        # les players ennemis
-        player_position = GameState().get_player_position(i, False)
-        player_distance = get_distance(player_position, point)
-        list_player.append(i, 'blue' if not GameState().our_team_color else 'yellow', player_distance)
+    if our_team or our_team == None:
+        for i in GameState().my_team.available_players.values():
+            # les players friends
+            player_distance = get_distance(i.pose.position, point)
+            list_player.append(i, player_distance)
+    if not our_team or our_team == None:
+        for i in GameState().other_team.available_players.values():
+            # les players ennemis
+            player_distance = get_distance(i.pose.position, point)
+            list_player.append(i, player_distance)
 
-    list_player = sorted(list_player, key=lambda listPlayer: listPlayer[2])
+    list_player = sorted(list_player, key=lambda x: x[1])
 
-    return list_player[0] # TODO (pturgeon) : Revoir si on retourne un tuple ou autre
+    return list_player
 
 
 def is_ball_moving(min_speed=0.1):
