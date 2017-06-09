@@ -2,6 +2,7 @@ from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.kalman_filter.friend_kalman_filter import FriendKalmanFilter
+from ai.Util.pathfinder_history import PathfinderHistory
 
 
 class OurPlayer(Player):
@@ -17,6 +18,7 @@ class OurPlayer(Player):
         self.pid = None  # for the moment
         self.in_play = False
         self.update = self._friend_kalman_update
+        self.pathfinder_history = PathfinderHistory()
 
     def _friend_kalman_update(self, poses, delta):
         ret = self.kf.filter(poses, self.cmd, delta)
