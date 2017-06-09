@@ -3,7 +3,7 @@ from .Position import Position
 import numpy as np
 
 
-ORIENTATION_ABSOLUTE_TOLERANCE = 0.25
+ORIENTATION_ABSOLUTE_TOLERANCE = 0.004  # Half a degree to tolerance
 
 class Pose(np.ndarray):
 

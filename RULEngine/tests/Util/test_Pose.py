@@ -14,10 +14,10 @@ class TestPose(unittest.TestCase):
         pos5 = Pose(Position(500, 400), -1.5)
         pos6 = Pose(Position(400, 500), 0)
 
-        pos7 = Pose(Position(), 1.50)
-        pos8 = Pose(Position(), 1.75)
-        pos9 = Pose(Position(), 1.76)
-        pos10 = Pose(Position(), 1.24)
+        pos7 = Pose(Position(), 1.500)
+        pos8 = Pose(Position(), 1.504)
+        pos9 = Pose(Position(), 1.505)
+        pos10 = Pose(Position(), 1.495)
 
         self.assertEqual(pos1, pos2)
         self.assertEqual(pos2, pos1)
