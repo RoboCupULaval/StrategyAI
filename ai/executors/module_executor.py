@@ -23,7 +23,7 @@ class ModuleExecutor(Executor):
 
     def start_initial_modules(self) -> None:
         """
-        Initialise les modules intelligents et le pathdfinder.
+        Initialise les modules intelligents et le pathfinder.
 
         :return: None
         """
