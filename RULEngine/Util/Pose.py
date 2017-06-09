@@ -1,9 +1,11 @@
 #Under MIT License, see LICENSE.txt
-from .Position import Position
+
+from RULEngine.Util.Position import Position
 import numpy as np
 
 
 ORIENTATION_ABSOLUTE_TOLERANCE = 0.004  # Half a degree to tolerance
+
 
 class Pose(np.ndarray):
 
@@ -47,3 +49,4 @@ class Pose(np.ndarray):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+

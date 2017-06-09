@@ -4,12 +4,13 @@ import numpy as np
 
 
 class Position(np.ndarray):
-    def __new__(cls, *args, abs_tol=0.01):
+    def __new__(cls, *args, abs_tol=0.01, dim=2):
+        assert(dim in (2, 3)), 'dimension invalid'
 
         if args is ():
             obj = np.zeros(3).view(cls)
-        elif isinstance(args[0], np.ndarray):
-            obj = np.asarray(args[0]).view(cls)
+        elif isinstance(args[0], (list, tuple, np.ndarray, Position)) and len(args) == 1:
+            obj = np.asarray(args[0].copy()).view(cls)
         elif len(args) == 2 or len(args) == 3:
             obj = np.asarray(args[:]).view(cls)
         else:
@@ -22,6 +23,7 @@ class Position(np.ndarray):
         obj.y = obj[1]
         obj.z = obj[2]
 
+        obj.dim = dim  # Use for the str and repr function
         obj.abs_tol = abs_tol
 
         return obj
@@ -30,6 +32,7 @@ class Position(np.ndarray):
         if obj is None:
             return
         self.abs_tol = getattr(obj, 'abs_tol', 0.01)
+        self.dim = getattr(obj, 'dim', 2)
 
     @property
     def x(self):
@@ -56,7 +59,7 @@ class Position(np.ndarray):
         self[2] = z
 
     def distance(self):
-        return np.linalg.norm(self)
+        return np.linalg.norm(self[0:2])
 
     def angle(self):
         angle = np.arctan2(self[1], self[0])
@@ -73,9 +76,21 @@ class Position(np.ndarray):
             raise ValueError
         return self / self.distance()
 
+    def __repr__(self):
+        if self.dim == 2:
+            return 'Position({})'.format(self[0:2])
+        else:
+            return 'Position({})'.format(self)
+
+    def __str__(self):
+        if self.dim == 2:
+            return self[0:2].view(np.ndarray).__str__()
+        else:
+            return super().__str__()
+
     def __eq__(self, other):
         min_abs_tol = min(self.abs_tol, other.abs_tol)
-        return np.allclose(self, other, atol=min_abs_tol)
+        return np.allclose(self.view(np.ndarray), other.view(np.ndarray), atol=min_abs_tol)
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -88,3 +103,6 @@ class Position(np.ndarray):
     def from_np(array):
         """Legacy. Do not use."""
         return Position(array)
+
+a = Position(1,1,1, dim=3)
+print(repr(a))
