@@ -78,6 +78,7 @@ class GoBehind(Action):
         norm_position1_2_position2 = math.sqrt((self.position1.x - self.position2.x) ** 2 +
                                                (self.position1.y - self.position2.y) ** 2)
 
+        # TODO: Remove this part of the logic, since we have a pathfinder to do all of that...
         if norm_player_2_position2 < norm_position1_2_position2:
             # on doit contourner l'objectif
 

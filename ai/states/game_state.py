@@ -84,6 +84,9 @@ class GameState(object, metaclass=Singleton):
         """
         return self.field.ball.position
 
+    def set_ball_position(self, newPosition : Position, delta_t) -> None:
+        self.field.ball.set_position(newPosition, delta_t)
+
     def get_ball_velocity(self) -> Position:
         """
         Retourne le vecteur vélocité de la balle.
