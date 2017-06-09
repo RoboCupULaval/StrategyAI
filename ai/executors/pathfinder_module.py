@@ -22,9 +22,9 @@ class PathfinderModule(Executor):
         self.pathfinder = self.get_pathfinder(self.type_of_pathfinder)
         self.last_time_pathfinding_for_robot = {}
         self.last_frame = time.time()
-        self.last_path = None
-        self.last_raw_path = None
-        self.last_pose_goal = None
+        # self.last_path = None
+        # self.last_raw_path = None
+        # self.last_pose_goal = None
 
     def exec(self):
         self._pathfind_ai_commands()
@@ -32,26 +32,28 @@ class PathfinderModule(Executor):
 
 
     def _pathfind_ai_commands(self) -> None:
+        last_path = None
+        last_raw_path = None
         for player in self.ws.game_state.my_team.available_players.values():
             if player.ai_command is None or not player.ai_command.pathfinder_on:
                 continue
-            if self.last_pose_goal is not None:
-                if not self.last_pose_goal == player.ai_command.pose_goal:
-                    self.last_pose_goal = player.ai_command.pose_goal
-                    self.last_path = None
-                    self.last_raw_path = None
+            if player.pathfinder_history.last_pose_goal is not None:
+                if not player.pathfinder_history.last_pose_goal == player.ai_command.pose_goal:
+                    player.pathfinder_history.last_pose_goal = player.ai_command.pose_goal
+                    last_path = player.pathfinder_history.last_path
+                    last_raw_path = player.pathfinder_history.last_raw_path
             if self.type_of_pathfinder.lower() == "path_part":
                 path, raw_path = self.pathfinder.get_path(player,
                                                           player.ai_command.pose_goal,
                                                           player.ai_command.cruise_speed,
-                                                          self.last_path,
-                                                          self.last_raw_path)
+                                                          last_path,
+                                                          last_raw_path)
                 self.draw_path(path)
                 if path.get_path_length() < 100:
-                    self.last_path = None
+                    player.pathfinder_history.last_path = None
                 else:
-                    self.last_path = path
-                self.last_raw_path = raw_path
+                    player.pathfinder_history.last_path = path
+                player.pathfinder_history.last_raw_path = raw_path
 
                 player.ai_command.path = path.points[1:]
                 player.ai_command.path_speeds = path.speeds
