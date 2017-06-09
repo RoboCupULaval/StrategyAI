@@ -26,12 +26,12 @@ def closest_player_to_point(point: Position, our_team = None):
         for i in GameState().my_team.available_players.values():
             # les players friends
             player_distance = get_distance(i.pose.position, point)
-            list_player.append(i, player_distance)
+            list_player.append((i, player_distance))
     if not our_team or our_team == None:
         for i in GameState().other_team.available_players.values():
             # les players ennemis
             player_distance = get_distance(i.pose.position, point)
-            list_player.append(i, player_distance)
+            list_player.append((i, player_distance))
 
     list_player = sorted(list_player, key=lambda x: x[1])
 
