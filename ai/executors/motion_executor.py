@@ -150,7 +150,7 @@ class RobotMotion(object):
         return next_velocity
 
     def apply_rotation_constraints(self, rotation_cmd: float) -> float:
-        rotation_cmd = clamp(rotation_cmd, self.setting.rotation.max_speed, -self.setting.rotation.max_speed)
+        rotation_cmd = clamp(rotation_cmd, -self.setting.rotation.max_speed, self.setting.rotation.max_speed)
         if np.abs(rotation_cmd) < self.setting.rotation.sensibility:
             rotation_cmd = 0
         elif np.abs(rotation_cmd) < self.setting.rotation.deadzone:

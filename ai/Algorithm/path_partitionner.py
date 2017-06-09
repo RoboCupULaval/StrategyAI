@@ -148,8 +148,8 @@ class PathPartitionner(Pathfinder):
             self.path = self.reshaper.reshape_path(self.path, self.player, self.cruise_speed)
             self.path = self.remove_redundant_points()
 
-        print("points", self.path.points)
-        print("speeds", self.path.speeds)
+        # print("points", self.path.points)
+        # print("speeds", self.path.speeds)
         return self.path, self.raw_path
 
     def get_raw_path(self, pose_target=Pose()):
