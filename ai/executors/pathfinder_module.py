@@ -38,8 +38,8 @@ class PathfinderModule(Executor):
             if player.ai_command is None or not player.ai_command.pathfinder_on:
                 continue
             if player.pathfinder_history.last_pose_goal is not None:
-                if not player.pathfinder_history.last_pose_goal == player.ai_command.pose_goal:
-                    player.pathfinder_history.last_pose_goal = player.ai_command.pose_goal
+                if player.pathfinder_history.last_pose_goal == player.ai_command.pose_goal.position:
+                    player.pathfinder_history.last_pose_goal = player.ai_command.pose_goal.position
                     last_path = player.pathfinder_history.last_path
                     last_raw_path = player.pathfinder_history.last_raw_path
             if self.type_of_pathfinder.lower() == "path_part":
@@ -53,6 +53,7 @@ class PathfinderModule(Executor):
                     player.pathfinder_history.last_path = None
                 else:
                     player.pathfinder_history.last_path = path
+                    player.pathfinder_history.last_pose_goal = path.goal
                 player.pathfinder_history.last_raw_path = raw_path
 
                 player.ai_command.path = path.points[1:]

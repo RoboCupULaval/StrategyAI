@@ -11,7 +11,7 @@ class Position(np.ndarray):
         elif isinstance(args[0], (list, tuple, np.ndarray, Position)) and len(args) == 1:
             obj = np.asarray(args[0].copy()).view(cls)
         elif len(args) == 2:
-            obj = np.asarray(args[:]).view(cls)
+            obj = np.asarray(args[:]).copy().view(cls)
         else:
             raise TypeError
 
