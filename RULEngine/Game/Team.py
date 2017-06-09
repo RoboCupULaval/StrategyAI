@@ -20,7 +20,6 @@ class Team:
         self.available_players = {}
         self.players_time_tracker = {}
         for player_id in range(PLAYER_PER_TEAM):
-            self.players_time_tracker[player_id] = time.time()
             self.players[player_id] = Player(self, player_id)
             if player_id < 6:
                 self.players[player_id].in_play = True

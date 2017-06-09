@@ -116,6 +116,10 @@ class Game:
         for i in range(0, 6):
             self.blue_team.update_player(i, kalman_blue[i], delta)
             self.yellow_team.update_player(i, kalman_yellow[i], delta)
+        self.blue_team.update_available_players()
+        self.yellow_team.update_available_players()
+        print(self.yellow_team.team_color)
+
 
     @staticmethod
     def _update_players_of_team(players, team, delta):

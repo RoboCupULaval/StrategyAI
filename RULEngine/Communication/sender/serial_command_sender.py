@@ -2,7 +2,11 @@
 import threading
 import time
 from collections import deque
-from pyhermes import McuCommunicator
+try:
+    from pyhermes import McuCommunicator
+except ImportError:
+    print("Couldn't find the pyhermes package. Cannot send command to physical robots.",
+          "\nTo remedy please run the command pip install -r requirements.txt")
 
 from RULEngine.Command.command import Command
 

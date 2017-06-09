@@ -75,6 +75,9 @@ class TeamColor(Enum):
     YELLOW_TEAM = 0
     BLUE_TEAM = 1
 
+    def __str__(self):
+        return self.name
+
 # FIXME: hack pour limiter le terrain facilement
 def is_legal_field_pose(pose):
     if isinstance(pose, Pose):
