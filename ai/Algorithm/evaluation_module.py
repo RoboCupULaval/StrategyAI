@@ -3,6 +3,7 @@
 import numpy as np
 
 from RULEngine.Util import Position
+from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import PLAYER_PER_TEAM, TeamColor
 from RULEngine.Util.geometry import *
 from RULEngine.Util.team_color_service import TeamColorService
@@ -66,9 +67,9 @@ def best_passing_option(passing_player):
 
     score_max = 0
     if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW_TEAM :# YELLOW_TEAM
-        goal = (Pose(Position(GameState().const["FIELD_GOAL_BLUE_X_LEFT"], 0), 0))
+        goal = Position(GameState().const["FIELD_GOAL_BLUE_X_LEFT"], 0)
     else:
-        goal = (Pose(Position(GameState().const["FIELD_GOAL_YELLOW_X_LEFT"], 0), 0))
+        goal = Position(GameState().const["FIELD_GOAL_YELLOW_X_LEFT"], 0)
 
     for i in GameState().my_team.available_players.values():
         # Calcul du score pour passeur vers receveur
@@ -104,9 +105,6 @@ def line_of_sight_clearance(player, target: Position):
 
 def trajectory_ellipse_score(pointA : Position, pointB: Position, obstacle: Position):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
-    pointA = pointA.conv_2_np()
-    pointB = pointB.conv_2_np()
-    obstacle = obstacle.conv_2_np()
     return np.linalg.norm(obstacle - pointA) + np.linalg.norm(pointB - obstacle) - np.linalg.norm(pointB - pointA)
 
 

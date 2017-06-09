@@ -3,7 +3,7 @@
 """ Livre des stratégies. """
 from typing import List
 
-from ai.STA.Strategy.offense import offense
+from ai.STA.Strategy.offense import Offense
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Strategy.indiana_jones import IndianaJones
 from ai.STA.Strategy.HumanControl import HumanControl
@@ -32,7 +32,7 @@ class StrategyBook(object):
         """
         self.strategy_book = {'SimpleDefense': SimpleDefense,
                               'SimpleOffense': SimpleOffense,
-                              'Offense': offense,
+                              'Offense': Offense,
                               'HumanControl': HumanControl,
                               'DoNothing': DoNothing,
                               'TestTransitions': TestTransitions,
