@@ -3,7 +3,7 @@
 import numpy as np
 
 
-POSITION_ABSOLUTE_TOLERANCE = 0.01
+POSITION_ABSOLUTE_TOLERANCE = 0.0001
 
 
 class Position(np.ndarray):
