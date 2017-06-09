@@ -3,11 +3,8 @@
 import numpy as np
 
 
-POSITION_ABSOLUTE_TOLERANCE = 0.0001
-
-
 class Position(np.ndarray):
-    def __new__(cls, *args):
+    def __new__(cls, *args, abs_tol=0.01):
 
         if args is ():
             obj = np.zeros(3).view(cls)
@@ -25,7 +22,14 @@ class Position(np.ndarray):
         obj.y = obj[1]
         obj.z = obj[2]
 
+        obj.abs_tol = abs_tol
+
         return obj
+
+    def __array_finalize__(self, obj):
+        if obj is None:
+            return
+        self.abs_tol = getattr(obj, 'abs_tol', 0.01)
 
     @property
     def x(self):
@@ -70,7 +74,8 @@ class Position(np.ndarray):
         return self / self.distance()
 
     def __eq__(self, other):
-        return bool(np.all(np.isclose(self, other, atol=POSITION_ABSOLUTE_TOLERANCE)))
+        min_abs_tol = min(self.abs_tol, other.abs_tol)
+        return np.allclose(self, other, atol=min_abs_tol)
 
     def __ne__(self, other):
         return not self.__eq__(other)

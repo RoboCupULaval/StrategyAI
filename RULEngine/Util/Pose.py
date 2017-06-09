@@ -3,6 +3,8 @@ from .Position import Position
 import numpy as np
 
 
+ORIENTATION_ABSOLUTE_TOLERANCE = 0.25
+
 class Pose(np.ndarray):
 
     def __new__(cls, position=Position(), orientation=0):
@@ -40,7 +42,8 @@ class Pose(np.ndarray):
         return self.__str__()
 
     def __eq__(self, other):
-        return bool(self.position == other.position and np.isclose(self.orientation, other.orientation, atol=0.01))
+        return self.position == other.position and np.isclose(self.orientation, other.orientation,
+                                                              atol=ORIENTATION_ABSOLUTE_TOLERANCE)
 
     def __ne__(self, other):
         return not self.__eq__(other)
