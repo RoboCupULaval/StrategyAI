@@ -11,7 +11,7 @@ class Position(np.ndarray):
         elif isinstance(args[0], (list, tuple, np.ndarray, Position)) and len(args) == 1:
             obj = np.asarray(args[0].copy()).view(cls)
         elif len(args) == 2:
-            obj = np.asarray(args[:]).view(cls)
+            obj = np.asarray(args[:]).copy().view(cls)
         else:
             raise TypeError
 
@@ -63,8 +63,11 @@ class Position(np.ndarray):
             return self
 
     def __eq__(self, other):
-        min_abs_tol = min(self.abs_tol, other.abs_tol)
-        return np.allclose(self.view(np.ndarray), other.view(np.ndarray), atol=min_abs_tol)
+        if type(other) is Position:
+            min_abs_tol = min(self.abs_tol, other.abs_tol)
+            return np.allclose(self.view(np.ndarray), other.view(np.ndarray), atol=min_abs_tol)
+        min_abs_tol = min(self.abs_tol, other.position.abs_tol)
+        return np.allclose(self.view(np.ndarray), other.position.view(np.ndarray), atol=min_abs_tol)
 
     def __ne__(self, other):
         return not self.__eq__(other)

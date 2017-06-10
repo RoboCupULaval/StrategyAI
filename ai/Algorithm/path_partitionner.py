@@ -48,7 +48,7 @@ class Path:
             pass
         else:
             if (threshold is not None) and len(speed_list) > 2:
-                if np.linalg.norm(points_list[0].conv_2_np() - points_list[1].conv_2_np()) < threshold:
+                if np.linalg.norm(points_list[0] - points_list[1]) < threshold:
                     del points_list[1]
                     del speed_list[1]
                 # print(position_list)
@@ -66,7 +66,7 @@ class Path:
     def get_path_length(self):
         length = 0
         for idx, point in enumerate(self.points[:-1]):
-            length += np.linalg.norm(point.conv_2_np() - self.points[idx+1].conv_2_np())
+            length += np.linalg.norm(point - self.points[idx+1])
         return length
 
     def quick_update_path(self, player):
@@ -81,7 +81,7 @@ class PathPartitionner(Pathfinder):
         self.game_state = self.p_worldstate.game_state
         self.path = Path(Position(0, 0), Position(0, 0))
         self.raw_path = Path(Position(0, 0), Position(0, 0))
-        self.res = 300
+        self.res = 100
         self.gap_proxy = 200
         self.max_recurs = 5
         self.players_obstacles = []
@@ -120,18 +120,18 @@ class PathPartitionner(Pathfinder):
 
         for player in self.game_state.my_team.available_players.values():
             if player.id != self.player.id:
-                self.pose_obstacle[i, :] = player.pose.position.conv_2_np()
+                self.pose_obstacle[i, :] = player.pose.position
                 self.players_obstacles.append(player)
                 i += 1
         for player in self.game_state.other_team.available_players.values():
-            self.pose_obstacle[i, :] = player.pose.position.conv_2_np()
+            self.pose_obstacle[i, :] = player.pose.position
             self.players_obstacles.append(player)
             i += 1
 
         # tentative de code pour ne pas recalculer le path a toutes les ittérations (marche un peu mais pas parfait)
-        #if (old_path is not None) and (np.linalg.norm(self.path.goal.conv_2_np() - old_raw_path.goal.conv_2_np()) < 20):
-        if (old_path is not None) and (not self.is_path_collide(old_raw_path, tolerance=self.gap_proxy-200)) and \
-                (np.linalg.norm(self.path.goal.conv_2_np() - old_raw_path.goal.conv_2_np()) < 20):
+        #if (old_path is not None) and (np.linalg.norm(self.path.goal - old_raw_path.goal) < 20):
+        if (old_path is not None) and (not self.is_path_collide(old_raw_path, tolerance=self.gap_proxy-50)) and \
+                (np.linalg.norm(self.path.goal - old_raw_path.goal) < 20):
             old_raw_path.quick_update_path(self.player)
             old_path.quick_update_path(self.player)
             self.path = old_path
@@ -140,6 +140,15 @@ class PathPartitionner(Pathfinder):
 
         else:
             self.path = Path(self.player.pose.position, pose_target.position)
+            if self.path.get_path_length() < 1:
+                """
+                hack shady pour eviter une erreur shady (trop fatiguer pour dealer ak ste shit la)
+                
+                File "/home/phil/robocup/StrategyIA/RULEngine/Util/Position.py", line 68, in __eq__
+                    min_abs_tol = min(self.abs_tol, other.position.abs_tol)
+                    AttributeError: 'numpy.ndarray' object has no attribute 'position'
+                """
+                return self.path , self.path
             self.closest_obs_speed = self.find_closest_obstacle(self.player.pose.position, self.path)
             self.path = self.fastpathplanner(self.path)
 
@@ -160,11 +169,11 @@ class PathPartitionner(Pathfinder):
                                        len(self.game_state.other_team.available_players) - 1, 2))
         for player in self.game_state.my_team.available_players.values():
             if player.id != self.player.id:
-                self.pose_obstacle[i, :] = player.pose.position.conv_2_np()
+                self.pose_obstacle[i, :] = player.pose.position
                 self.players_obstacles.append(player)
                 i += 1
         for player in self.game_state.other_team.available_players.values():
-            self.pose_obstacle[i, :] = player.pose.position.conv_2_np()
+            self.pose_obstacle[i, :] = player.pose.position
             self.players_obstacles.append(player)
             i += 1
 
@@ -178,8 +187,8 @@ class PathPartitionner(Pathfinder):
         if tolerance is None:
             tolerance = self.gap_proxy
         for idx, points in enumerate(path.points[:-1]):
-            pose_start = path.points[idx].conv_2_np()
-            pose_target = path.points[idx + 1].conv_2_np()
+            pose_start = path.points[idx]
+            pose_target = path.points[idx + 1]
             direction = (pose_target - pose_start)
             if np.linalg.norm(direction) < 0.00001:
                 return False
@@ -207,14 +216,14 @@ class PathPartitionner(Pathfinder):
 
         dist_point_obs = np.inf
         closest_obs = None
-        closest_player = self.players_obstacles[0].pose.position.conv_2_np()
+        closest_player = self.players_obstacles[0].pose.position
         #print(get_distance(path.start, path.goal))
-        if get_distance(path.start, path.goal) < 0.001:
+        if np.linalg.norm(path.start - path.goal) < 0.001:
             return [closest_obs, dist_point_obs, closest_player]
         if point == path.start:
             return [closest_obs, dist_point_obs, closest_player]
-        pose_start = path.start.conv_2_np()
-        direction = (point.conv_2_np() - pose_start) / np.linalg.norm(point.conv_2_np() - pose_start)
+        pose_start = path.start
+        direction = (point - pose_start) / np.linalg.norm(point - pose_start)
 
         for idx, pose_obs in enumerate(self.pose_obstacle):
             vec_robot_2_obs_temp = pose_obs - pose_start
@@ -245,7 +254,7 @@ class PathPartitionner(Pathfinder):
             sub_target = pose_target
             return sub_target
 
-        direction = (pose_target.conv_2_np() - pose_robot.conv_2_np()) / np.linalg.norm(pose_target.conv_2_np() - pose_robot.conv_2_np())
+        direction = (pose_target - pose_robot) / np.linalg.norm(pose_target - pose_robot)
         vec_robot_2_obs = np.array(conv_position_2_list(pose_obstacle_closest - pose_robot))
         len_along_path = np.dot(vec_robot_2_obs, direction)
         dist_from_path = np.linalg.norm(np.cross(direction, vec_robot_2_obs))
@@ -280,10 +289,10 @@ class PathPartitionner(Pathfinder):
                 sub_target_2 -= vec_perp * 0.01 * self.res
                 if np.linalg.norm(cruise_speed) < 0.1:
                     sub_target = sub_target_1
-                elif np.abs(np.dot(direction, (sub_target_1 - path.start.conv_2_np()) /
-                         np.linalg.norm(sub_target_1 - path.start.conv_2_np()))) > \
-                        np.abs(np.dot(direction, (sub_target_2 - path.start.conv_2_np()) /
-                            np.linalg.norm(sub_target_2 - path.start.conv_2_np()))):
+                elif np.abs(np.dot(direction, (sub_target_1 - path.start) /
+                         np.linalg.norm(sub_target_1 - path.start))) > \
+                        np.abs(np.dot(direction, (sub_target_2 - path.start) /
+                            np.linalg.norm(sub_target_2 - path.start))):
                     sub_target = sub_target_1
                 else:
                     sub_target = sub_target_2
@@ -345,20 +354,20 @@ class PathReshaper:
         positions_list = [path.points[0]]
         for idx, point in enumerate(path.points[1:-1]):
             i = idx + 1
-            if np.linalg.norm(path.points[i].conv_2_np() - path.points[i+1].conv_2_np()) < 10:
+            if np.linalg.norm(path.points[i] - path.points[i+1]) < 10:
                 continue
             positions_list += [path.points[i]]
         positions_list += [path.points[-1]]
         self.path.points = positions_list
-        p1 = self.path.points[0].conv_2_np()
+        p1 = self.path.points[0]
         point_list = [p1]
         speed_list = [0]
 
         for idx, point in enumerate(self.path.points[1:-1]):
             self.dist_from_path = 50  # mm
             i = idx + 1
-            p2 = point.conv_2_np()
-            p3 = self.path.points[i+1].conv_2_np()
+            p2 = point
+            p3 = self.path.points[i+1]
             # if np.linalg.norm(p1, p2) / 2 < OurPlayer.max_acc * 2 / vel_cruise ** 2:
             #     # on ne calcul pas le radius a partir de vel cruise. profil triangulaire
             #     vel_pointe = np.sqrt(2 * OurPlayer.max_acc / (np.linalg.norm(p1,p2) / 2))
@@ -434,10 +443,10 @@ class PathReshaper:
             p1 = point_list[-1]
 
         speed_list += [0]
-        point_list += [self.path.goal.conv_2_np()]
+        point_list += [self.path.goal]
         # on s'assure que le path est bel et bien réalisable par un robot et on
         # merge les points qui sont trop proches les un des autres.
-        position_list = [Position().from_np(point_list[0])]
+        position_list = [point_list[0]]
         new_speed_list = [speed_list[0]]
         for idx, point in enumerate(point_list[1:-1]):
             i = idx + 1
@@ -449,8 +458,8 @@ class PathReshaper:
                     if speed_list[i] > speed_list[i + 1]:
                         speed_list[i] *= np.linalg.norm(point_list[i] - point_list[i+1]) / min_dist
 
-            position_list += [Position().from_np(point_list[i])]
+            position_list += [point_list[i]]
             new_speed_list += [speed_list[i]]
-        position_list += [Position().from_np(point_list[-1])]
+        position_list += [point_list[-1]]
         new_speed_list += [speed_list[-1]]
         return Path().generate_path_from_points(position_list, new_speed_list)
