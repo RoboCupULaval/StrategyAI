@@ -42,13 +42,13 @@ class Game:
     def _create_teams(self):
         cfg = ConfigService()
         if cfg.config_dict["GAME"]["our_color"] == "blue":
-            self.our_team_color == TeamColor.BLUE_TEAM
+            self.our_team_color = TeamColor.BLUE_TEAM
             self.blue_team = OurTeam(TeamColor.BLUE_TEAM)
             self.friends = self.blue_team
             self.yellow_team = Team(TeamColor.YELLOW_TEAM)
             self.enemies = self.yellow_team
         elif cfg.config_dict["GAME"]["our_color"] == "yellow":
-            self.our_team_color == TeamColor.YELLOW_TEAM
+            self.our_team_color = TeamColor.YELLOW_TEAM
             self.yellow_team = OurTeam(TeamColor.YELLOW_TEAM)
             self.friends = self.yellow_team
             self.blue_team = Team(TeamColor.BLUE_TEAM)

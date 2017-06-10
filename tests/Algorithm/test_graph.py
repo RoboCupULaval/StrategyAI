@@ -2,6 +2,7 @@
 
 import unittest
 
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Game.Ball import Ball
 from RULEngine.Game.Game import Game
 from RULEngine.Game.Referee import Referee
@@ -30,6 +31,7 @@ def foo2():
     return False
 
 
+A_PLAYER_ID = 1
 class TestGraph(unittest.TestCase):
     def setUp(self):
         config_service = ConfigService().load_file("config/sim_standard.cfg")
@@ -43,8 +45,9 @@ class TestGraph(unittest.TestCase):
         self.game_state = GameState()
         self.empty_graph = Graph()
         self.graph1 = Graph()
-        self.tactic1 = Stop(self.game_state, 1)
-        self.tactic2 = GoToPositionNoPathfinder(self.game_state, 0, Pose(Position(500, 0), 0))
+        a_player = OurPlayer(TeamColor.YELLOW_TEAM, A_PLAYER_ID)
+        self.tactic1 = Stop(self.game_state, OurPlayer(TeamColor.YELLOW_TEAM, A_PLAYER_ID))
+        self.tactic2 = GoToPositionNoPathfinder(self.game_state, a_player, Pose(Position(500, 0), 0))
         self.node1 = Node(self.tactic1)
         self.node2 = Node(self.tactic2)
         self.vertex1 = Vertex(1, foo)

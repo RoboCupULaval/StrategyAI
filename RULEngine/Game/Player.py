@@ -6,6 +6,7 @@ from ..Util.Pose import Pose
 from ..Util.constant import DELTA_T
 
 
+
 class Player:
 
     def __init__(self, team, id):
@@ -15,6 +16,7 @@ class Player:
         self.id = id
         self.team = team
         self.pose = Pose()
+        # FIXME: Why use a list? A tuple or Position should be better
         self.velocity = [0, 0, 0]
         self.kf = EnemyKalmanFilter()
         self.update = self._update
@@ -25,7 +27,6 @@ class Player:
         return self.id == pid
 
     def _update(self, pose, delta=DELTA_T):
-        old_pose = self.pose
         self.pose = pose
 
     def _enemy_kalman_update(self, poses, delta):

@@ -7,7 +7,7 @@ class ConfigService(metaclass=Singleton):
     def __init__(self):
         self.config_dict = {}
 
-    def load_file(self, input_config_file):
+    def load_file(self, input_config_file) -> None:
         config_parser = ConfigParser(allow_no_value=False)
         try:
             config_parser.read_file(open(input_config_file))

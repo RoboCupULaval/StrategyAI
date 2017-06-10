@@ -91,4 +91,5 @@ class EnemyKalmanFilter:
         self.predict()
         output_state = self.x
         output_state[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
+        # TODO: State should be returned as Position and a velocity, not has the raw state vector
         return output_state

@@ -1,5 +1,6 @@
 import unittest
 
+from config.config_service import ConfigService
 from RULEngine.Game.Player import Player
 from RULEngine.Game.Team import Team
 from RULEngine.Util.constant import PLAYER_PER_TEAM
@@ -11,6 +12,8 @@ from RULEngine.Util.team_color_service import TeamColor
 class TestTeam(unittest.TestCase):
 
     def setUp(self):
+        # TODO: Because player require a KF, we need to load file config for a unitest... This is terrible.
+        self.cfg = ConfigService().load_file("config/sim_standard.cfg")
         self.team = Team(TeamColor.YELLOW_TEAM)
         self.team_blue = Team(TeamColor.BLUE_TEAM)
         self.first_player = self.team.players[0]
@@ -36,8 +39,9 @@ class TestTeam(unittest.TestCase):
         self.assertEqual(self.team.players[0].pose, self.first_player.pose)
 
     def test_invalid_id(self):
+        AN_INVALID_ID = PLAYER_PER_TEAM+1
         uut = self.team.update_player
-        self.assertRaises(KeyError, uut, 10, Pose())
+        self.assertRaises(KeyError, uut, AN_INVALID_ID, Pose())
 
     def test_is_team_yellow(self):
         self.assertTrue(self.team.is_team_yellow())
