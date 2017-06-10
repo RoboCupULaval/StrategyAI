@@ -6,14 +6,12 @@ import numpy as np
 class Position(np.ndarray):
     def __new__(cls, *args, abs_tol=0.01, z=0):
 
-        if args is ():
-            obj = np.zeros(2).view(cls)
-        elif isinstance(args[0], (list, tuple, np.ndarray, Position)) and len(args) == 1:
+        if len(args) == 1 and isinstance(args[0], (list, tuple, np.ndarray, Position)):
             obj = np.asarray(args[0].copy()).view(cls)
         elif len(args) == 2:
             obj = np.asarray(args[:]).copy().view(cls)
         else:
-            raise TypeError
+            obj = np.zeros(2).view(cls)
 
         obj.x = obj[0]
         obj.y = obj[1]
@@ -45,12 +43,12 @@ class Position(np.ndarray):
     def y(self, y):
         self[1] = y
 
-    def distance(self):
+    def norm(self):
         return np.linalg.norm(self)
 
     def angle(self):
-        angle = np.arctan2(self[1], self[0])
-        return angle if angle < np.pi else angle - 2 * np.pi
+        """Return the angle of the point from the origin between -pi and pi"""
+        return np.arctan2(self[1], self[0])
 
     def rotate(self, angle):
         rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]).view(Position)
@@ -79,6 +77,12 @@ class Position(np.ndarray):
     def from_np(array):
         """Legacy. Do not use."""
         return Position(array)
+
+    def __repr__(self):
+        return 'Position({:8.3f}, {:8.3f})'.format(self[0], self[1])
+
+    def __str__(self):
+        return '[{:8.3f}, {:8.3f}]'.format(self[0], self[1])
 
     def __hash__(self):
         return hash(str(self))
