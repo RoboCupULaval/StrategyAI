@@ -99,20 +99,22 @@ class RobotMotion(object):
 
         # Rotation control
         rotation_cmd = self.angle_controller.update(self.pose_error.orientation)
+        rotation_cmd = self.apply_rotation_constraints(rotation_cmd)
 
         # Translation control
         if self.target_reached() and self.target_speed <= self.setting.translation.deadzone:
             translation_cmd = Position(self.x_controller.update(self.pose_error.position.x),
                                        self.y_controller.update(self.pose_error.position.y))
             self.next_speed = 0
+            print('target reached:', self.pose_error.position)
         else:
             translation_cmd = self.get_next_velocity()
         # Send new command to robot
         translation_cmd = translation_cmd.rotate(-self.current_orientation)
-        rotation_cmd = self.apply_rotation_constraints(rotation_cmd)
         translation_cmd = self.apply_translation_constraints(translation_cmd)
-        #print(Pose(translation_cmd, rotation_cmd))
-        print(self.pose_error.orientation, self.target_orientation, self.current_orientation)
+
+        print(Pose(translation_cmd, rotation_cmd))
+
         return Pose(translation_cmd, rotation_cmd)
 
     def get_next_velocity(self) -> Position:
@@ -209,8 +211,10 @@ class RobotMotion(object):
         # Desired parameters
         if cmd.path:
             self.target_pose = Pose(cmd.path[0], cmd.pose_goal.orientation)
+            self.target_speed = cmd.path_speeds[1] / 1000
         else:  # No pathfinder case
             self.target_pose = cmd.pose_goal
+            self.target_speed = 0
 
         self.target_pose = self.target_pose / np.array([1000, 1000, 1]).view(Pose)
         self.pose_error = self.target_pose - self.current_pose
@@ -219,7 +223,6 @@ class RobotMotion(object):
         self.position_error = self.pose_error.position
         self.target_orientation = self.target_pose.orientation
         self.target_direction = self.position_error.normalized()
-        self.target_speed = cmd.path_speeds[1] / 1000
         self.cruise_speed = np.abs(cmd.cruise_speed)
 
     def stop(self):
@@ -236,16 +239,14 @@ def get_control_setting(is_sim: bool):
         translation = {"kp": 0.8, "ki": 0.01, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
         rotation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
-        translation = {"kp": 0.8, "ki": 0.01, "kd": 0, "antiwindup": 20, "deadzone": 0.10, "sensibility": 0.05}
-        rotation = {"kp": 0.05, "ki": 0.02, "kd": 0, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0.03}
+        translation = {"kp": 0.8, "ki": 0.01, "kd": 0, "antiwindup": 20, "deadzone": 0.2, "sensibility": 0.075}
+        rotation = {"kp": 0.05, "ki": 0.02, "kd": 0, "antiwindup": 20, "deadzone": 0.3, "sensibility": 0.15}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
     control_setting.rotation = DotDict(rotation)
 
     return control_setting
-
-# Geometry functions (Will be in util soon)
 
 
 def clamp(val: float, min_val: float, max_val: float) -> float:
