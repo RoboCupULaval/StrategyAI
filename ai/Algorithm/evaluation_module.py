@@ -67,24 +67,28 @@ def best_passing_option(passing_player):
 
     score_max = 0
     if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW_TEAM :# YELLOW_TEAM
-        goal = Position(GameState().const["FIELD_GOAL_BLUE_X_LEFT"], 0)
+        goal = Position(GameState().field.constant["FIELD_GOAL_BLUE_X_LEFT"], 0)
     else:
-        goal = Position(GameState().const["FIELD_GOAL_YELLOW_X_LEFT"], 0)
+        goal = Position(GameState().field.constant["FIELD_GOAL_YELLOW_X_RIGHT"], 0)
 
     for i in GameState().my_team.available_players.values():
-        # Calcul du score pour passeur vers receveur
-        score = line_of_sight_clearance(passing_player, i.pose.position)
+        if i is not passing_player:
+            # Calcul du score pour passeur vers receveur
+            score = line_of_sight_clearance(passing_player, i.pose.position)
 
-        # Calcul du score pour receveur vers but
-        score += line_of_sight_clearance(i, goal)
-        if score_max < score:
-            score_max = score
-            receiver_id = i
+            # Calcul du score pour receveur vers but
+            score += line_of_sight_clearance(i, goal)
+            if score_max < score:
+                score_max = score
+                receiver_id = i
+            print(score, i.id)
+            #print(goal)
 
-    score = line_of_sight_clearance(passing_player, goal) *2
+    score = line_of_sight_clearance(passing_player, goal) *2.5
     if score_max < score:
         score_max = score
         receiver_id = None
+    print(score, 'but')
 
     return receiver_id
 
@@ -105,6 +109,10 @@ def line_of_sight_clearance(player, target: Position):
 
 def trajectory_ellipse_score(pointA : Position, pointB: Position, obstacle: Position):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
+    if np.linalg.norm(obstacle - pointA) + np.linalg.norm(pointB - obstacle) > 1.5 * np.linalg.norm(pointB - pointA):
+        return 10000
+    if np.linalg.norm(obstacle - pointA) + np.linalg.norm(pointB - obstacle) < 1.1 * np.linalg.norm(pointB - pointA):
+        return -10000
     return np.linalg.norm(obstacle - pointA) + np.linalg.norm(pointB - obstacle) - np.linalg.norm(pointB - pointA)
 
 
