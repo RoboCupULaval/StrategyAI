@@ -45,7 +45,7 @@ class Position(np.ndarray):
     def y(self, y):
         self[1] = y
 
-    def distance(self):
+    def norm(self):
         return np.linalg.norm(self)
 
     def angle(self):
@@ -57,9 +57,10 @@ class Position(np.ndarray):
         return np.dot(rotation, self)
 
     def normalized(self):
-        if self.distance() == 0:
-            raise ValueError
-        return self / self.distance()
+        if self.norm() > 0:
+            return self / self.norm()
+        else:
+            return self
 
     def __eq__(self, other):
         min_abs_tol = min(self.abs_tol, other.abs_tol)
