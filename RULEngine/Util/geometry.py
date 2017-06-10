@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 import math as m
-
 import numpy as np
+import warnings
 
 from ..Util.Position import Position
 from ..Util.Pose import Pose
@@ -41,6 +41,7 @@ def get_distance(position_1: Position, position_2: Position) -> float:
     """
     # assert isinstance(position_1, Position)
     # assert isinstance(position_2, Position)
+    warnings.warn('(position_1 - position_2).norm() should be use instead.')
     return m.sqrt((position_2.x - position_1.x) ** 2 +
                   (position_2.y - position_1.y) ** 2)
 
@@ -57,7 +58,7 @@ def get_angle(main_position: Position, other: Position) -> float:
     """
     assert isinstance(main_position, Position), "TypeError main_position"
     assert isinstance(other, Position), "TypeError other"
-
+    warnings.warn('(position_1 - position_2).angle() should be use instead.')
     position_x = float(other.x - main_position.x)
     position_y = float(other.y - main_position.y)
     return m.atan2(position_y, position_x)

@@ -1,11 +1,10 @@
-#Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txt
 
 from RULEngine.Util.Position import Position
 import numpy as np
 import math as m
-import warnings
 
-ORIENTATION_ABSOLUTE_TOLERANCE = 0.004  # Half a degree of absolute tolerance (define in constant.py)
+ORIENTATION_ABSOLUTE_TOLERANCE = 0.004  # Half a degree of absolute tolerance
 
 
 class Pose(object):
@@ -70,7 +69,6 @@ class Pose(object):
         if isinstance(other, Pose):
             res = Pose(self.position + other.position, self.orientation + other.orientation)
         elif isinstance(other, Position):
-            warnings.warn("Addition between Pose and Position object")
             res = Pose(self.position + other, self.orientation)
         else:
             raise TypeError
@@ -80,20 +78,20 @@ class Pose(object):
         if isinstance(other, Pose):
             res = Pose(self.position - other.position, self.orientation - other.orientation)
         elif isinstance(other, Position):
-            warnings.warn("Subtraction between Pose and Position object")
             res = Pose(self.position - other, self.orientation)
         else:
             raise TypeError
         return res
 
-    def __eq__(self, other):
-        if other is Position:
-            warnings.warn("Comparison between Pose and Position object")
-            return self.position == other.position
-
-        orientation_equal = Pose.compare_angle(self.orientation, other.orientation)
-        position_equal = self.position == other.position
-        return position_equal and orientation_equal
+    def __eq__(self, other: ('Pose', Position)):
+        if isinstance(other, Position):
+            return self.position == other
+        elif isinstance(other, Pose):
+            orientation_equal = Pose.compare_angle(self.orientation, other.orientation)
+            position_equal = self.position == other.position
+            return position_equal and orientation_equal
+        else:
+            raise TypeError
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -116,5 +114,4 @@ class Pose(object):
         return self.position.x, self.position.y
 
     def conv_2_np(self) -> np.ndarray:
-        return np.asarray(np.append(self.position, self.orientation))
-
+        return np.asarray(np.append(self.position, [self.orientation]))

@@ -1,22 +1,35 @@
 # Under MIT License, see LICENSE.txt
 
 import numpy as np
+import RULEngine.Util.Pose
+import warnings
 
 
 class Position(np.ndarray):
-    def __new__(cls, *args, abs_tol=0.01, z=0):
 
-        if len(args) == 1 and isinstance(args[0], (list, tuple, np.ndarray, Position)):
-            obj = np.asarray(args[0].copy()).view(cls)
+    def __new__(cls, *args, z=0, abs_tol=0.01):
+        if len(args) == 0:
+            obj = Position(0, 0)
+        elif len(args) == 1:
+            if isinstance(args[0], list) and len(args[0]) == 2:
+                obj = np.asarray(args[0].copy()).view(cls)
+            elif isinstance(args[0], tuple) and len(args[0]) == 2:
+                obj = np.asarray(args[0]).view(cls)
+            elif isinstance(args[0], Position) and len(args[0]) == 2:
+                obj = np.asarray(args[0].copy()).view(cls)
+            elif isinstance(args[0], np.ndarray) and args[0].size == 2:
+                obj = np.asarray(args[0]).view(cls)
+            else:
+                raise ValueError
         elif len(args) == 2:
-            obj = np.asarray(args[:]).copy().view(cls)
+            obj = np.asarray(args).copy().view(cls)
         else:
-            obj = np.zeros(2).view(cls)
+            raise ValueError
 
         obj.x = obj[0]
         obj.y = obj[1]
-
         obj.z = z
+
         obj.abs_tol = abs_tol
 
         return obj
@@ -44,27 +57,33 @@ class Position(np.ndarray):
         self[1] = y
 
     def norm(self):
-        return np.linalg.norm(self)
+        """Return the distance of the point from the origin"""
+        return float(np.linalg.norm(self))
 
     def angle(self):
-        """Return the angle of the point from the origin between -pi and pi"""
-        return np.arctan2(self[1], self[0])
+        """Return the angle of the point from the x-axis between -pi and pi"""
+        if self == Position(0, 0):
+            warnings.warn('Angle is not defined for (0, 0). Result will be 0.')
+        return float(np.arctan2(self[1], self[0]))
 
     def rotate(self, angle):
         rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]).view(Position)
         return np.dot(rotation, self)
 
     def normalized(self):
-        if self.distance() == 0:
-            raise ValueError
-        return self / self.distance()
+        if self.norm() == 0:
+            raise ZeroDivisionError
+        return self / self.norm()
 
     def __eq__(self, other):
-        if type(other) is Position:
+        if isinstance(other, Position):
             min_abs_tol = min(self.abs_tol, other.abs_tol)
-            return np.allclose(self.view(np.ndarray), other.view(np.ndarray), atol=min_abs_tol)
-        min_abs_tol = min(self.abs_tol, other.position.abs_tol)
-        return np.allclose(self.view(np.ndarray), other.position.view(np.ndarray), atol=min_abs_tol)
+            return np.allclose(self, other, atol=min_abs_tol)
+        elif isinstance(other, RULEngine.Util.Pose.Pose):
+            min_abs_tol = min(self.abs_tol, other.position.abs_tol)
+            return np.allclose(self, other.position, atol=min_abs_tol)
+        else:
+            raise TypeError
 
     def __ne__(self, other):
         return not self.__eq__(other)
