@@ -2,6 +2,7 @@ import time
 from typing import List
 
 from RULEngine.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
+from RULEngine.Util.Pose import Pose
 from ai.Algorithm.AsPathManager import AsPathManager
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Algorithm.path_partitionner import PathPartitionner
@@ -51,6 +52,7 @@ class PathfinderModule(Executor):
                 self.draw_path(path)
                 if path.get_path_length() < 100:
                     player.pathfinder_history.last_path = None
+                    player.pathfinder_history.last_pose_goal = path.goal
                 else:
                     player.pathfinder_history.last_path = path
                     player.pathfinder_history.last_pose_goal = path.goal

@@ -62,8 +62,11 @@ class Position(np.ndarray):
         return self / self.distance()
 
     def __eq__(self, other):
-        min_abs_tol = min(self.abs_tol, other.abs_tol)
-        return np.allclose(self.view(np.ndarray), other.view(np.ndarray), atol=min_abs_tol)
+        if type(other) is Position:
+            min_abs_tol = min(self.abs_tol, other.abs_tol)
+            return np.allclose(self.view(np.ndarray), other.view(np.ndarray), atol=min_abs_tol)
+        min_abs_tol = min(self.abs_tol, other.position.abs_tol)
+        return np.allclose(self.view(np.ndarray), other.position.view(np.ndarray), atol=min_abs_tol)
 
     def __ne__(self, other):
         return not self.__eq__(other)

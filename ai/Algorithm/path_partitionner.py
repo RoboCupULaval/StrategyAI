@@ -81,7 +81,7 @@ class PathPartitionner(Pathfinder):
         self.game_state = self.p_worldstate.game_state
         self.path = Path(Position(0, 0), Position(0, 0))
         self.raw_path = Path(Position(0, 0), Position(0, 0))
-        self.res = 300
+        self.res = 100
         self.gap_proxy = 200
         self.max_recurs = 5
         self.players_obstacles = []
@@ -140,6 +140,15 @@ class PathPartitionner(Pathfinder):
 
         else:
             self.path = Path(self.player.pose.position, pose_target.position)
+            if self.path.get_path_length() < 1:
+                """
+                hack shady pour eviter une erreur shady (trop fatiguer pour dealer ak ste shit la)
+                
+                File "/home/phil/robocup/StrategyIA/RULEngine/Util/Position.py", line 68, in __eq__
+                    min_abs_tol = min(self.abs_tol, other.position.abs_tol)
+                    AttributeError: 'numpy.ndarray' object has no attribute 'position'
+                """
+                return self.path , self.path
             self.closest_obs_speed = self.find_closest_obstacle(self.player.pose.position, self.path)
             self.path = self.fastpathplanner(self.path)
 
@@ -209,7 +218,7 @@ class PathPartitionner(Pathfinder):
         closest_obs = None
         closest_player = self.players_obstacles[0].pose.position
         #print(get_distance(path.start, path.goal))
-        if get_distance(path.start, path.goal) < 0.001:
+        if np.linalg.norm(path.start - path.goal) < 0.001:
             return [closest_obs, dist_point_obs, closest_player]
         if point == path.start:
             return [closest_obs, dist_point_obs, closest_player]

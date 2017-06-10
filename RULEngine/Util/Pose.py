@@ -2,7 +2,7 @@
 
 from RULEngine.Util.Position import Position
 import numpy as np
-
+import warnings
 
 ORIENTATION_ABSOLUTE_TOLERANCE = 0.004  # Half a degree to tolerance
 
@@ -44,6 +44,9 @@ class Pose(np.ndarray):
         return self.__str__()
 
     def __eq__(self, other):
+        if other is Position:
+            warnings.warn("comparaison entre Une pose et une position")
+            return self.position == other.position
         return self.position == other.position and np.isclose(self.orientation, other.orientation,
                                                               atol=ORIENTATION_ABSOLUTE_TOLERANCE)
 
