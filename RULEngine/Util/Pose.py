@@ -3,6 +3,7 @@
 from RULEngine.Util.Position import Position
 import numpy as np
 import math as m
+from typing import Union
 
 ORIENTATION_ABSOLUTE_TOLERANCE = 0.004  # Half a degree of absolute tolerance
 
@@ -69,7 +70,7 @@ class Pose(object):
     def orientation(self, orientation):
         self._orientation = Pose.wrap_to_pi(orientation)
 
-    def __add__(self, other: ('Pose', Position)):
+    def __add__(self, other: Union['Pose', Position]):
         if isinstance(other, Pose):
             res = Pose(self.position + other.position, self.orientation + other.orientation)
         elif isinstance(other, Position):
@@ -78,7 +79,7 @@ class Pose(object):
             raise TypeError
         return res
 
-    def __sub__(self, other: ('Pose', Position)):
+    def __sub__(self, other: Union['Pose', Position]):
         if isinstance(other, Pose):
             res = Pose(self.position - other.position, self.orientation - other.orientation)
         elif isinstance(other, Position):
@@ -87,7 +88,7 @@ class Pose(object):
             raise TypeError
         return res
 
-    def __eq__(self, other: ('Pose', Position)):
+    def __eq__(self, other: Union['Pose', Position]):
         if isinstance(other, Position):
             return self.position == other
         elif isinstance(other, Pose):
