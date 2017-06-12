@@ -18,7 +18,7 @@ class Position(np.ndarray):
             elif isinstance(args[0], Position) and len(args[0]) == 2:
                 obj = np.asarray(args[0].copy()).view(cls)
             elif isinstance(args[0], np.ndarray) and args[0].size == 2:
-                obj = np.asarray(args[0]).view(cls)
+                obj = np.asarray(args[0].copy()).view(cls)
             else:
                 raise ValueError
         elif len(args) == 2:
@@ -58,7 +58,7 @@ class Position(np.ndarray):
 
     def norm(self):
         """Return the distance of the point from the origin"""
-        return float(np.linalg.norm(self))
+        return float(np.linalg.norm(self.view(np.ndarray)))
 
     def angle(self):
         """Return the angle of the point from the x-axis between -pi and pi"""
@@ -78,10 +78,10 @@ class Position(np.ndarray):
     def __eq__(self, other):
         if isinstance(other, Position):
             min_abs_tol = min(self.abs_tol, other.abs_tol)
-            return np.allclose(self, other, atol=min_abs_tol)
+            return np.allclose(self, other.view(np.ndarray), atol=min_abs_tol)
         elif isinstance(other, RULEngine.Util.Pose.Pose):
             min_abs_tol = min(self.abs_tol, other.position.abs_tol)
-            return np.allclose(self, other.position, atol=min_abs_tol)
+            return np.allclose(self, other.position.view(np.ndarray), atol=min_abs_tol)
         else:
             raise TypeError
 

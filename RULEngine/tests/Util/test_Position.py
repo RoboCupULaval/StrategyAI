@@ -96,6 +96,10 @@ class TestPosition(unittest.TestCase):
     def test_get_set(self):
 
         pos = Position(1, 2, z=3, abs_tol=4)
+
+        self.assertTrue(hasattr(pos, 'x'))
+        self.assertTrue(hasattr(pos, 'y'))
+
         self.assertTrue(pos.x == 1)
         self.assertTrue(pos.y == 2)
         self.assertTrue(pos.z == 3)
@@ -135,6 +139,7 @@ class TestPosition(unittest.TestCase):
         self.assertEqual(Position(-1, 0).rotate(m.pi/2), Position(0, -1))
         self.assertEqual(Position(0, -1).rotate(m.pi/2), Position(1, 0))
         self.assertEqual(Position(526, 878).rotate(2.14675), Position(-1022.833, -37.052))
+        self.assertTrue(type(Position(526, 878).rotate(2.14675)) is Position)
 
     def test_normalized(self):
         self.assertEqual(Position(1, 0).normalized(), Position(1, 0))
@@ -142,6 +147,7 @@ class TestPosition(unittest.TestCase):
         self.assertEqual(Position(10, 10).normalized(), Position(m.sqrt(2)/2, m.sqrt(2)/2))
         normalized_vector = Position(np.array([12.45, -23.23]) / np.sqrt(np.square([12.45, -23.23]).sum()))
         self.assertEqual(Position(12.45, -23.23).normalized(), normalized_vector)
+        self.assertTrue(type(Position(12.45, -23.23).normalized()) is Position)
 
         with self.assertRaises(ZeroDivisionError):
             Position(0, 0).normalized()

@@ -10,12 +10,16 @@ ORIENTATION_ABSOLUTE_TOLERANCE = 0.004  # Half a degree of absolute tolerance
 class Pose(object):
 
     def __init__(self, *args):
-        if len(args) == 1:
-            if isinstance(args[0], Pose):
-                position = args[0].position.copy()
+
+        if len(args) == 0:
+            position = Position()
+            orientation = 0
+        elif len(args) == 1:
+            if isinstance(args[0], Pose):  # From another Pose object
+                position = Position(args[0].position)
                 orientation = args[0].orientation
             elif isinstance(args[0], Position):  # Only a position object
-                position = args[0].copy()
+                position = Position(args[0])
                 orientation = 0
             elif isinstance(args[0], np.ndarray):  # Only a ndarray
                 if args[0].size == 3:
@@ -27,20 +31,20 @@ class Pose(object):
                 else:
                     raise ValueError
             else:
-                raise TypeError
+                raise ValueError
         elif len(args) == 2:  # Position and orientation or ndarray and orientation
-            if isinstance(args[0], Position):
-                position = args[0].copy()
-                orientation = args[1]
-            elif isinstance(args[0], np.ndarray):
-                assert(args[0].size == 2),  'ndarray should be of length 2.'
+            if isinstance(args[0], (Position, np.ndarray)):
+                if isinstance(args[0], np.ndarray):
+                    assert(args[0].size == 2),  'ndarray should be of length 2.'
                 position = Position(args[0])
                 orientation = args[1]
             else:
-                raise TypeError
-        else:  # Nothing is given, default case
-            position = Position()
-            orientation = 0
+                raise ValueError
+        elif len(args) == 3:
+            position = Position(args[0:2])
+            orientation = args[2]
+        else:
+            raise ValueError
 
         # wrap the orientation between -pi and pi
         self._orientation = float(Pose.wrap_to_pi(orientation))
@@ -87,7 +91,7 @@ class Pose(object):
         if isinstance(other, Position):
             return self.position == other
         elif isinstance(other, Pose):
-            orientation_equal = Pose.compare_angle(self.orientation, other.orientation)
+            orientation_equal = self.compare_orientation(other.orientation)
             position_equal = self.position == other.position
             return position_equal and orientation_equal
         else:
@@ -102,16 +106,35 @@ class Pose(object):
     def __repr__(self):
         return 'Pose({},{:7.3f})'.format(self.position, self.orientation)
 
+    def __getitem__(self, item):
+        assert(isinstance(item, int)), 'getitem only support integer indexing'
+        if 0 <= item < 2:
+            return self.position[item]
+        elif item == 2:
+            return self.orientation
+        else:
+            raise IndexError('Out of range')
+
     @staticmethod
     def wrap_to_pi(angle):
         return (angle + np.pi) % (2 * np.pi) - np.pi
 
-    @staticmethod
-    def compare_angle(angle1, angle2, abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE):
-        return m.isclose(Pose.wrap_to_pi(angle1 - angle2), 0, abs_tol=abs_tol, rel_tol=0)
+    def compare_orientation(self, other, abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE):
+        if isinstance(other, (int, float, np.generic)):
+            angle = other
+        elif isinstance(other, Pose):
+            angle = other.position
+        else:
+            raise TypeError
+
+        return m.isclose(Pose.wrap_to_pi(self.orientation - angle), 0, abs_tol=abs_tol, rel_tol=0)
+
+    def to_array(self):
+        return np.array([self.position.x, self.position.y, self.orientation])
 
     def to_tuple(self):
         return self.position.x, self.position.y
 
     def conv_2_np(self) -> np.ndarray:
-        return np.asarray(np.append(self.position, [self.orientation]))
+        """Legacy. Do not use."""
+        return self.to_array()
