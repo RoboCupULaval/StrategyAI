@@ -48,12 +48,15 @@ class Coach(object):
         :return: List(_Command) les commandes des robots
         """
         # main loop de l'IA
+        print("WUT!?",len(self.world_state.game_state.my_team.available_players.values()))
+        print(self.world_state.game_state.my_team.available_players.values())
+        for i in self.world_state.game_state.my_team.available_players.values():
+            print(type(i))
         self.debug_executor.exec()
         self.play_executor.exec()
         self.module_executor.exec()
         self.motion_executor.exec()
         robot_commands = self.robot_command_executor.exec()
-        print(len(self.world_state.game_state.my_team.available_players.values()))
         return robot_commands
 
     def set_reference(self, world_reference: ReferenceTransferObject) -> None:

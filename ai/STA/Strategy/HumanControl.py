@@ -8,7 +8,10 @@ from ai.STA.Tactic.Stop import Stop
 class HumanControl(Strategy):
     def __init__(self, game_state: GameState):
         super().__init__(game_state)
+        print(self.game_state.my_team.available_players.values())
+
         for player in self.game_state.my_team.available_players.values():
+            print("HEROEHO",player)
             self.add_tactic(player.id, Stop(self.game_state, player))
 
     def assign_tactic(self, tactic: Tactic, robot_id: int):

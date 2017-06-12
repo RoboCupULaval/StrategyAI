@@ -119,9 +119,14 @@ class Game:
         print("**************************************")
         print(len(kalman_blue[0]))
         """
-        for i in range(0, 6):
-            self.blue_team.update_player(i, vision_frame["blues"][i], delta)
-            self.yellow_team.update_player(i, vision_frame["yellows"][i], delta)
+        for i, position_list in vision_frame["blues"].items():
+            for j in position_list:
+                if j:
+                    self.blue_team.update_player(i, position_list, delta)
+        for i, position_list in vision_frame["yellows"].items():
+            for j in position_list:
+                if j:
+                    self.yellow_team.update_player(i, position_list, delta)
         self.blue_team.update_available_players()
         self.yellow_team.update_available_players()
 

@@ -14,8 +14,8 @@ class KalmanImageTransformer(ImageTransformer):
         nb_cameras = int(ConfigService().config_dict["IMAGE"]["number_of_camera"])
         self.last_camera_frame = [empty_camera for _ in range(nb_cameras)]
         self.kalman_arranged_frame = {"balls": [None for _ in range(nb_cameras)],
-                                      "blues": [{"id": [None for i in range(nb_cameras)]} for _ in range(PLAYER_PER_TEAM)],
-                                      "yellows": [{"id": [None for i in range(nb_cameras)]} for _ in range(PLAYER_PER_TEAM)]}
+                                      "blues": {i: [None for i in range(nb_cameras)] for i in range(PLAYER_PER_TEAM)},
+                                      "yellows": {i: [None for i in range(nb_cameras)] for i in range(PLAYER_PER_TEAM)}}
 
     def update(self, packets):
         self._update_camera_kalman(packets)
@@ -26,11 +26,11 @@ class KalmanImageTransformer(ImageTransformer):
         self.new_image_flag = False
         if not packets:
             return
-
         # change the packets of a camera if frame_number of camera is higher
         # than what we have
         for packet in packets:
             if packet.HasField("detection"):
+
                 c_id = packet.detection.camera_id
                 f_nb = packet.detection.frame_number
 
@@ -48,15 +48,8 @@ class KalmanImageTransformer(ImageTransformer):
                     for blue in packet.detection.robots_blue:
                         new_camera["blues"][blue.robot_id] = Pose(Position(blue.x, blue.y),
                                                                   blue.orientation)
-                        try:
-                            self.kalman_arranged_frame["blues"][blue.robot_id][c_id] = Pose(Position(blue.x, blue.y),
+                        self.kalman_arranged_frame["blues"][blue.robot_id][c_id] = Pose(Position(blue.x, blue.y),
                                                                                         blue.orientation)
-                        except Exception as e:
-                            print(len(self.kalman_arranged_frame["blues"]))
-                            print("blue robot id ->", blue.robot_id)
-                            print("c_id ->", c_id)
-                            print(self.kalman_arranged_frame)
-                            raise(e)
                     for yellow in packet.detection.robots_yellow:
                         new_camera["yellows"][yellow.robot_id] = Pose(Position(yellow.x, yellow.y),
                                                                       yellow.orientation)

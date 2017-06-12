@@ -21,9 +21,6 @@ class Team:
         self.players_time_tracker = {}
         for player_id in range(PLAYER_PER_TEAM):
             self.players[player_id] = Player(self, player_id)
-            if player_id < 6:
-                self.players[player_id].in_play = True
-                self.available_players[player_id] = self.players[player_id]
 
         self.update_player = self._update_player
         if ConfigService().config_dict["IMAGE"]["kalman"] == "true":
@@ -44,6 +41,7 @@ class Team:
     def update_available_players(self):
         for player_id, time_last_seen in self.players_time_tracker.items():
             if time.time() - time_last_seen > MIN_TIME_BEFORE_MOVING_OUT:
+                print("<________________________----")
                 del(self.available_players[player_id])
 
     def _update_player(self, player_id, pose, delta=0):

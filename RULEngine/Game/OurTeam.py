@@ -12,7 +12,6 @@ class OurTeam(Team):
             self.players[player_id] = OurPlayer(self, player_id)
             if player_id < 6:
                 self.players[player_id].in_play = True
-                self.available_players[player_id] = self.players[player_id]
 
     # todo change this MGL 2017/05/29
     def update_player_command(self, player_id, cmd):
