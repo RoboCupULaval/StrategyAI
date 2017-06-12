@@ -72,8 +72,8 @@ DEFAULT_MIN_SPEED = 0.65
 
 # TeamColor
 class TeamColor(Enum):
-    YELLOW_TEAM = 0
-    BLUE_TEAM = 1
+    YELLOW = 0
+    BLUE = 1
 
 # FIXME: hack pour limiter le terrain facilement
 def is_legal_field_pose(pose):
