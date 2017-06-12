@@ -13,6 +13,7 @@ from RULEngine.Util.team_color_service import TeamColorService, TeamColor
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
 from ai.Algorithm.Graph.Vertex import Vertex
+from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
@@ -45,9 +46,9 @@ class TestGraph(unittest.TestCase):
         self.game_state = GameState()
         self.empty_graph = Graph()
         self.graph1 = Graph()
-        a_player = OurPlayer(TeamColor.YELLOW_TEAM, A_PLAYER_ID)
-        self.tactic1 = Stop(self.game_state, OurPlayer(TeamColor.YELLOW_TEAM, A_PLAYER_ID))
-        self.tactic2 = GoToPositionNoPathfinder(self.game_state, a_player, Pose(Position(500, 0), 0))
+        self.a_player = OurPlayer(TeamColor.YELLOW_TEAM, A_PLAYER_ID)
+        self.tactic1 = Stop(self.game_state, self.a_player)
+        self.tactic2 = GoToPositionNoPathfinder(self.game_state, self.a_player, Pose(Position(500, 0), 0))
         self.node1 = Node(self.tactic1)
         self.node2 = Node(self.tactic2)
         self.vertex1 = Vertex(1, foo)
@@ -108,10 +109,10 @@ class TestGraph(unittest.TestCase):
         self.graph1.remove_vertex(0, 1)
         self.assertEqual(len(self.graph1.nodes[0].vertices), 0)
 
-    @unittest.skip("I don't know whuy the fuck it is broken here.")
+    #@unittest.skip("I don't know whuy the fuck it is broken here.")
     def test_exec(self):
         next_ai_command = self.graph1.exec()
-        expected_ai_command = AICommand(1, AICommandType.STOP)
+        expected_ai_command = AICommand(self.a_player, AICommandType.STOP)
         self.assertEqual(self.graph1.current_node, 1)
         self.assertEqual(next_ai_command, expected_ai_command)
 
@@ -122,14 +123,14 @@ class TestGraph(unittest.TestCase):
         self.empty_graph.add_vertex(0, 1, foo2)
 
         next_ai_command = self.empty_graph.exec()
-        expected_ai_command = AICommand(0, AICommandType.MOVE,
-                                        **{"pose_goal": Pose(Position(500, 0))})
+        expected_ai_command = MoveToPosition(self.game_state, self.a_player,
+                                             Pose(Position(500, 0), 0)).exec()
         self.assertEqual(self.empty_graph.current_node, 0)
         self.assertEqual(next_ai_command, expected_ai_command)
 
         next_ai_command = self.empty_graph.exec()
-        expected_ai_command = AICommand(0, AICommandType.MOVE,
-                                        **{"pose_goal": Pose(Position(500, 0))})
+        expected_ai_command = MoveToPosition(self.game_state, self.a_player,
+                                             Pose(Position(500, 0), 0)).exec()
         self.assertEqual(self.empty_graph.current_node, 0)
         self.assertEqual(next_ai_command, expected_ai_command)
 
