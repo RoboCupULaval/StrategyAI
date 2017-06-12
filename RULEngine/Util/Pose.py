@@ -1,9 +1,9 @@
 # Under MIT License, see LICENSE.txt
-
-from RULEngine.Util.Position import Position
 import numpy as np
 import math as m
 from typing import Union
+
+from RULEngine.Util.Position import Position
 
 ORIENTATION_ABSOLUTE_TOLERANCE = 0.004  # Half a degree of absolute tolerance
 

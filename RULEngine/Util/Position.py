@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 import numpy as np
-import RULEngine.Util.Pose
+# import RULEngine.Util.Pose
 import warnings
 
 
@@ -79,9 +79,9 @@ class Position(np.ndarray):
         if isinstance(other, Position):
             min_abs_tol = min(self.abs_tol, other.abs_tol)
             return np.allclose(self, other.view(np.ndarray), atol=min_abs_tol)
-        elif isinstance(other, RULEngine.Util.Pose.Pose):
-            min_abs_tol = min(self.abs_tol, other.position.abs_tol)
-            return np.allclose(self, other.position.view(np.ndarray), atol=min_abs_tol)
+        # elif isinstance(other, RULEngine.Util.Pose.Pose):
+        #     min_abs_tol = min(self.abs_tol, other.position.abs_tol)
+        #     return np.allclose(self, other.position.view(np.ndarray), atol=min_abs_tol)
         else:
             raise TypeError
 
