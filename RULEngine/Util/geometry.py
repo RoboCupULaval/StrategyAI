@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 import math as m
-
 import numpy as np
+import warnings
 
 from ..Util.Position import Position
 from ..Util.Pose import Pose
@@ -41,6 +41,7 @@ def get_distance(position_1: Position, position_2: Position) -> float:
     """
     # assert isinstance(position_1, Position)
     # assert isinstance(position_2, Position)
+    warnings.warn('(position_1 - position_2).norm() should be use instead.')
     return m.sqrt((position_2.x - position_1.x) ** 2 +
                   (position_2.y - position_1.y) ** 2)
 
@@ -57,7 +58,7 @@ def get_angle(main_position: Position, other: Position) -> float:
     """
     assert isinstance(main_position, Position), "TypeError main_position"
     assert isinstance(other, Position), "TypeError other"
-
+    warnings.warn('(position_1 - position_2).angle() should be use instead.')
     position_x = float(other.x - main_position.x)
     position_y = float(other.y - main_position.y)
     return m.atan2(position_y, position_x)
@@ -377,10 +378,12 @@ def is_facing_point_and_target(player_position: Position,
     angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
     return angle_difference < tolerated_angle
 
+
 def is_path_clear(origin: Position, target: Position, player: Position) -> bool:
     rayon_ref = 1.1 * np.linalg.norm(origin.conv_2_np() - target.conv_2_np())
     rayon_player = np.linalg.norm(origin.conv_2_np() - player.conv_2_np()) + np.linalg.norm(target.conv_2_np() - player.conv_2_np())
     return rayon_player > rayon_ref
+
 
 def rotate_point_around_origin(point, origin, angle):
     # TODO: ajouter des unit tests
@@ -400,6 +403,7 @@ def rotate_point_around_origin(point, origin, angle):
 
     return new_point
 
+
 def conv_position_2_list(position: Position):
     """
     converti les datas d'un objet position en liste
@@ -408,3 +412,11 @@ def conv_position_2_list(position: Position):
     """
 
     return [position.x, position.y]
+
+
+def wrap_to_pi(angle):
+    return (angle + np.pi) % (2 * np.pi) - np.pi
+
+
+def compare_angle(angle1, angle2, abs_tol=0.004):
+    return m.isclose(Pose.wrap_to_pi(angle1 - angle2), 0, abs_tol=abs_tol, rel_tol=0)

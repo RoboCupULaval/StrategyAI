@@ -39,7 +39,7 @@ class Team:
         return has_player
 
     def is_team_yellow(self):
-        return self.team_color == TeamColor.YELLOW_TEAM
+        return self.team_color == TeamColor.YELLOW
 
     def update_available_players(self):
         for player_id, time_last_seen in self.players_time_tracker.items():
