@@ -34,4 +34,4 @@ class Player:
         self.velocity = [ret[2], ret[3], ret[5]]
 
     def __str__(self):
-        return str(self.team.team_color)+" id: "+str(self.id)
+        return str(self.team.team_color.name)+" id: "+str(self.id)+"   "+str(hex(id(self)))

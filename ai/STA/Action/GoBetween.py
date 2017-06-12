@@ -61,6 +61,7 @@ class GoBetween(Action):
         pt1_to_pt2 = pt2 - pt1
 
         destination = np.cross(pt1_to_player, pt1_to_pt2) / np.linalg.norm(pt1_to_pt2) + player
+        # This handle the case where the projection is not between the two points
         outside_x = (destination[0] > pt1[0] and destination[0] > pt2[0]) or \
                     (destination[0] < pt1[0] and destination[0] < pt2[0])
         outside_y = (destination[1] > pt1[1] and destination[1] > pt2[1]) or \

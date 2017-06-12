@@ -19,10 +19,10 @@ def remove_duplicates(seq, concurent_list=None, round_up_threshold=1):
         return [x for idx, x in enumerate(seq) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])]
     else:
         return [x for idx, x in enumerate(seq) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])], \
-               [y for idx, y in enumerate(concurent_list) if not seq[idx] in seen2 or seen2_add(seq[idx])]
+               [y for idx, y in enumerate(concurent_list) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])]
 
 
-def round_position_to_number(positions, base=5):
+def round_position_to_number(positions, base=2):
 
     for position in positions:
         position.x = int(base * round(float(position.x)/base))

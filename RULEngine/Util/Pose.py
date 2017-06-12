@@ -1,42 +1,55 @@
 #Under MIT License, see LICENSE.txt
-from .Position import Position
+
+from RULEngine.Util.Position import Position
 import numpy as np
+import warnings
+
+ORIENTATION_ABSOLUTE_TOLERANCE = 0.004  # Half a degree to tolerance
 
 
-ORIENTATION_DELTA_TOLERANCE_MAGNITUDE = 1e4
+class Pose(np.ndarray):
 
+    def __new__(cls, position=Position(), orientation=0):
+        obj = np.asarray(np.append(position, orientation)).view(cls)
+        obj.position = position
+        obj.orientation = orientation
+        return obj
 
-class Pose(object):
-    """  Container of position and orientation """
-    def __init__(self, position=Position(), orientation=0.0):
-        assert(isinstance(position, Position)), 'position should be Position object.'
-        assert(isinstance(orientation, (int, float))), 'orientation should be int or float value.'
+    @property
+    def position(self):
+        return self[0:2].view(Position)
 
-        self.position = position
-        self.orientation = orientation
-        '''
-        if self.orientation >= m.pi:
-            self.orientation -= 2 * m.pi
-        elif self.orientation <= -m.pi:
-            self.orientation += 2*m.pi
-        '''
+    @position.setter
+    def position(self, position: Position):
+        self[0:2] = position[0:2]  # The height og the ball (z component) is discard in a pose
+
+    @property
+    def orientation(self):
+        return float(self[2])
+
+    @orientation.setter
+    def orientation(self, orientation):
+        self[2] = orientation
+
     def to_tuple(self):
-        """ Retourne la position de la pose sous forme d'un tuple."""
         return self.position.x, self.position.y
 
-    def conv_2_np(self):
-        return np.array([self.position.x, self.position.y, self.orientation])
+    def conv_2_np(self) -> np.ndarray:
+        return self
 
     def __str__(self):
-        return '[{}, theta={}]'.format(self.position, self.orientation)
+        return '[pos={}, theta={}]'.format(self.position, self.orientation)
+
     def __repr__(self):
         return self.__str__()
 
     def __eq__(self, other):
-        orientation_left_side = int(self.orientation * ORIENTATION_DELTA_TOLERANCE_MAGNITUDE)
-        orientation_right_side = int(other.orientation * ORIENTATION_DELTA_TOLERANCE_MAGNITUDE)
-        orientation_test = orientation_left_side == orientation_right_side
-        return self.position == other.position and orientation_test
+        if other is Position:
+            warnings.warn("comparaison entre Une pose et une position")
+            return self.position == other.position
+        return self.position == other.position and np.isclose(self.orientation, other.orientation,
+                                                              atol=ORIENTATION_ABSOLUTE_TOLERANCE)
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
