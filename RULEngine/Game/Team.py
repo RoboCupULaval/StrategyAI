@@ -56,6 +56,7 @@ class Team:
 
     def _kalman_update(self, player_id, pose_list, delta=0):
         try:
+            print(player_id, "  ->  ",pose_list)
             self.players[player_id].update(pose_list, delta)
             self.players_time_tracker[player_id] = time.time()
             self.available_players[player_id] = self.players[player_id]
