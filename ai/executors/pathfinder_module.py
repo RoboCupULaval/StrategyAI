@@ -2,8 +2,6 @@ import time
 from typing import List
 
 from RULEngine.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
-from RULEngine.Util.Pose import Pose
-from ai.Algorithm.AsPathManager import AsPathManager
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Algorithm.path_partitionner import PathPartitionner
 from ai.Util.ai_command import AICommand
