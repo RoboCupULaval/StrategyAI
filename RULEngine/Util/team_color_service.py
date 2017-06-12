@@ -14,12 +14,12 @@ class TeamColorService(object, metaclass=Singleton):
             except AssertionError:
                 raise WrongRobotColorError("The enemies robot color is wrong please check "
                                            "the config file")
-            self.OUR_TEAM_COLOR = TeamColor.YELLOW_TEAM
-            self.ENEMY_TEAM_COLOR = TeamColor.BLUE_TEAM
+            self.OUR_TEAM_COLOR = TeamColor.YELLOW
+            self.ENEMY_TEAM_COLOR = TeamColor.BLUE
 
         elif cfg.config_dict["GAME"]["our_color"] == "blue":
-            self.OUR_TEAM_COLOR = TeamColor.BLUE_TEAM
-            self.ENEMY_TEAM_COLOR = TeamColor.YELLOW_TEAM
+            self.OUR_TEAM_COLOR = TeamColor.BLUE
+            self.ENEMY_TEAM_COLOR = TeamColor.YELLOW
 
         else:
             raise WrongRobotColorError("")

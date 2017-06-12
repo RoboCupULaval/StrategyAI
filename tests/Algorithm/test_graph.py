@@ -38,7 +38,7 @@ class TestGraph(unittest.TestCase):
         self.game.set_referee(Referee())
         self.game.ball = Ball()
         game_world = ReferenceTransferObject(self.game)
-        game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW_TEAM))
+        game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW))
         self.game_state.set_reference(game_world)
         self.game_state = GameState()
         self.empty_graph = Graph()

@@ -11,7 +11,7 @@ class RefereeCommand(IntEnum):
     NORMAL_START = 2
     FORCE_START = 3
 
-    #raw commands
+    # raw commands
     PREPARE_KICKOFF_YELLOW = 4
     PREPARE_KICKOFF_BLUE = 5
     PREPARE_PENALTY_YELLOW = 6
@@ -27,7 +27,7 @@ class RefereeCommand(IntEnum):
     BALL_PLACEMENT_YELLOW = 16
     BALL_PLACEMENT_BLUE = 17
 
-    #internal commands
+    # internal commands
     PREPARE_KICKOFF_US = 34
     PREPARE_KICKOFF_THEM = 35
     PREPARE_PENALTY_US = 36
@@ -67,7 +67,7 @@ class Referee:
         self.prepare_command = None
         self.stage = Stage.NORMAL_FIRST_HALF_PRE
         self.stage_time_left = 0
-        self.ball_placement_point = (0,0)
+        self.ball_placement_point = (0, 0)
         self.our_color = ConfigService().config_dict["GAME"]["our_color"]
         self.team_info = {"ours": {
                             "name": "",
@@ -92,14 +92,14 @@ class Referee:
 
     @property
     def info(self):
-        return  {
+        return {
             "command": str(self.command),
             "stage": str(self.stage),
             "stage_time_left": self.stage_time_left
         }
 
     def update(self, frames):
-        if frames != []:
+        if frames:
             self.stage = Stage(frames[-1].stage)
             self.stage_time_left = frames[-1].stage_time_left
 
