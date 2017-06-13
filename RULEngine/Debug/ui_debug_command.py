@@ -2,6 +2,7 @@
 
 STRATEGY_COMMAND_TYPE = 5002
 TACTIC_COMMAND_TYPE = 5003
+AUTO_PLAY_COMMAND_TYPE = 5008
 
 
 class UIDebugCommand(object):
@@ -16,6 +17,9 @@ class UIDebugCommand(object):
 
     def is_tactic_cmd(self):
         return self.cmd_type == TACTIC_COMMAND_TYPE
+
+    def is_auto_play_cmd(self):
+        return self.cmd_type == AUTO_PLAY_COMMAND_TYPE
 
 
 
