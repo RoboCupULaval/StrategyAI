@@ -75,6 +75,14 @@ class Position(np.ndarray):
             raise ZeroDivisionError
         return self / self.norm()
 
+    def perpendicular(self):
+        """Retourne la normal unitaire entre le vecteur et la normal au plan np.array([0,0,1])"""
+        normalized_pose = self.normalized()
+        array_temp = np.array([normalized_pose[0], normalized_pose[1], 0])
+        z_vector = np.array([0, 0, 1])
+        res = np.cross(array_temp, z_vector)
+        return Position(res[0], res[1])
+
     def __eq__(self, other):
         if isinstance(other, Position):
             min_abs_tol = min(self.abs_tol, other.abs_tol)

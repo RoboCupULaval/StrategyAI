@@ -118,6 +118,7 @@ class Field:
 
                 self.constant["FIELD_GOAL_Y_TOP"] = self._defense_radius + (self._defense_stretch / 2)
                 self.constant["FIELD_GOAL_Y_BOTTOM"] = -self.constant["FIELD_GOAL_Y_TOP"]
+                self.constant["GOAL_WIDTH"] = self.constant["FIELD_GOAL_Y_TOP"] * 2
                 self.constant["FIELD_GOAL_BLUE_X_LEFT"] = self.constant["FIELD_X_LEFT"]
                 self.constant["FIELD_GOAL_BLUE_X_RIGHT"] = self.constant["FIELD_X_LEFT"] + self.constant["FIELD_GOAL_RADIUS"]
                 self.constant["FIELD_GOAL_YELLOW_X_LEFT"] = self.constant["FIELD_X_RIGHT"] - self.constant["FIELD_GOAL_RADIUS"]
