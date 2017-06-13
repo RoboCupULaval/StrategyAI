@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
-from enum import IntEnum
+
 import numpy as np
+import math as m
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
@@ -93,6 +94,8 @@ class RobotMotion(object):
                                     self.setting.rotation.kd,
                                     self.setting.rotation.antiwindup)
 
+        self.speed_controller = [PID(0.1, 0.1, 0, 10), PID(0.1, 0.1, 0, 10)]
+
     def update(self, cmd: AICommand) -> Pose():
 
         self.update_states(cmd)
@@ -109,11 +112,12 @@ class RobotMotion(object):
             print('target reached:', self.pose_error.position)
         else:
             translation_cmd = self.get_next_velocity()
+
         # Send new command to robot
         translation_cmd = translation_cmd.rotate(-self.current_orientation)
         translation_cmd = self.apply_translation_constraints(translation_cmd)
 
-        print(Pose(translation_cmd, rotation_cmd))
+        print('{:5.3f}, {:5.3f}, {:5.3f}'.format(self.current_speed, translation_cmd.norm(), rotation_cmd))
 
         return Pose(translation_cmd, rotation_cmd)
 
@@ -122,11 +126,10 @@ class RobotMotion(object):
            It try to produce a trapezoidal velocity path with the required cruising and target speed.
            The target speed is the speed that the robot need to reach at the target point."""
 
-        decceleration_factor = 1.2
+        deceleration_factor = 2
 
-        if not np.isclose(self.current_speed, self.next_speed, atol=0.25):
-            self.next_speed = self.current_speed
-            print('next speed too fast')
+        #if not np.isclose(self.current_speed, self.next_speed, atol=0.25):
+        #    self.next_speed = self.current_speed
 
         if self.target_reached():  # We need to go to target speed
             if self.next_speed < self.target_speed:  # Target speed is faster than current speed
@@ -134,7 +137,7 @@ class RobotMotion(object):
                 if self.next_speed > self.target_speed:  # Next_speed is too fast
                     self.next_speed = self.target_speed
             else:  # Target speed is slower than current speed
-                self.next_speed -= decceleration_factor * self.setting.translation.max_acc * self.dt
+                self.next_speed -= deceleration_factor * self.setting.translation.max_acc * self.dt
         else:  # We need to go to the cruising speed
             if self.next_speed < self.cruise_speed:  # Going faster
                 self.next_speed += self.setting.translation.max_acc * self.dt
@@ -170,20 +173,25 @@ class RobotMotion(object):
 
     def limit_acceleration(self, translation_cmd: Position) -> Position:
         delta_speed = translation_cmd - self.last_translation_cmd
-        self.current_acceleration = np.sqrt(np.square(delta_speed).sum()) / self.dt
-        self.current_acceleration = clamp(self.current_acceleration, 0, self.setting.translation.max_acc)
-        translation_cmd = self.last_translation_cmd + delta_speed.normalized() * self.current_acceleration * self.dt
-        self.last_translation_cmd = translation_cmd
+        if m.fabs(delta_speed.sum()) > 0:
+            self.current_acceleration = np.sqrt(np.square(delta_speed).sum()) / self.dt
+            self.current_acceleration = clamp(self.current_acceleration, 0, self.setting.translation.max_acc)
+            translation_cmd = self.last_translation_cmd + delta_speed.normalized() * self.current_acceleration * self.dt
+            self.last_translation_cmd = translation_cmd
+
         return translation_cmd
 
     def limit_speed(self, translation_cmd: Position) -> Position:
-        translation_speed = np.sqrt(np.square(translation_cmd).sum())
-        translation_speed = clamp(translation_speed, 0, self.setting.translation.max_speed)
-        new_speed = translation_cmd.normalized() * translation_speed
+        if m.fabs(translation_cmd.sum()) > 0:
+            translation_speed = np.sqrt(np.square(translation_cmd).sum())
+            translation_speed = clamp(translation_speed, 0, self.setting.translation.max_speed)
+            new_speed = translation_cmd.normalized() * translation_speed
+        else:
+            new_speed = translation_cmd
         return new_speed
 
     def target_reached(self):
-        alpha = 1.5
+        alpha = 1
         distance_to_reach_target_speed = 0.5 * (np.square(self.target_speed) - np.square(self.cruise_speed))
         distance_to_reach_target_speed /= self.setting.translation.max_acc
         distance_to_reach_target_speed = alpha * np.abs(distance_to_reach_target_speed)
@@ -202,11 +210,10 @@ class RobotMotion(object):
 
         # Current state of the robot
         self.current_pose = self.ws.game_state.game.friends.players[self.id].pose
-        self.current_pose = self.current_pose / np.array([1000, 1000, 1]).view(Pose)
+        self.current_pose = self.current_pose.to_meter()
         self.current_orientation = self.current_pose.orientation
-        self.current_velocity = np.array(self.ws.game_state.game.friends.players[self.id].velocity)
-        self.current_velocity = self.current_velocity / np.array([1000, 1000, 1]).view(Pose)
-        self.current_speed = np.linalg.norm(self.current_velocity)
+        self.current_velocity = self.ws.game_state.game.friends.players[self.id].velocity.to_meter()
+        self.current_speed = self.current_velocity.position.norm()
 
         # Desired parameters
         if cmd.path:
@@ -216,13 +223,14 @@ class RobotMotion(object):
             self.target_pose = cmd.pose_goal
             self.target_speed = 0
 
-        self.target_pose = self.target_pose / np.array([1000, 1000, 1]).view(Pose)
-        self.pose_error = self.target_pose - self.current_pose
-        if self.pose_error.orientation > np.pi:  # Try to minimize the rotation angle
-            self.pose_error.orientation = self.pose_error.orientation - 2 * np.pi
+        self.target_pose = self.target_pose.to_meter()
+        self.pose_error = self.target_pose - self.current_pose  # Pose are always wrap to pi
         self.position_error = self.pose_error.position
         self.target_orientation = self.target_pose.orientation
-        self.target_direction = self.position_error.normalized()
+        if m.fabs(self.position_error.sum()) > 0:
+            self.target_direction = self.position_error.normalized()
+        else:
+            self.target_direction = Position()
         self.cruise_speed = np.abs(cmd.cruise_speed)
 
     def stop(self):

@@ -4,8 +4,7 @@ import math as m
 from typing import Union
 
 from RULEngine.Util.Position import Position
-
-ORIENTATION_ABSOLUTE_TOLERANCE = 0.004  # Half a degree of absolute tolerance
+from RULEngine.Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE
 
 
 class Pose(object):
@@ -124,7 +123,7 @@ class Pose(object):
         if isinstance(other, (int, float, np.generic)):
             angle = other
         elif isinstance(other, Pose):
-            angle = other.position
+            angle = other.orientation
         else:
             raise TypeError
 
@@ -135,6 +134,9 @@ class Pose(object):
 
     def to_tuple(self):
         return self.position.x, self.position.y
+
+    def to_meter(self):
+        return Pose(self.position/1000, self.orientation)
 
     def conv_2_np(self) -> np.ndarray:
         """Legacy. Do not use."""

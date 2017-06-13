@@ -14,17 +14,19 @@ class MoveToPosition(Action):
     Attributs (en plus de ceux de Action):
         destination : La destination (pose) que le joueur doit atteindre
     """
-    def __init__(self, game_state: GameState, player: OurPlayer, p_destination: Pose, cruise_speed: [int, float]=1):
+    def __init__(self, game_state: GameState, player: OurPlayer, p_destination: Pose, pathfinder_on=True, cruise_speed: [int, float]=1):
         """
             :param game_state: L'état courant du jeu.
             :param p_player_id: Identifiant du joueur qui se déplace
             :param p_destination: destination (pose) que le joueur doit atteindre
+            :param pathfinder_on:
             :param cruise_speed
         """
         Action.__init__(self, game_state, player)
         assert isinstance(p_destination, Pose)
         assert isinstance(cruise_speed, (int, float))
         self.destination = p_destination
+        self.pathfinder_on = pathfinder_on
         self.cruise_speed = cruise_speed
 
     def exec(self):
@@ -33,5 +35,5 @@ class MoveToPosition(Action):
         :return:
         """
         return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.destination,
-                                                             "pathfinder_on": False,
+                                                             "pathfinder_on": self.pathfinder_on,
                                                              "cruise_speed": self.cruise_speed})

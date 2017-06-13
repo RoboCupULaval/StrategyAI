@@ -4,8 +4,7 @@ import numpy as np
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-# FIXME Dubious constant kick max speed
-from RULEngine.Util.constant import KICK_MAX_SPD
+
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
@@ -28,7 +27,6 @@ class Kick(Action):
         # TODO check the force not used by the new interface! MGL 2017/05/23
         Action.__init__(self, game_state, player)
         assert(isinstance(p_force, (int, float)))
-        assert(KICK_MAX_SPD >= p_force >= 0)
         self.force = p_force
         self.target = target
         self.speed_pose = Pose()

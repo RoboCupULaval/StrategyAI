@@ -64,51 +64,6 @@ def get_angle(main_position: Position, other: Position) -> float:
     return m.atan2(position_y, position_x)
 
 
-def cvt_angle_360(orientation: float) -> float:
-    """
-        Convertit un angle en radians en degrés 0-359.
-        Args:
-            orientation: L'angle à convertir, en radians.
-        Returns:
-            L'angle entre 0 et 359 degrés.
-    """
-    assert isinstance(orientation, (int, float)), "TypeError orientation"
-    orientation = m.degrees(orientation)
-
-    if orientation < 0:
-        while True:
-            if orientation >= 0:
-                break
-            else:
-                orientation += 360
-    elif orientation > 359:
-        while True:
-            if orientation < 360:
-                break
-            else:
-                orientation -= 360
-    return orientation
-
-
-def cvt_angle_180(orientation):
-    """
-        Convertit un angle en radians en degrés [-180, 180].
-        Args:
-            orientation: L'angle en radians.
-        Returns:
-            L'angle entre  -179 et 180 degrés.
-    """
-    assert isinstance(orientation, (int, float)), "TypeError orientation"
-
-    orientation = cvt_angle_360(orientation)
-    if orientation > 180:
-        return orientation-360
-    elif orientation <= -180:
-        return orientation+360
-    else:
-        return orientation
-
-
 def get_nearest(ref_position: Position, list_of_position: list, number=1):
     """
         Classe une liste de positions en ordre croissant de distance par
@@ -186,13 +141,12 @@ def get_line_equation(position1: Position, position2: Position) -> tuple:
     assert isinstance(position1, Position)
     assert isinstance(position2, Position)
 
-    delta_x = position2.x - position1.x
-    delta_y = position2.y - position1.y
+    delta = position2 - position1
 
-    pente = delta_y / delta_x
-    ordonnee = position1.y - pente * position1.x
+    slope = delta.y / delta.x
+    origin = position1.y - slope * position1.x
 
-    return pente, ordonnee
+    return slope, origin
 
 
 def get_lines_intersection(position_a1: Position, position_a2: Position,
