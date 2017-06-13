@@ -65,7 +65,7 @@ def is_target_reached(player, target: Position, min_dist=0.01):
 def best_passing_option(passing_player):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si but est la meilleure possibilité
 
-    score_max = 0
+    score_min = float("inf")
     if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW_TEAM :# YELLOW_TEAM
         goal = Position(GameState().field.constant["FIELD_GOAL_BLUE_X_LEFT"], 0)
     else:
@@ -78,42 +78,45 @@ def best_passing_option(passing_player):
 
             # Calcul du score pour receveur vers but
             score += line_of_sight_clearance(i, goal)
-            if score_max < score:
-                score_max = score
+            score = np.log(score)
+            if score_min > score:
+                score_min = score
                 receiver_id = i
-            print(score, i.id)
-            #print(goal)
+            print('player position :', i.pose.position, score, i.id)
 
-    score = line_of_sight_clearance(passing_player, goal) *2.5
-    if score_max < score:
-        score_max = score
+    score = np.log(line_of_sight_clearance(passing_player, goal))
+    if score_min > score:
         receiver_id = None
     print(score, 'but')
+
 
     return receiver_id
 
 
 def line_of_sight_clearance(player, target: Position):
-    # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est grand),
+    # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est petit),
     # NONE si obstacle dans l'ellipse
-    score = 0
+    score = np.linalg.norm(player.pose.position - target)
     for j in GameState().my_team.available_players.values():
         # Obstacle : les players friends
         if not j.id == player.id:
-            score += trajectory_ellipse_score(player.pose.position, target, j.pose.position)
-    for j in GameState().other_team.available_players.values():
-        # Obstacle : les players ennemis
-        score += trajectory_ellipse_score(player.pose.position, target, j.pose.position)
+            score *= trajectory_score(player.pose.position, target, j.pose.position)
+    # for j in GameState().other_team.available_players.values():
+    #     # Obstacle : les players ennemis
+    #     score *= trajectory_score(player.pose.position, target, j.pose.position)
     return score
 
 
-def trajectory_ellipse_score(pointA : Position, pointB: Position, obstacle: Position):
+def trajectory_score(pointA : Position, pointB: Position, obstacle: Position):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
-    if np.linalg.norm(obstacle - pointA) + np.linalg.norm(pointB - obstacle) > 1.5 * np.linalg.norm(pointB - pointA):
-        return 10000
-    if np.linalg.norm(obstacle - pointA) + np.linalg.norm(pointB - obstacle) < 1.1 * np.linalg.norm(pointB - pointA):
-        return -10000
-    return np.linalg.norm(obstacle - pointA) + np.linalg.norm(pointB - obstacle) - np.linalg.norm(pointB - pointA)
+    AB = pointB - pointA
+    AO = obstacle - pointA
+    normAC = np.dot(AB, AO) / np.linalg.norm(AB)
+    normOC = np.sqrt(np.linalg.norm(AO) ** 2 - (normAC) ** 2)
+    if (normAC < 0) or (normAC > 1.1 * np.linalg.norm(AB)):
+        return 1
+    else:
+        return max(1, min(normAC / normOC, 100000))
 
 
 def is_player_facing_target(player, target_position: Position, tolerated_angle: float) -> bool:
