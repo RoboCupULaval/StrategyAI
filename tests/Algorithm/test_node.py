@@ -41,7 +41,7 @@ class TestNode(unittest.TestCase):
         self.game.set_referee(Referee())
         self.game.ball = Ball()
         game_world = ReferenceTransferObject(self.game)
-        game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW_TEAM))
+        game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW))
         self.game_state.set_reference(game_world)
         self.game_state.game.friends.players[0].pose = Pose(Position(-4450, 0), 0)
         self.tactic1 = GoalKeeper(self.game_state, self.game_state.game.friends.players[A_GOAL_PLAYER_ID])

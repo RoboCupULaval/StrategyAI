@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.Util.Position import Position
+import RULEngine.Util.Position
 from RULEngine.Util.kalman_filter.enemy_kalman_filter import EnemyKalmanFilter
 from config.config_service import ConfigService
 from ..Util.Pose import Pose
@@ -31,8 +31,8 @@ class Player:
 
     def _enemy_kalman_update(self, poses, delta):
         ret = self.kf.filter(poses, delta)
-        self.pose = Pose(Position(ret[0], ret[1]), ret[4])
+        self.pose = Pose(RULEngine.Util.Position.Position(ret[0], ret[1]), ret[4])
         self.velocity = [ret[2], ret[3], ret[5]]
 
     def __str__(self):
-        return str(self.team.team_color)+" id: "+str(self.id)
+        return str(self.team.team_color.name)+" id: "+str(self.id)+"   "+str(hex(id(self)))

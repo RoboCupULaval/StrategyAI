@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 import math as m
-
 import numpy as np
+import warnings
 
 from ..Util.Position import Position
 from ..Util.Pose import Pose
@@ -19,10 +19,10 @@ def remove_duplicates(seq, concurent_list=None, round_up_threshold=1):
         return [x for idx, x in enumerate(seq) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])]
     else:
         return [x for idx, x in enumerate(seq) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])], \
-               [y for idx, y in enumerate(concurent_list) if not seq[idx] in seen2 or seen2_add(seq[idx])]
+               [y for idx, y in enumerate(concurent_list) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])]
 
 
-def round_position_to_number(positions, base=5):
+def round_position_to_number(positions, base=2):
 
     for position in positions:
         position.x = int(base * round(float(position.x)/base))
@@ -41,6 +41,7 @@ def get_distance(position_1: Position, position_2: Position) -> float:
     """
     # assert isinstance(position_1, Position)
     # assert isinstance(position_2, Position)
+    warnings.warn('(position_1 - position_2).norm() should be use instead.')
     return m.sqrt((position_2.x - position_1.x) ** 2 +
                   (position_2.y - position_1.y) ** 2)
 
@@ -57,7 +58,7 @@ def get_angle(main_position: Position, other: Position) -> float:
     """
     assert isinstance(main_position, Position), "TypeError main_position"
     assert isinstance(other, Position), "TypeError other"
-
+    warnings.warn('(position_1 - position_2).angle() should be use instead.')
     position_x = float(other.x - main_position.x)
     position_y = float(other.y - main_position.y)
     return m.atan2(position_y, position_x)
@@ -192,54 +193,6 @@ def get_line_equation(position1: Position, position2: Position) -> tuple:
     ordonnee = position1.y - pente * position1.x
 
     return pente, ordonnee
-
-
-def get_lines_intersection(position_a1: Position, position_a2: Position,
-                           position_b1: Position, position_b2: Position):
-    """
-        Calcul la position de l'intersection de deux lignes, données chacune
-        par deux positions.
-        Args:
-            position_a1: Position 1 sur la ligne A.
-            position_a2: Position 2 sur la ligne A.
-            position_b1: Position 1 sur la ligne B.
-            position_b2: Position 2 sur la ligne B.
-        Returns:
-            Position: La position de l'intersection des deux lignes.
-                      La position est située à l'infinie si les lignes sont
-                      parallèles.
-    """
-    assert isinstance(position_a1, Position)
-    assert isinstance(position_a2, Position)
-    assert isinstance(position_b1, Position)
-    assert isinstance(position_b2, Position)
-
-    delta_x_a = position_a1.x - position_a2.x
-    delta_y_a = position_a1.y - position_a2.y
-    delta_x_b = position_b1.x - position_b2.x
-    delta_y_b = position_b1.y - position_b2.y
-
-    denominator = delta_x_a * delta_y_b - delta_y_a * delta_x_b
-    if denominator == 0:
-        # Les lignes sont parallèles
-        return Position(m.inf, m.inf)
-
-    a = np.matrix([[delta_x_a, -delta_x_b], [delta_y_a, -delta_y_b]])
-    b = np.matrix([[position_b1.x - position_a1.x], [position_b1.y - position_a1.y]])
-
-    scale = np.linalg.solve(a, b)
-
-    intersection1 = np.matrix([[position_a1.x], [position_a1.y]]) + scale.item((0, 0))*np.matrix([[delta_x_a],
-                                                                                                  [delta_y_a]])
-    intersection2 = np.matrix([[position_b1.x], [position_b1.y]]) + scale.item((1, 0))*np.matrix([[delta_x_b],
-                                                                                                  [delta_y_b]])
-
-    assert np.allclose(intersection1, intersection2)
-
-    x = intersection1.item((0, 0))
-    y = intersection1.item((1, 0))
-
-    return Position(x, y)
 
 
 def get_closest_point_on_line(reference: Position,
@@ -377,10 +330,12 @@ def is_facing_point_and_target(player_position: Position,
     angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
     return angle_difference < tolerated_angle
 
+
 def is_path_clear(origin: Position, target: Position, player: Position) -> bool:
     rayon_ref = 1.1 * np.linalg.norm(origin.conv_2_np() - target.conv_2_np())
     rayon_player = np.linalg.norm(origin.conv_2_np() - player.conv_2_np()) + np.linalg.norm(target.conv_2_np() - player.conv_2_np())
     return rayon_player > rayon_ref
+
 
 def rotate_point_around_origin(point, origin, angle):
     # TODO: ajouter des unit tests
@@ -400,6 +355,7 @@ def rotate_point_around_origin(point, origin, angle):
 
     return new_point
 
+
 def conv_position_2_list(position: Position):
     """
     converti les datas d'un objet position en liste
@@ -408,3 +364,11 @@ def conv_position_2_list(position: Position):
     """
 
     return [position.x, position.y]
+
+
+def wrap_to_pi(angle):
+    return (angle + np.pi) % (2 * np.pi) - np.pi
+
+
+def compare_angle(angle1, angle2, abs_tol=0.004):
+    return m.isclose(Pose.wrap_to_pi(angle1 - angle2), 0, abs_tol=abs_tol, rel_tol=0)

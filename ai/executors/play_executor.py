@@ -1,7 +1,12 @@
 # Under MIT License, see LICENSE.txt
+import time
 
+from RULEngine.Debug.debug_interface import DebugInterface
+from RULEngine.Game.Referee import RefereeCommand
+from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
+from config.config_service import ConfigService
 
 
 class PlayExecutor(Executor):
@@ -13,6 +18,10 @@ class PlayExecutor(Executor):
         :param p_world_state: (WorldState) instance du worldstate
         """
         super().__init__(p_world_state)
+        cfg = ConfigService()
+        self.auto_play = SimpleAutoPlay(self.ws)
+        self.ws.play_state.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
+        self.last_time = 0
 
     def exec(self) -> None:
         """
@@ -20,12 +29,21 @@ class PlayExecutor(Executor):
 
         :return: None
         """
-        # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
-        self._send_books()
+
+        if self.ws.play_state.autonomous_flag:
+            self.auto_play.update()
 
         self._execute_strategy()
-        # TODO reduce the frequency at which we send it maybe? MGL 2017/03/16
-        self._send_robots_status()
+
+        if time.time() - self.last_time > 0.25:
+            # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
+            self._send_books()
+            self.ws.debug_interface.send_team_color()
+
+            self._send_robots_status()
+            self._send_auto_state()
+            self.last_time = time.time()
+
 
     def _execute_strategy(self) -> None:
         """
@@ -58,6 +76,12 @@ class PlayExecutor(Executor):
                                                                tactic_name,
                                                                action_name,
                                                                target)
+
+    def _send_auto_state(self) -> None:
+        self.ws.debug_interface.send_play_info(self.ws.game_state.game.referee.info,
+                                                self.ws.game_state.game.referee.team_info,
+                                                self.auto_play.info,
+                                                self.ws.play_state.autonomous_flag)
 
     def _send_books(self) -> None:
         """

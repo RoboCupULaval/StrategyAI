@@ -35,13 +35,13 @@ class TestActions(unittest.TestCase):
         self.game = Game()
         self.game.set_referee(Referee())
         game_world = ReferenceTransferObject(self.game)
-        game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW_TEAM))
+        game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW))
         self.game_state.set_reference(game_world)
-        self.a_player = OurPlayer(TeamColor.YELLOW_TEAM, A_PLAYER_ID)
+        self.a_player = OurPlayer(TeamColor.YELLOW, A_PLAYER_ID)
 
     def test_move_to(self):
         A_CRUISE_SPEED = 0.1
-        self.pose = Pose(Position(0, 0, 0), orientation=0.0)
+        self.pose = Pose(Position(0, 0), 0.0)
         self.move = MoveToPosition(self.game_state, self.a_player, self.pose, A_CRUISE_SPEED)
         return_cmd = self.move.exec()
         expected_cmd = AICommand(self.a_player, AICommandType.MOVE,
@@ -50,7 +50,7 @@ class TestActions(unittest.TestCase):
                                       "cruise_speed": A_CRUISE_SPEED})
         self.assertEqual(return_cmd, expected_cmd)
 
-        self.pose = Pose(Position(0.5, 0.3, 0.2), orientation=3.2)
+        self.pose = Pose(Position(0.5, 0.3), 3.2)
         self.move = MoveToPosition(self.game_state, self.a_player, self.pose, A_CRUISE_SPEED)
         self.assertEqual(MoveToPosition.exec(self.move),
                          AICommand(self.a_player, AICommandType.MOVE,
@@ -96,7 +96,7 @@ class TestActions(unittest.TestCase):
                                     **{"pose_goal": Pose(Position(100, 0), atan(2/5))})
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
-    @unittest.skip("GoBetween does not actually go in between")
+    #@unittest.skip("GoBetween does not actually go in between")
     def test_GoBetween(self):
         # test avec une droite verticale
         POS_TOP       = Position(100, 100)
@@ -105,56 +105,50 @@ class TestActions(unittest.TestCase):
         POS_INBETWEEN = Position(100, 0)
         self.go_between = GoBetween(self.game_state,self.a_player, POS_TOP, POS_BOTTOM,
                                     POS_TARGET)
-        ai_cmd = self.go_between.exec()
-        ai_cmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                    **{"pose_goal": Pose(POS_INBETWEEN, 0)})
+        ai_cmd = self.go_between.exec().pose_goal
+        ai_cmd_expected = Pose(POS_INBETWEEN, 0)
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
         # test avec une droite horizontale
         self.go_between = GoBetween(self.game_state,self.a_player, Position(100, 100), Position(-100, 100),
                                     Position(0, 200))
-        ai_cmd = self.go_between.exec()
-        ai_cmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                    **{"pose_goal": Pose(Position(0, 100), pi/2)})
+        ai_cmd = self.go_between.exec().pose_goal
+        ai_cmd_expected = Pose(Position(0, 100), pi/2)
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
         # test avec une droite quelconque
         self.go_between = GoBetween(self.game_state,self.a_player, Position(0, 500), Position(500, 0),
                                     Position(-300, -300))
-        ai_cmd = self.go_between.exec()
-        ai_cmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                    **{"pose_goal": Pose(Position(250, 250), -3*pi/4)})
+        ai_cmd = self.go_between.exec().pose_goal
+        ai_cmd_expected = Pose(Position(250, 250), -3*pi/4)
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
         # test destination calculée derrière position1
         self.go_between = GoBetween(self.game_state,self.a_player, Position(1000, 75), Position(1500, -250),
-                                    Position(0, 0), 180)
-        ai_cmd = self.go_between.exec()
-        ai_cmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                    **{"pose_goal": Pose(Position(1150, -23), 3.1215)})
+                                    Position(0, 0), 0)
+        ai_cmd = self.go_between.exec().pose_goal
+        ai_cmd_expected = Pose(Position(1000, 75), -3.067)
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
         # test destination calculée derrière position2
         self.go_between = GoBetween(self.game_state,self.a_player, Position(-100, 50), Position(-50, 50),
                                     Position(-60.0 + sqrt(3), 51.0), 10)
-        ai_cmd = self.go_between.exec()
-        ai_cmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                    **{"pose_goal": Pose(Position(-60, 50), 0.5235)})
+        ai_cmd = self.go_between.exec().pose_goal
+        ai_cmd_expected = Pose(Position(-60, 50), 0.5235)
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
         # test correction pour respecter la distance minimale
         self.go_between = GoBetween(self.game_state,self.a_player, Position(-500, 25), Position(1, 25),
                                     Position(-179, 0), 180)
-        ai_cmd = self.go_between.exec()
-        ai_cmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                    **{"pose_goal": Pose(Position(-179, 25), -pi/2)})
+        ai_cmd = self.go_between.exec().pose_goal
+        ai_cmd_expected = Pose(Position(-179, 25), -pi/2)
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
         # test distance entre les positions insuffisantes
         self.assertRaises(AssertionError, GoBetween, self.game_state,self.a_player, Position(1, 1),
                           Position(-1, -1), 50)
 
-    @unittest.skip("There is some obstacle avoidance that was aadded to goBehind that broke it in some case.")
+    @unittest.skip("There is some obstacle avoidance that was added to goBehind that broke it in some case. We should wait before the pathfinder handle a collidable-ball before fixing it")
     def test_GoBehind(self):
         # TODO: faire davantage de cas de test
         distance_behind = 500

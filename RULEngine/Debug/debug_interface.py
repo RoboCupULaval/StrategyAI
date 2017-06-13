@@ -4,6 +4,7 @@ import time
 from RULEngine.Debug.debug_command import DebugCommand
 from RULEngine.Util.singleton import Singleton
 from RULEngine.Game.OurPlayer import OurPlayer
+from config.config_service import ConfigService
 
 
 class Color(object):
@@ -60,8 +61,9 @@ def wrap_command(raw_command):
 class DebugInterface(metaclass=Singleton):
 
     def __init__(self):
-
         self.debug_state = []
+        self.team_color = str(ConfigService().config_dict["GAME"]["our_color"])
+        self.send_team_color()
 
     def add_log(self, level, message):
         log = DebugCommand(2, {'level': level, 'message': message})
@@ -151,8 +153,8 @@ class DebugInterface(metaclass=Singleton):
     def send_robot_strategic_state(self, player: OurPlayer, tactic, action, target="not implemented"):
         teamcolor_str = player.team.team_color.__str__()
         data = {teamcolor_str: {player.id: {'tactic': tactic,
-                                     'action': action,
-                                     'target': target}}}
+                                            'action': action,
+                                            'target': target}}}
         cmd = DebugCommand(1002, data)
         self.debug_state.append(cmd)
 
@@ -169,4 +171,14 @@ class DebugInterface(metaclass=Singleton):
         cmd = DebugCommand(1006, data)
         self.debug_state.append(cmd)
 
+    def send_team_color(self):
+        cmd = DebugCommand(1004, {'team_color': self.team_color})
+        self.debug_state.append(cmd)
+
+    def send_play_info(self, referee_info, referee_team_info, auto_play_info, auto_flag):
+        cmd = DebugCommand(1005, {'referee': referee_info,
+                                  'referee_team': referee_team_info,
+                                  'auto_play': auto_play_info,
+                                  'auto_flag': auto_flag})
+        self.debug_state.append(cmd)
 

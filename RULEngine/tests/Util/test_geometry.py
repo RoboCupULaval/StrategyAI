@@ -10,12 +10,12 @@ class TestGeometry(unittest.TestCase):
 
     def setUp(self):
         self.position = RULEngine.Util.Position.Position()
-        self.positionN = RULEngine.Util.Position.Position(0, 10000, 0)
-        self.positionNE = RULEngine.Util.Position.Position(10000, 10000, 0)
-        self.positionNO = RULEngine.Util.Position.Position(-10000, 10000, 0)
-        self.positionS = RULEngine.Util.Position.Position(0, -10000, 0)
-        self.positionSE = RULEngine.Util.Position.Position(10000, -10000, 0)
-        self.positionSO = RULEngine.Util.Position.Position(-10000, -10000, 0)
+        self.positionN = RULEngine.Util.Position.Position(0, 10000)
+        self.positionNE = RULEngine.Util.Position.Position(10000, 10000)
+        self.positionNO = RULEngine.Util.Position.Position(-10000, 10000)
+        self.positionS = RULEngine.Util.Position.Position(0, -10000)
+        self.positionSE = RULEngine.Util.Position.Position(10000, -10000)
+        self.positionSO = RULEngine.Util.Position.Position(-10000, -10000)
 
     def test_get_distance(self):
         dist = RULEngine.Util.geometry.get_distance(self.position, self.positionN)
@@ -70,15 +70,6 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(RULEngine.Util.geometry.get_line_equation(self.positionNE, self.positionSO), (1, 0))
         self.assertEqual(RULEngine.Util.geometry.get_line_equation(self.positionNE, self.positionNO), (0, 10000))
 
-    def test_get_lines_intersection(self):
-        no_intersection = RULEngine.Util.geometry.get_lines_intersection(self.positionS, self.positionN, self.positionNO, self.positionSO)
-        infinite_position = RULEngine.Util.Position.Position(m.inf, m.inf)
-        self.assertEqual(no_intersection, infinite_position)
-        null_intersection = RULEngine.Util.geometry.get_lines_intersection(self.positionSE, self.positionNO, self.positionNE, self.positionSO)
-        self.assertEqual(null_intersection, self.position)
-        intersection = RULEngine.Util.geometry.get_lines_intersection(self.positionNE, self.positionNO, self.position, self.positionN)
-        self.assertEqual(intersection, self.positionN)
-
     def test_get_closest_point_on_line(self):
         # Quand le point est nul (0, 0)
         close_null_point = RULEngine.Util.geometry.get_closest_point_on_line(self.positionNE, self.positionSE, self.positionNO)
@@ -111,10 +102,10 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(second, 2)
 
     def test_angle_to_ball_is_tolerated(self):
-        ball_position = self.positionN + RULEngine.Util.Position.Position(0, 5000, 0)
+        ball_position = self.positionN + RULEngine.Util.Position.Position(0, 5000)
         not_tolerated = RULEngine.Util.geometry.is_facing_point_and_target(self.positionN, ball_position, self.positionS, m.pi / 4)
         self.assertEqual(not_tolerated, False)
-        ball_position = self.positionS + RULEngine.Util.Position.Position(0, 5000, 0)
+        ball_position = self.positionS + RULEngine.Util.Position.Position(0, 5000)
         tolerated = RULEngine.Util.geometry.is_facing_point_and_target(self.positionS, ball_position, self.positionN, m.pi / 4)
         self.assertEqual(tolerated, True)
 

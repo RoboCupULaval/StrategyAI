@@ -16,13 +16,12 @@ class TeamColorService(object, metaclass=Singleton):
         else:
             team_str = team_color.__str__()
         if team_str == "yellow":
-            self.OUR_TEAM_COLOR = TeamColor.YELLOW_TEAM
-            self.ENEMY_TEAM_COLOR = TeamColor.BLUE_TEAM
+            self.OUR_TEAM_COLOR = TeamColor.YELLOW
+            self.ENEMY_TEAM_COLOR = TeamColor.BLUE
 
         elif team_str == "blue":
-            self.OUR_TEAM_COLOR = TeamColor.BLUE_TEAM
-            self.ENEMY_TEAM_COLOR = TeamColor.YELLOW_TEAM
-
+            self.OUR_TEAM_COLOR = TeamColor.BLUE
+            self.ENEMY_TEAM_COLOR = TeamColor.YELLOW
         else:
             raise WrongRobotColorError("")
 

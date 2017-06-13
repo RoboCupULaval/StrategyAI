@@ -62,7 +62,7 @@ RADIUS_TO_HALT = ROBOT_RADIUS + BALL_RADIUS
 POSITION_DEADZONE = ROBOT_RADIUS * 0.5
 
 # Orientation abs_tol
-ORIENTATION_ABSOLUTE_TOLERANCE = 1e-4
+ORIENTATION_ABSOLUTE_TOLERANCE = 0.004
 SPEED_ABSOLUTE_TOLERANCE = 1e-3
 
 # Speed
@@ -72,10 +72,10 @@ DEFAULT_MIN_SPEED = 0.65
 
 # TeamColor
 class TeamColor(Enum):
-    YELLOW_TEAM = 0
-    BLUE_TEAM = 1
     def __str__(self):
-        return 'blue' if self == TeamColor.BLUE_TEAM else 'yellow'
+        return 'blue' if self == TeamColor.BLUE else 'yellow'
+    YELLOW = 0
+    BLUE = 1
 
 # FIXME: hack pour limiter le terrain facilement
 def is_legal_field_pose(pose):
