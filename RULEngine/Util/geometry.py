@@ -2,8 +2,10 @@
 import math as m
 
 import numpy as np
+import warnings
 
 from ..Util.Position import Position
+from ..Util.Pose import Pose
 
 __author__ = 'RoboCupULaval'
 
@@ -40,6 +42,7 @@ def get_distance(position_1: Position, position_2: Position) -> float:
     """
     # assert isinstance(position_1, Position)
     # assert isinstance(position_2, Position)
+    warnings.warn('(position_1 - position_2).norm() should be use instead.')
     return m.sqrt((position_2.x - position_1.x) ** 2 +
                   (position_2.y - position_1.y) ** 2)
 
@@ -56,7 +59,7 @@ def get_angle(main_position: Position, other: Position) -> float:
     """
     assert isinstance(main_position, Position), "TypeError main_position"
     assert isinstance(other, Position), "TypeError other"
-
+    warnings.warn('(position_1 - position_2).angle() should be use instead.')
     position_x = float(other.x - main_position.x)
     position_y = float(other.y - main_position.y)
     return m.atan2(position_y, position_x)
@@ -234,21 +237,9 @@ def conv_position_2_list(position: Position):
     return [position.x, position.y]
 
 
-def normalized(vector: np.ndarray) -> np.ndarray:
-    if np.linalg.norm(vector) > 0:
-        return vector / np.linalg.norm(vector)
-    else:
-        return vector
+def wrap_to_pi(angle):
+    return (angle + np.pi) % (2 * np.pi) - np.pi
 
 
-def orientation(vector: np.ndarray) -> np.ndarray:
-    return np.arctan2(vector[1], vector[0])
-
-
-def robot2fixed(vector: np.ndarray, angle: float) -> np.ndarray:
-    tform = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
-    return np.dot(tform, vector)
-
-
-def fixed2robot(vector: np.ndarray, angle: float) -> np.ndarray:
-    return robot2fixed(vector, -angle)
+def compare_angle(angle1, angle2, abs_tol=0.004):
+    return m.isclose(Pose.wrap_to_pi(angle1 - angle2), 0, abs_tol=abs_tol, rel_tol=0)

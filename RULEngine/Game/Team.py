@@ -33,7 +33,7 @@ class Team:
         return has_player
 
     def is_team_yellow(self):
-        return self.team_color == TeamColor.YELLOW_TEAM
+        return self.team_color == TeamColor.YELLOW
 
     def _update_player(self, player_id, pose, delta=0):
         try:

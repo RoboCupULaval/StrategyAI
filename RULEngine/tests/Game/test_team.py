@@ -11,8 +11,8 @@ from RULEngine.Util.team_color_service import TeamColor
 class TestTeam(unittest.TestCase):
 
     def setUp(self):
-        self.team = Team(TeamColor.YELLOW_TEAM)
-        self.team_blue = Team(TeamColor.BLUE_TEAM)
+        self.team = Team(TeamColor.YELLOW)
+        self.team_blue = Team(TeamColor.BLUE)
         self.first_player = self.team.players[0]
         self.second_player = self.team.players[1]
         self.no_player = Player(self.team, 0)
@@ -20,7 +20,7 @@ class TestTeam(unittest.TestCase):
     def test_init(self):
         self.assertEqual(PLAYER_PER_TEAM, len(self.team.players))
         self.assertEqual(0, self.team.score)
-        self.assertEqual(TeamColor.YELLOW_TEAM, self.team.team_color)
+        self.assertEqual(TeamColor.YELLOW, self.team.team_color)
 
     def test_has_player_exists(self):
         self.assertTrue(self.team.has_player(self.first_player))

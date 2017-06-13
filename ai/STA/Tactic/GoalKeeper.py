@@ -37,7 +37,7 @@ class GoalKeeper(Tactic):
 
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None,):
         Tactic.__init__(self, game_state, player, target, args)
-        self.is_yellow = self.player.team.team_color == TeamColor.YELLOW_TEAM
+        self.is_yellow = self.player.team.team_color == TeamColor.YELLOW
         self.current_state = self.protect_goal
         self.next_state = self.protect_goal
         self.status_flag = Flags.WIP

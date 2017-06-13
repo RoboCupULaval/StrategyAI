@@ -204,6 +204,8 @@ class Framework(object):
     def _kalman_vision(self):
         vision_frames = self.vision.pop_frames()
         new_image_packet = self.image_transformer.update(vision_frames)
+        referee_frames = self.referee_command_receiver.pop_frames()
+        self.game.referee.update(referee_frames)
         if time.time() - self.time_of_last_loop > self.ai_timestamp:
             time_delta = time.time() - self.time_of_last_loop
             self.game.update(new_image_packet, time_delta)

@@ -31,7 +31,7 @@ class TestActions(unittest.TestCase):
         self.game = Game()
         self.game.set_referee(Referee())
         game_world = ReferenceTransferObject(self.game)
-        game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW_TEAM))
+        game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW))
         self.game_state.set_reference(game_world)
         self.player_id = 1  # random integer
 
