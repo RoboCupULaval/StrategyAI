@@ -42,7 +42,7 @@ class UIDebugRobotMonitor(object):
                 cmd = GetBattery(OurPlayer(None, robot_id), self.pause_cond)
                 response = self.serial_com.send_responding_command(cmd)
                 if response:
-                    print("Response from id {} with bat lvl {}V".format(robot_id, response))
+                    #print("Response from id {} with bat lvl {}V".format(robot_id, response))
                     self.robots_status[robot_id].battery_lvl = response
                     self.robots_status[robot_id].time_since_last_reading = time()
                 # Send last known state to UI-Debug
