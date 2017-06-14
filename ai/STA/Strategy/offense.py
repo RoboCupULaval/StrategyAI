@@ -28,7 +28,7 @@ class Offense(Strategy):
 
         for i in GameState().my_team.available_players.values():
             if not i.id == goalkeeper.id:
-                self.add_tactic(i.id, GoToPositionPathfinder(self.game_state, i, Pose(Position(50,50))))
+                self.add_tactic(i.id, GoToPositionPathfinder(self.game_state, i, Pose(Position(500,500))))
                 self.add_tactic(i.id, GoGetBall(self.game_state, i, Pose(GameState().get_ball_position())))
                 self.add_tactic(i.id, GoKick(self.game_state, i, self.kicktarget(i)))
 
