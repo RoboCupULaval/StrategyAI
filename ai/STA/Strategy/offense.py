@@ -33,16 +33,16 @@ class Offense(Strategy):
                 self.add_tactic(i.id, GoKick(self.game_state, i, self.kicktarget(i)))
 
                 self.add_condition(i.id, 0, 1, partial(self.is_closest, i))
-                self.add_condition(i.id, 1, 0, partial(self.is_not_closest, i))
+                self.add_condition(i.id, 1, 0, partial(not self.is_closest, i))
                 self.add_condition(i.id, 1, 2, partial(self.has_arrived_to_ball, i))
                 self.add_condition(i.id, 2, 0, partial(self.is_not_closest, i))
 
 
     def is_closest(self, player):
-        return player == closest_player_to_point(GameState().get_ball_position(), True)[0][0]
+        return player == closest_player_to_point(GameState().get_ball_position(), True)
 
     def is_not_closest(self, player):
-        return not (player == closest_player_to_point(GameState().get_ball_position(), True)[0][0])
+        return not (player == closest_player_to_point(GameState().get_ball_position(), True))
 
     def has_arrived_to_ball(self, i):
         if self.graphs[i.id].get_current_tactic_name() == 'GoGetBall':

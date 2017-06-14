@@ -5,13 +5,18 @@ import math
 
 from RULEngine.Util import Position
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.constant import PLAYER_PER_TEAM, TeamColor
+from RULEngine.Util.constant import PLAYER_PER_TEAM, TeamColor, ROBOT_RADIUS
 from RULEngine.Util.geometry import *
 from RULEngine.Util.team_color_service import TeamColorService
 from ai.states.game_state import GameState
 from typing import Union
 
-def player_with_ball(min_dist_from_ball):
+class PlayerPosition(object):
+    def __init__(self, player, distance):
+        self.player = player
+        self.distance = distance
+
+def player_with_ball(min_dist_from_ball = 1.2*ROBOT_RADIUS):
     # Retourne le joueur qui possède la balle, NONE si balle libre
     closest_player = closest_player_to_point(GameState().get_ball_position())
     if closest_player[0][1] < min_dist_from_ball:
@@ -20,7 +25,7 @@ def player_with_ball(min_dist_from_ball):
         return None
 
 
-def closest_player_to_point(point: Position, our_team = None):
+def closest_players_to_point(point: Position, our_team = None):
     # Retourne une liste de tuples (player, distance) en ordre croissant de distance,
     # our_team pour obtenir une liste contenant une équipe en particulier
     list_player = []
@@ -28,16 +33,20 @@ def closest_player_to_point(point: Position, our_team = None):
         for i in GameState().my_team.available_players.values():
             # les players friends
             player_distance = get_distance(i.pose.position, point)
-            list_player.append((i, player_distance))
+            list_player.append(PlayerPosition(i, player_distance))
     if not our_team or our_team == None:
         for i in GameState().other_team.available_players.values():
             # les players ennemis
             player_distance = get_distance(i.pose.position, point)
-            list_player.append((i, player_distance))
-
-    list_player = sorted(list_player, key=lambda x: x[1])
-
+            list_player.append(PlayerPosition(i, player_distance))
+    list_player = sorted(list_player, key=lambda x: x.distance)
     return list_player
+
+
+def closest_player_to_point(point: Position, our_team = None):
+    # Retourne le player le plus proche,
+    # our_team pour obtenir une liste contenant une équipe en particulier
+    return closest_players_to_point(point, our_team)[0].player
 
 
 def is_ball_moving(min_speed=0.1):
@@ -83,19 +92,16 @@ def best_passing_option(passing_player):
             if score_min > score:
                 score_min = score
                 receiver_id = i
-            #print(score, i.id)
 
     score = (line_of_sight_clearance(passing_player, goal))
     if score_min > score:
         receiver_id = None
-    #print(score, 'but')
 
     return receiver_id
 
 
 def line_of_sight_clearance(player, target: Position):
-    # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est petit),
-    # NONE si obstacle dans l'ellipse
+    # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est petit)
     score = np.linalg.norm(player.pose.position - target)
     for j in GameState().my_team.available_players.values():
         # Obstacle : les players friends
@@ -109,6 +115,7 @@ def line_of_sight_clearance(player, target: Position):
 
 def trajectory_score(pointA : Position, pointB: Position, obstacle: Position):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
+    proportion_max = 15 # Proportion du triangle rectancle derrière les robots obstacles
     AB = pointB - pointA
     AO = obstacle - pointA
     normAC = np.dot(AB, AO) / np.linalg.norm(AB)
@@ -116,7 +123,7 @@ def trajectory_score(pointA : Position, pointB: Position, obstacle: Position):
     if (normAC < 0) or (normAC > 1.1 * np.linalg.norm(AB)):
         return 1
     else:
-        return max(1, min(normAC / normOC, 15))
+        return max(1, min(normAC / normOC, proportion_max))
 
 
 
