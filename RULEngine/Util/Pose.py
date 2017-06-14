@@ -4,8 +4,7 @@ import math as m
 from typing import Union
 
 from RULEngine.Util.Position import Position
-
-ORIENTATION_ABSOLUTE_TOLERANCE = 0.004  # Half a degree of absolute tolerance
+from RULEngine.Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE
 
 
 class Pose(object):
@@ -116,6 +115,9 @@ class Pose(object):
         else:
             raise IndexError('Out of range')
 
+    def scale(self, value):
+        return Pose(self.position * value, self.orientation)
+
     @staticmethod
     def wrap_to_pi(angle):
         return (angle + np.pi) % (2 * np.pi) - np.pi
@@ -124,7 +126,7 @@ class Pose(object):
         if isinstance(other, (int, float, np.generic)):
             angle = other
         elif isinstance(other, Pose):
-            angle = other.position
+            angle = other.orientation
         else:
             raise TypeError
 

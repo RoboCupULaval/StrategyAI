@@ -70,7 +70,8 @@ class GoGetBall(Tactic):
                         self.game_state.get_ball_position()+Position(vector_player_2_ball[0]*70,
                                                                      vector_player_2_ball[1] * 70),
                         self.target.position,
-                        self.game_state.const["DISTANCE_BEHIND"], pathfinding=True)
+                        self.game_state.const["DISTANCE_BEHIND"],
+                        pathfinder_on=True)
 
     def start_dribbler(self):
         now = time.time()

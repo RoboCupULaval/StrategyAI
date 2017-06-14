@@ -1,7 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
 import numpy as np
-# import RULEngine.Util.Pose
 import warnings
 
 
@@ -78,19 +77,22 @@ class Position(np.ndarray):
     def __eq__(self, other):
         if isinstance(other, Position):
             min_abs_tol = min(self.abs_tol, other.abs_tol)
-            return np.allclose(self, other.view(np.ndarray), atol=min_abs_tol)
-        # elif isinstance(other, RULEngine.Util.Pose.Pose):
+            return np.allclose(self, other, atol=min_abs_tol)
+        # elif isinstance(other, np.ndarray):
         #     min_abs_tol = min(self.abs_tol, other.position.abs_tol)
-        #     return np.allclose(self, other.position.view(np.ndarray), atol=min_abs_tol)
+        #     return np.allclose(self, other.position, atol=min_abs_tol)
         else:
             raise TypeError
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def to_array(self):
+        return self
+
     def conv_2_np(self):
         """Legacy. Do not use."""
-        return self
+        return self.to_array()
 
     @staticmethod
     def from_np(array):
@@ -105,3 +107,4 @@ class Position(np.ndarray):
 
     def __hash__(self):
         return hash(str(self))
+

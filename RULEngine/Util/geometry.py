@@ -113,13 +113,12 @@ def get_line_equation(position1: Position, position2: Position) -> tuple:
     assert isinstance(position1, Position)
     assert isinstance(position2, Position)
 
-    delta_x = position2.x - position1.x
-    delta_y = position2.y - position1.y
+    delta = position2 - position1
 
-    pente = delta_y / delta_x
-    ordonnee = position1.y - pente * position1.x
+    slope = delta.y / delta.x
+    origin = position1.y - slope * position1.x
 
-    return pente, ordonnee
+    return slope, origin
 
 
 def get_lines_intersection(position_a1: Position, position_a2: Position,

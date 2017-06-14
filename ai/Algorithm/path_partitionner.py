@@ -229,8 +229,8 @@ class PathPartitionner(Pathfinder):
             vec_robot_2_obs_temp = pose_obs - pose_start
             dist_from_path_temp = np.linalg.norm(np.cross(direction, vec_robot_2_obs_temp))
             if self.gap_proxy > dist_from_path_temp and self.is_path_collide(path, [pose_obs]):
-                obstacle_pos = Position.from_np(pose_obs)
-                dist = get_distance(path.start, obstacle_pos)
+                obstacle_pos = Position(pose_obs)
+                dist = (path.start - obstacle_pos).norm()
                 if dist < dist_point_obs:
                     dist_point_obs = dist
                     closest_obs = obstacle_pos
@@ -239,7 +239,7 @@ class PathPartitionner(Pathfinder):
 
     def verify_sub_target(self, sub_target):
         for pose_obs in self.pose_obstacle:
-            dist_sub_2_obs = get_distance(Position.from_np(pose_obs), sub_target)
+            dist_sub_2_obs = (Position(pose_obs) - sub_target).norm()
             if dist_sub_2_obs < self.gap_proxy:
                 return True
         return False
@@ -259,12 +259,12 @@ class PathPartitionner(Pathfinder):
         len_along_path = np.dot(vec_robot_2_obs, direction)
         dist_from_path = np.linalg.norm(np.cross(direction, vec_robot_2_obs))
         projection_obs_on_direction = np.dot(direction, vec_robot_2_obs / np.linalg.norm(vec_robot_2_obs))
-        if 0 < len_along_path < get_distance(pose_target, pose_robot):
+        if 0 < len_along_path < (pose_target - pose_robot).norm():
             vec_perp = np.cross(np.append(direction, [0]), np.array([0, 0, 1]))
             vec_perp = vec_perp[0:2] / np.linalg.norm(vec_perp)
             # print(self.player.velocity)
-            cruise_speed = np.array(self.player.velocity[0:2])
-            self.closest_obs_speed = np.array(closest_player.velocity[0:2])
+            cruise_speed = self.player.velocity.position
+            self.closest_obs_speed = closest_player.velocity.position
             avoid_dir = -vec_perp
 
             if avoid_dir is None:

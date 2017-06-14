@@ -9,7 +9,7 @@ from ai.states.game_state import GameState
 from .Tactic import Tactic
 from . tactic_constants import Flags
 from ai.STA.Action.MoveToPosition import MoveToPosition
-from RULEngine.Util.geometry import get_distance
+
 from RULEngine.Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 
 
@@ -29,12 +29,14 @@ class GoToPositionNoPathfinder(Tactic):
         else:
             self.status_flag = Flags.WIP
 
-        return MoveToPosition(self.game_state, self.player, self.target, cruise_speed=self.cruise_speed).exec()
+        return MoveToPosition(self.game_state,
+                              self.player,
+                              self.target,
+                              pathfinder_on=False,
+                              cruise_speed=self.cruise_speed).exec()
 
     def check_success(self):
-        player_pose = self.player.pose
-        distance = get_distance(player_pose.position, self.target.position)
-        if distance < POSITION_DEADZONE and \
-           m.fabs(player_pose.orientation - self.target.orientation) <= 2*ANGLE_TO_HALT:
+        distance = (self.player.pose - self.target).position.norm()
+        if distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.target, abs_tol=ANGLE_TO_HALT):
             return True
         return False
