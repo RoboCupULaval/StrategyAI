@@ -4,42 +4,56 @@ from functools import partial
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.Algorithm.evaluation_module import closest_player_to_point, best_passing_option
-from ai.STA.Strategy.DoNothing import DoNothing
+from ai.STA.Tactic.GoGetBall import GoGetBall
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.go_kick import GoKick
 from ai.states.game_state import GameState
 from . Strategy import Strategy
+from ai.STA.Tactic.tactic_constants import Flags
 
 
-# stratégie: tout le monde fonce vers la balle car c'est tout ce qu'on sait faire
+# stratégie: attaque
 
 
 class Offense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
-        goal1 = Pose(Position(GameState().const["FIELD_GOAL_BLUE_X_LEFT"], 0), 0)
-        goal2 = Pose(Position(GameState().const["FIELD_GOAL_YELLOW_X_LEFT"], 0), 0)
-        goalkeeper = closest_player_to_point(goal1.position, True)[0][0]
+        ourgoal = Pose(Position(GameState().const["FIELD_GOAL_BLUE_X_LEFT"], 0), 0)
+        self.theirgoal = Pose(Position(GameState().const["FIELD_GOAL_YELLOW_X_LEFT"], 0), 0)
 
-        self.add_tactic(goalkeeper.id, GoToPositionPathfinder(self.game_state, goalkeeper, goal1))
+        # Goal Keeper fixé en début de stratégie
+        goalkeeper = closest_player_to_point(ourgoal.position, True)[0][0]
+        self.add_tactic(goalkeeper.id, GoalKeeper(self.game_state, goalkeeper, ourgoal))
 
         for i in GameState().my_team.available_players.values():
             if not i.id == goalkeeper.id:
-                self.add_tactic(i.id, Stop(self.game_state, i))
-                self.add_tactic(i.id, Stop(self.game_state, i))
+                self.add_tactic(i.id, GoToPositionPathfinder(self.game_state, i, Pose(Position(50,50))))
+                self.add_tactic(i.id, GoGetBall(self.game_state, i, Pose(GameState().get_ball_position())))
+                self.add_tactic(i.id, GoKick(self.game_state, i, self.kicktarget(i)))
 
-                # self.add_tactic(i.id, GoToPositionPathfinder(self.game_state, i, goal2))
-                # self.add_tactic(i.id, GoKick(self.game_state, i, goal1))
                 self.add_condition(i.id, 0, 1, partial(self.is_closest, i))
                 self.add_condition(i.id, 1, 0, partial(self.is_not_closest, i))
+                self.add_condition(i.id, 1, 2, partial(self.has_arrived_to_ball, i))
+                self.add_condition(i.id, 2, 0, partial(self.is_not_closest, i))
 
 
     def is_closest(self, player):
-        print(best_passing_option(GameState().my_team.available_players[3]))
-        #print(self.game_state.game.delta_t)
         return player == closest_player_to_point(GameState().get_ball_position(), True)[0][0]
 
     def is_not_closest(self, player):
         return not (player == closest_player_to_point(GameState().get_ball_position(), True)[0][0])
+
+    def has_arrived_to_ball(self, i):
+        if self.graphs[i.id].get_current_tactic_name() == 'GoGetBall':
+            return self.graphs[i.id].get_current_tactic().status_flag == Flags.SUCCESS and \
+                   best_passing_option(GameState().my_team.available_players[i.id]) is not None
+        else:
+            return False
+
+    def kicktarget(self, i):
+        target = best_passing_option(GameState().my_team.available_players[i.id])
+        if target is not None:
+            return target.pose
+        else:
+            return self.theirgoal
