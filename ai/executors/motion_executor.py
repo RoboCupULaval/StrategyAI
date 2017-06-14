@@ -61,17 +61,15 @@ class RobotMotion(object):
         self.setting.rotation.max_speed = None
 
         self.current_pose = Pose()
-        self.current_orientation = 0
         self.current_velocity = Pose()
-        self.current_acceleration = Position()
         self.current_speed = Position()
+        self.current_acceleration = Position()
 
         self.pose_error = Pose()
         self.position_error = Position()
 
         self.target_pose = Pose()
         self.target_speed = 0
-        self.target_orientation = 0
         self.target_direction = Position()
 
         self.last_translation_cmd = Position()
@@ -114,7 +112,7 @@ class RobotMotion(object):
             translation_cmd = self.get_next_velocity()
 
         # Send new command to robot
-        translation_cmd = translation_cmd.rotate(-self.current_orientation)
+        translation_cmd = translation_cmd.rotate(-self.current_pose.orientation)
         translation_cmd = self.apply_translation_constraints(translation_cmd)
 
         print('{:5.3f}, {:5.3f}, {:5.3f}'.format(self.current_speed, translation_cmd.norm(), rotation_cmd))
@@ -128,8 +126,8 @@ class RobotMotion(object):
 
         deceleration_factor = 2
 
-        #if not np.isclose(self.current_speed, self.next_speed, atol=0.25):
-        #    self.next_speed = self.current_speed
+        if not np.isclose(self.current_speed, self.next_speed, atol=0.25):
+            self.next_speed = self.current_speed
 
         if self.target_reached():  # We need to go to target speed
             if self.next_speed < self.target_speed:  # Target speed is faster than current speed
@@ -173,7 +171,7 @@ class RobotMotion(object):
 
     def limit_acceleration(self, translation_cmd: Position) -> Position:
         delta_speed = translation_cmd - self.last_translation_cmd
-        if m.fabs(delta_speed.sum()) > 0:
+        if np.all(delta_speed > 0):
             self.current_acceleration = np.sqrt(np.square(delta_speed).sum()) / self.dt
             self.current_acceleration = clamp(self.current_acceleration, 0, self.setting.translation.max_acc)
             translation_cmd = self.last_translation_cmd + delta_speed.normalized() * self.current_acceleration * self.dt
@@ -182,7 +180,7 @@ class RobotMotion(object):
         return translation_cmd
 
     def limit_speed(self, translation_cmd: Position) -> Position:
-        if m.fabs(translation_cmd.sum()) > 0:
+        if np.all(translation_cmd > 0):
             translation_speed = np.sqrt(np.square(translation_cmd).sum())
             translation_speed = clamp(translation_speed, 0, self.setting.translation.max_speed)
             new_speed = translation_cmd.normalized() * translation_speed
@@ -190,7 +188,7 @@ class RobotMotion(object):
             new_speed = translation_cmd
         return new_speed
 
-    def target_reached(self):
+    def target_reached(self) -> bool:
         alpha = 1
         distance_to_reach_target_speed = 0.5 * (np.square(self.target_speed) - np.square(self.cruise_speed))
         distance_to_reach_target_speed /= self.setting.translation.max_acc
@@ -209,29 +207,25 @@ class RobotMotion(object):
         self.setting.rotation.max_speed = self.ws.game_state.get_player(self.id).max_angular_speed
 
         # Current state of the robot
-        self.current_pose = self.ws.game_state.game.friends.players[self.id].pose
-        self.current_pose = self.current_pose.to_meter()
-        self.current_orientation = self.current_pose.orientation
-        self.current_velocity = self.ws.game_state.game.friends.players[self.id].velocity.to_meter()
+        self.current_pose = self.ws.game_state.game.friends.players[self.id].pose.scale(1 / 1000)
+        self.current_velocity = self.ws.game_state.game.friends.players[self.id].velocity.scale(1 / 1000)
         self.current_speed = self.current_velocity.position.norm()
 
         # Desired parameters
         if cmd.path:
-            self.target_pose = Pose(cmd.path[0], cmd.pose_goal.orientation)
+            self.target_pose = Pose(cmd.path[0], cmd.pose_goal.orientation).scale(1 / 1000)
             self.target_speed = cmd.path_speeds[1] / 1000
         else:  # No pathfinder case
             self.target_pose = cmd.pose_goal
             self.target_speed = 0
 
-        self.target_pose = self.target_pose.to_meter()
         self.pose_error = self.target_pose - self.current_pose  # Pose are always wrap to pi
         self.position_error = self.pose_error.position
-        self.target_orientation = self.target_pose.orientation
-        if m.fabs(self.position_error.sum()) > 0:
+        if np.all(self.position_error > 0):
             self.target_direction = self.position_error.normalized()
         else:
             self.target_direction = Position()
-        self.cruise_speed = np.abs(cmd.cruise_speed)
+        self.cruise_speed = cmd.cruise_speed
 
     def stop(self):
         self.angle_controller.reset()

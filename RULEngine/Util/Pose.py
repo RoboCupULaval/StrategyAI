@@ -115,6 +115,9 @@ class Pose(object):
         else:
             raise IndexError('Out of range')
 
+    def scale(self, value):
+        return Pose(self.position * value, self.orientation)
+
     @staticmethod
     def wrap_to_pi(angle):
         return (angle + np.pi) % (2 * np.pi) - np.pi
@@ -134,9 +137,6 @@ class Pose(object):
 
     def to_tuple(self):
         return self.position.x, self.position.y
-
-    def to_meter(self):
-        return Pose(self.position/1000, self.orientation)
 
     def conv_2_np(self) -> np.ndarray:
         """Legacy. Do not use."""
