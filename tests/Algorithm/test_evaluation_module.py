@@ -16,91 +16,91 @@ class TestEvaluationModule(unittest.TestCase):
     MAX_VALUE = 15
 
     def setUp(self):
-        self.pointA = Position(0, 0)
-        self.pointB = Position(0, 0)
+        self.start_point = Position(0, 0)
+        self.goal = Position(0, 0)
         self.obstacle = Position(0, 0)
 
     def test_givenObstacleBehindPlayer_thenReturnsMultiplicativeNullValue(self):
         self._define_points_obstacle((100, 100), (200, 200), (50, 50))
 
-        assert trajectory_score(self.pointA, self.pointB, self.obstacle) == self.MULTIPLICATIVE_NULL_VALUE
+        assert trajectory_score(self.start_point, self.goal, self.obstacle) == self.MULTIPLICATIVE_NULL_VALUE
 
     def test_givenObstacleVeryFarFromPlayer_thenTrajectoryScoreReturnsMultiplicativeNullValue(self):
         self._define_points_obstacle((100, 100), (200, 200), (1500, 1500))
 
-        assert trajectory_score(self.pointA, self.pointB, self.obstacle) == self.MULTIPLICATIVE_NULL_VALUE
+        assert trajectory_score(self.start_point, self.goal, self.obstacle) == self.MULTIPLICATIVE_NULL_VALUE
 
     def test_givenObstacleOnPath_thenTrajectoryScoreReturnsMaxValue(self):
         self._define_points_obstacle((100, 100), (200, 200), (150, 150))
 
-        assert trajectory_score(self.pointA, self.pointB, self.obstacle) == self.MAX_VALUE
+        assert trajectory_score(self.start_point, self.goal, self.obstacle) == self.MAX_VALUE
 
     def test_givenOnePlayerInMyTeamFarFromGoal_thenLineOfSightClearanceIsDistanceToTarget(self):
         player1 = self._build_mock_player(Position(100, 100), 1)
         player2 = self._build_mock_player(Position(1500, 1500), 2)
-        self.pointB.x, self.pointB.y = (200, 200)
+        self.goal.x, self.goal.y = (200, 200)
         self._create_mock_teams({player1.id: player1, player2.id: player2}, {})
 
-        distance_to_target = np.linalg.norm(player1.pose.position - self.pointB)
+        distance_to_target = np.linalg.norm(player1.pose.position - self.goal)
 
-        assert line_of_sight_clearance(player1, self.pointB) == distance_to_target
+        assert line_of_sight_clearance(player1, self.goal) == distance_to_target
 
     def test_givenOnePlayerInMyTeamNearFromGoal_thenLineOfSightClearanceIsDistanceToTargetTimesPathScore(self):
         player1 = self._build_mock_player(Position(100, 100), 1)
         player2 = self._build_mock_player(Position(130, 130), 2)
-        self.pointB.x, self.pointB.y = (200, 200)
+        self.goal.x, self.goal.y = (200, 200)
         self._create_mock_teams({player1.id: player1, player2.id: player2}, {})
 
-        distance_to_target = np.linalg.norm(player1.pose.position - self.pointB)
-        path_score = trajectory_score(player1.pose.position, self.pointB, player2.pose.position)
+        distance_to_target = np.linalg.norm(player1.pose.position - self.goal)
+        path_score = trajectory_score(player1.pose.position, self.goal, player2.pose.position)
 
-        assert line_of_sight_clearance(player1, self.pointB) == distance_to_target*path_score
+        assert line_of_sight_clearance(player1, self.goal) == distance_to_target * path_score
 
     def test_givenTwoPlayerInMyTeamNearFromGoal_thenLineOfSightClearanceIsDistanceToTargetTimesBothPathScores(self):
         player1 = self._build_mock_player(Position(100, 100), 1)
         player2 = self._build_mock_player(Position(130, 130), 2)
         player3 = self._build_mock_player(Position(160, 170), 3)
-        self.pointB.x, self.pointB.y = (200, 200)
+        self.goal.x, self.goal.y = (200, 200)
         self._create_mock_teams({player1.id: player1, player2.id: player2, player3.id: player3}, {})
 
-        distance_to_target = np.linalg.norm(player1.pose.position - self.pointB)
-        path_score2 = trajectory_score(player1.pose.position, self.pointB, player2.pose.position)
-        path_score3 = trajectory_score(player1.pose.position, self.pointB, player3.pose.position)
+        distance_to_target = np.linalg.norm(player1.pose.position - self.goal)
+        path_score_to_p2 = trajectory_score(player1.pose.position, self.goal, player2.pose.position)
+        path_score_to_p3 = trajectory_score(player1.pose.position, self.goal, player3.pose.position)
 
-        assert line_of_sight_clearance(player1, self.pointB) == distance_to_target*path_score2*path_score3
+        assert line_of_sight_clearance(player1, self.goal) == distance_to_target * path_score_to_p2 * path_score_to_p3
     def test_givenOnePlayerInOtherTeamFarFromGoal_thenLineOfSightClearanceIsDistanceToTarget(self):
         player1 = self._build_mock_player(Position(100, 100), 1)
         player2 = self._build_mock_player(Position(1500, 1500), 2)
-        self.pointB.x, self.pointB.y = (200, 200)
+        self.goal.x, self.goal.y = (200, 200)
         self._create_mock_teams({player1.id: player1}, {2: player2})
 
-        distance_to_target = np.linalg.norm(player1.pose.position - self.pointB)
+        distance_to_target = np.linalg.norm(player1.pose.position - self.goal)
 
-        assert line_of_sight_clearance(player1, self.pointB) == distance_to_target
+        assert line_of_sight_clearance(player1, self.goal) == distance_to_target
 
     def test_givenOnePlayerInOtherTeamNearGoal_thenLineOfSightClearanceIsDistanceToTargetTimesPathScore(self):
         player1 = self._build_mock_player(Position(100, 100), 1)
         player2 = self._build_mock_player(Position(130, 130), 2)
-        self.pointB.x, self.pointB.y = (200, 200)
+        self.goal.x, self.goal.y = (200, 200)
         self._create_mock_teams({player1.id: player1}, {2: player2})
 
-        distance_to_target = np.linalg.norm(player1.pose.position - self.pointB)
-        path_score = trajectory_score(player1.pose.position, self.pointB, player2.pose.position)
+        distance_to_target = np.linalg.norm(player1.pose.position - self.goal)
+        path_score = trajectory_score(player1.pose.position, self.goal, player2.pose.position)
 
-        assert line_of_sight_clearance(player1, self.pointB) == distance_to_target*path_score
+        assert line_of_sight_clearance(player1, self.goal) == distance_to_target * path_score
 
     def test_givenTwoPlayerInOtherTeamNearGoal_thenLineOfSightClearanceIsDistanceToTargetTimesBothPathScores(self):
         player1 = self._build_mock_player(Position(100, 100), 1)
         player2 = self._build_mock_player(Position(130, 130), 2)
         player3 = self._build_mock_player(Position(160, 170), 3)
-        self.pointB.x, self.pointB.y = (200, 200)
+        self.goal.x, self.goal.y = (200, 200)
         self._create_mock_teams({player1.id: player1}, {player2.id: player2, player3.id: player3})
 
-        distance_to_target = np.linalg.norm(player1.pose.position - self.pointB)
-        path_score2 = trajectory_score(player1.pose.position, self.pointB, player2.pose.position)
-        path_score3 = trajectory_score(player1.pose.position, self.pointB, player3.pose.position)
+        distance_to_target = np.linalg.norm(player1.pose.position - self.goal)
+        path_score_to_p2 = trajectory_score(player1.pose.position, self.goal, player2.pose.position)
+        path_score_to_p3 = trajectory_score(player1.pose.position, self.goal, player3.pose.position)
 
-        assert line_of_sight_clearance(player1, self.pointB) == distance_to_target*path_score2*path_score3
+        assert line_of_sight_clearance(player1, self.goal) == distance_to_target * path_score_to_p2 * path_score_to_p3
 
     def _build_mock_player(self, position, id):
         player = create_autospec(Player)
@@ -119,7 +119,7 @@ class TestEvaluationModule(unittest.TestCase):
         team2.available_players = opponents
         GameState().other_team = team2
 
-    def _define_points_obstacle(self, pointA, pointB, obstacle):
-        self.pointA.x, self.pointA.y = pointA
-        self.pointB.x, self.pointB.y = pointB
+    def _define_points_obstacle(self, start_point, goal, obstacle):
+        self.start_point.x, self.start_point.y = start_point
+        self.goal.x, self.goal.y = goal
         self.obstacle.x, self.obstacle.y = obstacle
