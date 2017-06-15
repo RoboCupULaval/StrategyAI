@@ -90,9 +90,8 @@ class RobotMotion(object):
         self.angle_controller = PID(self.setting.rotation.kp,
                                     self.setting.rotation.ki,
                                     self.setting.rotation.kd,
-                                    self.setting.rotation.antiwindup)
-
-        self.speed_controller = [PID(0.1, 0.1, 0, 10), PID(0.1, 0.1, 0, 10)]
+                                    self.setting.rotation.antiwindup,
+                                    wrap_err=True)
 
     def update(self, cmd: AICommand) -> Pose():
 
@@ -103,7 +102,7 @@ class RobotMotion(object):
         rotation_cmd = self.apply_rotation_constraints(rotation_cmd)
 
         # Translation control
-        if self.target_reached() and self.target_speed <= self.setting.translation.deadzone:
+        if self.target_reached() and self.target_speed < self.setting.translation.deadzone:
             translation_cmd = Position(self.x_controller.update(self.pose_error.position.x),
                                        self.y_controller.update(self.pose_error.position.y))
             self.next_speed = 0
@@ -111,9 +110,10 @@ class RobotMotion(object):
         else:
             translation_cmd = self.get_next_velocity()
 
-        # Send new command to robot
-        translation_cmd = translation_cmd.rotate(-self.current_pose.orientation)
         translation_cmd = self.apply_translation_constraints(translation_cmd)
+
+        # Adjust command to robot's orientation
+        translation_cmd = translation_cmd.rotate(-self.current_pose.orientation)
 
         print('{:5.3f}, {:5.3f}, {:5.3f}'.format(self.current_speed, translation_cmd.norm(), rotation_cmd))
 
@@ -145,34 +145,37 @@ class RobotMotion(object):
 
         return next_velocity
 
-    def apply_rotation_constraints(self, rotation_cmd: float) -> float:
-        rotation_cmd = clamp(rotation_cmd, -self.setting.rotation.max_speed, self.setting.rotation.max_speed)
-        if np.abs(rotation_cmd) < self.setting.rotation.sensibility:
-            rotation_cmd = 0
-        elif np.abs(rotation_cmd) < self.setting.rotation.deadzone:
-            rotation_cmd = np.sign(rotation_cmd) * self.setting.rotation.deadzone
+    def apply_rotation_constraints(self, r_cmd: float) -> float:
+        deadzone = self.setting.rotation.deadzone
+        sensibility = self.setting.rotation.sensibility
+        max_speed = self.setting.rotation.max_speed
 
-        return rotation_cmd
+        if abs(r_cmd) < sensibility:
+            r_cmd = 0
+        elif abs(r_cmd) < deadzone:
+            r_cmd = m.copysign(deadzone, r_cmd)
+        else:
+            r_cmd = clamp(r_cmd, -max_speed, max_speed)
+        return r_cmd
 
-    def apply_translation_constraints(self, translation_cmd: Position) -> Position:
+    def apply_translation_constraints(self, t_cmd: Position) -> Position:
+        deadzone = self.setting.translation.deadzone
+        sensibility = self.setting.translation.sensibility
+        signs = np.copysign(1, t_cmd.view(np.ndarray))
 
-        translation_cmd = self.limit_acceleration(translation_cmd)
+        t_cmd = self.limit_acceleration(t_cmd)
+        t_cmd = self.limit_speed(t_cmd)
 
-        translation_cmd = self.limit_speed(translation_cmd)
+        t_cmd[np.abs(t_cmd) < sensibility] = 0
+        t_cmd[np.abs(t_cmd) < deadzone] = deadzone
+        t_cmd = np.copysign(t_cmd, signs)
 
-        translation_cmd[np.abs(translation_cmd) < self.setting.translation.sensibility] = 0
-
-        if np.abs(translation_cmd.x) < self.setting.translation.deadzone:
-            translation_cmd.x = np.sign(translation_cmd.x) * self.setting.translation.deadzone
-        if np.abs(translation_cmd.y) < self.setting.translation.deadzone:
-            translation_cmd.y = np.sign(translation_cmd.y) * self.setting.translation.deadzone
-
-        return translation_cmd
+        return t_cmd
 
     def limit_acceleration(self, translation_cmd: Position) -> Position:
         delta_speed = translation_cmd - self.last_translation_cmd
-        if np.all(delta_speed > 0):
-            self.current_acceleration = np.sqrt(np.square(delta_speed).sum()) / self.dt
+        if np.any([np.abs(delta_speed) > 0]):
+            self.current_acceleration = float(np.sqrt(np.sum(np.square(delta_speed))) / self.dt)
             self.current_acceleration = clamp(self.current_acceleration, 0, self.setting.translation.max_acc)
             translation_cmd = self.last_translation_cmd + delta_speed.normalized() * self.current_acceleration * self.dt
             self.last_translation_cmd = translation_cmd
@@ -180,20 +183,19 @@ class RobotMotion(object):
         return translation_cmd
 
     def limit_speed(self, translation_cmd: Position) -> Position:
-        if np.all(translation_cmd > 0):
-            translation_speed = np.sqrt(np.square(translation_cmd).sum())
+        if np.any([np.abs(translation_cmd) > 0]):
+            translation_speed = float(np.sqrt(np.sum(np.square(translation_cmd))))
             translation_speed = clamp(translation_speed, 0, self.setting.translation.max_speed)
             new_speed = translation_cmd.normalized() * translation_speed
         else:
             new_speed = translation_cmd
         return new_speed
 
-    def target_reached(self) -> bool:
-        alpha = 1
-        distance_to_reach_target_speed = 0.5 * (np.square(self.target_speed) - np.square(self.cruise_speed))
+    def target_reached(self, boost_factor=1) -> bool:
+        distance_to_reach_target_speed = 0.5 * (self.target_speed ** 2 - self.cruise_speed ** 2)
         distance_to_reach_target_speed /= self.setting.translation.max_acc
-        distance_to_reach_target_speed = alpha * np.abs(distance_to_reach_target_speed)
-        if np.square(self.position_error).sum() <= distance_to_reach_target_speed ** 2:
+        distance_to_reach_target_speed = boost_factor * abs(distance_to_reach_target_speed)
+        if np.sum(np.square(self.position_error)) <= distance_to_reach_target_speed ** 2:
             return True
         else:
             return False
@@ -221,7 +223,7 @@ class RobotMotion(object):
 
         self.pose_error = self.target_pose - self.current_pose  # Pose are always wrap to pi
         self.position_error = self.pose_error.position
-        if np.all(self.position_error > 0):
+        if any([self.position_error > 0]):
             self.target_direction = self.position_error.normalized()
         else:
             self.target_direction = Position()
