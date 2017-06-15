@@ -71,6 +71,21 @@ def is_target_reached(player, target: Position, min_dist=0.01):
     # Retourne TRUE si dans un rayon de l'objectif
     return get_distance(target, player.pose.position) < min_dist
 
+def best_position_option(player, pointA: Position, pointB: Position):
+    # Retourne la position (entre pointA et pointB) la mieux placée pour une passe
+    ncounts = 11
+    points_projection = zip([pointA.x + i * (pointB.x - pointA.x)/(ncounts-1) for i in range(ncounts)],
+                            [pointA.y + i * (pointB.y - pointA.y)/(ncounts-1) for i in range(ncounts)])
+    score_min = float("inf")
+
+    best_position = Position((pointA + pointB) / 2)
+    for x, y in points_projection:
+        i = Position(x, y)
+        score = line_of_sight_clearance(player, i)
+        if score_min > score:
+            score_min = score
+            best_position = i
+    return best_position
 
 def best_passing_option(passing_player):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si but est la meilleure possibilité
