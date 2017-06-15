@@ -22,27 +22,30 @@ class Offense(Strategy):
         ourgoal = Pose(Position(GameState().const["FIELD_GOAL_BLUE_X_LEFT"], 0), 0)
         self.theirgoal = Pose(Position(GameState().const["FIELD_GOAL_YELLOW_X_LEFT"], 0), 0)
 
+        self.robots_position = self.generate_robot_positions()
+
         # Goal Keeper fixé en début de stratégie
-        goalkeeper = closest_player_to_point(ourgoal.position, True)[0][0]
+        goalkeeper = closest_player_to_point(ourgoal.position, True)
         self.add_tactic(goalkeeper.id, GoalKeeper(self.game_state, goalkeeper, ourgoal))
 
+        count = 0
         for i in GameState().my_team.available_players.values():
             if not i.id == goalkeeper.id:
-                self.add_tactic(i.id, GoToPositionPathfinder(self.game_state, i, Pose(Position(500,500))))
+                self.add_tactic(i.id, GoToPositionPathfinder(self.game_state, i, self.robots_position[count]))
                 self.add_tactic(i.id, GoGetBall(self.game_state, i, Pose(GameState().get_ball_position())))
                 self.add_tactic(i.id, GoKick(self.game_state, i, self.kicktarget(i)))
 
                 self.add_condition(i.id, 0, 1, partial(self.is_closest, i))
-                self.add_condition(i.id, 1, 0, partial(not self.is_closest, i))
+                self.add_condition(i.id, 1, 0, partial(self.is_not_closest, i))
                 self.add_condition(i.id, 1, 2, partial(self.has_arrived_to_ball, i))
                 self.add_condition(i.id, 2, 0, partial(self.is_not_closest, i))
-
+                count += 1
 
     def is_closest(self, player):
         return player == closest_player_to_point(GameState().get_ball_position(), True)
 
     def is_not_closest(self, player):
-        return not (player == closest_player_to_point(GameState().get_ball_position(), True))
+        return player != closest_player_to_point(GameState().get_ball_position(), True)
 
     def has_arrived_to_ball(self, i):
         if self.graphs[i.id].get_current_tactic_name() == 'GoGetBall':
@@ -57,3 +60,11 @@ class Offense(Strategy):
             return target.pose
         else:
             return self.theirgoal
+
+    def generate_robot_positions(self):
+        return [Pose(Position(500, 500), 0),
+                Pose(Position(-500, 500), 0),
+                Pose(Position(500, -500), 0),
+                Pose(Position(-500, -500), 0),
+                Pose(Position(-1000, 1000), 0),
+                Pose(Position(1000, 1000), 0)]
