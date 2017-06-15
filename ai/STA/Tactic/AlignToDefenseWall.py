@@ -6,10 +6,11 @@ import time
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
+from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS, TeamColor
 from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
-from RULEngine.Util.constant import TeamColor
+from ai.STA.Action.Idle import Idle
 
 __author__ = 'RoboCupULaval'
 
@@ -20,16 +21,16 @@ COMMAND_DELAY = 1.0
 
 
 class AllignToDefenseWall(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, number_of_robots: int=0, robot_formation_number: int=0,
+    def __init__(self, game_state: GameState, player: OurPlayer, robots_in_formation: List[OurPlayer] = None,
                  args: List[str]=None):
         Tactic.__init__(self, game_state, player, args=args)
-        self.current_state = self.go_allign
-        self.next_state = self.go_allign
+        self.current_state = self.define_center_of_formation
+        self.next_state = self.define_center_of_formation
         self.game_state = game_state
         self.last_time = time.time()
-        self.number_of_robots = number_of_robots
+        self.robots_in_formation = robots_in_formation
+
         self.player = player
-        self.robot_formation_number = robot_formation_number
         self.field_goal_radius = self.game_state.const["FIELD_GOAL_RADIUS"]
         self.field_goal_segment = self.game_state.const["FIELD_GOAL_SEGMENT"]
         self.keep_out_distance = self.field_goal_radius + self.field_goal_segment
@@ -38,8 +39,17 @@ class AllignToDefenseWall(Tactic):
             self.goal_middle = Position(-self.game_state.field.constant["FIELD_X_RIGHT"], 0)
         else:
             self.goal_middle = Position(self.game_state.field.constant["FIELD_X_RIGHT"], 0)
+        self.position_middle_formation = Position(0, 0)
+        self.positions_in_formations = []
+        self.vec_ball_2_goal = Position(1, 0)
+        self.vec_perp_of_ball_2_goal = Position(0, 1)
+        if self.robots_in_formation is None:
+            self.next_state = self.halt
+            self.number_of_robots = 0
+        else:
+            self.number_of_robots = len(self.robots_in_formation)
 
-    def go_allign(self):
+    def define_center_of_formation(self):
         """
         on calcul la position du points qui intersecte le segment de droite allant de la ball jusqu'au but et le cercle
         de rayon self.keep_out_distance.
@@ -54,30 +64,91 @@ class AllignToDefenseWall(Tactic):
 
 
         ball_position = self.game_state.get_ball_position()
-        vec_ball_2_goal = self.goal_middle - ball_position
+        self.vec_ball_2_goal = self.goal_middle - ball_position
         """
         respecte la règle de la main droite et pointe toujours vers le coin suppérieur du but si on est à gauche du 
         terrain et l'inverse si on est à droite du terrain
         """
-        vec_perp_of_ball_2_goal = vec_ball_2_goal.perpendicular()
-        vec_ball_2_goal_top = self.goal_middle + np.divide(Position(self.goal_width, 0), 2.0) - ball_position
-        vec_ball_2_goal_bottom = self.goal_middle - np.divide(Position(self.goal_width, 0), 2.0) - ball_position
-        vec_bottom_goal_2_to_goal = Position(self.goal_width * 2.0, 0)
+        self.vec_perp_of_ball_2_goal = self.vec_ball_2_goal.perpendicular()
+        # vec_ball_2_goal_top = self.goal_middle + np.divide(Position(self.goal_width, 0), 2.0) - ball_position
+        # vec_ball_2_goal_bottom = self.goal_middle - np.divide(Position(self.goal_width, 0), 2.0) - ball_position
+        vec_bottom_goal_2_to_top_goal = Position(self.goal_width * 2.0, 0)
 
-        vec_triangle_base = np.multiply(np.dot(vec_perp_of_ball_2_goal, vec_bottom_goal_2_to_goal),
-                                        vec_perp_of_ball_2_goal)
-        if vec_ball_2_goal_top.norm() < vec_ball_2_goal_bottom.norm():
-            lower_triangle_corner = self.goal_middle + np.divide(Position(self.goal_width, 0), 2.0) - vec_triangle_base
-            upper_tirangle_corner = self.goal_middle + np.divide(Position(self.goal_width, 0), 2.0)
-        else:
-            upper_tirangle_corner = self.goal_middle - np.divide(Position(self.goal_width, 0), 2.0) + vec_triangle_base
-            lower_triangle_corner = self.goal_middle - np.divide(Position(self.goal_width, 0), 2.0)
-        vec_ball_2_limit_circle = (vec_ball_2_goal.norm() - self.keep_out_distance) * \
+        vec_triangle_base = np.multiply(np.dot(self.vec_perp_of_ball_2_goal, vec_bottom_goal_2_to_top_goal),
+                                        self.vec_perp_of_ball_2_goal)
+        # if vec_ball_2_goal_top.norm() < vec_ball_2_goal_bottom.norm():
+        #     lower_triangle_corner = self.goal_middle + np.divide(Position(self.goal_width, 0), 2.0) - vec_triangle_base
+        #     upper_tirangle_corner = self.goal_middle + np.divide(Position(self.goal_width, 0), 2.0)
+        # else:
+        #     upper_tirangle_corner = self.goal_middle - np.divide(Position(self.goal_width, 0), 2.0) + vec_triangle_base
+        #     lower_triangle_corner = self.goal_middle - np.divide(Position(self.goal_width, 0), 2.0)
+        vec_ball_2_limit_circle = (self.vec_ball_2_goal.norm() - self.keep_out_distance) * \
                                   (self.goal_middle - ball_position).normalize()
+        if self.number_of_robots * 1.8 * ROBOT_RADIUS > vec_triangle_base.norm():
+            self.position_middle_formation = ball_position + vec_ball_2_limit_circle
+        else:
+            self.position_middle_formation = ball_position + \
+                                            vec_ball_2_limit_circle.normalize() * \
+                                            (self.number_of_robots * 1.8 * ROBOT_RADIUS / vec_triangle_base.norm())
+        self.next_state = self.assign_position_in_formation
 
+    def assign_position_in_formation(self):
+        if self.number_of_robots == 1:
+            self.positions_in_formations = [self.position_middle_formation]
+        elif self.number_of_robots == 2:
+            position_0 = self.position_middle_formation + self.vec_perp_of_ball_2_goal * ROBOT_RADIUS * 0.9 - \
+                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
+            position_1 = self.position_middle_formation - self.vec_perp_of_ball_2_goal * ROBOT_RADIUS * 0.9 + \
+                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
 
+            self.positions_in_formations = [position_0, position_1]
 
+        elif self.number_of_robots == 3:
+            position_0 = self.position_middle_formation + self.vec_perp_of_ball_2_goal * 2. * ROBOT_RADIUS * 0.9 + \
+                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
+            position_1 = self.position_middle_formation - self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
+            position_2 = self.position_middle_formation - self.vec_perp_of_ball_2_goal * 2. * ROBOT_RADIUS * 0.9 + \
+                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
 
+            self.positions_in_formations = [position_0, position_1, position_2]
+
+        elif self.number_of_robots == 4:
+            local_middle_of_formation = self.position_middle_formation + self.vec_perp_of_ball_2_goal * ROBOT_RADIUS /2.
+            position_0 = local_middle_of_formation + self.vec_perp_of_ball_2_goal * 3. * ROBOT_RADIUS * 0.9 + \
+                         self.vec_ball_2_goal.normalized() * 2. * ROBOT_RADIUS * 0.9
+            position_1 = local_middle_of_formation + self.vec_perp_of_ball_2_goal * ROBOT_RADIUS * 0.9 + \
+                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
+            position_2 = local_middle_of_formation - self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
+            position_3 = local_middle_of_formation - self.vec_perp_of_ball_2_goal * ROBOT_RADIUS * 0.9 + \
+                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
+
+            self.positions_in_formations = [position_0, position_1, position_2, position_3]
+
+        elif self.number_of_robots == 5:
+            position_0 = self.position_middle_formation + self.vec_perp_of_ball_2_goal * 3. * ROBOT_RADIUS * 0.9 + \
+                         self.vec_ball_2_goal.normalized() * 2. * ROBOT_RADIUS * 0.9
+            position_1 = self.position_middle_formation + self.vec_perp_of_ball_2_goal * ROBOT_RADIUS * 0.9 + \
+                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
+            position_2 = self.position_middle_formation - self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
+            position_3 = self.position_middle_formation - self.vec_perp_of_ball_2_goal * ROBOT_RADIUS * 0.9 + \
+                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
+            position_4 = self.position_middle_formation - self.vec_perp_of_ball_2_goal * 3 * ROBOT_RADIUS * 0.9 + \
+                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
+
+            self.positions_in_formations = [position_0, position_1, position_2, position_3, position_4]
+
+        return self.positions_in_formations
+
+    def halt(self):
+        self.status_flag = Flags.SUCCESS
+        return Idle(self.game_state, self.player)
+
+    def check_success(self):
+        player_position = self.player.pose.position
+        distance = (player_position - self.target.position).norm()
+        if distance < self.game_state.const["POSITION_DEADZONE"]:
+            return True
+        return False
 
 
 
