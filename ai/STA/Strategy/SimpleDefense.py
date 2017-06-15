@@ -4,6 +4,8 @@ from functools import partial
 import numpy as np
 
 from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import *
 from ai.STA.Tactic.GoGetBall import GoGetBall
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
