@@ -4,6 +4,7 @@ import unittest
 from math import pi, atan, sqrt
 
 from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Game.Referee import Referee
@@ -42,7 +43,7 @@ class TestActions(unittest.TestCase):
     def test_move_to(self):
         A_CRUISE_SPEED = 0.1
         self.pose = Pose(Position(0, 0), 0.0)
-        self.move = MoveToPosition(self.game_state, self.a_player, self.pose, A_CRUISE_SPEED)
+        self.move = MoveToPosition(self.game_state, self.a_player, self.pose, False, A_CRUISE_SPEED)
         return_cmd = self.move.exec()
         expected_cmd = AICommand(self.a_player, AICommandType.MOVE,
                                    **{"pose_goal": self.pose,
@@ -51,7 +52,7 @@ class TestActions(unittest.TestCase):
         self.assertEqual(return_cmd, expected_cmd)
 
         self.pose = Pose(Position(0.5, 0.3), 3.2)
-        self.move = MoveToPosition(self.game_state, self.a_player, self.pose, A_CRUISE_SPEED)
+        self.move = MoveToPosition(self.game_state, self.a_player, self.pose, False, A_CRUISE_SPEED)
         self.assertEqual(MoveToPosition.exec(self.move),
                          AICommand(self.a_player, AICommandType.MOVE,
                                    **{"pose_goal": self.pose,

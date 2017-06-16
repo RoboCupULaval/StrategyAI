@@ -30,6 +30,6 @@ class GetBall(Action):
         :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
         """
         ball_position = self.game_state.get_ball_position()
-        destination_orientation = get_angle(self.player.pose.position, ball_position)
+        destination_orientation = (ball_position - self.player.pose.position).angle()
         destination_pose = {"pose_goal": Pose(ball_position, destination_orientation)}
         return AICommand(self.player, AICommandType.MOVE, **destination_pose)

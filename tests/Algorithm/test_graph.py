@@ -123,13 +123,13 @@ class TestGraph(unittest.TestCase):
         self.empty_graph.add_vertex(0, 1, foo2)
 
         next_ai_command = self.empty_graph.exec()
-        expected_ai_command = MoveToPosition(self.game_state, self.a_player,
+        expected_ai_command = GoToPositionNoPathfinder(self.game_state, self.a_player,
                                              Pose(Position(500, 0), 0)).exec()
         self.assertEqual(self.empty_graph.current_node, 0)
         self.assertEqual(next_ai_command, expected_ai_command)
 
         next_ai_command = self.empty_graph.exec()
-        expected_ai_command = MoveToPosition(self.game_state, self.a_player,
+        expected_ai_command = GoToPositionNoPathfinder(self.game_state, self.a_player,
                                              Pose(Position(500, 0), 0)).exec()
         self.assertEqual(self.empty_graph.current_node, 0)
         self.assertEqual(next_ai_command, expected_ai_command)

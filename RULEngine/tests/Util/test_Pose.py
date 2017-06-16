@@ -227,6 +227,10 @@ class TestPose(unittest.TestCase):
         self.assertFalse(pose.compare_orientation(m.pi-1.001*tol, tol))
         self.assertFalse(pose.compare_orientation(-m.pi+1.001*tol, tol))
 
+        pose1 = Pose(Position(1, 1), 0)
+        pose2 = Pose(Position(10, 10), 0)
+        self.assertTrue(pose1.compare_orientation(pose2))
+
     def test_to_array(self):
         pose = Pose(Position(1, 2), 3)
         pose_array = pose.to_array()

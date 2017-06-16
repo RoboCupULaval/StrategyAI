@@ -1,4 +1,6 @@
 # Under MIT License, see LICENSE.txt
+
+# TODO (pturgeon): faire disparaitre ce fichier
 from math import fabs
 
 from RULEngine.Util.area import is_inside_circle
@@ -9,10 +11,10 @@ from RULEngine.Util.constant import *
 def can_get_ball(game_state, player_id, target):
     player_position = game_state.get_player_pose(player_id).position
     ball_position = game_state.get_ball_position()
-
+    player_orientation = game_state.get_player_pose(player_id).orientation
     if is_inside_circle(player_position, ball_position, RADIUS_TO_GRAB_BALL):
 
-        if is_facing_point_and_target(player_position, ball_position, target, ANGLE_TO_GRAB_BALL):
+        if compare_angle(player_orientation, (player_position - ball_position).angle(), abs_tol=ANGLE_TO_GRAB_BALL/2):
             return True
 
     return False
@@ -34,9 +36,9 @@ def has_ball(game_state, player_id):
 def has_ball_facing_target(game_state, player_id, target_position):
     player_position = game_state.get_player_position(player_id)
     ball_position = game_state.get_ball_position()
-
+    player_orientation = game_state.get_player_pose(player_id).orientation
     if has_ball(game_state, player_id):
-        if is_facing_point_and_target(player_position, ball_position, target_position, ANGLE_TO_HALT):
+        if fabs(player_orientation - get_angle(player_position, ball_position)) <= ANGLE_TO_HALT:
             return True
 
     return False
