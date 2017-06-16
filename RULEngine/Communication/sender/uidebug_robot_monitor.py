@@ -1,22 +1,23 @@
 # Under MIT License, see LICENSE.txt
-
-import pickle
 import threading
+from time import sleep, time
 
 from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Communication.sender.serial_command_sender import SerialCommandSender
-from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 from RULEngine.Command.command import GetBattery
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from time import sleep, time
+
 
 PERIOD_BETWEEN_BAT_MONITORING = 0.1
+
 
 class RobotStatus:
     def __init__(self):
         self.battery_lvl = 0
         self.time_since_last_reading = 0
+
+
 class UIDebugRobotMonitor(object):
     """
         Service pour loguer l'état du robot (niveau batterie, packet lost, etc.) et l'envoyer à l'uidebug
@@ -42,7 +43,7 @@ class UIDebugRobotMonitor(object):
                 cmd = GetBattery(OurPlayer(None, robot_id), self.pause_cond)
                 response = self.serial_com.send_responding_command(cmd)
                 if response:
-                    #print("Response from id {} with bat lvl {}V".format(robot_id, response))
+                    # print("Response from id {} with bat lvl {}V".format(robot_id, response))
                     self.robots_status[robot_id].battery_lvl = response
                     self.robots_status[robot_id].time_since_last_reading = time()
                 # Send last known state to UI-Debug

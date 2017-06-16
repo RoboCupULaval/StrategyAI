@@ -12,7 +12,7 @@ import threading
 import time
 
 from RULEngine.Communication.sender.uidebug_robot_monitor import UIDebugRobotMonitor
-from RULEngine.Command.command import Stop, Dribbler
+from RULEngine.Command.command import Stop
 from RULEngine.Communication.protobuf import \
     messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
 from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver

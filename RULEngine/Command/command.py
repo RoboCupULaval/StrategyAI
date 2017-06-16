@@ -8,14 +8,12 @@
     contrôler les robots.
 """
 from abc import abstractmethod
+import threading
 from pyhermes import McuCommunicator
 
 from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.Util.Pose import Pose
 
-import threading
-
-from ..Util.area import *
-from pyhermes import McuCommunicator
 
 class Command(object):
     def __init__(self, player: OurPlayer):
@@ -28,6 +26,7 @@ class Command(object):
     @abstractmethod
     def package_command(self, mcu_communicator: McuCommunicator):
         pass
+
 
 class ResponseCommand(Command):
     def __init__(self, player: OurPlayer, pause_cond: threading.Condition):
@@ -46,6 +45,9 @@ class ResponseCommand(Command):
             if not self.completed:
                 self.pause_cond.wait()
 
+    def package_command(self, mcu_communicator: McuCommunicator):
+        pass
+
 
 class GetBattery(ResponseCommand):
     def __init__(self, player, pause_cond: threading.Condition):
@@ -53,6 +55,7 @@ class GetBattery(ResponseCommand):
 
     def package_command(self, mcu_communicator: McuCommunicator):
         return mcu_communicator.getBatterie(self.player.id)
+
 
 class Move(Command):
     def __init__(self, player: OurPlayer):
@@ -63,6 +66,7 @@ class Move(Command):
                                    self.cmd_repr.position.x,
                                    self.cmd_repr.position.y,
                                    self.cmd_repr.orientation)
+
 
 class Kick(Command):
     def __init__(self, player: OurPlayer):

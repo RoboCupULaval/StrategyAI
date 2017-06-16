@@ -15,7 +15,7 @@ class Color(object):
         self.b = b
 
     def repr(self):
-        return (self.r, self.g, self.b)
+        return self.r, self.g, self.b
 
 # Solarized color definition
 YELLOW = Color(181, 137, 0)
@@ -150,7 +150,7 @@ class DebugInterface(metaclass=Singleton):
         cmd = DebugCommand(1001, cmd_tactics_dict)
         self.debug_state.append(cmd)
 
-    def send_robot_strategic_state(self, player: OurPlayer, tactic, action, target="not implemented"):
+    def send_robot_strategic_state(self, player: OurPlayer, tactic: str, action: str, target: str="not implemented"):
         teamcolor_str = player.team.team_color.__str__()
         data = {teamcolor_str: {player.id: {'tactic': tactic,
                                             'action': action,

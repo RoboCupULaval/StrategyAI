@@ -1,12 +1,9 @@
 # Under MIT License, see LICENSE.txt
-import threading
 import time
 from collections import deque
-from pyhermes import McuCommunicator
 
-from RULEngine.Command.command import Command, ResponseCommand
 from RULEngine.Command.command import *
-from RULEngine.Game.Player import Player
+
 
 COMMUNICATION_SLEEP = 0.001
 MOVE_COMMAND_SLEEP = 0.05
@@ -60,8 +57,6 @@ class SerialCommandSender(object):
         command.pause_thread()
 
         return command.response
-
-
 
     def stop(self):
         self.terminate.set()

@@ -6,7 +6,7 @@ from config.config_service import ConfigService
 
 class TeamColorService(object, metaclass=Singleton):
 
-    def __init__(self, team_color = None):
+    def __init__(self, team_color=None):
         if team_color is None:
             cfg = ConfigService()
             team_str = cfg.config_dict["GAME"]["our_color"]
