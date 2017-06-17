@@ -3,6 +3,7 @@
 """ Livre des stratégies. """
 from typing import List
 
+from ai.STA.Strategy.DenfenseWall import DefenseWall
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Strategy.indiana_jones import IndianaJones
 from ai.STA.Strategy.HumanControl import HumanControl
@@ -41,7 +42,8 @@ class StrategyBook(object):
                               'TestPasses': TestPasses,
                               'RobocupChoreography': RobocupChoreography,
                               'BambaFollow': BambaFollow,
-                              'PassesWithDecisions': PassesWithDecisions
+                              'PassesWithDecisions': PassesWithDecisions,
+                              'DefenseWall': DefenseWall
                               }
 
     def get_strategies_name_list(self) -> List[str]:

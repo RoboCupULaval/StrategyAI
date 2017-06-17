@@ -118,7 +118,7 @@ class Field:
 
                 self.constant["FIELD_GOAL_Y_TOP"] = self._defense_radius + (self._defense_stretch / 2)
                 self.constant["FIELD_GOAL_Y_BOTTOM"] = -self.constant["FIELD_GOAL_Y_TOP"]
-                self.constant["GOAL_WIDTH"] = self.constant["FIELD_GOAL_Y_TOP"] * 2
+                self.constant["GOAL_WIDTH"] = self.constant["FIELD_GOAL_Y_TOP"] * 2.
                 self.constant["FIELD_GOAL_BLUE_X_LEFT"] = self.constant["FIELD_X_LEFT"]
                 self.constant["FIELD_GOAL_BLUE_X_RIGHT"] = self.constant["FIELD_X_LEFT"] + self.constant["FIELD_GOAL_RADIUS"]
                 self.constant["FIELD_GOAL_YELLOW_X_LEFT"] = self.constant["FIELD_X_RIGHT"] - self.constant["FIELD_GOAL_RADIUS"]
@@ -147,6 +147,7 @@ normal = {
     "FIELD_GOAL_SEGMENT": 500,
 
     # Goal Parameters
+    "GOAL_WIDTH": 1000,
     "FIELD_GOAL_Y_TOP": 1250,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
     "FIELD_GOAL_Y_BOTTOM": -1250,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
     "FIELD_GOAL_BLUE_X_LEFT": -4500,  # FIELD_X_LEFT
@@ -216,6 +217,7 @@ small = {
     "FIELD_GOAL_SEGMENT": 181,
 
     # Goal Parameters
+    "GOAL_WIDTH": 500,
     "FIELD_GOAL_Y_TOP": 536,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
     "FIELD_GOAL_Y_BOTTOM": -536,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
     "FIELD_GOAL_BLUE_X_LEFT": -1636,  # FIELD_X_LEFT

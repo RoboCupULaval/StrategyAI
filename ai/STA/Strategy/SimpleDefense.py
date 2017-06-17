@@ -23,8 +23,8 @@ class SimpleDefense(Strategy):
         robot1 = self.game_state.my_team.available_players[5]
         robot2 = self.game_state.my_team.available_players[3]
         robot3 = self.game_state.my_team.available_players[4]
-        goal1 = Pose(Position(-1636, 0))
-        goal2 = Pose(Position(1636, 0))
+        goal1 = Pose(-Position(self.game_state.field.constant["FIELD_X_RIGHT"], 0))
+        goal2 = Pose(Position(self.game_state.field.constant["FIELD_X_RIGHT"], 0))
         self.add_tactic(robot1.id, GoalKeeper(self.game_state, robot1))
 
         self.add_tactic(robot2.id, Intercept(self.game_state, robot2))
