@@ -94,10 +94,10 @@ class Position(np.ndarray):
 def position_builder(args, cls):
     if len(args) == 0:
         obj = Position(0, 0)
-    elif len(args) == 1 and len(args[0]) == 2:
-        if isinstance(args[0], (list, Position, np.ndarray)):
+    elif len(args) == 1:
+        if isinstance(args[0], (list, Position, np.ndarray)) and len(args[0]) == 2:
             obj = np.asarray(args[0].copy()).view(cls)
-        elif isinstance(args[0], tuple):
+        elif isinstance(args[0], tuple) and len(args[0]) == 2:
             obj = np.asarray(args[0]).view(cls)
         else:
             raise ValueError
