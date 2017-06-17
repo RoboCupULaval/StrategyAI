@@ -65,7 +65,7 @@ class ProtectGoal(Action):
         # Vérification que destination_position respecte la distance maximale
         if self.maximum_distance is None:
             destination_position = self.game_state.game.field.stay_inside_goal_area(destination_position,
-                                                                                    self.is_right_goal)
+                                                                                    our_goal=True)
         else:
             destination_position = stayInsideCircle(destination_position, goal_position, self.maximum_distance)
 
