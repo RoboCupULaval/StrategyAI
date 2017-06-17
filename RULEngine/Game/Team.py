@@ -19,6 +19,8 @@ class Team:
         self.players = {}
         self.available_players = {}
         self.players_time_tracker = {}
+        self.entering_players = {}
+        self.exiting_players = []
         for player_id in range(PLAYER_PER_TEAM):
             self.players[player_id] = Player(self, player_id)
 
@@ -42,19 +44,23 @@ class Team:
         for player_id, time_last_seen in self.players_time_tracker.items():
             if time.time() - time_last_seen > MIN_TIME_BEFORE_MOVING_OUT:
                 print("<________________________----")
-                del(self.available_players[player_id])
+                self.exiting_players = self.available_players[player_id]
+        if self.entering_players and self.exiting_players:
+            new_player = self.entering_players.popitem()
+            exiting_player = self.exiting_players.pop()
+            self.available_players[exiting_player.id] = new_player
+
 
     def _update_player(self, player_id, pose, delta=0):
         try:
             self.players[player_id].update(pose, delta)
             self.players_time_tracker[player_id] = time.time()
-            self.available_players[player_id] = self.players[player_id]
+            self.entering_players[player_id] = self.players[player_id]
         except KeyError as err:
             raise err
 
     def _kalman_update(self, player_id, pose_list, delta=0):
         try:
-            print(player_id, "  ->  ",pose_list)
             self.players[player_id].update(pose_list, delta)
             self.players_time_tracker[player_id] = time.time()
             self.available_players[player_id] = self.players[player_id]
