@@ -53,7 +53,7 @@ class ProtectGoal(Action):
         """
         goalkeeper_position = self.player.pose.position
         ball_position = self.game_state.get_ball_position()
-        goal_x = self.game_state.const["FIELD_X_RIGHT"] if self.is_right_goal else self.game_state.const["FIELD_X_LEFT"]
+        goal_x = self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"]
         goal_position = Position(goal_x, 0)
 
         # Calcul de la position d'interception entre la balle et le centre du but
