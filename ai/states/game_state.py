@@ -4,12 +4,14 @@
 """
     Ce module garde en mémoire l'état du jeu
 """
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Game.Player import Player
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Util.constant import TeamColor
 from RULEngine.Util.singleton import Singleton
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from ai.Util.role import Role
 
 
 class GameState(object, metaclass=Singleton):
@@ -25,6 +27,19 @@ class GameState(object, metaclass=Singleton):
         self.other_team = None
         self.timestamp = 0
         self.const = None
+        self._roles_translation = {r: None for r in Role}
+
+    def get_player_by_role(self, role: Role) -> OurPlayer:
+        return self._roles_translation[role]
+
+    def get_role_by_player_id(self, player_id: int) -> Role:
+        for r, p in self._roles_translation.items():
+            if p.id == player_id:
+                return r
+
+    def bind_random_available_players_to_role(self) -> OurPlayer:
+        pass
+
 
     def get_our_team_color(self) -> TeamColor:
         """

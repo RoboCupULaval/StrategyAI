@@ -26,8 +26,6 @@ class Strategy(metaclass=ABCMeta):
         assert isinstance(p_game_state, GameState)
         self.game_state = p_game_state
         self.roles_graph = {r: Graph() for r in Role}
-        self._tactics_arguments = {r: {0: (Pose(), [])} for r in Role}
-        self._roles_translation = {r: r.value for r in Role}
 
     def add_tactic(self, role: Role, tactic: Tactic) -> None:
         """
@@ -80,27 +78,14 @@ class Strategy(metaclass=ABCMeta):
             print(i,"->",g)
         for r in Role:
             try:
-                player = self.get_player_by_role(r)
+                player = self.game_state.get_player_by_role(r)
                 tactic = self.roles_graph[r]
-                if not tactic.initialized:
-                    tactic(self.game_state,
-                           player,
-                           self._tactics_arguments[r][self.roles_graph[r].current_node][0],
-                           self._tactics_arguments[r][self.roles_graph[r].current_node][1])
                 commands[player.id] = self.roles_graph[r].exec()
                 player.ai_command = commands[player.id]
 
             except EmptyGraphException as e:
                 print(r)
         return commands
-
-    def get_player_by_role(self, role: Role) -> OurPlayer:
-        return self.game_state.my_team.available_players[self._roles_translation[role]]
-
-    def get_role_by_player_id(self, player_id: int) -> Role:
-        for r, id in self._roles_translation.items():
-            if id == player_id:
-                return r
 
     def _update_roles_translation(self) -> None:
         pass
