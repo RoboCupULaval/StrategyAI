@@ -223,7 +223,7 @@ class RobotMotion(object):
 
         self.pose_error = self.target_pose - self.current_pose  # Pose are always wrap to pi
         self.position_error = self.pose_error.position
-        if any([self.position_error > 0]):
+        if np.any([self.position_error > 0]):
             self.target_direction = self.position_error.normalized()
         else:
             self.target_direction = Position()
