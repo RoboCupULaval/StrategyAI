@@ -5,6 +5,7 @@ from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.geometry import get_distance
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
+from ai.Algorithm.evaluation_module import is_ball_our_side
 from ai.STA.Action.PathfindToPosition import PathfindToPosition
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.Idle import Idle

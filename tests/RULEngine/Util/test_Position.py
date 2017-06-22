@@ -7,7 +7,6 @@ from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import compare_angle
 
 
-
 class TestPosition(unittest.TestCase):
 
     def test_new(self):
@@ -184,20 +183,3 @@ class TestPosition(unittest.TestCase):
         self.assertFalse(pos11 == pos10)
         self.assertFalse(pos10 == pos11)
 
-        pos13 = Position(4, 5)
-        pos14 = Position(1, 1)
-
-        pose1 = Pose(Position(0, 0), 0)
-        pose2 = Pose(pos13, 0)
-
-        self.assertTrue(pose1 == pos1)
-
-        self.assertTrue(pose2 == pos13)
-        self.assertTrue(pos1 == pose1)
-        self.assertTrue(pos13 == pose2)
-        self.assertTrue(pose1 == pos1)
-
-        self.assertFalse(pose1 == pos13)
-        self.assertFalse(pose2 == pos1)
-        self.assertFalse(pose2 == pos14)
-        self.assertFalse(pos14 == pose2)

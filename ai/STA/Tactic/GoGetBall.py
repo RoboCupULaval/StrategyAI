@@ -13,6 +13,13 @@ from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.MoveToPosition import MoveToPosition
+
+
+from RULEngine.Util.geometry import get_distance, get_angle
+from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
+import numpy as np
 from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
@@ -63,7 +70,8 @@ class GoGetBall(Tactic):
                         self.game_state.get_ball_position()+Position(vector_player_2_ball[0]*70,
                                                                      vector_player_2_ball[1] * 70),
                         self.target.position,
-                        self.game_state.const["DISTANCE_BEHIND"], pathfinding=True)
+                        self.game_state.const["DISTANCE_BEHIND"],
+                        pathfinder_on=True)
 
     def start_dribbler(self):
         now = time.time()

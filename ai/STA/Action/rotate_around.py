@@ -4,7 +4,7 @@ import numpy as np
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import PLAYER_PER_TEAM
+
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType

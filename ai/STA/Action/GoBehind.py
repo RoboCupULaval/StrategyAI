@@ -28,7 +28,7 @@ class GoBehind(Action):
                     (exemple: le but)
     """
     def __init__(self, game_state: GameState, player: OurPlayer, position1: Position, position2: Position=None,
-                 distance_behind: int=250, cruise_speed: int=1, pathfinding: bool=False, orientation: str= 'front'):
+                 distance_behind: [int, float]=250, cruise_speed: [int, float]=1, pathfinder_on: bool=False, orientation: str= 'front'):
         """
             :param game_state: L'état courant du jeu.
             :param player: Instance du joueur qui doit se déplacer
@@ -43,7 +43,7 @@ class GoBehind(Action):
         self.position1 = position1
         self.position2 = position2
         self.distance_behind = distance_behind
-        self.pathfind = pathfinding
+        self.pathfinder_on = pathfinder_on
         self.rayon_avoid = 300  # (mm)
         self.cruise_speed = cruise_speed
         self.orientation = orientation
@@ -122,4 +122,4 @@ class GoBehind(Action):
     def exec(self):
         return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.get_destination(),
                                                              "cruise_speed": self.cruise_speed,
-                                                             "pathfinder_on": self.pathfind})
+                                                             "pathfinder_on": self.pathfinder_on})

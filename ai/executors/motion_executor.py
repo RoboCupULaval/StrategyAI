@@ -199,10 +199,10 @@ class RobotMotion(object):
 
         # Current state of the robot
         self.current_pose = self.ws.game_state.game.friends.players[self.id].pose.conv_2_np()
-        self.current_pose = self.current_pose / np.array([1000, 1000, 1])
+        self.current_pose = self.current_pose/ np.array([1000, 1000, 1])
         self.current_orientation = self.current_pose[Pos.THETA]
-        self.current_velocity = np.array(self.ws.game_state.game.friends.players[self.id].velocity)
-        self.current_velocity = self.current_velocity / np.array([1000, 1000, 1])
+        self.current_velocity = self.ws.game_state.game.friends.players[self.id].velocity
+        self.current_velocity.position = self.current_velocity.position / 1000
 
         # Desired parameters
         if cmd.path:

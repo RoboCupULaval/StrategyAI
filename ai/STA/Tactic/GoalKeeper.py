@@ -1,4 +1,5 @@
 # Under MIT licence, see LICENCE.txt
+
 from typing import List
 
 from RULEngine.Game.OurPlayer import OurPlayer
@@ -32,7 +33,7 @@ class GoalKeeper(Tactic):
         is_yellow : un booléen indiquant si le gardien est dans l'équipe des jaunes, ce qui détermine quel but est
         protégé. Les jaunes protègent le but de droite et les bleus, le but de gauche.
     """
-    # TODO: À complexifier pour prendre en compte la position des jouers adverses et la vitesse de la balle.
+    # TODO: À complexifier pour prendre en compte la position des joueurs adverses et la vitesse de la balle.
 
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None,):
         Tactic.__init__(self, game_state, player, target, args)
@@ -42,12 +43,14 @@ class GoalKeeper(Tactic):
         self.status_flag = Flags.WIP
 
     def protect_goal(self):
+
         ball_position = self.game_state.get_ball_position()
         if not self.game_state.game.field.is_inside_goal_area(ball_position, self.is_yellow):
             self.next_state = self.protect_goal
         else:
             self.next_state = self.go_behind_ball
         self.target = Pose(self.game_state.get_ball_position())
+
         return ProtectGoal(self.game_state, self.player, self.is_yellow,
                            minimum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"])
 

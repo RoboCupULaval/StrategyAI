@@ -70,7 +70,7 @@ class GoKick(Tactic):
         else:
             self.next_state = self.get_behind_ball
         return GoBehind(self.game_state, self.player, self.game_state.get_ball_position(),
-                        self.target.position, 120, pathfinding=True)
+                        self.target.position, 120, pathfinder_on=True)
 
     def grab_ball(self):
         if self._get_distance_from_ball() < 120:

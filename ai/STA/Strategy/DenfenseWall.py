@@ -21,7 +21,7 @@ class DefenseWall(Strategy):
         self.add_tactic(robot1.id, AllignToDefenseWall(self.game_state, robot1, self.robots))
         self.add_tactic(robot2.id, AllignToDefenseWall(self.game_state, robot2, self.robots))
         self.add_tactic(robot2.id, AllignToDefenseWall(self.game_state, robot3, self.robots))
-        
+
         for player in self.game_state.my_team.available_players.values():
             if not (player == robot1 or player == robot2 or player == robot3):
                 self.add_tactic(player.id, Stop(self.game_state, player))
