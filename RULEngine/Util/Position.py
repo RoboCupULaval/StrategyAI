@@ -1,97 +1,110 @@
 # Under MIT License, see LICENSE.txt
 
-import math
 import numpy as np
+import warnings
 
-POSITION_DELTA_TOLERANCE_MAGNITUDE = 1e0
 
+class Position(np.ndarray):
 
-class Position(object):
-    """ Vector with [x, y, z] """
-    def __init__(self, x=0., y=0., z=0., abs_tol=POSITION_DELTA_TOLERANCE_MAGNITUDE, delta_t=0.03):
-        # assert(isinstance(x, (int, float))), 'x should be int or float.'
-        # assert(isinstance(y, (int, float))), 'y should be int or float.'
-        # assert(isinstance(z, (int, float))), 'z should be int or float.'
+    def __new__(cls, *args, z=0, abs_tol=0.01):
+        if len(args) == 0:
+            obj = Position(0, 0)
+        elif len(args) == 1:
+            if isinstance(args[0], list) and len(args[0]) == 2:
+                obj = np.asarray(args[0].copy()).view(cls)
+            elif isinstance(args[0], tuple) and len(args[0]) == 2:
+                obj = np.asarray(args[0]).view(cls)
+            elif isinstance(args[0], Position) and len(args[0]) == 2:
+                obj = np.asarray(args[0].copy()).view(cls)
+            elif isinstance(args[0], np.ndarray) and args[0].size == 2:
+                obj = np.asarray(args[0].copy()).view(cls)
+            else:
+                raise ValueError
+        elif len(args) == 2:
+            obj = np.asarray(args).copy().view(cls)
+        else:
+            raise ValueError
 
-        self.x = float(x)
-        self.y = float(y)
-        self.z = float(z)
-        self.abs_tol = abs_tol
-        self.delta_t = delta_t
+        obj.x = obj[0]
+        obj.y = obj[1]
+        obj.z = z
 
-    def copy(self):
-        """
-        copy() -> Position
+        obj.abs_tol = abs_tol
 
-        Return copy of Position.
-        """
-        return Position(self.x, self.y, self.z)
+        return obj
 
-    def get_delta_t(self):
-        return self.delta_t
+    def __array_finalize__(self, obj):
+        if obj is None:
+            return
+        self.z = getattr(obj, 'z', 0)
+        self.abs_tol = getattr(obj, 'abs_tol', 0.01)
+
+    @property
+    def x(self):
+        return float(self[0])
+
+    @x.setter
+    def x(self, x):
+        self[0] = x
+
+    @property
+    def y(self):
+        return float(self[1])
+
+    @y.setter
+    def y(self, y):
+        self[1] = y
+
+    def norm(self):
+        """Return the distance of the point from the origin"""
+        return float(np.linalg.norm(self.view(np.ndarray)))
+
+    def angle(self):
+        """Return the angle of the point from the x-axis between -pi and pi"""
+        if self == Position(0, 0):
+            warnings.warn('Angle is not defined for (0, 0). Result will be 0.')
+        return float(np.arctan2(self[1], self[0]))
+
+    def rotate(self, angle):
+        rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]).view(Position)
+        return np.dot(rotation, self)
+
+    def normalized(self):
+        if self.norm() == 0:
+            raise ZeroDivisionError
+        return self / self.norm()
+
+    def __eq__(self, other):
+        if isinstance(other, Position):
+            min_abs_tol = min(self.abs_tol, other.abs_tol)
+            return np.allclose(self, other, atol=min_abs_tol)
+        # elif isinstance(other, np.ndarray):
+        #     min_abs_tol = min(self.abs_tol, other.position.abs_tol)
+        #     return np.allclose(self, other.position, atol=min_abs_tol)
+        else:
+            raise TypeError
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def to_array(self):
+        return self
 
     def conv_2_np(self):
-        return np.array([self.x, self.y])
+        """Legacy. Do not use."""
+        return self.to_array()
 
     @staticmethod
     def from_np(array):
-        return Position(array[0], array[1])
-
-    # *** OPERATORS ***
-    def __add__(self, other):
-        """ Return self + other """
-        if not isinstance(other, (Position, int, float)):
-            return NotImplemented
-        else:
-            new_x = self.x + (other.x if isinstance(other, Position) else other)
-            new_y = self.y + (other.y if isinstance(other, Position) else other)
-            return Position(new_x, new_y)
-
-    def __sub__(self, other):
-        """ Return self - other """
-        # if not isinstance(other, (Position, int, float)):
-        #     raise NotImplementedError
-        # else:
-        #     new_x = self.x - (other.x if isinstance(other, Position) else other)
-        #     new_y = self.y - (other.y if isinstance(other, Position) else other)
-        #     return Position(new_x, new_y)
-        new_x = self.x - other.x
-        new_y = self.y - other.y
-        return Position(new_x, new_y)
-
-    def __mul__(self, other):
-        """ Return self * other """
-        if not isinstance(other, (int, float)):
-            raise NotImplementedError
-        else:
-            new_x = self.x * other
-            new_y = self.y * other
-            return Position(new_x, new_y)
-
-    def __truediv__(self, other):
-        """ Return self / other """
-        if not isinstance(other, (int, float)):
-            raise NotImplementedError
-        else:
-            new_x = self.x / other
-            new_y = self.y / other
-            return Position(new_x, new_y)
-
-    def __eq__(self, other):
-        """
-            L'égalité est vérifié au niveau de l'unité.
-            La comparison de float exige toujours un seuil de tolérance.
-            Dans ce cas-ci, les décimales n'importent pas.
-            Position(0.5, 0) == Position(0, 0) -> True
-            (multiplication par la magnitude de tolérance, définie dans constant.py, puis conversion pour couper les décimales)
-        """
-        min_abs_tol = min(self.abs_tol, other.abs_tol)
-        return math.isclose(self.x, other.x, abs_tol=min_abs_tol) and math.isclose(self.y, other.y, abs_tol=min_abs_tol)
-
-    def __ne__(self, other):
-        """ Return self != other """
-        return not self.__eq__(other)
+        """Legacy. Do not use."""
+        return Position(array)
 
     def __repr__(self):
-        """ Return str(self) """
-        return "(x={}, y={}, z={})".format(self.x, self.y, self.z)
+        return 'Position({:8.3f}, {:8.3f})'.format(self[0], self[1])
+
+    def __str__(self):
+        return '[{:8.3f}, {:8.3f}]'.format(self[0], self[1])
+
+    def __hash__(self):
+        return hash(str(self))
+

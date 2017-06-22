@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from RULEngine.Command.command import Command, ResponseCommand, GetBattery
 from RULEngine.Communication.protobuf import grSim_Packet_pb2 as grSim_Packet
 from RULEngine.Communication.util.udp_socket import udp_socket
 
@@ -19,7 +19,7 @@ class GrSimCommandSender(object):
         """
         self.server.send(packet.SerializeToString())
 
-    def send_command(self, command):
+    def send_command(self, command: Command):
         """
             Construit le paquet à envoyer à partir de la commande reçut.
 
@@ -31,14 +31,21 @@ class GrSimCommandSender(object):
         grsim_command = packet.commands.robot_commands.add()
         grsim_command.id = command.player.id
         grsim_command.wheelsspeed = False
-        grsim_command.veltangent = command.pose.position.x
-        grsim_command.velnormal = command.pose.position.y
-        grsim_command.velangular = command.pose.orientation
+        grsim_command.veltangent = command.player.ai_command.speed.position.x
+        grsim_command.velnormal = command.player.ai_command.speed.position.y
+        grsim_command.velangular = command.player.ai_command.speed.orientation
         grsim_command.spinner = True
-        grsim_command.kickspeedx = command.kick_speed
+        grsim_command.kickspeedx = command.player.ai_command.kick_strength
         grsim_command.kickspeedz = 0
 
         self._send_packet(packet)
+
+    def send_responding_command(self, command: ResponseCommand):
+        if isinstance(command, GetBattery):
+            FAKE_VOLTAGE = 14.42
+            return FAKE_VOLTAGE
+
+        raise NotImplementedError("Only GetBattery is supported by grsim_command_sender.")
 
     def stop(self):
         pass

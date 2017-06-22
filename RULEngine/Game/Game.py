@@ -2,6 +2,7 @@
 from typing import List
 
 from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2
+from RULEngine.Game.OurTeam import OurTeam
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.team_color_service import TeamColor
@@ -27,6 +28,9 @@ class Game:
         self.delta_t = None
         self.cmd = None
         self._create_teams()
+        self.update = self._update
+        if ConfigService().config_dict["IMAGE"]["kalman"] == "true":
+            self.update = self._kalman_update
 
     def set_command(self, cmd):
         for commands in cmd:
@@ -38,22 +42,23 @@ class Game:
     def _create_teams(self):
         cfg = ConfigService()
         if cfg.config_dict["GAME"]["our_color"] == "blue":
-            self.our_team_color == TeamColor.BLUE_TEAM
-            self.blue_team = Team(TeamColor.BLUE_TEAM, kalman_type='friend')
+            self.our_team_color == TeamColor.BLUE
+            self.blue_team = OurTeam(TeamColor.BLUE)
             self.friends = self.blue_team
-            self.yellow_team = Team(TeamColor.YELLOW_TEAM, kalman_type="enemy")
+            self.yellow_team = Team(TeamColor.YELLOW)
             self.enemies = self.yellow_team
         elif cfg.config_dict["GAME"]["our_color"] == "yellow":
-            self.our_team_color == TeamColor.YELLOW_TEAM
-            self.yellow_team = Team(TeamColor.YELLOW_TEAM, kalman_type='friend')
+            self.our_team_color == TeamColor.YELLOW
+            self.yellow_team = OurTeam(TeamColor.YELLOW)
             self.friends = self.yellow_team
-            self.blue_team = Team(TeamColor.BLUE_TEAM, kalman_type="enemy")
+            self.blue_team = Team(TeamColor.BLUE)
             self.enemies = self.blue_team
         else:
             raise ValueError("Config file contains wrong colors!")
 
     def update_game_state(self, referee_command):
         # TODO: Réviser code, ça semble louche
+        # TODO: remove or change completly! WHAT IS THIS??? MGL 2017/05/14
         blue_team = referee_command.teams[0]
         self.blue_team.score = blue_team.goalie_count
         yellow_team = referee_command.teams[0]
@@ -63,19 +68,19 @@ class Game:
         # command = Referee.Command(referee_command.command.name)
         # self.referee.command = command
 
-    def update(self, vision_frame: messages_robocup_ssl_wrapper_pb2, delta: float):
+    def _update(self, vision_frame: messages_robocup_ssl_wrapper_pb2, delta: float) -> None:
         self.delta_t = delta
         # print(delta)
         self._update_ball(vision_frame, delta)
         self._update_players(vision_frame, delta)
 
-    def update_kalman(self, vision_frame: List, delta: float):
+    def _kalman_update(self, vision_frame: List, delta: float) -> None:
         self.delta_t = delta
         self.kalman_update_ball(vision_frame, delta)
         self.kalman_update_players(vision_frame, delta)
 
     def is_team_yellow(self):
-        return self.our_team_color == TeamColor.YELLOW_TEAM
+        return self.our_team_color == TeamColor.YELLOW
 
     def _update_ball(self, vision_frame, delta):
         try:
@@ -101,16 +106,16 @@ class Game:
         self.ball.kalman_update(kalman_list, delta)
 
     def kalman_update_players(self, vision_frame, delta):
-        kalman_blue = [[] for i in range(0, 6)]
-        kalman_yellow = [[] for i in range(0, 6)]
+        kalman_blue = [[] for _ in range(0, 6)]
+        kalman_yellow = [[] for _ in range(0, 6)]
         for c in vision_frame:
             for i in range(0, 6):
                 kalman_blue[i].append(c["blues"][i])
                 kalman_yellow[i].append(c["yellows"][i])
 
         for i in range(0, 6):
-            self.blue_team.kalman_update(i, kalman_blue[i], delta)
-            self.yellow_team.kalman_update(i, kalman_yellow[i], delta)
+            self.blue_team.update_player(i, kalman_blue[i], delta)
+            self.yellow_team.update_player(i, kalman_yellow[i], delta)
 
     @staticmethod
     def _update_players_of_team(players, team, delta):
