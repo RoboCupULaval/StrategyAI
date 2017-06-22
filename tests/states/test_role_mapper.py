@@ -84,8 +84,3 @@ missing_required_expected = {
     Role.SECOND_ATTACK: 4,
     Role.GOALKEEPER: 0
 }
-
-
-
-
-
