@@ -76,6 +76,8 @@ class Strategy(metaclass=ABCMeta):
         commands = {}
         for i, g in enumerate(self.roles_graph):
             print(i,"->",g)
+        # TODO We should probably iterate over game_state.RoleMapping instead of Role
+        # TODO It would allow us to deal with fewer than 6 roles
         for r in Role:
             try:
                 player = self.game_state.get_player_by_role(r)
