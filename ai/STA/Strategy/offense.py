@@ -33,13 +33,14 @@ class Offense(Strategy):
             if not i.id == goalkeeper.id:
                 self.add_tactic(i.id, GoToPositionPathfinder(self.game_state, i, self.robots_position[count]))
                 self.add_tactic(i.id, GoGetBall(self.game_state, i, Pose(GameState().get_ball_position())))
-                self.add_tactic(i.id, GoKick(self.game_state, i, self.kicktarget(i)))
+                self.add_tactic(i.id, GoKick(self.game_state, i, self.theirgoal))
 
                 self.add_condition(i.id, 0, 1, partial(self.is_closest, i))
                 self.add_condition(i.id, 1, 0, partial(self.is_not_closest, i))
-                self.add_condition(i.id, 1, 2, partial(self.has_arrived_to_ball, i))
+                self.add_condition(i.id, 1, 2, partial(self.is_behind_ball, i))
                 self.add_condition(i.id, 2, 0, partial(self.is_not_closest, i))
                 count += 1
+
 
     def is_closest(self, player):
         return player == closest_player_to_point(GameState().get_ball_position(), True)
@@ -47,7 +48,7 @@ class Offense(Strategy):
     def is_not_closest(self, player):
         return player != closest_player_to_point(GameState().get_ball_position(), True)
 
-    def has_arrived_to_ball(self, i):
+    def is_behind_ball(self, i):
         if self.graphs[i.id].get_current_tactic_name() == 'GoGetBall':
             return self.graphs[i.id].get_current_tactic().status_flag == Flags.SUCCESS and \
                    best_passing_option(GameState().my_team.available_players[i.id]) is not None
