@@ -1,44 +1,70 @@
 # Under MIT License, see LICENSE.txt
-import threading
 import time
 from collections import deque
-from pyhermes import McuCommunicator
 
-from RULEngine.Command.command import Command
+from RULEngine.Command.command import *
+
 
 COMMUNICATION_SLEEP = 0.001
+MOVE_COMMAND_SLEEP = 0.05
 
 
 class SerialCommandSender(object):
-    def __init__(self, baud_rate: int=115200):
-        # todo see if we still need the baud_rate, ask embedded! MGL 2017/05/29
-        self.mcu_communicator = McuCommunicator()
+    def __init__(self):
+        self.mcu_com = McuCommunicator(timeout=0.1)
+
+        self.last_time = 0
         self.command_queue = deque()
+
+        self.command_dict = {0: Stop(OurPlayer(None, 0)), 1: Stop(OurPlayer(None, 1)), 2: Stop(OurPlayer(None, 2)),
+                             3: Stop(OurPlayer(None, 3)), 4: Stop(OurPlayer(None, 4)), 5: Stop(OurPlayer(None, 5))}
+
         self.terminate = threading.Event()
         self.comm_thread = threading.Thread(target=self.send_loop)
         self.comm_thread.start()
 
     def send_loop(self):
         while not self.terminate.is_set():
-            if len(self.command_queue) > 100:
-                print("Warning! high amount of queued serial commands to send")
-                if len(self.command_queue) > 1000:
-                    raise RuntimeError("command queue of serial command exceded 1000 back up commands")
-            try:
-                next_command = self.command_queue.popleft()
-            except IndexError:
-                next_command = None
-            if next_command is not None:
-                # print(next_command)
-                next_command.package_command(self.mcu_communicator)
-            time.sleep(COMMUNICATION_SLEEP)
+            if time.time() - self.last_time > MOVE_COMMAND_SLEEP:
+                for next_command in self.command_dict.values():
+                    # print(c)
+                    self._package_commands(next_command)
+                    time.sleep(COMMUNICATION_SLEEP)
+                self.last_time = time.time()
+            else:
+                time.sleep(COMMUNICATION_SLEEP)
+                try:
+                    next_command = self.command_queue.popleft()
+                except IndexError:
+                    next_command = None
+                if next_command:
+                    self._package_commands(next_command)
 
     def send_command(self, command: Command):
         # self.command_queue.append(command)
         # print("({}) Command deque length: {}".format(time.time(), len(self.command_queue)))
+
+        if isinstance(command, Move) or isinstance(command, Stop):
+            self.command_dict[command.player.id] = command
+        else:
+            self.command_queue.append(command)
+
+    def send_responding_command(self, command: ResponseCommand):
+        """
+        Pause le thread appelant jusqu'à qu'une réponse est reçu
+        """
         self.command_queue.append(command)
+        command.pause_thread()
+
+        return command.response
 
     def stop(self):
         self.terminate.set()
         self.comm_thread.join()
-        self.terminate.clear()
+
+    def _package_commands(self, command: Command):
+        response = command.package_command(self.mcu_com)
+
+        if isinstance(command, ResponseCommand):
+            command.response = response
+            command.wakeup_thread()

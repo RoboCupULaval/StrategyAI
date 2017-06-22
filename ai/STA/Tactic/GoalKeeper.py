@@ -1,4 +1,5 @@
 # Under MIT licence, see LICENCE.txt
+
 from typing import List
 
 from RULEngine.Game.OurPlayer import OurPlayer
@@ -32,7 +33,7 @@ class GoalKeeper(Tactic):
         is_yellow : un booléen indiquant si le gardien est dans l'équipe des jaunes, ce qui détermine quel but est
         protégé. Les jaunes protègent le but de droite et les bleus, le but de gauche.
     """
-    # TODO: À complexifier pour prendre en compte la position des jouers adverses et la vitesse de la balle.
+    # TODO: À complexifier pour prendre en compte la position des joueurs adverses et la vitesse de la balle.
 
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None,):
         Tactic.__init__(self, game_state, player, target, args)

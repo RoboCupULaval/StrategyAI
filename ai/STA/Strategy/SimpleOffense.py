@@ -4,7 +4,6 @@ from functools import partial
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from ai.STA.Tactic.GoGetBall import GoGetBall
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.capture import Capture
