@@ -81,7 +81,7 @@ class ProtectZone(Tactic):
 
         destination = stayInsideSquare(self.game_state.get_ball_position(), self.y_top, self.y_bottom, self.x_left,
                                        self.x_right)
-        destination = self.game_state.game.field.stay_outside_goal_area(destination, self.is_yellow)
+        destination = self.game_state.game.field.stay_outside_goal_area(destination, our_goal=True)
         orientation = get_angle(destination, self.game_state.get_ball_position())
         return MoveToPosition(self.game_state, self.player, Pose(destination, orientation))
 
