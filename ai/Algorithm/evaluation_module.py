@@ -98,7 +98,7 @@ def best_passing_option(passing_player):
             score = (score)
             if score_min > score:
                 score_min = score
-                receiver_id = i
+                receiver_id = i.id
 
     score = (line_of_sight_clearance(passing_player, goal))
     if score_min > score:

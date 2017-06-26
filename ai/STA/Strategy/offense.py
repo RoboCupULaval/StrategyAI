@@ -19,8 +19,8 @@ from ai.STA.Tactic.tactic_constants import Flags
 class Offense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
-        ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_EXTERNAL"], 0), 0)
-        self.theirgoal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_EXTERNAL"], 0), 0)
+        ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
+        self.theirgoal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
 
         self.robots_position = self.generate_robot_positions()
 
