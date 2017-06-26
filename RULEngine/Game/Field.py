@@ -24,8 +24,8 @@ class Field:
     def is_inside_goal_area(self, position, our_goal=True):
         assert (isinstance(position, Position))
         assert (isinstance(our_goal, bool))
-        x1 = self.constant["FIELD_OUR_GOAL_X_LEFT"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_LEFT"]
-        x2 = self.constant["FIELD_OUR_GOAL_X_RIGHT"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_RIGHT"]
+        x1 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
+        x2 = self.constant["FIELD_OUR_GOAL_X_INTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_INTERNAL"]
 
         if x1 > x2:
             x_right = x1
@@ -57,8 +57,8 @@ class Field:
         if self.is_inside_goal_area(position, our_goal):
             return Position(position.x, position.y)
         else:
-            x1 = self.constant["FIELD_OUR_GOAL_X_LEFT"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_LEFT"]
-            x2 = self.constant["FIELD_OUR_GOAL_X_RIGHT"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_RIGHT"]
+            x1 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
+            x2 = self.constant["FIELD_OUR_GOAL_X_INTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_INTERNAL"]
 
             if x1 > x2:
                 x_right = x1
@@ -90,8 +90,8 @@ class Field:
         if self.is_outside_goal_area(position, our_goal):
             return Position(position.x, position.y)
         else:
-            x1 = self.constant["FIELD_OUR_GOAL_X_LEFT"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_LEFT"]
-            x2 = self.constant["FIELD_OUR_GOAL_X_RIGHT"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_RIGHT"]
+            x1 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
+            x2 = self.constant["FIELD_OUR_GOAL_X_INTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_INTERNAL"]
 
             if x1 > x2:
                 x_right = x1
