@@ -33,14 +33,13 @@ class Offense(Strategy):
             if not i.id == goalkeeper.id:
                 self.add_tactic(i.id, GoToPositionPathfinder(self.game_state, i, self.robots_position[count]))
                 self.add_tactic(i.id, GoGetBall(self.game_state, i, Pose(GameState().get_ball_position())))
-                self.add_tactic(i.id, GoKick(self.game_state, i, self.theirgoal))
+                self.add_tactic(i.id, GoKick(self.game_state, i, auto_update_target=True))
 
                 self.add_condition(i.id, 0, 1, partial(self.is_closest, i))
                 self.add_condition(i.id, 1, 0, partial(self.is_not_closest, i))
                 self.add_condition(i.id, 1, 2, partial(self.is_behind_ball, i))
                 self.add_condition(i.id, 2, 0, partial(self.is_not_closest, i))
                 count += 1
-
 
     def is_closest(self, player):
         return player == closest_player_to_point(GameState().get_ball_position(), True)
@@ -55,17 +54,10 @@ class Offense(Strategy):
         else:
             return False
 
-    def kicktarget(self, i):
-        target = best_passing_option(GameState().my_team.available_players[i.id])
-        if target is not None:
-            return target.pose
-        else:
-            return self.theirgoal
-
     def generate_robot_positions(self):
-        return [Pose(Position(500, 500), 0),
-                Pose(Position(-500, 500), 0),
-                Pose(Position(500, -500), 0),
-                Pose(Position(-500, -500), 0),
+        return [Pose(Position(2000, 1000), 0),
+                Pose(Position(2000, -1000), 0),
                 Pose(Position(-1000, 1000), 0),
-                Pose(Position(1000, 1000), 0)]
+                Pose(Position(-1000, -1000), 0),
+                Pose(Position(-1000, 0), 0),
+                Pose(Position(0, 0), 0)]
