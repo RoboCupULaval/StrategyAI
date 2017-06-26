@@ -7,7 +7,7 @@ from RULEngine.Util.Position import Position
 
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType
+from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
 
 
 class Kick(Action):
@@ -34,7 +34,7 @@ class Kick(Action):
     def exec(self):
         """
         Execute le kick
-        :return: Un IAcommand
+        :return: Un AIcommand
         """
         target = self.target.position.conv_2_np()
         player = self.player.pose.position.conv_2_np()
@@ -42,8 +42,8 @@ class Kick(Action):
         norm_player_2_target = np.linalg.norm(player_to_target)
         norm_player_2_target = norm_player_2_target if norm_player_2_target != 0 else 1
         player_to_target = 0.3 * player_to_target / norm_player_2_target
-        self.speed_pose = Pose(Position.from_np(player_to_target))
+        self.speed_pose = Pose(player_to_target)
         return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.speed_pose,
-                                                             "speed_flag": True,
+                                                             "control_loop_type": AIControlLoopType.SPEED,
                                                              "kick": True,
                                                              "kick_strength": self.force})

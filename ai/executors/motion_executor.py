@@ -42,8 +42,8 @@ class MotionExecutor(Executor):
                     cmd.speed = self.robot_motion[r_id].update(cmd)
 
                 elif cmd.control_loop_type is AIControlLoopType.SPEED:
-                    speed = fixed2robot(cmd.pose_goal.conv_2_np(), player.pose.orientation)
-                    cmd.speed = Pose(Position(speed[Pos.X], speed[Pos.Y]), speed[Pos.THETA])
+                    speed = cmd.pose_goal.position.rotate(-player.pose.orientation)
+                    cmd.speed = Pose(speed, player.pose.orientation)
 
                 elif cmd.control_loop_type is AIControlLoopType.OPEN:
                     cmd.speed = cmd.pose_goal

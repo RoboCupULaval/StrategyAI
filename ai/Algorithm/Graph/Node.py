@@ -69,7 +69,7 @@ class Node:
 
     def set_flag(self, status_flag):
         """
-        Modifie l'attribut status flag de la tactique du moeud.
+        Modifie l'attribut status flag de la tactique du noeud.
         :param status_flag: Une valeur de l'enum Flags de tactic_constant
         """
         assert isinstance(status_flag, Flags)

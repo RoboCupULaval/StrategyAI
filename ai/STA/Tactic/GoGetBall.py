@@ -92,9 +92,13 @@ class GoGetBall(Tactic):
         angle_ball_2_target = np.arctan2(self.target.position.y - ball_y, self.target.position.x - ball_x)
         return MoveToPosition(self.game_state, self.player, Pose(Position(ball_x, ball_y), angle_ball_2_target))
 
-    def halt(self):
-        self.status_flag = Flags.SUCCESS
+    def halt(self):  # FAIRE CECI DANS TOUTE LES TACTIQUES
+        if self.status_flag == Flags.INIT:
+            self.next_state = self.get_behind_ball
+        else:
+            self.status_flag = Flags.SUCCESS
         return Idle(self.game_state, self.player)
+
 
     def _get_distance_from_ball(self):
         return get_distance(self.player.pose.position, self.game_state.get_ball_position())
