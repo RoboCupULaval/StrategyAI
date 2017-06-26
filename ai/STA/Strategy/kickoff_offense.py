@@ -16,6 +16,7 @@ class KickOffOffense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
+        # Attribution des joueurs
         attack_left = self.game_state.my_team.available_players[3]
         attack_right = self.game_state.my_team.available_players[0]
         middle = self.game_state.my_team.available_players[1]
