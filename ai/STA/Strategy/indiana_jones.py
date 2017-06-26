@@ -22,8 +22,8 @@ class IndianaJones(Strategy):
         obs_left = self.game_state.my_team.available_players[3]
 
         # Positions objectifs d'Indiana Jones
-        goal_left = (Pose(Position(self.game_state.const["FIELD_GOAL_YELLOW_X_LEFT"], 0), 0))
-        goal_right = (Pose(Position(self.game_state.const["FIELD_GOAL_BLUE_X_RIGHT"], 0), 0))
+        goal_left = (Pose(Position(self.game_state.const["FIELD_OUR_GOAL_X_INTERNAL"], 0), 0))
+        goal_right = (Pose(Position(self.game_state.const["FIELD_THEIR_GOAL_X_INTERNAL"], 0), 0))
 
         # Positions objectifs des obstacles
         y_down = self.game_state.const["FIELD_Y_BOTTOM"] + 500
