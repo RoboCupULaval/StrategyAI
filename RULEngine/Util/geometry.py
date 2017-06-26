@@ -121,54 +121,6 @@ def get_line_equation(position1: Position, position2: Position) -> tuple:
     return slope, origin
 
 
-def get_lines_intersection(position_a1: Position, position_a2: Position,
-                           position_b1: Position, position_b2: Position):
-    """
-        Calcul la position de l'intersection de deux lignes, données chacune
-        par deux positions.
-        Args:
-            position_a1: Position 1 sur la ligne A.
-            position_a2: Position 2 sur la ligne A.
-            position_b1: Position 1 sur la ligne B.
-            position_b2: Position 2 sur la ligne B.
-        Returns:
-            Position: La position de l'intersection des deux lignes.
-                      La position est située à l'infinie si les lignes sont
-                      parallèles.
-    """
-    assert isinstance(position_a1, Position)
-    assert isinstance(position_a2, Position)
-    assert isinstance(position_b1, Position)
-    assert isinstance(position_b2, Position)
-
-    delta_x_a = position_a1.x - position_a2.x
-    delta_y_a = position_a1.y - position_a2.y
-    delta_x_b = position_b1.x - position_b2.x
-    delta_y_b = position_b1.y - position_b2.y
-
-    denominator = delta_x_a * delta_y_b - delta_y_a * delta_x_b
-    if denominator == 0:
-        # Les lignes sont parallèles
-        return Position(m.inf, m.inf)
-
-    a = np.matrix([[delta_x_a, -delta_x_b], [delta_y_a, -delta_y_b]])
-    b = np.matrix([[position_b1.x - position_a1.x], [position_b1.y - position_a1.y]])
-
-    scale = np.linalg.solve(a, b)
-
-    intersection1 = np.matrix([[position_a1.x], [position_a1.y]]) + scale.item((0, 0))*np.matrix([[delta_x_a],
-                                                                                                  [delta_y_a]])
-    intersection2 = np.matrix([[position_b1.x], [position_b1.y]]) + scale.item((1, 0))*np.matrix([[delta_x_b],
-                                                                                                  [delta_y_b]])
-
-    assert np.allclose(intersection1, intersection2)
-
-    x = intersection1.item((0, 0))
-    y = intersection1.item((1, 0))
-
-    return Position(x, y)
-
-
 def get_closest_point_on_line(reference: Position,
                               position1: Position,
                               position2: Position) -> Position:
@@ -242,3 +194,4 @@ def wrap_to_pi(angle):
 
 def compare_angle(angle1, angle2, abs_tol=0.004):
     return m.isclose(Pose.wrap_to_pi(angle1 - angle2), 0, abs_tol=abs_tol, rel_tol=0)
+
