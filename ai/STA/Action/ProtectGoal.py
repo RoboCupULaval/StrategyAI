@@ -53,7 +53,7 @@ class ProtectGoal(Action):
         """
         goalkeeper_position = self.player.pose.position
         ball_position = self.game_state.get_ball_position()
-        goal_x = self.game_state.const["FIELD_X_RIGHT"] if self.is_right_goal else self.game_state.const["FIELD_X_LEFT"]
+        goal_x = self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"]
         goal_position = Position(goal_x, 0)
 
         # Calcul de la position d'interception entre la balle et le centre du but
@@ -65,7 +65,7 @@ class ProtectGoal(Action):
         # Vérification que destination_position respecte la distance maximale
         if self.maximum_distance is None:
             destination_position = self.game_state.game.field.stay_inside_goal_area(destination_position,
-                                                                                    self.is_right_goal)
+                                                                                    our_goal=True)
         else:
             destination_position = stayInsideCircle(destination_position, goal_position, self.maximum_distance)
 
