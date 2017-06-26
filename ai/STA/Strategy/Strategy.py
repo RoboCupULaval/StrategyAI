@@ -3,11 +3,14 @@
 from abc import ABCMeta
 from typing import List, Tuple, Callable, Dict
 
-from RULEngine.Util.constant import PLAYER_PER_TEAM
-from ai.Algorithm.Graph.Graph import Graph
+from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.constant import PLAYER_ON_FIELD_PER_TEAM
+from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
 from ai.STA.Tactic.Tactic import Tactic
 from ai.Util.ai_command import AICommand
+from ai.Util.role import Role
 from ai.states.game_state import GameState
 
 
@@ -22,30 +25,28 @@ class Strategy(metaclass=ABCMeta):
         """
         assert isinstance(p_game_state, GameState)
         self.game_state = p_game_state
-        self.graphs = []
-        for i in range(PLAYER_PER_TEAM):
-            self.graphs.append(Graph())
+        self.roles_graph = {r: Graph() for r in Role}
 
-    def add_tactic(self, robot_id: int, tactic: Tactic) -> None:
+    def add_tactic(self, role: Role, tactic: Tactic) -> None:
         """
         Ajoute une tactique au graph des tactiques d'un robot.
-        :param robot_id: L'id du robot auquel est assignée la tactique.
-        :param tactic: La tactique à assigner au robot.
+        :param role: Le role auquel est assignée la tactique.
+        :param tactic: La tactique à assigner au robot du role.
         """
-        assert(isinstance(robot_id, int))
-        self.graphs[robot_id].add_node(Node(tactic))
+        assert(isinstance(role, Role))
+        self.roles_graph[role].add_node(Node(tactic))
 
-    def add_condition(self, robot_id: int, start_node: int, end_node: int, condition: Callable[..., bool]):
+    def add_condition(self, role: Role, start_node: int, end_node: int, condition: Callable[..., bool]):
         """
         Ajoute une condition permettant de gérer la transition entre deux tactiques d'un robot.
-        :param robot_id: L'id du robot.
+        :param role: Le role qui a la tactic.
         :param start_node: Le noeud de départ du vertex.
         :param end_node: Le noeud d'arrivée du vertex.
         :param condition: Une fonction retournant un booléen permettant de déterminer si on peut effectuer la transition
         du noeud de départ vers le noeud d'arrivé.
         """
-        assert(isinstance(robot_id, int))
-        self.graphs[robot_id].add_vertex(start_node, end_node, condition)
+        assert(isinstance(role, Role))
+        self.roles_graph[role].add_vertex(start_node, end_node, condition)
 
     def get_current_state(self) -> List[Tuple[int, str, str, str]]:
         """
@@ -56,8 +57,8 @@ class Strategy(metaclass=ABCMeta):
                 -Sa target, soit un objet Pose.
         """
         state = []
-        for player in self.game_state.my_team.available_players.values():
-            current_tactic = self.graphs[player.id].get_current_tactic()
+        for r in Role:
+            current_tactic = self.roles_graph[r].get_current_tactic()
             try:
                 tactic_name = current_tactic.current_state.__name__
             except AttributeError:
@@ -73,14 +74,34 @@ class Strategy(metaclass=ABCMeta):
         envoyée au robot i.
         """
         commands = {}
-        for player in self.game_state.my_team.available_players.values():
-            commands[player.id] = self.graphs[player.id].exec()
-            player.ai_command = commands[player.id]
+        for i, g in enumerate(self.roles_graph):
+            print(i,"->",g)
+        # TODO We should probably iterate over game_state.RoleMapping instead of Role
+        # TODO It would allow us to deal with fewer than 6 roles
+        for r in Role:
+            try:
+                player = self.game_state.get_player_by_role(r)
+                tactic = self.roles_graph[r]
+                commands[player.id] = self.roles_graph[r].exec()
+                player.ai_command = commands[player.id]
+
+            except EmptyGraphException as e:
+                print(r)
         return commands
+
+    def _update_roles_translation(self) -> None:
+        pass
+
+    def _store_tactic_arguments(self, role: Role, node_id: int, tactic_arguments = List) -> None:
+        self._tactics_arguments[role][node_id] = tactic_arguments
+
+    def _retrive_tactic_arguments(self, role: Role, node_id: int) -> List:
+        return self._tactics_arguments[role][node_id]
 
     def __str__(self):
         return self.__class__.__name__
 
+    # TODO check if this is correct MGL 2017/06/16
     def __eq__(self, other):
         """
         La comparaison est basée sur le nom des stratégies. Deux stratégies possédant le même nom sont considérée égale.

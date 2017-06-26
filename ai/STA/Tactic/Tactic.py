@@ -15,7 +15,10 @@ class Tactic:
     """
         Classe mère de toutes les tactiques
     """
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None):
+    # IM SORRY MGL 2017/06/16
+    initialized = False
+
+    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List=None):
         """
         Initialise la tactic avec des valeurs
 
@@ -40,6 +43,7 @@ class Tactic:
         self.next_state = self.halt
         self.status_flag = Flags.INIT
         self.target = target
+        self.initialized = True
 
     def halt(self) -> Idle:
         """
