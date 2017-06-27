@@ -56,16 +56,7 @@ class GoKick(Tactic):
     def get_behind_ball(self):
         self.status_flag = Flags.WIP
 
-        player_x = self.player.pose.position.x
-        player_y = self.player.pose.position.y
-
-        ball_x = self.game_state.get_ball_position().x
-        ball_y = self.game_state.get_ball_position().y
-
-        vector_player_2_ball = np.array([ball_x - player_x, ball_y - player_y])
-        vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
-
-        if self._is_player_towards_ball_and_target():
+        if self._is_player_towards_ball_and_target(-0.95):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.get_behind_ball
@@ -90,10 +81,13 @@ class GoKick(Tactic):
             self.next_state = self.kick
         else:
             self.next_state = self.kick_charge
-        return Kick(self.game_state, self.player, 1, self.target)
+        return Kick(self.game_state, self.player, 10, self.target)
 
-    def halt(self):
-        self.status_flag = Flags.SUCCESS
+    def halt(self):  # FAIRE CECI DANS TOUTE LES TACTIQUES
+        if self.status_flag == Flags.INIT:
+            self.next_state = self.kick_charge
+        else:
+            self.status_flag = Flags.SUCCESS
         return Idle(self.game_state, self.player)
 
     def _get_distance_from_ball(self):
