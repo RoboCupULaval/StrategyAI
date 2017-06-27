@@ -5,6 +5,7 @@ import math as m
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.PID import PID
 from ai.Util.ai_command import AICommandType, AIControlLoopType, AICommand
 from ai.executors.executor import Executor
@@ -38,13 +39,13 @@ class MotionExecutor(Executor):
 
                 elif cmd.control_loop_type is AIControlLoopType.SPEED:
                     speed = cmd.pose_goal.rotate(-player.pose.orientation)
-                    cmd.speed = Pose(Position(speed.position.x, speed.position.y), speed.orientation)
+                    cmd.speed = SpeedPose(Position(speed.position.x, speed.position.y), speed.orientation)
 
                 elif cmd.control_loop_type is AIControlLoopType.OPEN:
-                    cmd.speed = cmd.pose_goal
+                    cmd.speed = SpeedPose(cmd.pose_goal)
 
             elif cmd.command is AICommandType.STOP:
-                cmd.speed = Pose(Position(0, 0), 0)
+                cmd.speed = SpeedPose(Position(0, 0), 0)
                 self.robot_motion[r_id].stop()
 
 

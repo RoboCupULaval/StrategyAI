@@ -127,7 +127,6 @@ class Pose(object):
 
         raise ValueError
 
-
     def _build_from_single(self, arg):
         orientation = 0
 
