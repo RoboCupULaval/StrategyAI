@@ -22,7 +22,7 @@ from ai.STA.Tactic.DemoFollowBall import DemoFollowBall
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.Joystick import Joystick
+# from ai.STA.Tactic.Joystick import Joystick
 
 
 class TacticBook(object):
@@ -44,7 +44,7 @@ class TacticBook(object):
                             "TestTurnOnYou": TestTurnOnYou,
                             'RotateAroundPosition': RotateAroundPosition,
                             "VaEtVient": VaEtVient,
-                            'Joystick': Joystick,
+                            # 'Joystick': Joystick,
                             'RobotIdent': RobotIdent,
                             'PositionForPass': PositionForPass,
                             'Capture': Capture,

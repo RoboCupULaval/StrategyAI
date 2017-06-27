@@ -10,7 +10,6 @@ from ai.STA.Tactic.DemoFollowBall import DemoFollowBall
 from ai.STA.Tactic.DemoFollowRobot import DemoFollowRobot
 from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.Stop import Stop
-from ai.STA.Tactic.Joystick import Joystick
 
 
 class BambaFollow(Strategy):

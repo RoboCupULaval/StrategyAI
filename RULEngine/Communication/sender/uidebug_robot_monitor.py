@@ -9,7 +9,7 @@ from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 
-PERIOD_BETWEEN_BAT_MONITORING = 0.1
+PERIOD_BETWEEN_BAT_MONITORING = 0.5
 
 
 class RobotStatus:

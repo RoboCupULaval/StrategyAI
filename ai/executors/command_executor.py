@@ -53,7 +53,7 @@ class CommandExecutor(Executor):
                 temp.append(Kick(player))
 
             if player.ai_command.command == AICommandType.MOVE:
-                assert (isinstance(player.ai_command.speed, Pose))
+                assert (isinstance(player.ai_command.speed, tuple))
                 temp.append(Move(player))
             elif player.ai_command.command == AICommandType.STOP:
                 temp.append(Stop(player))
