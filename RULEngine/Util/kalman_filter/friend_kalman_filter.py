@@ -32,12 +32,44 @@ class FriendKalmanFilter:
         self.H += [[0, 0, 0, 0, 1, 0] for _ in range(ncameras)]  # Orientation
         self.H = np.array(self.H)
         # Process covariance
-        values = np.array([10 ** 0, 10 ** 0, 10 ** 1, 10 ** 1, 10 ** (-1), 10 ** (-1)]) # Orientation Covariance was 0.01, SB
+        """
+        petite covariance = on a confiance au fait que le robot respecte ce qu'on lui dit de faire et que notre 
+                            modèle physique est cool.
+                            
+        grosse covariance = on pense que le robot agit comme un poméranien sur l'acide.
+        
+        Est-ce que notre robot est un poméranien sur l'acide? I don't think so.
+        
+        Think twice avant de mettre la covariance au dessus de 0.1.
+        
+        Si la covariance est trop basse, le kalman va prendre du temps avant de donner de l'importance aux données 
+        de la vision.
+        
+        Ca va se traduire un peu comme mettre du délais dans la vision. Aka, donner du pot au poméranien.
+        
+        Donnerais-tu du pot a un petit poméranien? Non! Non tu le ferais pas.
+        """
+        values = np.array([10 ** 2,
+                           10 ** 2,
+                           10 ** 2,
+                           10 ** 2,
+                           10 ** (-1),
+                           10 ** (-1)]) # Orientation Covariance was 0.01, SB
         self.Q = np.diag(values)
         # Observation covariance
-        values = [10 ** 0 for _ in range(ncameras)]
-        values += [10 ** 0 for _ in range(ncameras)]
-        values += [10 ** (-3) for _ in range(ncameras)]
+        """
+        petite covariance = on a confiance aux pouvoirs de la calibration et de ssl-vision (oui oui!)
+        grosse covariance = on pense que la vision agit comme un poméranien sur l'acide.
+
+        Est-ce que notre vision est un poméranien sur l'acide? I don't think so.
+        Think twice avant de mettre la covariance au dessus de 0.1.
+        
+        Sans dire que j'utiliserais ssl-vision pour conduire mon char, jpense que c'est quand même assez sharp pour 
+        mériter au moins 0.01 pour la position.
+        """
+        values = [10 ** (1) for _ in range(ncameras)]
+        values += [10 ** (1) for _ in range(ncameras)]
+        values += [10 ** (-1) for _ in range(ncameras)]
         self.R = np.diag(values)  # Pose * ncameras
         # Initial state covariance
         self.P = 10 ** 3 * np.eye(6)
@@ -51,6 +83,7 @@ class FriendKalmanFilter:
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
 
     def update(self, observation):
+        print(observation)
         obsx = []
         obsy = []
         obsth = []

@@ -5,7 +5,7 @@ from collections import deque
 from RULEngine.Command.command import *
 
 
-COMMUNICATION_SLEEP = 0.001
+COMMUNICATION_SLEEP = 0.05
 MOVE_COMMAND_SLEEP = 0.05
 
 

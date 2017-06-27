@@ -108,7 +108,7 @@ class RobotMotion(object):
         rotation_cmd = self.apply_rotation_constraints(rotation_cmd)
 
         # Translation control
-        if self.target_reached and self.target_speed <= self.setting.translation.deadzone:
+        if 0:#self.target_reached and self.target_speed <= self.setting.translation.deadzone:
             translation_cmd = np.array([self.x_controller.update(self.pose_error[Pos.X]),
                                         self.y_controller.update(self.pose_error[Pos.Y])])
             self.next_speed = 0
@@ -119,6 +119,7 @@ class RobotMotion(object):
 
         # Send new command to robot
         translation_cmd = fixed2robot(translation_cmd, self.current_orientation)
+        print(translation_cmd)
         return Pose(Position(translation_cmd[Pos.X], translation_cmd[Pos.Y]), rotation_cmd)
 
     def get_next_velocity(self) -> np.ndarray:
@@ -235,8 +236,8 @@ def get_control_setting(is_sim: bool):
         translation = {"kp": 0.8, "ki": 0.01, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
         rotation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
-        translation = {"kp": 0.8, "ki": 0.01, "kd": 0, "antiwindup": 20, "deadzone": 0.08, "sensibility": 0.02}
-        rotation = {"kp": 0.1, "ki": 0.01, "kd": 0, "antiwindup": 10, "deadzone": 0.1, "sensibility": 0.05}
+        translation = {"kp": 1, "ki": 0.001, "kd": 10, "antiwindup": 20, "deadzone": 0.08, "sensibility": 0.01}
+        rotation = {"kp": 1, "ki": 0.001, "kd": 10, "antiwindup": 10, "deadzone": 0.1, "sensibility": 0.01}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
