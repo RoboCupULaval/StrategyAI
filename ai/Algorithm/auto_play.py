@@ -149,14 +149,18 @@ class SimpleAutoPlay(AutoPlay):
 
             # The ball is free to take
             'FORCE_START': 'DoNothing',
+            'NORMAL_OFFENSE': 'Offense',
+            'NORMAL_DEFFENSE': 'DoNothing',
 
             'TIMEOUT': 'DoNothing',
 
-            'PREPARE_KICKOFF_OFFENSE': 'DoNothing',
+            # Kickoff
+            'PREPARE_KICKOFF_OFFENSE': 'PrepareKickOffOffense',
             'PREPARE_KICKOFF_DEFENSE': 'DoNothing',
             'OFFENSE_KICKOFF': 'DoNothing',
             'DEFENSE_KICKOFF': 'DoNothing',
 
+            # Penalty
             'PREPARE_PENALTY_OFFENSE': 'DoNothing',
             'PREPARE_PENALTY_DEFENSE': 'DoNothing',
             'OFFENSE_PENALTY': 'DoNothing',
