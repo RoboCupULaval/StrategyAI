@@ -18,7 +18,7 @@ from ai.STA.Strategy.PerpetualMovement import PerpetualMovement
 from ai.STA.Strategy.passes_with_decisions import PassesWithDecisions
 from ai.STA.Strategy.robocup_choreography import RobocupChoreography
 from ai.STA.Strategy.bamba_follow import BambaFollow
-from ai.STA.Strategy.kickoff_offense import KickOffOffense
+from ai.STA.Strategy.prepare_kickoff_offense import PrepareKickOffOffense
 
 class StrategyBook(object):
     """
@@ -45,7 +45,7 @@ class StrategyBook(object):
                               'RobocupChoreography': RobocupChoreography,
                               'BambaFollow': BambaFollow,
                               'PassesWithDecisions': PassesWithDecisions,
-                              'KickOffOffense' : KickOffOffense
+                              'PrepareKickOffOffense' : PrepareKickOffOffense
                               }
 
     def get_strategies_name_list(self) -> List[str]:
