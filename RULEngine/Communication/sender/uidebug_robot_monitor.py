@@ -37,6 +37,7 @@ class UIDebugRobotMonitor(object):
 
     def _monitor_loop(self):
         """ Moniteur le niveau des batteries des robots. """
+        return
         while not self.terminate.is_set():
             for robot_id in range(PLAYER_PER_TEAM):
                 # Ask for batterie level

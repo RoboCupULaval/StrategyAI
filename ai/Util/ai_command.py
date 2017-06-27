@@ -1,7 +1,9 @@
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from RULEngine.Util.SpeedPose import SpeedPose
 from enum import Enum
+
 
 
 class AICommandType(Enum):
@@ -40,7 +42,7 @@ class AICommand(object):
         self.charge_kick = other_args.get("charge_kick", False)
         self.kick = other_args.get("kick", False)
         self.pose_goal = other_args.get("pose_goal", Pose())
-        self.speed = (Position(), 0)  # Change to SpeedPose Object
+        self.speed = SpeedPose()  # TODO: Change to SpeedPose Object
         self.wheel_speed = (0, 0, 0, 0)
         self.cruise_speed = other_args.get("cruise_speed", 1)
 
