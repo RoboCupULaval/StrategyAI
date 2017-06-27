@@ -13,11 +13,10 @@ class FaceTarget(Tactic):
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None):
         super().__init__(game_state, player, target, args)
         self.next_state = exec
+        self.player_position = player.pose.position
 
     def exec(self):
         self.status_flag = Flags.WIP
-        player_position = self.player.pose.position
-        print(player_position)
-        target_orientation = (self.target.position - player_position).angle()
-        return AICommand(self.player, AICommandType.MOVE, pose_goal=Pose(player_position, target_orientation))
+        target_orientation = (self.target.position - self.player.pose.position).angle()
+        return AICommand(self.player, AICommandType.MOVE, pose_goal=Pose(self.player_position, target_orientation))
 
