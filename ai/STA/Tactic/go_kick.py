@@ -89,7 +89,7 @@ class GoKick(Tactic):
             self.next_state = self.kick
         else:
             self.next_state = self.kick_charge
-        return Kick(self.game_state, self.player, 10, self.target)
+        return Kick(self.game_state, self.player, 3, self.target) #TODO (pturgeon) contante de force magique
 
     def halt(self):  # FAIRE CECI DANS TOUTE LES TACTIQUES
         if self.status_flag == Flags.INIT:

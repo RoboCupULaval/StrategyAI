@@ -7,6 +7,7 @@ from ai.Algorithm.evaluation_module import closest_player_to_point
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.go_kick import GoKick
+from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.states.game_state import GameState
 from . Strategy import Strategy
 
@@ -28,7 +29,8 @@ class Offense(Strategy):
         count = 0
         for i in GameState().my_team.available_players.values():
             if not i.id == goalkeeper.id:
-                self.add_tactic(i.id, GoToPositionPathfinder(self.game_state, i, self.robots_position[count]))
+                #self.add_tactic(i.id, GoToPositionPathfinder(self.game_state, i, self.robots_position[count]))
+                self.add_tactic(i.id, PositionForPass(self.game_state, i, auto_position=True))#self.robots_position[count]))
                 self.add_tactic(i.id, GoKick(self.game_state, i, auto_update_target=True))
 
                 self.add_condition(i.id, 0, 1, partial(self.is_closest, i))
