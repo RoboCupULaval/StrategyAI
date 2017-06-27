@@ -171,7 +171,14 @@ class TestRobotMotion(unittest.TestCase):
         self.rm.stop()
 
     def test_apply_translation_constraints(self):
+        deadzone = self.rm.setting.translation.deadzone
         self.assertEqual(self.rm.apply_translation_constraints(Position(0, 0)), Position(0, 0))
+        self.assertEqual(self.rm.apply_translation_constraints(Position(-deadzone, 0)), Position(-deadzone, 0))
+        self.rm.stop()
+        self.assertEqual(self.rm.apply_translation_constraints(Position(deadzone, 0)), Position(deadzone, 0))
+        self.rm.stop()
+        self.assertEqual(self.rm.apply_translation_constraints(Position(0, -deadzone)), Position(0, -deadzone))
+        self.rm.stop()
 
     def test_target_reached(self):
         self.rm.target_speed = 1

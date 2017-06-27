@@ -15,8 +15,8 @@ class SpeedPose(Pose):
         return self._orientation
 
     @orientation.setter
-    def orientation(self, orientation):
-        self._orientation = float(orientation)
+    def orientation(self, angular_speed):
+        self._orientation = float(angular_speed)
 
     def __add__(self, other: Union['SpeedPose', Position]):
         if isinstance(other, SpeedPose):

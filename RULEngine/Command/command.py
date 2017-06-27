@@ -63,9 +63,9 @@ class Move(Command):
 
     def package_command(self, mcu_communicator: McuCommunicator) -> None:
         mcu_communicator.sendSpeed(self.player.id,
-                                   self.cmd_repr.position.x,
-                                   self.cmd_repr.position.y,
-                                   self.cmd_repr.orientation)
+                                   self.cmd_repr[0].x,
+                                   self.cmd_repr[0].y,
+                                   self.cmd_repr[1])
 
 
 class Kick(Command):

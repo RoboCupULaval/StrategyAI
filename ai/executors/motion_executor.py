@@ -107,40 +107,41 @@ class RobotMotion(object):
             translation_cmd = Position(self.x_controller.update(self.pose_error.position.x),
                                        self.y_controller.update(self.pose_error.position.y))
             self.next_speed = 0
-            print('target reached:', self.pose_error.position)
         else:
             translation_cmd = self.get_next_velocity()
 
         translation_cmd = self.apply_translation_constraints(translation_cmd)
 
+        print('{:5.3f}, {}, {:5.3f}, {}'.format(self.current_speed, translation_cmd, self.next_speed, self.target_direction))
+
         # Adjust command to robot's orientation
         translation_cmd = translation_cmd.rotate(-self.current_pose.orientation)
 
-        print('{:5.3f}, {:5.3f}, {:5.3f}'.format(self.current_speed, translation_cmd.norm(), rotation_cmd))
-
-        return Pose(translation_cmd, rotation_cmd)
+        return SpeedPose(translation_cmd, rotation_cmd)
 
     def get_next_velocity(self) -> Position:
         """Return the next velocity according to a constant acceleration model of a point mass.
            It try to produce a trapezoidal velocity path with the required cruising and target speed.
            The target speed is the speed that the robot need to reach at the target point."""
 
-        deceleration_factor = 2
+        deceleration_factor = 1
 
-        if not np.isclose(self.current_speed, self.next_speed, atol=0.25):
-            self.next_speed = self.current_speed
+        #if not np.isclose(self.current_speed, self.next_speed, atol=0.25):
+        #    self.next_speed = self.current_speed
 
         if self.target_reached():  # We need to go to target speed
             if self.next_speed < self.target_speed:  # Target speed is faster than current speed
                 self.next_speed += self.setting.translation.max_acc * self.dt
                 if self.next_speed > self.target_speed:  # Next_speed is too fast
                     self.next_speed = self.target_speed
+                print("Accelerating")
             else:  # Target speed is slower than current speed
                 self.next_speed -= deceleration_factor * self.setting.translation.max_acc * self.dt
+                print("Slowing down")
         else:  # We need to go to the cruising speed
             if self.next_speed < self.cruise_speed:  # Going faster
                 self.next_speed += self.setting.translation.max_acc * self.dt
-
+            print("Going to cruising speed")
         self.next_speed = np.clip(self.next_speed, 0, self.cruise_speed)  # We don't want to go faster than cruise speed
         next_velocity = self.target_direction * self.next_speed
 
@@ -151,27 +152,29 @@ class RobotMotion(object):
         sensibility = self.setting.rotation.sensibility
         max_speed = self.setting.rotation.max_speed
 
-        if abs(r_cmd) < sensibility:
-            r_cmd = 0
-        elif abs(r_cmd) < deadzone:
-            r_cmd = m.copysign(deadzone, r_cmd)
-        else:
-            r_cmd = clamp(r_cmd, -max_speed, max_speed)
+        r_cmd = RobotMotion.apply_deadzone(r_cmd, deadzone, sensibility)
+        r_cmd = clamp(r_cmd, -max_speed, max_speed)
+
         return r_cmd
 
     def apply_translation_constraints(self, t_cmd: Position) -> Position:
         deadzone = self.setting.translation.deadzone
         sensibility = self.setting.translation.sensibility
-        signs = np.copysign(1, t_cmd.view(np.ndarray))
 
         t_cmd = self.limit_acceleration(t_cmd)
         t_cmd = self.limit_speed(t_cmd)
-
-        t_cmd[np.abs(t_cmd) < sensibility] = 0
-        t_cmd[np.abs(t_cmd) < deadzone] = deadzone
-        t_cmd = np.copysign(t_cmd, signs)
+        t_cmd[0] = RobotMotion.apply_deadzone(t_cmd[0], deadzone, sensibility)
+        t_cmd[1] = RobotMotion.apply_deadzone(t_cmd[1], deadzone, sensibility)
 
         return t_cmd
+
+    @staticmethod
+    def apply_deadzone(value, deadzone, sensibility):
+        if abs(value) < sensibility:
+            value = 0
+        elif abs(value) <= deadzone:
+            value = m.copysign(deadzone, value)
+        return value
 
     def limit_acceleration(self, translation_cmd: Position) -> Position:
         delta_speed = translation_cmd - self.last_translation_cmd
@@ -207,7 +210,7 @@ class RobotMotion(object):
         # Dynamics constraints
         self.setting.translation.max_acc = self.ws.game_state.get_player(self.id).max_acc
         self.setting.translation.max_speed = self.ws.game_state.get_player(self.id).max_speed
-        self.setting.rotation.max_speed = self.ws.game_state.get_player(self.id).max_angular_speed
+        self.setting.rotation.max_speed = cmd.cruise_speed  # self.ws.game_state.get_player(self.id).max_angular_speed
 
         # Current state of the robot
         self.current_pose = self.ws.game_state.game.friends.players[self.id].pose.scale(1 / 1000)
@@ -244,8 +247,8 @@ def get_control_setting(is_sim: bool):
         translation = {"kp": 0.8, "ki": 0.01, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
         rotation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
-        translation = {"kp": 0.8, "ki": 0.01, "kd": 0, "antiwindup": 20, "deadzone": 0.2, "sensibility": 0.075}
-        rotation = {"kp": 0.05, "ki": 0.02, "kd": 0, "antiwindup": 20, "deadzone": 0.3, "sensibility": 0.15}
+        translation = {"kp": 0.5, "ki": 0.01, "kd": 0, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0.05}
+        rotation = {"kp": 1, "ki": 0.1, "kd": 0, "antiwindup": 20, "deadzone": 0.2, "sensibility": 0.1}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
