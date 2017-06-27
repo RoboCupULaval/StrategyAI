@@ -51,7 +51,7 @@ class SerialCommandSender(object):
 
         if isinstance(command, Move) or isinstance(command, Stop):
             self.command_dict[command.player.id] = command
-        else:
+        elif isinstance(command, Command):
             self.command_queue.append(command)
 
     def send_responding_command(self, command: ResponseCommand):

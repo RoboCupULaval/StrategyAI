@@ -25,7 +25,7 @@ class Node:
         """
         :param p_tactic: La tactique du noeud.
         """
-        print(p_tactic)
+        # print(p_tactic)
         assert isinstance(p_tactic, Tactic)
         self.tactic = p_tactic
         self.vertices = []

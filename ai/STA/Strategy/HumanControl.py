@@ -11,13 +11,15 @@ class HumanControl(Strategy):
         super().__init__(game_state)
 
         for r in Role:
-            self.add_tactic(r, Stop)
-            print(r)
-        print("HUMANCONTROL out")
+            p = self.game_state.get_player_by_role(r)
+            if p is None:
+                continue
+            self.add_tactic(r, Stop(self.game_state, p))
 
     def assign_tactic(self, tactic: Tactic, robot_id: int):
         assert isinstance(tactic, Tactic)
         assert isinstance(robot_id, int)
 
         self.roles_graph[robot_id].remove_node(0)
-        self.add_tactic(robot_id, tactic)
+        r = self.game_state.get_role_by_player_id(robot_id)
+        self.add_tactic(r, tactic)

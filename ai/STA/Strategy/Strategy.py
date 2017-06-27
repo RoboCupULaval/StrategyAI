@@ -5,7 +5,6 @@ from typing import List, Tuple, Callable, Dict
 
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.constant import PLAYER_ON_FIELD_PER_TEAM
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
 from ai.STA.Tactic.Tactic import Tactic
@@ -26,6 +25,11 @@ class Strategy(metaclass=ABCMeta):
         assert isinstance(p_game_state, GameState)
         self.game_state = p_game_state
         self.roles_graph = {r: Graph() for r in Role}
+        players = [p for p in self.game_state.my_team.available_players.values()]
+        roles = [r for r in Role]
+        role_mapping = dict(zip(roles, players))
+        self.game_state.map_players_to_roles_by_player(role_mapping)
+
 
     def add_tactic(self, role: Role, tactic: Tactic) -> None:
         """
@@ -59,6 +63,9 @@ class Strategy(metaclass=ABCMeta):
         state = []
         for r in Role:
             current_tactic = self.roles_graph[r].get_current_tactic()
+            if current_tactic is None:
+                continue
+
             try:
                 tactic_name = current_tactic.current_state.__name__
             except AttributeError:
@@ -74,29 +81,25 @@ class Strategy(metaclass=ABCMeta):
         envoyée au robot i.
         """
         commands = {}
-        for i, g in enumerate(self.roles_graph):
-            print(i,"->",g)
+        # for i, g in enumerate(self.roles_graph):
+        #     print(i,"->",g)
         # TODO We should probably iterate over game_state.RoleMapping instead of Role
         # TODO It would allow us to deal with fewer than 6 roles
         for r in Role:
+            player = self.game_state.get_player_by_role(r)
+            if player is None:
+                continue
+            tactic = self.roles_graph.get(r, None)
+            if tactic is None:
+                continue
+
             try:
-                player = self.game_state.get_player_by_role(r)
-                tactic = self.roles_graph[r]
                 commands[player.id] = self.roles_graph[r].exec()
-                player.ai_command = commands[player.id]
-
             except EmptyGraphException as e:
-                print(r)
+                continue
+            player.ai_command = commands[player.id]
+
         return commands
-
-    def _update_roles_translation(self) -> None:
-        pass
-
-    def _store_tactic_arguments(self, role: Role, node_id: int, tactic_arguments = List) -> None:
-        self._tactics_arguments[role][node_id] = tactic_arguments
-
-    def _retrive_tactic_arguments(self, role: Role, node_id: int) -> List:
-        return self._tactics_arguments[role][node_id]
 
     def __str__(self):
         return self.__class__.__name__
