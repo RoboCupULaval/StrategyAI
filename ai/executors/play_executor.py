@@ -35,14 +35,14 @@ class PlayExecutor(Executor):
 
         self._execute_strategy()
 
-        #if time.time() - self.last_time > 0.25:
+        if time.time() - self.last_time > 0.25:
             # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
-        self._send_books()
-        self.ws.debug_interface.send_team_color()
+            self._send_books()
+            self.ws.debug_interface.send_team_color()
+            self.last_time = time.time()
 
         self._send_robots_status()
         self._send_auto_state()
-        self.last_time = time.time()
 
 
     def _execute_strategy(self) -> None:
