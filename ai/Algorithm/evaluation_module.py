@@ -3,6 +3,7 @@
 import numpy as np
 import math
 
+from RULEngine.Game.Field import FieldSide
 from RULEngine.Util import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import PLAYER_PER_TEAM, TeamColor, ROBOT_RADIUS
@@ -55,16 +56,10 @@ def is_ball_moving(min_speed=0.1):
 
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
-    if GameState().const["FIELD_GOAL_YELLOW_X_LEFT"] > 0:
-        if TeamColorService().OUR_TEAM_COLOR is TeamColor.BLUE: # BLUE
-            return GameState().get_ball_position().x < 0
-        else: # YELLOW
-            return GameState().get_ball_position().x > 0
+    if GameState().field.our_side == FieldSide.POSITIVE:
+        return GameState().get_ball_position().x > 0
     else:
-        if TeamColorService().OUR_TEAM_COLOR is TeamColor.BLUE: # BLUE
-            return GameState().get_ball_position().x > 0
-        else: # YELLOW
-            return GameState().get_ball_position().x < 0
+        return GameState().get_ball_position().x < 0
 
 
 def is_target_reached(player, target: Position, min_dist=0.01):
@@ -91,10 +86,7 @@ def best_passing_option(passing_player):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si but est la meilleure possibilité
 
     score_min = float("inf")
-    if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW :# YELLOW
-        goal = Position(GameState().field.constant["FIELD_GOAL_BLUE_X_LEFT"], 0)
-    else:
-        goal = Position(GameState().field.constant["FIELD_GOAL_YELLOW_X_RIGHT"], 0)
+    goal = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
 
     for i in GameState().my_team.available_players.values():
         if i.id != passing_player.id:
