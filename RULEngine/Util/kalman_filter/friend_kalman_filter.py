@@ -83,7 +83,6 @@ class FriendKalmanFilter:
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
 
     def update(self, observation):
-        print(observation)
         obsx = []
         obsy = []
         obsth = []
