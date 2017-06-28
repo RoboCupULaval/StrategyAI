@@ -150,14 +150,6 @@ class Field:
 
                 self.constant["FIELD_GOAL_Y_TOP"] = self._defense_radius + (self._defense_stretch / 2)
                 self.constant["FIELD_GOAL_Y_BOTTOM"] = -self.constant["FIELD_GOAL_Y_TOP"]
-<<<<<<< HEAD
-                self.constant["GOAL_WIDTH"] = self.constant["FIELD_GOAL_Y_TOP"] * 2.
-                self.constant["FIELD_GOAL_BLUE_X_LEFT"] = self.constant["FIELD_X_LEFT"]
-                self.constant["FIELD_GOAL_BLUE_X_RIGHT"] = self.constant["FIELD_X_LEFT"] + self.constant["FIELD_GOAL_RADIUS"]
-                self.constant["FIELD_GOAL_YELLOW_X_LEFT"] = self.constant["FIELD_X_RIGHT"] - self.constant["FIELD_GOAL_RADIUS"]
-                self.constant["FIELD_GOAL_YELLOW_X_RIGHT"] = self.constant["FIELD_X_RIGHT"]
-=======
->>>>>>> fix/motion_executor_speed
 
                 if self.our_side == FieldSide.POSITIVE:
                     self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self.constant["FIELD_X_NEGATIVE"]
@@ -289,22 +281,13 @@ negative_side_constant = {
 
 
     # Goal Parameters
-<<<<<<< HEAD
-    "GOAL_WIDTH": 500,
-    "FIELD_GOAL_Y_TOP": 536,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
-    "FIELD_GOAL_Y_BOTTOM": -536,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
-    "FIELD_GOAL_BLUE_X_LEFT": -1636,  # FIELD_X_LEFT
-    "FIELD_GOAL_BLUE_X_RIGHT": -1272,  # FIELD_X_LEFT + FIELD_GOAL_RADIUS
-    "FIELD_GOAL_YELLOW_X_LEFT": 1272,  # FIELD_X_RIGHT - FIELD_GOAL_RADIUS
-    "FIELD_GOAL_YELLOW_X_RIGHT": 1636,  # FIELD_X_RIGHT
-=======
+
     "FIELD_GOAL_Y_TOP": 1250,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
     "FIELD_GOAL_Y_BOTTOM": -1250,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
     "FIELD_OUR_GOAL_X_EXTERNAL": -4500,  # FIELD_X_LEFT
     "FIELD_OUR_GOAL_X_INTERNAL": -3500,  # FIELD_X_LEFT + FIELD_GOAL_RADIUS
     "FIELD_THEIR_GOAL_X_INTERNAL": 3500,  # FIELD_X_RIGHT - FIELD_GOAL_RADIUS
     "FIELD_THEIR_GOAL_X_EXTERNAL": 4500,  # FIELD_X_RIGHT
->>>>>>> fix/motion_executor_speed
 
     # Field Positions
     "FIELD_OUR_GOAL_TOP_CIRCLE": Position(-4500, 250),  # FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2)

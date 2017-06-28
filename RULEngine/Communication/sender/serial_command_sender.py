@@ -4,8 +4,6 @@ from collections import deque
 
 from RULEngine.Command.command import *
 
-
-
 COMMUNICATION_SLEEP = 0.01
 MOVE_COMMAND_SLEEP = 0.04
 
