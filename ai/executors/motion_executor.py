@@ -215,7 +215,7 @@ class RobotMotion(object):
         # Dynamics constraints
         self.setting.translation.max_acc = self.ws.game_state.get_player(self.id).max_acc
         self.setting.translation.max_speed = self.ws.game_state.get_player(self.id).max_speed
-        self.setting.rotation.max_speed = cmd.cruise_speed  # self.ws.game_state.get_player(self.id).max_angular_speed
+        self.setting.rotation.max_speed = self.ws.game_state.get_player(self.id).max_angular_speed  # self.ws.game_state.get_player(self.id).max_angular_speed
 
         # Current state of the robot
         self.current_pose = self.ws.game_state.game.friends.players[self.id].pose.scale(1 / 1000)
@@ -253,7 +253,7 @@ def get_control_setting(is_sim: bool):
         rotation = {"kp": 2, "ki": 0, "kd": 0.1, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
         translation = {"kp": 1, "ki": 0.0, "kd": 5, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0.05}
-        rotation = {"kp": 1, "ki": 0.1, "kd": 0, "antiwindup": 20, "deadzone": 0.2, "sensibility": 0.1}
+        rotation = {"kp": 2, "ki": 0, "kd": 5, "antiwindup": 20, "deadzone": 0.2, "sensibility": 0.1}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
