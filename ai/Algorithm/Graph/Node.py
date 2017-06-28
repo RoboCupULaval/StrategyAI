@@ -80,7 +80,7 @@ class Node:
         """
         :return: Une représentation du noeud sous forme d'une chaîne de caractères.
         """
-        output_string = "Tactic: " + str(self.tactic) + "/ Vertices: "
+        output_string = "Tactic: " + str(self.tactic) + "    Vertices: "
         for vertex in self.vertices:
             output_string += "\n    " + str(vertex)
         return output_string
