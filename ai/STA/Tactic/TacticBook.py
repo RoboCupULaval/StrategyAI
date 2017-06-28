@@ -36,7 +36,7 @@ class TacticBook(object):
                             'ReceivePass': ReceivePass,
                             'GoalKeeper': GoalKeeper,
                             'CoverZone': ProtectZone,
-                            #'GoGetBall': GoGetBall,
+                            'GoGetBall': GoGetBall,
                             'DemoFollowBall': DemoFollowBall,
                             'DemoFollowRobot': DemoFollowRobot,
                             'Stop': Stop,

@@ -31,8 +31,8 @@ class AICommand(object):
         :param p_command: (AICommandType) le type de AICommand
         :param other_args: (Dict) les flags et arguments à passer
         """
-        assert isinstance(player, OurPlayer), "Création d'un ai_command sans passer une instance de OurPlayer."
-        assert isinstance(command_type, AICommandType), "Besoin d'une AiCommandType!"
+        assert isinstance(player, OurPlayer), "ai_command object need OurPlayer object."
+        assert isinstance(command_type, AICommandType), "ai_command object need a AiCommandType."
         self.player = player
         self.robot_id = player.id
         self.command = command_type
@@ -42,8 +42,6 @@ class AICommand(object):
         self.charge_kick = other_args.get("charge_kick", False)
         self.kick = other_args.get("kick", False)
         self.pose_goal = other_args.get("pose_goal", Pose())
-        self.speed = SpeedPose()  # TODO: Change to SpeedPose Object
-        self.wheel_speed = (0, 0, 0, 0)
         self.cruise_speed = other_args.get("cruise_speed", 1)
 
         self.control_loop_type = other_args.get("control_loop_type", AIControlLoopType.POSITION)
@@ -55,17 +53,5 @@ class AICommand(object):
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    # Getter and setter here?
-
     def __str__(self):
         return str(self.player.id)+"  " + str(self.player.team.team_color) + "  ->  "+str(id(self))
-
-
-class RotateAroundCommand(object):
-    """ Please, move me somewhere else"""
-    # TODO what it wants ^
-    def __init__(self, radius=0.0, direction=0.0, orientation=0.0, center_position=Position()):
-        self.radius = radius
-        self.direction = direction
-        self.orientation = orientation
-        self.center_position = center_position

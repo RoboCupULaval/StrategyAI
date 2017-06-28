@@ -37,8 +37,7 @@ class RobotIdent(Tactic):
             self.status_flag = Flags.WIP
 
             # Creating speed pose
-            cmd_vx, cmd_vy, cmd_vt = self.commands[self.cmd_id]
-            speed_pose = SpeedPose(Position(cmd_vx, cmd_vy), cmd_vt)
+            speed_pose = SpeedPose(self.commands[self.cmd_id])
             self.cmd_id += 1
 
             # Saving data
