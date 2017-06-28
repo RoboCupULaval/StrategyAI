@@ -31,10 +31,15 @@ class SerialCommandSender(object):
     def send_loop(self):
         while not self.terminate.is_set():
             if time.time() - self.last_time > MOVE_COMMAND_SLEEP:
-                for next_command in self.command_dict.values():
-                    # print(c)
-                    self._package_commands(next_command)
-                    time.sleep(COMMUNICATION_SLEEP)
+                try:
+                    for next_command in self.command_dict.values():
+                        # print(c)
+                        self._package_commands(next_command)
+                        time.sleep(COMMUNICATION_SLEEP)
+                except RuntimeError as r:
+                    # TODO FIXME this bug, happens when the dict gets changed inbetween loop because of the time.sleep
+                    # possibly making thread switch and then we add a new entry in the command dict after an ia loop.
+                    print("FIXME:",self.__class__.__name__)
                 self.last_time = time.time()
             else:
                 time.sleep(COMMUNICATION_SLEEP)

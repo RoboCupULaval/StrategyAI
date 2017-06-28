@@ -20,7 +20,7 @@ class Command(object):
         assert isinstance(player, OurPlayer)
         self.player = player
         # fixme Why does command need the speed???
-        self.cmd_repr = [0, 0]
+        self.cmd_repr = Pose()
         if player.ai_command is not None:
             self.cmd_repr = player.ai_command.speed
 
