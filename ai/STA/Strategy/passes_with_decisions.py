@@ -26,7 +26,7 @@ class PassesWithDecisions(Strategy):
         self.player_ID_no1 = 2
         self.player_ID_no2 = 3
         self.goal_ID = None
-        self.goal = (Pose(Position(self.game_state.const["FIELD_GOAL_YELLOW_X_LEFT"], 0), 0))
+        self.goal = (Pose(Position(self.game_state.const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0))
 
         self.add_tactic(self.passing_ID, Stop(self.game_state, self.passing_ID))
         self.add_tactic(self.passing_ID, PassToPlayer(self.game_state, self.passing_ID, target_id=self.player_ID_no1))

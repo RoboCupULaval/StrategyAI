@@ -25,5 +25,5 @@ Installer le language de programmation qui sert à faire rouler l'IA
 
 Dans un terminal se trouvant dans le dossier StrategyIA/ run the command:
 ```
-pip install -e requirements.txt
+pip install -r requirements.txt
 ```

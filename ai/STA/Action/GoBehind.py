@@ -53,10 +53,7 @@ class GoBehind(Action):
 
         # TODO find something better MGL 2017/05/22
         if self.position2 is None:
-            if game_state.get_our_team_color() == TeamColor.YELLOW:  # yellow
-                self.position2 = game_state.const["FIELD_GOAL_BLUE_MID_GOAL"]
-            else:
-                self.position2 = game_state.const["FIELD_GOAL_YELLOW_MID_GOAL"]
+            self.position2 = game_state.const["FIELD_THEIR_GOAL_MID_GOAL"]
 
     def get_destination(self):
         """

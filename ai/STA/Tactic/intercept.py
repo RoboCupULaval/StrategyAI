@@ -95,10 +95,7 @@ class Intercept(Tactic):
             self.target = None
             dist_behind = 250
         if self.target is None:
-            if self.game_state.get_our_team_color() == 0:  # yellow
-                self.target = Pose(self.game_state.const["FIELD_GOAL_BLUE_MID_GOAL"], 0)
-            else:
-                self.target = Pose(self.game_state.const["FIELD_GOAL_YELLOW_MID_GOAL"], 0)
+            self.target = Pose(self.game_state.const["FIELD_THEIR_GOAL_MID_GOAL"], 0)
         if self._is_player_towards_ball_and_target():
                 self.next_state = self.grab_ball
         else:

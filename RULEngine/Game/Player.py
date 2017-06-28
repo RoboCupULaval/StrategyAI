@@ -1,17 +1,15 @@
 # Under MIT License, see LICENSE.txt
-
+import RULEngine.Util.Position
 from RULEngine.Util.kalman_filter.enemy_kalman_filter import EnemyKalmanFilter
 from config.config_service import ConfigService
-from ..Util.Pose import Pose
-from ..Util.Position import Position
+from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
 
 
 class Player:
 
     def __init__(self, team, id):
-
         self.cmd = [0, 0, 0]
-
         self.id = id
         self.team = team
         self.pose = Pose()
@@ -25,7 +23,6 @@ class Player:
         return self.id == pid
 
     def _update(self, pose):
-        old_pose = self.pose
         self.pose = pose
 
     def _enemy_kalman_update(self, poses, delta):

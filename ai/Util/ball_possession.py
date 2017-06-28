@@ -14,7 +14,7 @@ def can_get_ball(game_state, player_id, target):
     player_orientation = game_state.get_player_pose(player_id).orientation
     if is_inside_circle(player_position, ball_position, RADIUS_TO_GRAB_BALL):
 
-        if fabs(player_orientation - get_angle(player_position, ball_position)) <= ANGLE_TO_GRAB_BALL:
+        if compare_angle(player_orientation, (player_position - ball_position).angle(), abs_tol=ANGLE_TO_GRAB_BALL/2):
             return True
 
     return False

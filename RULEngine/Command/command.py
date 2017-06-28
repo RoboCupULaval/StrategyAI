@@ -8,6 +8,7 @@
     contrôler les robots.
 """
 from abc import abstractmethod
+import threading
 from pyhermes import McuCommunicator
 
 from RULEngine.Game.OurPlayer import OurPlayer
@@ -18,11 +19,42 @@ class Command(object):
     def __init__(self, player: OurPlayer):
         assert isinstance(player, OurPlayer)
         self.player = player
-        self.cmd_repr = player.ai_command.speed
+        # fixme Why does command need the speed???
+        if player.ai_command is not None:
+            self.cmd_repr = player.ai_command.speed
 
     @abstractmethod
     def package_command(self, mcu_communicator: McuCommunicator):
         pass
+
+
+class ResponseCommand(Command):
+    def __init__(self, player: OurPlayer, pause_cond: threading.Condition):
+        super().__init__(player)
+        self.pause_cond = pause_cond
+        self.completed = False
+
+    def wakeup_thread(self):
+        # We don't want wake up
+        with self.pause_cond:
+            self.completed = True
+            self.pause_cond.notify()
+
+    def pause_thread(self):
+        with self.pause_cond:
+            if not self.completed:
+                self.pause_cond.wait()
+
+    def package_command(self, mcu_communicator: McuCommunicator):
+        pass
+
+
+class GetBattery(ResponseCommand):
+    def __init__(self, player, pause_cond: threading.Condition):
+        super().__init__(player, pause_cond)
+
+    def package_command(self, mcu_communicator: McuCommunicator):
+        return mcu_communicator.getBatterie(self.player.id)
 
 
 class Move(Command):

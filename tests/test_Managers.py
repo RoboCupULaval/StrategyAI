@@ -20,7 +20,6 @@ class TestGameStateManager(unittest.TestCase):
         self.referee = Referee
         self.game.set_referee(self.referee)
         self.tcsvc = TeamColorService(TeamColor.BLUE)
-        self.game.set_our_team_color(self.tcsvc.OUR_TEAM_COLOR)
         self.game_world_OK = ReferenceTransferObject(self.game)
         self.game_world_OK.set_team_color_svc(self.tcsvc)
 

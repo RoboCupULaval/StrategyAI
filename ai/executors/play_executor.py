@@ -35,14 +35,14 @@ class PlayExecutor(Executor):
 
         self._execute_strategy()
 
-        #if time.time() - self.last_time > 0.25:
+        if time.time() - self.last_time > 0.25:
             # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
-        self._send_books()
-        self.ws.debug_interface.send_team_color()
+            self._send_books()
+            self.ws.debug_interface.send_team_color()
+            self.last_time = time.time()
 
         self._send_robots_status()
         self._send_auto_state()
-        self.last_time = time.time()
 
 
     def _execute_strategy(self) -> None:
@@ -72,10 +72,10 @@ class PlayExecutor(Executor):
             tactic_name = state[1]
             action_name = state[2]
             target = (int(state[3].position.x), int(state[3].position.y))
-            self.ws.debug_interface.send_robot_status(player_id,
-                                                      tactic_name,
-                                                      action_name,
-                                                      target)
+            self.ws.debug_interface.send_robot_strategic_state(player_id,
+                                                               tactic_name,
+                                                               action_name,
+                                                               target)
 
     def _send_auto_state(self) -> None:
         self.ws.debug_interface.send_play_info(self.ws.game_state.game.referee.info,

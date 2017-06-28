@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 class FriendKalmanFilter:
     def __init__(self):
         cfg = ConfigService()
-        self.default_dt = cfg.config_dict["GAME"]["ai_timestamp"]
+        self.default_dt = float(cfg.config_dict["GAME"]["ai_timestamp"])
         ncameras = int(cfg.config_dict["IMAGE"]["number_of_camera"])
 
         # Transition model

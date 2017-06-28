@@ -1,7 +1,9 @@
 # Under MIT License, see LICENSE.txt
+import time
 
 from RULEngine.Debug.debug_command import DebugCommand
 from RULEngine.Util.singleton import Singleton
+from RULEngine.Game.OurPlayer import OurPlayer
 from config.config_service import ConfigService
 
 
@@ -13,7 +15,7 @@ class Color(object):
         self.b = b
 
     def repr(self):
-        return (self.r, self.g, self.b)
+        return self.r, self.g, self.b
 
 # Solarized color definition
 YELLOW = Color(181, 137, 0)
@@ -148,11 +150,25 @@ class DebugInterface(metaclass=Singleton):
         cmd = DebugCommand(1001, cmd_tactics_dict)
         self.debug_state.append(cmd)
 
-    def send_robot_status(self, player_id, tactic, action, target="not implemented"):
-        data = {self.team_color: {player_id: {'tactic': tactic,
-                                     'action': action,
-                                     'target': target}}}
+    def send_robot_strategic_state(self, player: OurPlayer, tactic: str, action: str, target: str="not implemented"):
+        teamcolor_str = player.team.team_color.__str__()
+        data = {teamcolor_str: {player.id: {'tactic': tactic,
+                                            'action': action,
+                                            'target': target}}}
         cmd = DebugCommand(1002, data)
+        self.debug_state.append(cmd)
+
+    def send_robot_state(self, player_id, battery_volt, time_last_response):
+        MAX_BAT = 16.4
+        MIN_BAT = 12.0
+        battery_lvl = (battery_volt - MIN_BAT) / (MAX_BAT - MIN_BAT) * 100
+        time_since_last_response = time.time() - time_last_response
+        if time_since_last_response > 5.0:
+            battery_lvl = 0
+        data = {'blue': {player_id: {'battery_lvl': battery_lvl,
+                                     'time_since_last_response': time_since_last_response
+                                     }}}
+        cmd = DebugCommand(1006, data)
         self.debug_state.append(cmd)
 
     def send_team_color(self):
