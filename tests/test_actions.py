@@ -23,7 +23,7 @@ from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.MoveToDribblingBall import MoveToDribblingBall
 from ai.STA.Action.ProtectGoal import ProtectGoal
 from ai.states.game_state import GameState
-from ai.Util.ai_command import AICommand, AICommandType
+from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
 
 A_DELTA_T = 1
 A_PLAYER_ID = 1
@@ -188,7 +188,7 @@ class TestActions(unittest.TestCase):
         expected_cmd = AICommand(self.a_player, AICommandType.MOVE,
                                  **{"pose_goal": self.a_player.pose,
                                     "kick": True,
-                                    "speed_flag":True})
+                                    "control_loop_type": AIControlLoopType.SPEED,})
         return_cmd = self.kick.exec()
         self.assertEqual(expected_cmd, return_cmd)
 
@@ -197,7 +197,7 @@ class TestActions(unittest.TestCase):
         self.assertEqual(self.kick.exec(), AICommand(self.a_player, AICommandType.MOVE,
                                            **{"pose_goal": self.a_player.pose,
                                               "kick": True,
-                                              "speed_flag": True,
+                                              "control_loop_type": AIControlLoopType.SPEED,
                                               "kick_strength": 1}))
 
         # test avec la valeur 0.3 (force intermediaire)
@@ -205,7 +205,7 @@ class TestActions(unittest.TestCase):
         self.assertEqual(self.kick.exec(), AICommand(self.a_player, AICommandType.MOVE,
                                            **{"pose_goal": self.a_player.pose,
                                               "kick": True,
-                                              "speed_flag": True,
+                                              "control_loop_type": AIControlLoopType.SPEED,
                                               "kick_strength": 0.3}))
 
     @unittest.skip("I got lazy, didn't want to review all of the protectgoal.")

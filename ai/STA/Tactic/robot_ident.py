@@ -5,6 +5,7 @@ from typing import List
 
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.Position import Position
 from ai.STA.Action.Idle import Idle
 from ai.Util.ai_command import AICommandType, AICommand, AIControlLoopType
@@ -37,7 +38,7 @@ class RobotIdent(Tactic):
 
             # Creating speed pose
             cmd_vx, cmd_vy, cmd_vt = self.commands[self.cmd_id]
-            speed_pose = Pose(Position(cmd_vx, cmd_vy), cmd_vt)
+            speed_pose = SpeedPose(Position(cmd_vx, cmd_vy), cmd_vt)
             self.cmd_id += 1
 
             # Saving data

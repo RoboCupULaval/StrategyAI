@@ -1,15 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
-import numpy as np
-import math
-
-from RULEngine.Util import Position
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.constant import PLAYER_PER_TEAM, TeamColor, ROBOT_RADIUS
+from RULEngine.Game.Field import FieldSide
+from RULEngine.Util.constant import ROBOT_RADIUS
 from RULEngine.Util.geometry import *
-from RULEngine.Util.team_color_service import TeamColorService
 from ai.states.game_state import GameState
-from typing import Union
 
 class PlayerPosition(object):
     def __init__(self, player, distance):
@@ -55,16 +49,10 @@ def is_ball_moving(min_speed=0.1):
 
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
-    if GameState().const["FIELD_GOAL_YELLOW_X_LEFT"] > 0:
-        if TeamColorService().OUR_TEAM_COLOR is TeamColor.BLUE: # BLUE
-            return GameState().get_ball_position().x < 0
-        else: # YELLOW
-            return GameState().get_ball_position().x > 0
+    if GameState().field.our_side == FieldSide.POSITIVE:
+        return GameState().get_ball_position().x > 0
     else:
-        if TeamColorService().OUR_TEAM_COLOR is TeamColor.BLUE: # BLUE
-            return GameState().get_ball_position().x > 0
-        else: # YELLOW
-            return GameState().get_ball_position().x < 0
+        return GameState().get_ball_position().x < 0
 
 
 def is_target_reached(player, target: Position, min_dist=0.01):
@@ -91,10 +79,7 @@ def best_passing_option(passing_player):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si but est la meilleure possibilité
 
     score_min = float("inf")
-    if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW :# YELLOW
-        goal = Position(GameState().field.constant["FIELD_GOAL_BLUE_X_LEFT"], 0)
-    else:
-        goal = Position(GameState().field.constant["FIELD_GOAL_YELLOW_X_RIGHT"], 0)
+    goal = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
 
     for i in GameState().my_team.available_players.values():
         if i.id != passing_player.id:
@@ -103,10 +88,9 @@ def best_passing_option(passing_player):
 
             # Calcul du score pour receveur vers but
             score += line_of_sight_clearance(i, goal)
-            score = (score)
             if score_min > score:
                 score_min = score
-                receiver_id = i
+                receiver_id = i.id
 
     score = (line_of_sight_clearance(passing_player, goal))
     if score_min > score:
@@ -164,3 +148,25 @@ def ballDirection(self):
     pass # TODO :
 
 
+def best_position_in_region(player, A, B):
+    # Retourne la position (dans un rectangle aux coins A et B) la mieux placée pour une passe
+    ncounts = 3
+    bottom_left = Position(min(A.x, B.x), min(A.y, B.y))
+    top_right = Position(max(A.x, B.x), max(A.y, B.y))
+
+    x_points = [bottom_left.x + i * (top_right.x - bottom_left.x) / (ncounts - 1) for i in range(ncounts)]
+    y_points = [bottom_left.y + j * (top_right.y - bottom_left.y) / (ncounts - 1) for j in range(ncounts)]
+
+    score_min = float("inf")
+
+    best_position = (bottom_left + top_right) / 2
+    for x in x_points:
+        for y in y_points:
+            i = Position(x, y)
+            score = line_of_sight_clearance(player, i)
+            if score_min > score:
+                score_min = score
+                best_position = i
+
+    print(player.id, best_position)
+    return best_position

@@ -22,9 +22,9 @@ class ConfigService(metaclass=Singleton):
 
 
 default_dict = {"GAME": {"type": "sim",
-                         "terrain_type": "normal",
                          "our_color": "blue",
                          "their_color": "yellow",
+                         "our_side": "positive",
                          "autonomous_play": "false",
                          "ai_timestamp": "0.05"},
                 "COMMUNICATION": {"type": "sim",

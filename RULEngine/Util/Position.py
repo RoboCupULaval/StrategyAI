@@ -7,28 +7,11 @@ import warnings
 class Position(np.ndarray):
 
     def __new__(cls, *args, z=0, abs_tol=0.01):
-        if len(args) == 0:
-            obj = Position(0, 0)
-        elif len(args) == 1:
-            if isinstance(args[0], list) and len(args[0]) == 2:
-                obj = np.asarray(args[0].copy()).view(cls)
-            elif isinstance(args[0], tuple) and len(args[0]) == 2:
-                obj = np.asarray(args[0]).view(cls)
-            elif isinstance(args[0], Position) and len(args[0]) == 2:
-                obj = np.asarray(args[0].copy()).view(cls)
-            elif isinstance(args[0], np.ndarray) and args[0].size == 2:
-                obj = np.asarray(args[0].copy()).view(cls)
-            else:
-                raise ValueError
-        elif len(args) == 2:
-            obj = np.asarray(args).copy().view(cls)
-        else:
-            raise ValueError
+        obj = position_builder(args, cls)
 
         obj.x = obj[0]
         obj.y = obj[1]
         obj.z = z
-
         obj.abs_tol = abs_tol
 
         return obj
@@ -116,3 +99,19 @@ class Position(np.ndarray):
     def __hash__(self):
         return hash(str(self))
 
+def position_builder(args, cls):
+    if len(args) == 0:
+        obj = Position(0, 0)
+    elif len(args) == 1:
+        if isinstance(args[0], (list, Position, np.ndarray)) and len(args[0]) == 2:
+            obj = np.asarray(args[0].copy()).view(cls)
+        elif isinstance(args[0], tuple) and len(args[0]) == 2:
+            obj = np.asarray(args[0]).view(cls)
+        else:
+            raise ValueError
+    elif len(args) == 2:
+        obj = np.asarray(args).copy().view(cls)
+    else:
+        raise ValueError
+
+    return obj

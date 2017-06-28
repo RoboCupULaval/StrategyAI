@@ -1,6 +1,9 @@
 
+from .geometry import wrap_to_pi
+
+
 class PID(object):
-    def __init__(self, kp: float, ki: float, kd: float, antiwindup_size=0):
+    def __init__(self, kp: float, ki: float, kd: float, antiwindup_size=0, wrap_err=False):
         """
         Simple PID parallel implementation
         Args:
@@ -24,10 +27,17 @@ class PID(object):
         else:
             self.antiwindup_active = False
 
+        self.wrap_err = wrap_err
+
     def update(self, err: float) -> float:
         d_err = err - self.last_err
         self.last_err = err
         self.err_sum += err
+
+        if self.wrap_err:
+            d_err = wrap_to_pi(d_err)
+            self.last_err = wrap_to_pi(self.last_err)
+            self.err_sum = wrap_to_pi(err)
 
         if self.antiwindup_active:
             self.err_sum -= self.old_err[self.antiwindup_idx]
