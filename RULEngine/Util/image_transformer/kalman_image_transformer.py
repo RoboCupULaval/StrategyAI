@@ -29,6 +29,7 @@ class KalmanImageTransformer(ImageTransformer):
         # change the packets of a camera if frame_number of camera is higher
         # than what we have
         for packet in packets:
+            print(packet)
             if packet.HasField("detection"):
                 c_id = packet.detection.camera_id
                 f_nb = packet.detection.frame_number
