@@ -104,7 +104,8 @@ class Graph:
                 self.set_current_node(next_node)
             return next_ai_command
         else:
-            raise EmptyGraphException("Le graph ne contient aucun noeud.")
+            raise EmptyGraphException("Le graph ne contient aucun noeud. "
+                                      "(avez vous appliqué une tactique sur chacun des joueurs)")
 
     def set_current_node(self, node_index):
         """

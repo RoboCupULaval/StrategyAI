@@ -11,19 +11,17 @@ from . Strategy import Strategy
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 class DefenseWall(Strategy):
-    def __init__(self, game_state: GameState, number_of_players: int = 3):
+    def __init__(self, game_state: GameState, number_of_players: int = 5):
         super().__init__(game_state)
         self.number_of_players = number_of_players
-        robot1 = self.game_state.my_team.available_players[5]
-        robot2 = self.game_state.my_team.available_players[3]
-        robot3 = self.game_state.my_team.available_players[4]
-        self.robots = [robot1, robot2, robot3]
-        self.add_tactic(robot1.id, AllignToDefenseWall(self.game_state, robot1, self.robots))
-        self.add_tactic(robot2.id, AllignToDefenseWall(self.game_state, robot2, self.robots))
-        self.add_tactic(robot2.id, AllignToDefenseWall(self.game_state, robot3, self.robots))
+        self.robots = []
+        for i in range(self.number_of_players):
+            self.robots += [self.game_state.my_team.available_players[i]]
+        for i in range(self.number_of_players):
+            self.add_tactic(self.robots[i].id, AllignToDefenseWall(self.game_state, self.robots[i], self.robots))
 
         for player in self.game_state.my_team.available_players.values():
-            if not (player == robot1 or player == robot2 or player == robot3):
+            if not any(self.robots) == player:
                 self.add_tactic(player.id, Stop(self.game_state, player))
 
 

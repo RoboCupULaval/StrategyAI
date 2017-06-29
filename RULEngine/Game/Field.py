@@ -188,7 +188,6 @@ positive_side_constant = {
     "PLAYER_PER_TEAM": 6,
     # TODO KICKSPEED
     "KICK_MAX_SPD": 4,
-
     # Field Parameters
     "FIELD_Y_TOP": 3000,
     "FIELD_Y_BOTTOM": -3000,
@@ -281,7 +280,7 @@ negative_side_constant = {
 
 
     # Goal Parameters
-
+    "GOAL_WIDTH": 1000,
     "FIELD_GOAL_Y_TOP": 1250,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
     "FIELD_GOAL_Y_BOTTOM": -1250,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
     "FIELD_OUR_GOAL_X_EXTERNAL": -4500,  # FIELD_X_LEFT
