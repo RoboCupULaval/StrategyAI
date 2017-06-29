@@ -1,6 +1,6 @@
 # Under MIT licence, see LICENCE.txt
 import math
-from typing import List
+from typing import List, Union
 import numpy as np
 import time
 
@@ -42,8 +42,12 @@ class GoKick(Tactic):
         target: Position à laquelle faire face après avoir pris la balle
     """
 
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None,
+    def __init__(self, game_state: GameState, player: OurPlayer,
+                 target: Pose=Pose(),
+                 args: List[str]=None,
+                 kick_force: Union[int, float]=3,
                  auto_update_target=False):
+
         Tactic.__init__(self, game_state, player, target, args)
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge
@@ -52,7 +56,7 @@ class GoKick(Tactic):
         self.target_assignation_last_time = None
         self.target = target
         self._find_best_passing_option()
-        self.kick_force = args.getattr("kick_force", 3)
+        self.kick_force = kick_force
 
     def kick_charge(self):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
