@@ -112,6 +112,20 @@ def line_of_sight_clearance(player, target: Position):
     return score
 
 
+def line_of_sight_clearance_ball(player, target: Position):
+    # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
+    # (plus c'est dégagé plus le score est petit)
+    score = np.linalg.norm(GameState().get_ball_position() - target)
+    # for j in GameState().my_team.available_players.values():
+    #     # Obstacle : les players friends
+    #     if not (j.id == player.id or j.pose.position == target):
+    #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
+    for j in GameState().other_team.available_players.values():
+        # Obstacle : les players ennemis
+        score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
+    return score
+
+
 def trajectory_score(pointA : Position, pointB: Position, obstacle: Position):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
     proportion_max = 15 # Proportion du triangle rectancle derrière les robots obstacles
@@ -150,7 +164,7 @@ def ballDirection(self):
 
 def best_position_in_region(player, A, B):
     # Retourne la position (dans un rectangle aux coins A et B) la mieux placée pour une passe
-    ncounts = 3
+    ncounts = 5
     bottom_left = Position(min(A.x, B.x), min(A.y, B.y))
     top_right = Position(max(A.x, B.x), max(A.y, B.y))
 
@@ -163,7 +177,8 @@ def best_position_in_region(player, A, B):
     for x in x_points:
         for y in y_points:
             i = Position(x, y)
-            score = line_of_sight_clearance(player, i)
+            score = line_of_sight_clearance_ball(player, i)
+            #print('id', player.id, '   x : ', x, '   y : ', y, '   score : ', score)
             if score_min > score:
                 score_min = score
                 best_position = i
