@@ -52,6 +52,7 @@ class GoKick(Tactic):
         self.target_assignation_last_time = None
         self.target = target
         self._find_best_passing_option()
+        self.kick_force = args.getattr("kick_force", 3)
 
     def kick_charge(self):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
@@ -89,7 +90,7 @@ class GoKick(Tactic):
             self.next_state = self.kick
         else:
             self.next_state = self.kick_charge
-        return Kick(self.game_state, self.player, 3, self.target) #TODO (pturgeon) contante de force magique
+        return Kick(self.game_state, self.player, self.kick_force, self.target)
 
     def halt(self):  # FAIRE CECI DANS TOUTE LES TACTIQUES
         if self.status_flag == Flags.INIT:

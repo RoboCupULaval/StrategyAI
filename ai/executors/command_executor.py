@@ -3,7 +3,7 @@ from typing import List
 
 from RULEngine.Command.command import *
 from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
+from RULEngine.Util.SpeedPose import SpeedPose
 from ai.executors.executor import Executor
 from ai.Util.ai_command import AICommandType
 from ai.states.world_state import WorldState
@@ -53,7 +53,7 @@ class CommandExecutor(Executor):
                 temp.append(Kick(player))
 
             if player.ai_command.command == AICommandType.MOVE:
-                assert (isinstance(player.ai_command.speed, Pose))
+                assert (isinstance(player.ai_command.speed, SpeedPose))
                 temp.append(Move(player))
             elif player.ai_command.command == AICommandType.STOP:
                 temp.append(Stop(player))
