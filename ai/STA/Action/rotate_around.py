@@ -11,6 +11,8 @@ from ai.Util.ai_command import AICommand, AICommandType
 
 from typing import Union
 
+ROTATION_SPEED = 4*m.pi  # rad/s
+
 
 class RotateAround(Action):
     def __init__(self, game_state: GameState,
@@ -37,7 +39,7 @@ class RotateAround(Action):
 
         player_to_target = (target - player).normalized()
 
-        delta_theta = m.copysign(m.pi/6, -1 if self.is_clockwise else 1)
+        delta_theta = m.copysign(ROTATION_SPEED*self.game_state.get_delta_t(), -1 if self.is_clockwise else 1)
         player_to_target_rot = -player_to_target.rotate(delta_theta)
 
         translation = player_to_target_rot * self.radius
