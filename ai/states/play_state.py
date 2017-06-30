@@ -25,9 +25,7 @@ class PlayState(object, metaclass=Singleton):
         # Livres
         self.strategy_book = StrategyBook()
         self.tactic_book = TacticBook()
-
         self.autonomous_flag = False
-
         self.current_strategy = None
 
     def set_strategy(self, strategy: Strategy) -> None:

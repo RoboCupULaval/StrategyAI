@@ -1,6 +1,11 @@
 # Under MIT License, see LICENSE.txt
 import time
 from collections import deque
+try:
+    from pyhermes import McuCommunicator
+except ImportError:
+    print("Couldn't find the pyhermes package. Cannot send command to physical robots.",
+          "\nTo remedy please run the command pip install -r requirements.txt")
 
 from RULEngine.Command.command import *
 
@@ -26,10 +31,15 @@ class SerialCommandSender(object):
     def send_loop(self):
         while not self.terminate.is_set():
             if time.time() - self.last_time > MOVE_COMMAND_SLEEP:
-                for next_command in self.command_dict.values():
-                    # print(c)
-                    self._package_commands(next_command)
-                    time.sleep(COMMUNICATION_SLEEP)
+                try:
+                    for next_command in self.command_dict.values():
+                        # print(c)
+                        self._package_commands(next_command)
+                        time.sleep(COMMUNICATION_SLEEP)
+                except RuntimeError as r:
+                    # TODO FIXME this bug, happens when the dict gets changed inbetween loop because of the time.sleep
+                    # possibly making thread switch and then we add a new entry in the command dict after an ia loop.
+                    print("FIXME:",self.__class__.__name__)
                 self.last_time = time.time()
             else:
                 time.sleep(COMMUNICATION_SLEEP)
@@ -46,7 +56,7 @@ class SerialCommandSender(object):
 
         if isinstance(command, Move) or isinstance(command, Stop):
             self.command_dict[command.player.id] = command
-        else:
+        elif isinstance(command, Command):
             self.command_queue.append(command)
 
     def send_responding_command(self, command: ResponseCommand):
