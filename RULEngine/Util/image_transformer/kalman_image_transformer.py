@@ -12,7 +12,7 @@ class KalmanImageTransformer(ImageTransformer):
     def __init__(self):
         super().__init__()
         nb_cameras = int(ConfigService().config_dict["IMAGE"]["number_of_camera"])
-        self.last_camera_frame = [empty_camera for _ in range(nb_cameras)]
+        self.last_camera_frame = [empty_camera for _ in range(0, nb_cameras)]
         self.kalman_arranged_frame = {"balls": [None for _ in range(nb_cameras)],
                                       "blues": {i: [None for i in range(nb_cameras)] for i in range(PLAYER_PER_TEAM)},
                                       "yellows": {i: [None for i in range(nb_cameras)] for i in range(PLAYER_PER_TEAM)}}
@@ -34,7 +34,6 @@ class KalmanImageTransformer(ImageTransformer):
 
                 c_id = packet.detection.camera_id
                 f_nb = packet.detection.frame_number
-
                 if f_nb > self.last_camera_frame[c_id]["frame_number"]:
                     new_camera = deepcopy(empty_camera)
                     new_camera["camera_id"] = c_id
