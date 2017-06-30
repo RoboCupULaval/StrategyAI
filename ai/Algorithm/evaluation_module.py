@@ -179,14 +179,18 @@ def best_position_in_region(player, A, B):
     score_min = float("inf")
 
     best_position = (bottom_left + top_right) / 2
+    ball_position = GameState().get_ball_position()
+
     for x in x_points:
         for y in y_points:
             i = Position(x, y)
+            dist_from_ball = np.linalg.norm(ball_position-i)
+
+            if dist_from_ball < 1000: continue # Évite que le robot se positionne sur la balle
+
             score = line_of_sight_clearance_ball(player, i)
-            #print('id', player.id, '   x : ', x, '   y : ', y, '   score : ', score)
             if score_min > score:
                 score_min = score
                 best_position = i
 
-    # print(player.id, best_position)
     return best_position

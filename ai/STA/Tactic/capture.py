@@ -104,15 +104,15 @@ class Capture(Tactic):
                 return True
         return False
 
-    def _is_player_towards_target(self, fact=-0.99):
-
-        player = self.player.pose.position.conv_2_np()
-        target = self.target.position.conv_2_np()
-
-        vector_target_2_player = player - target
-        vector_target_2_player /= np.linalg.norm(vector_target_2_player)
-        vector_player_dir = np.array([np.cos(self.player.pose.orientation),
-                                      np.sin(self.player.pose.orientation)])
-        if np.dot(vector_player_dir, vector_target_2_player) < fact:
-            return True
-        return False
+    # def _is_player_towards_target(self, fact=-0.99):
+    #
+    #     player = self.player.pose.position.conv_2_np()
+    #     target = self.target.position.conv_2_np()
+    #
+    #     vector_target_2_player = player - target
+    #     vector_target_2_player /= np.linalg.norm(vector_target_2_player)
+    #     vector_player_dir = np.array([np.cos(self.player.pose.orientation),
+    #                                   np.sin(self.player.pose.orientation)])
+    #     if np.dot(vector_player_dir, vector_target_2_player) < fact:
+    #         return True
+    #     return False

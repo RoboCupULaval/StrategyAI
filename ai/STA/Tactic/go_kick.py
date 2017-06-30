@@ -1,5 +1,4 @@
 # Under MIT licence, see LICENCE.txt
-import math
 from typing import List, Union
 import numpy as np
 import time
@@ -16,18 +15,13 @@ from ai.STA.Action.Kick import Kick
 from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ai_command import AICommandType
 from ai.STA.Action.GoBehind import GoBehind
 from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
 
-ORIENTATION_DEADZONE = 0.2
-DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
-DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
-COMMAND_DELAY = 1.0
+COMMAND_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
-
 
 class GoKick(Tactic):
     """
@@ -63,7 +57,7 @@ class GoKick(Tactic):
             self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
 
-        return AllStar(self.game_state, self.player,  **{"charge_kick": True, "dribbler_on": 1})
+        return AllStar(self.game_state, self.player,  **{"charge_kick": True})
 
     def go_behind_ball(self):
         self.status_flag = Flags.WIP
@@ -74,7 +68,7 @@ class GoKick(Tactic):
             self.next_state = self.go_behind_ball
             self._find_best_passing_option()
         return GoBehind(self.game_state, self.player, self.game_state.get_ball_position(),
-                        self.target.position, 120, pathfinder_on=True)
+                        self.target.position, 250, pathfinder_on=True)
 
     def grab_ball(self):
         if self._get_distance_from_ball() < 120:
@@ -87,7 +81,7 @@ class GoKick(Tactic):
         return Grab(self.game_state, self.player)
 
     def kick(self):
-        if self._get_distance_from_ball() > 1000:
+        if self._get_distance_from_ball() > 100:
             self.next_state = self.halt
             self.cmd_last_time = time.time()
         elif time.time() - self.cmd_last_time < COMMAND_DELAY:
@@ -129,45 +123,11 @@ class GoKick(Tactic):
                 return True
         return False
 
-    def _is_player_towards_target(self, fact=-0.99):
-
-        player_x = self.player.pose.position.x
-        player_y = self.player.pose.position.y
-
-        target_x = self.target.position.x
-        target_y = self.target.position.y
-
-        vector_player_2_target = np.array([player_x - target_x,  player_y - target_y])
-        vector_player_2_target /= np.linalg.norm(vector_player_2_target)
-        vector_player_dir = np.array([np.cos(self.player.pose.orientation),
-                                      np.sin(self.player.pose.orientation)])
-        if np.dot(vector_player_dir, vector_player_2_target) < fact:
-            return True
-        return False
-
-    def _generate_move_to(self):
-        player_pose = self.player.pose
-        ball_position = self.game_state.get_ball_position()
-
-        dest_position = self.get_behind_ball_position(ball_position)
-        destination_pose = Pose(dest_position, player_pose.orientation)
-
-        return AllStar(self.game_state, self.player, **{"pose_goal": destination_pose,
-                                                        "ai_command_type": AICommandType.MOVE})
-
-    def get_behind_ball_position(self, ball_position):
-        vec_dir = self.target.position - ball_position
-        mag = math.sqrt(vec_dir.x ** 2 + vec_dir.y ** 2)
-        scale_coeff = ROBOT_RADIUS * 3 / mag
-        dest_position = ball_position - (vec_dir * scale_coeff)
-        return dest_position
-
     def _find_best_passing_option(self):
         if (self.auto_update_target
             and (self.target_assignation_last_time is None
                 or time.time() - self.target_assignation_last_time > TARGET_ASSIGNATION_DELAY)):
             tentative_target_id = best_passing_option(self.player)
-            print(tentative_target_id)
             if tentative_target_id is None:
                 self.target = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
             else:
