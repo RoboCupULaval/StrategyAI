@@ -45,7 +45,7 @@ class GoalKeeper(Tactic):
     def protect_goal(self):
 
         ball_position = self.game_state.get_ball_position()
-        if not self.game_state.game.field.is_inside_goal_area(ball_position, self.is_yellow):
+        if not self.game_state.game.field.is_inside_goal_area(ball_position, our_goal=True):
             self.next_state = self.protect_goal
         else:
             self.next_state = self.go_behind_ball
@@ -56,7 +56,7 @@ class GoalKeeper(Tactic):
 
     def go_behind_ball(self):
         ball_position = self.game_state.get_ball_position()
-        if not self.game_state.game.field.is_inside_goal_area(ball_position, self.is_yellow):
+        if not self.game_state.game.field.is_inside_goal_area(ball_position, our_goal=True):
             self.next_state = self.protect_goal
         else:
             if can_get_ball(self.game_state, self.player_id, ball_position):

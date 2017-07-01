@@ -221,7 +221,6 @@ class Framework(object):
 
             # Communication
             self._send_robot_commands(robot_commands)
-            self.game.set_command(robot_commands)
             self._send_debug_commands()
             self._send_new_vision_packet()
             self.time_of_last_loop = time.time()
@@ -257,9 +256,9 @@ class Framework(object):
         self.thread_terminate.set()
         self.ia_running_thread.join()
         self.thread_terminate.clear()
-        self.robot_command_sender.stop()
         if self.uidebug_robot_monitor:
             self.uidebug_robot_monitor.stop()
+        self.robot_command_sender.stop()
         try:
             team = self.game.friends
 
@@ -308,7 +307,7 @@ class Framework(object):
         pck_ball.pixel_x = self.game.field.ball.position.x
         pck_ball.pixel_y = self.game.field.ball.position.y
 
-        for p in self.game.blue_team.players.values():
+        for p in self.game.blue_team.available_players.values():
             packet_robot = pb_sslwrapper.detection.robots_blue.add()
             packet_robot.confidence = 0.999
             packet_robot.robot_id = p.id
@@ -318,7 +317,7 @@ class Framework(object):
             packet_robot.pixel_x = 0.
             packet_robot.pixel_y = 0.
 
-        for p in self.game.yellow_team.players.values():
+        for p in self.game.yellow_team.available_players.values():
             packet_robot = pb_sslwrapper.detection.robots_yellow.add()
             packet_robot.confidence = 0.999
             packet_robot.robot_id = p.id

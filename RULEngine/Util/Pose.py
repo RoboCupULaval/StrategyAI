@@ -10,41 +10,7 @@ from RULEngine.Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE
 class Pose(object):
 
     def __init__(self, *args):
-
-        if len(args) == 0:
-            position = Position()
-            orientation = 0
-        elif len(args) == 1:
-            if isinstance(args[0], Pose):  # From another Pose object
-                position = Position(args[0].position)
-                orientation = args[0].orientation
-            elif isinstance(args[0], Position):  # Only a position object
-                position = Position(args[0])
-                orientation = 0
-            elif isinstance(args[0], np.ndarray):  # Only a ndarray
-                if args[0].size == 3:
-                    position = Position(args[0][0:2])
-                    orientation = args[0][2]
-                elif args[0].size == 2:
-                    position = Position(args[0])
-                    orientation = 0
-                else:
-                    raise ValueError
-            else:
-                raise ValueError
-        elif len(args) == 2:  # Position and orientation or ndarray and orientation
-            if isinstance(args[0], (Position, np.ndarray)):
-                if isinstance(args[0], np.ndarray):
-                    assert(args[0].size == 2),  'ndarray should be of length 2.'
-                position = Position(args[0])
-                orientation = args[1]
-            else:
-                raise ValueError
-        elif len(args) == 3:
-            position = Position(args[0:2])
-            orientation = args[2]
-        else:
-            raise ValueError
+        position, orientation = self._pose_builder(args)
 
         # wrap the orientation between -pi and pi
         self._orientation = float(Pose.wrap_to_pi(orientation))
@@ -141,3 +107,64 @@ class Pose(object):
     def conv_2_np(self) -> np.ndarray:
         """Legacy. Do not use."""
         return self.to_array()
+
+    def _pose_builder(self, args):
+        """ This pose builder method allows us to keep the __init__ method of
+            pose clean, while doing the multiple if/ese if outside of it.
+            TODO : Find a more elegant way of doing this, either with @singleDispatch or
+            by reducing the possible constructor arguments. -DC, 16/06/2017
+        """
+        builders = {
+            1: self._build_from_single,
+            2: self._build_from_double,
+            3: self._build_from_triple
+        }
+
+        if len(args) == 0:
+            return Position(), 0
+        elif len(args) in builders:
+            return builders[len(args)](args)
+
+        raise ValueError
+
+    def _build_from_single(self, arg):
+        orientation = 0
+
+        # At some points, we pass a unary tuple instead of a useful object. This breaks the if conditions, so we
+        # extract the desired object from the tuple before type-checking it.
+        if isinstance(arg, tuple):
+            arg = arg[0]
+
+        if isinstance(arg, Pose):  # From another Pose object
+            position = Position(arg.position)
+            orientation = arg.orientation
+        elif isinstance(arg, Position):  # Only a position object
+            position = Position(arg)
+        elif isinstance(arg, np.ndarray):  # Only a ndarray
+            if arg.size == 3:
+                position = Position(arg[0:2])
+                orientation = arg[2]
+            elif arg.size == 2:
+                position = Position(arg)
+            else:
+                raise ValueError
+        else:
+            raise ValueError
+
+        return position, orientation
+
+    def _build_from_double(self, args):
+        if isinstance(args[0], Position) or (isinstance(args[0], np.ndarray) and args[0].size == 2):
+            # ndArray size must be 2
+            position = Position(args[0])
+            orientation = args[1]
+        else:
+            raise ValueError
+
+        return position, orientation
+
+    def _build_from_triple(self, args):
+        position = Position(args[0:2])
+        orientation = args[2]
+
+        return position, orientation

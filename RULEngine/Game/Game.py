@@ -6,7 +6,7 @@ from RULEngine.Game.OurTeam import OurTeam
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.team_color_service import TeamColor
-
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 from RULEngine.Game.Team import Team
 from RULEngine.Game.Ball import Ball
 from RULEngine.Game.Field import Field
@@ -31,10 +31,6 @@ class Game:
         self.update = self._update
         if ConfigService().config_dict["IMAGE"]["kalman"] == "true":
             self.update = self._kalman_update
-
-    def set_command(self, cmd):
-        for commands in cmd:
-            self.friends.update_player_command(commands.player.id, commands)
 
     def set_referee(self, p_referee):
         self.referee = p_referee
@@ -100,22 +96,36 @@ class Game:
         self._update_players_of_team(yellow_team, self.yellow_team, delta)
 
     def kalman_update_ball(self, vision_frame, delta):
+        """
         kalman_list = []
         for c in vision_frame:
             kalman_list.append(c["ball"])
-        self.ball.kalman_update(kalman_list, delta)
+        """
+        self.ball.kalman_update(vision_frame["balls"], delta)
 
     def kalman_update_players(self, vision_frame, delta):
+
+        """
         kalman_blue = [[] for _ in range(0, 6)]
         kalman_yellow = [[] for _ in range(0, 6)]
         for c in vision_frame:
             for i in range(0, 6):
                 kalman_blue[i].append(c["blues"][i])
                 kalman_yellow[i].append(c["yellows"][i])
+        print("**************************************")
+        print(len(kalman_blue[0]))
+        """
+        for i, position_list in vision_frame["blues"].items():
+            for j in position_list:
+                if j:
+                    self.blue_team.update_player(i, position_list, delta)
+        for i, position_list in vision_frame["yellows"].items():
+            for j in position_list:
+                if j:
+                    self.yellow_team.update_player(i, position_list, delta)
+        self.blue_team.update_available_players()
+        self.yellow_team.update_available_players()
 
-        for i in range(0, 6):
-            self.blue_team.update_player(i, kalman_blue[i], delta)
-            self.yellow_team.update_player(i, kalman_yellow[i], delta)
 
     @staticmethod
     def _update_players_of_team(players, team, delta):

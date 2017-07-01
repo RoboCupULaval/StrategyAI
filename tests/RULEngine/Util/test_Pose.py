@@ -106,11 +106,11 @@ class TestPose(unittest.TestCase):
             Pose((0, 0, 0), 0)
         with self.assertRaises(ValueError):
             Pose(np.zeros(1))
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             Pose(np.zeros(1), 0)
         with self.assertRaises(ValueError):
             Pose(np.zeros(4))
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             Pose(np.zeros(4), 0)
 
     def test_get_set(self):

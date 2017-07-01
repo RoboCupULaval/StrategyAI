@@ -1,12 +1,17 @@
 # Under MIT License, see LICENSE.txt
 import time
 from collections import deque
+try:
+    from pyhermes import McuCommunicator
+except ImportError:
+    print("Couldn't find the pyhermes package. Cannot send command to physical robots.",
+          "\nTo remedy please run the command pip install -r requirements.txt")
 
 from RULEngine.Command.command import *
 
 
-COMMUNICATION_SLEEP = 0.001
-MOVE_COMMAND_SLEEP = 0.05
+COMMUNICATION_SLEEP = 0.01
+MOVE_COMMAND_SLEEP = 0.04
 
 
 class SerialCommandSender(object):
@@ -24,21 +29,31 @@ class SerialCommandSender(object):
         self.comm_thread.start()
 
     def send_loop(self):
+        PACKET_FREQ = 100
+        count = 0
+        self.speed_time = time.time()
         while not self.terminate.is_set():
             if time.time() - self.last_time > MOVE_COMMAND_SLEEP:
                 for next_command in self.command_dict.values():
-                    # print(c)
-                    self._package_commands(next_command)
-                    time.sleep(COMMUNICATION_SLEEP)
+                    if not isinstance(next_command, Stop):
+                        count += 1
+                        self._package_commands(next_command)
+                        time.sleep(COMMUNICATION_SLEEP)
                 self.last_time = time.time()
             else:
-                time.sleep(COMMUNICATION_SLEEP)
                 try:
                     next_command = self.command_queue.popleft()
                 except IndexError:
                     next_command = None
                 if next_command:
+                    count += 1
                     self._package_commands(next_command)
+                    time.sleep(COMMUNICATION_SLEEP)
+            if count > PACKET_FREQ:
+                timelapse = time.time() - self.speed_time
+                self.speed_time = time.time()
+                print("{} packets took {:3.2}s, this is {:3.2f} packet/s".format(count, timelapse, count/timelapse))
+                count = 0
 
     def send_command(self, command: Command):
         # self.command_queue.append(command)
@@ -46,7 +61,7 @@ class SerialCommandSender(object):
 
         if isinstance(command, Move) or isinstance(command, Stop):
             self.command_dict[command.player.id] = command
-        else:
+        elif isinstance(command, Command):
             self.command_queue.append(command)
 
     def send_responding_command(self, command: ResponseCommand):
