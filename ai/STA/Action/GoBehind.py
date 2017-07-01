@@ -48,9 +48,6 @@ class GoBehind(Action):
         self.cruise_speed = cruise_speed
         self.orientation = orientation
 
-        if self.distance_behind is None:
-            self.distance_behind = 250
-
         # TODO find something better MGL 2017/05/22
         if self.position2 is None:
             self.position2 = game_state.const["FIELD_THEIR_GOAL_MID_GOAL"]
