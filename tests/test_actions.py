@@ -11,7 +11,6 @@ from RULEngine.Game.Referee import Referee
 from RULEngine.Util.team_color_service import TeamColorService, TeamColor
 from RULEngine.Game.Game import Game
 from config.config_service import ConfigService
-from RULEngine.Game.Ball import Ball
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import *
 from ai.STA.Action.GoBehind import GoBehind
@@ -20,7 +19,6 @@ from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.MoveToPosition import MoveToPosition
-from ai.STA.Action.MoveToDribblingBall import MoveToDribblingBall
 from ai.STA.Action.ProtectGoal import ProtectGoal
 from ai.states.game_state import GameState
 from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType

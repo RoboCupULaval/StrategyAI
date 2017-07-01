@@ -3,9 +3,6 @@
 from abc import ABCMeta
 from typing import List, Tuple, Callable, Dict
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
 from ai.STA.Tactic.Tactic import Tactic
@@ -102,22 +99,6 @@ class Strategy(metaclass=ABCMeta):
 
         return commands
 
-    def _update_roles_translation(self) -> None:
-        pass
-
-    def _store_tactic_arguments(self, role: Role, node_id: int, tactic_arguments = List) -> None:
-        self._tactics_arguments[role][node_id] = tactic_arguments
-
-    def _retrive_tactic_arguments(self, role: Role, node_id: int) -> List:
-        return self._tactics_arguments[role][node_id]
-
-    def get_player_by_role(self, role: Role) -> OurPlayer:
-        return self.game_state.my_team.available_players[self._roles_translation[role]]
-
-    def get_role_by_player_id(self, player_id: int) -> Role:
-        for r, id in self._roles_translation.items():
-            if id == player_id:
-                return r
     def __str__(self):
         return self.__class__.__name__
 
