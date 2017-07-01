@@ -42,6 +42,7 @@ class AICommand(object):
         self.charge_kick = other_args.get("charge_kick", False)
         self.kick = other_args.get("kick", False)
         self.pose_goal = other_args.get("pose_goal", Pose())
+        self.speed = other_args.get("speed", SpeedPose())
         self.cruise_speed = other_args.get("cruise_speed", 1)
 
         self.control_loop_type = other_args.get("control_loop_type", AIControlLoopType.POSITION)

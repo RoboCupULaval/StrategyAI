@@ -27,13 +27,14 @@ class Offense(Strategy):
 
         self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
 
-        for i in role_by_robots:
-            self.add_tactic(i[0], PositionForPass(self.game_state, i[1], auto_position=True))
-            self.add_tactic(i[0], GoKick(self.game_state, i[1], auto_update_target=True))
+        for index, player in role_by_robots:
+            if player:
+                self.add_tactic(index, PositionForPass(self.game_state, player, auto_position=True))
+                self.add_tactic(index, GoKick(self.game_state, player, auto_update_target=True))
 
-            self.add_condition(i[0], 0, 1, partial(self.is_closest, i[1]))
-            self.add_condition(i[0], 1, 0, partial(self.is_not_closest, i[1]))
-            self.add_condition(i[0], 1, 1, partial(self.has_kicked, i[1]))
+                self.add_condition(index, 0, 1, partial(self.is_closest, player))
+                self.add_condition(index, 1, 0, partial(self.is_not_closest, player))
+                self.add_condition(index, 1, 1, partial(self.has_kicked, player))
 
     def is_closest(self, player):
         return player == closest_player_to_point(GameState().get_ball_position(), True)

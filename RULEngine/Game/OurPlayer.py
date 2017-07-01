@@ -26,6 +26,11 @@ class OurPlayer(Player):
         self.pose = Pose(Position(ret[0], ret[1]), ret[4])
         self.velocity = SpeedPose(Position(ret[2], ret[3]), ret[5])
 
-    def set_command(self, cmd):
-        self.cmd = [cmd.cmd_repr.position.x, cmd.cmd_repr.position.y, cmd.cmd_repr.orientation]
+    def set_command(self):
+        if self.ai_command.speed is not None:
+            self.cmd = [self.ai_command.speed.position.x,
+                        self.ai_command.speed.position.y,
+                        self.ai_command.speed.orientation]
+        else:
+            self.cmd = [0, 0, 0]
 
