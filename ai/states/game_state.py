@@ -6,11 +6,11 @@
 """
 from RULEngine.Game.Player import Player
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
-from RULEngine.Util.constant import TeamColor
+from RULEngine.Util.constant import TeamColor, PLAYER_PER_TEAM
 from RULEngine.Util.singleton import Singleton
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-
+from RULEngine.Debug.debug_interface import DebugInterface, COLOR_ID_MAP
 
 class GameState(object, metaclass=Singleton):
 
@@ -25,7 +25,7 @@ class GameState(object, metaclass=Singleton):
         self.other_team = None
         self.timestamp = 0
         self.const = None
-
+        self.debug_interface = DebugInterface()
     def get_our_team_color(self) -> TeamColor:
         """
         Retourne la couleur de notre équipe TeamColor Enum
@@ -124,3 +124,8 @@ class GameState(object, metaclass=Singleton):
         self.other_team = self.game.enemies
         self.our_team_color = reference_transfer_object.team_color_svc.OUR_TEAM_COLOR
         self.const = self.game.field.constant
+
+    def display_player_kalman(self):
+        for player in self.my_team.available_players.values():
+            pose = player.pose
+            self.debug_interface.add_circle(center=(pose[0], pose[1]), radius=90, timeout=0.06)

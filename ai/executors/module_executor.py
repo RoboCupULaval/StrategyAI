@@ -20,6 +20,7 @@ class ModuleExecutor(Executor):
         for module in self.ws.module_state.modules.values():
             module.update()
         self.ws.module_state.pathfinder_module.exec()
+        self.ws.game_state.display_player_kalman()
 
     def start_initial_modules(self) -> None:
         """

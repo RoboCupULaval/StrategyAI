@@ -8,7 +8,6 @@ from RULEngine.Command.command import GetBattery
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
-
 PERIOD_BETWEEN_BAT_MONITORING = 0.5
 
 
@@ -37,23 +36,25 @@ class UIDebugRobotMonitor(object):
 
     def _monitor_loop(self):
         """ Moniteur le niveau des batteries des robots. """
+        if False:
+            while not self.terminate.is_set():
+                for robot_id in range(PLAYER_PER_TEAM):
+
+                        # Ask for batterie level
+                        cmd = GetBattery(OurPlayer(None, robot_id), self.pause_cond)
+                        response = self.serial_com.send_responding_command(cmd)
+                        if response:
+                            # print("Response from id {} with bat lvl {}V".format(robot_id, response))
+                            self.robots_status[robot_id].battery_lvl = response
+                            self.robots_status[robot_id].time_since_last_reading = time()
+                        # Send last known state to UI-Debug
+                        self.debug_interface.send_robot_state(robot_id,
+                                                              self.robots_status[robot_id].battery_lvl,
+                                                              self.robots_status[robot_id].time_since_last_reading)
+                        if self.terminate.is_set():
+                            return
+                        sleep(PERIOD_BETWEEN_BAT_MONITORING)
         return
-        while not self.terminate.is_set():
-            for robot_id in range(PLAYER_PER_TEAM):
-                # Ask for batterie level
-                cmd = GetBattery(OurPlayer(None, robot_id), self.pause_cond)
-                response = self.serial_com.send_responding_command(cmd)
-                if response:
-                    # print("Response from id {} with bat lvl {}V".format(robot_id, response))
-                    self.robots_status[robot_id].battery_lvl = response
-                    self.robots_status[robot_id].time_since_last_reading = time()
-                # Send last known state to UI-Debug
-                self.debug_interface.send_robot_state(robot_id,
-                                                      self.robots_status[robot_id].battery_lvl,
-                                                      self.robots_status[robot_id].time_since_last_reading)
-                if self.terminate.is_set():
-                    return
-                sleep(PERIOD_BETWEEN_BAT_MONITORING)
 
     def stop(self):
         self.terminate.set()
