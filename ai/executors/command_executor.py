@@ -31,6 +31,7 @@ class CommandExecutor(Executor):
         # Transform to other command type
         for player in self.ws.game_state.my_team.available_players.values():
             ready_to_ship_robot_packet_list += (self._parse_ai_command(player))
+            player.set_command()
         return ready_to_ship_robot_packet_list
 
     @staticmethod
@@ -59,6 +60,7 @@ class CommandExecutor(Executor):
                 temp.append(Move(player))
             elif player.ai_command.command == AICommandType.STOP:
                 temp.append(Stop(player))
+                player.ai_command.speed = SpeedPose()
             return temp
         # TODO FIXME T_T ugly hack kill me with fire
         # this is done so that when a player has no ai_command we can send the command to stop him
@@ -67,4 +69,5 @@ class CommandExecutor(Executor):
         # command.player.ai_commands.speed, he finds aicommand as none breaking it. MGL 2017/06/26
 
         player.ai_command = AICommand(player, AICommandType.STOP)
+        player.ai_command.speed = SpeedPose()
         return [Stop(player)]

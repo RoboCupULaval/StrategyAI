@@ -221,7 +221,6 @@ class Framework(object):
 
             # Communication
             self._send_robot_commands(robot_commands)
-            self.game.set_command(robot_commands)
             self._send_debug_commands()
             self._send_new_vision_packet()
             self.time_of_last_loop = time.time()
