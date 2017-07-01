@@ -27,12 +27,8 @@ class Field:
         x1 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
         x2 = self.constant["FIELD_OUR_GOAL_X_INTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_INTERNAL"]
 
-        if x1 > x2:
-            x_right = x1
-            x_left = x2
-        else:
-            x_right = x2
-            x_left = x1
+        x_right = max(x1, x2)
+        x_left = min(x1, x2)
 
         top_circle = self.constant["FIELD_OUR_GOAL_TOP_CIRCLE"] if our_goal\
             else self.constant["FIELD_THEIR_GOAL_TOP_CIRCLE"]
@@ -60,12 +56,8 @@ class Field:
             x1 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
             x2 = self.constant["FIELD_OUR_GOAL_X_INTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_INTERNAL"]
 
-            if x1 > x2:
-                x_right = x1
-                x_left = x2
-            else:
-                x_right = x2
-                x_left = x1
+            x_right = max(x1, x2)
+            x_left = min(x1, x2)
 
             position = stayInsideSquare(position, self.constant["FIELD_GOAL_Y_TOP"],
                                         self.constant["FIELD_GOAL_Y_BOTTOM"], x_left, x_right)
@@ -93,12 +85,8 @@ class Field:
             x1 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
             x2 = self.constant["FIELD_OUR_GOAL_X_INTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_INTERNAL"]
 
-            if x1 > x2:
-                x_right = x1
-                x_left = x2
-            else:
-                x_right = x2
-                x_left = x1
+            x_right = max(x1, x2)
+            x_left = min(x1, x2)
 
             y_top = self.constant["FIELD_GOAL_SEGMENT"] / 2
             y_bottom = (self.constant["FIELD_GOAL_SEGMENT"] / 2) * -1

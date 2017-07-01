@@ -1,5 +1,6 @@
 # Under MIT License, see LICENSE.txt
 from typing import List
+import sys
 
 from ai.STA.Tactic.DemoFollowRobot import DemoFollowRobot
 from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
@@ -23,7 +24,12 @@ from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.face_target import FaceTarget
-# from ai.STA.Tactic.Joystick import Joystick
+
+try:
+    from ai.STA.Tactic.Joystick import Joystick
+except ImportError:
+    import warnings
+    warnings.warn('Pygame is not installed, disabling Joystick tactic.', stacklevel=1)
 
 
 class TacticBook(object):
@@ -36,7 +42,7 @@ class TacticBook(object):
                             'ReceivePass': ReceivePass,
                             'GoalKeeper': GoalKeeper,
                             'CoverZone': ProtectZone,
-                            #'GoGetBall': GoGetBall,
+                            'GoGetBall': GoGetBall,
                             'DemoFollowBall': DemoFollowBall,
                             'DemoFollowRobot': DemoFollowRobot,
                             'Stop': Stop,
@@ -46,7 +52,6 @@ class TacticBook(object):
                             "TestTurnOnYou": TestTurnOnYou,
                             'RotateAroundPosition': RotateAroundPosition,
                             "VaEtVient": VaEtVient,
-                            # 'Joystick': Joystick,
                             'RobotIdent': RobotIdent,
                             'PositionForPass': PositionForPass,
                             'Capture': Capture,
@@ -54,6 +59,8 @@ class TacticBook(object):
                             'Bump': Bump,
                             'Intercept': Intercept
                             }
+        if 'Joystick' in sys.modules:
+            self.tactic_book['Joystick'] = Joystick
 
     def get_tactics_name_list(self) -> List[str]:
         """

@@ -116,16 +116,15 @@ class RobotMotion(object):
 
         translation_cmd = self.apply_translation_constraints(translation_cmd)
 
-
-        print('Speed: {:5.3f}, Command: {}, {:5.3f}, next speed: {:5.3f}, target_speed: {:5.3f}, {:5.3f}, reached:{}, error: {}'.format(self.current_speed,
-                                                            translation_cmd,
-                                                            rotation_cmd,
-                                                            self.next_speed,
-                                                            self.target_speed,
-                                                            self.target_direction.angle()/m.pi*180,
-                                                            self.target_reached(),
-                                                            self.pose_error))
-
+        # print('Speed: {:5.3f}, Command: {}, {:5.3f}, next speed: {:5.3f},
+        #        target_speed: {:5.3f}, {:5.3f}, reached:{}, error: {}'.format(self.current_speed,
+        #                                                    translation_cmd,
+        #                                                    rotation_cmd,
+        #                                                    self.next_speed,
+        #                                                    self.target_speed,
+        #                                                    self.target_direction.angle()/m.pi*180,
+        #                                                    self.target_reached(),
+        #                                                    self.pose_error))
         # Adjust command to robot's orientation
         translation_cmd = translation_cmd.rotate(-self.current_pose.orientation)
 
@@ -247,6 +246,7 @@ class RobotMotion(object):
         self.angle_controller.reset()
         self.x_controller.reset()
         self.y_controller.reset()
+
 
 def get_control_setting(is_sim: bool):
 
