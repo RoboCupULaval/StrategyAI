@@ -3,8 +3,6 @@
 from abc import ABCMeta
 from typing import List, Tuple, Callable, Dict
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
 from ai.STA.Tactic.Tactic import Tactic

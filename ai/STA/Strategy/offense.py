@@ -12,8 +12,6 @@ from ai.states.game_state import GameState
 from . Strategy import Strategy
 from ai.Util.role import Role
 
-# stratégie: attaque
-
 
 class Offense(Strategy):
     def __init__(self, p_game_state):

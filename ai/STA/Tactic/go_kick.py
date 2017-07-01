@@ -6,7 +6,6 @@ import time
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from RULEngine.Util.geometry import get_distance
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.STA.Action.AllStar import AllStar

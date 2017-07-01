@@ -1,5 +1,4 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.STA.Tactic.Stop import Stop
 from ai.Util.role import Role
 from . Strategy import Strategy

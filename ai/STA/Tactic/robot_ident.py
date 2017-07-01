@@ -6,7 +6,6 @@ from typing import List
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.SpeedPose import SpeedPose
-from RULEngine.Util.Position import Position
 from ai.STA.Action.Idle import Idle
 from ai.Util.ai_command import AICommandType, AICommand, AIControlLoopType
 from ai.STA.Tactic.Tactic import Tactic
