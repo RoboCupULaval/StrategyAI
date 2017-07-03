@@ -32,10 +32,6 @@ class Game:
         if ConfigService().config_dict["IMAGE"]["kalman"] == "true":
             self.update = self._kalman_update
 
-    def set_command(self, cmd):
-        for commands in cmd:
-            self.friends.update_player_command(commands.player.id, commands)
-
     def set_referee(self, p_referee):
         self.referee = p_referee
 

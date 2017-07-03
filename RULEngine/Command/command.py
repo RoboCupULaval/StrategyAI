@@ -20,13 +20,16 @@ class Command(object):
         assert isinstance(player, OurPlayer)
         self.player = player
         # fixme Why does command need the speed???
-        if player.ai_command is not None:
-            self.cmd_repr = player.ai_command.speed
+        # self.cmd_repr = Pose()
+        # if player.ai_command is not None:
+        #     self.cmd_repr = player.ai_command.speed
 
     @abstractmethod
     def package_command(self, mcu_communicator: McuCommunicator):
         pass
 
+    def __str__(self):
+        pass # return " cmd_repr="+str(self.cmd_repr)
 
 class ResponseCommand(Command):
     def __init__(self, player: OurPlayer, pause_cond: threading.Condition):
@@ -63,9 +66,9 @@ class Move(Command):
 
     def package_command(self, mcu_communicator: McuCommunicator) -> None:
         mcu_communicator.sendSpeed(self.player.id,
-                                   self.cmd_repr.position.x,
-                                   self.cmd_repr.position.y,
-                                   self.cmd_repr.orientation)
+                                   self.player.ai_command.speed.position.x,
+                                   self.player.ai_command.speed.position.y,
+                                   self.player.ai_command.speed.orientation)
 
 
 class Kick(Command):

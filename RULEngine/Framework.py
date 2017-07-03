@@ -213,7 +213,6 @@ class Framework(object):
         self.game.referee.update(referee_frames)
         if time.time() - self.time_of_last_loop > self.ai_timestamp:
             time_delta = time.time() - self.time_of_last_loop
-            print(new_image_packet,"\n**************************************\n")
             self.game.update(new_image_packet, time_delta)
             self.game.field.update_field_dimensions(vision_frames)
 
@@ -222,7 +221,6 @@ class Framework(object):
 
             # Communication
             self._send_robot_commands(robot_commands)
-            self.game.set_command(robot_commands)
             self._send_debug_commands()
             self._send_new_vision_packet()
             self.time_of_last_loop = time.time()
@@ -258,9 +256,9 @@ class Framework(object):
         self.thread_terminate.set()
         self.ia_running_thread.join()
         self.thread_terminate.clear()
+        self.robot_command_sender.stop()
         if self.uidebug_robot_monitor:
             self.uidebug_robot_monitor.stop()
-        self.robot_command_sender.stop()
         try:
             team = self.game.friends
 
