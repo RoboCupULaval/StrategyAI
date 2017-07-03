@@ -9,8 +9,6 @@ from ai.Util.ai_command import AICommandType, AICommand
 from ai.states.world_state import WorldState
 
 
-
-
 class CommandExecutor(Executor):
     def __init__(self, world_state: WorldState):
         """
@@ -31,7 +29,6 @@ class CommandExecutor(Executor):
         # Transform to other command type
         for player in self.ws.game_state.my_team.available_players.values():
             ready_to_ship_robot_packet_list += (self._parse_ai_command(player))
-            player.set_command()
         return ready_to_ship_robot_packet_list
 
     @staticmethod

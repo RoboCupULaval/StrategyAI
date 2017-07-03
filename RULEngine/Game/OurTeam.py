@@ -12,6 +12,13 @@ class OurTeam(Team):
             self.players[player_id] = OurPlayer(self, player_id)
             if player_id < 6:
                 self.players[player_id].in_play = True
+                self.available_players[player_id] = self.players[player_id]
+
+    def _kalman_update(self, player_id, pose_list, delta=0):
+        try:
+            self.players[player_id].update(pose_list, delta)
+        except KeyError as err:
+            raise err
 
     # todo change this MGL 2017/05/29
     def update_player_command(self, player_id, cmd):

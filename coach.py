@@ -53,6 +53,7 @@ class Coach(object):
         self.module_executor.exec()
         self.motion_executor.exec()
         robot_commands = self.robot_command_executor.exec()
+
         return robot_commands
 
     def set_reference(self, world_reference: ReferenceTransferObject) -> None:

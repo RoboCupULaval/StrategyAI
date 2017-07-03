@@ -4,15 +4,12 @@
 """
     Ce module garde en mémoire l'état du jeu
 """
-from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Game.Player import Player
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Util.constant import TeamColor
 from RULEngine.Util.singleton import Singleton
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from ai.Util.role import Role
-from ai.Util.role_mapper import RoleMapper
 
 
 class GameState(object, metaclass=Singleton):
@@ -28,29 +25,6 @@ class GameState(object, metaclass=Singleton):
         self.other_team = None
         self.timestamp = 0
         self.const = None
-        self._role_mapper = RoleMapper()
-
-    def get_player_by_role(self, role: Role) -> OurPlayer:
-        return self._role_mapper.roles_translation[role]
-
-    def get_role_by_player_id(self, player_id: int) -> Role:
-        for r, p in self._role_mapper.roles_translation.items():
-            if p.id == player_id:
-                return r
-
-    def bind_random_available_players_to_role(self) -> OurPlayer:
-        pass
-
-    def print_role_mapping(self):
-        # Testing purposes only
-        for key, value in self._role_mapper.roles_translation.items():
-            print(key, value)
-
-    def map_players_to_roles_by_player(self, mapping):
-        self._role_mapper.map_by_player(mapping)
-
-    def get_role_mapping(self):
-        return self._role_mapper.roles_translation
 
     def get_our_team_color(self) -> TeamColor:
         """
@@ -110,7 +84,7 @@ class GameState(object, metaclass=Singleton):
         """
         return self.field.ball.position
 
-    def set_ball_position(self, newPosition: Position, delta_t) -> None:
+    def set_ball_position(self, newPosition : Position, delta_t) -> None:
         self.field.ball.set_position(newPosition, delta_t)
 
     def get_ball_velocity(self) -> Position:
