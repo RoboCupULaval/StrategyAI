@@ -12,7 +12,6 @@ from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 from config.config_service import ConfigService
 
-
 MIN_DISTANCE_TO_REACH_TARGET_SPEED = 0.5
 
 
@@ -116,15 +115,14 @@ class RobotMotion(object):
 
         translation_cmd = self.apply_translation_constraints(translation_cmd)
 
-        # print('Speed: {:5.3f}, Command: {}, {:5.3f}, next speed: {:5.3f},
-        #        target_speed: {:5.3f}, {:5.3f}, reached:{}, error: {}'.format(self.current_speed,
-        #                                                    translation_cmd,
-        #                                                    rotation_cmd,
-        #                                                    self.next_speed,
-        #                                                    self.target_speed,
-        #                                                    self.target_direction.angle()/m.pi*180,
-        #                                                    self.target_reached(),
-        #                                                    self.pose_error))
+        print('Speed: {:5.3f}, Command: {}, {:5.3f}, next speed: {:5.3f}, target_speed: {:5.3f}, {:5.3f}, reached:{}, error: {}'.format(self.current_speed,
+                                                           translation_cmd,
+                                                           rotation_cmd,
+                                                           self.next_speed,
+                                                           self.target_speed,
+                                                           self.target_direction.angle()/m.pi*180,
+                                                           self.target_reached(),
+                                                           self.pose_error))
 
         # Adjust command to robot's orientation
         translation_cmd = translation_cmd.rotate(-self.current_pose.orientation)
@@ -216,7 +214,7 @@ class RobotMotion(object):
         # Dynamics constraints
         self.setting.translation.max_acc = self.ws.game_state.get_player(self.id).max_acc
         self.setting.translation.max_speed = self.ws.game_state.get_player(self.id).max_speed
-        self.setting.rotation.max_speed = self.ws.game_state.get_player(self.id).max_angular_speed  # self.ws.game_state.get_player(self.id).max_angular_speed
+        self.setting.rotation.max_speed = self.ws.game_state.get_player(self.id).max_angular_speed
 
         # Current state of the robot
         self.current_pose = self.ws.game_state.game.friends.players[self.id].pose.scale(1 / 1000)
@@ -235,7 +233,10 @@ class RobotMotion(object):
         self.position_error = self.pose_error.position
         if self.position_error.norm() > 0:
             self.target_direction = self.position_error.normalized()
+
         self.cruise_speed = cmd.cruise_speed
+
+        self.ws.debug_interface.add_vector(1000*self.position_error, 1000*self.current_pose.position, timeout=0.05)
 
     def stop(self):
         self.reset()
@@ -251,11 +252,11 @@ class RobotMotion(object):
 def get_control_setting(is_sim: bool):
 
     if is_sim:
-        translation = {"kp": 0.8, "ki": 0.01, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
-        rotation = {"kp": 2, "ki": 0, "kd": 0.1, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        translation = {"kp": 0.8, "ki": 0, "kd": 1, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
+        rotation = {"kp": 2, "ki": 0, "kd": 1, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
-        translation = {"kp": 1, "ki": 0.0, "kd": 5, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0.05}
-        rotation = {"kp": 2, "ki": 0, "kd": 5, "antiwindup": 20, "deadzone": 0.2, "sensibility": 0.1}
+        translation = {"kp": 1, "ki": 0.0, "kd": 0, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0.05}
+        rotation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 20, "deadzone": 0.2, "sensibility": 0.1}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
