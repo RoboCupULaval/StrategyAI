@@ -35,6 +35,7 @@ class SerialCommandSender(object):
                         time.sleep(COMMUNICATION_SLEEP)
                 self.last_time = time.time()
             else:
+                time.sleep(COMMUNICATION_SLEEP)
                 try:
                     next_command = self.command_queue.popleft()
                 except IndexError:
@@ -42,7 +43,6 @@ class SerialCommandSender(object):
                 if next_command:
                     count += 1
                     self._package_commands(next_command)
-                    time.sleep(COMMUNICATION_SLEEP)
             if count > PACKET_FREQ:
                 timelapse = time.time() - self.speed_time
                 self.speed_time = time.time()
