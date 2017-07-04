@@ -4,8 +4,8 @@ from collections import deque
 
 from RULEngine.Command.command import *
 
-COMMUNICATION_SLEEP = 0.01
-MOVE_COMMAND_SLEEP = 0.04
+COMMUNICATION_SLEEP = 0.001
+MOVE_COMMAND_SLEEP = 0.05
 
 
 class SerialCommandSender(object):
@@ -15,25 +15,24 @@ class SerialCommandSender(object):
         self.last_time = 0
         self.command_queue = deque()
 
-        self.command_dict = {0: Stop(OurPlayer(None, 0)), 1: Stop(OurPlayer(None, 1)), 2: Stop(OurPlayer(None, 2)),
-                             3: Stop(OurPlayer(None, 3)), 4: Stop(OurPlayer(None, 4)), 5: Stop(OurPlayer(None, 5))}
+        self.command_dict = {}
 
         self.terminate = threading.Event()
-        self.comm_thread = threading.Thread(target=self.send_loop)
+        self.comm_thread = threading.Thread(target=self.send_loop, name="SerialCommandSender")
         self.comm_thread.start()
 
     def send_loop(self):
-        PACKET_FREQ = 100
+        PACKET_FREQ = 50
         count = 0
         self.speed_time = time.time()
         while not self.terminate.is_set():
             if time.time() - self.last_time > MOVE_COMMAND_SLEEP:
-                for next_command in self.command_dict.values():
-                    if not isinstance(next_command, Stop):
+                self.last_time = time.time()
+                for _, next_command in self.command_dict.items():
+                    if isinstance(next_command, Move):
                         count += 1
                         self._package_commands(next_command)
                         time.sleep(COMMUNICATION_SLEEP)
-                self.last_time = time.time()
             else:
                 try:
                     next_command = self.command_queue.popleft()
@@ -42,7 +41,7 @@ class SerialCommandSender(object):
                 if next_command:
                     count += 1
                     self._package_commands(next_command)
-                    time.sleep(COMMUNICATION_SLEEP)
+                time.sleep(COMMUNICATION_SLEEP)
             if count > PACKET_FREQ:
                 timelapse = time.time() - self.speed_time
                 self.speed_time = time.time()
