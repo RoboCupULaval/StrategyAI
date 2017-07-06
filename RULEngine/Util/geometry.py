@@ -183,7 +183,7 @@ def get_closest_point_on_segment(reference: Position,
     """
 
     position_on_line = get_closest_point_on_line(reference, position1, position2)
-
+    position_on_segment = position_on_line
     if position1.x > position2.x:
         if position_on_line.x > position1.x:
             position_on_segment = position1
