@@ -6,23 +6,38 @@ import numpy as np
 from RULEngine.Game.OurPlayer import OurPlayer
 from ai.STA.Tactic.AlignToDefenseWall import AllignToDefenseWall
 from ai.STA.Tactic.Stop import Stop
+from ai.Util.role import Role
 from ai.states.game_state import GameState
 from . Strategy import Strategy
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 class DefenseWall(Strategy):
-    def __init__(self, game_state: GameState, number_of_players: int = 5):
+    def __init__(self, game_state: GameState, number_of_players: int = 4, hard_code=True):
         super().__init__(game_state)
         self.number_of_players = number_of_players
         self.robots = []
-        for i in range(self.number_of_players):
-            self.robots += [self.game_state.my_team.available_players[i]]
-        for i in range(self.number_of_players):
-            self.add_tactic(self.robots[i].id, AllignToDefenseWall(self.game_state, self.robots[i], self.robots))
 
-        for player in self.game_state.my_team.available_players.values():
-            if not any(self.robots) == player:
-                self.add_tactic(player.id, Stop(self.game_state, player))
+
+        roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE,
+                             Role.FIRST_DEFENCE]
+        if hard_code:
+            game_state.map_players_to_roles_by_player_id({
+                Role.GOALKEEPER: 0,
+                Role.FIRST_ATTACK: 2,
+                Role.SECOND_ATTACK: 3,
+                Role.MIDDLE: 4,
+                Role.FIRST_DEFENCE: 5,
+                Role.SECOND_DEFENCE: 5
+            })
+
+        role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
+        self.robots = [player for _, player in role_by_robots]
+        for role, player in role_by_robots:
+            self.add_tactic(role, AllignToDefenseWall(self.game_state, player, self.robots))
+
+        # for player in self.game_state.my_team.available_players.values():
+        #     if not any(self.robots) == player:
+        #         self.add_tactic(player.id, Stop(self.game_state, player))
 
 
     def is_ball_closest_to_player(self, player: OurPlayer):

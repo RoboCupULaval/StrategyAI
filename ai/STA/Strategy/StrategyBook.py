@@ -3,7 +3,7 @@
 """ Livre des stratégies. """
 from typing import List
 
-from ai.STA.Strategy.DenfenseWall import DefenseWall
+from ai.STA.Strategy.DefenseWall import DefenseWall
 from ai.STA.Strategy.offense import Offense
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Strategy.indiana_jones import IndianaJones

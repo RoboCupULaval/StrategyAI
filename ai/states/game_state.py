@@ -46,6 +46,10 @@ class GameState(object, metaclass=Singleton):
         for key, value in self._role_mapper.roles_translation.items():
             print(key, value)
 
+    def map_players_to_roles_by_player_id(self, mapping_by_player_id):
+        mapping_by_player = {role: self.my_team.available_players[player_id] for role, player_id in mapping_by_player_id.items()}
+        self._role_mapper.map_by_player(mapping_by_player)
+
     def map_players_to_roles_by_player(self, mapping):
         self._role_mapper.map_by_player(mapping)
 

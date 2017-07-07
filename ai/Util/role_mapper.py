@@ -1,3 +1,4 @@
+from Game import OurPlayer
 from .role import Role
 
 class RoleMapper(object):
