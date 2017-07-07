@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
 import numpy as np
+import time
 
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
@@ -9,16 +10,16 @@ from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.Algorithm.evaluation_module import best_position_in_region
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommandType
 from ai.states.game_state import GameState
+from RULEngine.Debug.debug_interface import COLOR_ID_MAP
 
 __author__ = 'RoboCupULaval'
 
 ORIENTATION_DEADZONE = 0.2
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
-COMMAND_DELAY = 1.5
+DELAY = 1
 
 
 class PositionForPass(Tactic):
@@ -40,6 +41,9 @@ class PositionForPass(Tactic):
         self.current_state = self.move_to_pass_position
         self.next_state = self.move_to_pass_position
         self.auto_position = auto_position
+        self.target_position = self._find_best_player_position()
+        print('init', self.target_position)
+        self.last_time = time.time()
 
     def move_to_pass_position(self):
         self.next_state = self.move_to_pass_position
@@ -70,10 +74,13 @@ class PositionForPass(Tactic):
         ball_x = self.game_state.get_ball_position().x
         ball_y = self.game_state.get_ball_position().y
 
-        self._find_best_player_position()
-
+        if time.time() - self.last_time > DELAY:
+            self.target_position = self._find_best_player_position()
+            self.last_time = time.time()
         destination_orientation = np.arctan2(ball_y - player_y, ball_x - player_x)
-        return Pose(self.target.position, destination_orientation)
+        self.game_state.debug_interface.add_point(self.target_position, COLOR_ID_MAP[4], width=5,
+                                                  timeout = 0.1)
+        return Pose(self.target_position, destination_orientation)
 
     def _find_best_player_position(self):
         if self.auto_position:
@@ -81,20 +88,22 @@ class PositionForPass(Tactic):
             if self.player.id == 1: #role is 'top_defence':
                 A = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"]+pad, GameState().const["FIELD_Y_TOP"]-pad)
                 B = Position(0-pad, (GameState().const["FIELD_Y_TOP"] / 3)+pad)
-                self.target.position = best_position_in_region(self.player, A, B)
+                return best_position_in_region(self.player, A, B)
             elif self.player.id == 2: #player.role is 'bottom_defence':
                 A = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"]+pad, GameState().const["FIELD_Y_BOTTOM"]+pad)
                 B = Position(0-pad, (GameState().const["FIELD_Y_BOTTOM"] / 3)-pad)
-                self.target.position = best_position_in_region(self.player, A, B)
+                return best_position_in_region(self.player, A, B)
             elif self.player.id == 3: #player.role is 'top_offence':
                 A = Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"]-pad, GameState().const["FIELD_Y_TOP"]-pad)
                 B = Position(0+pad, 0+pad)
-                self.target.position = best_position_in_region(self.player, A, B)
+                return best_position_in_region(self.player, A, B)
             elif self.player.id == 4: #player.role is 'bottom_offence':
                 A = Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"]-pad, GameState().const["FIELD_Y_BOTTOM"]+pad)
                 B = Position(0+pad, 0-pad)
-                self.target.position = best_position_in_region(self.player, A, B)
+                return best_position_in_region(self.player, A, B)
             elif self.player.id == 5: #player.role is 'center':
-                A = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"]-pad, (GameState().const["FIELD_Y_BOTTOM"] / 3)-pad)
-                B = Position(0-pad, GameState().const["FIELD_Y_TOP"] / 3)
-                self.target.position = best_position_in_region(self.player, A, B)
+                A = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"]+1000, (GameState().const["FIELD_Y_BOTTOM"] / 3)+pad)
+                B = Position(0-pad, GameState().const["FIELD_Y_TOP"] / 3-pad)
+                return best_position_in_region(self.player, A, B)
+            #self.game_state.debug_interface.add_point(self.target.position, COLOR_ID_MAP[4], width=5,
+                                                     # timeout = 0.1)

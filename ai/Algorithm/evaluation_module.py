@@ -192,5 +192,4 @@ def best_position_in_region(player, A, B):
             if score_min > score:
                 score_min = score
                 best_position = i
-
     return best_position

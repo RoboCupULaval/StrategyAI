@@ -214,7 +214,7 @@ class Framework(object):
         self.game.referee.update(referee_frames)
         if time.time() - self.time_of_last_loop > self.ai_timestamp:
             time_delta = time.time() - self.time_of_last_loop
-            print(new_image_packet,"\n**************************************\n")
+            #print(new_image_packet,"\n**************************************\n")
             self.game.update(new_image_packet, time_delta)
             self.game.field.update_field_dimensions(vision_frames)
 
