@@ -162,18 +162,3 @@ class AllignToDefenseWall(Tactic):
         if distance < self.game_state.const["POSITION_DEADZONE"]:
             return True
         return False
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
