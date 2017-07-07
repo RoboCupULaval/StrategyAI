@@ -22,6 +22,7 @@ class Offense(Strategy):
 
         # Goal Keeper fixé en début de stratégie
         goalkeeper = closest_player_to_point(ourgoal.position, True)
+        print('Goal', goalkeeper.id)
         self.add_tactic(goalkeeper.id, GoalKeeper(self.game_state, goalkeeper, ourgoal))
 
         for i in GameState().my_team.available_players.values():
