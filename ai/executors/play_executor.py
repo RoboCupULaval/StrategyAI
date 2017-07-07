@@ -39,10 +39,10 @@ class PlayExecutor(Executor):
             # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
             self._send_books()
             self.ws.debug_interface.send_team_color()
-
-            self._send_robots_status()
-            self._send_auto_state()
             self.last_time = time.time()
+
+        self._send_robots_status()
+        self._send_auto_state()
 
 
     def _execute_strategy(self) -> None:
