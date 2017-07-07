@@ -4,6 +4,7 @@ import sys
 
 from ai.STA.Tactic.DemoFollowRobot import DemoFollowRobot
 from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
+from ai.STA.Tactic.RotateAroundBall import RotateAroundBall
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.bumb import Bump
 from ai.STA.Tactic.capture import Capture
@@ -51,6 +52,7 @@ class TacticBook(object):
                             'GoKick': GoKick,
                             "TestTurnOnYou": TestTurnOnYou,
                             'RotateAroundPosition': RotateAroundPosition,
+                            'RotateAroundBall': RotateAroundBall,
                             "VaEtVient": VaEtVient,
                             'RobotIdent': RobotIdent,
                             'PositionForPass': PositionForPass,

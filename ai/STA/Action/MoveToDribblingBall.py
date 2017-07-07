@@ -33,10 +33,11 @@ class MoveToDribblingBall(Action):
         Exécute le déplacement en tenant compte de la possession de la balle. Le robot se déplace vers la destination,
         mais s'oriente de façon à garder la balle sur le dribleur. C'est la responsabilité de la Tactique de faire les
         corrections de trajectoire nécessaire.
-        :return:
         """
         # TODO: Améliorer le comportement en ajoutant l'intervalle d'anle correspondant à la largeur du dribbleur
-        destination_orientation = get_angle(self.player.pose.position,
-                                            self.game_state.get_ball_position())
+        ball_position = self.game_state.get_ball_position()
+        destination_orientation = (self.player.pose.position - ball_position).angle()
         destination_pose = Pose(self.destination, destination_orientation)
-        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": destination_pose})
+        return AICommand(self.player,
+                         AICommandType.MOVE,
+                         pose_goal=destination_pose)

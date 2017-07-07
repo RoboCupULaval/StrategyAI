@@ -31,5 +31,7 @@ class GetBall(Action):
         """
         ball_position = self.game_state.get_ball_position()
         destination_orientation = (ball_position - self.player.pose.position).angle()
-        destination_pose = {"pose_goal": Pose(ball_position, destination_orientation)}
-        return AICommand(self.player, AICommandType.MOVE, **destination_pose)
+
+        return AICommand(self.player,
+                         AICommandType.MOVE,
+                         pose_goal=Pose(ball_position, destination_orientation))
