@@ -79,7 +79,9 @@ class PositionForPass(Tactic):
             self.last_time = time.time()
         destination_orientation = np.arctan2(ball_y - player_y, ball_x - player_x)
         self.game_state.debug_interface.add_point(self.target_position, COLOR_ID_MAP[4], width=5,
-                                                  timeout = 0.1)
+                                                  timeout = 1)
+        self.game_state.debug_interface.add_line(self.target_position, self.player.pose.position,
+                                                  timeout=0.1)
         return Pose(self.target_position, destination_orientation)
 
     def _find_best_player_position(self):
@@ -102,6 +104,7 @@ class PositionForPass(Tactic):
             elif self.player.id == 1: #role is 'top_defence':
                 A = Position(our_goal_field_limit, GameState().const["FIELD_Y_TOP"]-pad)
                 B = Position(our_side_center_field_limit, (GameState().const["FIELD_Y_TOP"] / 3)+pad)
+
                 return best_position_in_region(self.player, A, B)
             elif self.player.id == 2: #player.role is 'bottom_defence':
                 A = Position(our_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
@@ -116,7 +119,7 @@ class PositionForPass(Tactic):
                 B = Position(their_side_center_field_limit, -pad)
                 return best_position_in_region(self.player, A, B)
             elif self.player.id == 5: #player.role is 'center':
-                A = Position(our_goal_field_limit+5000, (GameState().const["FIELD_Y_BOTTOM"] / 3)+pad)
+                A = Position(our_goal_field_limit+1000, (GameState().const["FIELD_Y_BOTTOM"] / 3)+pad)
                 B = Position(our_side_center_field_limit, GameState().const["FIELD_Y_TOP"] / 3-pad)
                 return best_position_in_region(self.player, A, B)
             elif self.player.id == 6:  # role None:
