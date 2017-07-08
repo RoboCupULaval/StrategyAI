@@ -1,12 +1,8 @@
 # Under MIT licence, see LICENCE.txt
 import time
 from typing import List
-import numpy as np
 
 from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.geometry import get_distance
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Action.GoBehind import GoBehind
@@ -15,8 +11,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.MoveToPosition import MoveToPosition
 
 
-from RULEngine.Util.geometry import get_distance, get_angle
-from RULEngine.Util.constant import DISTANCE_BEHIND, PLAYER_PER_TEAM, POSITION_DEADZONE, BALL_RADIUS
+from RULEngine.Util.geometry import get_distance
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 import numpy as np

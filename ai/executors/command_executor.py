@@ -5,7 +5,7 @@ from RULEngine.Command.command import *
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.SpeedPose import SpeedPose
 from ai.executors.executor import Executor
-from ai.Util.ai_command import AICommandType
+from ai.Util.ai_command import AICommandType, AICommand
 from ai.states.world_state import WorldState
 
 
@@ -57,5 +57,14 @@ class CommandExecutor(Executor):
                 temp.append(Move(player))
             elif player.ai_command.command == AICommandType.STOP:
                 temp.append(Stop(player))
+                player.ai_command.speed = SpeedPose()
             return temp
+        # TODO FIXME T_T ugly hack kill me with fire
+        # this is done so that when a player has no ai_command we can send the command to stop him
+        # without having the parts that send the commands freak out because there is no ai_command to fetch some
+        # informations they need. At this time it's for the grsim_command_sender when he get
+        # command.player.ai_commands.speed, he finds aicommand as none breaking it. MGL 2017/06/26
+
+        player.ai_command = AICommand(player, AICommandType.STOP)
+        player.ai_command.speed = SpeedPose()
         return [Stop(player)]

@@ -123,7 +123,7 @@ class Graph:
         """
         output_string = ""
         for i in range(len(self.nodes)):
-            output_string += "Node " + str(i) + ": " + str(self.nodes[i]) + "\n"
+            output_string += "Node " + str(i) + ": " + str(self.nodes[i])
         return output_string
 
 

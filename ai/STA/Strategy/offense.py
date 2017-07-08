@@ -8,10 +8,9 @@ from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.position_for_pass import PositionForPass
+from ai.Util.role import Role
 from ai.states.game_state import GameState
 from . Strategy import Strategy
-
-# stratégie: attaque
 
 
 class Offense(Strategy):
@@ -20,18 +19,22 @@ class Offense(Strategy):
         ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
         self.theirgoal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
 
-        # Goal Keeper fixé en début de stratégie
-        goalkeeper = closest_player_to_point(ourgoal.position, True)
-        self.add_tactic(goalkeeper.id, GoalKeeper(self.game_state, goalkeeper, ourgoal))
+        roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE,
+                             Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
+        role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
 
-        for i in GameState().my_team.available_players.values():
-            if not i.id == goalkeeper.id:
-                self.add_tactic(i.id, PositionForPass(self.game_state, i, auto_position=True))
-                self.add_tactic(i.id, GoKick(self.game_state, i, auto_update_target=True))
+        goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
 
-                self.add_condition(i.id, 0, 1, partial(self.is_closest, i))
-                self.add_condition(i.id, 1, 0, partial(self.is_not_closest, i))
-                self.add_condition(i.id, 1, 1, partial(self.has_kicked, i))
+        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
+
+        for index, player in role_by_robots:
+            if player:
+                self.add_tactic(index, PositionForPass(self.game_state, player, auto_position=True))
+                self.add_tactic(index, GoKick(self.game_state, player, auto_update_target=True))
+
+                self.add_condition(index, 0, 1, partial(self.is_closest, player))
+                self.add_condition(index, 1, 0, partial(self.is_not_closest, player))
+                self.add_condition(index, 1, 1, partial(self.has_kicked, player))
 
     def is_closest(self, player):
         return player == closest_player_to_point(GameState().get_ball_position(), True)
@@ -40,7 +43,8 @@ class Offense(Strategy):
         return player != closest_player_to_point(GameState().get_ball_position(), True)
 
     def has_kicked(self, player):
-        if self.graphs[player.id].get_current_tactic_name() == 'GoKick':
-            return self.graphs[player.id].get_current_tactic().status_flag == Flags.SUCCESS
+        role = GameState().get_role_by_player_id(player.id)
+        if self.roles_graph[role].get_current_tactic_name() == 'GoKick':
+            return self.roles_graph[role].get_current_tactic().status_flag == Flags.SUCCESS
         else:
             return False

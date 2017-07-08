@@ -1,6 +1,5 @@
 # Under MIT license, see LICENSE.txt
 
-import math as m
 from typing import List
 
 from RULEngine.Game.OurPlayer import OurPlayer

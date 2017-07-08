@@ -32,7 +32,7 @@ class UIDebugRobotMonitor(object):
         self.monitor_thread = threading.Thread(target=self._monitor_loop)
         self.pause_cond = threading.Condition(threading.Lock())
 
-        self.monitor_thread.start()
+        #self.monitor_thread.start()
 
     def _monitor_loop(self):
         """ Moniteur le niveau des batteries des robots. """
