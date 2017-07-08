@@ -6,7 +6,7 @@ from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.area import stayInsideCircle, stayOutsideCircle
-from RULEngine.Util.geometry import get_angle, get_closest_point_on_line
+from RULEngine.Util.geometry import get_angle, get_closest_point_on_line, get_closest_point_on_segment
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
 from ai.states.game_state import GameState
@@ -41,6 +41,8 @@ class ProtectGoal(Action):
         assert (isinstance(maximum_distance, (int, float)) or maximum_distance is None)
         if maximum_distance is not None:
             assert maximum_distance >= minimum_distance
+        if maximum_distance is None:
+            maximum_distance = minimum_distance
         self.is_right_goal = is_right_goal
         self.minimum_distance = minimum_distance
         self.maximum_distance = maximum_distance
@@ -55,11 +57,11 @@ class ProtectGoal(Action):
         goal_x = self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"]
         goal_position = Position(goal_x, 0)
 
-        # Calcul de la position d'interception entre la balle et le centre du but
-        destination_position = get_closest_point_on_line(goalkeeper_position, goal_position, ball_position)
+        # Calcul des deux positions extremums entre la balle et le centre du but
+        inner_circle_position = stayInsideCircle(ball_position, goal_position, self.minimum_distance)
+        outer_circle_position = stayInsideCircle(ball_position, goal_position, self.maximum_distance)
 
-        # Vérification que destination_position respecte la distance minimale
-        destination_position = stayOutsideCircle(destination_position, goal_position, self.minimum_distance)
+        destination_position = get_closest_point_on_segment(goalkeeper_position, inner_circle_position, outer_circle_position)
 
         # Vérification que destination_position respecte la distance maximale
         if self.maximum_distance is None:

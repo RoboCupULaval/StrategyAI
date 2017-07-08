@@ -165,6 +165,36 @@ def get_closest_point_on_line(reference: Position,
 
     return Position(pos_x, pos_y)
 
+def get_closest_point_on_segment(reference: Position,
+                                position1: Position,
+                                position2: Position) -> Position:
+    """
+        Calcul la position du point sur un segment le plus près d'une position de
+        référence. Le segment est donné par deux positions. La ligne reliant la
+        position recherchée et la position de référence est perpendiculaire à
+        la droite représentant le segment.
+        Args:
+            reference: La position de référence
+            position1: Le premier point formant la droite
+            position2: Le second point formant la droite
+        Returns:
+            La position du point de la droite le plus proche de la position de
+            référence.
+    """
+
+    position_on_line = get_closest_point_on_line(reference, position1, position2)
+    position_on_segment = position_on_line
+    if position1.x > position2.x:
+        if position_on_line.x > position1.x:
+            position_on_segment = position1
+        if position_on_line.x < position2.x:
+            position_on_segment = position2
+    else:
+        if position_on_line.x > position2.x:
+            position_on_segment = position2
+        if position_on_line.x < position1.x:
+            position_on_segment = position1
+    return position_on_segment
 
 def get_angle_between_three_points(pointA : Position, pointO : Position, pointB : Position):
     A = pointA.conv_2_np()
