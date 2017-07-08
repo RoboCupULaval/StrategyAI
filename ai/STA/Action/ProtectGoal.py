@@ -71,11 +71,11 @@ class ProtectGoal(Action):
             destination_position = stayInsideCircle(destination_position, goal_position, self.maximum_distance)
 
         # Calcul de l'orientation de la pose de destination
-        destination_orientation = (destination_position - ball_position).angle()
+        destination_orientation = (ball_position - destination_position).angle()
 
         destination_pose = Pose(destination_position, destination_orientation)
         return AICommand(self.player,
                          AICommandType.MOVE,
                          pose_goal=destination_pose,
-                         pathfinder_on=True)
+                         pathfinder_on=False)
 
