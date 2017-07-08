@@ -10,6 +10,7 @@
 import signal
 import threading
 import time
+import warnings
 
 from RULEngine.Communication.sender.uidebug_robot_monitor import UIDebugRobotMonitor
 from RULEngine.Command.command import Stop
@@ -211,8 +212,10 @@ class Framework(object):
         new_image_packet = self.image_transformer.update(vision_frames)
         referee_frames = self.referee_command_receiver.pop_frames()
         self.game.referee.update(referee_frames)
-        if time.time() - self.time_of_last_loop > self.ai_timestamp:
-            time_delta = time.time() - self.time_of_last_loop
+        new_time_delta = time.time() - self.time_of_last_loop
+        if new_time_delta > self.ai_timestamp:
+            time_delta = new_time_delta
+            self.time_of_last_loop = time.time()
             self.game.update(new_image_packet, time_delta)
             self.game.field.update_field_dimensions(vision_frames)
 
@@ -223,7 +226,9 @@ class Framework(object):
             self._send_robot_commands(robot_commands)
             self._send_debug_commands()
             self._send_new_vision_packet()
-            self.time_of_last_loop = time.time()
+
+            if time_delta > self.ai_timestamp * 1.3:
+                warnings.warn("Update loop takes {:5.3f}s instead of {}s!!!".format(time_delta, self.ai_timestamp))
 
     """
     def _test_vision(self):

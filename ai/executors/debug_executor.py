@@ -80,7 +80,11 @@ class DebugExecutor(Executor):
         # FIXME this pid thingy is getting out of control
         # find the player id in question
         # get the player if applicable!
-        this_player = self.ws.game_state.get_player(cmd.data['id'])
+        try:
+            this_player = self.ws.game_state.get_player(cmd.data['id'])
+        except KeyError as id:
+            print("Invalid player id: {}".format(cmd.data['id']))
+            return
         player_id = this_player.id
         tactic_name = cmd.data['tactic']
         # TODO ui must send better packets back with the args.
