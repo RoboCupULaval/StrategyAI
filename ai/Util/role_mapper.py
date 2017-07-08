@@ -1,3 +1,5 @@
+from collections import Counter
+
 from Game import OurPlayer
 from .role import Role
 
@@ -15,8 +17,9 @@ class RoleMapper(object):
             base_map[key] = value
 
         results = self._apply_locked_roles(saved_roles, base_map)
-        # if len(results.values()) > len(set(results.values())):
-        #     raise ValueError('Tried to assign a locked robot to another role')
+
+        if abs(len(results.values()) - len(set(results.values()))) > Counter(results.values())[None]:
+            raise ValueError("Tried to assign a locked robot to another role, {}".format(Counter(results.values())))
         self.roles_translation = results
 
     def _remove_undesired_roles(self, base_map, new_map):

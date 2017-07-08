@@ -35,7 +35,6 @@ class TacticBook(object):
         """
         self.tactic_book = {'FaceTarget': FaceTarget,
                             'PassBall': PassBall,
-                            'ReceivePass': ReceivePass,
                             'GoalKeeper': GoalKeeper,
                             'CoverZone': ProtectZone,
                             'GoGetBall': GoGetBall,
@@ -47,7 +46,6 @@ class TacticBook(object):
                             'GoKick': GoKick,
                             "TestTurnOnYou": TestTurnOnYou,
                             'RotateAroundPosition': RotateAroundPosition,
-                            "VaEtVient": VaEtVient,
                             'RobotIdent': RobotIdent,
                             'PositionForPass': PositionForPass,
                             'Bump': Bump,

@@ -18,7 +18,7 @@ class RoleMapperTests(TestCase):
         state = GameState()
         state.map_players_to_roles_by_player(basic_roles)
         state.map_players_to_roles_by_player(missing_middle)
-        self.assertDictEqual(state.get_role_mapping(), missing_middle)
+        self.assertDictEqual(state.get_role_mapping(), missing_middle_expected)
 
     def test_givenBasicMapping_whenMapMissingLockedRole_thenKeepsLockedRole(self):
         state = GameState()
@@ -64,6 +64,14 @@ missing_middle = {
     Role.GOALKEEPER: 0,
     Role.FIRST_DEFENCE: 1,
     Role.SECOND_DEFENCE: 2,
+    Role.FIRST_ATTACK: 4,
+    Role.SECOND_ATTACK: 5
+}
+missing_middle_expected = {
+    Role.GOALKEEPER: 0,
+    Role.FIRST_DEFENCE: 1,
+    Role.SECOND_DEFENCE: 2,
+    Role.MIDDLE: None,
     Role.FIRST_ATTACK: 4,
     Role.SECOND_ATTACK: 5
 }

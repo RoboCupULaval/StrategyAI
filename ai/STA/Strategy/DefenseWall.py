@@ -22,12 +22,10 @@ class DefenseWall(Strategy):
                              Role.FIRST_DEFENCE]
         if hard_code:
             game_state.map_players_to_roles_by_player_id({
-                Role.GOALKEEPER: 0,
                 Role.FIRST_ATTACK: 2,
                 Role.SECOND_ATTACK: 3,
                 Role.MIDDLE: 4,
                 Role.FIRST_DEFENCE: 5,
-                Role.SECOND_DEFENCE: 5
             })
 
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]

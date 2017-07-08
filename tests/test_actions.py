@@ -81,19 +81,6 @@ class TestActions(unittest.TestCase):
                                     **{"pose_goal": grab_pose})
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
-    def test_MoveWithBall(self):
-        self.move_with_ball = MoveToDribblingBall(self.game_state,self.a_player, Position(100, 0))
-        self.game_state.set_ball_position(Position(5, 0), A_DELTA_T)
-        ai_cmd = self.move_with_ball.exec()
-        ai_cmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                    **{"pose_goal": Pose(Position(100, 0), 0)})
-        self.assertEqual(ai_cmd, ai_cmd_expected)
-
-        self.game_state.set_ball_position(Position(5, 2), A_DELTA_T)
-        ai_cmd = self.move_with_ball.exec()
-        ai_cmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                    **{"pose_goal": Pose(Position(100, 0), atan(2/5))})
-        self.assertEqual(ai_cmd, ai_cmd_expected)
 
     #@unittest.skip("GoBetween does not actually go in between")
     def test_GoBetween(self):
