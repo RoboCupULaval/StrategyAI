@@ -12,6 +12,7 @@ from ai.STA.Tactic.Tactic import Tactic
 from ai.Util.ai_command import AICommandType
 from ai.states.game_state import GameState
 from RULEngine.Debug.debug_interface import COLOR_ID_MAP
+from ai.Util.role import Role
 
 __author__ = 'RoboCupULaval'
 
@@ -78,29 +79,26 @@ class PositionForPass(Tactic):
                 their_goal_field_limit = GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"] - pad
                 their_side_center_field_limit = pad
 
-            if self.player.id == 0:  # role None:
-                return Position(0,0)
-            elif self.player.id == 1:  # role is 'top_defence':
+            role = GameState().get_role_by_player_id(self.player.id)
+            if role is Role.FIRST_DEFENCE:  # role is 'top_defence':
                 A = Position(our_goal_field_limit, GameState().const["FIELD_Y_TOP"]-pad)
                 B = Position(our_side_center_field_limit, (GameState().const["FIELD_Y_TOP"] / 3)+pad)
                 return best_position_in_region(self.player, A, B)
-            elif self.player.id == 2:  # player.role is 'bottom_defence':
+            elif role is Role.SECOND_DEFENCE:  # player.role is 'bottom_defence':
                 A = Position(our_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
                 B = Position(our_side_center_field_limit, (GameState().const["FIELD_Y_BOTTOM"] / 3)-pad)
                 return best_position_in_region(self.player, A, B)
-            elif self.player.id == 3:  # player.role is 'top_offence':
+            elif role is Role.FIRST_ATTACK:  # player.role is 'top_offence':
                 A = Position(their_goal_field_limit, GameState().const["FIELD_Y_TOP"]-pad)
                 B = Position(their_side_center_field_limit, pad)
                 return best_position_in_region(self.player, A, B)
-            elif self.player.id == 4:  # player.role is 'bottom_offence':
+            elif role is Role.SECOND_ATTACK:  # player.role is 'bottom_offence':
                 A = Position(their_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
                 B = Position(their_side_center_field_limit, -pad)
                 return best_position_in_region(self.player, A, B)
-            elif self.player.id == 5:  # player.role is 'center':
+            elif role is Role.MIDDLE:  # player.role is 'center':
                 A = Position(our_goal_field_limit+1000, (GameState().const["FIELD_Y_BOTTOM"] / 3)+pad)
                 B = Position(our_side_center_field_limit, GameState().const["FIELD_Y_TOP"] / 3-pad)
                 return best_position_in_region(self.player, A, B)
-            elif self.player.id == 6:  # role None:
-                return Position(0, 0)
         else:
             return self.target_position

@@ -1,6 +1,4 @@
 from collections import Counter
-
-from Game import OurPlayer
 from .role import Role
 
 class RoleMapper(object):
