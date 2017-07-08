@@ -106,9 +106,9 @@ class GoBehind(Action):
         # TODO why?!? MGL 2017/05/22
         destination_orientation = 0
         if self.orientation == 'front':
-            destination_orientation = get_angle(destination_position, self.position1)
+            destination_orientation = (destination_position - self.position1).angle()
         elif self.orientation == 'back':
-            destination_orientation = get_angle(destination_position, self.position1) + np.pi
+            destination_orientation = (destination_position - self.position1).angle() + np.pi
 
         destination_pose = Pose(destination_position, destination_orientation)
         return destination_pose
