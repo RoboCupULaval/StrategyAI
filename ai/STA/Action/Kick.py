@@ -31,7 +31,10 @@ class Kick(Action):
         target = self.target.position
         player = self.player.pose.position
         player_to_target = target - player
-        player_to_target = 0.3 * player_to_target.normalized()
+        if player_to_target.norm() > 0:
+            player_to_target = 0.3 * player_to_target.normalized()
+        else:
+            player_to_target = SpeedPose()
 
         cmd_params = {"pose_goal": SpeedPose(player_to_target),
                       "control_loop_type": AIControlLoopType.SPEED,
