@@ -83,22 +83,18 @@ class PositionForPass(Tactic):
             if role is Role.FIRST_DEFENCE:  # role is 'top_defence':
                 A = Position(our_goal_field_limit, GameState().const["FIELD_Y_TOP"]-pad)
                 B = Position(our_side_center_field_limit, (GameState().const["FIELD_Y_TOP"] / 3)+pad)
-                return best_position_in_region(self.player, A, B)
             elif role is Role.SECOND_DEFENCE:  # player.role is 'bottom_defence':
                 A = Position(our_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
                 B = Position(our_side_center_field_limit, (GameState().const["FIELD_Y_BOTTOM"] / 3)-pad)
-                return best_position_in_region(self.player, A, B)
             elif role is Role.FIRST_ATTACK:  # player.role is 'top_offence':
                 A = Position(their_goal_field_limit, GameState().const["FIELD_Y_TOP"]-pad)
                 B = Position(their_side_center_field_limit, pad)
-                return best_position_in_region(self.player, A, B)
             elif role is Role.SECOND_ATTACK:  # player.role is 'bottom_offence':
                 A = Position(their_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
                 B = Position(their_side_center_field_limit, -pad)
-                return best_position_in_region(self.player, A, B)
             elif role is Role.MIDDLE:  # player.role is 'center':
                 A = Position(our_goal_field_limit+1000, (GameState().const["FIELD_Y_BOTTOM"] / 3)+pad)
                 B = Position(our_side_center_field_limit, GameState().const["FIELD_Y_TOP"] / 3-pad)
-                return best_position_in_region(self.player, A, B)
+            return best_position_in_region(self.player, A, B)
         else:
             return self.target_position
