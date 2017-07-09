@@ -121,7 +121,7 @@ def stayOutsideCircle(position, center, radius):
     if isOutsideCircle(position, center, radius):
         return Position(position.x, position.y)
     else:
-        pos_angle = get_angle(center, position)
+        pos_angle = (position - center).angle()
         pos_x = radius * m.cos(pos_angle) + center.x
         pos_y = radius * m.sin(pos_angle) + center.y
         return Position(pos_x, pos_y)

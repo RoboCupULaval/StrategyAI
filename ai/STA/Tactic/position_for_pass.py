@@ -11,6 +11,7 @@ from ai.STA.Action.AllStar import AllStar
 from ai.STA.Tactic.Tactic import Tactic
 from ai.Util.ai_command import AICommandType
 from ai.states.game_state import GameState
+import time
 
 __author__ = 'RoboCupULaval'
 
@@ -41,6 +42,7 @@ class PositionForPass(Tactic):
         self.auto_position = auto_position
 
     def move_to_pass_position(self):
+
         self.next_state = self.move_to_pass_position
         # if self._is_player_towards_ball():
         #     self.status_flag = Flags.SUCCESS
@@ -65,6 +67,7 @@ class PositionForPass(Tactic):
         return False
 
     def _get_destination_pose(self):
+
         player_x = self.player.pose.position.x
         player_y = self.player.pose.position.y
         ball_x = self.game_state.get_ball_position().x
@@ -73,6 +76,7 @@ class PositionForPass(Tactic):
         self._find_best_player_position()
 
         destination_orientation = np.arctan2(ball_y - player_y, ball_x - player_x)
+
         return Pose(self.target.position, destination_orientation)
 
     def _find_best_player_position(self):
