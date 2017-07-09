@@ -10,7 +10,7 @@ from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.Util.role import Role
 from ai.states.game_state import GameState
-from . Strategy import Strategy
+from ai.STA.Strategy.Strategy import Strategy
 
 
 class Offense(Strategy):
