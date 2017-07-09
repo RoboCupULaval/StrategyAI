@@ -21,7 +21,7 @@ class RotateAround(Action):
                  player: OurPlayer,
                  target: Pose,
                  radius: Union[int, float]=DEFAULT_RADIUS,
-                 is_clockwise: Union[bool]=None,
+                 is_clockwise: Union[bool, None]=None,
                  aiming: Union[Pose, None]=None,
                  pathfinder_on=False,
                  rotation_speed: Union[int, float]=DEFAULT_ROTATION_SPEED):
@@ -57,7 +57,7 @@ class RotateAround(Action):
 
         if self.aiming is not None:
             aiming_to_target = target - self.aiming
-            heading_error = aiming_to_target.angle() - target_to_player.angle()
+            heading_error = wrap_to_pi(aiming_to_target.angle() - target_to_player.angle())
             if compare_angle(heading_error, 0, abs_tol=self.rotation_speed*dt/2):  # True if heading is right
                 next_position = self.radius * aiming_to_target.normalized()
                 next_orientation = aiming_to_target.angle() - m.pi
@@ -69,7 +69,7 @@ class RotateAround(Action):
                 next_position = self.radius * target_to_player.normalized().rotate(delta_angle)
                 next_orientation = self.target.orientation + delta_angle / 2
 
-        else:  # If no heading, we just rotate around the target with the target orientation
+        else:  # If no aiming, we just rotate around the target with the target orientation
             delta_angle = m.copysign(self.rotation_speed * dt, -1 if self.is_clockwise else 1)
             next_position = self.radius * target_to_player.normalized().rotate(delta_angle)
             next_orientation = self.target.orientation + delta_angle / 2
