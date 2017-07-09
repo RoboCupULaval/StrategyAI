@@ -65,7 +65,6 @@ class PathfinderModule(Executor):
                                                 player.ai_command.pose_goal,
                                                 player.ai_command.cruise_speed)
                 player.ai_command.path = path
-        print(time.time() - start)
 
     # TODO find what this does? MGL 2017/05/17
     """
