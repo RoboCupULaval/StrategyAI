@@ -228,7 +228,8 @@ class Framework(object):
             self._send_new_vision_packet()
 
             if time_delta > self.ai_timestamp * 1.3:
-                warnings.warn("Update loop takes {:5.3f}s instead of {}s.".format(time_delta, self.ai_timestamp))
+                warnings.warn("Update loop took {:5.3f}s instead of {}s!".format(time_delta, self.ai_timestamp),
+                              RuntimeWarning, stacklevel=2)
 
     """
     def _test_vision(self):
@@ -280,7 +281,7 @@ class Framework(object):
 
     def _wait_for_first_frame(self):
         while not self.vision.get_latest_frame() and not self.thread_terminate.is_set():
-            time.sleep(0.01)
+            time.sleep(0.1)
             print("En attente d'une image de la vision.")
 
     def _send_robot_commands(self, commands):
