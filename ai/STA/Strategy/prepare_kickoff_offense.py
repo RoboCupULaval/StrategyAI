@@ -22,7 +22,6 @@ class PrepareKickOffOffense(Strategy):
         middle = self.game_state.get_player_by_role(Role.MIDDLE)
         defense_top = self.game_state.get_player_by_role(Role.FIRST_DEFENCE)
         defense_bottom = self.game_state.get_player_by_role(Role.SECOND_DEFENCE)
-
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
 
         # Positions objectifs des joueurs
@@ -31,36 +30,27 @@ class PrepareKickOffOffense(Strategy):
         attack_bottom_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15,
                                                GameState().const["FIELD_Y_TOP"] * 3 / 5))
         middle_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 30, 0))
-        defense_bottom_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                                GameState().const["FIELD_Y_BOTTOM"] / 3))
         defense_top_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
                                              GameState().const["FIELD_Y_TOP"] / 3))
-        ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
+        defense_bottom_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
+                                                GameState().const["FIELD_Y_BOTTOM"] / 3))
 
-        # Tactiques
-        self.add_tactic(Role.SECOND_ATTACK, GoToPositionPathfinder(self.game_state, attack_bottom,
-                                                                   attack_bottom_position))
-        self.add_tactic(Role.SECOND_ATTACK, Stop(self.game_state, attack_bottom))
-        self.add_condition(Role.SECOND_ATTACK, 0, 1, partial(self.arrived_to_position, attack_bottom))
+        our_goal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
 
-        self.add_tactic(Role.FIRST_ATTACK, GoToPositionPathfinder(self.game_state, attack_top, attack_top_position))
-        self.add_tactic(Role.FIRST_ATTACK, Stop(self.game_state, attack_top))
-        self.add_condition(Role.FIRST_ATTACK, 0, 1, partial(self.arrived_to_position, attack_top))
+        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, our_goal))
 
-        self.add_tactic(Role.MIDDLE, GoToPositionPathfinder(self.game_state, middle, middle_position))
-        self.add_tactic(Role.MIDDLE, Stop(self.game_state, middle))
-        self.add_condition(Role.MIDDLE, 0, 1, partial(self.arrived_to_position, middle))
+        robots_and_positions = [(attack_top, attack_top_position),
+                                (attack_bottom, attack_bottom_position),
+                                (middle, middle_position),
+                                (defense_top, defense_top_position),
+                                (defense_bottom, defense_bottom_position)]
 
-        self.add_tactic(Role.SECOND_DEFENCE, GoToPositionPathfinder(self.game_state, defense_bottom,
-                                                                    defense_bottom_position))
-        self.add_tactic(Role.SECOND_DEFENCE, Stop(self.game_state, defense_bottom))
-        self.add_condition(Role.SECOND_DEFENCE, 0, 1, partial(self.arrived_to_position, defense_bottom))
-
-        self.add_tactic(Role.FIRST_DEFENCE, GoToPositionPathfinder(self.game_state, defense_top, defense_top_position))
-        self.add_tactic(Role.FIRST_DEFENCE, Stop(self.game_state, defense_top))
-        self.add_condition(Role.FIRST_DEFENCE, 0, 1, partial(self.arrived_to_position, defense_top))
-
-        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
+        for player, position in robots_and_positions:
+            if player:
+                role = GameState().get_role_by_player_id(player.id)
+                self.add_tactic(role, GoToPositionPathfinder(self.game_state, player, position))
+                self.add_tactic(role, Stop(self.game_state, player))
+                self.add_condition(role, 0, 1, partial(self.arrived_to_position, player))
 
     def arrived_to_position(self, player):
         role = GameState().get_role_by_player_id(player.id)
