@@ -24,4 +24,5 @@ class RotateAroundBall(Tactic):
                             self.player,
                             Pose(ball_position, orientation),
                             self.radius,
-                            aiming=self.target).exec()
+                            aiming=self.target,
+                            aim_in_back=False).exec()

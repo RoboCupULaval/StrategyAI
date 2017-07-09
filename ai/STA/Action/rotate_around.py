@@ -24,7 +24,8 @@ class RotateAround(Action):
                  is_clockwise: Union[bool, None]=None,
                  aiming: Union[Pose, None]=None,
                  pathfinder_on=False,
-                 rotation_speed: Union[int, float]=DEFAULT_ROTATION_SPEED):
+                 rotation_speed: Union[int, float]=DEFAULT_ROTATION_SPEED,
+                 aim_in_back: bool=True):
         """
             Rotate around the target position in the direction specify by is_clockwise flag.
             If a heading is provide, the robot will stop to rotate when it face the heading
@@ -44,9 +45,10 @@ class RotateAround(Action):
         self.target = target
         self.radius = radius
         self.is_clockwise = is_clockwise
-        self.aiming = aiming.position
+        self.aiming = aiming.position if isinstance(aiming, Pose) else aiming
         self.pathfinder_on = pathfinder_on
         self.rotation_speed = rotation_speed
+        self.aim_in_back = aim_in_back
 
     def generate_destination(self):
 
@@ -56,8 +58,10 @@ class RotateAround(Action):
         target_to_player = player - target
 
         if self.aiming is not None:
-            aiming_to_target = target - self.aiming
+            aiming_to_target = target - self.aiming if self.aim_in_back else self.aiming - target
+
             heading_error = wrap_to_pi(aiming_to_target.angle() - target_to_player.angle())
+
             if compare_angle(heading_error, 0, abs_tol=self.rotation_speed*dt/2):  # True if heading is right
                 next_position = self.radius * aiming_to_target.normalized()
                 next_orientation = aiming_to_target.angle() - m.pi
@@ -75,6 +79,9 @@ class RotateAround(Action):
             next_orientation = self.target.orientation + delta_angle / 2
 
         next_position += target
+
+        if not self.aim_in_back:
+            next_orientation = wrap_to_pi(next_orientation + m.pi)
 
         return Pose(next_position, next_orientation)
 
