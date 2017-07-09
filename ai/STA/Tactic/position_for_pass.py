@@ -9,7 +9,6 @@ from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.Algorithm.evaluation_module import best_position_in_region
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommandType
 from ai.states.game_state import GameState
 

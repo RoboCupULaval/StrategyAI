@@ -5,7 +5,7 @@ from math import fabs
 
 from ai.Util.joystick.joystick_config import configs
 
-class RobotJoystick():
+class RobotJoystick:
 
     """ X : is up/down and Y is left/right, ranging from 1.0 to -1.0 with up and right being positive values"""
 
