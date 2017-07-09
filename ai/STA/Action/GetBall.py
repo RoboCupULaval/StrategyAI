@@ -1,7 +1,6 @@
 # Under MIT licence, see LICENCE.txt
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.geometry import get_angle
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
@@ -20,7 +19,7 @@ class GetBall(Action):
     def __init__(self, game_state: GameState, player: OurPlayer):
         """
             :param game_state: L'état courant du jeu.
-            :param p_player_id: Identifiant du joueur qui prend le contrôle de la balle
+            :param player: Joueur qui prend le contrôle de la balle
         """
         Action.__init__(self, game_state, player)
 

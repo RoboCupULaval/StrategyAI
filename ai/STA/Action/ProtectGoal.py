@@ -5,7 +5,6 @@ import math
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import PLAYER_PER_TEAM
 from RULEngine.Util.area import stayInsideCircle, stayOutsideCircle
 from RULEngine.Util.geometry import get_angle, get_closest_point_on_line
 from ai.STA.Action.Action import Action

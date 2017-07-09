@@ -143,11 +143,6 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(self.graph1.current_node, 1)
         self.assertEqual(self.graph1.nodes[0].tactic.status_flag, Flags.INIT)
 
-    def test_str(self):
-        expected_string = ""
-        for i in range(len(self.graph1.nodes)):
-            expected_string += "Node " + str(i) + ": " + str(self.graph1.nodes[i]) + "\n"
-        self.assertEqual(str(self.graph1), expected_string)
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,16 +1,11 @@
 # Under MIT License, see LICENSE.txt
 
-import numpy as np
 from functools import partial
 
-from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Util.Pose import Position, Pose
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.STA.Strategy.Strategy import Strategy
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
-from ai.STA.Tactic.capture import Capture
-from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.pass_to_player import PassToPlayer

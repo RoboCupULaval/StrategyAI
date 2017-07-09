@@ -9,11 +9,10 @@ from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
+from RULEngine.Util.constant import ROBOT_RADIUS
 from RULEngine.Util.geometry import get_distance
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
-from ai.STA.Action.Move import Move
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.GoBehind import GoBehind

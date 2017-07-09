@@ -23,9 +23,6 @@ from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
 
-ORIENTATION_DEADZONE = 0.2
-DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
-DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
 COMMAND_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
 
@@ -56,31 +53,29 @@ class GoKick(Tactic):
         self.auto_update_target = auto_update_target
         self.target_assignation_last_time = None
         self.target = target
-        #self._find_best_passing_option()
+        self._find_best_passing_option()
         self.kick_force = kick_force
         self.ball_position = self.game_state.get_ball_position()
         self.ball_spacing = 100
 
     def kick_charge(self):
-        print('Charging')
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
             self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
 
         return AllStar(self.game_state,
                        self.player,
-                       charge_kick=True,
-                       dribbler_on=1)
+                       charge_kick=True)
 
     def go_behind_ball(self):
         self.ball_spacing = 100
         self.status_flag = Flags.WIP
-        print('Going behind ball', self._is_player_towards_ball_and_target(), self._get_distance_from_ball())
-        if self._is_player_towards_ball_and_target() and self._get_distance_from_ball() < 250:
+
+        if self._is_player_towards_ball_and_target(-0.95):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
-            #  self._find_best_passing_option()
+            self._find_best_passing_option()
 
         orientation = (self.target.position - self.ball_position).angle()
         return RotateAround(self.game_state,
@@ -91,7 +86,6 @@ class GoKick(Tactic):
                             heading=self.target)
 
     def grab_ball(self):
-        print('Grabbing ball', self._is_player_towards_ball_and_target(), self._get_distance_from_ball())
         if self._get_distance_from_ball() < 120:
             self.next_state = self.kick
             self.cmd_last_time = time.time()
@@ -109,8 +103,7 @@ class GoKick(Tactic):
                             heading=self.target)
 
     def kick(self):
-        print('Kicking')
-        if self._get_distance_from_ball() > 200:
+        if self._get_distance_from_ball() > 120:
             self.next_state = self.halt
             self.cmd_last_time = time.time()
         elif time.time() - self.cmd_last_time < COMMAND_DELAY:
@@ -143,7 +136,6 @@ class GoKick(Tactic):
             and (self.target_assignation_last_time is None
                 or time.time() - self.target_assignation_last_time > TARGET_ASSIGNATION_DELAY)):
             tentative_target_id = best_passing_option(self.player)
-            print(tentative_target_id)
             if tentative_target_id is None:
                 self.target = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
             else:

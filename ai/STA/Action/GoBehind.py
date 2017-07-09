@@ -6,7 +6,6 @@ from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_angle
-from RULEngine.Util.constant import TeamColor
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
@@ -28,7 +27,8 @@ class GoBehind(Action):
                     (exemple: le but)
     """
     def __init__(self, game_state: GameState, player: OurPlayer, position1: Position, position2: Position=None,
-                 distance_behind: [int, float]=250, cruise_speed: [int, float]=1, pathfinder_on: bool=False, orientation: str= 'front'):
+                 distance_behind: [int, float]=250, cruise_speed: [int, float]=1,
+                 pathfinder_on: bool=False, orientation: str= 'front'):
         """
             :param game_state: L'état courant du jeu.
             :param player: Instance du joueur qui doit se déplacer
@@ -47,9 +47,6 @@ class GoBehind(Action):
         self.rayon_avoid = 300  # (mm)
         self.cruise_speed = cruise_speed
         self.orientation = orientation
-
-        if self.distance_behind is None:
-            self.distance_behind = 250
 
         # TODO find something better MGL 2017/05/22
         if self.position2 is None:

@@ -92,9 +92,9 @@ class PathfinderModule(Executor):
         assert isinstance(type_of_pathfinder, str)
         assert type_of_pathfinder.lower() in ["rrt", "astar", "path_part"]
 
-        if type_of_pathfinder.lower() == "astar":
-            return AsPathManager(self.ws, ConfigService().config_dict["GAME"]["type"] == "sim")
-        elif type_of_pathfinder.lower() == "rrt":
+        # if type_of_pathfinder.lower() == "astar":
+            # return AsPathManager(self.ws, ConfigService().config_dict["GAME"]["type"] == "sim")
+        if type_of_pathfinder.lower() == "rrt":
             return PathfinderRRT(self.ws)
         elif type_of_pathfinder.lower() == "path_part":
             return PathPartitionner(self.ws)
@@ -112,8 +112,9 @@ class PathfinderModule(Executor):
                 if idx == 0:
                     pass
                 else:
-                    self.ws.debug_interface.add_line(points[idx - 1], points[idx])
+                    self.ws.debug_interface.add_line(points[idx - 1], points[idx], timeout=0.1)
 
         #    print(points)
+        #self.ws.debug_interface.add_multi_line(points)
         self.ws.debug_interface.add_multiple_points(points[1:], COLOR_ID_MAP[pid], width=5, link="path - " + str(pid),
                                                     timeout=DEFAULT_PATH_TIMEOUT)

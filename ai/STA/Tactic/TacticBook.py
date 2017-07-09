@@ -7,17 +7,13 @@ from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
 from ai.STA.Tactic.RotateAroundBall import RotateAroundBall
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.bumb import Bump
-from ai.STA.Tactic.capture import Capture
 from ai.STA.Tactic.intercept import Intercept
-from ai.STA.Tactic.mark import Mark
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.robot_ident import RobotIdent
 from ai.STA.Tactic.test_turn_on_you import TestTurnOnYou
-from ai.STA.Tactic.va_et_vient import VaEtVient
 from ai.STA.Tactic.GoGetBall import GoGetBall
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.PassBall import PassBall
-from ai.STA.Tactic.ReceivePass import ReceivePass
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.ProtectZone import ProtectZone
 from ai.STA.Tactic.DemoFollowBall import DemoFollowBall
@@ -40,7 +36,6 @@ class TacticBook(object):
         """
         self.tactic_book = {'FaceTarget': FaceTarget,
                             'PassBall': PassBall,
-                            'ReceivePass': ReceivePass,
                             'GoalKeeper': GoalKeeper,
                             'CoverZone': ProtectZone,
                             'GoGetBall': GoGetBall,
@@ -50,14 +45,11 @@ class TacticBook(object):
                             'GoToPositionNoPathfinder': GoToPositionNoPathfinder,
                             'GoToPositionPathfinder': GoToPositionPathfinder,
                             'GoKick': GoKick,
-                            "TestTurnOnYou": TestTurnOnYou,
+                            'TestTurnOnYou': TestTurnOnYou,
                             'RotateAroundPosition': RotateAroundPosition,
                             'RotateAroundBall': RotateAroundBall,
-                            "VaEtVient": VaEtVient,
                             'RobotIdent': RobotIdent,
                             'PositionForPass': PositionForPass,
-                            'Capture': Capture,
-                            'Mark': Mark,
                             'Bump': Bump,
                             'Intercept': Intercept
                             }

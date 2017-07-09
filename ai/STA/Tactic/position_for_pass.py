@@ -9,7 +9,6 @@ from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.Algorithm.evaluation_module import best_position_in_region
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommandType
 from ai.states.game_state import GameState
 
@@ -77,23 +76,24 @@ class PositionForPass(Tactic):
 
     def _find_best_player_position(self):
         if self.auto_position:
+            pad = 200
             if self.player.id == 1: #role is 'top_defence':
-                A = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], GameState().const["FIELD_Y_TOP"] )
-                B = Position(0, GameState().const["FIELD_Y_TOP"] / 3)
+                A = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"]+pad, GameState().const["FIELD_Y_TOP"]-pad)
+                B = Position(0-pad, (GameState().const["FIELD_Y_TOP"] / 3)+pad)
                 self.target.position = best_position_in_region(self.player, A, B)
             elif self.player.id == 2: #player.role is 'bottom_defence':
-                A = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], GameState().const["FIELD_Y_BOTTOM"])
-                B = Position(0, GameState().const["FIELD_Y_BOTTOM"] / 3)
+                A = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"]+pad, GameState().const["FIELD_Y_BOTTOM"]+pad)
+                B = Position(0-pad, (GameState().const["FIELD_Y_BOTTOM"] / 3)-pad)
                 self.target.position = best_position_in_region(self.player, A, B)
             elif self.player.id == 3: #player.role is 'top_offence':
-                A = Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], GameState().const["FIELD_Y_TOP"])
-                B = Position(0, 0)
+                A = Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"]-pad, GameState().const["FIELD_Y_TOP"]-pad)
+                B = Position(0+pad, 0+pad)
                 self.target.position = best_position_in_region(self.player, A, B)
             elif self.player.id == 4: #player.role is 'bottom_offence':
-                A = Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], GameState().const["FIELD_Y_BOTTOM"])
-                B = Position(0, 0)
+                A = Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"]-pad, GameState().const["FIELD_Y_BOTTOM"]+pad)
+                B = Position(0+pad, 0-pad)
                 self.target.position = best_position_in_region(self.player, A, B)
             elif self.player.id == 5: #player.role is 'center':
-                A = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], GameState().const["FIELD_Y_BOTTOM"] / 3)
-                B = Position(0, GameState().const["FIELD_Y_TOP"] / 3)
+                A = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"]-pad, (GameState().const["FIELD_Y_BOTTOM"] / 3)-pad)
+                B = Position(0-pad, GameState().const["FIELD_Y_TOP"] / 3)
                 self.target.position = best_position_in_region(self.player, A, B)

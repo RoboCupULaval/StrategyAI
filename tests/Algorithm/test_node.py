@@ -91,13 +91,6 @@ class TestNode(unittest.TestCase):
         self.assertEqual(next_ai_command, expected_aicmd)
         self.assertEqual(next_node, -1)
 
-    def test_str(self):
-        self.node1.add_vertex(self.vertex1)
-        self.node1.add_vertex(self.vertex2)
-        expected_string = "Tactic: GoalKeeper    Vertices: "
-        for vertex in self.node1.vertices:
-            expected_string += "\n    " + str(vertex)
-        self.assertEqual(str(self.node1), expected_string)
 
     def test_set_flag(self):
         self.assertRaises(AssertionError, self.node1.set_flag, "not a flag")
