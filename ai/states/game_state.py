@@ -18,7 +18,7 @@ from ai.Util.role_mapper import RoleMapper
 
 class GameState(object, metaclass=Singleton):
 
-    def __init__(self):
+    def __init__(self, for_unitest_pls_remove_debug_interface_oh_god=True):
         """
         initialise le GameState, initialise les variables avec des valeurs nulles
         """
@@ -30,7 +30,8 @@ class GameState(object, metaclass=Singleton):
         self.timestamp = 0
         self.const = None
         # FIXME: Gamestate should not have a debug interface
-        self.debug_interface = DebugInterface()
+        if for_unitest_pls_remove_debug_interface_oh_god:
+            self.debug_interface = DebugInterface()
         self._role_mapper = RoleMapper()
 
     def get_player_by_role(self, role: Role) -> OurPlayer:

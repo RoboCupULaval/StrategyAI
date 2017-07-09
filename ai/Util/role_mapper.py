@@ -1,5 +1,6 @@
 from collections import Counter
-from .role import Role
+
+from ai.Util.role import Role
 
 class RoleMapper(object):
     LOCKED_ROLES = [Role.GOALKEEPER]
