@@ -4,6 +4,7 @@ import time
 from RULEngine.Debug.debug_command import DebugCommand
 from RULEngine.Util.singleton import Singleton
 from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.Util.Position import Position
 from config.config_service import ConfigService
 
 
@@ -103,6 +104,18 @@ class DebugInterface(metaclass=Singleton):
         data = {'start': start_point,
                 'end': end_point,
                 'color': MAGENTA.repr(),
+                'timeout': timeout}
+        command = DebugCommand(3001, data)
+        self.debug_state.append(command)
+
+    def add_vector(self, vector: Position(), start_point=Position(), timeout=DEFAULT_DEBUG_TIMEOUT):
+
+        end_point = start_point + vector
+        start_point = (start_point.x, start_point.y)
+        end_point = (end_point.x, end_point.y)
+        data = {'start': start_point,
+                'end': end_point,
+                'color': CYAN.repr(),
                 'timeout': timeout}
         command = DebugCommand(3001, data)
         self.debug_state.append(command)

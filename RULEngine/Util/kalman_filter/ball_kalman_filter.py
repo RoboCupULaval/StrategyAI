@@ -13,28 +13,24 @@ class BallKalmanFilter:
         ncameras = int(cfg.config_dict["IMAGE"]["number_of_camera"])
 
         # Transition model
-        self.F = np.array([[1, 0, self.default_dt, 0, 0, 0],  # Position x
-                           [0, 1, 0, self.default_dt, 0, 0],  # Position y
-                           [0, 0, 1, 0, 0, 0],  # Speed x
-                           [0, 0, 0, 1, 0, 0],  # Speed y
-                           [0, 0, 0, 0, 1, self.default_dt],  # Orientation
-                           [0, 0, 0, 0, 0, 1]])  # Speed w
+        self.transition_model(self.default_dt)
+
         # Observation model
         self.H = [[1, 0, 0, 0] for _ in range(ncameras)]  # Position x
         self.H += [[0, 1, 0, 0] for _ in range(ncameras)]  # Position y
         self.H = np.array(self.H)
+
         # Process covariance
-        values = np.array([10 ** 0, 10 ** 0, 10 ** 0, 10 ** 0])
-        self.Q = np.diag(values)
+        self.Q = np.diag([10 ** 0, 10 ** 0, 10 ** 0, 10 ** 0])
+
         # Observation covariance
-        values = [10 ** 0 for _ in range(ncameras)]
-        values += [10 ** 0 for _ in range(ncameras)]
-        self.R = np.diag(values)  # Pose * ncameras
+        self.R = 10 ** 0 * np.eye(2*ncameras)  # Pose * ncameras
+
         # Initial state covariance
         self.P = 10 ** 3 * np.eye(4)
+
         # Initial state estimation
-        # self.x = np.array([observation.x, observation.y, 0, 0])
-        self.x = np.array([0, 0, 0, 0])
+        self.x = np.zeros(4)
 
     def predict(self):
         self.x = np.dot(self.F, self.x)
@@ -52,7 +48,6 @@ class BallKalmanFilter:
                 obsy.append(None)
         observation = np.array(obsx + obsy)
 
-        observation = np.array(observation)
         mask = np.array([obs is not None for obs in observation])
         observation_wmask = observation[mask]
         if len(observation_wmask) != 0:

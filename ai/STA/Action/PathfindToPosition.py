@@ -5,6 +5,8 @@ from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
 
+# TODO remove this and use MoveToPosition (Simon B)
+
 
 class PathfindToPosition(Action):
     """

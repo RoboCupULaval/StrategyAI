@@ -12,6 +12,7 @@ from RULEngine.Util.team_color_service import TeamColorService, TeamColor
 from RULEngine.Game.Game import Game
 from config.config_service import ConfigService
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.constant import *
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GoBetween import GoBetween
@@ -169,18 +170,18 @@ class TestActions(unittest.TestCase):
     def test_kick(self):
 
         # test avec la valeur 0 (nulle)
-        self.kick = Kick(self.game_state,self.a_player, 0)
+        self.kick = Kick(self.game_state, self.a_player, 0)
         expected_cmd = AICommand(self.a_player, AICommandType.MOVE,
-                                 **{"pose_goal": self.a_player.pose,
+                                 **{"pose_goal": SpeedPose(self.a_player.pose),
                                     "kick": True,
-                                    "control_loop_type": AIControlLoopType.SPEED,})
+                                    "control_loop_type": AIControlLoopType.SPEED})
         return_cmd = self.kick.exec()
         self.assertEqual(expected_cmd, return_cmd)
 
         # test avec la valeur 1 (force maximale)
         self.kick = Kick(self.game_state,self.a_player, 1)
         self.assertEqual(self.kick.exec(), AICommand(self.a_player, AICommandType.MOVE,
-                                           **{"pose_goal": self.a_player.pose,
+                                           **{"pose_goal": SpeedPose(self.a_player.pose),
                                               "kick": True,
                                               "control_loop_type": AIControlLoopType.SPEED,
                                               "kick_strength": 1}))
@@ -188,7 +189,7 @@ class TestActions(unittest.TestCase):
         # test avec la valeur 0.3 (force intermediaire)
         self.kick = Kick(self.game_state,self.a_player, 0.3)
         self.assertEqual(self.kick.exec(), AICommand(self.a_player, AICommandType.MOVE,
-                                           **{"pose_goal": self.a_player.pose,
+                                           **{"pose_goal": SpeedPose(self.a_player.pose),
                                               "kick": True,
                                               "control_loop_type": AIControlLoopType.SPEED,
                                               "kick_strength": 0.3}))
