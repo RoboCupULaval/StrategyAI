@@ -228,7 +228,7 @@ class Framework(object):
             self._send_new_vision_packet()
 
             if time_delta > self.ai_timestamp * 1.3:
-                warnings.warn("Update loop takes {:5.3f}s instead of {}s!!!".format(time_delta, self.ai_timestamp))
+                warnings.warn("Update loop takes {:5.3f}s instead of {}s.".format(time_delta, self.ai_timestamp))
 
     """
     def _test_vision(self):

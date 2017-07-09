@@ -12,30 +12,41 @@ from ai.Util.ai_command import AICommand, AICommandType
 
 from typing import Union
 
-ROTATION_SPEED = 6*m.pi  # rad/s
+DEFAULT_ROTATION_SPEED = 6*m.pi  # rad/s
+DEFAULT_RADIUS = 150  # mm
 
 
 class RotateAround(Action):
     def __init__(self, game_state: GameState,
                  player: OurPlayer,
                  target: Pose,
-                 radius: Union[int, float],
+                 radius: Union[int, float]=DEFAULT_RADIUS,
                  is_clockwise: Union[bool]=None,
-                 heading: Union[Pose, None]=None,
-                 pathfinder_on=False):
+                 aiming: Union[Pose, None]=None,
+                 pathfinder_on=False,
+                 rotation_speed: Union[int, float]=DEFAULT_ROTATION_SPEED):
         """
+            Rotate around the target position in the direction specify by is_clockwise flag.
+            If a heading is provide, the robot will stop to rotate when it face the heading
+            position around the target point.
+
+            Warning: If the target is the ball and it stick to the dribbler, the robot will
+            go backward since the robot cannot be at the right radius (Ball is moving with the robot)
+
             :param game_state: current game state
             :param player: Instance of the player (OurPlayer)
             :param target: Position of the center of rotation
             :param radius: Radius of the rotation around target position
-            :param is_clockwise: Sense of rotation flag.
+            :param is_clockwise: Sense of rotation flag
+            :param aiming: Desired facing direction of the robot at the target
         """
         Action.__init__(self, game_state, player)
         self.target = target
         self.radius = radius
         self.is_clockwise = is_clockwise
-        self.heading = heading.position
+        self.aiming = aiming.position
         self.pathfinder_on = pathfinder_on
+        self.rotation_speed = rotation_speed
 
     def generate_destination(self):
 
@@ -44,21 +55,22 @@ class RotateAround(Action):
         target = self.target.position
         target_to_player = player - target
 
-        delta_angle = m.copysign(ROTATION_SPEED * dt, -1 if self.is_clockwise else 1)
-
-        if self.heading is not None:
-            heading_to_target = target - self.heading
-            heading_error = wrap_to_pi(heading_to_target.angle() - target_to_player.angle())
-            if compare_angle(heading_error, 0, abs_tol=abs(delta_angle)/2):  # True if heading is right
-                next_position = self.radius * heading_to_target.normalized()
-                next_orientation = heading_to_target.angle() - m.pi
+        if self.aiming is not None:
+            aiming_to_target = target - self.aiming
+            heading_error = aiming_to_target.angle() - target_to_player.angle()
+            if compare_angle(heading_error, 0, abs_tol=self.rotation_speed*dt/2):  # True if heading is right
+                next_position = self.radius * aiming_to_target.normalized()
+                next_orientation = aiming_to_target.angle() - m.pi
             else:
                 if self.is_clockwise is None:  # Force the rotation in a specific orientation
-                    delta_angle = m.copysign(ROTATION_SPEED * dt, heading_error)
+                    delta_angle = m.copysign(self.rotation_speed * dt, heading_error)
+                else:
+                    delta_angle = m.copysign(self.rotation_speed * dt, -1 if self.is_clockwise else 1)
                 next_position = self.radius * target_to_player.normalized().rotate(delta_angle)
                 next_orientation = self.target.orientation + delta_angle / 2
 
         else:  # If no heading, we just rotate around the target with the target orientation
+            delta_angle = m.copysign(self.rotation_speed * dt, -1 if self.is_clockwise else 1)
             next_position = self.radius * target_to_player.normalized().rotate(delta_angle)
             next_orientation = self.target.orientation + delta_angle / 2
 
