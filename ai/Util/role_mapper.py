@@ -1,5 +1,6 @@
 from collections import Counter
 
+
 from RULEngine.Game import OurPlayer
 from .role import Role
 
