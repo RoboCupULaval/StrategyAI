@@ -33,12 +33,13 @@ class PathfinderModule(Executor):
     def _pathfind_ai_commands(self) -> None:
         last_path = None
         last_raw_path = None
+        start = time.time()
         for player in self.ws.game_state.my_team.available_players.values():
             if player.ai_command is None or not player.ai_command.pathfinder_on:
                 continue
             if player.pathfinder_history.last_pose_goal is not None:
-                if player.pathfinder_history.last_pose_goal == player.ai_command.pose_goal.position:
-                    player.pathfinder_history.last_pose_goal = player.ai_command.pose_goal.position
+                if (player.pathfinder_history.last_pose_goal - player.ai_command.pose_goal.position).norm() < 200:
+                    #player.pathfinder_history.last_pose_goal = player.ai_command.pose_goal.position
                     last_path = player.pathfinder_history.last_path
                     last_raw_path = player.pathfinder_history.last_raw_path
             if self.type_of_pathfinder.lower() == "path_part":
@@ -64,6 +65,7 @@ class PathfinderModule(Executor):
                                                 player.ai_command.pose_goal,
                                                 player.ai_command.cruise_speed)
                 player.ai_command.path = path
+        print(time.time() - start)
 
     # TODO find what this does? MGL 2017/05/17
     """
