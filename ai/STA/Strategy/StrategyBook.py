@@ -10,6 +10,7 @@ from ai.STA.Strategy.indiana_jones import IndianaJones
 from ai.STA.Strategy.HumanControl import HumanControl
 from ai.STA.Strategy.DoNothing import DoNothing
 from ai.STA.Strategy.passes_with_decisions import PassesWithDecisions
+from ai.STA.Strategy.prepare_kickoff_offense import PrepareKickOffOffense
 from ai.STA.Strategy.robocup_choreography import RobocupChoreography
 from ai.STA.Strategy.bamba_follow import BambaFollow
 
@@ -31,7 +32,8 @@ class StrategyBook(object):
                               'RobocupChoreography': RobocupChoreography,
                               'BambaFollow': BambaFollow,
                               'PassesWithDecisions': PassesWithDecisions,
-                              'DefenseWall': DefenseWall
+                              'DefenseWall': DefenseWall,
+                              'PrepareKickOffOffense': PrepareKickOffOffense
                               }
 
     def get_strategies_name_list(self) -> List[str]:
