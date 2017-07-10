@@ -142,7 +142,7 @@ def trajectory_score(pointA : Position, pointB: Position, obstacle: Position):
     if (normAC < 0) or (normAC > 1.1 * np.linalg.norm(AB)):
         return 1
     else:
-        return max(1, min(normAC / normOC, proportion_max))
+        return max(1, proportion_max if normOC == 0 else min(normAC / normOC, proportion_max))
 
 
 def is_player_facing_target(player, target_position: Position, tolerated_angle: float) -> bool:
