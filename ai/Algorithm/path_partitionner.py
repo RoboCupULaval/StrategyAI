@@ -90,6 +90,7 @@ class PathPartitionner(Pathfinder):
         self.cruise_speed = 1
         self.player = None
         self.closest_obs_speed = np.array([0, 0])
+        self.path_appendice = None
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None):
 
@@ -128,15 +129,25 @@ class PathPartitionner(Pathfinder):
             self.players_obstacles.append(player)
             i += 1
 
-        # tentative de code pour ne pas recalculer le path a toutes les ittérations (marche un peu mais pas parfait)
-        #if (old_path is not None) and (np.linalg.norm(self.path.goal - old_raw_path.goal) < 20):
+        # Debug code pls no remove
+        # if old_path is not None:
+            # print("is_path_colide", self.is_path_collide(old_raw_path, tolerance=self.gap_proxy-50))
+            # print("meme goal?", (np.linalg.norm(pose_target.position - old_raw_path.goal) < 200))
+            # print("quel goal?", pose_target.position, old_raw_path.goal)
         if (old_path is not None) and (not self.is_path_collide(old_raw_path, tolerance=self.gap_proxy-50)) and \
-                (np.linalg.norm(self.path.goal - old_raw_path.goal) < 20):
-            old_raw_path.quick_update_path(self.player)
-            old_path.quick_update_path(self.player)
-            self.path = old_path
-            self.raw_path = old_raw_path
-            self.path = self.remove_redundant_points()
+                ((pose_target.position - old_raw_path.goal).norm() < 200):
+            if np.linalg.norm(pose_target.position - old_raw_path.goal) > 20:
+                self.path_appendice = Path(old_raw_path.goal, self.path.goal)
+                self.path_appendice = self.fastpathplanner(self.path_appendice)
+                self.raw_path = old_raw_path.join_segments(self.path_appendice)
+                self.path = self.reshaper.reshape_path(self.raw_path, self.player, self.cruise_speed)
+                self.path = self.remove_redundant_points()
+            else:
+                old_raw_path.quick_update_path(self.player)
+                old_path.quick_update_path(self.player)
+                self.path = old_path
+                self.raw_path = old_raw_path
+                self.path = self.remove_redundant_points()
 
         else:
             self.path = Path(self.player.pose.position, pose_target.position)
@@ -198,6 +209,8 @@ class PathPartitionner(Pathfinder):
             if distance_sub_path > 0.01:
                 for pose_obs in obstacles:
                     vec_robot_2_obs = pose_obs - pose_start
+                    if np.linalg.norm(vec_robot_2_obs) < 0.00001:
+                        continue
                     dist_from_path = np.linalg.norm(np.cross(direction, vec_robot_2_obs))
                     projection_obs_on_direction = \
                         np.dot(direction, vec_robot_2_obs / np.linalg.norm(vec_robot_2_obs))
@@ -213,7 +226,6 @@ class PathPartitionner(Pathfinder):
         return False
 
     def find_closest_obstacle(self, point, path):
-
         dist_point_obs = np.inf
         closest_obs = None
         closest_player = self.players_obstacles[0].pose.position
@@ -228,7 +240,7 @@ class PathPartitionner(Pathfinder):
         for idx, pose_obs in enumerate(self.pose_obstacle):
             vec_robot_2_obs_temp = pose_obs - pose_start
             dist_from_path_temp = np.linalg.norm(np.cross(direction, vec_robot_2_obs_temp))
-            if self.gap_proxy > dist_from_path_temp and self.is_path_collide(path, [pose_obs]):
+            if self.gap_proxy > dist_from_path_temp:
                 obstacle_pos = Position(pose_obs)
                 dist = (path.start - obstacle_pos).norm()
                 if dist < dist_point_obs:

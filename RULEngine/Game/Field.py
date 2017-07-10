@@ -103,7 +103,7 @@ class Field:
 
     def update_field_dimensions(self, packets):
         if not packets:
-            return
+            return False
 
         for packet in packets:
             if packet.HasField("geometry"):
@@ -167,6 +167,9 @@ class Field:
                     self.constant["FIELD_THEIR_GOAL_TOP_CIRCLE"] = Position(self.constant["FIELD_X_POSITIVE"], self.constant["FIELD_GOAL_SEGMENT"] / 2)
                     self.constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"] = Position(self.constant["FIELD_X_POSITIVE"], -self.constant["FIELD_GOAL_SEGMENT"] / 2)
                     self.constant["FIELD_THEIR_GOAL_MID_GOAL"] = Position(self.constant["FIELD_X_POSITIVE"], 0)
+                return True
+            else:
+                return False
 
 
 

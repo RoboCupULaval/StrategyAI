@@ -64,7 +64,7 @@ class GoalKeeper(Tactic):
 
         return ProtectGoal(self.game_state, self.player, self.is_yellow,
                            minimum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"],
-                           maximum_distance=1000)
+                           maximum_distance=1500)
 
     def go_behind_ball(self):
         if not self.player == closest_player_to_point(GameState().get_ball_position()):
