@@ -115,9 +115,9 @@ class Pose(object):
             by reducing the possible constructor arguments. -DC, 16/06/2017
         """
         builders = {
-            1 : self._build_from_single,
-            2 : self._build_from_double,
-            3 : self._build_from_triple
+            1: self._build_from_single,
+            2: self._build_from_double,
+            3: self._build_from_triple
         }
 
         if len(args) == 0:
@@ -126,7 +126,6 @@ class Pose(object):
             return builders[len(args)](args)
 
         raise ValueError
-
 
     def _build_from_single(self, arg):
         orientation = 0

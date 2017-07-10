@@ -60,27 +60,6 @@ class TestGameStateManager(unittest.TestCase):
         self.assertRaises(AssertionError,
                           game_state_manager.set_reference, game_world_nok)
 
-    def test_get_player_pose(self):
-        self.assertIs(self.GameStateManager1.get_player_pose(0, True),
-                      self.game.friends.players[0].pose)
-        self.assertIs(self.GameStateManager2.get_player_pose(0, False),
-                      self.game.enemies.players[0].pose)
-        self.assertIsNot(self.GameStateManager1.get_player_pose(0, True),
-                         self.game.friends.players[1].pose)
-        self.assertIsNot(self.GameStateManager2.get_player_pose(0, False),
-                         self.game.enemies.players[1].pose)
-        self.assertIsNot(self.GameStateManager1.get_player_pose(0, True),
-                         self.game.enemies.players[0].pose)
-        self.assertIsNot(self.GameStateManager2.get_player_pose(0, False),
-                         self.game.friends.players[0].pose)
-
-    def test_get_player_position(self):
-        self.assertIs(self.GameStateManager1.get_player_position(0, True),
-                      self.game.friends.players[0].pose.position)
-        self.assertIs(self.GameStateManager2.get_player_position(0, False),
-                      self.game.enemies.players[0].pose.position)
-
-
 
 class TestModuleManager(unittest.TestCase):
     """

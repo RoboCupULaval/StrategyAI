@@ -3,7 +3,6 @@ import numpy as np
 
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
 from ai.states.game_state import GameState
@@ -20,9 +19,6 @@ class Grab(Action):
         Action.__init__(self, game_state, player)
 
     def exec(self):
-        ball = self.game_state.get_ball_position().conv_2_np()
-        player = self.player.pose.position.conv_2_np()
-        player_to_ball = ball - player
-        player_to_ball = 0.3 * player_to_ball / np.linalg.norm(player_to_ball)
-        speed_pose = Pose(Position.from_np(player_to_ball))
-        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": speed_pose, "speed_flag": True})
+        ball = self.game_state.get_ball_position()
+
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": Pose(ball, self.player.pose.orientation)})

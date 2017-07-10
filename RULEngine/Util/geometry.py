@@ -42,7 +42,7 @@ def get_distance(position_1: Position, position_2: Position) -> float:
     """
     # assert isinstance(position_1, Position)
     # assert isinstance(position_2, Position)
-    warnings.warn('(position_1 - position_2).norm() should be use instead.')
+    warnings.warn('(position_1 - position_2).norm() should be use instead.', stacklevel=2)
     return m.sqrt((position_2.x - position_1.x) ** 2 +
                   (position_2.y - position_1.y) ** 2)
 
@@ -59,7 +59,7 @@ def get_angle(main_position: Position, other: Position) -> float:
     """
     assert isinstance(main_position, Position), "TypeError main_position"
     assert isinstance(other, Position), "TypeError other"
-    warnings.warn('(position_1 - position_2).angle() should be use instead.')
+    warnings.warn('(position_1 - position_2).angle() should be use instead.', stacklevel=2)
     position_x = float(other.x - main_position.x)
     position_y = float(other.y - main_position.y)
     return m.atan2(position_y, position_x)
@@ -164,6 +164,38 @@ def get_closest_point_on_line(reference: Position,
         pos_y = position1.y
 
     return Position(pos_x, pos_y)
+
+def get_closest_point_on_segment(reference: Position,
+                                position1: Position,
+                                position2: Position) -> Position:
+    """
+        Calcul la position du point sur un segment le plus près d'une position de
+        référence. Le segment est donné par deux positions. La ligne reliant la
+        position recherchée et la position de référence est perpendiculaire à
+        la droite représentant le segment.
+        Args:
+            reference: La position de référence
+            position1: Le premier point formant la droite
+            position2: Le second point formant la droite
+        Returns:
+            La position du point de la droite le plus proche de la position de
+            référence.
+    """
+
+    position_on_line = get_closest_point_on_line(reference, position1, position2)
+    position_on_segment = position_on_line
+
+    # This handle the case where the projection is not between the two points
+    outside_x = (reference.x > position1.x and reference.x > position2.x) or \
+                (reference.x < position1.x and reference.x < position2.x)
+    outside_y = (reference.y > position1.y and reference.y > position2.y) or \
+                (reference.y < position1.y and reference.y < position2.y)
+    if outside_x or outside_y:
+        if (position1 - reference).norm() < (position2 - reference).norm():
+            position_on_segment = position1
+        else:
+            position_on_segment = position2
+    return position_on_segment
 
 
 def get_angle_between_three_points(pointA : Position, pointO : Position, pointB : Position):

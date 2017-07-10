@@ -27,12 +27,8 @@ class Field:
         x1 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
         x2 = self.constant["FIELD_OUR_GOAL_X_INTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_INTERNAL"]
 
-        if x1 > x2:
-            x_right = x1
-            x_left = x2
-        else:
-            x_right = x2
-            x_left = x1
+        x_right = max(x1, x2)
+        x_left = min(x1, x2)
 
         top_circle = self.constant["FIELD_OUR_GOAL_TOP_CIRCLE"] if our_goal\
             else self.constant["FIELD_THEIR_GOAL_TOP_CIRCLE"]
@@ -60,12 +56,8 @@ class Field:
             x1 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
             x2 = self.constant["FIELD_OUR_GOAL_X_INTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_INTERNAL"]
 
-            if x1 > x2:
-                x_right = x1
-                x_left = x2
-            else:
-                x_right = x2
-                x_left = x1
+            x_right = max(x1, x2)
+            x_left = min(x1, x2)
 
             position = stayInsideSquare(position, self.constant["FIELD_GOAL_Y_TOP"],
                                         self.constant["FIELD_GOAL_Y_BOTTOM"], x_left, x_right)
@@ -93,12 +85,8 @@ class Field:
             x1 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
             x2 = self.constant["FIELD_OUR_GOAL_X_INTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_INTERNAL"]
 
-            if x1 > x2:
-                x_right = x1
-                x_left = x2
-            else:
-                x_right = x2
-                x_left = x1
+            x_right = max(x1, x2)
+            x_left = min(x1, x2)
 
             y_top = self.constant["FIELD_GOAL_SEGMENT"] / 2
             y_bottom = (self.constant["FIELD_GOAL_SEGMENT"] / 2) * -1
@@ -115,7 +103,7 @@ class Field:
 
     def update_field_dimensions(self, packets):
         if not packets:
-            return
+            return False
 
         for packet in packets:
             if packet.HasField("geometry"):
@@ -179,6 +167,9 @@ class Field:
                     self.constant["FIELD_THEIR_GOAL_TOP_CIRCLE"] = Position(self.constant["FIELD_X_POSITIVE"], self.constant["FIELD_GOAL_SEGMENT"] / 2)
                     self.constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"] = Position(self.constant["FIELD_X_POSITIVE"], -self.constant["FIELD_GOAL_SEGMENT"] / 2)
                     self.constant["FIELD_THEIR_GOAL_MID_GOAL"] = Position(self.constant["FIELD_X_POSITIVE"], 0)
+                return True
+            else:
+                return False
 
 
 
@@ -188,7 +179,6 @@ positive_side_constant = {
     "PLAYER_PER_TEAM": 6,
     # TODO KICKSPEED
     "KICK_MAX_SPD": 4,
-
     # Field Parameters
     "FIELD_Y_TOP": 3000,
     "FIELD_Y_BOTTOM": -3000,
@@ -204,6 +194,7 @@ positive_side_constant = {
     "FIELD_GOAL_SEGMENT": 500,
 
     # Goal Parameters
+    "GOAL_WIDTH": 1000,
     "FIELD_GOAL_Y_TOP": 1250,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
     "FIELD_GOAL_Y_BOTTOM": -1250,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
     "FIELD_OUR_GOAL_X_EXTERNAL": 4500,  # FIELD_X_LEFT
@@ -280,6 +271,7 @@ negative_side_constant = {
 
 
     # Goal Parameters
+    "GOAL_WIDTH": 1000,
     "FIELD_GOAL_Y_TOP": 1250,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
     "FIELD_GOAL_Y_BOTTOM": -1250,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
     "FIELD_OUR_GOAL_X_EXTERNAL": -4500,  # FIELD_X_LEFT

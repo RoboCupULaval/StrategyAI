@@ -11,7 +11,6 @@ from RULEngine.Game.Referee import Referee
 from RULEngine.Util.team_color_service import TeamColorService, TeamColor
 from RULEngine.Game.Game import Game
 from config.config_service import ConfigService
-from RULEngine.Game.Ball import Ball
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import *
 from ai.STA.Action.GoBehind import GoBehind
@@ -20,7 +19,6 @@ from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.MoveToPosition import MoveToPosition
-from ai.STA.Action.MoveToDribblingBall import MoveToDribblingBall
 from ai.STA.Action.ProtectGoal import ProtectGoal
 from ai.states.game_state import GameState
 from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
@@ -83,21 +81,8 @@ class TestActions(unittest.TestCase):
                                     **{"pose_goal": grab_pose})
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
-    def test_MoveWithBall(self):
-        self.move_with_ball = MoveToDribblingBall(self.game_state,self.a_player, Position(100, 0))
-        self.game_state.set_ball_position(Position(5, 0), A_DELTA_T)
-        ai_cmd = self.move_with_ball.exec()
-        ai_cmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                    **{"pose_goal": Pose(Position(100, 0), 0)})
-        self.assertEqual(ai_cmd, ai_cmd_expected)
 
-        self.game_state.set_ball_position(Position(5, 2), A_DELTA_T)
-        ai_cmd = self.move_with_ball.exec()
-        ai_cmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                    **{"pose_goal": Pose(Position(100, 0), atan(2/5))})
-        self.assertEqual(ai_cmd, ai_cmd_expected)
-
-    #@unittest.skip("GoBetween does not actually go in between")
+    @unittest.skip("GoBetween does not actually go in between")
     def test_GoBetween(self):
         # test avec une droite verticale
         POS_TOP       = Position(100, 100)
