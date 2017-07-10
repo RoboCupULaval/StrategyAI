@@ -121,7 +121,6 @@ def line_of_sight_clearance(player, target):
 def line_of_sight_clearance_ball(player, targets, distances=None):
     # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
     # (plus c'est dégagé plus le score est petit)
-
     ball_position = GameState().get_ball_position()
     if distances is None:
         # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
@@ -129,31 +128,10 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
                           (targets - np.array(ball_position))).sum(axis=1))
     else:
         scores = distances
-    # for j in GameState().my_team.available_players.values():
-    #     # Obstacle : les players friends
-    #     if not (j.id == player.id or j.pose.position == target):
-    #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
     for j in GameState().other_team.available_players.values():
         # Obstacle : les players ennemis
         scores *= trajectory_score(np.array(GameState().get_ball_position()), targets, np.array(j.pose.position))
-        #print(scores)
-        #print(scores_temp)
     return scores
-
-def line_of_sight_clearance_ball_legacy(player, target: Position):
-    # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
-    # (plus c'est dégagé plus le score est petit)
-    score = np.linalg.norm(GameState().get_ball_position() - target)
-
-    # for j in GameState().my_team.available_players.values():
-    #     # Obstacle : les players friends
-    #     if not (j.id == player.id or j.pose.position == target):
-    #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
-    for j in GameState().other_team.available_players.values():
-        # Obstacle : les players ennemis
-        score *= trajectory_score_legacy(GameState().get_ball_position(), target, j.pose.position)
-    return score
-
 
 def trajectory_score(pointA, pointsB, obstacle):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
@@ -182,20 +160,6 @@ def trajectory_score(pointA, pointsB, obstacle):
         scores[scores == 0] = temp
     return scores
 
-
-def trajectory_score_legacy(pointA : Position, pointB: Position, obstacle: Position):
-    # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
-    proportion_max = 15 # Proportion du triangle rectancle derrière les robots obstacles
-    AB = pointB - pointA
-    AO = obstacle - pointA
-    normAC = np.dot(AB, AO) / np.linalg.norm(AB)
-    #print("pointB", pointB)
-    normOC = np.sqrt(np.linalg.norm(AO) ** 2 - (normAC) ** 2)
-    if (normAC < 0) or (normAC > 1.1 * np.linalg.norm(AB)):
-        return 1
-    else:
-        return max(1, min(normAC / normOC, proportion_max))
-
 def is_player_facing_target(player, target_position: Position, tolerated_angle: float) -> bool:
     """
         Détermine si l'angle entre le devant du joueur et la cible est suffisamment petit
@@ -220,20 +184,12 @@ def ball_direction(self):
 
 def best_position_in_region(player, A, B):
     # Retourne la position (dans un rectangle aux coins A et B) la mieux placée pour une passe
-    start1 = time.time()
     ncounts = 5
     bottom_left = Position(min(A.x, B.x), min(A.y, B.y))
     top_right = Position(max(A.x, B.x), max(A.y, B.y))
-
-    score_min = float("inf")
-
-    best_position = (bottom_left + top_right) / 2
     ball_position = GameState().get_ball_position()
 
-    # print("total:", time.time() - start1)
-
     positions = []
-    dist_from_ball = []
     for i in range(ncounts):
         x_point = bottom_left.x + i * (top_right.x - bottom_left.x) / (ncounts - 1)
         for j in range(ncounts):
@@ -241,53 +197,13 @@ def best_position_in_region(player, A, B):
             positions += [Position(x_point, y_point)]
     positions = np.stack(positions)
     # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
-    # print(type((positions - np.array(ball_position))))
-    dists_from_ball = np.sqrt(((positions - np.array(ball_position)) * (positions - np.array(ball_position))).sum(axis=1))
+    dists_from_ball = np.sqrt(((positions - np.array(ball_position)) *
+                               (positions - np.array(ball_position))).sum(axis=1))
     positions = positions[dists_from_ball > 1000, :]
     dists_from_ball = dists_from_ball[dists_from_ball > 1000]
-    # print("positions.shape", positions.shape)
     scores = line_of_sight_clearance_ball(player, positions, dists_from_ball)
     best_score_index = np.argmin(scores)
     best_position = positions[best_score_index, :]
-    # print("best_position", best_position)
-    # print("segment:", time.time() - start2)
-    dt_new = time.time() - start1
-    start2 = time.time()
-    best_position_legacy= best_position_in_region_legacy(player, A, B)
-    dt_legacy = time.time() - start2
-    print("dt_new: ", dt_new)
-    print("dt-legacy: ", dt_legacy)
-    print("ratio amelioration: ", dt_legacy * 100./dt_new, "%")
-    if (best_position != best_position_legacy):
-        print("FUUUUUUUUUUUU")
-        time.sleep(10)
-    return best_position
-
-
-def best_position_in_region_legacy(player, A, B):
-    # Retourne la position (dans un rectangle aux coins A et B) la mieux placée pour une passe
-    ncounts = 5
-    bottom_left = Position(min(A.x, B.x), min(A.y, B.y))
-    top_right = Position(max(A.x, B.x), max(A.y, B.y))
-
-    x_points = [bottom_left.x + i * (top_right.x - bottom_left.x) / (ncounts - 1) for i in range(ncounts)]
-    y_points = [bottom_left.y + j * (top_right.y - bottom_left.y) / (ncounts - 1) for j in range(ncounts)]
-
-    score_min = float("inf")
-
-    best_position = (bottom_left + top_right) / 2
-    ball_position = GameState().get_ball_position()
-
-    for x in x_points:
-        for y in y_points:
-            i = Position(x, y)
-            dist_from_ball = np.linalg.norm(ball_position-i)
-
-            if dist_from_ball < 1000: continue # Évite que le robot se positionne sur la balle
-
-            score = line_of_sight_clearance_ball_legacy(player, i)
-            if score_min > score:
-                score_min = score
-                best_position = i
 
     return best_position
+
