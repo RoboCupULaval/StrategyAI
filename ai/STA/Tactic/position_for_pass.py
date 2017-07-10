@@ -47,7 +47,8 @@ class PositionForPass(Tactic):
         # else:
         #     self.status_flag = Flags.WIP
         return AllStar(self.game_state, self.player, **{"pose_goal": self._get_destination_pose(),
-                                                        "ai_command_type": AICommandType.MOVE})
+                                                        "ai_command_type": AICommandType.MOVE,
+                                                        "pathfinder_on": True})
 
     def _is_player_towards_ball(self, fact=-0.99):
         player_x = self.player.pose.position.x

@@ -49,7 +49,3 @@ class DefenseWall(Strategy):
                 if dist < dist_ref:
                     return False
         return True
-
-    def condition(self, i):
-        # print(i, self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS)
-        return self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS
