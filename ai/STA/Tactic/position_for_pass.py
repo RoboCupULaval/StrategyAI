@@ -83,10 +83,10 @@ class PositionForPass(Tactic):
                 A = Position(our_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
                 B = Position(our_side_center_field_limit, (GameState().const["FIELD_Y_BOTTOM"] / 3)-pad)
             elif role is Role.FIRST_ATTACK:  # player.role is 'top_offence':
-                A = Position(their_goal_field_limit, GameState().const["FIELD_Y_TOP"]-pad)
+                A = Position(their_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
                 B = Position(their_side_center_field_limit, pad)
             elif role is Role.SECOND_ATTACK:  # player.role is 'bottom_offence':
-                A = Position(their_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
+                A = Position(their_goal_field_limit, GameState().const["FIELD_Y_TOP"]-pad)
                 B = Position(their_side_center_field_limit, -pad)
             elif role is Role.MIDDLE:  # player.role is 'center':
                 A = Position(our_goal_field_limit+1000, (GameState().const["FIELD_Y_BOTTOM"] / 3)+pad)
