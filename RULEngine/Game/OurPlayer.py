@@ -41,6 +41,11 @@ class OurPlayer(Player):
         #     circle = DebugCommand(3003, data)
         #     self.debug_state.append(circle)
 
-    def set_command(self, cmd):
-        self.cmd = [cmd.cmd_repr.position.x, cmd.cmd_repr.position.y, cmd.cmd_repr.orientation]
+    def set_command(self):
+        if self.ai_command.speed is not None:
+            self.cmd = [self.ai_command.speed.position.x,
+                        self.ai_command.speed.position.y,
+                        self.ai_command.speed.orientation]
+        else:
+            self.cmd = [0, 0, 0]
 

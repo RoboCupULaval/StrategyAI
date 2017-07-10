@@ -28,12 +28,12 @@ def closest_players_to_point(point: Position, our_team=None):
     if our_team or our_team is None:
         for i in GameState().my_team.available_players.values():
             # les players friends
-            player_distance = get_distance(i.pose.position, point)
+            player_distance = (i.pose.position - point).norm()
             list_player.append(PlayerPosition(i, player_distance))
     if not our_team or our_team is None:
         for i in GameState().other_team.available_players.values():
             # les players ennemis
-            player_distance = get_distance(i.pose.position, point)
+            player_distance = (i.pose.position - point).norm()
             list_player.append(PlayerPosition(i, player_distance))
     list_player = sorted(list_player, key=lambda x: x.distance)
     return list_player
@@ -142,7 +142,7 @@ def trajectory_score(pointA : Position, pointB: Position, obstacle: Position):
     if (normAC < 0) or (normAC > 1.1 * np.linalg.norm(AB)):
         return 1
     else:
-        return max(1, min(normAC / normOC, proportion_max))
+        return max(1, proportion_max if normOC == 0 else min(normAC / normOC, proportion_max))
 
 
 def is_player_facing_target(player, target_position: Position, tolerated_angle: float) -> bool:
@@ -192,5 +192,4 @@ def best_position_in_region(player, A, B):
             if score_min > score:
                 score_min = score
                 best_position = i
-
     return best_position

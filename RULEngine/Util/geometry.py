@@ -184,17 +184,19 @@ def get_closest_point_on_segment(reference: Position,
 
     position_on_line = get_closest_point_on_line(reference, position1, position2)
     position_on_segment = position_on_line
-    if position1.x > position2.x:
-        if position_on_line.x > position1.x:
+
+    # This handle the case where the projection is not between the two points
+    outside_x = (reference.x > position1.x and reference.x > position2.x) or \
+                (reference.x < position1.x and reference.x < position2.x)
+    outside_y = (reference.y > position1.y and reference.y > position2.y) or \
+                (reference.y < position1.y and reference.y < position2.y)
+    if outside_x or outside_y:
+        if (position1 - reference).norm() < (position2 - reference).norm():
             position_on_segment = position1
-        if position_on_line.x < position2.x:
+        else:
             position_on_segment = position2
-    else:
-        if position_on_line.x > position2.x:
-            position_on_segment = position2
-        if position_on_line.x < position1.x:
-            position_on_segment = position1
     return position_on_segment
+
 
 def get_angle_between_three_points(pointA : Position, pointO : Position, pointB : Position):
     A = pointA.conv_2_np()

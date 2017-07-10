@@ -5,8 +5,7 @@ import numpy as np
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.geometry import get_angle
-from RULEngine.Util.constant import TeamColor
+from RULEngine.Util.geometry import wrap_to_pi
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
@@ -28,7 +27,8 @@ class GoBehind(Action):
                     (exemple: le but)
     """
     def __init__(self, game_state: GameState, player: OurPlayer, position1: Position, position2: Position=None,
-                 distance_behind: [int, float]=250, cruise_speed: [int, float]=1, pathfinder_on: bool=False, orientation: str= 'front'):
+                 distance_behind: [int, float]=250, cruise_speed: [int, float]=1,
+                 pathfinder_on: bool=False, orientation: str= 'front'):
         """
             :param game_state: L'état courant du jeu.
             :param player: Instance du joueur qui doit se déplacer
@@ -106,9 +106,9 @@ class GoBehind(Action):
         # TODO why?!? MGL 2017/05/22
         destination_orientation = 0
         if self.orientation == 'front':
-            destination_orientation = get_angle(destination_position, self.position1)
+            destination_orientation = (self.position1 - destination_position).angle()
         elif self.orientation == 'back':
-            destination_orientation = get_angle(destination_position, self.position1) + np.pi
+            destination_orientation = wrap_to_pi((self.position1 - destination_position).angle() + np.pi)
 
         destination_pose = Pose(destination_position, destination_orientation)
         return destination_pose

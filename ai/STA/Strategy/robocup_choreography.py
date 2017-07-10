@@ -6,7 +6,6 @@ from random import shuffle
 from RULEngine.Util.Pose import Position, Pose
 from ai.STA.Strategy.Strategy import Strategy
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags

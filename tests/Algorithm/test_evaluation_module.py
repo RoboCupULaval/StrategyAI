@@ -113,11 +113,11 @@ class TestEvaluationModule(unittest.TestCase):
     def _create_mock_teams(self, allies, opponents):
         team1 = create_autospec(Team)
         team1.available_players = allies
-        GameState().my_team = team1
+        GameState(for_unitest_pls_remove_debug_interface_oh_god=False).my_team = team1
 
         team2 = create_autospec(Team)
         team2.available_players = opponents
-        GameState().other_team = team2
+        GameState(for_unitest_pls_remove_debug_interface_oh_god=False).other_team = team2
 
     def _define_points_obstacle(self, start_point, goal, obstacle):
         self.start_point.x, self.start_point.y = start_point

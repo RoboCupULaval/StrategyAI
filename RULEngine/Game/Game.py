@@ -6,7 +6,7 @@ from RULEngine.Game.OurTeam import OurTeam
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.team_color_service import TeamColor
-
+from RULEngine.Util.constant import PLAYER_PER_TEAM
 from RULEngine.Game.Team import Team
 from RULEngine.Game.Ball import Ball
 from RULEngine.Game.Field import Field
@@ -31,10 +31,6 @@ class Game:
         self.update = self._update
         if ConfigService().config_dict["IMAGE"]["kalman"] == "true":
             self.update = self._kalman_update
-
-    def set_command(self, cmd):
-        for commands in cmd:
-            self.friends.update_player_command(commands.player.id, commands)
 
     def set_referee(self, p_referee):
         self.referee = p_referee
@@ -104,6 +100,7 @@ class Game:
         for c in vision_frame:
             kalman_list.append(c["ball"])
         self.ball.kalman_update(kalman_list, delta)
+
 
     def kalman_update_players(self, vision_frame, delta):
         kalman_blue = [[] for _ in range(0, 6)]
