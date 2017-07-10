@@ -53,15 +53,15 @@ class GoBetween(Action):
         pt1 = self.position1
         pt2 = self.position2
         target = self.target
-        delta = self.minimum_distance * (pt2 - pt1) / (pt2 - pt1).norm()
+        delta = self.minimum_distance * (pt2 - pt1).normalized()
         pt1 = pt1 + delta
         pt2 = pt2 - delta
 
         destination = get_closest_point_on_segment(target, pt1, pt2)
         dest_to_target = target - destination
-        destination_orientation = np.arctan2(dest_to_target.y, dest_to_target.x)
+        destination_orientation = dest_to_target.angle()
 
-        return Pose(Position.from_np(destination), destination_orientation)
+        return Pose(destination, destination_orientation)
 
     def exec(self):
         return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.get_destination(),

@@ -5,7 +5,7 @@ import numpy as np
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.geometry import get_angle
+from RULEngine.Util.geometry import get_angle, wrap_to_pi
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
@@ -106,9 +106,9 @@ class GoBehind(Action):
         # TODO why?!? MGL 2017/05/22
         destination_orientation = 0
         if self.orientation == 'front':
-            destination_orientation = (self.position1 - destination_position).angle()
+            destination_orientation = wrap_to_pi((self.position1 - destination_position).angle())
         elif self.orientation == 'back':
-            destination_orientation = (self.position1 - destination_position).angle() + np.pi
+            destination_orientation = wrap_to_pi((self.position1 - destination_position).angle()) + np.pi
 
         destination_pose = Pose(destination_position, destination_orientation)
         return destination_pose
