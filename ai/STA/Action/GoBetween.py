@@ -4,6 +4,7 @@ import numpy as np
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from RULEngine.Util.geometry import get_closest_point_on_segment
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
@@ -52,32 +53,13 @@ class GoBetween(Action):
         pt1 = self.position1
         pt2 = self.position2
         target = self.target
-
-        delta = self.minimum_distance * ((pt2 - pt1).normalized())
+        delta = self.minimum_distance * (pt2 - pt1).normalized()
         pt1 = pt1 + delta
         pt2 = pt2 - delta
 
-        pt1_to_target = target - pt1
-        pt2_to_target = target - pt2
-        pt1_to_pt2 = pt2 - pt1
-        proj_pt1_to_pt2 = pt1_to_target[0] * pt1_to_pt2[0] + pt1_to_target[1] * pt1_to_pt2[1]
-
-        pt1_to_pt2_mag = pt1_to_pt2[0] ** 2 + pt1_to_pt2[1] ** 2
-        proj_mag = proj_pt1_to_pt2 / pt1_to_pt2_mag
-        destination = pt1 + Position(pt1_to_pt2[0] * proj_mag, pt1_to_pt2[1] * proj_mag)
-
-        # This handle the case where the projection is not between the two points
-        outside_x = (destination[0] > pt1[0] and destination[0] > pt2[0]) or \
-                    (destination[0] < pt1[0] and destination[0] < pt2[0])
-        outside_y = (destination[1] > pt1[1] and destination[1] > pt2[1]) or \
-                    (destination[1] < pt1[1] and destination[1] < pt2[1])
-        if outside_x or outside_y:
-            if pt1_to_target.norm() < pt2_to_target.norm():
-                destination = pt1
-            else:
-                destination = pt2
-
-        destination_orientation = (target - destination).angle()
+        destination = get_closest_point_on_segment(target, pt1, pt2)
+        dest_to_target = target - destination
+        destination_orientation = dest_to_target.angle()
 
         return Pose(destination, destination_orientation)
 

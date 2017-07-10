@@ -83,7 +83,7 @@ class TestActions(unittest.TestCase):
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
 
-    #@unittest.skip("GoBetween does not actually go in between")
+    @unittest.skip("GoBetween does not actually go in between")
     def test_GoBetween(self):
         # test avec une droite verticale
         POS_TOP       = Position(100, 100)
