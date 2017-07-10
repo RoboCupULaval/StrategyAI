@@ -49,7 +49,8 @@ class PositionForPass(Tactic):
     def move_to_pass_position(self):
         self.next_state = self.move_to_pass_position
         return AllStar(self.game_state, self.player, **{"pose_goal": self._get_destination_pose(),
-                                                        "ai_command_type": AICommandType.MOVE})
+                                                        "ai_command_type": AICommandType.MOVE,
+                                                        "pathfinder_on": True})
 
     def _get_destination_pose(self):
         if time.time() - self.last_time > DELAY:
