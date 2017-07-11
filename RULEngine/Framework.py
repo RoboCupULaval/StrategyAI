@@ -131,6 +131,7 @@ class Framework(object):
         """ Fonction exécuté et agissant comme boucle principale. """
 
         self._wait_for_first_frame()
+        self._wait_for_first_geometry_packet()
         print(self.vision_routine)
         # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
         while not self.thread_terminate.is_set():
@@ -282,6 +283,12 @@ class Framework(object):
         while not self.vision.get_latest_frame() and not self.thread_terminate.is_set():
             time.sleep(0.01)
             print("En attente d'une image de la vision.")
+
+    def _wait_for_first_geometry_packet(self):
+        while not self.game.field.update_field_dimensions(self.vision.pop_frames()) and\
+                not self.thread_terminate.is_set():
+            time.sleep(0.01)
+            print("En attente du premier packet de géométrie du terrain.")
 
     def _send_robot_commands(self, commands):
         """ Envoi les commades des robots au serveur. """
