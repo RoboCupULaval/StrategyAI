@@ -209,10 +209,6 @@ class Framework(object):
 
     def _kalman_vision(self):
         vision_frames = self.vision.pop_frames()
-        if len(vision_frames) > 0:
-            for packet in vision_frames:
-                if packet.HasField("detection"):
-                    print(packet)
         new_image_packet = self.image_transformer.update(vision_frames)
         referee_frames = self.referee_command_receiver.pop_frames()
         self.game.referee.update(referee_frames)

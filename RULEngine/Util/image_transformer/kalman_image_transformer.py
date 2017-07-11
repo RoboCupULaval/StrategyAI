@@ -3,6 +3,7 @@ from copy import deepcopy
 from typing import Dict, List
 
 import RULEngine.Communication.protobuf.messages_robocup_ssl_detection_pb2 as ssl_detection
+import RULEngine.Communication.protobuf.messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM
@@ -19,16 +20,24 @@ class KalmanImageTransformer(ImageTransformer):
         self.new_image_flag = False
         self.time = time.time()
 
-    def update(self, packets):
+        self.cameras = [CameraPacket(cam_nb) for cam_nb in range(nb_cameras)]
+
+    def update(self, packets: List[ssl_wrapper]=None):
+        self.new_image_flag = False
         self._update_camera_kalman(packets)
 
         return self.last_camera_frame
 
-    def _update_camera_kalman(self, packets):
-        self.new_image_flag = False
+    def _update_camera_kalman(self, packets: List[ssl_wrapper]) -> None:
         if not packets:
             return
 
+        for packet in packets:
+            if packet.HasField("detection"):
+                self.cameras[packet.detection.camera_id].update(packet)
+
+
+        """
         # change the packets of a camera if frame_number of camera is higher
         # than what we have
         for packet in packets:
@@ -55,6 +64,7 @@ class KalmanImageTransformer(ImageTransformer):
 
                     self.last_camera_frame[c_id] = new_camera
                     self.new_image_flag = True
+        """
 
 # TODO check the max numbers of bots
 empty_camera = {"frame_number": 0,
@@ -95,8 +105,8 @@ class CameraPacket:
         self.packet = camera_packet
 
         # reset the set of the robots currently viewed in our packet
-        self.robots_blue_set = {i for i in range(PLAYER_PER_TEAM)}
-        self.robots_yellow_set = {i for i in range(PLAYER_PER_TEAM)}
+        self.robots_blue_set.update([i for i in range(PLAYER_PER_TEAM)])
+        self.robots_yellow_set.update([i for i in range(PLAYER_PER_TEAM)])
 
         self._update_entities()
         self._remove_missing_entities()
