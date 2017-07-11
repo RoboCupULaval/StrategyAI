@@ -189,6 +189,7 @@ def best_position_in_region(player, A, B):
     top_right = Position(max(A.x, B.x), max(A.y, B.y))
     ball_position = GameState().get_ball_position()
 
+
     positions = []
     for i in range(ncounts):
         x_point = bottom_left.x + i * (top_right.x - bottom_left.x) / (ncounts - 1)
