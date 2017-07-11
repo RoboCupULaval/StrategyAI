@@ -21,5 +21,6 @@ class HumanControl(Strategy):
         assert isinstance(robot_id, int)
 
         r = self.game_state.get_role_by_player_id(robot_id)
-        self.roles_graph[r].remove_node(0)
-        self.add_tactic(r, tactic)
+        if r:
+            self.roles_graph[r].remove_node(0)
+            self.add_tactic(r, tactic)
