@@ -50,32 +50,32 @@ class Coach(object):
         # main loop de l'IA
         # debug code! no remove pls (au moins pas avant le Japon)
 
-        # start_debug_interface = time.time()
+        start_debug_interface = time.time()
         self.debug_executor.exec()
-        # end_debug_interface = time.time()
-        # start_play_executor = time.time()
+        end_debug_interface = time.time()
+        start_play_executor = time.time()
         self.play_executor.exec()
-        # end_play_executor = time.time()
-        # start_module_executor = time.time()
+        end_play_executor = time.time()
+        start_module_executor = time.time()
         self.module_executor.exec()
-        # end_module_executor = time.time()
-        # start_motion_executor = time.time()
+        end_module_executor = time.time()
+        start_motion_executor = time.time()
         self.motion_executor.exec()
-        # end_motion_executor = time.time()
-        # start_robot_commands = time.time()
+        end_motion_executor = time.time()
+        start_robot_commands = time.time()
         robot_commands = self.robot_command_executor.exec()
-        # end_robot_commands = time.time()
+        end_robot_commands = time.time()
 
-        # somme = end_debug_interface - start_debug_interface + end_play_executor - start_debug_interface + \
-        #         end_module_executor - start_module_executor + end_motion_executor - start_motion_executor + \
-        #         end_robot_commands - start_robot_commands
+        somme = end_debug_interface - start_debug_interface + end_play_executor - start_debug_interface + \
+                end_module_executor - start_module_executor + end_motion_executor - start_motion_executor + \
+                end_robot_commands - start_robot_commands
 
-        # print("debug_interface:",  end_debug_interface - start_debug_interface)
-        # print("play_executor:", end_play_executor - start_debug_interface)
-        # print("module_executor:", end_module_executor - start_module_executor)
-        # print("motion_executor:", end_motion_executor - start_motion_executor)
-        # print("robot_commands:", end_robot_commands - start_robot_commands)
-        # print("somme:", somme)
+        print("debug_interface:",  end_debug_interface - start_debug_interface)
+        print("play_executor:", end_play_executor - start_debug_interface)
+        print("module_executor:", end_module_executor - start_module_executor)
+        print("motion_executor:", end_motion_executor - start_motion_executor)
+        print("robot_commands:", end_robot_commands - start_robot_commands)
+        print("somme:", somme)
         return robot_commands
 
     def set_reference(self, world_reference: ReferenceTransferObject) -> None:

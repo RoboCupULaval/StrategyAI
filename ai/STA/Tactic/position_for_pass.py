@@ -9,6 +9,7 @@ from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.Algorithm.evaluation_module import best_position_in_region
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.Util.ai_command import AICommandType
 from ai.states.game_state import GameState
 import time
@@ -48,9 +49,10 @@ class PositionForPass(Tactic):
         #     self.status_flag = Flags.SUCCESS
         # else:
         #     self.status_flag = Flags.WIP
-        return AllStar(self.game_state, self.player, **{"pose_goal": self._get_destination_pose(),
-                                                        "ai_command_type": AICommandType.MOVE,
-                                                        "pathfinder_on": True})
+        # return AllStar(self.game_state, self.player, **{"pose_goal": self._get_destination_pose(),
+        #                                                 "ai_command_type": AICommandType.MOVE,
+        #                                                 "pathfinder_on": True})
+        return GoToPositionPathfinder(self.game_state, self.player, self._get_destination_pose())
 
     def _is_player_towards_ball(self, fact=-0.99):
         player_x = self.player.pose.position.x

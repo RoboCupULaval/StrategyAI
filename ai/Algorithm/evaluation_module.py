@@ -121,6 +121,7 @@ def line_of_sight_clearance(player, target):
 def line_of_sight_clearance_ball(player, targets, distances=None):
     # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
     # (plus c'est dégagé plus le score est petit)
+
     ball_position = GameState().get_ball_position()
     if distances is None:
         # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
@@ -128,10 +129,31 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
                           (targets - np.array(ball_position))).sum(axis=1))
     else:
         scores = distances
+    # for j in GameState().my_team.available_players.values():
+    #     # Obstacle : les players friends
+    #     if not (j.id == player.id or j.pose.position == target):
+    #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
     for j in GameState().other_team.available_players.values():
         # Obstacle : les players ennemis
         scores *= trajectory_score(np.array(GameState().get_ball_position()), targets, np.array(j.pose.position))
+        #print(scores)
+        #print(scores_temp)
     return scores
+
+def line_of_sight_clearance_ball_legacy(player, target: Position):
+    # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
+    # (plus c'est dégagé plus le score est petit)
+    score = np.linalg.norm(GameState().get_ball_position() - target)
+
+    # for j in GameState().my_team.available_players.values():
+    #     # Obstacle : les players friends
+    #     if not (j.id == player.id or j.pose.position == target):
+    #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
+    for j in GameState().other_team.available_players.values():
+        # Obstacle : les players ennemis
+        score *= trajectory_score_legacy(GameState().get_ball_position(), target, j.pose.position)
+    return score
+
 
 def trajectory_score(pointA, pointsB, obstacle):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
