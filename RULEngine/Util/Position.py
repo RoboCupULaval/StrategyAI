@@ -69,9 +69,9 @@ class Position(np.ndarray):
         if isinstance(other, Position):
             min_abs_tol = min(self.abs_tol, other.abs_tol)
             return np.allclose(self, other, atol=min_abs_tol)
-        # elif isinstance(other, np.ndarray):
-        #     min_abs_tol = min(self.abs_tol, other.position.abs_tol)
-        #     return np.allclose(self, other.position, atol=min_abs_tol)
+        elif isinstance(other, np.ndarray) and other.size == 2:
+            min_abs_tol = self.abs_tol
+            return np.allclose(self, other, atol=min_abs_tol)
         else:
             raise TypeError
 

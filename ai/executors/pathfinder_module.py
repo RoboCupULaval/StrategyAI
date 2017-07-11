@@ -33,7 +33,6 @@ class PathfinderModule(Executor):
     def _pathfind_ai_commands(self) -> None:
         last_path = None
         last_raw_path = None
-        start = time.time()
         for player in self.ws.game_state.my_team.available_players.values():
             if player.ai_command is None or not player.ai_command.pathfinder_on:
                 continue
@@ -65,7 +64,6 @@ class PathfinderModule(Executor):
                                                 player.ai_command.pose_goal,
                                                 player.ai_command.cruise_speed)
                 player.ai_command.path = path
-
     # TODO find what this does? MGL 2017/05/17
     """
     def _modify_path_for_cinematic_constraints(self, ai_commandes: list):

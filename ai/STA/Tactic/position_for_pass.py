@@ -11,6 +11,7 @@ from ai.STA.Action.AllStar import AllStar
 from ai.STA.Tactic.Tactic import Tactic
 from ai.Util.ai_command import AICommandType
 from ai.states.game_state import GameState
+
 from RULEngine.Debug.debug_interface import COLOR_ID_MAP
 from ai.Util.role import Role
 
@@ -47,6 +48,7 @@ class PositionForPass(Tactic):
         self.last_time = time.time()
 
     def move_to_pass_position(self):
+
         self.next_state = self.move_to_pass_position
         return AllStar(self.game_state, self.player, **{"pose_goal": self._get_destination_pose(),
                                                         "ai_command_type": AICommandType.MOVE,
@@ -60,7 +62,6 @@ class PositionForPass(Tactic):
         self.game_state.debug_interface.add_point(self.target_position, COLOR_ID_MAP[4], width=5,
                                                   timeout=0.1)
         return Pose(self.target_position, destination_orientation)
-
     def _find_best_player_position(self):
         if self.auto_position:
             pad = 200
