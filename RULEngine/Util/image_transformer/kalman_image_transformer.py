@@ -1,6 +1,6 @@
 import time
 from copy import deepcopy
-from typing import Dict, List
+from typing import Dict, List, Type
 
 import RULEngine.Communication.protobuf.messages_robocup_ssl_detection_pb2 as ssl_detection
 import RULEngine.Communication.protobuf.messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
@@ -15,20 +15,19 @@ class KalmanImageTransformer(ImageTransformer):
     def __init__(self):
         super().__init__()
         nb_cameras = int(ConfigService().config_dict["IMAGE"]["number_of_camera"])
-        self.last_camera_frame = [empty_camera for _ in range(nb_cameras)]
         self.last_new_packet = None
         self.new_image_flag = False
         self.time = time.time()
-
         self.cameras = [CameraPacket(cam_nb) for cam_nb in range(nb_cameras)]
+        self.last_camera_frame = self._create_kalman_image()
 
-    def update(self, packets: List[ssl_wrapper]=None):
+    def update(self, packets: List=None):
         self.new_image_flag = False
         self._update_camera_kalman(packets)
-
+        self._create_kalman_image()
         return self.last_camera_frame
 
-    def _update_camera_kalman(self, packets: List[ssl_wrapper]) -> None:
+    def _update_camera_kalman(self, packets: List[ssl_wrapper.SSL_WrapperPacket]) -> None:
         if not packets:
             return
 
@@ -36,49 +35,14 @@ class KalmanImageTransformer(ImageTransformer):
             if packet.HasField("detection"):
                 self.cameras[packet.detection.camera_id].update(packet)
 
-
-        """
-        # change the packets of a camera if frame_number of camera is higher
-        # than what we have
-        for packet in packets:
-            if packet.HasField("detection"):
-                c_id = packet.detection.camera_id
-                f_nb = packet.detection.frame_number
-
-                if f_nb > self.last_camera_frame[c_id]["frame_number"]:
-                    new_camera = deepcopy(empty_camera)
-                    new_camera["camera_id"] = c_id
-                    new_camera["frame_number"] = f_nb
-                    new_camera["t_capture"] = packet.detection.t_capture
-                    new_camera["timestamp"] = time.time()
-
-                    for ball in packet.detection.balls:
-                        new_camera["ball"] = Position(ball.x, ball.y)
-
-                    for blue in packet.detection.robots_blue:
-                        new_camera["blues"][blue.robot_id] = Pose(Position(blue.x, blue.y),
-                                                                  blue.orientation)
-                    for yellow in packet.detection.robots_yellow:
-                        new_camera["yellows"][yellow.robot_id] = Pose(Position(yellow.x, yellow.y),
-                                                                      yellow.orientation)
-
-                    self.last_camera_frame[c_id] = new_camera
-                    self.new_image_flag = True
-        """
-
-# TODO check the max numbers of bots
-empty_camera = {"frame_number": 0,
-                "t_capture": None,
-                "camera_id": None,
-                "timestamp": 0,
-                "ball": None,
-                "blues": [None for _ in range(0, 11)],
-                "yellows": [None for __ in range(0, 11)]
-                }
+    def _create_kalman_image(self):
+        self.last_camera_frame = {"ball": [camera.ball for camera in self.cameras],
+                                  "blues": list(zip(*(camera.robots_blue for camera in self.cameras))),
+                                  "yellows": list(zip(*(camera.robots_yellow for camera in self.cameras)))}
 
 
 class CameraPacket:
-    def __init__(self, id):
+    def __init__(self, id: int):
         assert 0 <= id <= int(ConfigService().config_dict["IMAGE"]["number_of_camera"]), "Creating CameraPacket " \
                                                                                          "class with wrong id!"
         self.camera_id = id
@@ -118,19 +82,19 @@ class CameraPacket:
 
         # maybe a sanity check on the id of the robots. always 0 to 11 ? Possible key error on the set operations
         for blue in self.packet.detection.robots_blue:
-            self.robots_blue[blue.robot_id] = Position(blue.x, blue.y, blue.orientation)
+            self.robots_blue[blue.robot_id] = Pose(blue.x, blue.y, blue.orientation)
             self.robots_blue_set.remove(blue.robot_id)
 
         for yellow in self.packet.detection.robots_yellow:
-            self.robots_yellow[yellow.robot_id] = Position(yellow.x, yellow.y, yellow.orientation)
-            self.robots_blue_set.remove(yellow.robot_id)
+            self.robots_yellow[yellow.robot_id] = Pose(yellow.x, yellow.y, yellow.orientation)
+            self.robots_yellow_set.remove(yellow.robot_id)
 
     def _remove_missing_entities(self) -> None:
         while self.robots_blue_set:
             self.robots_blue[self.robots_blue_set.pop()] = None
 
         while self.robots_yellow_set:
-            self.robots_blue[self.robots_yellow_set.pop()] = None
+            self.robots_yellow[self.robots_yellow_set.pop()] = None
 
     def get_robots_blue(self)-> List:
         return self.robots_blue
