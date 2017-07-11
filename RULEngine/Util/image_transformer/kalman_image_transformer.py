@@ -31,6 +31,8 @@ class KalmanImageTransformer(ImageTransformer):
         if not packets:
             return
 
+        self.last_new_packet = packets
+
         for packet in packets:
             if packet.HasField("detection"):
                 self.cameras[packet.detection.camera_id].update(packet)
