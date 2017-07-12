@@ -97,8 +97,7 @@ class GoKick(Tactic):
         return Idle(self.game_state, self.player)
 
     def _get_distance_from_ball(self):
-        return get_distance(self.player.pose.position,
-                            self.game_state.get_ball_position())
+        return (self.player.pose.position - self.game_state.get_ball_position()).norm()
 
     def _is_player_towards_ball_and_target(self, fact=-0.99):
         player_x = self.player.pose.position.x
