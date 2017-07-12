@@ -29,15 +29,17 @@ class DefenseWall(Strategy):
 
                 self.add_condition(role, 0, 1, partial(self.is_closest, player))
                 self.add_condition(role, 1, 0, partial(self.is_not_closest, player))
+                self.add_condition(role, 1, 1, partial(self.is_ball_closest_to_player, player))
 
         # for player in self.game_state.my_team.available_players.values():
         #     if not any(self.robots) == player:
         #         self.add_tactic(player.id, Stop(self.game_state, player))
 
     def is_closest(self, player):
-        if (player == closest_players_to_point(GameState().get_ball_position(), True)[0]) or (player == closest_players_to_point(GameState().get_ball_position(), True)[0]):
-            pass
-        return player == closest_players_to_point(GameState().get_ball_position(), True)
+        if (player == closest_players_to_point(GameState().get_ball_position(), True)[0]) or (player == closest_players_to_point(GameState().get_ball_position(), True)[1]):
+            print(player.id)
+            return True
+        return False
 
     def is_not_closest(self, player):
         return player != closest_players_to_point(GameState().get_ball_position(), True)
@@ -54,6 +56,6 @@ class DefenseWall(Strategy):
                     return False
         return True
 
-    def condition(self, i):
-        # print(i, self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS)
-        return self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS
+    # def condition(self, i):
+    #     # print(i, self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS)
+    #     return self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS
