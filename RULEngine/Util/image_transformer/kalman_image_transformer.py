@@ -53,9 +53,7 @@ class CameraPacket:
         self.frame_number = 0
         self.ball = None
         self.robots_blue = [None for _ in range(PLAYER_PER_TEAM)]
-        self.robots_blue_set = set()
         self.robots_yellow = [None for _ in range(PLAYER_PER_TEAM)]
-        self.robots_yellow_set = set()
         self.packet = None
 
     def update(self, camera_packet: ssl_detection._SSL_DETECTIONFRAME) -> None:
@@ -70,12 +68,11 @@ class CameraPacket:
         # remember the last packet received
         self.packet = camera_packet
 
-        # reset the set of the robots currently viewed in our packet
-        self.robots_blue_set.update([i for i in range(PLAYER_PER_TEAM)])
-        self.robots_yellow_set.update([i for i in range(PLAYER_PER_TEAM)])
+        # reset the robots currently viewed in our packet
+        self.robots_blue = [None for _ in range(PLAYER_PER_TEAM)]
+        self.robots_yellow = [None for _ in range(PLAYER_PER_TEAM)]
 
         self._update_entities()
-        self._remove_missing_entities()
 
     def _update_entities(self) -> None:
         # should there be a sanity check for multiple balls/players on the field viewed by the same camera?
@@ -85,18 +82,9 @@ class CameraPacket:
         # maybe a sanity check on the id of the robots. always 0 to 11 ? Possible key error on the set operations
         for blue in self.packet.detection.robots_blue:
             self.robots_blue[blue.robot_id] = Pose(blue.x, blue.y, blue.orientation)
-            self.robots_blue_set.remove(blue.robot_id)
 
         for yellow in self.packet.detection.robots_yellow:
             self.robots_yellow[yellow.robot_id] = Pose(yellow.x, yellow.y, yellow.orientation)
-            self.robots_yellow_set.remove(yellow.robot_id)
-
-    def _remove_missing_entities(self) -> None:
-        while self.robots_blue_set:
-            self.robots_blue[self.robots_blue_set.pop()] = None
-
-        while self.robots_yellow_set:
-            self.robots_yellow[self.robots_yellow_set.pop()] = None
 
     def get_robots_blue(self)-> List:
         return self.robots_blue
