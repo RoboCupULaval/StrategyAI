@@ -11,22 +11,23 @@ class FriendKalmanFilter:
     def __init__(self):
         cfg = ConfigService()
         self.default_dt = float(cfg.config_dict["GAME"]["ai_timestamp"])
-        self.tau_xy = 0.2
-        self.tau_orientation = 0.2
+        self.tau_x = 0.4
+        self.tau_y = 0.4
+        self.tau_orientation = self.default_dt
         ncameras = int(cfg.config_dict["IMAGE"]["number_of_camera"])
 
         # Transition model
         self.F = np.array([[1, 0, self.default_dt, 0, 0, 0],  # Position x
                            [0, 1, 0, self.default_dt, 0, 0],  # Position y
-                           [0, 0, (1 - self.default_dt/self.tau_xy), 0, 0, 0],  # Speed x
-                           [0, 0, 0, (1 - self.default_dt/self.tau_xy), 0, 0],  # Speed y
+                           [0, 0, (1 - self.default_dt/self.tau_x), 0, 0, 0],  # Speed x
+                           [0, 0, 0, (1 - self.default_dt/self.tau_y), 0, 0],  # Speed y
                            [0, 0, 0, 0, 1, self.default_dt],  # Orientation
                            [0, 0, 0, 0, 0, (1 - self.default_dt/self.tau_orientation)]])  # Speed w
         # Control input model
         self.B = np.array([[0, 0, 0],
                            [0, 0, 0],
-                           [self.default_dt/self.tau_xy, 0, 0],  # Speed x
-                           [0, self.default_dt/self.tau_xy, 0],  # Speed y
+                           [self.default_dt/self.tau_x, 0, 0],  # Speed x
+                           [0, self.default_dt/self.tau_y, 0],  # Speed y
                            [0, 0, 0],
                            [0, 0, self.default_dt/self.tau_orientation]])  # Speed w
         # Observation model
@@ -35,10 +36,10 @@ class FriendKalmanFilter:
         self.H += [[0, 0, 0, 0, 1, 0] for _ in range(ncameras)]  # Orientation
         self.H = np.array(self.H)
         # Process covariance
-        values = np.array([10 ** 1,
-                           10 ** 1,
+        values = np.array([10 ** 2,
                            10 ** 2,
-                           10 ** 2,
+                           10 ** 3,
+                           10 ** 3,
                            10 ** (-1),
                            10 ** (-1)]) # Orientation Covariance was 0.01, SB
         self.Q = np.diag(values)
@@ -96,14 +97,14 @@ class FriendKalmanFilter:
     def transition_model(self, dt):
         self.F = np.array([[1, 0, dt, 0, 0, 0],  # Position x
                            [0, 1, 0, dt, 0, 0],  # Position y
-                           [0, 0, (1 - dt/self.tau_xy), 0, 0, 0],  # Speed x
-                           [0, 0, 0, (1 - dt/self.tau_xy), 0, 0],  # Speed y
+                           [0, 0, (1 - dt/self.tau_x), 0, 0, 0],  # Speed x
+                           [0, 0, 0, (1 - dt/self.tau_y), 0, 0],  # Speed y
                            [0, 0, 0, 0, 1, dt],  # Orientation
                            [0, 0, 0, 0, 0, (1 - dt/self.tau_orientation)]])  # Speed w
         self.B = np.array([[0, 0, 0],
                            [0, 0, 0],
-                           [dt/self.tau_xy, 0, 0],  # Speed x
-                           [0, dt/self.tau_xy, 0],  # Speed y
+                           [dt/self.tau_x, 0, 0],  # Speed x
+                           [0, dt/self.tau_y, 0],  # Speed y
                            [0, 0, 0],
                            [0, 0, self.default_dt/self.tau_orientation]])  # Speed w
 

@@ -47,5 +47,5 @@ class OurPlayer(Player):
                         self.ai_command.speed.position.y,
                         self.ai_command.speed.orientation]
         else:
-            self.cmd = [0, 0, 0]
+            self.cmd = None
 
