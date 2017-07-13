@@ -23,7 +23,7 @@ from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
 
-COMMAND_DELAY = 0.5
+VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
 
 GO_BEHIND_SPACING = 250
@@ -55,7 +55,7 @@ class GoKick(Tactic):
         Tactic.__init__(self, game_state, player, target, args)
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge
-        self.cmd_last_time = time.time()
+        self.kick_last_time = time.time()
         self.auto_update_target = auto_update_target
         self.target_assignation_last_time = 0
         self.target = target
@@ -65,10 +65,7 @@ class GoKick(Tactic):
         self.ball_spacing = GRAB_BALL_SPACING
 
     def kick_charge(self):
-        if time.time() - self.cmd_last_time > COMMAND_DELAY:
-            self.next_state = self.go_behind_ball
-            self.cmd_last_time = time.time()
-
+        self.next_state = self.go_behind_ball
         return AllStar(self.game_state,
                        self.player,
                        charge_kick=True)
@@ -97,7 +94,6 @@ class GoKick(Tactic):
     def grab_ball(self):
         if self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
-            self.cmd_last_time = time.time()
         elif self._is_player_towards_ball_and_target():
             self.ball_spacing -= APPROACH_SPEED * self.game_state.get_delta_t()
             self.next_state = self.grab_ball
@@ -116,12 +112,30 @@ class GoKick(Tactic):
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
         if self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
-            self.next_state = self.halt
-            self.cmd_last_time = time.time()
-        elif time.time() - self.cmd_last_time < COMMAND_DELAY:
-            self.next_state = self.kick
+            self.next_state = self.grab_ball
         else:
+            self.next_state = self.validate_kick
+
+        return Kick(self.game_state, self.player, self.kick_force, self.target)
+
+    def validate_kick(self):
+        if self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
+            self.next_state = self.halt
+        elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
+            self.next_state = self.validate_kick
+        elif self.kick_last_time:
             self.next_state = self.kick_charge
+
+        return Idle(self.game_state, self.player)
+
+    def kick(self):
+        self.ball_spacing = GRAB_BALL_SPACING
+        if self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
+            self.next_state = self.halt
+        else:
+            self.kick_last_time = time.time()
+            self.next_state = self.validate_kick
+
         return Kick(self.game_state, self.player, self.kick_force, self.target)
 
     def halt(self):
