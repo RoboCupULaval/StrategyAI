@@ -20,4 +20,4 @@ class Pathfinder_Benchmark(Strategy):
 
         for index, player in role_by_robots:
             if player:
-                self.add_tactic(index, GoToRandomPosition(self.game_state, player, Position(1400, 0), 1000, 1000))
+                self.add_tactic(index, GoToRandomPosition(self.game_state, player, Position(1400, 0), 2000, 3000))
