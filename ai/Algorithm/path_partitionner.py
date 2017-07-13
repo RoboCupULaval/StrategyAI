@@ -246,6 +246,8 @@ class PathPartitionner(Pathfinder):
             obstacles = self.pose_obstacle
         if tolerance is None:
             tolerance = self.gap_proxy
+        if path.start == path.goal:
+            return False
         #print(path.points)
         points = np.vstack(np.array((path.points)))
         points_start = points[:-1]

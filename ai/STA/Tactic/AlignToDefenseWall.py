@@ -47,14 +47,20 @@ class AllignToDefenseWall(Tactic):
         self.positions_in_formations = []
         self.vec_ball_2_goal = Position(1, 0)
         self.vec_perp_of_ball_2_goal = Position(0, 1)
+        self.player_number_in_formation = None
         if len(self.robots_in_formation) == 0:
             self.next_state = self.halt
             self.number_of_robots = 0
         else:
             self.number_of_robots = len(self.robots_in_formation)
         for idx, player in enumerate(self.robots_in_formation):
+            print(player is self.player)
             if player is self.player:
                 self.player_number_in_formation = idx
+                print(self.player_number_in_formation)
+        if self.player_number_in_formation is None:
+            self.player_number_in_formation = 0
+            self.next_state = self.halt
 
     def define_center_of_formation(self):
         """
