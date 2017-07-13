@@ -265,6 +265,8 @@ class PathPartitionner(Pathfinder):
         vecs_robot_2_obs = positions_obstacles - np.matlib.repmat(points_start, obstacles.shape[0], 1)
         directions = np.matlib.repmat(directions, obstacles.shape[0], 1)
         dist_robot_2_obs = np.sqrt((vecs_robot_2_obs * vecs_robot_2_obs).sum(axis=1))
+        if (dist_robot_2_obs == 0).all():
+            return True
         big_enough_dists = dist_robot_2_obs > 0.0000000001
         dist_robot_2_obs = np.vstack(dist_robot_2_obs[big_enough_dists])
         vec_robot_2_obs = vecs_robot_2_obs[big_enough_dists]
