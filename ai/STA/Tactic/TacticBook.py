@@ -6,6 +6,7 @@ from ai.STA.Tactic.DemoFollowRobot import DemoFollowRobot
 from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.bumb import Bump
+from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 from ai.STA.Tactic.intercept import Intercept
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.robot_ident import RobotIdent
@@ -49,7 +50,8 @@ class TacticBook(object):
                             'RobotIdent': RobotIdent,
                             'PositionForPass': PositionForPass,
                             'Bump': Bump,
-                            'Intercept': Intercept
+                            'Intercept': Intercept,
+                            'GoToRandomPosition': GoToRandomPosition
                             }
         if 'Joystick' in sys.modules:
             self.tactic_book['Joystick'] = Joystick

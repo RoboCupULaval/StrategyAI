@@ -9,9 +9,8 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.states.game_state import GameState
-from . Strategy import Strategy
+from ai.STA.Strategy.Strategy import Strategy
 from ai.Util.role import Role
-
 
 class Offense(Strategy):
     def __init__(self, p_game_state):

@@ -5,11 +5,9 @@ import numpy as np
 
 from RULEngine.Game.OurPlayer import OurPlayer
 from ai.STA.Tactic.AlignToDefenseWall import AllignToDefenseWall
-from ai.STA.Tactic.Stop import Stop
 from ai.Util.role import Role
 from ai.states.game_state import GameState
 from . Strategy import Strategy
-from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 class DefenseWall(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4, hard_code=True):
@@ -49,7 +47,3 @@ class DefenseWall(Strategy):
                 if dist < dist_ref:
                     return False
         return True
-
-    def condition(self, i):
-        # print(i, self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS)
-        return self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS
