@@ -89,7 +89,8 @@ class GoKick(Tactic):
                             GO_BEHIND_SPACING,
                             pathfinder_on=True,
                             aiming=self.target,
-                            rotation_speed=6*m.pi)
+                            rotation_speed=6*m.pi,
+                            speed_mode=True)
 
     def grab_ball(self):
         if self._get_distance_from_ball() < KICK_DISTANCE:

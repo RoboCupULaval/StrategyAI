@@ -47,7 +47,8 @@ class PathfinderModule(Executor):
                                                           player.ai_command.pose_goal,
                                                           player.ai_command.cruise_speed,
                                                           last_path,
-                                                          last_raw_path)
+                                                          last_raw_path,
+                                                          end_speed=player.ai_command.end_speed)
                 self.draw_path(path)
                 if path.get_path_length() < 100:
                     player.pathfinder_history.last_path = None
