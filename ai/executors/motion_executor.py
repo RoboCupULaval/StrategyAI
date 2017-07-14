@@ -153,7 +153,10 @@ class RobotMotion(object):
         return next_velocity
 
     def apply_rotation_constraints(self, r_cmd: float) -> float:
-        deadzone = self.setting.rotation.deadzone
+        if self.current_speed < 0.1:
+            deadzone = self.setting.rotation.deadzone
+        else:
+            deadzone = 0
         sensibility = self.setting.rotation.sensibility
         max_speed = self.setting.rotation.max_speed
 
@@ -255,8 +258,8 @@ def get_control_setting(is_sim: bool):
         rotation = {"kp": 2, "ki": 0, "kd": 0.1, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
 
-        translation = {"kp": 1, "ki": 0.0, "kd": 5, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0.05}
-        rotation = {"kp": 2, "ki": 0, "kd": 5, "antiwindup": 20, "deadzone": 0.2, "sensibility": 0.1}
+        translation = {"kp": 1, "ki": 0.0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
+        rotation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)

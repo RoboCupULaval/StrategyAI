@@ -11,8 +11,8 @@ class FriendKalmanFilter:
     def __init__(self):
         cfg = ConfigService()
         self.default_dt = float(cfg.config_dict["GAME"]["ai_timestamp"])
-        self.tau_x = 0.4
-        self.tau_y = 0.4
+        self.tau_x = 0.3
+        self.tau_y = 0.3
         self.tau_orientation = self.default_dt
         ncameras = int(cfg.config_dict["IMAGE"]["number_of_camera"])
 
@@ -36,20 +36,20 @@ class FriendKalmanFilter:
         self.H += [[0, 0, 0, 0, 1, 0] for _ in range(ncameras)]  # Orientation
         self.H = np.array(self.H)
         # Process covariance
-        values = np.array([10 ** 2,
-                           10 ** 2,
+        values = np.array([10 ** 3,
+                           10 ** 3,
                            10 ** 3,
                            10 ** 3,
                            10 ** (-1),
                            10 ** (-1)]) # Orientation Covariance was 0.01, SB
         self.Q = np.diag(values)
         # Observation covariance
-        values = [10 ** (1) for _ in range(ncameras)]
-        values += [10 ** (1) for _ in range(ncameras)]
+        values = [10 ** (-3) for _ in range(ncameras)]
+        values += [10 ** (-3) for _ in range(ncameras)]
         values += [10 ** (-1) for _ in range(ncameras)]
         self.R = np.diag(values)  # Pose * ncameras
         # Initial state covariance
-        self.P = 10 ** 3 * np.eye(6)
+        self.P = 10 ** 6 * np.eye(6)
         self.x = np.array([9999, 9999, 0, 0, 0, 0])
 
     def predict(self, command):
@@ -94,7 +94,7 @@ class FriendKalmanFilter:
             self.x = self.x + np.dot(K, np.transpose(y))
             self.P = np.dot((np.eye(self.P.shape[0]) - np.dot(K, H)), self.P)
 
-    def transition_model(self, dt):
+    def transition_model_with_command(self, dt):
         self.F = np.array([[1, 0, dt, 0, 0, 0],  # Position x
                            [0, 1, 0, dt, 0, 0],  # Position y
                            [0, 0, (1 - dt/self.tau_x), 0, 0, 0],  # Speed x
@@ -108,13 +108,31 @@ class FriendKalmanFilter:
                            [0, 0, 0],
                            [0, 0, self.default_dt/self.tau_orientation]])  # Speed w
 
+    def transition_model(self, dt):
+        self.F = np.array([[1, 0, dt, 0, 0, 0],  # Position x
+                           [0, 1, 0, dt, 0, 0],  # Position y
+                           [0, 0, 1, 0, 0, 0],  # Speed x
+                           [0, 0, 0, 1, 0, 0],  # Speed y
+                           [0, 0, 0, 0, 1, dt],  # Orientation
+                           [0, 0, 0, 0, 0, 1]])  # Speed w
+        self.B = np.array([[0, 0, 0],
+                           [0, 0, 0],
+                           [0, 0, 0],  # Speed x
+                           [0, 0, 0],  # Speed y
+                           [0, 0, 0],
+                           [0, 0, 0]])  # Speed w
+
     def filter(self, observation=None, command=None, dt=0.05):
         if not dt:
             dt = self.default_dt
-        self.transition_model(dt)
+        if command is not None:
+            self.transition_model_with_command(dt)
+        else:
+            self.transition_model(dt)
         if observation is not None:
             self.update(observation)
         self.predict(command)
         output_state = self.x
         output_state[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
+
         return output_state
