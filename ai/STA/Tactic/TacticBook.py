@@ -4,6 +4,7 @@ import sys
 
 from ai.STA.Tactic.DemoFollowRobot import DemoFollowRobot
 from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
+from ai.STA.Tactic.RotateAroundBall import RotateAroundBall
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.bumb import Bump
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
@@ -45,8 +46,9 @@ class TacticBook(object):
                             'GoToPositionNoPathfinder': GoToPositionNoPathfinder,
                             'GoToPositionPathfinder': GoToPositionPathfinder,
                             'GoKick': GoKick,
-                            "TestTurnOnYou": TestTurnOnYou,
+                            'TestTurnOnYou': TestTurnOnYou,
                             'RotateAroundPosition': RotateAroundPosition,
+                            'RotateAroundBall': RotateAroundBall,
                             'RobotIdent': RobotIdent,
                             'PositionForPass': PositionForPass,
                             'Bump': Bump,
