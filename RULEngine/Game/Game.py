@@ -72,8 +72,8 @@ class Game:
 
     def _kalman_update(self, vision_frame: List, delta: float) -> None:
         self.delta_t = delta
-        self.kalman_update_ball(vision_frame, delta)
-        self.kalman_update_players(vision_frame, delta)
+        self.kalman_update_ball(vision_frame)
+        self.kalman_update_players(vision_frame)
 
     def is_team_yellow(self):
         return self.our_team_color == TeamColor.YELLOW
@@ -95,24 +95,14 @@ class Game:
         self._update_players_of_team(blue_team, self.blue_team, delta)
         self._update_players_of_team(yellow_team, self.yellow_team, delta)
 
-    def kalman_update_ball(self, vision_frame, delta):
-        kalman_list = []
-        for c in vision_frame:
-            kalman_list.append(c["ball"])
-        self.ball.kalman_update(kalman_list, delta)
+    def kalman_update_ball(self, vision_frame):
+        self.ball.kalman_update(vision_frame["ball"], self.delta_t)
 
 
-    def kalman_update_players(self, vision_frame, delta):
-        kalman_blue = [[] for _ in range(0, 6)]
-        kalman_yellow = [[] for _ in range(0, 6)]
-        for c in vision_frame:
-            for i in range(0, 6):
-                kalman_blue[i].append(c["blues"][i])
-                kalman_yellow[i].append(c["yellows"][i])
-
-        for i in range(0, 6):
-            self.blue_team.update_player(i, kalman_blue[i], delta)
-            self.yellow_team.update_player(i, kalman_yellow[i], delta)
+    def kalman_update_players(self, vision_frame):
+        for i in range(PLAYER_PER_TEAM):
+            self.blue_team.update_player(i, vision_frame["blues"][i], self.delta_t)
+            self.yellow_team.update_player(i, vision_frame["yellows"][i], self.delta_t)
 
     @staticmethod
     def _update_players_of_team(players, team, delta):
