@@ -70,12 +70,12 @@ class Coach(object):
                 end_module_executor - start_module_executor + end_motion_executor - start_motion_executor + \
                 end_robot_commands - start_robot_commands
 
-        print("debug_interface:",  end_debug_interface - start_debug_interface)
-        print("play_executor:", end_play_executor - start_debug_interface)
-        print("module_executor:", end_module_executor - start_module_executor)
-        print("motion_executor:", end_motion_executor - start_motion_executor)
-        print("robot_commands:", end_robot_commands - start_robot_commands)
-        print("somme:", somme)
+        # print("debug_interface:",  end_debug_interface - start_debug_interface)
+        # print("play_executor:", end_play_executor - start_debug_interface)
+        # print("module_executor:", end_module_executor - start_module_executor)
+        # print("motion_executor:", end_motion_executor - start_motion_executor)
+        # print("robot_commands:", end_robot_commands - start_robot_commands)
+        # print("somme:", somme)
         return robot_commands
 
     def set_reference(self, world_reference: ReferenceTransferObject) -> None:

@@ -9,7 +9,7 @@ except ImportError:
 
 from RULEngine.Command.command import *
 
-COMMUNICATION_SLEEP = 0.001
+COMMUNICATION_SLEEP = 0.01
 MOVE_COMMAND_SLEEP = 0.05
 
 
@@ -35,6 +35,8 @@ class SerialCommandSender(object):
                 self.last_time = time.time()
                 for _, next_command in self.command_dict.items():
                     if isinstance(next_command, Move):
+                        if next_command.player.id == 0:
+                            print(next_command.cmd_repr)
                         count += 1
                         self._package_commands(next_command)
                         time.sleep(COMMUNICATION_SLEEP)

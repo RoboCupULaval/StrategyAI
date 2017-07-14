@@ -54,7 +54,8 @@ class GetBattery(ResponseCommand):
         super().__init__(player, pause_cond)
 
     def package_command(self, mcu_communicator: McuCommunicator):
-        return mcu_communicator.getBatterie(self.player.id)
+        id = 6 if self.player.id == 0 else self.player.id
+        return mcu_communicator.getBatterie(id)
 
 
 class Move(Command):
@@ -62,7 +63,8 @@ class Move(Command):
         super().__init__(player)
 
     def package_command(self, mcu_communicator: McuCommunicator) -> None:
-        mcu_communicator.sendSpeed(self.player.id,
+        id = 6 if self.player.id == 0 else self.player.id
+        mcu_communicator.sendSpeed(id,
                                    self.cmd_repr.position.x,
                                    self.cmd_repr.position.y,
                                    self.cmd_repr.orientation)
@@ -75,7 +77,8 @@ class Kick(Command):
         self.kick_speed = self.player.ai_command.kick_strength
 
     def package_command(self, mcu_communicator: McuCommunicator) -> None:
-        mcu_communicator.kick(self.player.id)
+        id = 6 if self.player.id == 0 else self.player.id
+        mcu_communicator.kick(id)
 
 
 class Stop(Command):
@@ -84,7 +87,9 @@ class Stop(Command):
         self.speed_repr = Pose()
 
     def package_command(self, mcu_communicator: McuCommunicator) -> None:
-        mcu_communicator.sendSpeed(self.player.id, 0, 0, 0)
+        id = 6 if self.player.id == 0 else self.player.id
+
+        mcu_communicator.sendSpeed(id, 0, 0, 0)
 
 
 class StartChargingKick(Command):
@@ -92,7 +97,9 @@ class StartChargingKick(Command):
         super().__init__(player)
 
     def package_command(self, mcu_communicator: McuCommunicator) -> None:
-        mcu_communicator.charge(self.player.id)
+        id = 6 if self.player.id == 0 else self.player.id
+
+        mcu_communicator.charge(id)
 
 
 class Dribbler(Command):
@@ -102,7 +109,9 @@ class Dribbler(Command):
         # todo ask embedded about dribbler strength MGL 2017/05/29
 
     def package_command(self, mcu_communicator: McuCommunicator) -> None:
+        id = 6 if self.player.id == 0 else self.player.id
+
         if self.activate:
-            mcu_communicator.turnOnDribbler(self.player.id)
+            mcu_communicator.turnOnDribbler(id)
         else:
-            mcu_communicator.turnOffDribbler(self.player.id)
+            mcu_communicator.turnOffDribbler(id)
