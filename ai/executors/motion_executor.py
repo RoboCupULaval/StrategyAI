@@ -12,7 +12,7 @@ from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 from config.config_service import ConfigService
 
-MIN_DISTANCE_TO_REACH_TARGET_SPEED = 0.5
+MIN_DISTANCE_TO_REACH_TARGET_SPEED = 0.1
 
 
 class DotDict(dict):
@@ -105,7 +105,7 @@ class RobotMotion(object):
         rotation_cmd = self.apply_rotation_constraints(rotation_cmd)
 
         # Translation control
-        if self.target_reached() and self.target_speed <= self.setting.translation.deadzone:
+        if self.target_reached():
             translation_cmd = Position(self.x_controller.update(self.pose_error.position.x),
                                        self.y_controller.update(self.pose_error.position.y))
             self.next_speed = 0
@@ -198,14 +198,17 @@ class RobotMotion(object):
             new_speed = Position(0, 0)
         return new_speed
 
-    def target_reached(self, boost_factor=1) -> bool:
-        distance_to_reach_target_speed = 0.5 * (self.target_speed ** 2 - self.cruise_speed ** 2)
+    def target_reached(self, boost_factor=1.2) -> bool:
+        distance_to_reach_target_speed = 0.5 * (self.target_speed ** 2 - self.current_speed ** 2)
         distance_to_reach_target_speed /= self.setting.translation.max_acc
         distance_to_reach_target_speed = boost_factor * abs(distance_to_reach_target_speed)
         distance_to_reach_target_speed = max(distance_to_reach_target_speed, MIN_DISTANCE_TO_REACH_TARGET_SPEED)
         if np.sum(np.square(self.position_error)) <= distance_to_reach_target_speed ** 2:
+            print(True)
+
             return True
         else:
+            print(False)
             return False
 
     def update_states(self, cmd: AICommand):
