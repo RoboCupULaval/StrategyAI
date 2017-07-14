@@ -35,7 +35,7 @@ class SerialCommandSender(object):
                 self.last_time = time.time()
                 for _, next_command in self.command_dict.items():
                     if isinstance(next_command, Move):
-                        if next_command.player.id == 0:
+                        if next_command.player.id == 6:
                             print(next_command.cmd_repr)
                         count += 1
                         self._package_commands(next_command)

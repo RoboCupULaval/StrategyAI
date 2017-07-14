@@ -49,7 +49,7 @@ class Coach(object):
         """
         # main loop de l'IA
         # debug code! no remove pls (au moins pas avant le Japon)
-
+        print([i.id for i in self.world_state.game_state.my_team.available_players.values()])
         start_debug_interface = time.time()
         self.debug_executor.exec()
         end_debug_interface = time.time()
