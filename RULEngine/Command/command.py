@@ -54,7 +54,6 @@ class GetBattery(ResponseCommand):
         super().__init__(player, pause_cond)
 
     def package_command(self, mcu_communicator: McuCommunicator):
-        id = 6 if self.player.id == 0 else self.player.id
         return mcu_communicator.getBatterie(id)
 
 

@@ -35,7 +35,7 @@ class SerialCommandSender(object):
                 self.last_time = time.time()
                 for _, next_command in self.command_dict.items():
                     if isinstance(next_command, Move):
-                        if next_command.player.id == 6:
+                        if next_command.player.id == 0:
                             print(next_command.cmd_repr)
                         count += 1
                         self._package_commands(next_command)
@@ -78,8 +78,11 @@ class SerialCommandSender(object):
         self.comm_thread.join()
 
     def _package_commands(self, command: Command):
-        response = command.package_command(self.mcu_com)
+        if command.player.id in [1, 2, 3, 4, 5, 6]:
+            response = command.package_command(self.mcu_com)
 
-        if isinstance(command, ResponseCommand):
-            command.response = response
-            command.wakeup_thread()
+            if isinstance(command, ResponseCommand):
+                command.response = response
+                command.wakeup_thread()
+        else:
+            print("SDSADFSFSDAFSADFSADSFASdfa")
