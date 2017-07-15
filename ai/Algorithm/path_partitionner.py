@@ -149,10 +149,15 @@ class PathPartitionner(Pathfinder):
         #     print("is_path_colide", self.is_path_collide(old_raw_path, tolerance=self.gap_proxy))
         #     print("meme goal?", (np.linalg.norm(pose_target.position - old_raw_path.goal) < 200))
         #     print("quel goal?", pose_target.position, old_raw_path.goal)
+        if self.end_speed == 0:
+            hysteresis = 200
+        else:
+            hysteresis = 22
         if (old_path is not None) and (not self.is_path_collide(old_raw_path,
                                                                 tolerance=self.gap_proxy-50)) and \
-                ((pose_target.position - old_raw_path.goal).norm() < 22):
+                ((pose_target.position - old_raw_path.goal).norm() < hysteresis):
             if np.linalg.norm(pose_target.position - old_raw_path.goal) > 20:
+                old_raw_path.quick_update_path(self.player)
                 self.path_appendice = Path(old_raw_path.goal, self.path.goal)
                 self.path_appendice = self.fastpathplanner(self.path_appendice)
                 self.raw_path = old_raw_path.join_segments(self.path_appendice)
@@ -167,7 +172,7 @@ class PathPartitionner(Pathfinder):
 
         else:
             self.path = Path(self.player.pose.position.conv_2_np(), pose_target.position.conv_2_np(), 0, self.end_speed)
-            print(self.path.speeds)
+            #print(self.path.speeds)
             if self.path.get_path_length() < 0.001:
                 """
                 hack shady pour eviter une erreur shady (trop fatiguer pour dealer ak ste shit la)
@@ -188,7 +193,7 @@ class PathPartitionner(Pathfinder):
 
         # print("points", self.path.points)
         # print("speeds", self.path.speeds)
-        print(self.path.speeds)
+        #print(self.path.speeds)
         return self.path, self.raw_path
 
     def get_raw_path(self, pose_target=Position()):
@@ -398,7 +403,11 @@ class PathPartitionner(Pathfinder):
 
     def remove_redundant_points(self):
         if len(self.path.points) > 2:
-            points, speeds = remove_duplicates(self.path.points, self.path.speeds, 5)
+            if self.player.velocity.position.norm() > 1000:
+                points, speeds = remove_duplicates(self.path.points, self.path.speeds,
+                                                   5 * self.player.velocity.position.norm() / 500)
+            else:
+                points, speeds = remove_duplicates(self.path.points, self.path.speeds, 5)
             return Path().generate_path_from_points(points, speeds)
         else:
             return Path().generate_path_from_points(self.path.points, self.path.speeds)

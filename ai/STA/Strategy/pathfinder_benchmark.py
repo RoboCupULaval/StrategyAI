@@ -19,5 +19,4 @@ class Pathfinder_Benchmark(Strategy):
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
 
         for index, player in role_by_robots:
-            if index ==4:
-                self.add_tactic(index, GoToRandomPosition(self.game_state, player, Position(0, 0), 2000, 3000))
+            self.add_tactic(index, GoToRandomPosition(self.game_state, player, Position(0, 0), 2000, 3000))

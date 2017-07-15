@@ -12,7 +12,7 @@ from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 from config.config_service import ConfigService
 
-MIN_DISTANCE_TO_REACH_TARGET_SPEED = 0.1
+MIN_DISTANCE_TO_REACH_TARGET_SPEED = 0.05
 
 
 class DotDict(dict):
@@ -95,6 +95,7 @@ class RobotMotion(object):
                                     self.setting.rotation.kd,
                                     self.setting.rotation.antiwindup,
                                     wrap_err=True)
+        self.speed_flag = False
 
     def update(self, cmd: AICommand) -> Pose():
 
@@ -105,16 +106,23 @@ class RobotMotion(object):
         rotation_cmd = self.apply_rotation_constraints(rotation_cmd)
 
         # Translation control
-        if self.target_reached():
-            translation_cmd = Position(self.x_controller.update(self.pose_error.position.x),
-                                       self.y_controller.update(self.pose_error.position.y))
-            self.next_speed = 0
+        # if self.target_reached():
+        translation_cmd = Position(self.x_controller.update(self.pose_error.position.x),
+                                   self.y_controller.update(self.pose_error.position.y))
+        #     self.next_speed = 0
+        # else:
+        #     self.reset()
+        translation_cmd = self.get_next_velocity()
+        if self.cruise_speed > 1:
+            threshold = MIN_DISTANCE_TO_REACH_TARGET_SPEED * self.cruise_speed
         else:
-            self.reset()
-            translation_cmd = self.get_next_velocity()
-
+            threshold = MIN_DISTANCE_TO_REACH_TARGET_SPEED
+        if self.position_error.norm() < threshold:
+            self.speed_flag = True
+        if self.speed_flag and self.target_speed==0:
+            translation_cmd = Position(self.x_controller.update(self.pose_error.position.x, dt=self.dt),
+                                       self.y_controller.update(self.pose_error.position.y, dt=self.dt))
         translation_cmd = self.apply_translation_constraints(translation_cmd)
-
         # print('Speed: {:5.3f}, Command: {}, {:5.3f}, next speed: {:5.3f}, target_speed: {:5.3f}, {:5.3f}, reached:{}, error: {}'.format(self.current_speed,
         #                                                   translation_cmd,
         #                                                   rotation_cmd,
@@ -201,17 +209,14 @@ class RobotMotion(object):
             new_speed = Position(0, 0)
         return new_speed
 
-    def target_reached(self, boost_factor=1.2) -> bool:
+    def target_reached(self, boost_factor=1) -> bool:
         distance_to_reach_target_speed = 0.5 * (self.target_speed ** 2 - self.current_speed ** 2)
         distance_to_reach_target_speed /= self.setting.translation.max_acc
         distance_to_reach_target_speed = boost_factor * abs(distance_to_reach_target_speed)
         distance_to_reach_target_speed = max(distance_to_reach_target_speed, MIN_DISTANCE_TO_REACH_TARGET_SPEED)
         if np.sum(np.square(self.position_error)) <= distance_to_reach_target_speed ** 2:
-            print(True)
-
             return True
         else:
-            print(False)
             return False
 
     def update_states(self, cmd: AICommand):
@@ -253,16 +258,17 @@ class RobotMotion(object):
         self.angle_controller.reset()
         self.x_controller.reset()
         self.y_controller.reset()
+        self.speed_flag = False
 
 
 def get_control_setting(is_sim: bool):
 
     if is_sim:
-        translation = {"kp": 0.8, "ki": 0, "kd": 1, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
+        translation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
         rotation = {"kp": 2, "ki": 0, "kd": 1, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
-        translation = {"kp": 1, "ki": 0.0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
-        rotation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
+        translation = {"kp": 0.3, "ki": 0.0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
+        rotation = {"kp": 0.5, "ki": 0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
