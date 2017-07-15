@@ -8,7 +8,6 @@ class OurTeam(Team):
     def __init__(self, team_color: TeamColor):
         super().__init__(team_color)
         # It is our team so we use our player!
-        self.available_players.clear()
         for player_id in range(PLAYER_PER_TEAM):
             self.players[player_id] = OurPlayer(self, player_id)
             if 1 <= player_id <= 6:
