@@ -68,7 +68,8 @@ class CameraPacket:
         # remember the last packet received
         self.packet = camera_packet
 
-        # reset the robots currently viewed in our packet
+        # reset the ball and robots currently viewed in our packet
+        self.ball = None
         self.robots_blue = [None for _ in range(PLAYER_PER_TEAM)]
         self.robots_yellow = [None for _ in range(PLAYER_PER_TEAM)]
 
