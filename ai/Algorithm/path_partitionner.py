@@ -168,12 +168,14 @@ class PathPartitionner(Pathfinder):
                 old_path.quick_update_path(self.player)
                 self.path = old_path
                 self.raw_path = old_raw_path
+                self.raw_path.speeds[0] = self.player.velocity.position.norm()
+                self.path = self.reshaper.reshape_path(self.raw_path, self.player, self.cruise_speed)
                 self.path = self.remove_redundant_points()
 
         else:
             self.path = Path(self.player.pose.position.conv_2_np(), pose_target.position.conv_2_np(), 0, self.end_speed)
             #print(self.path.speeds)
-            if self.path.get_path_length() < 0.001:
+            if self.path.get_path_length() < 0.1:
                 """
                 hack shady pour eviter une erreur shady (trop fatiguer pour dealer ak ste shit la)
                 
@@ -193,7 +195,6 @@ class PathPartitionner(Pathfinder):
 
         # print("points", self.path.points)
         # print("speeds", self.path.speeds)
-        #print(self.path.speeds)
         return self.path, self.raw_path
 
     def get_raw_path(self, pose_target=Position()):

@@ -7,7 +7,7 @@ from ai.Util.pathfinder_history import PathfinderHistory
 
 
 class OurPlayer(Player):
-    max_speed = 1
+    max_speed = 3
     max_angular_speed = 6.2
     max_acc = 2
 

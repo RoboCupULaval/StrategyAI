@@ -31,13 +31,14 @@ class Kick(Action):
         target = self.target.position
         player = self.player.pose.position
         player_to_target = target - player
-        if player_to_target.norm() > 0:
-            player_to_target = 0.3 * player_to_target.normalized()
-        else:
-            player_to_target = SpeedPose()
+        #if player_to_target.norm() > 0:
+        player_to_target = self.target.position - 20 * player_to_target.normalized()
+        # else:
+        #     player_to_target = SpeedPose()
 
-        cmd_params = {"pose_goal": SpeedPose(player_to_target),
-                      "control_loop_type": AIControlLoopType.SPEED,
+        cmd_params = {"pose_goal": Pose(player_to_target, self.player.pose.orientation),
                       "kick": True,
-                      "kick_strength": self.force}
+                      "pathfinder_on": True,
+                      "kick_strength": self.force,
+                      "cruise_speed": 0.1}
         return AICommand(self.player, AICommandType.MOVE, **cmd_params)

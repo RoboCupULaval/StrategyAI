@@ -7,6 +7,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.PID import PID
+from RULEngine.Util.constant import POSITION_DEADZONE
 from ai.Util.ai_command import AICommandType, AIControlLoopType, AICommand
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
@@ -26,6 +27,9 @@ class MotionExecutor(Executor):
         super().__init__(p_world_state)
         is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
         self.robot_motion = [RobotMotion(p_world_state, player_id, is_sim=is_simulation) for player_id in range(12)]
+        self.last_goal = []
+        for i in range(12):
+            self.last_goal += [None]
 
     def exec(self):
         for player in self.ws.game_state.my_team.available_players.values():
@@ -34,21 +38,24 @@ class MotionExecutor(Executor):
 
             cmd = player.ai_command
             r_id = player.id
-
+            if not (self.last_goal[r_id] is None) and cmd.path != []:
+                if self.last_goal[r_id] != cmd.path[0]:
+                    self.robot_motion[r_id].reset()
             if cmd.command is AICommandType.MOVE:
+                if self.last_goal[r_id] is None:
+                    self.last_goal[r_id] = cmd.path[0]
                 if cmd.control_loop_type is AIControlLoopType.POSITION:
                     cmd.speed = self.robot_motion[r_id].update(cmd)
-
                 elif cmd.control_loop_type is AIControlLoopType.SPEED:
                     speed = cmd.pose_goal.position.rotate(-player.pose.orientation)
                     cmd.speed = SpeedPose(speed, cmd.pose_goal.orientation)
 
                 elif cmd.control_loop_type is AIControlLoopType.OPEN:
                     cmd.speed = SpeedPose(cmd.pose_goal)
-
             elif cmd.command is AICommandType.STOP:
                 cmd.speed = SpeedPose(Position(0, 0), 0)
                 self.robot_motion[r_id].stop()
+                self.last_goal[r_id] = None
 
 
 class RobotMotion(object):
@@ -119,7 +126,8 @@ class RobotMotion(object):
             threshold = MIN_DISTANCE_TO_REACH_TARGET_SPEED
         if self.position_error.norm() < threshold:
             self.speed_flag = True
-        if self.speed_flag and self.target_speed==0:
+        if self.speed_flag and self.target_speed == 0:
+            self.reset()
             translation_cmd = Position(self.x_controller.update(self.pose_error.position.x, dt=self.dt),
                                        self.y_controller.update(self.pose_error.position.y, dt=self.dt))
         translation_cmd = self.apply_translation_constraints(translation_cmd)
@@ -268,7 +276,7 @@ def get_control_setting(is_sim: bool):
         rotation = {"kp": 2, "ki": 0, "kd": 1, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
         translation = {"kp": 1, "ki": 0.0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
-        rotation = {"kp": 0.5, "ki": 0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
+        rotation = {"kp": 1, "ki": 0.01, "kd": 0.5, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
