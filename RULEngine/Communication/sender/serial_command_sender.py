@@ -9,7 +9,7 @@ except ImportError:
 
 from RULEngine.Command.command import *
 
-COMMUNICATION_SLEEP = 0.001
+COMMUNICATION_SLEEP = 0.01
 MOVE_COMMAND_SLEEP = 0.05
 
 
@@ -76,8 +76,10 @@ class SerialCommandSender(object):
         self.comm_thread.join()
 
     def _package_commands(self, command: Command):
-        response = command.package_command(self.mcu_com)
+        available_ids = [1, 2, 3, 4, 5, 6]
+        if command.player.id in available_ids:
+            response = command.package_command(self.mcu_com)
 
-        if isinstance(command, ResponseCommand):
-            command.response = response
-            command.wakeup_thread()
+            if isinstance(command, ResponseCommand):
+                command.response = response
+                command.wakeup_thread()
