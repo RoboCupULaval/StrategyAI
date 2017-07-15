@@ -10,8 +10,9 @@ class OurTeam(Team):
         # It is our team so we use our player!
         for player_id in range(PLAYER_PER_TEAM):
             self.players[player_id] = OurPlayer(self, player_id)
-            if player_id < 6:
+            if 1 <= player_id <= 6:
                 self.players[player_id].in_play = True
+                self.available_players[player_id] = self.players[player_id]
 
     # todo change this MGL 2017/05/29
     def update_player_command(self, player_id, cmd):
