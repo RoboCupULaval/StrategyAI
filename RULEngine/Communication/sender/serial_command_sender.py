@@ -35,8 +35,6 @@ class SerialCommandSender(object):
                 self.last_time = time.time()
                 for _, next_command in self.command_dict.items():
                     if isinstance(next_command, Move):
-                        if next_command.player.id == 0:
-                            print(next_command.cmd_repr)
                         count += 1
                         self._package_commands(next_command)
                         time.sleep(COMMUNICATION_SLEEP)
@@ -84,5 +82,3 @@ class SerialCommandSender(object):
             if isinstance(command, ResponseCommand):
                 command.response = response
                 command.wakeup_thread()
-        else:
-            print("SDSADFSFSDAFSADFSADSFASdfa")
