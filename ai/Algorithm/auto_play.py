@@ -93,7 +93,6 @@ class SimpleAutoPlay(AutoPlay):
 
 
     def _analyse_game(self):
-        # TODO handle kickoff and penalty transition
         if is_ball_our_side():
             return SimpleAutoPlayState.NORMAL_DEFENSE
         else:
@@ -168,26 +167,26 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.BALL_PLACEMENT_US: 'DoNothing',
 
             SimpleAutoPlayState.NORMAL_OFFENSE: 'Offense',
-            SimpleAutoPlayState.NORMAL_DEFENSE: 'DoNothing',
+            SimpleAutoPlayState.NORMAL_DEFENSE: 'DefenseWall',
 
             SimpleAutoPlayState.TIMEOUT: 'DoNothing',
 
             # Kickoff
             SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE: 'PrepareKickOffOffense',
             SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE: 'DoNothing',
-            SimpleAutoPlayState.OFFENSE_KICKOFF: 'DoNothing',
-            SimpleAutoPlayState.DEFENSE_KICKOFF: 'DoNothing',
+            SimpleAutoPlayState.OFFENSE_KICKOFF: 'Offense',
+            SimpleAutoPlayState.DEFENSE_KICKOFF: 'DefenseWall',
 
             # Penalty
             SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE: 'DoNothing',
             SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE: 'DoNothing',
             SimpleAutoPlayState.OFFENSE_PENALTY: 'DoNothing',
-            SimpleAutoPlayState.DEFENSE_PENALTY: 'DoNothing',
+            SimpleAutoPlayState.DEFENSE_PENALTY: 'DefenseWall',
 
             # Freekicks
-            SimpleAutoPlayState.DIRECT_FREE_DEFENSE: 'DoNothing',
+            SimpleAutoPlayState.DIRECT_FREE_DEFENSE: 'DefenseWall',
             SimpleAutoPlayState.DIRECT_FREE_OFFENSE: 'DoNothing',
-            SimpleAutoPlayState.INDIRECT_FREE_DEFENSE: 'DoNothing',
+            SimpleAutoPlayState.INDIRECT_FREE_DEFENSE: 'DefenseWall',
             SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'DoNothing'
 
         }.get(state, SimpleAutoPlayState.HALT)
