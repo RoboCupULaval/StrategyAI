@@ -76,7 +76,8 @@ class SerialCommandSender(object):
         self.comm_thread.join()
 
     def _package_commands(self, command: Command):
-        if command.player.id in [1, 2, 3, 4, 5, 6]:
+        available_ids = [1, 2, 3, 4, 5, 6]
+        if command.player.id in available_ids:
             response = command.package_command(self.mcu_com)
 
             if isinstance(command, ResponseCommand):
