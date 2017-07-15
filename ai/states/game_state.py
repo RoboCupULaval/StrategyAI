@@ -165,3 +165,7 @@ class GameState(object, metaclass=Singleton):
         for player in self.my_team.available_players.values():
             pose = player.pose
             self.debug_interface.add_circle(center=(pose[0], pose[1]), radius=90, timeout=0.06)
+
+    def display_ball_kalman(self):
+        position = self.game.ball.position
+        self.debug_interface.add_circle(center=(position[0], position[1]), radius=90, timeout=0.06)
