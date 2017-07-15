@@ -20,5 +20,4 @@ class Grab(Action):
 
     def exec(self):
         ball = self.game_state.get_ball_position()
-
-        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": Pose(ball, self.player.pose.orientation)})
+        return AICommand(self.player, AICommandType.MOVE, pose_goal=Pose(ball, self.player.pose.orientation))

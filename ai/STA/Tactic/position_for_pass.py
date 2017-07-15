@@ -9,8 +9,10 @@ from RULEngine.Util.Position import Position
 from ai.Algorithm.evaluation_module import best_position_in_region
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.Util.ai_command import AICommandType
 from ai.states.game_state import GameState
+
 from RULEngine.Debug.debug_interface import COLOR_ID_MAP
 from ai.Util.role import Role
 
@@ -47,10 +49,16 @@ class PositionForPass(Tactic):
         self.last_time = time.time()
 
     def move_to_pass_position(self):
+
         self.next_state = self.move_to_pass_position
-        return AllStar(self.game_state, self.player, **{"pose_goal": self._get_destination_pose(),
-                                                        "ai_command_type": AICommandType.MOVE,
-                                                        "pathfinder_on": True})
+        # if self._is_player_towards_ball():
+        #     self.status_flag = Flags.SUCCESS
+        # else:
+        #     self.status_flag = Flags.WIP
+        # return AllStar(self.game_state, self.player, **{"pose_goal": self._get_destination_pose(),
+        #                                                 "ai_command_type": AICommandType.MOVE,
+        #                                                 "pathfinder_on": True})
+        return GoToPositionPathfinder(self.game_state, self.player, self._get_destination_pose())
 
     def _get_destination_pose(self):
         if time.time() - self.last_time > DELAY:
@@ -60,7 +68,6 @@ class PositionForPass(Tactic):
         self.game_state.debug_interface.add_point(self.target_position, COLOR_ID_MAP[4], width=5,
                                                   timeout=0.1)
         return Pose(self.target_position, destination_orientation)
-
     def _find_best_player_position(self):
         if self.auto_position:
             pad = 200
@@ -75,6 +82,7 @@ class PositionForPass(Tactic):
                 their_goal_field_limit = GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"] - pad
                 their_side_center_field_limit = pad
 
+
             role = GameState().get_role_by_player_id(self.player.id)
             if role is Role.FIRST_DEFENCE:  # role is 'top_defence':
                 A = Position(our_goal_field_limit, GameState().const["FIELD_Y_TOP"]-pad)
@@ -83,14 +91,17 @@ class PositionForPass(Tactic):
                 A = Position(our_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
                 B = Position(our_side_center_field_limit, (GameState().const["FIELD_Y_BOTTOM"] / 3)-pad)
             elif role is Role.FIRST_ATTACK:  # player.role is 'top_offence':
-                A = Position(their_goal_field_limit, GameState().const["FIELD_Y_TOP"]-pad)
+                A = Position(their_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
                 B = Position(their_side_center_field_limit, pad)
             elif role is Role.SECOND_ATTACK:  # player.role is 'bottom_offence':
-                A = Position(their_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
+                A = Position(their_goal_field_limit, GameState().const["FIELD_Y_TOP"]-pad)
                 B = Position(their_side_center_field_limit, -pad)
             elif role is Role.MIDDLE:  # player.role is 'center':
                 A = Position(our_goal_field_limit+1000, (GameState().const["FIELD_Y_BOTTOM"] / 3)+pad)
                 B = Position(our_side_center_field_limit, GameState().const["FIELD_Y_TOP"] / 3-pad)
+            elif role is Role.GOALKEEPER:  # player.role is 'center':
+                A = Position(their_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
+                B = Position(their_side_center_field_limit, pad)
             return best_position_in_region(self.player, A, B)
         else:
             return self.target_position

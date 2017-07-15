@@ -10,9 +10,11 @@ from ai.STA.Strategy.indiana_jones import IndianaJones
 from ai.STA.Strategy.HumanControl import HumanControl
 from ai.STA.Strategy.DoNothing import DoNothing
 from ai.STA.Strategy.passes_with_decisions import PassesWithDecisions
+from ai.STA.Strategy.pathfinder_benchmark import Pathfinder_Benchmark
 from ai.STA.Strategy.prepare_kickoff_offense import PrepareKickOffOffense
 from ai.STA.Strategy.robocup_choreography import RobocupChoreography
 from ai.STA.Strategy.bamba_follow import BambaFollow
+
 
 class StrategyBook(object):
     """
@@ -33,6 +35,7 @@ class StrategyBook(object):
                               'BambaFollow': BambaFollow,
                               'PassesWithDecisions': PassesWithDecisions,
                               'DefenseWall': DefenseWall,
+                              'Pathfinder_Benchmark': Pathfinder_Benchmark,
                               'PrepareKickOffOffense': PrepareKickOffOffense
                               }
 

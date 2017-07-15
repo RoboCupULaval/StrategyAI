@@ -4,6 +4,8 @@
 """
     Ce module garde en mémoire l'état du jeu
 """
+from typing import Union
+
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Game.Player import Player
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
@@ -37,7 +39,7 @@ class GameState(object, metaclass=Singleton):
     def get_player_by_role(self, role: Role) -> OurPlayer:
         return self._role_mapper.roles_translation[role]
 
-    def get_role_by_player_id(self, player_id: int) -> Role:
+    def get_role_by_player_id(self, player_id: int) -> Union[Role, None]:
         for r, p in self._role_mapper.roles_translation.items():
             if p.id == player_id:
                 return r
