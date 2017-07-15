@@ -98,7 +98,6 @@ class Game:
     def kalman_update_ball(self, vision_frame):
         self.ball.kalman_update(vision_frame["ball"], self.delta_t)
 
-
     def kalman_update_players(self, vision_frame):
         for i in range(PLAYER_PER_TEAM):
             self.blue_team.update_player(i, vision_frame["blues"][i], self.delta_t)

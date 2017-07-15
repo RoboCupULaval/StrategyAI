@@ -3,7 +3,7 @@ import unittest
 from config.config_service import ConfigService
 from RULEngine.Game.Player import Player
 from RULEngine.Game.Team import Team
-from RULEngine.Util.constant import PLAYER_PER_TEAM
+from RULEngine.Util.constant import PLAYER_PER_TEAM, MAX_PLAYER_ON_FIELD_PER_TEAM
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.team_color_service import TeamColor
@@ -22,7 +22,10 @@ class TestTeam(unittest.TestCase):
 
     def test_init(self):
         self.assertEqual(PLAYER_PER_TEAM, len(self.team.players))
+        self.assertEqual(0, len(self.team.available_players))
         self.assertEqual(0, self.team.score)
+        self.assertFalse(self.team.exiting_players)
+        self.assertFalse(self.team.entering_players)
         self.assertEqual(TeamColor.YELLOW, self.team.team_color)
 
     def test_has_player_exists(self):
@@ -37,6 +40,17 @@ class TestTeam(unittest.TestCase):
         self.team.update_player(0, [Pose(Position(500, 500))])
         self.assertNotEqual(init_pose, self.team.players[0].pose)
         self.assertEqual(self.team.players[0].pose, self.first_player.pose)
+
+    def test_update_availability_players(self):
+        for i in range(MAX_PLAYER_ON_FIELD_PER_TEAM):
+            self.team.update_player(i, [Pose(Position(500, 500))])
+            self.assertTrue(self.team.players[i] in self.team.available_players)
+        self.team.update_player(MAX_PLAYER_ON_FIELD_PER_TEAM+1, [Pose(Position(500, 500))])
+        self.assertFalse(self.team.players[MAX_PLAYER_ON_FIELD_PER_TEAM+1] in self.team.available_players)
+        self.assertTrue(len(self.team.available_players) == MAX_PLAYER_ON_FIELD_PER_TEAM)
+        self.team.update_player(0, [None])
+        self.assertTrue(self.team.players[0] not in self.team.available_players)
+
 
     def test_invalid_id(self):
         AN_INVALID_ID = PLAYER_PER_TEAM+1
