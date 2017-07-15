@@ -21,14 +21,14 @@ class Field:
     def move_ball(self, position, delta):
         self.ball.set_position(position, delta)
 
-    def is_inside_goal_area(self, position, our_goal=True):
+    def is_inside_goal_area(self, position, dist_from_goal_area=0, our_goal=True):
         assert (isinstance(position, Position))
         assert (isinstance(our_goal, bool))
         x1 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
         x2 = self.constant["FIELD_OUR_GOAL_X_INTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_INTERNAL"]
 
-        x_right = max(x1, x2)
-        x_left = min(x1, x2)
+        x_right = max(x1, x2) + dist_from_goal_area
+        x_left = min(x1, x2) - dist_from_goal_area
 
         top_circle = self.constant["FIELD_OUR_GOAL_TOP_CIRCLE"] if our_goal\
             else self.constant["FIELD_THEIR_GOAL_TOP_CIRCLE"]
@@ -37,16 +37,16 @@ class Field:
 
         if isInsideSquare(position, self.constant["FIELD_GOAL_Y_TOP"], self.constant["FIELD_GOAL_Y_BOTTOM"],
                           x_left, x_right):
-            if is_inside_circle(position, top_circle, self.constant["FIELD_GOAL_RADIUS"]):
+            if is_inside_circle(position, top_circle, self.constant["FIELD_GOAL_RADIUS"] + dist_from_goal_area):
                 return True
-            elif is_inside_circle(position, bot_circle, self.constant["FIELD_GOAL_RADIUS"]):
+            elif is_inside_circle(position, bot_circle, self.constant["FIELD_GOAL_RADIUS"] + dist_from_goal_area):
                 return True
             return True
         else:
             return False
 
-    def is_outside_goal_area(self, position, our_goal=True):
-        return not self.is_inside_goal_area(position, our_goal)
+    def is_outside_goal_area(self, position, dist_from_goal_area=0, our_goal=True):
+        return not self.is_inside_goal_area(position, dist_from_goal_area, our_goal)
 
     def stay_inside_goal_area(self, position, our_goal=True):
         # TODO Not tested: stayInsideGoalArea
@@ -77,16 +77,17 @@ class Field:
                 else:
                     return stayInsideCircle(position, circle_bot, self.constant["FIELD_GOAL_RADIUS"])
 
-    def stay_outside_goal_area(self, position, our_goal=True):
+    def stay_outside_goal_area(self, position, dist_from_goal_area=200, our_goal=True):
         # TODO Not tested: stayOutsideGoalArea
-        if self.is_outside_goal_area(position, our_goal):
+        if self.is_outside_goal_area(position, dist_from_goal_area, our_goal):
             return Position(position.x, position.y)
         else:
             x1 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
             x2 = self.constant["FIELD_OUR_GOAL_X_INTERNAL"] if our_goal else self.constant["FIELD_THEIR_GOAL_X_INTERNAL"]
+            x1 = 2*x1-x2
 
-            x_right = max(x1, x2)
-            x_left = min(x1, x2)
+            x_right = max(x1, x2) + dist_from_goal_area
+            x_left = min(x1, x2) - dist_from_goal_area
 
             y_top = self.constant["FIELD_GOAL_SEGMENT"] / 2
             y_bottom = (self.constant["FIELD_GOAL_SEGMENT"] / 2) * -1
@@ -97,8 +98,8 @@ class Field:
                 else self.constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"]
 
             position = stayOutsideSquare(position, y_top, y_bottom, x_left, x_right)
-            position = stayOutsideCircle(position, circle_top, self.constant["FIELD_GOAL_RADIUS"])
-            position = stayOutsideCircle(position, circle_bot, self.constant["FIELD_GOAL_RADIUS"])
+            position = stayOutsideCircle(position, circle_top, self.constant["FIELD_GOAL_RADIUS"] + dist_from_goal_area)
+            position = stayOutsideCircle(position, circle_bot, self.constant["FIELD_GOAL_RADIUS"] + dist_from_goal_area)
             return Position(position.x, position.y)
 
     def update_field_dimensions(self, packets):

@@ -103,14 +103,15 @@ def stayOutsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
         pos_x = position.x
         pos_y = position.y
 
-        if pos_y < Y_TOP:
+        # TODO Project position on segment instead of corner
+        if pos_y > Y_TOP - (Y_TOP - Y_BOTTOM) / 2:
             pos_y = Y_TOP
-        elif pos_y > Y_BOTTOM:
+        else:
             pos_y = Y_BOTTOM
 
-        if pos_x < X_RIGHT:
+        if pos_x > X_RIGHT - (X_RIGHT - X_LEFT) / 2:
             pos_x = X_RIGHT
-        elif pos_x > X_LEFT:
+        else:
             pos_x = X_LEFT
 
         return Position(pos_x, pos_y)
@@ -121,7 +122,7 @@ def stayOutsideCircle(position, center, radius):
     if isOutsideCircle(position, center, radius):
         return Position(position.x, position.y)
     else:
-        pos_angle = (center - position).angle()
+        pos_angle = (position-center).angle()
         pos_x = radius * m.cos(pos_angle) + center.x
         pos_y = radius * m.sin(pos_angle) + center.y
         return Position(pos_x, pos_y)
