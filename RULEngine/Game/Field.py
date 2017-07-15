@@ -102,6 +102,22 @@ class Field:
             position = stayOutsideCircle(position, circle_bot, self.constant["FIELD_GOAL_RADIUS"] + dist_from_goal_area)
             return Position(position.x, position.y)
 
+    def stay_inside_play_field(self, position):
+        return stayInsideSquare(position, Y_TOP=self.constant["FIELD_Y_TOP"],
+                                          Y_BOTTOM=self.constant["FIELD_Y_BOTTOM"],
+                                          X_LEFT=self.constant["FIELD_X_LEFT"],
+                                          X_RIGHT=self.constant["FIELD_X_RIGHT"])
+
+    def stay_inside_full_field(self, position):
+        return stayInsideSquare(position, Y_TOP=self.constant["FIELD_Y_TOP"] + self.constant["FIELD_BOUNDARY_WIDTH"],
+                                Y_BOTTOM=self.constant["FIELD_Y_BOTTOM"] - self.constant["FIELD_BOUNDARY_WIDTH"],
+                                X_LEFT=self.constant["FIELD_X_LEFT"] - self.constant["FIELD_BOUNDARY_WIDTH"],
+                                X_RIGHT=self.constant["FIELD_X_RIGHT"] + self.constant["FIELD_BOUNDARY_WIDTH"])
+
+    def respect_field_rules(self, position):
+        new_position = self.stay_outside_goal_area(position, our_goal=False)
+        return self.stay_inside_play_field(new_position)
+
     def update_field_dimensions(self, packets):
         if not packets:
             return False
@@ -133,6 +149,8 @@ class Field:
                 self.constant["FIELD_Y_NEGATIVE"] = -self._field_width / 2
                 self.constant["FIELD_X_NEGATIVE"] = -self._field_length / 2
                 self.constant["FIELD_X_POSITIVE"] = self._field_length / 2
+
+                self.constant["FIELD_BOUNDARY_WIDTH"] = self._boundary_width
 
                 self.constant["FIELD_GOAL_RADIUS"] = self._defense_radius
                 self.constant["FIELD_GOAL_SEGMENT"] = self._defense_stretch
@@ -190,6 +208,8 @@ positive_side_constant = {
     "FIELD_Y_NEGATIVE": -3000,
     "FIELD_X_NEGATIVE": -4500,
     "FIELD_X_POSITIVE": 4500,
+
+    "FIELD_BOUNDARY_WIDTH": 700,
     
     "FIELD_GOAL_RADIUS": 1000,
     "FIELD_GOAL_SEGMENT": 500,
