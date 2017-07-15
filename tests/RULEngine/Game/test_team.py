@@ -13,7 +13,7 @@ class TestTeam(unittest.TestCase):
 
     def setUp(self):
         # TODO: Because player require a KF, we need to load file config for a unitest... This is terrible.
-        self.cfg = ConfigService().load_file("config/sim_kalman_redirect.cfg")
+        ConfigService().load_file("config/sim_kalman_redirect.cfg")
         self.team = Team(TeamColor.YELLOW)
         self.team_blue = Team(TeamColor.BLUE)
         self.first_player = self.team.players[0]
@@ -44,12 +44,14 @@ class TestTeam(unittest.TestCase):
     def test_update_availability_players(self):
         for i in range(MAX_PLAYER_ON_FIELD_PER_TEAM):
             self.team.update_player(i, [Pose(Position(500, 500))])
-            self.assertTrue(self.team.players[i] in self.team.available_players)
+            self.assertTrue(self.team.players[i] in self.team.available_players.values())
         self.team.update_player(MAX_PLAYER_ON_FIELD_PER_TEAM+1, [Pose(Position(500, 500))])
-        self.assertFalse(self.team.players[MAX_PLAYER_ON_FIELD_PER_TEAM+1] in self.team.available_players)
+        self.assertFalse(self.team.players[MAX_PLAYER_ON_FIELD_PER_TEAM+1] in self.team.available_players.values())
         self.assertTrue(len(self.team.available_players) == MAX_PLAYER_ON_FIELD_PER_TEAM)
-        self.team.update_player(0, [None])
-        self.assertTrue(self.team.players[0] not in self.team.available_players)
+        # simulating 21 frames where we don't see the robot
+        for i in range(21):
+            self.team.update_player(0, [None])
+        self.assertTrue(self.team.players[0] not in self.team.available_players.values())
 
 
     def test_invalid_id(self):

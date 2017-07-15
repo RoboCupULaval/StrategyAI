@@ -62,10 +62,10 @@ class FriendKalmanFilter:
         obsy = []
         obsth = []
         # counter to skip the rest of the function if we don't have suffisent info
-        count = 0
+        observation_is_useful = False
         for obs in observation:
             if obs is not None:
-                count += 1
+                observation_is_useful = True
                 obsx.append(obs.position.x)
                 obsy.append(obs.position.y)
                 obsth.append(obs.orientation)
@@ -74,7 +74,7 @@ class FriendKalmanFilter:
                 obsy.append(None)
                 obsth.append(None)
         # skip if we received an observation contening only Nones
-        if count:
+        if observation_is_useful:
             self.empty_frames_counter = 0
             observation = np.array(obsx + obsy + obsth)
 
