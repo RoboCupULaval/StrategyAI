@@ -11,6 +11,7 @@ class FriendKalmanFilter:
         cfg = ConfigService()
         self.default_dt = float(cfg.config_dict["GAME"]["ai_timestamp"])
         ncameras = int(cfg.config_dict["IMAGE"]["number_of_camera"])
+        self.frames_to_extrapolate = int(cfg.config_dict["IMAGE"]["frames_to_extrapolate"])
 
         # Transition model
         self.F = np.array([[1, 0, self.default_dt, 0, 0, 0],  # Position x
@@ -115,6 +116,6 @@ class FriendKalmanFilter:
         self.predict(command)
         self.x[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
         output_state = self.x.tolist()
-        if self.empty_frames_counter > 20:
+        if self.empty_frames_counter > self.frames_to_extrapolate:
             output_state = [0, 0, 0, 0, 0, 0]
         return output_state
