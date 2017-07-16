@@ -16,6 +16,7 @@ from ai.STA.Action.Kick import Kick
 from ai.STA.Action.rotate_around import RotateAround
 from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommandType
 from ai.STA.Action.GoBehind import GoBehind
@@ -90,7 +91,7 @@ class GoKick(Tactic):
                             GO_BEHIND_SPACING,
                             pathfinder_on=True,
                             aiming=self.target,
-                            rotation_speed=6 * m.pi,
+                            rotation_speed=3 * m.pi,
                             speed_mode=True,
                             behind_target=distance_behind)
 
@@ -106,16 +107,17 @@ class GoKick(Tactic):
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
         distance_behind = self.player.pose.position
-        return RotateAround(self.game_state,
-                            self.player,
-                            Pose(ball_position, orientation),
-                            self.ball_spacing,
-                            aiming=self.target,
-                            rotation_speed=m.pi,
-                            pathfinder_on=True,
-                            speed_mode=True,
-                            behind_target=distance_behind,
-                            approach=True)
+        return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, self.player.pose.orientation))
+        # return RotateAround(self.game_state,
+        #                     self.player,
+        #                     Pose(ball_position, orientation),
+        #                     self.ball_spacing,
+        #                     aiming=self.target,
+        #                     rotation_speed=m.pi,
+        #                     pathfinder_on=True,
+        #                     speed_mode=True,
+        #                     behind_target=distance_behind,
+        #                     approach=True)
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING

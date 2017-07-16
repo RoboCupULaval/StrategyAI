@@ -76,6 +76,12 @@ class Path:
         return self.generate_path_from_points(self.points, self.speeds, 80)
 
 
+class CollisionBody:
+    def __init__(self, body_position, body_velocity, body_avoid_radius=150):
+        self.position = body_position
+        self.velocity = body_velocity
+        self.avoid_radius = body_avoid_radius
+
 class PathPartitionner(Pathfinder):
     def __init__(self, p_worldstate: WorldState):
         super().__init__(p_worldstate)
@@ -86,7 +92,7 @@ class PathPartitionner(Pathfinder):
         self.res = 100
         self.gap_proxy = 250
         self.max_recurs = 3
-        self.players_obstacles = []
+        self.collision_body = []
         self.pose_obstacle = None
         self.reshaper = PathReshaper(self.path)
         self.cruise_speed = 1
@@ -116,7 +122,8 @@ class PathPartitionner(Pathfinder):
         return path
 
     def get_path(self, player: OurPlayer, pose_target: Pose=Pose(), cruise_speed: [int, float]=1,
-                 old_path=None, old_raw_path=Path(Position(99999, 99999), Position(99999, -99999)), end_speed=0):
+                 old_path=None, old_raw_path=Path(Position(99999, 99999), Position(99999, -99999)),
+                 end_speed=0, ball_collision=True):
         self.cruise_speed = cruise_speed
         self.end_speed = end_speed
         self.player = player
@@ -128,13 +135,19 @@ class PathPartitionner(Pathfinder):
 
         for player in self.game_state.my_team.available_players.values():
             if player.id != self.player.id:
-                self.pose_obstacle[i, :] = player.pose.position.conv_2_np()
-                self.players_obstacles.append(player)
+                self.pose_obstacle[i, :] = player.pose.position
+                self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position,
+                                                         self.gap_proxy))
                 i += 1
         for player in self.game_state.other_team.available_players.values():
-            self.pose_obstacle[i, :] = player.pose.position.conv_2_np()
-            self.players_obstacles.append(player)
+            self.pose_obstacle[i, :] = player.pose.position
+            self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position, self.gap_proxy))
             i += 1
+        if ball_collision:
+            ball_position = self.game_state.get_ball_position()
+            self.pose_obstacle += [ball_position]
+            self.collision_body.append(CollisionBody(ball_position, self.game_state.get_ball_velocity(),
+                                                     100))
         # Debug code pls no remove
         # if old_path is not None:
 
@@ -150,9 +163,9 @@ class PathPartitionner(Pathfinder):
         #     print("meme goal?", (np.linalg.norm(pose_target.position - old_raw_path.goal) < 200))
         #     print("quel goal?", pose_target.position, old_raw_path.goal)
         if self.end_speed == 0:
-            hysteresis = 200
+            hysteresis = 50 * cruise_speed
         else:
-            hysteresis = 22
+            hysteresis = 5 * cruise_speed
         if (old_path is not None) and (not self.is_path_collide(old_raw_path,
                                                                 tolerance=self.gap_proxy-50)) and \
                 ((pose_target.position - old_raw_path.goal).norm() < hysteresis):
@@ -206,11 +219,11 @@ class PathPartitionner(Pathfinder):
         for player in self.game_state.my_team.available_players.values():
             if player.id != self.player.id:
                 self.pose_obstacle[i, :] = player.pose.position
-                self.players_obstacles.append(player)
+                self.collision_body.append(player)
                 i += 1
         for player in self.game_state.other_team.available_players.values():
             self.pose_obstacle[i, :] = player.pose.position
-            self.players_obstacles.append(player)
+            self.collision_body.append(player)
             i += 1
 
         self.path = Path(self.player.pose.position, pose_target.position)
@@ -292,11 +305,11 @@ class PathPartitionner(Pathfinder):
     def find_closest_obstacle(self, point, path):
         dist_point_obs = np.inf
         closest_obs = None
-        closest_player = self.players_obstacles[0].pose.position
+        closest_collision_body = self.collision_body[0].position
         if np.linalg.norm(path.start - path.goal) < 0.001:
-            return [closest_obs, dist_point_obs, closest_player]
+            return [closest_obs, dist_point_obs, closest_collision_body]
         if point == path.start:
-            return [closest_obs, dist_point_obs, closest_player]
+            return [closest_obs, dist_point_obs, closest_collision_body]
         pose_start = path.start
         direction = (point - pose_start) / np.linalg.norm(point - pose_start)
 
@@ -309,8 +322,8 @@ class PathPartitionner(Pathfinder):
                 if dist < dist_point_obs:
                     dist_point_obs = dist
                     closest_obs = obstacle_pos
-                    closest_player = self.players_obstacles[idx]
-        return [closest_obs, dist_point_obs, closest_player]
+                    closest_collision_body = self.collision_body[idx]
+        return [closest_obs, dist_point_obs, closest_collision_body]
 
     def verify_sub_target(self, sub_target):
         for pose_obs in self.pose_obstacle:
@@ -323,7 +336,7 @@ class PathPartitionner(Pathfinder):
 
         pose_robot = path.start
         pose_target = path.goal
-        pose_obstacle_closest, dist_point_obs, closest_player = self.find_closest_obstacle(pose_target, path)
+        pose_obstacle_closest, dist_point_obs, closest_collision_body = self.find_closest_obstacle(pose_target, path)
         if pose_obstacle_closest is None:
             sub_target = pose_target
             return sub_target, avoid_dir
@@ -337,7 +350,7 @@ class PathPartitionner(Pathfinder):
             vec_perp = np.cross(np.append(direction, [0]), np.array([0, 0, 1]))
             vec_perp = vec_perp[0:2] / np.linalg.norm(vec_perp)
             cruise_speed = self.player.velocity.position.conv_2_np()
-            self.closest_obs_speed = closest_player.velocity.position
+            self.closest_obs_speed = closest_collision_body.velocity
             avoid_dir = -vec_perp
 
             if avoid_dir is None:
