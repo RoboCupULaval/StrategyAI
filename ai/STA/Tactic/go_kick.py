@@ -26,7 +26,7 @@ __author__ = 'RoboCupULaval'
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
 
-GO_BEHIND_SPACING = 250
+GO_BEHIND_SPACING = 200
 GRAB_BALL_SPACING = 120
 APPROACH_SPEED = 100
 KICK_DISTANCE = 105
@@ -90,7 +90,7 @@ class GoKick(Tactic):
                             GO_BEHIND_SPACING,
                             pathfinder_on=True,
                             aiming=self.target,
-                            rotation_speed=m.pi,
+                            rotation_speed=6 * m.pi,
                             speed_mode=True,
                             behind_target=distance_behind)
 

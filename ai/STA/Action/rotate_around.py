@@ -66,7 +66,7 @@ class RotateAround(Action):
         target_to_player = player - target
         if not(self.behind_target is None):
             if (self.behind_target - self.player.pose.position).norm() < 300:
-                print((self.behind_target - self.player.pose.position).norm())
+                # print((self.behind_target - self.player.pose.position).norm())
                 self.tangential_speed *= (self.behind_target - self.player.pose.position).norm() / 300
 
         if self.aiming is not None:

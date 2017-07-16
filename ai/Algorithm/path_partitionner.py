@@ -84,7 +84,7 @@ class PathPartitionner(Pathfinder):
         self.path = Path(Position(0, 0), Position(0, 0))
         self.raw_path = Path(Position(0, 0), Position(0, 0))
         self.res = 100
-        self.gap_proxy = 180
+        self.gap_proxy = 250
         self.max_recurs = 3
         self.players_obstacles = []
         self.pose_obstacle = None

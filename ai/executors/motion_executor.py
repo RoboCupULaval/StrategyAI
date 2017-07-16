@@ -64,7 +64,7 @@ class RobotMotion(object):
         self.id = robot_id
 
         self.dt = None
-
+        self.is_sim = is_sim
         self.setting = get_control_setting(is_sim)
         self.setting.translation.max_acc = None
         self.setting.translation.max_speed = None
@@ -120,14 +120,19 @@ class RobotMotion(object):
         # else:
         #     self.reset()
         translation_cmd = self.get_next_velocity()
-        if self.cruise_speed > 1:
-            threshold = MIN_DISTANCE_TO_REACH_TARGET_SPEED * self.cruise_speed
+        if self.is_sim:
+            if self.cruise_speed > 1:
+                threshold = MIN_DISTANCE_TO_REACH_TARGET_SPEED * self.cruise_speed
+            else:
+                threshold = MIN_DISTANCE_TO_REACH_TARGET_SPEED
         else:
-            threshold = MIN_DISTANCE_TO_REACH_TARGET_SPEED
+            if self.cruise_speed > 1:
+                threshold = MIN_DISTANCE_TO_REACH_TARGET_SPEED * self.cruise_speed * 10
+            else:
+                threshold = MIN_DISTANCE_TO_REACH_TARGET_SPEED * 10
         if self.position_error.norm() < threshold:
             self.speed_flag = True
         if self.speed_flag and self.target_speed == 0:
-            self.reset()
             translation_cmd = Position(self.x_controller.update(self.pose_error.position.x, dt=self.dt),
                                        self.y_controller.update(self.pose_error.position.y, dt=self.dt))
         translation_cmd = self.apply_translation_constraints(translation_cmd)
@@ -167,7 +172,7 @@ class RobotMotion(object):
         return next_velocity
 
     def apply_rotation_constraints(self, r_cmd: float) -> float:
-        if self.current_speed < 0.1:
+        if self.current_speed < 0:
             deadzone = self.setting.rotation.deadzone
         else:
             deadzone = 0
@@ -255,7 +260,7 @@ class RobotMotion(object):
 
         self.cruise_speed = cmd.cruise_speed
 
-        self.ws.debug_interface.add_vector(1000*self.position_error, 1000*self.current_pose.position, timeout=0.05)
+        #self.ws.debug_interface.add_vector(1000*self.position_error, 1000*self.current_pose.position, timeout=0.05)
 
     def stop(self):
         self.reset()
@@ -275,8 +280,8 @@ def get_control_setting(is_sim: bool):
         translation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
         rotation = {"kp": 2, "ki": 0, "kd": 1, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
-        translation = {"kp": 1, "ki": 0.0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
-        rotation = {"kp": 1, "ki": 0.01, "kd": 0.5, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0}
+        translation = {"kp": 1, "ki": 0.0, "kd": 5, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0}
+        rotation = {"kp": 1, "ki": 0.05, "kd": 0, "antiwindup": 20, "deadzone": 0.2, "sensibility": 0}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
