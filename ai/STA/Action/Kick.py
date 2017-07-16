@@ -36,7 +36,7 @@ class Kick(Action):
         # else:
         #     player_to_target = SpeedPose()
 
-        cmd_params = {"pose_goal": Pose(player_to_target, self.player.pose.orientation),
+        cmd_params = {"pose_goal": Pose(self.player.pose.position, self.player.pose.orientation),
                       "kick": True,
                       "pathfinder_on": True,
                       "kick_strength": self.force,
