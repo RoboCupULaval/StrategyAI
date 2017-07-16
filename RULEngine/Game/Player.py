@@ -8,7 +8,6 @@ from RULEngine.Util.Position import Position
 class Player:
 
     def __init__(self, team, id):
-        self.cmd = None
         self.id = id
         self.team = team
         self.pose = Pose()
@@ -30,7 +29,7 @@ class Player:
         self.velocity = Pose(Position(ret[2], ret[3]), ret[5])
 
     def check_if_on_field(self):
-        return self.pose == Pose()
+        return not self.pose == Pose()
 
     def __str__(self):
         return str(self.team.team_color.name)+" "+str(self.id)+"   "

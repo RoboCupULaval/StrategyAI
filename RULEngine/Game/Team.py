@@ -41,7 +41,7 @@ class Team:
     def _update_availability_player(self, player: Player):
         player_is_playing = self.available_players.get(player.id, None)
 
-        if player.check_if_on_field():
+        if not player.check_if_on_field():
             if player_is_playing:
                 self.exiting_players[player.id] = player
         else:

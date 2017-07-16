@@ -13,6 +13,7 @@ class OurPlayer(Player):
 
     def __init__(self, team, id: int):
         super().__init__(team=team, id=id)
+        self.cmd = None
         self.kf = FriendKalmanFilter()
         self.ai_command = None
         self.pid = None  # for the moment
