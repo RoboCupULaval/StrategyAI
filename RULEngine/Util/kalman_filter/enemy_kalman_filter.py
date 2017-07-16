@@ -40,7 +40,6 @@ class EnemyKalmanFilter:
 
         self.empty_frames_counter = 0
 
-
     def predict(self):
         self.x = np.dot(self.F, self.x)
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
