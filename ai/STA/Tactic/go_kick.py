@@ -28,10 +28,10 @@ VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
 
 GO_BEHIND_SPACING = 200
-GRAB_BALL_SPACING = 120
+GRAB_BALL_SPACING = 200
 APPROACH_SPEED = 100
-KICK_DISTANCE = 105
-KICK_SUCCEED_THRESHOLD = 200
+KICK_DISTANCE = 90
+KICK_SUCCEED_THRESHOLD = 300
 
 
 class GoKick(Tactic):
@@ -64,6 +64,7 @@ class GoKick(Tactic):
             self._find_best_passing_option()
         self.kick_force = kick_force
         self.ball_spacing = GRAB_BALL_SPACING
+        self.tries_flag = 0
 
     def kick_charge(self):
         self.next_state = self.go_behind_ball
@@ -82,32 +83,44 @@ class GoKick(Tactic):
             if self.auto_update_target:
                 self._find_best_passing_option()
 
+
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
         distance_behind = self.get_destination_behind_ball()
-        return RotateAround(self.game_state,
-                            self.player,
-                            Pose(ball_position, orientation),
-                            GO_BEHIND_SPACING,
-                            pathfinder_on=True,
-                            aiming=self.target,
-                            rotation_speed=3 * m.pi,
-                            speed_mode=True,
-                            behind_target=distance_behind)
+        distance_to_goal = (distance_behind - self.player.pose.position).norm()
+        if distance_to_goal > 150:
+            go_behind_ball_speed = 1
+        else:
+            go_behind_ball_speed = distance_to_goal / 150
+        if self.tries_flag == 0:
+            return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
+                                          collision_ball=True, cruise_speed=go_behind_ball_speed)
+        else:
+            return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
+                                          collision_ball=False, cruise_speed=go_behind_ball_speed)
+        # return RotateAround(self.game_state,
+        #                     self.player,
+        #                     Pose(ball_position, orientation),
+        #                     GO_BEHIND_SPACING,
+        #                     pathfinder_on=True,
+        #                     aiming=self.target,
+        #                     rotation_speed=3 * m.pi,
+        #                     speed_mode=True,
+        #                     behind_target=distance_behind)
 
     def grab_ball(self):
         if self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
         elif self._is_player_towards_ball_and_target():
-            self.ball_spacing -= APPROACH_SPEED * self.game_state.get_delta_t()
             self.next_state = self.grab_ball
         else:
+            self.tries_flag = self.tries_flag + 1
             self.next_state = self.go_behind_ball
 
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
         distance_behind = self.player.pose.position
-        return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, self.player.pose.orientation))
+        return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation), cruise_speed=APPROACH_SPEED/1000)
         # return RotateAround(self.game_state,
         #                     self.player,
         #                     Pose(ball_position, orientation),
