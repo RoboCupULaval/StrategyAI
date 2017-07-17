@@ -30,7 +30,7 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
         }
 
     @abstractmethod
-    def update(self):
+    def update(self, available_players_changed: bool):
         """ Effectue la mise à jour du module """
         pass
 
@@ -73,14 +73,14 @@ class SimpleAutoPlay(AutoPlay):
         super().__init__(worldstate)
         self.last_ref_command = RefereeCommand.HALT
         
-    def update(self):
+    def update(self, available_players_changed: bool):
         self.next_state = self._select_next_state()
 
         if self.next_state is None:
             self.next_state = SimpleAutoPlayState.HALT
             self.selected_strategy = self._get_new_strategy(self.next_state)
 
-        elif self.next_state != self.current_state:
+        elif self.next_state != self.current_state or available_players_changed:
             self.selected_strategy = self._get_new_strategy(self.next_state)
 
         self.current_state = self.next_state

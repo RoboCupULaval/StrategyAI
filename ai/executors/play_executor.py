@@ -22,6 +22,7 @@ class PlayExecutor(Executor):
         self.auto_play = SimpleAutoPlay(self.ws)
         self.ws.play_state.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
         self.last_time = 0
+        self.last_available_players = {}
 
     def exec(self) -> None:
         """
@@ -29,9 +30,8 @@ class PlayExecutor(Executor):
 
         :return: None
         """
-
         if self.ws.play_state.autonomous_flag:
-            self.auto_play.update()
+            self.auto_play.update(self._has_available_players_changed())
 
         self._execute_strategy()
 
@@ -95,3 +95,18 @@ class PlayExecutor(Executor):
                        get_tactics_name_list(),
                        'action': ['None']}
         self.ws.debug_interface.send_books(cmd_tactics)
+
+    def _has_available_players_changed(self) -> bool:
+        available_players = self.ws.game_state.my_team.available_players
+        player_change = False
+        for i in available_players:
+            if i not in self.last_available_players:
+                player_change = True
+                break
+        if not player_change:
+            for i in self.last_available_players:
+                if i not in available_players:
+                    player_change = True
+                    break
+        self.last_available_players = available_players.copy()
+        return player_change
