@@ -1,5 +1,4 @@
 # Under MIT License, see LICENSE.txt
-import time
 
 from RULEngine.Game.Player import Player
 from RULEngine.Util.constant import PLAYER_PER_TEAM
@@ -18,9 +17,8 @@ class Team:
 
         self.players = {}
         self.available_players = {}
-        self.players_time_tracker = {}
         self.entering_players = {}
-        self.exiting_players = []
+        self.exiting_players = {}
         for player_id in range(PLAYER_PER_TEAM):
             self.players[player_id] = Player(self, player_id)
 
@@ -40,35 +38,42 @@ class Team:
     def is_team_yellow(self):
         return self.team_color == TeamColor.YELLOW
 
-    def update_available_players(self):
-        for player_id, time_last_seen in self.players_time_tracker.items():
-            if time.time() - time_last_seen > MIN_TIME_BEFORE_MOVING_OUT:
-                print("<________________________----")
-                self.exiting_players = self.available_players[player_id]
-        if self.entering_players and self.exiting_players:
-            new_player = self.entering_players.popitem()
-            exiting_player = self.exiting_players.pop()
-            self.available_players[exiting_player.id] = new_player
+    def _update_availability_player(self, player: Player):
+        player_is_playing = self.available_players.get(player.id, None)
 
+        if not player.check_if_on_field():
+            if player_is_playing:
+                self.exiting_players[player.id] = player
+        else:
+            if player_is_playing is None:
+                self.entering_players[player.id] = player
+
+        if len(self.available_players) > 6 and self.exiting_players:
+            out_player = self.exiting_players.popitem()[1]
+            del(self.available_players[out_player.id])
+        elif len(self.available_players) < 6 and self.entering_players:
+            in_player = self.entering_players.popitem()[1]
+            self.available_players[in_player.id] = in_player
+        else:
+            if self.entering_players and self.exiting_players:
+                in_player = self.entering_players.popitem()[1]
+                out_player = self.exiting_players.popitem()[1]
+                del(self.available_players[out_player.id])
+                self.available_players[in_player.id] = in_player
+            elif self.exiting_players:
+                out_player = self.exiting_players.popitem()[1]
+                del(self.available_players[out_player.id])
 
     def _update_player(self, player_id, pose, delta=0):
         try:
             self.players[player_id].update(pose, delta)
-            self.players_time_tracker[player_id] = time.time()
-            self.entering_players[player_id] = self.players[player_id]
+            self._update_availability_player(self.players[player_id])
         except KeyError as err:
             raise err
 
     def _kalman_update(self, player_id, pose_list, delta=0):
         try:
             self.players[player_id].update(pose_list, delta)
-            self.players_time_tracker[player_id] = time.time()
-            self.available_players[player_id] = self.players[player_id]
-        except KeyError as err:
-            raise err
-
-    def _update_player_command(self, player_id, cmd):
-        try:
-            self.players[player_id].set_command(cmd)
+            self._update_availability_player(self.players[player_id])
         except KeyError as err:
             raise err
