@@ -1,6 +1,7 @@
 import numpy as np
 import warnings
 
+from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.states.game_state import GameState
 from config.config_service import ConfigService
@@ -88,8 +89,11 @@ class BallKalmanFilter:
                 closest_player = players_their_team[0].player
                 closest_player_distance_to_ball = players_their_team[0].player_distance
             if closest_player_distance_to_ball < 150:
-                self.x[2] = closest_player.velocity.position[0]
-                self.x[3] = closest_player.velocity.position[1]
+                #self.x[2] = closest_player.velocity.position[0]
+                #self.x[3] = closest_player.velocity.position[1]
+                player_to_ball = (last_ball_pose - closest_player.position).normalized() * (BALL_RADIUS + ROBOT_RADIUS)
+                self.x[0] = closest_player.position[0] + player_to_ball.x
+                self.x[1] = closest_player.position[1] + player_to_ball.y
 
         self.predict()
         output_state = self.x

@@ -18,7 +18,7 @@ from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ai_command import AICommandType
+from ai.Util.ai_command import AICommandType, AICommand
 from ai.STA.Action.GoBehind import GoBehind
 from ai.states.game_state import GameState
 
@@ -30,8 +30,9 @@ TARGET_ASSIGNATION_DELAY = 1
 GO_BEHIND_SPACING = 200
 GRAB_BALL_SPACING = 200
 APPROACH_SPEED = 100
-KICK_DISTANCE = 90
+KICK_DISTANCE = 120
 KICK_SUCCEED_THRESHOLD = 300
+COMMAND_DELAY = 0.5
 
 
 class GoKick(Tactic):
@@ -56,6 +57,7 @@ class GoKick(Tactic):
         Tactic.__init__(self, game_state, player, target, args)
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge
+        self.cmd_last_time = time.time()
         self.kick_last_time = time.time()
         self.auto_update_target = auto_update_target
         self.target_assignation_last_time = 0
@@ -67,7 +69,11 @@ class GoKick(Tactic):
         self.tries_flag = 0
 
     def kick_charge(self):
-        self.next_state = self.go_behind_ball
+        print('charge')
+
+        if time.time() - self.cmd_last_time > COMMAND_DELAY:
+            self.next_state = self.go_behind_ball
+            self.cmd_last_time = time.time()
         return AllStar(self.game_state,
                        self.player,
                        charge_kick=True)
@@ -118,8 +124,12 @@ class GoKick(Tactic):
             self.next_state = self.go_behind_ball
 
         ball_position = self.game_state.get_ball_position()
-        orientation = (self.target.position - ball_position).angle()
+        orientation = (ball_position - self.player.pose.position).angle()
         distance_behind = self.player.pose.position
+        """
+                Exécute le déplacement
+                """
+        # return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": Pose(ball_position, orientation)})
         return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation), cruise_speed=APPROACH_SPEED/1000)
         # return RotateAround(self.game_state,
         #                     self.player,
@@ -137,7 +147,7 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.grab_ball
         else:
-            self.next_state = self.validate_kick
+            self.next_state = self.kick
         return Kick(self.game_state, self.player, self.kick_force, self.target)
 
     def validate_kick(self):
