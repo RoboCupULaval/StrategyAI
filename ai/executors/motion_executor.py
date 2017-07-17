@@ -281,7 +281,7 @@ def get_control_setting(is_sim: bool):
         rotation = {"kp": 2, "ki": 0, "kd": 1, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
         translation = {"kp": 1, "ki": 0.0, "kd": 5, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0}
-        rotation = {"kp": 1, "ki": 0.05, "kd": 0, "antiwindup": 20, "deadzone": 0.2, "sensibility": 0}
+        rotation = {"kp": 0.5, "ki": 0.05, "kd": 1, "antiwindup": 20, "deadzone": 0.3, "sensibility": 0.1}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)

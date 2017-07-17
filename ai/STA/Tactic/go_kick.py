@@ -162,12 +162,14 @@ class GoKick(Tactic):
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
-        self.next_state = self.validate_kick
+        self.next_state = self.kick
         if not self._is_player_towards_ball_and_target():
             self.next_state = self.go_behind_ball
             self.status_flag = Flags.INIT
             self.grab_ball_tries = 0
             self.tries_flag = 0
+        self.tries_flag += 1
+        print(self.tries_flag % 10)
 
         return Kick(self.game_state, self.player, self.kick_force, self.target)
 
@@ -192,7 +194,7 @@ class GoKick(Tactic):
     def _get_distance_from_ball(self):
         return (self.player.pose.position - self.game_state.get_ball_position()).norm()
 
-    def _is_player_towards_ball_and_target(self, abs_tol=m.pi/20):
+    def _is_player_towards_ball_and_target(self, abs_tol=m.pi/30):
         ball_position = self.game_state.get_ball_position()
         target_to_ball = ball_position - self.target.position
         ball_to_player = self.player.pose.position - ball_position

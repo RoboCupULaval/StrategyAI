@@ -32,11 +32,11 @@ class Kick(Action):
         player = self.player.pose.position
         player_to_target = target - player
         #if player_to_target.norm() > 0:
-        player_to_target = self.target.position - 20 * player_to_target.normalized()
+        player_to_target = self.target.position + 20 * player_to_target.normalized()
         # else:
         #     player_to_target = SpeedPose()
 
-        cmd_params = {"pose_goal": Pose(self.player.pose.position, self.player.pose.orientation),
+        cmd_params = {"pose_goal": Pose(player_to_target, self.player.pose.orientation),
                       "kick": True,
                       "pathfinder_on": True,
                       "kick_strength": self.force,
