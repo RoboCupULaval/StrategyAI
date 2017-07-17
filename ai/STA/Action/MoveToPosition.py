@@ -8,7 +8,7 @@ from ai.states.game_state import GameState
 
 class MoveToPosition(Action):
 
-    def __init__(self, game_state: GameState, player: OurPlayer, destination: Pose, pathfinder_on=True, cruise_speed: [int, float]=1,  collision_ball=False):
+    def __init__(self, game_state: GameState, player: OurPlayer, destination: Pose, pathfinder_on=True, cruise_speed: [int, float]=1,  collision_ball=False, charge_kick=False):
         """
             :param game_state: Current state of the game.
             :param player: Instance of the player
@@ -23,12 +23,21 @@ class MoveToPosition(Action):
         self.pathfinder_on = pathfinder_on
         self.cruise_speed = cruise_speed
         self.collision_ball = collision_ball
+        self.charge_kick = charge_kick
 
     def exec(self):
-
-        return AICommand(self.player,
-                         AICommandType.MOVE,
-                         pose_goal=self.destination,
-                         pathfinder_on=self.pathfinder_on,
-                         cruise_speed=self.cruise_speed,
-                         collision_ball=self.collision_ball)
+        if self.charge_kick:
+            return AICommand(self.player,
+                             AICommandType.MOVE,
+                             pose_goal=self.destination,
+                             pathfinder_on=self.pathfinder_on,
+                             cruise_speed=self.cruise_speed,
+                             collision_ball=self.collision_ball,
+                             charge_kick=self.charge_kick)
+        else:
+            return AICommand(self.player,
+                             AICommandType.MOVE,
+                             pose_goal=self.destination,
+                             pathfinder_on=self.pathfinder_on,
+                             cruise_speed=self.cruise_speed,
+                             collision_ball=self.collision_ball)

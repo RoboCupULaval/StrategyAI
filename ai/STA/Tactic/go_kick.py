@@ -18,7 +18,7 @@ from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ai_command import AICommandType
+from ai.Util.ai_command import AICommandType, AICommand
 from ai.STA.Action.GoBehind import GoBehind
 from ai.states.game_state import GameState
 
@@ -30,8 +30,9 @@ TARGET_ASSIGNATION_DELAY = 1
 GO_BEHIND_SPACING = 200
 GRAB_BALL_SPACING = 220
 APPROACH_SPEED = 100
-KICK_DISTANCE = 90
+KICK_DISTANCE = 110
 KICK_SUCCEED_THRESHOLD = 300
+COMMAND_DELAY = 0.5
 
 
 class GoKick(Tactic):
@@ -56,6 +57,7 @@ class GoKick(Tactic):
         Tactic.__init__(self, game_state, player, target, args)
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge
+        self.cmd_last_time = time.time()
         self.kick_last_time = time.time()
         self.auto_update_target = auto_update_target
         self.target_assignation_last_time = 0
@@ -68,7 +70,11 @@ class GoKick(Tactic):
         self.grab_ball_tries = 0
 
     def kick_charge(self):
-        self.next_state = self.go_behind_ball
+        print('charge')
+
+        if time.time() - self.cmd_last_time > COMMAND_DELAY:
+            self.next_state = self.go_behind_ball
+            self.cmd_last_time = time.time()
         return AllStar(self.game_state,
                        self.player,
                        charge_kick=True)
@@ -116,11 +122,8 @@ class GoKick(Tactic):
         elif not self._is_player_towards_ball_and_target():
             self.next_state = self.go_behind_ball
             self.grab_ball_tries = 0
-            print("reset")
+            self.status_flag = Flags.INIT
         else:
-            print(self._get_distance_from_ball())
-            print(KICK_DISTANCE + self.grab_ball_tries * 10)
-            print(self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10))
             if (self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10)):
                 self.next_state = self.kick
 
@@ -133,13 +136,19 @@ class GoKick(Tactic):
 
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
+        # orientation = (ball_position - self.player.pose.position).angle()
         distance_behind = self.get_destination_behind_ball()
         distance_to_goal = (distance_behind - self.player.pose.position).norm()
         if distance_to_goal > 150:
             go_behind_ball_speed = 1
         else:
             go_behind_ball_speed = distance_to_goal / 150
-        return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation), cruise_speed=go_behind_ball_speed/1000)
+        return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation),
+                                     cruise_speed=go_behind_ball_speed, charge_kick=True)
+        # return AllStar(self.game_state,
+        #                self.player,
+        #                charge_kick=True,
+        #                pose_goal=Pose(ball_position, orientation))
         # return RotateAround(self.game_state,
         #                     self.player,
         #                     Pose(ball_position, orientation),
@@ -156,19 +165,20 @@ class GoKick(Tactic):
         self.next_state = self.validate_kick
         if not self._is_player_towards_ball_and_target():
             self.next_state = self.go_behind_ball
+            self.status_flag = Flags.INIT
             self.grab_ball_tries = 0
             self.tries_flag = 0
-            print("reset")
 
         return Kick(self.game_state, self.player, self.kick_force, self.target)
 
     def validate_kick(self):
         if self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.halt
-        # elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
-        #     self.next_state = self.grab_ball
+        elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
+            self.status_flag = Flags.INIT
+            self.next_state = self.go_behind_ball
         elif self.kick_last_time:
-            self.next_state = self.kick
+            self.next_state = self.grab_ball()
 
         return Idle(self.game_state, self.player)
 
