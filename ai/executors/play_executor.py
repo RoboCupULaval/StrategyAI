@@ -4,6 +4,7 @@ import time
 from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Game.Referee import RefereeCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
+from ai.Util.role import Role
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 from config.config_service import ConfigService
@@ -23,6 +24,7 @@ class PlayExecutor(Executor):
         self.ws.play_state.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
         self.last_time = 0
         self.last_available_players = {}
+        self.goalie_id = -1
 
     def exec(self) -> None:
         """
@@ -31,6 +33,9 @@ class PlayExecutor(Executor):
         :return: None
         """
         if self.ws.play_state.autonomous_flag:
+            if self.ws.game_state.game.referee.team_info['ours']['goalie'] != self.goalie_id:
+                self.goalie_id = self.ws.game_state.game.referee.team_info['ours']['goalie']
+                self.ws.game_state.update_id_for_locked_role(self.goalie_id, Role.GOALKEEPER)
             self.auto_play.update(self._has_available_players_changed())
 
         self._execute_strategy()
