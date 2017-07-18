@@ -128,6 +128,8 @@ class Field:
                 self.constant["FIELD_X_LEFT"] = -self._field_length / 2
                 self.constant["FIELD_X_RIGHT"] = self._field_length / 2
 
+                self.constant["CENTER_CENTER_RADIUS"] = self._center_circle_radius
+
                 self.constant["FIELD_Y_POSITIVE"] = self._field_width / 2
                 self.constant["FIELD_Y_NEGATIVE"] = -self._field_width / 2
                 self.constant["FIELD_X_NEGATIVE"] = -self._field_length / 2
@@ -184,6 +186,8 @@ positive_side_constant = {
     "FIELD_Y_BOTTOM": -3000,
     "FIELD_X_LEFT": -4500,
     "FIELD_X_RIGHT": 4500,
+
+    "CENTER_CENTER_RADIUS": 1000,
     
     "FIELD_Y_POSITIVE": 3000,
     "FIELD_Y_NEGATIVE": -3000,
@@ -259,7 +263,9 @@ negative_side_constant = {
     "FIELD_Y_TOP": 3000,
     "FIELD_Y_BOTTOM": -3000,
     "FIELD_X_LEFT": -4500,
-    "FIELD_X_RIGHT": 4500,   
+    "FIELD_X_RIGHT": 4500,
+
+    "CENTER_CENTER_RADIUS": 1000,
     
     "FIELD_Y_POSITIVE": 3000,
     "FIELD_Y_NEGATIVE": -3000,
