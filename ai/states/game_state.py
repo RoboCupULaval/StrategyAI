@@ -62,6 +62,9 @@ class GameState(object, metaclass=Singleton):
     def get_role_mapping(self):
         return self._role_mapper.roles_translation
 
+    def update_id_for_locked_role(self, id, role):
+        return self._role_mapper.update_id_for_locked_role(id, role)
+
     def get_our_team_color(self) -> TeamColor:
         """
         Retourne la couleur de notre équipe TeamColor Enum
