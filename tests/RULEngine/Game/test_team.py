@@ -46,13 +46,12 @@ class TestTeam(unittest.TestCase):
             self.team.update_player(i, [Pose(Position(500, 500))])
             self.assertTrue(self.team.players[i] in self.team.available_players.values())
         self.team.update_player(MAX_PLAYER_ON_FIELD_PER_TEAM+1, [Pose(Position(500, 500))])
-        self.assertFalse(self.team.players[MAX_PLAYER_ON_FIELD_PER_TEAM+1] in self.team.available_players.values())
-        self.assertTrue(len(self.team.available_players) == MAX_PLAYER_ON_FIELD_PER_TEAM)
+        self.assertTrue(self.team.players[MAX_PLAYER_ON_FIELD_PER_TEAM+1] in self.team.available_players.values())
+        self.assertTrue(len(self.team.available_players) == MAX_PLAYER_ON_FIELD_PER_TEAM+1)
         # simulating 21 frames where we don't see the robot
         for i in range(21):
             self.team.update_player(0, [None])
         self.assertTrue(self.team.players[0] not in self.team.available_players.values())
-
 
     def test_invalid_id(self):
         AN_INVALID_ID = PLAYER_PER_TEAM+1
