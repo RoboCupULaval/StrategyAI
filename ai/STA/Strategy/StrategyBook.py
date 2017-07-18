@@ -28,7 +28,7 @@ class StrategyBook(object):
     def __init__(self):
         """
         Initialise le dictionnaire des stratégies présentées au reste de l'IA.
-        """git
+        """
         self.strategy_book = {'Offense': Offense,
                               'HumanControl': HumanControl,
                               'DoNothing': DoNothing,
