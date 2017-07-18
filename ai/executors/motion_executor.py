@@ -68,10 +68,13 @@ class RobotMotion(object):
         self.setting = get_control_setting(is_sim)
         self.setting.translation.max_acc = None
         self.setting.translation.max_speed = None
+        self.setting.translation.max_angular_acc = None
         self.setting.rotation.max_speed = None
 
         self.current_pose = Pose()
+        self.current_orientation = 0
         self.current_velocity = Pose()
+        self.current_angular_speed = 0
         self.current_speed = Position()
         self.current_acceleration = Position()
 
@@ -81,11 +84,16 @@ class RobotMotion(object):
         self.target_pose = Pose()
         self.target_speed = 0
         self.target_direction = Position()
+        self.target_angular_speed = 0
+        self.target_angle = 0
+        self.angle_error = 0
 
         self.last_translation_cmd = Position()
         self.cruise_speed = 0
+        self.cruise_angular_speed = 0
 
         self.next_speed = 0
+        self.next_angular_speed = 0
 
         self.x_controller = PID(self.setting.translation.kp,
                                 self.setting.translation.ki,
@@ -171,6 +179,27 @@ class RobotMotion(object):
 
         return next_velocity
 
+    def get_next_anuglar_velocity(self) -> float:
+        """Return the next velocity according to a constant acceleration model of a point mass.
+           It try to produce a trapezoidal velocity path with the required cruising and target speed.
+           The target speed is the speed that the robot need to reach at the target point."""
+
+        if self.target_angle_reached():  # We need to go to target speed
+            if self.next_angular_speed < self.target_angular_speed:  # Target speed is faster than current speed
+                self.next_angular_speed += self.setting.translation.max_acc * self.dt
+                if self.next_angular_speed > self.target_angular_speed:  # Next_speed is too fast
+                    self.next_angular_speed = self.target_angular_speed
+            else:  # Target speed is slower than current speed
+                self.next_angular_speed -= self.setting.translation.max_acc * self.dt
+        else:  # We need to go to the cruising speed
+            if self.next_angular_speed < self.cruise_angular_speed:  # Going faster
+                self.next_angular_speed += self.setting.translation.max_acc * self.dt
+
+        self.next_speed = np.clip(self.next_angular_speed, 0, self.cruise_angular_speed)  # We don't want to go faster than cruise speed
+        next_velocity = self.next_angular_speed
+
+        return next_velocity
+
     def apply_rotation_constraints(self, r_cmd: float) -> float:
         if self.current_speed < 0:
             deadzone = self.setting.rotation.deadzone
@@ -222,6 +251,25 @@ class RobotMotion(object):
             new_speed = Position(0, 0)
         return new_speed
 
+    def limit_angular_acceleration(self, orientation_cmd: int):
+        delta_speed = orientation_cmd - self.last_translation_cmd
+        if delta_speed.norm() > 0:
+            self.current_acceleration = float(np.sqrt(np.sum(np.square(delta_speed))) / self.dt)
+            self.current_acceleration = clamp(self.current_acceleration, 0, self.setting.translation.max_acc)
+            orientation_cmd = self.last_translation_cmd + delta_speed.normalized() * self.current_acceleration * self.dt
+
+        self.last_translation_cmd = orientation_cmd
+        return orientation_cmd
+
+    def limit_angular_speed(self, translation_cmd: Position) -> Position:
+        if translation_cmd.norm() > 0:
+            translation_speed = float(np.sqrt(np.sum(np.square(translation_cmd))))
+            translation_speed = clamp(translation_speed, 0, self.setting.translation.max_speed)
+            new_speed = translation_cmd.normalized() * translation_speed
+        else:
+            new_speed = Position(0, 0)
+        return new_speed
+
     def target_reached(self, boost_factor=1) -> bool:
         distance_to_reach_target_speed = 0.5 * (self.target_speed ** 2 - self.current_speed ** 2)
         distance_to_reach_target_speed /= self.setting.translation.max_acc
@@ -232,19 +280,31 @@ class RobotMotion(object):
         else:
             return False
 
+    def target_angle_reached(self, boost_factor=1) -> bool:
+        distance_to_reach_target_angular_speed = 0.5 * (self.target_angular_speed ** 2 - self.current_angular_speed ** 2)
+        distance_to_reach_target_angular_speed /= self.setting.translation.max_angular_acc
+        distance_to_reach_target_angular_speed = boost_factor * abs(distance_to_reach_target_angular_speed)
+        distance_to_reach_target_angular_speed = max(distance_to_reach_target_angular_speed, MIN_DISTANCE_TO_REACH_TARGET_SPEED)
+        if np.sum(np.square(self.angle_error)) <= distance_to_reach_target_angular_speed ** 2:
+            return True
+        else:
+            return False
+
     def update_states(self, cmd: AICommand):
         self.dt = self.ws.game_state.game.delta_t
 
         # Dynamics constraints
         self.setting.translation.max_acc = self.ws.game_state.get_player(self.id).max_acc
         self.setting.translation.max_speed = self.ws.game_state.get_player(self.id).max_speed
+        self.setting.translation.max_angular_acc = self.ws.game_state.get_player(self.id).max_angular_acc
         self.setting.rotation.max_speed = self.ws.game_state.get_player(self.id).max_angular_speed
 
         # Current state of the robot
         self.current_pose = self.ws.game_state.game.friends.players[self.id].pose.scale(1 / 1000)
         self.current_velocity = self.ws.game_state.game.friends.players[self.id].velocity.scale(1 / 1000)
         self.current_speed = self.current_velocity.position.norm()
-
+        self.current_angular_speed = self.current_velocity.orientation
+        self.current_orientation = self.current_pose.orientation
         # Desired parameters
         if cmd.path:
             self.target_pose = Pose(cmd.path[0], cmd.pose_goal.orientation).scale(1 / 1000)
@@ -252,9 +312,10 @@ class RobotMotion(object):
         else:  # No pathfinder case
             self.target_pose = cmd.pose_goal.scale(1 / 1000)
             self.target_speed = 0
-
+        self.target_angle = self.target_pose.orientation
         self.pose_error = self.target_pose - self.current_pose  # Pose are always wrap to pi
         self.position_error = self.pose_error.position
+        self.angle_error = self.pose_error.orientation
         if self.position_error.norm() > 0:
             self.target_direction = self.position_error.normalized()
 

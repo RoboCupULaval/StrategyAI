@@ -10,6 +10,7 @@ class OurPlayer(Player):
     max_speed = 2
     max_angular_speed = 3.14
     max_acc = 1.5
+    max_angular_acc = 1
 
     def __init__(self, team, id: int):
         super().__init__(team=team, id=id)
