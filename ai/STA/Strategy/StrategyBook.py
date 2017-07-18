@@ -40,7 +40,6 @@ class StrategyBook(object):
                               'Pathfinder_Benchmark': Pathfinder_Benchmark,
                               'PrepareKickOffOffense': PrepareKickOffOffense,
                               'StayAway': StayAway
-                              'PrepareKickOffOffense': PrepareKickOffOffense,
                               'PrepareKickOffDefense': PrepareKickOffDefense
                               }
 
