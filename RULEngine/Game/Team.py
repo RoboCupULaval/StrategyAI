@@ -43,26 +43,11 @@ class Team:
 
         if not player.check_if_on_field():
             if player_is_playing:
-                self.exiting_players[player.id] = player
+                del(self.available_players[player.id])
         else:
             if player_is_playing is None:
-                self.entering_players[player.id] = player
+                self.available_players[player.id] = player
 
-        if len(self.available_players) > 6 and self.exiting_players:
-            out_player = self.exiting_players.popitem()[1]
-            del(self.available_players[out_player.id])
-        elif len(self.available_players) < 6 and self.entering_players:
-            in_player = self.entering_players.popitem()[1]
-            self.available_players[in_player.id] = in_player
-        else:
-            if self.entering_players and self.exiting_players:
-                in_player = self.entering_players.popitem()[1]
-                out_player = self.exiting_players.popitem()[1]
-                del(self.available_players[out_player.id])
-                self.available_players[in_player.id] = in_player
-            elif self.exiting_players:
-                out_player = self.exiting_players.popitem()[1]
-                del(self.available_players[out_player.id])
 
     def _update_player(self, player_id, pose, delta=0):
         try:
