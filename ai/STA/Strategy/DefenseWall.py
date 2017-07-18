@@ -59,8 +59,8 @@ class DefenseWall(Strategy):
         return not(self.is_closest(player))
 
     def is_not_one_of_the_closests(self, player):
-        print(player.id)
-        print(not(self.is_closest(player) or self.is_second_closest(player)))
+        # print(player.id)
+        # print(not(self.is_closest(player) or self.is_second_closest(player)))
         return not(self.is_closest(player) or self.is_second_closest(player))
 
     def has_kicked(self, player):
