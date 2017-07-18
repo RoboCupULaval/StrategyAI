@@ -14,6 +14,7 @@ from ai.STA.Strategy.pathfinder_benchmark import Pathfinder_Benchmark
 from ai.STA.Strategy.prepare_kickoff_offense import PrepareKickOffOffense
 from ai.STA.Strategy.robocup_choreography import RobocupChoreography
 from ai.STA.Strategy.bamba_follow import BambaFollow
+from ai.STA.Strategy.stay_away import StayAway
 
 
 class StrategyBook(object):
@@ -36,7 +37,8 @@ class StrategyBook(object):
                               'PassesWithDecisions': PassesWithDecisions,
                               'DefenseWall': DefenseWall,
                               'Pathfinder_Benchmark': Pathfinder_Benchmark,
-                              'PrepareKickOffOffense': PrepareKickOffOffense
+                              'PrepareKickOffOffense': PrepareKickOffOffense,
+                              'StayAway': StayAway
                               }
 
     def get_strategies_name_list(self) -> List[str]:
