@@ -90,8 +90,6 @@ class SimpleAutoPlay(AutoPlay):
     def str(self):
         pass
 
-
-
     def _analyse_game(self):
         if is_ball_our_side():
             return SimpleAutoPlayState.NORMAL_DEFENSE

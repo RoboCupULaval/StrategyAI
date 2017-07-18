@@ -35,7 +35,7 @@ class PlayExecutor(Executor):
         if self.ws.play_state.autonomous_flag:
             if self.ws.game_state.game.referee.team_info['ours']['goalie'] != self.goalie_id:
                 self.goalie_id = self.ws.game_state.game.referee.team_info['ours']['goalie']
-                self.ws.game_state.update_id_for_locked_role(self.goalie_id, Role.GOALKEEPER)
+                self.ws.game_state.update_player_for_locked_role(self.goalie_id, Role.GOALKEEPER)
             self.auto_play.update(self._has_available_players_changed())
 
         self._execute_strategy()

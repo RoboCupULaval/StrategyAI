@@ -62,8 +62,12 @@ class GameState(object, metaclass=Singleton):
     def get_role_mapping(self):
         return self._role_mapper.roles_translation
 
-    def update_id_for_locked_role(self, id, role):
-        return self._role_mapper.update_id_for_locked_role(id, role)
+    def update_player_for_locked_role(self, player_id, role):
+        player = self._get_player_from_all_possible_player(player_id)
+        return self._role_mapper.update_player_for_locked_role(player, role)
+
+    def _get_player_from_all_possible_player(self, player_id):
+        return self.my_team.players[player_id]
 
     def get_our_team_color(self) -> TeamColor:
         """
