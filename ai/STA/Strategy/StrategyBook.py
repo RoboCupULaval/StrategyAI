@@ -15,6 +15,7 @@ from ai.STA.Strategy.prepare_kickoff_defense import PrepareKickOffDefense
 from ai.STA.Strategy.prepare_kickoff_offense import PrepareKickOffOffense
 from ai.STA.Strategy.robocup_choreography import RobocupChoreography
 from ai.STA.Strategy.bamba_follow import BambaFollow
+from ai.STA.Strategy.stay_away import StayAway
 
 
 class StrategyBook(object):
@@ -27,7 +28,7 @@ class StrategyBook(object):
     def __init__(self):
         """
         Initialise le dictionnaire des stratégies présentées au reste de l'IA.
-        """
+        """git
         self.strategy_book = {'Offense': Offense,
                               'HumanControl': HumanControl,
                               'DoNothing': DoNothing,
@@ -37,6 +38,8 @@ class StrategyBook(object):
                               'PassesWithDecisions': PassesWithDecisions,
                               'DefenseWall': DefenseWall,
                               'Pathfinder_Benchmark': Pathfinder_Benchmark,
+                              'PrepareKickOffOffense': PrepareKickOffOffense,
+                              'StayAway': StayAway
                               'PrepareKickOffOffense': PrepareKickOffOffense,
                               'PrepareKickOffDefense': PrepareKickOffDefense
                               }
