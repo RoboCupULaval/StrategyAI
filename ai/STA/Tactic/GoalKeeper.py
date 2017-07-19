@@ -14,6 +14,7 @@ from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.ProtectGoal import ProtectGoal
 from ai.STA.Action.GoBehind import GoBehind
@@ -41,7 +42,8 @@ class GoalKeeper(Tactic):
     """
     # TODO: À complexifier pour prendre en compte la position des joueurs adverses et la vitesse de la balle.
 
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None,):
+    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(),
+                 penality_kick=False, args: List[str]=None,):
         Tactic.__init__(self, game_state, player, target, args)
         self.is_yellow = self.player.team.team_color == TeamColor.YELLOW
         self.current_state = self.protect_goal
@@ -51,20 +53,24 @@ class GoalKeeper(Tactic):
         self.target = target
         self._find_best_passing_option()
         self.kick_force = 5
+        self.penality_kick = penality_kick
 
     def kick_charge(self):
         self.next_state = self.protect_goal
         return AllStar(self.game_state, self.player,  **{"charge_kick": True})
 
     def protect_goal(self):
-        if self.player == closest_player_to_point(GameState().get_ball_position()):
-            self.next_state = self.go_behind_ball
+        if not self.penality_kick:
+            if self.player == closest_player_to_point(GameState().get_ball_position()):
+                self.next_state = self.go_behind_ball
+            else:
+                self.next_state = self.protect_goal
+            return ProtectGoal(self.game_state, self.player, self.is_yellow,
+                       minimum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"]-250,
+                       maximum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"])
         else:
-            self.next_state = self.protect_goal
-
-        return ProtectGoal(self.game_state, self.player, self.is_yellow,
-                           minimum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"]-250,
-                           maximum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"])
+            return GoToPositionPathfinder(self.game_state, self.player,
+                                          Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0))
 
     def go_behind_ball(self):
         if not self.player == closest_player_to_point(GameState().get_ball_position()):
