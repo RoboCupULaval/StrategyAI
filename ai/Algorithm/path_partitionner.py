@@ -220,7 +220,7 @@ class PathPartitionner(Pathfinder):
             ball_position = self.game_state.get_ball_position()
             self.pose_obstacle[i, :] += ball_position
             self.collision_body.append(CollisionBody(ball_position, self.game_state.get_ball_velocity(),
-                                                     100))
+                                                     50))
 
 
     def get_raw_path(self, pose_target=Position()):

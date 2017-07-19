@@ -201,7 +201,7 @@ class RobotMotion(object):
         return next_velocity
 
     def apply_rotation_constraints(self, r_cmd: float) -> float:
-        if self.current_speed < 0:
+        if self.current_speed < 0.1:
             deadzone = self.setting.rotation.deadzone
         else:
             deadzone = 0
