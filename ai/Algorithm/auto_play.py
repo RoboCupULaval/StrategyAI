@@ -156,10 +156,10 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.HALT: 'DoNothing',
 
             # Robots must stay 50 cm from the ball
-            SimpleAutoPlayState.STOP: 'DoNothing',
-            SimpleAutoPlayState.GOAL_US: 'DoNothing',
-            SimpleAutoPlayState.GOAL_THEM: 'DoNothing',
-            SimpleAutoPlayState.BALL_PLACEMENT_THEM: 'DoNothing',
+            SimpleAutoPlayState.STOP: 'StayAway',
+            SimpleAutoPlayState.GOAL_US: 'StayAway',
+            SimpleAutoPlayState.GOAL_THEM: 'StayAway',
+            SimpleAutoPlayState.BALL_PLACEMENT_THEM: 'StayAway',
 
             # Place the ball to the designated position
             SimpleAutoPlayState.BALL_PLACEMENT_US: 'DoNothing',
@@ -171,7 +171,7 @@ class SimpleAutoPlay(AutoPlay):
 
             # Kickoff
             SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE: 'PrepareKickOffOffense',
-            SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE: 'DoNothing',
+            SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE: 'PrepareKickOffDefense',
             SimpleAutoPlayState.OFFENSE_KICKOFF: 'Offense',
             SimpleAutoPlayState.DEFENSE_KICKOFF: 'DefenseWall',
 
