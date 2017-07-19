@@ -27,9 +27,7 @@ class MotionExecutor(Executor):
         super().__init__(p_world_state)
         is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
         self.robot_motion = [RobotMotion(p_world_state, player_id, is_sim=is_simulation) for player_id in range(12)]
-        self.last_goal = []
-        for i in range(12):
-            self.last_goal += [None]
+        self.last_goal = [None for _ in range(12)]
 
     def exec(self):
         for player in self.ws.game_state.my_team.available_players.values():
@@ -38,11 +36,11 @@ class MotionExecutor(Executor):
 
             cmd = player.ai_command
             r_id = player.id
-            if not (self.last_goal[r_id] is None) and cmd.path != []:
+            if self.last_goal[r_id] is not None and cmd.path != []:
                 if self.last_goal[r_id] != cmd.path[0]:
-                    self.robot_motion[r_id].reset()
+                    pass  # self.robot_motion[r_id].reset() --> this always reset the control no matter what
             if cmd.command is AICommandType.MOVE:
-                if self.last_goal[r_id] is None:
+                if self.last_goal[r_id] is None and cmd.path != []:
                     self.last_goal[r_id] = cmd.path[0]
                 if cmd.control_loop_type is AIControlLoopType.POSITION:
                     cmd.speed = self.robot_motion[r_id].update(cmd)
@@ -68,14 +66,14 @@ class RobotMotion(object):
         self.setting = get_control_setting(is_sim)
         self.setting.translation.max_acc = None
         self.setting.translation.max_speed = None
-        self.setting.translation.max_angular_acc = None
+        self.setting.rotation.max_angular_acc = None
         self.setting.rotation.max_speed = None
 
         self.current_pose = Pose()
         self.current_orientation = 0
         self.current_velocity = Pose()
         self.current_angular_speed = 0
-        self.current_speed = Position()
+        self.current_speed = 0
         self.current_acceleration = Position()
 
         self.pose_error = Pose()

@@ -46,7 +46,6 @@ class Kick(Action):
                       "pathfinder_on": True,
                       "kick_strength": self.force,
                       "cruise_speed": 0.1,
-                      "charge_kick": True,
                       "end_seppd":self.end_speed}
         print("command kick")
         return AICommand(self.player, AICommandType.MOVE, **cmd_params)
