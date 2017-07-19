@@ -43,6 +43,8 @@ class PathfinderModule(Executor):
                     last_path = player.pathfinder_history.last_path
                     last_raw_path = player.pathfinder_history.last_raw_path
             if self.type_of_pathfinder.lower() == "path_part":
+                field = self.ws.game_state.game.field
+                player.ai_command.pose_goal.position = field.respect_field_rules(player.ai_command.pose_goal.position)
                 path, raw_path = self.pathfinder.get_path(player,
                                                           player.ai_command.pose_goal,
                                                           player.ai_command.cruise_speed,

@@ -11,6 +11,7 @@ from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 from ai.STA.Tactic.intercept import Intercept
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.robot_ident import RobotIdent
+from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
 from ai.STA.Tactic.test_turn_on_you import TestTurnOnYou
 from ai.STA.Tactic.GoGetBall import GoGetBall
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
@@ -53,7 +54,8 @@ class TacticBook(object):
                             'PositionForPass': PositionForPass,
                             'Bump': Bump,
                             'Intercept': Intercept,
-                            'GoToRandomPosition': GoToRandomPosition
+                            'GoToRandomPosition': GoToRandomPosition,
+                            'StayAwayFromBall': StayAwayFromBall
                             }
         if 'Joystick' in sys.modules:
             self.tactic_book['Joystick'] = Joystick
