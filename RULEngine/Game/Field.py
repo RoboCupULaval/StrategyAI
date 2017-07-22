@@ -3,6 +3,7 @@ from RULEngine.Game.Ball import Ball
 from ai.Algorithm.path_partitionner import CollisionBody
 from config.config_service import ConfigService
 from ..Util.area import *
+from RULEngine.Debug.debug_interface import DebugInterface
 
 class FieldSide(Enum):
     POSITIVE = 0
@@ -11,6 +12,7 @@ class FieldSide(Enum):
 class Field:
     def __init__(self, ball: Ball):
         self.ball = ball
+        self.debug_interface = DebugInterface()
         cfg = ConfigService()            
         if cfg.config_dict["GAME"]["our_side"] == "positive":
             self.our_side = FieldSide.POSITIVE
@@ -19,8 +21,8 @@ class Field:
             self.our_side = FieldSide.NEGATIVE
             self.constant = negative_side_constant
         x1 = self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
-        self.field_collision_body = CollisionBody(Position(x1, 0), Position(0, 0), 2000)
-
+        self.field_collision_body = CollisionBody(Position(x1 + 500, 0), Position(0, 0), 1500, type="zone")
+        self.debug_interface.add_circle((x1 + 500, 0), radius=1500, timeout=0)
     def move_ball(self, position, delta):
         self.ball.set_position(position, delta)
 
