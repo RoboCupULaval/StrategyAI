@@ -10,7 +10,7 @@ class OurTeam(Team):
         # It is our team so we use our player!
         for player_id in range(PLAYER_PER_TEAM):
             self.players[player_id] = OurPlayer(self, player_id)
-            if 0 <= player_id <= 6:
+            if 1 <= player_id <= 6:
                 self.players[player_id].in_play = True  # TODO : check if useless
                 self.available_players[player_id] = self.players[player_id]
 
