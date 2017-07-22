@@ -8,7 +8,9 @@ from RULEngine.Util.Position import Position
 from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.PID import PID
 from RULEngine.Util.constant import POSITION_DEADZONE
+from ai.Algorithm.path_partitionner import CollisionBody
 from ai.Util.ai_command import AICommandType, AIControlLoopType, AICommand
+from ai.Util.role import Role
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 from config.config_service import ConfigService
@@ -36,6 +38,12 @@ class MotionExecutor(Executor):
 
             cmd = player.ai_command
             r_id = player.id
+
+            if player is not self.ws.game_state.get_player_by_role(Role.GOALKEEPER):
+                player.collision_body_mask[1] = 1
+            else:
+                player.collision_body_mask[1] = 0
+
             if self.last_goal[r_id] is not None and cmd.path != []:
                 if self.last_goal[r_id] != cmd.path[0]:
                     pass  # self.robot_motion[r_id].reset() --> this always reset the control no matter what

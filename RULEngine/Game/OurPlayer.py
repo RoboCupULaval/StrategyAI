@@ -21,6 +21,8 @@ class OurPlayer(Player):
         self.in_play = False
         self.update = self._friend_kalman_update
         self.pathfinder_history = PathfinderHistory()
+        self.collision_body_mask = [0, 0]
+
 
     def _friend_kalman_update(self, poses, delta):
         ret = self.kf.filter(poses, self.cmd, delta)

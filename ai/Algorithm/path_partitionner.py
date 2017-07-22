@@ -5,7 +5,6 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_distance, conv_position_2_list, remove_duplicates
 from ai.Algorithm.IntelligentModule import Pathfinder
-from ai.states.world_state import WorldState
 import numpy as np
 import numpy.matlib
 import time
@@ -83,7 +82,7 @@ class CollisionBody:
         self.type = type
 
 class PathPartitionner(Pathfinder):
-    def __init__(self, p_worldstate: WorldState):
+    def __init__(self, p_worldstate):
         super().__init__(p_worldstate)
         self.p_worldstate = p_worldstate
         self.game_state = self.p_worldstate.game_state

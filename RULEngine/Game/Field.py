@@ -19,7 +19,9 @@ class Field:
             self.our_side = FieldSide.NEGATIVE
             self.constant = negative_side_constant
         x1 = self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
-        self.field_collision_body = CollisionBody(Position(x1, 0), Position(0, 0), 2000)
+        x2 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
+        self.field_collision_body = [CollisionBody(Position(x1, 0), Position(0, 0), 2000),
+                                     CollisionBody(Position(x2, 0), Position(0, 0), 2000)]
 
     def move_ball(self, position, delta):
         self.ball.set_position(position, delta)
