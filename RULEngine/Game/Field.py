@@ -1,5 +1,6 @@
 # Under MIT License, see LICENSE.txt
 from RULEngine.Game.Ball import Ball
+from ai.Algorithm.path_partitionner import CollisionBody
 from config.config_service import ConfigService
 from ..Util.area import *
 
@@ -17,6 +18,8 @@ class Field:
         else:
             self.our_side = FieldSide.NEGATIVE
             self.constant = negative_side_constant
+        x1 = self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
+        self.field_collision_body = CollisionBody(Position(x1, 0), Position(0, 0), 2000)
 
     def move_ball(self, position, delta):
         self.ball.set_position(position, delta)
