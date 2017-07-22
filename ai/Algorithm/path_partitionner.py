@@ -49,10 +49,9 @@ class Path:
         if len(points_list) < 3:
             pass
         else:
-            if (threshold is not None) and len(speed_list) > 2:
+            if (threshold is not None):
                 if np.linalg.norm(points_list[0] - points_list[1]) < threshold:
                     del points_list[1]
-                    del speed_list[1]
                 # print(position_list)
                 # print(new_speed_list)
 
@@ -73,14 +72,15 @@ class Path:
 
     def quick_update_path(self, player):
         self.points[0] = player.pose.position
-        return self.generate_path_from_points(self.points, self.speeds, 80)
+        return self.generate_path_from_points(self.points, self.speeds, 50)
 
 
 class CollisionBody:
-    def __init__(self, body_position, body_velocity, body_avoid_radius=150):
+    def __init__(self, body_position, body_velocity, body_avoid_radius=150, type="player"):
         self.position = body_position
         self.velocity = body_velocity
         self.avoid_radius = body_avoid_radius
+        self.type = type
 
 class PathPartitionner(Pathfinder):
     def __init__(self, p_worldstate: WorldState):
@@ -105,6 +105,7 @@ class PathPartitionner(Pathfinder):
         self.path_colide_points = None
         self.end_speed = 0
         self.ball_collision = False
+        self.avoid_radius = np.array([])
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None):
 
@@ -134,23 +135,20 @@ class PathPartitionner(Pathfinder):
         # Debug code pls no remove
         # if old_path is not None:
 
-        # if old_path is not None:
-        #     # start_1 = time.time()
-        #     # self.is_path_collide(old_raw_path, tolerance=self.gap_proxy-50)
-        #     # end_1 = time.time()
-        #     # start_2 = time.time()
-        #     # self.is_path_collide_legacy(old_raw_path, tolerance=self.gap_proxy - 50)
-        #     # end_2 = time.time()
-        #     #print(end_1 - start_1, end_2 - start_2)
-        #     print("is_path_colide", self.is_path_collide(old_raw_path, tolerance=self.gap_proxy))
-        #     print("meme goal?", (np.linalg.norm(pose_target.position - old_raw_path.goal) < 200))
-        #     print("quel goal?", pose_target.position, old_raw_path.goal)
+        if old_path is not None:
+            # start_1 = time.time()
+            # self.is_path_collide(old_raw_path, tolerance=self.gap_proxy-50)
+            # end_1 = time.time()
+            # start_2 = time.time()
+            # self.is_path_collide_legacy(old_raw_path, tolerance=self.gap_proxy - 50)
+            # end_2 = time.time()
+            #print(end_1 - start_1, end_2 - start_2)
         if self.end_speed == 0:
             hysteresis = 50 * cruise_speed
         else:
-            hysteresis = 5 * cruise_speed
+            hysteresis = 50 * cruise_speed
         if (old_path is not None) and (not self.is_path_collide(old_raw_path,
-                                                                tolerance=self.gap_proxy-50)) and \
+                                                                tolerance=2)) and \
                 ((pose_target.position - old_raw_path.goal).norm() < hysteresis):
             if np.linalg.norm(pose_target.position - old_raw_path.goal) > 20:
                 old_raw_path.quick_update_path(self.player)
@@ -158,15 +156,15 @@ class PathPartitionner(Pathfinder):
                 self.path_appendice = self.fastpathplanner(self.path_appendice)
                 self.raw_path = old_raw_path.join_segments(self.path_appendice)
                 self.path = self.reshaper.reshape_path(self.raw_path, self.player, self.cruise_speed)
-                self.path = self.remove_redundant_points()
+                #self.path = self.remove_redundant_points()
             else:
                 old_raw_path.quick_update_path(self.player)
-                old_path.quick_update_path(self.player)
-                self.path = old_path
+                #old_path.quick_update_path(self.player)
+                #self.path = old_path
                 self.raw_path = old_raw_path
                 self.raw_path.speeds[0] = self.player.velocity.position.norm()
                 self.path = self.reshaper.reshape_path(self.raw_path, self.player, self.cruise_speed)
-                self.path = self.remove_redundant_points()
+                #self.path = self.remove_redundant_points()
 
         else:
             self.path = Path(self.player.pose.position.conv_2_np(), pose_target.position.conv_2_np(), 0, self.end_speed)
@@ -187,7 +185,7 @@ class PathPartitionner(Pathfinder):
 
             self.raw_path = self.path
             self.path = self.reshaper.reshape_path(self.path, self.player, self.cruise_speed)
-            self.path = self.remove_redundant_points()
+            #self.path = self.remove_redundant_points()
 
         # print("points", self.path.points)
         # print("speeds", self.path.speeds)
@@ -219,8 +217,10 @@ class PathPartitionner(Pathfinder):
         if self.ball_collision:
             ball_position = self.game_state.get_ball_position()
             self.pose_obstacle[i, :] += ball_position
-            self.collision_body.append(CollisionBody(ball_position, self.game_state.get_ball_velocity(),
-                                                     50))
+            self.collision_body.append(CollisionBody(ball_position, Position(0, 0),
+                                                     50, type="ball"))
+
+        self.avoid_radius = np.array([obj.avoid_radius for obj in self.collision_body])
 
 
     def get_raw_path(self, pose_target=Position()):
@@ -281,7 +281,9 @@ class PathPartitionner(Pathfinder):
         if obstacles is None:
             obstacles = self.pose_obstacle
         if tolerance is None:
-            tolerance = self.gap_proxy
+            tolerances = self.avoid_radius
+        else:
+            tolerances = self.avoid_radius - self.avoid_radius / tolerance
         if path.start == path.goal:
             return False
         #print(path.points)
@@ -307,11 +309,13 @@ class PathPartitionner(Pathfinder):
         dist_robot_2_obs = np.vstack(dist_robot_2_obs[big_enough_dists])
         vec_robot_2_obs = vecs_robot_2_obs[big_enough_dists]
         directions_valid = directions[big_enough_dists]
+        tolerances = tolerances[big_enough_dists]
         dists_from_path = np.abs(np.cross(directions_valid, vec_robot_2_obs))
         projection_obs_on_direction = (directions_valid * vec_robot_2_obs / dist_robot_2_obs).sum(axis=1)
         points_to_consider = np.abs(projection_obs_on_direction) < 1
         dists_to_consider = dists_from_path[points_to_consider]
-        if dists_to_consider[np.abs(dists_to_consider) < tolerance].any() and (path.start - path.goal).norm() > 50:
+        tolerances = tolerances[points_to_consider]
+        if dists_to_consider[np.abs(dists_to_consider) < tolerances].any() and (path.start - path.goal).norm() > 50:
             return True
         return False
 
@@ -365,8 +369,7 @@ class PathPartitionner(Pathfinder):
             cruise_speed = self.player.velocity.position.conv_2_np()
             self.closest_obs_speed = closest_collision_body.velocity
             avoid_dir = -vec_perp
-
-            if avoid_dir is None:
+            if closest_collision_body.type == "ball":
                 avoid_dir = -vec_perp
                 sub_target_1 = np.array(conv_position_2_list(pose_robot)) + \
                     direction * len_along_path + vec_perp * self.res
@@ -395,7 +398,6 @@ class PathPartitionner(Pathfinder):
                     sub_target = sub_target_1
                 else:
                     sub_target = sub_target_2
-
 
             else:
                 # if np.dot(avoid_dir, np.transpose(vec_perp)) < 0:

@@ -145,7 +145,7 @@ class GoKick(Tactic):
         else:
             go_behind_ball_speed = distance_to_goal / 150
         return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation),
-                                     cruise_speed=0.2, end_speed=0.1)
+                                     cruise_speed=go_behind_ball_speed, end_speed=0.1)
         # return AllStar(self.game_state,
         #                self.player,
         #                charge_kick=True,
