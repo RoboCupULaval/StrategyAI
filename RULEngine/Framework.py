@@ -130,8 +130,8 @@ class Framework(object):
     def game_thread_main_loop(self):
         """ Fonction exécuté et agissant comme boucle principale. """
 
-        #self._wait_for_first_frame()
-        #self._wait_for_first_geometry_packet()
+        self._wait_for_first_frame()
+        self._wait_for_first_geometry_packet()
         print(self.vision_routine)
         # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
         while not self.thread_terminate.is_set():
