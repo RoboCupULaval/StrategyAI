@@ -223,10 +223,13 @@ class PathPartitionner(Pathfinder):
             ball_position = self.game_state.get_ball_position()
             self.pose_obstacle[i, :] += ball_position
             self.collision_body.append(CollisionBody(ball_position, Position(0, 0),
-                                                     50, type="ball"))
+                                                     110, type="ball"))
         if not(self.optional_collision is None):
-            self.pose_obstacle = np.vstack((self.pose_obstacle, self.optional_collision.position))
-            self.collision_body.append(self.optional_collision)
+            # for idx, collision_body in enumerate(self.optional_collision):
+            for idx, mask in enumerate(self.player.collision_body_mask):
+                if mask == 1:
+                    self.pose_obstacle = np.vstack((self.pose_obstacle, self.optional_collision[idx].position))
+                    self.collision_body.append(self.optional_collision[idx])
         self.avoid_radius = np.array([obj.avoid_radius for obj in self.collision_body])
         # print(self.pose_obstacle.shape)
         # print(len(self.collision_body))

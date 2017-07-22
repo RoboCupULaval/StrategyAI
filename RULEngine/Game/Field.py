@@ -21,8 +21,12 @@ class Field:
             self.our_side = FieldSide.NEGATIVE
             self.constant = negative_side_constant
         x1 = self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
-        self.field_collision_body = CollisionBody(Position(x1 + 500, 0), Position(0, 0), 1500, type="zone")
-        self.debug_interface.add_circle((x1 + 500, 0), radius=1500, timeout=0)
+        x2 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
+        self.field_collision_body = [CollisionBody(Position(x1 + 500, 0), Position(0, 0), 1500, "zone"),
+                                     CollisionBody(Position(x2 - 500, 0), Position(0, 0), 1500, "zone")]
+        self.debug_interface.add_circle((x1 + 500, 0), radius=1500, timeout=0, color=(255, 0, 0))
+        self.debug_interface.add_circle((x2 - 500, 0), radius=1500, timeout=0, color=(255, 0, 0))
+
     def move_ball(self, position, delta):
         self.ball.set_position(position, delta)
 
