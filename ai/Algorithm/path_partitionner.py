@@ -82,10 +82,9 @@ class CollisionBody:
         self.type = type
 
 class PathPartitionner(Pathfinder):
-    def __init__(self, p_worldstate):
-        super().__init__(p_worldstate)
-        self.p_worldstate = p_worldstate
-        self.game_state = self.p_worldstate.game_state
+    def __init__(self, gamestate):
+        super().__init__(None)
+        self.game_state = gamestate
         self.path = Path(Position(0, 0), Position(0, 0))
         self.raw_path = Path(Position(0, 0), Position(0, 0))
         self.res = 100
@@ -338,15 +337,17 @@ class PathPartitionner(Pathfinder):
         return False
 
     def find_closest_obstacle(self, point, path):
+        assert(isinstance(point, Position))
         dist_point_obs = np.inf
         closest_obs = None
         closest_collision_body = self.collision_body[0].position
-        if np.linalg.norm(path.start - path.goal) < 0.001:
+        if (path.start - path.goal).norm() < 0.001:
             return [closest_obs, dist_point_obs, closest_collision_body]
+        #print(path.start, type(path.start), point, type(point))
         if point == path.start:
             return [closest_obs, dist_point_obs, closest_collision_body]
         pose_start = path.start
-        direction = (point - pose_start) / np.linalg.norm(point - pose_start)
+        direction = (point - pose_start).normalized()
 
         for idx, pose_obs in enumerate(self.pose_obstacle):
             vec_robot_2_obs_temp = pose_obs - pose_start

@@ -11,16 +11,31 @@ from config.config_service import ConfigService
 import concurrent.futures
 from multiprocessing import Pool
 from functools import partial
-
+from profilehooks import profile
 
 INTERMEDIATE_DISTANCE_THRESHOLD = 540
 AIcommands = List[AICommand]
 
 
-def pathfind_ai_commands(type_pathfinder, field, pathfinder, player) -> Path:
-    start = time.time()
+def create_pathfinder(game_state, type_of_pathfinder):
+    assert isinstance(type_of_pathfinder, str)
+    assert type_of_pathfinder.lower() in ["rrt", "astar", "path_part"]
+
+    # if type_of_pathfinder.lower() == "astar":
+    # return AsPathManager(self.ws, ConfigService().config_dict["GAME"]["type"] == "sim")
+    if type_of_pathfinder.lower() == "rrt":
+        return PathfinderRRT(game_state)
+    elif type_of_pathfinder.lower() == "path_part":
+        return PathPartitionner(game_state)
+    else:
+        raise TypeError("Couldn't init a pathfinder with the type of ",
+                        type_of_pathfinder, "!")
+
+
+def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
     last_path = None
     last_raw_path = None
+    field = game_state.game.field
     if player.ai_command is None or not player.ai_command.pathfinder_on:
         return None
     if player.pathfinder_history.last_pose_goal is not None:
@@ -28,6 +43,7 @@ def pathfind_ai_commands(type_pathfinder, field, pathfinder, player) -> Path:
             # player.pathfinder_history.last_pose_goal = player.ai_command.pose_goal.position
             last_path = player.pathfinder_history.last_path
             last_raw_path = player.pathfinder_history.last_raw_path
+    pathfinder = create_pathfinder(game_state, type_pathfinder)
     if type_pathfinder == "path_part":
         player.ai_command.pose_goal.position = field.respect_field_rules(player.ai_command.pose_goal.position)
         collision_body = field.field_collision_body
@@ -50,39 +66,37 @@ def pathfind_ai_commands(type_pathfinder, field, pathfinder, player) -> Path:
 
         player.ai_command.path = path.points[1:]
         player.ai_command.path_speeds = path.speeds
+        return path
 
     else:
         path = pathfinder.get_path(player,
-                                        player.ai_command.pose_goal,
-                                        player.ai_command.cruise_speed)
+                                   player.ai_command.pose_goal,
+                                   player.ai_command.cruise_speed)
         player.ai_command.path = path
         # print(time.time() - start)
-    return path
+        return path
 
 class PathfinderModule(Executor):
 
     def __init__(self, world_state: WorldState):
         super().__init__(world_state)
         self.type_of_pathfinder = ConfigService().config_dict["STRATEGY"]["pathfinder"]
-        self.pathfinder = self.get_pathfinder(self.type_of_pathfinder)
         self.last_time_pathfinding_for_robot = {}
         self.last_frame = time.time()
+        self.game_state = world_state.game_state
         # self.last_path = None
         # self.last_raw_path = None
         # self.last_pose_goal = None
-        self.pool = Pool(6)
+        self.pool = Pool(processes=12)
 
+    #@profile(immediate=True)
     def exec(self):
-        callback = partial(pathfind_ai_commands,
-                           self.type_of_pathfinder.lower(),
-                           self.ws.game_state.game.field,
-                           self.pathfinder,
-                           )
-        #paths = [callback(player) for player in  self.ws.game_state.my_team.available_players.values()]
-
-        paths = self.pool.map(callback, self.ws.game_state.my_team.available_players.values())
+        callback = partial(pathfind_ai_commands, self.type_of_pathfinder.lower(), self.game_state)
+        paths = [callback(player) for player in  self.ws.game_state.my_team.available_players.values()]
+        #print(len(self.ws.game_state.my_team.available_players.values()))
+        #paths = self.pool.map(callback, self.game_state.my_team.available_players.values())
         for path in paths:
-            if path:
+            if path is not None:
                 self.draw_path(path)
         # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         #     future_to_path = {executor.submit(self._pathfind_ai_commands(player), player): player for player in
@@ -123,19 +137,6 @@ class PathfinderModule(Executor):
 
         self.pathfinder = self.get_pathfinder(type_of_pathfinder)
 
-    def get_pathfinder(self, type_of_pathfinder):
-        assert isinstance(type_of_pathfinder, str)
-        assert type_of_pathfinder.lower() in ["rrt", "astar", "path_part"]
-
-        # if type_of_pathfinder.lower() == "astar":
-            # return AsPathManager(self.ws, ConfigService().config_dict["GAME"]["type"] == "sim")
-        if type_of_pathfinder.lower() == "rrt":
-            return PathfinderRRT(self.ws)
-        elif type_of_pathfinder.lower() == "path_part":
-            return PathPartitionner(self.ws)
-        else:
-            raise TypeError("Couldn't init a pathfinder with the type of ",
-                            type_of_pathfinder, "!")
 
     def draw_path(self, path, pid=0):
         points = []
