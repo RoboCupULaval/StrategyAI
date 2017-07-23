@@ -3,15 +3,61 @@ from typing import List
 
 from RULEngine.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
-from ai.Algorithm.path_partitionner import PathPartitionner
+from ai.Algorithm.path_partitionner import PathPartitionner, Path
 from ai.Util.ai_command import AICommand
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 from config.config_service import ConfigService
+import concurrent.futures
+from multiprocessing import Pool
+from functools import partial
+
 
 INTERMEDIATE_DISTANCE_THRESHOLD = 540
 AIcommands = List[AICommand]
 
+
+def pathfind_ai_commands(type_pathfinder, field, pathfinder, player) -> Path:
+    start = time.time()
+    last_path = None
+    last_raw_path = None
+    if player.ai_command is None or not player.ai_command.pathfinder_on:
+        return None
+    if player.pathfinder_history.last_pose_goal is not None:
+        if (player.pathfinder_history.last_pose_goal - player.ai_command.pose_goal.position).norm() < 200:
+            # player.pathfinder_history.last_pose_goal = player.ai_command.pose_goal.position
+            last_path = player.pathfinder_history.last_path
+            last_raw_path = player.pathfinder_history.last_raw_path
+    if type_pathfinder == "path_part":
+        player.ai_command.pose_goal.position = field.respect_field_rules(player.ai_command.pose_goal.position)
+        collision_body = field.field_collision_body
+        path, raw_path = pathfinder.get_path(player,
+                                             player.ai_command.pose_goal,
+                                             player.ai_command.cruise_speed,
+                                             last_path,
+                                             last_raw_path,
+                                             end_speed=player.ai_command.end_speed,
+                                             ball_collision=player.ai_command.collision_ball,
+                                             optional_collision=collision_body)
+
+        if path.get_path_length() < 100:
+            player.pathfinder_history.last_path = None
+            player.pathfinder_history.last_pose_goal = path.goal
+        else:
+            player.pathfinder_history.last_path = path
+            player.pathfinder_history.last_pose_goal = path.goal
+        player.pathfinder_history.last_raw_path = raw_path
+
+        player.ai_command.path = path.points[1:]
+        player.ai_command.path_speeds = path.speeds
+
+    else:
+        path = pathfinder.get_path(player,
+                                        player.ai_command.pose_goal,
+                                        player.ai_command.cruise_speed)
+        player.ai_command.path = path
+        # print(time.time() - start)
+    return path
 
 class PathfinderModule(Executor):
 
@@ -24,54 +70,36 @@ class PathfinderModule(Executor):
         # self.last_path = None
         # self.last_raw_path = None
         # self.last_pose_goal = None
+        self.pool = Pool(6)
 
     def exec(self):
-        self._pathfind_ai_commands()
+        callback = partial(pathfind_ai_commands,
+                           self.type_of_pathfinder.lower(),
+                           self.ws.game_state.game.field,
+                           self.pathfinder,
+                           )
+        #paths = [callback(player) for player in  self.ws.game_state.my_team.available_players.values()]
+
+        paths = self.pool.map(callback, self.ws.game_state.my_team.available_players.values())
+        for path in paths:
+            if path:
+                self.draw_path(path)
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        #     future_to_path = {executor.submit(self._pathfind_ai_commands(player), player): player for player in
+        #                       self.ws.game_state.my_team.available_players.values()}
+        #     # for future in concurrent.futures.as_completed(future_to_path):
+        #     #     url = future_to_path[future]
+        #     #     try:
+        #     #         data = future.result()
+        #     #     except Exception as exc:
+        #     #         print('%r generated an exception: %s' % (url, exc))
+        #     #     else:
+        #     #         print('%r page is %d bytes' % (url, len(data)))
+        # for player in self.ws.game_state.my_team.available_players.values():
+        #     self._pathfind_ai_commands(player)
         # self._modify_path_for_cinematic_constraints(ai_commands)
 
 
-    def _pathfind_ai_commands(self) -> None:
-        start = time.time()
-        last_path = None
-        last_raw_path = None
-        for player in self.ws.game_state.my_team.available_players.values():
-            if player.ai_command is None or not player.ai_command.pathfinder_on:
-                continue
-            if player.pathfinder_history.last_pose_goal is not None:
-                if (player.pathfinder_history.last_pose_goal - player.ai_command.pose_goal.position).norm() < 200:
-                    #player.pathfinder_history.last_pose_goal = player.ai_command.pose_goal.position
-                    last_path = player.pathfinder_history.last_path
-                    last_raw_path = player.pathfinder_history.last_raw_path
-            if self.type_of_pathfinder.lower() == "path_part":
-                field = self.ws.game_state.game.field
-                player.ai_command.pose_goal.position = field.respect_field_rules(player.ai_command.pose_goal.position)
-                collision_body = field.field_collision_body
-                path, raw_path = self.pathfinder.get_path(player,
-                                                          player.ai_command.pose_goal,
-                                                          player.ai_command.cruise_speed,
-                                                          last_path,
-                                                          last_raw_path,
-                                                          end_speed=player.ai_command.end_speed,
-                                                          ball_collision=player.ai_command.collision_ball,
-                                                          optional_collision=collision_body)
-                self.draw_path(path)
-                if path.get_path_length() < 100:
-                    player.pathfinder_history.last_path = None
-                    player.pathfinder_history.last_pose_goal = path.goal
-                else:
-                    player.pathfinder_history.last_path = path
-                    player.pathfinder_history.last_pose_goal = path.goal
-                player.pathfinder_history.last_raw_path = raw_path
-
-                player.ai_command.path = path.points[1:]
-                player.ai_command.path_speeds = path.speeds
-
-            else:
-                path = self.pathfinder.get_path(player,
-                                                player.ai_command.pose_goal,
-                                                player.ai_command.cruise_speed)
-                player.ai_command.path = path
-        #print(time.time() - start)
     # TODO find what this does? MGL 2017/05/17
     """
     def _modify_path_for_cinematic_constraints(self, ai_commandes: list):

@@ -136,17 +136,17 @@ class PathPartitionner(Pathfinder):
         # Debug code pls no remove
         # if old_path is not None:
 
-        if old_path is not None:
-            # start_1 = time.time()
-            # self.is_path_collide(old_raw_path, tolerance=self.gap_proxy-50)
-            # end_1 = time.time()
-            # start_2 = time.time()
-            # self.is_path_collide_legacy(old_raw_path, tolerance=self.gap_proxy - 50)
-            # end_2 = time.time()
-            #print(end_1 - start_1, end_2 - start_2)
-            print("is_path_colide", self.is_path_collide(old_raw_path, tolerance=10))
-            print("meme goal?", (np.linalg.norm(pose_target.position - old_raw_path.goal) < 200))
-            print("quel goal?", pose_target.position, old_raw_path.goal)
+        # if old_path is not None:
+        #     # start_1 = time.time()
+        #     # self.is_path_collide(old_raw_path, tolerance=self.gap_proxy-50)
+        #     # end_1 = time.time()
+        #     # start_2 = time.time()
+        #     # self.is_path_collide_legacy(old_raw_path, tolerance=self.gap_proxy - 50)
+        #     # end_2 = time.time()
+        #     #print(end_1 - start_1, end_2 - start_2)
+        #     print("is_path_colide", self.is_path_collide(old_raw_path, tolerance=10))
+        #     print("meme goal?", (np.linalg.norm(pose_target.position - old_raw_path.goal) < 200))
+        #     print("quel goal?", pose_target.position, old_raw_path.goal)
         if self.end_speed == 0:
             hysteresis = 50 * cruise_speed
         else:
