@@ -7,7 +7,7 @@ __author__ = 'RoboCupULaval'
 
 ROBOT_RADIUS = 90
 BALL_RADIUS = 21
-PLAYER_PER_TEAM = 12
+PLAYER_PER_TEAM = 7
 
 # Communication information
 DEBUG_RECEIVE_BUFFER_SIZE = 100

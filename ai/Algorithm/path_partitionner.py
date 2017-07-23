@@ -88,7 +88,7 @@ class PathPartitionner(Pathfinder):
         self.path = Path(Position(0, 0), Position(0, 0))
         self.raw_path = Path(Position(0, 0), Position(0, 0))
         self.res = 100
-        self.gap_proxy = 250
+        self.gap_proxy = 200
         self.max_recurs = 3
         self.collision_body = []
         self.pose_obstacle = None
@@ -151,7 +151,7 @@ class PathPartitionner(Pathfinder):
         else:
             hysteresis = 50 * cruise_speed
         if (old_path is not None) and (not self.is_path_collide(old_raw_path,
-                                                                tolerance=2)) and \
+                                                                tolerance=1.5)) and \
                 ((pose_target.position - old_raw_path.goal).norm() < hysteresis):
             if np.linalg.norm(pose_target.position - old_raw_path.goal) > 20:
                 old_raw_path.quick_update_path(self.player)
@@ -198,6 +198,7 @@ class PathPartitionner(Pathfinder):
     def get_pertinent_collision_objects(self):
 
         i = 0
+        factor = 1.2
         self.collision_body = []
         if self.ball_collision:
             lenght_pose_obstacle = len(self.game_state.my_team.available_players) + \
@@ -209,20 +210,28 @@ class PathPartitionner(Pathfinder):
 
         for player in self.game_state.my_team.available_players.values():
             if player.id != self.player.id:
-                self.pose_obstacle[i, :] = player.pose.position
-                self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position,
-                                                         self.gap_proxy))
-                i += 1
+                # print((self.path.start - player.pose.position).norm() + (self.path.goal - player.pose.position).norm() - \
+                #         (self.path.goal - self.path.start).norm(), (self.path.goal - self.path.start).norm())
+                if (self.player.pose.position - player.pose.position).norm() + \
+                        (self.player.ai_command.pose_goal.position - player.pose.position).norm() < \
+                        (self.player.ai_command.pose_goal.position - self.player.pose.position).norm() * factor:
+                    self.pose_obstacle[i, :] = player.pose.position
+                    self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position,
+                                                             self.gap_proxy))
+                    i += 1
         for player in self.game_state.other_team.available_players.values():
-            self.pose_obstacle[i, :] = player.pose.position
-            self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position, self.gap_proxy))
-            i += 1
-
+            if (self.player.pose.position - player.pose.position).norm() + \
+                        (self.player.ai_command.pose_goal.position - player.pose.position).norm() < \
+                        (self.player.ai_command.pose_goal.position - self.player.pose.position).norm() * factor:
+                self.pose_obstacle[i, :] = player.pose.position
+                self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position, self.gap_proxy))
+                i += 1
         if self.ball_collision:
             ball_position = self.game_state.get_ball_position()
             self.pose_obstacle[i, :] += ball_position
             self.collision_body.append(CollisionBody(ball_position, Position(0, 0),
                                                      110, type="ball"))
+        self.pose_obstacle = self.pose_obstacle[0:i, :]
         if not(self.optional_collision is None):
             # for idx, collision_body in enumerate(self.optional_collision):
             for idx, mask in enumerate(self.player.collision_body_mask):
@@ -295,7 +304,7 @@ class PathPartitionner(Pathfinder):
             tolerances = self.avoid_radius
         else:
             tolerances = self.avoid_radius - self.avoid_radius / tolerance
-        if path.start == path.goal:
+        if path.start == path.goal or len(obstacles) == 0:
             return False
         #print(path.points)
         points = np.vstack(np.array(path.points))
@@ -383,7 +392,7 @@ class PathPartitionner(Pathfinder):
         len_along_path = np.dot(vec_robot_2_obs, direction)
         dist_from_path = np.linalg.norm(np.cross(direction, vec_robot_2_obs))
         projection_obs_on_direction = np.dot(direction, vec_robot_2_obs / np.linalg.norm(vec_robot_2_obs))
-        self.res = closest_collision_body.avoid_radius / 10.
+        self.res = closest_collision_body.avoid_radius / 2.
         if 0 < len_along_path < (pose_target - pose_robot).norm():
             vec_perp = np.cross(np.append(direction, [0]), np.array([0, 0, 1]))
             vec_perp = vec_perp[0:2] / np.linalg.norm(vec_perp)

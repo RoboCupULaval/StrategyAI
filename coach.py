@@ -65,17 +65,17 @@ class Coach(object):
         dt_debug = end_debug_interface - start_debug_interface
         dt_play_exe = end_play_executor - start_play_executor
         dt_module_exe = end_module_executor - start_module_executor
-        dt_motion_exe =  end_motion_executor - start_motion_executor
+        dt_motion_exe = end_motion_executor - start_motion_executor
         dt_robot_cmd = end_robot_commands - start_robot_commands
         sum = dt_debug + dt_play_exe + dt_module_exe + dt_motion_exe + dt_robot_cmd
 
-        print("[{:4.1f}ms total] debug_inter:{:4.1f}ms/{:3.1f}% | play_exec:{:4.1f}ms/{:3.1f}% | module_exec:{:4.1f}ms/{:3.1f}% | motion_exec:{:4.1f}ms/{:3.1f}% | robot_cmd:{:4.1f}ms/{:3.1f}%"
-              .format(sum*1000,
-                      dt_debug*1000, dt_debug/sum*100.0,
-                      dt_play_exe*1000, dt_play_exe/sum*100.0,
-                      dt_module_exe*1000, dt_module_exe/sum*100.0,
-                      dt_motion_exe*1000, dt_motion_exe/sum*100.0,
-                      dt_robot_cmd*1000, dt_robot_cmd/sum*100.0))
+        # print("[{:4.1f}ms total] debug_inter:{:4.1f}ms/{:3.1f}% | play_exec:{:4.1f}ms/{:3.1f}% | module_exec:{:4.1f}ms/{:3.1f}% | motion_exec:{:4.1f}ms/{:3.1f}% | robot_cmd:{:4.1f}ms/{:3.1f}%"
+        #       .format(sum*1000,
+        #               dt_debug*1000, dt_debug/sum*100.0,
+        #               dt_play_exe*1000, dt_play_exe/sum*100.0,
+        #               dt_module_exe*1000, dt_module_exe/sum*100.0,
+        #               dt_motion_exe*1000, dt_motion_exe/sum*100.0,
+        #               dt_robot_cmd*1000, dt_robot_cmd/sum*100.0))
 
         return robot_commands
 
