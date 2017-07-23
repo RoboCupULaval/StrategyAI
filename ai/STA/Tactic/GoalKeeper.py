@@ -1,15 +1,18 @@
 # Under MIT licence, see LICENCE.txt
 
 from typing import List
-import numpy as np
+import math as m
 import time
 
+from RULEngine.Util.constant import ROBOT_RADIUS
+from RULEngine.Game.Field import FieldSide
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.geometry import get_distance
+from RULEngine.Util.geometry import clamp, compare_angle, wrap_to_pi
 from RULEngine.Util.constant import TeamColor
-from ai.Algorithm.evaluation_module import closest_player_to_point, best_passing_option
+from ai.Algorithm.evaluation_module import closest_player_to_point, best_passing_option, player_with_ball
+
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.grab import Grab
@@ -23,6 +26,7 @@ from ai.states.game_state import GameState
 __author__ = 'RoboCupULaval'
 
 TARGET_ASSIGNATION_DELAY = 1
+
 
 class GoalKeeper(Tactic):
     """
@@ -43,7 +47,7 @@ class GoalKeeper(Tactic):
     # TODO: À complexifier pour prendre en compte la position des joueurs adverses et la vitesse de la balle.
 
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(),
-                 penality_kick=False, args: List[str]=None,):
+                 penalty_kick=False, args: List[str]=None,):
         Tactic.__init__(self, game_state, player, target, args)
         self.is_yellow = self.player.team.team_color == TeamColor.YELLOW
         self.current_state = self.protect_goal
@@ -53,29 +57,46 @@ class GoalKeeper(Tactic):
         self.target = target
         self._find_best_passing_option()
         self.kick_force = 5
-        self.penality_kick = penality_kick
+        self.penalty_kick = penalty_kick
 
     def kick_charge(self):
         self.next_state = self.protect_goal
         return AllStar(self.game_state, self.player,  **{"charge_kick": True})
 
     def protect_goal(self):
-        if not self.penality_kick:
+        if not self.penalty_kick:
             if self.player == closest_player_to_point(GameState().get_ball_position()):
                 self.next_state = self.go_behind_ball
             else:
                 self.next_state = self.protect_goal
             return ProtectGoal(self.game_state, self.player, self.is_yellow,
-                       minimum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"]-250,
-                       maximum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"])
+                               minimum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"]-250,
+                               maximum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"])
         else:
-            return GoToPositionPathfinder(self.game_state, self.player,
-                                          Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0))
+            our_goal = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
+            opponent_kicker = player_with_ball(2*ROBOT_RADIUS)
+            ball_position = self.game_state.get_ball_position()
+            if opponent_kicker is not None:
+                ball_to_goal = our_goal.x - ball_position.x
+                if self.game_state.field.our_side is FieldSide.POSITIVE:
+                    opponent_kicker_orientation = opponent_kicker.pose.angle()
+                else:
+                    opponent_kicker_orientation = wrap_to_pi(opponent_kicker.pose.orientation - m.pi)
+                y_position_on_line = ball_to_goal * m.tan(opponent_kicker_orientation)
+                y_position_on_line = clamp(y_position_on_line,
+                                           -GameState().const["GOAL_WIDTH"]/4,
+                                           GameState().const["GOAL_WIDTH"]/4)
+                print(y_position_on_line)
+                return GoToPositionPathfinder(self.game_state, self.player, Pose(our_goal.x,
+                                                                                 y_position_on_line,
+                                                                                 opponent_kicker_orientation))
+            else:
+                return GoToPositionPathfinder(self.game_state, self.player, Pose(our_goal))
 
     def go_behind_ball(self):
         if not self.player == closest_player_to_point(GameState().get_ball_position()):
             self.next_state = self.protect_goal
-        elif self._is_player_towards_ball_and_target(-0.95):
+        elif self._is_player_towards_ball_and_target():
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -88,7 +109,7 @@ class GoalKeeper(Tactic):
             self.next_state = self.protect_goal
         elif self._get_distance_from_ball() < 120:
             self.next_state = self.kick
-        elif self._is_player_towards_ball_and_target(-0.95):
+        elif self._is_player_towards_ball_and_target():
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -102,29 +123,13 @@ class GoalKeeper(Tactic):
         return Kick(self.game_state, self.player, self.kick_force, self.target)
 
     def _get_distance_from_ball(self):
-        return get_distance(self.player.pose.position,
-                            self.game_state.get_ball_position())
+        return (self.player.pose.position - self.game_state.get_ball_position()).norm()
 
-    def _is_player_towards_ball_and_target(self, fact=-0.99):
-        player_x = self.player.pose.position.x
-        player_y = self.player.pose.position.y
-
-        ball_x = self.game_state.get_ball_position().x
-        ball_y = self.game_state.get_ball_position().y
-
-        target_x = self.target.position.x
-        target_y = self.target.position.y
-
-        vector_player_2_ball = np.array([ball_x - player_x, ball_y - player_y])
-        vector_target_2_ball = np.array([ball_x - target_x, ball_y - target_y])
-        vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
-        vector_target_2_ball /= np.linalg.norm(vector_target_2_ball)
-        vector_player_dir = np.array([np.cos(self.player.pose.orientation),
-                                      np.sin(self.player.pose.orientation)])
-        if np.dot(vector_player_2_ball, vector_target_2_ball) < fact:
-            if np.dot(vector_player_dir, vector_target_2_ball) < fact:
-                return True
-        return False
+    def _is_player_towards_ball_and_target(self, abs_tol=m.pi/30):
+        ball_position = self.game_state.get_ball_position()
+        target_to_ball = ball_position - self.target.position
+        ball_to_player = self.player.pose.position - ball_position
+        return compare_angle(target_to_ball.angle(), ball_to_player.angle(), abs_tol=abs_tol)
 
     def _find_best_passing_option(self):
         if self.target_assignation_last_time is None \

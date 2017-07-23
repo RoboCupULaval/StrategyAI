@@ -6,6 +6,7 @@ from RULEngine.Util.geometry import *
 from ai.states.game_state import GameState
 import time
 
+
 class PlayerPosition(object):
     def __init__(self, player, distance):
         self.player = player
@@ -14,9 +15,9 @@ class PlayerPosition(object):
 
 def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS):
     # Retourne le joueur qui possède la balle, NONE si balle libre
-    closest_player = closest_player_to_point(GameState().get_ball_position())
-    if closest_player[0][1] < min_dist_from_ball:
-        return closest_player[0][0]
+    closest_players = closest_players_to_point(GameState().get_ball_position())
+    if closest_players[0].distance < min_dist_from_ball:
+        return closest_players[0].player
     else:
         return None
 

@@ -26,7 +26,7 @@ class PenalityDefense(Strategy):
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
 
-        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal, penality_kick=True))
+        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal, penalty_kick=True))
 
         for index, position, player in role_by_robots:
             if player:
