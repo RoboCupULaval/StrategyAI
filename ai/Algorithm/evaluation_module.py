@@ -64,17 +64,15 @@ def is_target_reached(player, target: Position, min_dist=0.01):
 def best_position_option(player, pointA: Position, pointB: Position):
     # Retourne la position (entre pointA et pointB) la mieux placée pour une passe
     ncounts = 11
-    points_projection = zip([pointA.x + i * (pointB.x - pointA.x)/(ncounts-1) for i in range(ncounts)],
-                            [pointA.y + i * (pointB.y - pointA.y)/(ncounts-1) for i in range(ncounts)])
-    score_min = float("inf")
+    positions = []
 
-    best_position = Position((pointA + pointB) / 2)
-    for x, y in points_projection:
-        i = Position(x, y)
-        score = line_of_sight_clearance(player, i)
-        if score_min > score:
-            score_min = score
-            best_position = i
+    for i in range(ncounts):
+        positions += [Position(pointA.x + i * (pointB.x - pointA.x)/(ncounts-1),
+                               pointA.y + i * (pointB.y - pointA.y)/(ncounts-1))]
+    positions = np.stack(positions)
+    scores = line_of_sight_clearance(player, positions)
+    best_score_index = np.argmin(scores)
+    best_position = positions[best_score_index, :]
     return best_position
 
 
@@ -103,24 +101,34 @@ def best_passing_option(passing_player):
 
     return receiver_id
 
+def best_goal_score_option(passing_player):
+    # Retourne la meilleure position dans le but pour kick
+    goalA = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"], GameState().field.constant["FIELD_GOAL_WIDTH"]/2)
+    goalB = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"], -GameState().field.constant["FIELD_GOAL_WIDTH"]/2)
+    best_position = best_position_option(passing_player, goalA, goalB)
+    print('kick au goal', best_position)
+    return best_position
 
-def line_of_sight_clearance(player, target):
+def line_of_sight_clearance(player, targets):
     # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est petit)
-    score = np.linalg.norm(player.pose.position - target)
+    score = np.linalg.norm(player.pose.position - targets)
     for j in GameState().my_team.available_players.values():
         # Obstacle : les players friends
-        if not (j.id == player.id or j.pose.position == target):
-            score *= trajectory_score(player.pose.position, target, j.pose.position)
+        condition = []
+        if not (j.id == player.id):
+            condition += [target is not j.pose.position for target in targets]
+            if any(condition):
+                score *= trajectory_score(player.pose.position, targets[condition], j.pose.position)
     for j in GameState().other_team.available_players.values():
         # Obstacle : les players ennemis
-        score *= trajectory_score(player.pose.position, target, j.pose.position)
+        score *= trajectory_score(player.pose.position, targets, np.array(j.pose.position))
     return score
 
 
 def line_of_sight_clearance_ball(player, targets, distances=None):
     # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
     # (plus c'est dégagé plus le score est petit)
-
+    start = time.time()
     ball_position = GameState().get_ball_position()
     if distances is None:
         # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
@@ -150,7 +158,7 @@ def line_of_sight_clearance_ball_legacy(player, target: Position):
     #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
     for j in GameState().other_team.available_players.values():
         # Obstacle : les players ennemis
-        score *= trajectory_score_legacy(GameState().get_ball_position(), target, j.pose.position)
+        score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
     return score
 
 

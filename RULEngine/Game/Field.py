@@ -169,6 +169,8 @@ class Field:
                 self.constant["FIELD_GOAL_Y_TOP"] = self._defense_radius + (self._defense_stretch / 2)
                 self.constant["FIELD_GOAL_Y_BOTTOM"] = -self.constant["FIELD_GOAL_Y_TOP"]
 
+                self.constant["FIELD_GOAL_WIDTH"] = self._goal_width
+
                 if self.our_side == FieldSide.POSITIVE:
                     self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self.constant["FIELD_X_NEGATIVE"]
                     self.constant["FIELD_THEIR_GOAL_X_INTERNAL"] = self.constant["FIELD_X_NEGATIVE"] + self.constant["FIELD_GOAL_RADIUS"]

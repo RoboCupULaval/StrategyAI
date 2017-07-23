@@ -9,7 +9,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from RULEngine.Util.geometry import get_distance, compare_angle, wrap_to_pi
-from ai.Algorithm.evaluation_module import best_passing_option
+from ai.Algorithm.evaluation_module import best_passing_option, best_goal_score_option
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
@@ -209,7 +209,7 @@ class GoKick(Tactic):
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
             tentative_target_id = best_passing_option(self.player)
             if tentative_target_id is None:
-                self.target = Pose(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0, 0)
+                self.target = Pose(best_goal_score_option(self.player))
             else:
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
 
