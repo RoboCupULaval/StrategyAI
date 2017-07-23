@@ -48,33 +48,35 @@ class Coach(object):
         :return: List(_Command) les commandes des robots
         """
         # main loop de l'IA
-        # debug code! no remove pls (au moins pas avant le Japon)
+        # debug code! no remostart_play_executorve pls (au moins pas avant le Japon)
+
         start_debug_interface = time.time()
         self.debug_executor.exec()
-        end_debug_interface = time.time()
-        start_play_executor = time.time()
+        end_debug_interface = start_play_executor = time.time()
         self.play_executor.exec()
-        end_play_executor = time.time()
-        start_module_executor = time.time()
+        end_play_executor = start_module_executor = time.time()
         self.module_executor.exec()
-        end_module_executor = time.time()
-        start_motion_executor = time.time()
+        end_module_executor = start_motion_executor = time.time()
         self.motion_executor.exec()
-        end_motion_executor = time.time()
-        start_robot_commands = time.time()
+        end_motion_executor = start_robot_commands = time.time()
         robot_commands = self.robot_command_executor.exec()
         end_robot_commands = time.time()
 
-        somme = end_debug_interface - start_debug_interface + end_play_executor - start_play_executor + \
-                end_module_executor - start_module_executor + end_motion_executor - start_motion_executor + \
-                end_robot_commands - start_robot_commands
+        dt_debug = end_debug_interface - start_debug_interface
+        dt_play_exe = end_play_executor - start_play_executor
+        dt_module_exe = end_module_executor - start_module_executor
+        dt_motion_exe =  end_motion_executor - start_motion_executor
+        dt_robot_cmd = end_robot_commands - start_robot_commands
+        sum = dt_debug + dt_play_exe + dt_module_exe + dt_motion_exe + dt_robot_cmd
 
-        # print("debug_interface:",  end_debug_interface - start_debug_interface)
-        # print("play_executor:", end_play_executor - start_play_executor)
-        # print("module_executor:", end_module_executor - start_module_executor)
-        # print("motion_executor:", end_motion_executor - start_motion_executor)
-        # print("robot_commands:", end_robot_commands - start_robot_commands)
-        # print("somme:", somme)
+        print("[{:4.1f}ms total] debug_inter:{:4.1f}ms/{:3.1f}% | play_exec:{:4.1f}ms/{:3.1f}% | module_exec:{:4.1f}ms/{:3.1f}% | motion_exec:{:4.1f}ms/{:3.1f}% | robot_cmd:{:4.1f}ms/{:3.1f}%"
+              .format(sum*1000,
+                      dt_debug*1000, dt_debug/sum*100.0,
+                      dt_play_exe*1000, dt_play_exe/sum*100.0,
+                      dt_module_exe*1000, dt_module_exe/sum*100.0,
+                      dt_motion_exe*1000, dt_motion_exe/sum*100.0,
+                      dt_robot_cmd*1000, dt_robot_cmd/sum*100.0))
+
         return robot_commands
 
     def set_reference(self, world_reference: ReferenceTransferObject) -> None:
