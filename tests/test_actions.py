@@ -174,7 +174,10 @@ class TestActions(unittest.TestCase):
         expected_cmd = AICommand(self.a_player, AICommandType.MOVE,
                                  **{"pose_goal": SpeedPose(self.a_player.pose),
                                     "kick": True,
-                                    "control_loop_type": AIControlLoopType.SPEED})
+                                    "control_loop_type": AIControlLoopType.SPEED,
+                                    "cruise_speed": 0.1,
+                                    "end_speed": self.end_speed
+                                    })
         return_cmd = self.kick.exec()
         self.assertEqual(expected_cmd, return_cmd)
 
