@@ -2,6 +2,7 @@ import numpy as np
 import warnings
 
 from RULEngine.Util.Position import Position
+from RULEngine.Util.Pose import Pose
 from config.config_service import ConfigService
 
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
@@ -15,6 +16,7 @@ class FriendKalmanFilter:
         self.tau_y = 0.3
         self.tau_orientation = self.default_dt
         ncameras = int(cfg.config_dict["IMAGE"]["number_of_camera"])
+        self.frames_to_extrapolate = int(cfg.config_dict["IMAGE"]["frames_to_extrapolate"])
 
         # Transition model
         self.F = np.array([[1, 0, self.default_dt, 0, 0, 0],  # Position x
@@ -41,7 +43,7 @@ class FriendKalmanFilter:
                            10 ** 3,
                            10 ** 3,
                            10 ** (-1),
-                           10 ** (-1)]) # Orientation Covariance was 0.01, SB
+                           10 ** (-1)])  # Orientation Covariance was 0.01, SB
         self.Q = np.diag(values)
         # Observation covariance
         values = [10 ** (-3) for _ in range(ncameras)]
@@ -52,21 +54,27 @@ class FriendKalmanFilter:
         self.P = 10 ** 6 * np.eye(6)
         self.x = np.array([9999, 9999, 0, 0, 0, 0])
 
+        self.empty_frames_counter = 0
+
     def predict(self, command):
         if command is None:
             self.x = np.dot(self.F, self.x)
         else:
             conversion_m_to_mm = 1000
-            command_xy = conversion_m_to_mm * Position(command[0], command[1]).rotate(self.x[4])
-            self.x = np.dot(self.F, self.x) + np.dot(self.B, np.array([command_xy.x, command_xy.y, command[2]]))
+            command = Pose(*command).scale(conversion_m_to_mm)
+            command.position = command.position.rotate(self.x[4])
+            self.x = np.dot(self.F, self.x) + np.dot(self.B, command.to_array())
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
 
     def update(self, observation):
         obsx = []
         obsy = []
         obsth = []
+        # counter to skip the rest of the function if we don't have suffisent info
+        observation_is_useful = False
         for obs in observation:
             if obs is not None:
+                observation_is_useful = True
                 obsx.append(obs.position.x)
                 obsy.append(obs.position.y)
                 obsth.append(obs.orientation)
@@ -74,25 +82,30 @@ class FriendKalmanFilter:
                 obsx.append(None)
                 obsy.append(None)
                 obsth.append(None)
-        observation = np.array(obsx + obsy + obsth)
+        # skip if we received an observation contening only Nones
+        if observation_is_useful:
+            self.empty_frames_counter = 0
+            observation = np.array(obsx + obsy + obsth)
 
-        observation = np.array(observation)
-        mask = np.array([obs is not None for obs in observation])
-        observation_wmask = observation[mask]
-        if len(observation_wmask) != 0:
-            H = self.H[mask]
-            R = np.transpose(self.R[mask])
-            R = np.transpose(R[mask])
+            observation = np.array(observation)
+            mask = np.array([obs is not None for obs in observation])
+            observation_wmask = observation[mask]
+            if len(observation_wmask) != 0:
+                H = self.H[mask]
+                R = np.transpose(self.R[mask])
+                R = np.transpose(R[mask])
 
-            y = np.array(observation_wmask) - np.dot(H, self.x)
+                y = np.array(observation_wmask) - np.dot(H, self.x)
 
-            idx = int(2 * len(y) / 3)
-            y[idx::] = (y[idx::] + np.pi) % (2 * np.pi) - np.pi
+                idx = int(2 * len(y) / 3)
+                y[idx::] = (y[idx::] + np.pi) % (2 * np.pi) - np.pi
 
-            S = np.dot(np.dot(H, self.P), np.transpose(H)) + R
-            K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
-            self.x = self.x + np.dot(K, np.transpose(y))
-            self.P = np.dot((np.eye(self.P.shape[0]) - np.dot(K, H)), self.P)
+                S = np.dot(np.dot(H, self.P), np.transpose(H)) + R
+                K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
+                self.x = self.x + np.dot(K, np.transpose(y))
+                self.P = np.dot((np.eye(self.P.shape[0]) - np.dot(K, H)), self.P)
+        else:
+            self.empty_frames_counter += 1
 
     def transition_model_with_command(self, dt):
         self.F = np.array([[1, 0, dt, 0, 0, 0],  # Position x
@@ -132,7 +145,8 @@ class FriendKalmanFilter:
         if observation is not None:
             self.update(observation)
         self.predict(command)
-        output_state = self.x
-        output_state[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
-
+        self.x[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
+        output_state = self.x.tolist()
+        if self.empty_frames_counter > self.frames_to_extrapolate:
+            output_state = [0, 0, 0, 0, 0, 0]
         return output_state
