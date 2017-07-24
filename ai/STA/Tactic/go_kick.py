@@ -106,16 +106,7 @@ class GoKick(Tactic):
         else:
             return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
                                           collision_ball=False, cruise_speed=1)
-        # return RotateAround(self.game_state,
-        #                     self.player,
-        #                     Pose(ball_position, orientation),
-        #                     GO_BEHIND_SPACING,
-        #                     pathfinder_on=True,
-        #                     aiming=self.target,
-        #                     rotation_speed=3 * m.pi,
-        #                     speed_mode=True,
-        #                     behind_target=distance_behind)
-
+ 
     def grab_ball(self):
         if self.grab_ball_tries == 0:
             if self._get_distance_from_ball() < KICK_DISTANCE:
