@@ -129,7 +129,6 @@ class Framework(object):
         else:
             self.stop_game()
 
-    @profile(immediate=True)
     def game_thread_main_loop(self):
         """ Fonction exécuté et agissant comme boucle principale. """
 
