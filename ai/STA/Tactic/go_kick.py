@@ -95,7 +95,7 @@ class GoKick(Tactic):
         else:
             return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
                                           collision_ball=False, cruise_speed=1)
- 
+
     def grab_ball(self):
         if self.grab_ball_tries == 0:
             if self._get_distance_from_ball() < KICK_DISTANCE:
@@ -116,7 +116,6 @@ class GoKick(Tactic):
         return Kick(self.game_state, self.player, self.kick_force, self.target, cruise_speed=0.1, end_speed=0.1)
 
     def validate_kick(self):
-        print(self.game_state.get_ball_velocity().norm())
         if self.game_state.get_ball_velocity().norm() > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.halt
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
@@ -161,6 +160,7 @@ class GoKick(Tactic):
             Calcule le point situé à  x pixels derrière la position 1 par rapport à la position 2
             :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
             """
+        # TODO: Simplify and use position object
 
         delta_x = self.target.position.x - self.game_state.get_ball_position().x
         delta_y = self.target.position.y - self.game_state.get_ball_position().y
