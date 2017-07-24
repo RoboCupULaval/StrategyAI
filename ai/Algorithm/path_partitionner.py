@@ -122,7 +122,7 @@ class PathPartitionner(Pathfinder):
             path = path_1.join_segments(path_2)
         return path
 
-    @profile(immediate=False)
+    # @profile(immediate=False)
     def get_path(self, player: OurPlayer, pose_target: Pose=Pose(), cruise_speed: [int, float]=1,
                  old_path=None, old_raw_path=Path(Position(99999, 99999), Position(99999, -99999)),
                  end_speed=0, ball_collision=False, optional_collision=None):
