@@ -10,6 +10,7 @@ import numpy.matlib
 import time
 from profilehooks import profile
 
+
 class Path:
     def __init__(self, start=Position(),  end=Position(), start_speed=0, end_speed=0):
 
