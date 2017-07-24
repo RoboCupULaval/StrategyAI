@@ -9,7 +9,7 @@ from typing import Union
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Game.Player import Player
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
-from RULEngine.Util.constant import TeamColor
+from RULEngine.Util.constant import TeamColor, ROBOT_RADIUS
 from RULEngine.Util.singleton import Singleton
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
@@ -163,5 +163,6 @@ class GameState(object, metaclass=Singleton):
 
     def display_player_kalman(self):
         for player in self.my_team.available_players.values():
-            pose = player.pose
-            self.debug_interface.add_circle(center=(pose[0], pose[1]), radius=90, timeout=0.06)
+            if player.check_if_on_field():
+                pose = player.pose
+                self.debug_interface.add_circle(center=(pose[0], pose[1]), radius=ROBOT_RADIUS, timeout=0.06)
