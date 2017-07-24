@@ -90,17 +90,19 @@ class PathfinderModule(Executor):
         # self.last_path = None
         # self.last_raw_path = None
         # self.last_pose_goal = None
-        #self.pool = Pool(processes=12)
-
+        # self.pool = Pool(processes=12)
 
     def exec(self):
+
         callback = partial(pathfind_ai_commands, self.type_of_pathfinder.lower(), self.game_state)
         paths = [callback(player) for player in list(self.ws.game_state.my_team.available_players.values())]
         #print(len(self.ws.game_state.my_team.available_players.values()))
         #paths = self.pool.map(callback, self.game_state.my_team.available_players.values())
+        start = time.time()
         for path in paths:
             if path is not None:
                 self.draw_path(path)
+        print(time.time() - start)
         # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         #     future_to_path = {executor.submit(self._pathfind_ai_commands(player), player): player for player in
         #                       self.ws.game_state.my_team.available_players.values()}

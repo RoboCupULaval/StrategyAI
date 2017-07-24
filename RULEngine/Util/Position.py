@@ -2,6 +2,7 @@
 
 import numpy as np
 import warnings
+import math
 
 POSITION_ABS_TOL = 0.01
 
@@ -48,8 +49,7 @@ class Position(np.ndarray):
 
     def norm(self):
         """Return the distance of the point from the origin"""
-
-        return np.sqrt(self[0] ** 2 + self[1] ** 2)
+        return math.sqrt(self[0] ** 2 + self[1] ** 2)
 
     def angle(self):
         """Return the angle of the point from the x-axis between -pi and pi"""

@@ -122,7 +122,7 @@ class PathPartitionner(Pathfinder):
             path = path_1.join_segments(path_2)
         return path
 
-
+    @profile(immediate=False)
     def get_path(self, player: OurPlayer, pose_target: Pose=Pose(), cruise_speed: [int, float]=1,
                  old_path=None, old_raw_path=Path(Position(99999, 99999), Position(99999, -99999)),
                  end_speed=0, ball_collision=False, optional_collision=None):
@@ -237,7 +237,7 @@ class PathPartitionner(Pathfinder):
             # for idx, collision_body in enumerate(self.optional_collision):
             for idx, mask in enumerate(self.player.collision_body_mask):
                 if mask == 1:
-                    self.pose_obstacle = np.vstack((self.pose_obstacle, self.optional_collision[idx].position))
+                    self.pose_obstacle = np.concatenate((self.pose_obstacle, self.optional_collision[idx].position.reshape(1, 2)))
                     self.collision_body.append(self.optional_collision[idx])
         self.avoid_radius = np.array([obj.avoid_radius for obj in self.collision_body])
         # print(self.pose_obstacle.shape)
