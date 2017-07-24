@@ -88,8 +88,8 @@ class GoalKeeper(Tactic):
 
                 y_position_on_line = ball_to_goal * tan(opponent_kicker_orientation)
                 y_position_on_line = clamp(y_position_on_line,
-                                           -GameState().const["GOAL_WIDTH"]/4,
-                                           GameState().const["GOAL_WIDTH"]/4)
+                                           -GameState().const["FIELD_GOAL_WIDTH"]/4,
+                                           GameState().const["FIELD_GOAL_WIDTH"]/4)
 
                 return MoveToPosition(self.game_state,
                               self.player,
