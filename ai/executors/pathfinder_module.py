@@ -102,7 +102,6 @@ class PathfinderModule(Executor):
         for path in paths:
             if path is not None:
                 self.draw_path(path)
-        print(time.time() - start)
         # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         #     future_to_path = {executor.submit(self._pathfind_ai_commands(player), player): player for player in
         #                       self.ws.game_state.my_team.available_players.values()}
