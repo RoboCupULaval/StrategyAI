@@ -146,20 +146,6 @@ class GoKick(Tactic):
             go_behind_ball_speed = distance_to_goal / 150
         return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation),
                                      cruise_speed=0.2, end_speed=0.1)
-        # return AllStar(self.game_state,
-        #                self.player,
-        #                charge_kick=True,
-        #                pose_goal=Pose(ball_position, orientation))
-        # return RotateAround(self.game_state,
-        #                     self.player,
-        #                     Pose(ball_position, orientation),
-        #                     self.ball_spacing,
-        #                     aiming=self.target,
-        #                     rotation_speed=m.pi,
-        #                     pathfinder_on=True,
-        #                     speed_mode=True,
-        #                     behind_target=distance_behind,
-        #                     approach=True)
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
