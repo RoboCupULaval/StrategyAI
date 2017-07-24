@@ -52,7 +52,8 @@ class GoKick(Tactic):
                  target: Pose=Pose(),
                  args: List[str]=None,
                  kick_force: Union[int, float]=5,
-                 auto_update_target=False):
+                 auto_update_target=False,
+                 consider_goal_as_target=True):
 
         Tactic.__init__(self, game_state, player, target, args)
         self.current_state = self.kick_charge
@@ -60,6 +61,7 @@ class GoKick(Tactic):
         self.cmd_last_time = time.time()
         self.kick_last_time = time.time()
         self.auto_update_target = auto_update_target
+        self.consider_goal_as_target = consider_goal_as_target
         self.target_assignation_last_time = 0
         self.target = target
         if self.auto_update_target:
@@ -147,7 +149,7 @@ class GoKick(Tactic):
         assignation_delay = (time.time() - self.target_assignation_last_time)
 
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
-            tentative_target_id = best_passing_option(self.player)
+            tentative_target_id = best_passing_option(self.player, self.consider_goal_as_target)
             if tentative_target_id is None:
                 self.target = Pose(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0, 0)
             else:
