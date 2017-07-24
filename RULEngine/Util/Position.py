@@ -49,7 +49,7 @@ class Position(np.ndarray):
     def norm(self):
         """Return the distance of the point from the origin"""
 
-        return float(np.sqrt(np.sum(np.square(self))))
+        return np.sqrt(self[0] ** 2 + self[1] ** 2)
 
     def angle(self):
         """Return the angle of the point from the x-axis between -pi and pi"""
@@ -71,7 +71,8 @@ class Position(np.ndarray):
         return Position(self[1], -self[0]).normalized()
 
     def __eq__(self, other):
-        return np.allclose(self, other, atol=POSITION_ABS_TOL)
+        return (self - other).norm() < self.abs_tol
+        #return np.allclose(self, other, atol=POSITION_ABS_TOL)
 
     def __ne__(self, other):
         return not self.__eq__(other)
