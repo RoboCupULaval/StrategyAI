@@ -133,11 +133,30 @@ class Framework(object):
         self._wait_for_first_frame()
         self._wait_for_first_geometry_packet()
         print(self.vision_routine)
-        # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
-        while not self.thread_terminate.is_set():
-            self.time_stamp = time.time()
-            self.vision_routine()
-            time.sleep(0)
+        output_diag = False
+        if output_diag:
+            from pycallgraph import PyCallGraph
+            from pycallgraph import Config
+            from pycallgraph.output import GraphvizOutput
+            start = time.time()
+            graphviz = GraphvizOutput()
+            graphviz.output_file = "output.png"
+            self.expression = r'^([^s]).*(.)\2.*\1$'
+
+            with PyCallGraph(config=Config(groups=True), output=graphviz):
+                # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
+                while not self.thread_terminate.is_set():
+                    if (time.time() - start) > 20:
+                        break
+                    self.time_stamp = time.time()
+                    self.vision_routine()
+                    time.sleep(0)
+                return
+        else:
+            while not self.thread_terminate.is_set():
+                self.time_stamp = time.time()
+                self.vision_routine()
+                time.sleep(0)
 
     def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer):
         """ Démarrage du moteur de l'IA initial, ajustement de l'équipe de l'ia

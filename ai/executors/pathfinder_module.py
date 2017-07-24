@@ -89,7 +89,7 @@ class PathfinderModule(Executor):
         # self.last_pose_goal = None
         #self.pool = Pool(processes=12)
 
-    #@profile(immediate=True)
+
     def exec(self):
         callback = partial(pathfind_ai_commands, self.type_of_pathfinder.lower(), self.game_state)
         paths = [callback(player) for player in list(self.ws.game_state.my_team.available_players.values())]

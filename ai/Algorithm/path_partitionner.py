@@ -8,7 +8,7 @@ from ai.Algorithm.IntelligentModule import Pathfinder
 import numpy as np
 import numpy.matlib
 import time
-
+from profilehooks import profile
 
 class Path:
     def __init__(self, start=Position(),  end=Position(), start_speed=0, end_speed=0):
@@ -194,7 +194,7 @@ class PathPartitionner(Pathfinder):
         # print("speeds", self.path.speeds)
         return self.path, self.raw_path
 
-
+    #@profile(immediate=False)
     def get_pertinent_collision_objects(self):
 
         i = 0

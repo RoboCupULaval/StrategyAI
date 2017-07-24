@@ -2,13 +2,12 @@
 
 import numpy as np
 import warnings
-
+from profilehooks import profile
 
 class Position(np.ndarray):
 
     def __new__(cls, *args, z=0, abs_tol=0.01):
         obj = position_builder(args, cls)
-
         obj.x = obj[0]
         obj.y = obj[1]
         obj.z = z
@@ -19,8 +18,8 @@ class Position(np.ndarray):
     def __array_finalize__(self, obj):
         if obj is None:
             return
-        self.z = getattr(obj, 'z', 0)
-        self._abs_tol = getattr(obj, 'abs_tol', 0.01)
+        self.z = 0
+        self._abs_tol = 0.01
 
     @property
     def x(self):
@@ -46,9 +45,13 @@ class Position(np.ndarray):
     def abs_tol(self, abs_tol):
         self._abs_tol = abs_tol
 
+
     def norm(self):
         """Return the distance of the point from the origin"""
-        return float(np.linalg.norm(self.view(np.ndarray)))
+
+        return np.sqrt(self[0] ** 2 + self[1] ** 2)
+        # return np.sqrt(np.dot(np.array([self[0], self[1]]), np.array([self[0], self[1]])))
+        #return float(np.linalg.norm(self.view(np.ndarray)))
 
     def angle(self):
         """Return the angle of the point from the x-axis between -pi and pi"""
@@ -108,17 +111,18 @@ class Position(np.ndarray):
         return hash(str(self))
 
 def position_builder(args, cls):
+
     if len(args) == 0:
         obj = Position(0, 0)
     elif len(args) == 1:
-        if isinstance(args[0], (list, Position, np.ndarray)) and len(args[0]) == 2:
-            obj = np.asarray(args[0].copy()).view(cls)
-        elif isinstance(args[0], tuple) and len(args[0]) == 2:
+        if len(args[0]) == 2:
             obj = np.asarray(args[0]).view(cls)
+        # elif isinstance(args[0], tuple) and len(args[0]) == 2:
+        #     obj = np.asarray(args[0]).view(cls)
         else:
             raise ValueError
     elif len(args) == 2:
-        obj = np.asarray(args).copy().view(cls)
+        obj = np.asarray(args).view(cls)
     else:
         raise ValueError
 
