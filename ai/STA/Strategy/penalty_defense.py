@@ -9,7 +9,7 @@ from ai.STA.Strategy.Strategy import Strategy
 from ai.Util.role import Role
 
 
-class PenalityDefense(Strategy):
+class PenaltyDefense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
         ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
