@@ -70,8 +70,6 @@ class GoKick(Tactic):
         self.grab_ball_tries = 0
 
     def kick_charge(self):
-        print('charge')
-
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
             self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
@@ -82,10 +80,6 @@ class GoKick(Tactic):
     def go_behind_ball(self):
         self.ball_spacing = GRAB_BALL_SPACING
         self.status_flag = Flags.WIP
-
-
-
-
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
         distance_behind = self.get_destination_behind_ball()
@@ -95,11 +89,6 @@ class GoKick(Tactic):
             self.next_state = self.go_behind_ball
             if self.auto_update_target:
                 self._find_best_passing_option()
-        distance_to_goal = (distance_behind - self.player.pose.position).norm()
-        # if distance_to_goal > 150:
-        #     go_behind_ball_speed = 1
-        # else:
-        #     go_behind_ball_speed = distance_to_goal / 150
         if self.tries_flag == 0:
             return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
                                           collision_ball=True, cruise_speed=1)
@@ -111,50 +100,25 @@ class GoKick(Tactic):
         if self.grab_ball_tries == 0:
             if self._get_distance_from_ball() < KICK_DISTANCE:
                 self.next_state = self.kick
-        # elif not self._is_player_towards_ball_and_target():
-        #     self.next_state = self.go_behind_ball
-        #     self.grab_ball_tries = 0
-        #     self.status_flag = Flags.INIT
         else:
             if (self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10)):
                 self.next_state = self.kick
 
-
-
-        # else:
-        #     self.tries_flag = self.tries_flag + 1
-        #     self.next_state = self.grab_ball
-        #     self.grab_ball_tries = self.grab_ball_tries + 1
-
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
-        # orientation = (ball_position - self.player.pose.position).angle()
-        distance_behind = self.get_destination_behind_ball()
-        distance_to_goal = (distance_behind - self.player.pose.position).norm()
-        if distance_to_goal > 150:
-            go_behind_ball_speed = 1
-        else:
-            go_behind_ball_speed = distance_to_goal / 150
         return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation),
                                      cruise_speed=0.2, end_speed=0.1)
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
         self.next_state = self.validate_kick
-        # if not self._is_player_towards_ball_and_target():
-        #     self.next_state = self.go_behind_ball
-        #     self.status_flag = Flags.INIT
         self.tries_flag += 1
-        # print(self.tries_flag % 10)
-        ball_position = self.game_state.get_ball_position()
-        orientation = (self.target.position - ball_position).angle()
         return Kick(self.game_state, self.player, self.kick_force, self.target, cruise_speed=0.1, end_speed=0.1)
 
     def validate_kick(self):
         print(self.game_state.get_ball_velocity().norm())
         if self.game_state.get_ball_velocity().norm() > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.halt
-            #print(self._get_distance_from_ball())
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
             self.next_state = self.kick
         else:
