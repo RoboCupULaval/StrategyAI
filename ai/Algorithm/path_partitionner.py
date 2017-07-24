@@ -12,12 +12,12 @@ import time
 
 
 class Path:
-    def __init__(self, start=Position(),  end=Position()):
+    def __init__(self, start=Position(),  end=Position(), start_speed=0, end_speed=0):
 
         self.start = start
         self.goal = end
         self.points = [start, end]
-        self.speeds = [0, 0]
+        self.speeds = [start_speed, end_speed]
 
     def join_segments(self, other):
         new_path = Path()
@@ -97,6 +97,7 @@ class PathPartitionner(Pathfinder):
         self.path_colide_directions = None
         self.dist_robot_2_obs = None
         self.path_colide_points = None
+        self.end_speed = 0
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None):
 
@@ -115,8 +116,9 @@ class PathPartitionner(Pathfinder):
         return path
 
     def get_path(self, player: OurPlayer, pose_target: Pose=Pose(), cruise_speed: [int, float]=1,
-                 old_path=None, old_raw_path=Path(Position(99999, 99999), Position(99999, -99999))):
+                 old_path=None, old_raw_path=Path(Position(99999, 99999), Position(99999, -99999)), end_speed=0):
         self.cruise_speed = cruise_speed
+        self.end_speed = end_speed
         self.player = player
 
         i = 0
@@ -149,7 +151,7 @@ class PathPartitionner(Pathfinder):
         #     print("quel goal?", pose_target.position, old_raw_path.goal)
         if (old_path is not None) and (not self.is_path_collide(old_raw_path,
                                                                 tolerance=self.gap_proxy-50)) and \
-                ((pose_target.position - old_raw_path.goal).norm() < 200):
+                ((pose_target.position - old_raw_path.goal).norm() < 22):
             if np.linalg.norm(pose_target.position - old_raw_path.goal) > 20:
                 self.path_appendice = Path(old_raw_path.goal, self.path.goal)
                 self.path_appendice = self.fastpathplanner(self.path_appendice)
@@ -164,8 +166,9 @@ class PathPartitionner(Pathfinder):
                 self.path = self.remove_redundant_points()
 
         else:
-            self.path = Path(self.player.pose.position.conv_2_np(), pose_target.position.conv_2_np())
-            if self.path.get_path_length() < 1:
+            self.path = Path(self.player.pose.position.conv_2_np(), pose_target.position.conv_2_np(), 0, self.end_speed)
+            print(self.path.speeds)
+            if self.path.get_path_length() < 0.001:
                 """
                 hack shady pour eviter une erreur shady (trop fatiguer pour dealer ak ste shit la)
                 
@@ -185,6 +188,7 @@ class PathPartitionner(Pathfinder):
 
         # print("points", self.path.points)
         # print("speeds", self.path.speeds)
+        print(self.path.speeds)
         return self.path, self.raw_path
 
     def get_raw_path(self, pose_target=Position()):
@@ -426,7 +430,7 @@ class PathReshaper:
         self.path.points = positions_list
         p1 = self.path.points[0]
         point_list = [p1]
-        speed_list = [0]
+        speed_list = [self.path.speeds[0]]
 
         for idx, point in enumerate(self.path.points[1:-1]):
             self.dist_from_path = 50  # mm
@@ -507,7 +511,7 @@ class PathReshaper:
             #                        np.sqrt(radius / (OurPlayer.max_acc * 1000))]
             p1 = point_list[-1]
 
-        speed_list += [0]
+        speed_list += [self.path.speeds[-1]]
         point_list += [self.path.goal]
         # on s'assure que le path est bel et bien réalisable par un robot et on
         # merge les points qui sont trop proches les un des autres.

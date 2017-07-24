@@ -44,7 +44,7 @@ class AICommand(object):
         self.pose_goal = other_args.get("pose_goal", Pose())
         self.speed = other_args.get("speed", SpeedPose())
         self.cruise_speed = other_args.get("cruise_speed", 1)
-
+        self.end_speed = other_args.get("end_speed", 0)
         self.control_loop_type = other_args.get("control_loop_type", AIControlLoopType.POSITION)
 
         # this is for the pathfinder only no direct assignation
