@@ -1,7 +1,7 @@
 import numpy as np
 import warnings
 
-from Util.Position import Position
+from RULEngine.Util.Position import Position
 from config.config_service import ConfigService
 
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
