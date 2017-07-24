@@ -2,9 +2,11 @@
 from config.config_service import ConfigService
 from RULEngine.Util.area import *
 
+
 class FieldSide(Enum):
     POSITIVE = 0
     NEGATIVE = 1
+
 
 class Field:
     def __init__(self, ball):
