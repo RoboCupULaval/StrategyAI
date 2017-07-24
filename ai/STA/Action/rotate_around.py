@@ -23,8 +23,11 @@ class RotateAround(Action):
                  radius: Union[int, float]=DEFAULT_RADIUS,
                  is_clockwise: Union[bool, None]=None,
                  aiming: Union[Pose, None]=None,
-                 pathfinder_on=False,
-                 rotation_speed: Union[int, float]=DEFAULT_ROTATION_SPEED):
+                 pathfinder_on=True,
+                 speed_mode=False,
+                 rotation_speed: Union[int, float]=DEFAULT_ROTATION_SPEED,
+                 behind_target=None,
+                 approach=False):
         """
             Rotate around the target position in the direction specify by is_clockwise flag.
             If a heading is provide, the robot will stop to rotate when it face the heading
@@ -44,9 +47,16 @@ class RotateAround(Action):
         self.target = target
         self.radius = radius
         self.is_clockwise = is_clockwise
-        self.aiming = aiming.position
+        self.aiming = aiming.position if aiming is not None else None
         self.pathfinder_on = pathfinder_on
         self.rotation_speed = rotation_speed
+        self.behind_target = behind_target
+        self.approach = approach
+        self.approach_speed = 0.2
+        if speed_mode:
+            self.tangential_speed = self.rotation_speed * self.radius / 2.
+        else:
+            self.tangential_speed = 0
 
     def generate_destination(self):
 
@@ -54,6 +64,10 @@ class RotateAround(Action):
         player = self.player.pose.position
         target = self.target.position
         target_to_player = player - target
+        if not(self.behind_target is None):
+            if (self.behind_target - self.player.pose.position).norm() < 300:
+                # print((self.behind_target - self.player.pose.position).norm())
+                self.tangential_speed *= (self.behind_target - self.player.pose.position).norm() / 300
 
         if self.aiming is not None:
             aiming_to_target = target - self.aiming
@@ -61,13 +75,14 @@ class RotateAround(Action):
             if compare_angle(heading_error, 0, abs_tol=self.rotation_speed*dt/2):  # True if heading is right
                 next_position = self.radius * aiming_to_target.normalized()
                 next_orientation = aiming_to_target.angle() - m.pi
+                self.tangential_speed = 0
             else:
                 if self.is_clockwise is None:  # Force the rotation in a specific orientation
                     delta_angle = m.copysign(self.rotation_speed * dt, heading_error)
                 else:
                     delta_angle = m.copysign(self.rotation_speed * dt, -1 if self.is_clockwise else 1)
                 next_position = self.radius * target_to_player.normalized().rotate(delta_angle)
-                next_orientation = self.target.orientation + delta_angle / 2
+                next_orientation = aiming_to_target.angle() - m.pi
 
         else:  # If no aiming, we just rotate around the target with the target orientation
             delta_angle = m.copysign(self.rotation_speed * dt, -1 if self.is_clockwise else 1)
@@ -79,7 +94,16 @@ class RotateAround(Action):
         return Pose(next_position, next_orientation)
 
     def exec(self):
-        return AICommand(self.player,
-                         AICommandType.MOVE,
-                         pose_goal=self.generate_destination(),
-                         pathfinder_on=self.pathfinder_on)
+        if self.approach:
+            return AICommand(self.player,
+                             AICommandType.MOVE,
+                             pose_goal=self.generate_destination(),
+                             pathfinder_on=self.pathfinder_on,
+                             cruise_speed=self.approach_speed,
+                             end_speed=self.tangential_speed)
+        else:
+            return AICommand(self.player,
+                             AICommandType.MOVE,
+                             pose_goal=self.generate_destination(),
+                             pathfinder_on=self.pathfinder_on,
+                             end_speed=self.tangential_speed)

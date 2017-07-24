@@ -166,3 +166,7 @@ class GameState(object, metaclass=Singleton):
             if player.check_if_on_field():
                 pose = player.pose
                 self.debug_interface.add_circle(center=(pose[0], pose[1]), radius=ROBOT_RADIUS, timeout=0.06)
+
+    def display_ball_kalman(self):
+        position = self.game.ball.position
+        self.debug_interface.add_circle(center=(position[0], position[1]), radius=90, timeout=0.06)
