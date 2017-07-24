@@ -2,6 +2,7 @@ import time
 from typing import List
 
 from RULEngine.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
+from RULEngine.Util.Position import Position
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Algorithm.path_partitionner import PathPartitionner, Path
 from ai.Util.ai_command import AICommand
@@ -45,7 +46,9 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
             last_raw_path = player.pathfinder_history.last_raw_path
     pathfinder = create_pathfinder(game_state, type_pathfinder)
     if type_pathfinder == "path_part":
-        player.ai_command.pose_goal.position = field.respect_field_rules(player.ai_command.pose_goal.position)
+        player.ai_command.pose_goal.position = \
+            field.respect_field_rules(Position(player.ai_command.pose_goal.position[0],
+                                               player.ai_command.pose_goal.position[1]))
         collision_body = field.field_collision_body
         path, raw_path = pathfinder.get_path(player,
                                              player.ai_command.pose_goal,
