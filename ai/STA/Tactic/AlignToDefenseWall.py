@@ -40,7 +40,7 @@ class AllignToDefenseWall(Tactic):
         self.field_goal_radius = self.game_state.const["FIELD_GOAL_RADIUS"]
         self.field_goal_segment = self.game_state.const["FIELD_GOAL_SEGMENT"]
         self.keep_out_distance = self.field_goal_radius + np.divide(self.field_goal_segment, 2.)
-        self.goal_width = self.game_state.const["GOAL_WIDTH"]
+        self.goal_width = self.game_state.const["FIELD_GOAL_WIDTH"]
         if self.player.team.team_color is TeamColor.BLUE:
             self.goal_middle = Position(-self.game_state.field.constant["FIELD_X_RIGHT"], 0)
         else:
