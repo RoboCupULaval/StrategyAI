@@ -1,12 +1,11 @@
 # Under MIT license, see LICENSE.txt
 
 from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.Pose import Pose
 
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
+from ai.Util.ai_command import AICommand, AICommandType
 
 
 class Kick(Action):
@@ -24,6 +23,7 @@ class Kick(Action):
         self.force = p_force
         self.target = target
         self.end_speed = end_speed
+        self.cruise_speed = cruise_speed
 
     def exec(self):
         """
@@ -47,5 +47,5 @@ class Kick(Action):
                       "kick_strength": self.force,
                       "cruise_speed": 0.1,
                       "end_speed": self.end_speed}
-        print("command kick")
+        # print("command kick")
         return AICommand(self.player, AICommandType.MOVE, **cmd_params)
