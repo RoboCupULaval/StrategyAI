@@ -1,5 +1,4 @@
 # Under MIT License, see LICENSE.txt
-
 from RULEngine.Game.Field import FieldSide
 from RULEngine.Util.constant import ROBOT_RADIUS
 from RULEngine.Util.geometry import *
@@ -50,7 +49,7 @@ def is_ball_moving(min_speed=0.1):
 
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
-    if GameState().field.our_side == FieldSide.POSITIVE:
+    if GameState().field.our_side == FieldSide.POSITIVE: # POSITIVE
         return GameState().get_ball_position().x > 0
     else:
         return GameState().get_ball_position().x < 0
@@ -78,7 +77,7 @@ def best_position_option(player, pointA: Position, pointB: Position):
     return best_position
 
 
-def best_passing_option(passing_player):
+def best_passing_option(passing_player, consider_goal=True):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si but est la meilleure possibilité
 
     score_min = float("inf")
@@ -97,9 +96,10 @@ def best_passing_option(passing_player):
                 score_min = score
                 receiver_id = i.id
 
-    score = (line_of_sight_clearance(passing_player, np.array(goal)))
-    if score_min > score:
-        receiver_id = None
+    if consider_goal and not is_ball_our_side():
+        score = (line_of_sight_clearance(passing_player, np.array(goal)))
+        if score_min > score:
+            receiver_id = None
 
     return receiver_id
 

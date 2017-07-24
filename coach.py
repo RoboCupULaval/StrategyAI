@@ -65,12 +65,12 @@ class Coach(object):
         robot_commands = self.robot_command_executor.exec()
         end_robot_commands = time.time()
 
-        somme = end_debug_interface - start_debug_interface + end_play_executor - start_debug_interface + \
+        somme = end_debug_interface - start_debug_interface + end_play_executor - start_play_executor + \
                 end_module_executor - start_module_executor + end_motion_executor - start_motion_executor + \
                 end_robot_commands - start_robot_commands
 
         # print("debug_interface:",  end_debug_interface - start_debug_interface)
-        # print("play_executor:", end_play_executor - start_debug_interface)
+        # print("play_executor:", end_play_executor - start_play_executor)
         # print("module_executor:", end_module_executor - start_module_executor)
         # print("motion_executor:", end_motion_executor - start_motion_executor)
         # print("robot_commands:", end_robot_commands - start_robot_commands)

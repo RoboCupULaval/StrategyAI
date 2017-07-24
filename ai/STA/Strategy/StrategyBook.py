@@ -4,6 +4,8 @@
 from typing import List
 
 from ai.STA.Strategy.DefenseWall import DefenseWall
+from ai.STA.Strategy.direct_free_kick import DirectFreeKick
+from ai.STA.Strategy.indirect_free_kick import IndirectFreeKick
 from ai.STA.Strategy.offense import Offense
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Strategy.indiana_jones import IndianaJones
@@ -45,6 +47,9 @@ class StrategyBook(object):
                               'PrepareKickOffDefense': PrepareKickOffDefense,
                               'PenalityDefense': PenalityDefense,
                               'PenalityOffense': PenalityOffense
+                              'PrepareKickOffDefense': PrepareKickOffDefense,
+                              'DirectFreeKick': DirectFreeKick,
+                              'IndirectFreeKick': IndirectFreeKick
                               }
 
     def get_strategies_name_list(self) -> List[str]:
