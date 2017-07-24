@@ -7,7 +7,6 @@ from RULEngine.Util.geometry import get_distance, conv_position_2_list, remove_d
 from ai.Algorithm.IntelligentModule import Pathfinder
 import numpy as np
 import numpy.matlib
-import time
 from profilehooks import profile
 
 class Path:
@@ -122,6 +121,7 @@ class PathPartitionner(Pathfinder):
             path = path_1.join_segments(path_2)
         return path
 
+    
     def get_path(self, player: OurPlayer, pose_target: Pose=Pose(), cruise_speed: [int, float]=1,
                  old_path=None, old_raw_path=Path(Position(99999, 99999), Position(99999, -99999)),
                  end_speed=0, ball_collision=False, optional_collision=None):
@@ -194,7 +194,7 @@ class PathPartitionner(Pathfinder):
         # print("speeds", self.path.speeds)
         return self.path, self.raw_path
 
-    #@profile(immediate=False)
+
     def get_pertinent_collision_objects(self):
 
         i = 0
@@ -297,7 +297,7 @@ class PathPartitionner(Pathfinder):
                         return True
         return False
 
-    def is_path_collide(self, path, obstacles=None, tolerance=None, first_call = False):
+    def is_path_collide(self, path, obstacles=None, tolerance=None, flag_closest_obs=False):
         if obstacles is None:
             obstacles = self.pose_obstacle
         if tolerance is None:
@@ -307,15 +307,20 @@ class PathPartitionner(Pathfinder):
         if path.start == path.goal or len(obstacles) == 0:
             return False
         #print(path.points)
-        points = np.vstack(np.array(path.points))
+        # points = np.vstack(np.array(path.points))
+        points = np.array(path.points)
+        # print(points)
+        # print(points_dummy)
         points_start = points[:-1]
         points_target = points[1:]
         paths_len = np.sqrt(((points_target - points_start) * (points_target - points_start)).sum(axis=1))
         big_enough_paths = paths_len > 0.000001
+
         directions = np.array((points_target - points_start)[big_enough_paths])
-        directions /= np.vstack(np.sqrt((directions * directions).sum(axis=1)))
+        norm_directions = np.sqrt((directions * directions).sum(axis=1))
+        norm_directions = np.matlib.repmat(norm_directions.reshape(norm_directions.shape[0], 1), 1, 2)
+        directions = directions / norm_directions
         points_start = points_start[big_enough_paths]
-        directions = directions
         positions_obstacles = np.matlib.repmat(obstacles, 1, points_start.shape[0]).reshape((obstacles.shape[0] *
                                                                                              points_start.shape[0],
                                                                                              obstacles.shape[1]))
@@ -330,7 +335,8 @@ class PathPartitionner(Pathfinder):
         if (dist_robot_2_obs == 0).all() and (path.start - path.goal).norm() > 50:
             return True
         big_enough_dists = dist_robot_2_obs > 0.0000001
-        dist_robot_2_obs = np.vstack(dist_robot_2_obs[big_enough_dists])
+        dist_robot_2_obs = dist_robot_2_obs[big_enough_dists]
+        dist_robot_2_obs = dist_robot_2_obs.reshape(dist_robot_2_obs.shape[0], 1)
         vec_robot_2_obs = vecs_robot_2_obs[big_enough_dists]
         directions_valid = directions[big_enough_dists]
         tolerances = tolerances[big_enough_dists]
@@ -338,14 +344,27 @@ class PathPartitionner(Pathfinder):
         dists_from_path = np.abs(np.cross(directions_valid, vec_robot_2_obs))
         projection_obs_on_direction = (directions_valid * vec_robot_2_obs / dist_robot_2_obs).sum(axis=1)
         points_to_consider = np.abs(projection_obs_on_direction) < 1
-        dists_to_consider = np.vstack(dists_from_path[points_to_consider])
+        dists_to_consider = dists_from_path[points_to_consider]
+        dists_to_consider = dists_to_consider.reshape(dists_to_consider.shape[0], 1)
         #print(points_to_consider)
-        tolerances = tolerances[points_to_consider]
-        if dists_to_consider[np.abs(dists_to_consider) < tolerances].any() and (path.start - path.goal).norm() > 50:
-            return True
-        return False
+        if flag_closest_obs:
+            dists_to_consider_condition = np.abs(dists_to_consider) < tolerances
+            collision_body = np.array(self.collision_body)
+            collision_body = np.array([collision_body[points_to_consider]]).T
+            collision_body = collision_body[dists_to_consider_condition]
+            dist_robot_2_obs = dist_robot_2_obs[dists_to_consider_condition]
+            idx = np.argmin(dist_robot_2_obs)
+            closest_collision_body = collision_body[idx]
+            return closest_collision_body.position, dist_robot_2_obs[idx], closest_collision_body
 
-    def find_closest_obstacle(self, point, path):
+        else:
+            tolerances = tolerances[points_to_consider]
+            if dists_to_consider[np.abs(dists_to_consider) < tolerances].any() and (path.start - path.goal).norm() > 50:
+                return True
+            return False
+
+    #@profile(immediate=False)
+    def find_closest_obstacle_legacy(self, point, path):
         assert(isinstance(point, Position))
         dist_point_obs = np.inf
         closest_obs = None
@@ -369,6 +388,19 @@ class PathPartitionner(Pathfinder):
                     closest_obs = obstacle_pos
                     closest_collision_body = self.collision_body[idx]
         return [closest_obs, dist_point_obs, closest_collision_body]
+
+
+    def find_closest_obstacle(self, point, path):
+        assert(isinstance(point, Position))
+        dist_point_obs = np.inf
+        closest_obs = None
+        closest_collision_body = self.collision_body[0].position
+        if (path.start - path.goal).norm() < 0.001:
+            return [closest_obs, dist_point_obs, closest_collision_body]
+        if point == path.start:
+            return [closest_obs, dist_point_obs, closest_collision_body]
+        path.goal = point
+        return self.is_path_collide(path, tolerance=None, flag_closest_obs=True)
 
     def verify_sub_target(self, sub_target):
         for collision_body in self.collision_body:
