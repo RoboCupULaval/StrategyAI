@@ -155,6 +155,7 @@ class Field:
 
                 self.constant["FIELD_GOAL_RADIUS"] = self._defense_radius
                 self.constant["FIELD_GOAL_SEGMENT"] = self._defense_stretch
+                self.constant["FIELD_GOAL_WIDTH"] = self._goal_width
 
                 self.constant["FIELD_GOAL_Y_TOP"] = self._defense_radius + (self._defense_stretch / 2)
                 self.constant["FIELD_GOAL_Y_BOTTOM"] = -self.constant["FIELD_GOAL_Y_TOP"]
@@ -218,7 +219,7 @@ positive_side_constant = {
     "FIELD_GOAL_SEGMENT": 500,
 
     # Goal Parameters
-    "GOAL_WIDTH": 1000,
+    "FIELD_GOAL_WIDTH": 1000,
     "FIELD_GOAL_Y_TOP": 1250,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
     "FIELD_GOAL_Y_BOTTOM": -1250,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
     "FIELD_OUR_GOAL_X_EXTERNAL": 4500,  # FIELD_X_LEFT
@@ -297,7 +298,7 @@ negative_side_constant = {
 
 
     # Goal Parameters
-    "GOAL_WIDTH": 1000,
+    "FIELD_GOAL_WIDTH": 1000,
     "FIELD_GOAL_Y_TOP": 1250,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
     "FIELD_GOAL_Y_BOTTOM": -1250,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
     "FIELD_OUR_GOAL_X_EXTERNAL": -4500,  # FIELD_X_LEFT
