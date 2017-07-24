@@ -12,11 +12,11 @@ class PlayerPosition(object):
         self.distance = distance
 
 
-def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS):
+def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
     # Retourne le joueur qui possède la balle, NONE si balle libre
-    closest_player = closest_player_to_point(GameState().get_ball_position())
-    if closest_player[0][1] < min_dist_from_ball:
-        return closest_player[0][0]
+    closest_player = closest_player_to_point(GameState().get_ball_position(), our_team)
+    if (closest_player.pose.position - GameState().get_ball_position()).norm() < min_dist_from_ball:
+        return closest_player
     else:
         return None
 
@@ -229,4 +229,28 @@ def best_position_in_region(player, A, B):
     best_position = positions[best_score_index, :]
 
     return best_position
+
+def score_strategy_other_team():
+    # Retourne le score de l'équipe ennemie (négatif = ils sont en offensive, positif = ils sont en défensive)
+    i = 0
+    x_sum = 0
+    for player in GameState().other_team.available_players.values():
+        x_sum += player.pose.position.x
+        i += 1
+    if GameState().field.our_side == FieldSide.POSITIVE:
+        score = -x_sum/i - GameState().get_ball_position().x
+    else:
+        score = x_sum/i + GameState().get_ball_position().x
+
+    player_their_team = player_with_ball(our_team=False)
+    player_our_team = player_with_ball(our_team=True)
+
+    if player_their_team is not None and player_our_team is not None:
+        their_player_to_ball = GameState().get_ball_position() - player_their_team
+        our_player_to_ball = GameState().get_ball_position() - player_our_team
+        score += their_player_to_ball.norm() - our_player_to_ball.norm()
+
+    return score
+
+
 

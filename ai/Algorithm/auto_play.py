@@ -91,7 +91,8 @@ class SimpleAutoPlay(AutoPlay):
         pass
 
     def _analyse_game(self):
-        if is_ball_our_side():
+        print('scoreeeeeeeeeeeeeeeeeeeeee', score_strategy_other_team())
+        if score_strategy_other_team() < 0:
             return SimpleAutoPlayState.NORMAL_DEFENSE
         else:
             return SimpleAutoPlayState.NORMAL_OFFENSE
