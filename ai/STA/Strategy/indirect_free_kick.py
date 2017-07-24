@@ -40,10 +40,10 @@ class IndirectFreeKick(Strategy):
                 self.add_condition(index, 1, 1, partial(self.has_kicked, player))
 
     def is_closest(self, player):
-        return player == closest_player_to_point(GameState().get_ball_position(), True)
+        return player == closest_player_to_point(GameState().get_ball_position(), True).player
 
     def is_not_closest(self, player):
-        return player != closest_player_to_point(GameState().get_ball_position(), True)
+        return player != closest_player_to_point(GameState().get_ball_position(), True).player
 
     def has_kicked(self, player):
         role = GameState().get_role_by_player_id(player.id)
