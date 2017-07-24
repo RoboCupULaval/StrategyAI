@@ -131,7 +131,6 @@ def line_of_sight_clearance(player, targets):
 def line_of_sight_clearance_ball(player, targets, distances=None):
     # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
     # (plus c'est dégagé plus le score est petit)
-    start = time.time()
     ball_position = GameState().get_ball_position()
     if distances is None:
         # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:

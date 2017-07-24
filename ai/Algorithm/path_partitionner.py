@@ -107,7 +107,7 @@ class PathPartitionner(Pathfinder):
         self.optional_collision = None
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None):
-
+        self.get_pertinent_collision_objects(False)
         if self.is_path_collide(path) and depth < self.max_recurs and not(path.start == path.goal):
             sub_target, avoid_dir = self.search_point(path, avoid_dir)
             if sub_target == path.goal or sub_target == path.start:
@@ -196,53 +196,62 @@ class PathPartitionner(Pathfinder):
         return self.path, self.raw_path
 
 
-    def get_pertinent_collision_objects(self):
-
-        i = 0
+    def get_pertinent_collision_objects(self, first_call = True):
         factor = 1.1
-        self.collision_body = []
-        if self.ball_collision:
-            lenght_pose_obstacle = len(self.game_state.my_team.available_players) + \
-                                   len(self.game_state.other_team.available_players)
-        else:
-            lenght_pose_obstacle = len(self.game_state.my_team.available_players) + \
-                                   len(self.game_state.other_team.available_players) - 1
-        self.pose_obstacle = np.zeros((lenght_pose_obstacle, 2))
+        if first_call:
+            i = 0
 
-        for player in self.game_state.my_team.available_players.values():
-            if player.id != self.player.id:
-                # print((self.path.start - player.pose.position).norm() + (self.path.goal - player.pose.position).norm() - \
-                #         (self.path.goal - self.path.start).norm(), (self.path.goal - self.path.start).norm())
+            self.collision_body = []
+            if self.ball_collision:
+                lenght_pose_obstacle = len(self.game_state.my_team.available_players) + \
+                                       len(self.game_state.other_team.available_players)
+            else:
+                lenght_pose_obstacle = len(self.game_state.my_team.available_players) + \
+                                       len(self.game_state.other_team.available_players) - 1
+            self.pose_obstacle = np.zeros((lenght_pose_obstacle, 2))
+
+            for player in self.game_state.my_team.available_players.values():
+                if player.id != self.player.id:
+                    # print((self.path.start - player.pose.position).norm() + (self.path.goal - player.pose.position).norm() - \
+                    #         (self.path.goal - self.path.start).norm(), (self.path.goal - self.path.start).norm())
+                    if (self.player.pose.position - player.pose.position).norm() + \
+                            (self.player.ai_command.pose_goal.position - player.pose.position).norm() < \
+                            (self.player.ai_command.pose_goal.position - self.player.pose.position).norm() * factor:
+                        self.pose_obstacle[i, :] = player.pose.position
+                        self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position,
+                                                                 self.gap_proxy))
+                        i += 1
+            for player in self.game_state.other_team.available_players.values():
                 if (self.player.pose.position - player.pose.position).norm() + \
-                        (self.player.ai_command.pose_goal.position - player.pose.position).norm() < \
-                        (self.player.ai_command.pose_goal.position - self.player.pose.position).norm() * factor:
+                            (self.player.ai_command.pose_goal.position - player.pose.position).norm() < \
+                            (self.player.ai_command.pose_goal.position - self.player.pose.position).norm() * factor:
                     self.pose_obstacle[i, :] = player.pose.position
-                    self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position,
-                                                             self.gap_proxy))
+                    self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position, self.gap_proxy))
                     i += 1
-        for player in self.game_state.other_team.available_players.values():
-            if (self.player.pose.position - player.pose.position).norm() + \
-                        (self.player.ai_command.pose_goal.position - player.pose.position).norm() < \
-                        (self.player.ai_command.pose_goal.position - self.player.pose.position).norm() * factor:
-                self.pose_obstacle[i, :] = player.pose.position
-                self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position, self.gap_proxy))
-                i += 1
-        if self.ball_collision:
-            ball_position = self.game_state.get_ball_position()
-            self.pose_obstacle[i, :] += ball_position
-            self.collision_body.append(CollisionBody(ball_position, Position(0, 0),
-                                                     110, type="ball"))
-        self.pose_obstacle = self.pose_obstacle[0:i, :]
-        if not(self.optional_collision is None):
-            # for idx, collision_body in enumerate(self.optional_collision):
-            for idx, mask in enumerate(self.player.collision_body_mask):
-                if mask == 1:
-                    self.pose_obstacle = np.concatenate((self.pose_obstacle, self.optional_collision[idx].position.reshape(1, 2)))
-                    self.collision_body.append(self.optional_collision[idx])
-        self.avoid_radius = np.array([obj.avoid_radius for obj in self.collision_body])
-        # print(self.pose_obstacle.shape)
-        # print(len(self.collision_body))
-        # print(self.avoid_radius)
+            if self.ball_collision:
+                ball_position = self.game_state.get_ball_position()
+                self.pose_obstacle[i, :] += ball_position
+                self.collision_body.append(CollisionBody(ball_position, Position(0, 0),
+                                                         110, type="ball"))
+            self.pose_obstacle = self.pose_obstacle[0:i, :]
+            if not(self.optional_collision is None):
+                # for idx, collision_body in enumerate(self.optional_collision):
+                for idx, mask in enumerate(self.player.collision_body_mask):
+                    if mask == 1:
+                        self.pose_obstacle = np.concatenate((self.pose_obstacle, self.optional_collision[idx].position.reshape(1, 2)))
+                        self.collision_body.append(self.optional_collision[idx])
+            self.avoid_radius = np.array([obj.avoid_radius for obj in self.collision_body])
+            # print(self.pose_obstacle.shape)
+            # print(len(self.collision_body))
+            # print(self.avoid_radius)
+        else:
+            factor = 1.1
+            temp = (self.path.start - self.pose_obstacle) + (self.path.goal - self.pose_obstacle)
+            norm = np.sqrt((temp * temp).sum(axis=1))
+            conditon = norm < (self.path.goal - self.path.start).norm() * factor
+            self.pose_obstacle = self.pose_obstacle[conditon, :]
+            self.collision_body = np.array(self.collision_body)[conditon]
+            self.avoid_radius = self.avoid_radius[conditon]
 
     def get_raw_path(self, pose_target=Position()):
         # sans path_reshaper
@@ -403,12 +412,18 @@ class PathPartitionner(Pathfinder):
         path.goal = point
         return self.is_path_collide(path, tolerance=None, flag_closest_obs=True)
 
-    def verify_sub_target(self, sub_target):
+    def verify_sub_target_legacy(self, sub_target):
         for collision_body in self.collision_body:
             pose_obs = collision_body.position
             dist_sub_2_obs = (Position(pose_obs) - sub_target).norm()
             if dist_sub_2_obs < collision_body.avoid_radius:
                 return True
+        return False
+
+    def verify_sub_target(self, sub_target):
+        dist_sub_2_obs = np.sqrt(((self.pose_obstacle - sub_target) * (self.pose_obstacle - sub_target)).sum(axis=1))
+        if dist_sub_2_obs[dist_sub_2_obs < self.avoid_radius].any():
+            return True
         return False
 
     def search_point(self, path, avoid_dir=None):
