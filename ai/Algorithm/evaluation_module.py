@@ -103,10 +103,13 @@ def best_passing_option(passing_player):
 
 def best_goal_score_option(passing_player):
     # Retourne la meilleure position dans le but pour kick
-    goalA = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"], GameState().field.constant["FIELD_GOAL_WIDTH"]/2)
-    goalB = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"], -GameState().field.constant["FIELD_GOAL_WIDTH"]/2)
+    goalA = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"],
+                     GameState().field.constant["FIELD_GOAL_WIDTH"]/2 -
+                     GameState().field.constant["FIELD_GOAL_WALL_WIDTH"])
+    goalB = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"],
+                     -GameState().field.constant["FIELD_GOAL_WIDTH"] / 2 +
+                     GameState().field.constant["FIELD_GOAL_WALL_WIDTH"])
     best_position = best_position_option(passing_player, goalA, goalB)
-    print('kick au goal', best_position)
     return best_position
 
 def line_of_sight_clearance(player, targets):

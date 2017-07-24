@@ -212,8 +212,13 @@ class GoKick(Tactic):
                 self.target = Pose(best_goal_score_option(self.player))
             else:
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
+                self.game_state.get_player(tentative_target_id).receiver_pass_flag = True
 
+
+            print("Target player/goal : ", tentative_target_id, self.target)
             self.target_assignation_last_time = time.time()
+
+
 
     def get_destination_behind_ball(self):
         """

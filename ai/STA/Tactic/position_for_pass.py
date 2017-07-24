@@ -62,7 +62,8 @@ class PositionForPass(Tactic):
 
     def _get_destination_pose(self):
         if time.time() - self.last_time > DELAY:
-            self.target_position = self._find_best_player_position()
+            if self.player.receiver_pass_flag is False:
+                self.target_position = self._find_best_player_position()
             self.last_time = time.time()
         destination_orientation = (self.game_state.get_ball_position() - self.player.pose.position).angle()
         self.game_state.debug_interface.add_point(self.target_position, COLOR_ID_MAP[4], width=5,

@@ -22,6 +22,7 @@ class OurPlayer(Player):
         self.update = self._friend_kalman_update
         self.pathfinder_history = PathfinderHistory()
         self.collision_body_mask = [0, 0]
+        self.receiver_pass_flag = False
 
 
     def _friend_kalman_update(self, poses, delta):

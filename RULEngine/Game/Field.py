@@ -170,6 +170,7 @@ class Field:
                 self.constant["FIELD_GOAL_Y_BOTTOM"] = -self.constant["FIELD_GOAL_Y_TOP"]
 
                 self.constant["FIELD_GOAL_WIDTH"] = self._goal_width
+                self.constant["FIELD_GOAL_WALL_WIDTH"] = self._goal_wall_width
 
                 if self.our_side == FieldSide.POSITIVE:
                     self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self.constant["FIELD_X_NEGATIVE"]
