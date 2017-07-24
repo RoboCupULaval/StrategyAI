@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 from typing import List
-import math as m
+from math import tan, pi
 import time
 
 from RULEngine.Util.constant import ROBOT_RADIUS
@@ -17,7 +17,7 @@ from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
+from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.ProtectGoal import ProtectGoal
 from ai.STA.Action.GoBehind import GoBehind
@@ -65,7 +65,7 @@ class GoalKeeper(Tactic):
 
     def protect_goal(self):
         if not self.penalty_kick:
-            if self.player == closest_player_to_point(GameState().get_ball_position()):
+            if self.player == closest_player_to_point(GameState().get_ball_position()).player:
                 self.next_state = self.go_behind_ball
             else:
                 self.next_state = self.protect_goal
@@ -78,23 +78,33 @@ class GoalKeeper(Tactic):
             ball_position = self.game_state.get_ball_position()
             if opponent_kicker is not None:
                 ball_to_goal = our_goal.x - ball_position.x
+
                 if self.game_state.field.our_side is FieldSide.POSITIVE:
-                    opponent_kicker_orientation = opponent_kicker.pose.angle()
+                    opponent_kicker_orientation = clamp(opponent_kicker.pose.orientation, -pi/5, pi/5)
+                    goalkeeper_orientation = wrap_to_pi(opponent_kicker_orientation - pi)
                 else:
-                    opponent_kicker_orientation = wrap_to_pi(opponent_kicker.pose.orientation - m.pi)
-                y_position_on_line = ball_to_goal * m.tan(opponent_kicker_orientation)
+                    opponent_kicker_orientation = clamp(wrap_to_pi(opponent_kicker.pose.orientation - pi), -pi/5, pi/5)
+                    goalkeeper_orientation = opponent_kicker_orientation
+
+                y_position_on_line = ball_to_goal * tan(opponent_kicker_orientation)
                 y_position_on_line = clamp(y_position_on_line,
                                            -GameState().const["GOAL_WIDTH"]/4,
                                            GameState().const["GOAL_WIDTH"]/4)
-                print(y_position_on_line)
-                return GoToPositionPathfinder(self.game_state, self.player, Pose(our_goal.x,
-                                                                                 y_position_on_line,
-                                                                                 opponent_kicker_orientation))
+
+                return MoveToPosition(self.game_state,
+                              self.player,
+                              Pose(our_goal.x, y_position_on_line, goalkeeper_orientation),
+                              pathfinder_on=True,
+                              cruise_speed=2)
             else:
-                return GoToPositionPathfinder(self.game_state, self.player, Pose(our_goal))
+                return MoveToPosition(self.game_state,
+                              self.player,
+                              Pose(our_goal),
+                              pathfinder_on=True,
+                              cruise_speed=2)
 
     def go_behind_ball(self):
-        if not self.player == closest_player_to_point(GameState().get_ball_position()):
+        if not self.player == closest_player_to_point(GameState().get_ball_position()).player:
             self.next_state = self.protect_goal
         elif self._is_player_towards_ball_and_target():
             self.next_state = self.grab_ball
@@ -105,7 +115,7 @@ class GoalKeeper(Tactic):
                         self.target.position, 250, pathfinder_on=True)
 
     def grab_ball(self):
-        if not self.player == closest_player_to_point(GameState().get_ball_position()):
+        if not self.player == closest_player_to_point(GameState().get_ball_position()).player:
             self.next_state = self.protect_goal
         elif self._get_distance_from_ball() < 120:
             self.next_state = self.kick
@@ -116,7 +126,7 @@ class GoalKeeper(Tactic):
         return Grab(self.game_state, self.player)
 
     def kick(self):
-        if not self.player == closest_player_to_point(GameState().get_ball_position()):
+        if not self.player == closest_player_to_point(GameState().get_ball_position()).player:
             self.next_state = self.protect_goal
         else:
             self.next_state = self.kick_charge
@@ -125,7 +135,7 @@ class GoalKeeper(Tactic):
     def _get_distance_from_ball(self):
         return (self.player.pose.position - self.game_state.get_ball_position()).norm()
 
-    def _is_player_towards_ball_and_target(self, abs_tol=m.pi/30):
+    def _is_player_towards_ball_and_target(self, abs_tol=pi/30):
         ball_position = self.game_state.get_ball_position()
         target_to_ball = ball_position - self.target.position
         ball_to_player = self.player.pose.position - ball_position
