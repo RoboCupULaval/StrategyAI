@@ -1,14 +1,13 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.Game.Ball import Ball
 from config.config_service import ConfigService
-from ..Util.area import *
+from RULEngine.Util.area import *
 
 class FieldSide(Enum):
     POSITIVE = 0
     NEGATIVE = 1
 
 class Field:
-    def __init__(self, ball: Ball):
+    def __init__(self, ball):
         self.ball = ball
         cfg = ConfigService()            
         if cfg.config_dict["GAME"]["our_side"] == "positive":

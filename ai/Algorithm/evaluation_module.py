@@ -1,9 +1,8 @@
 # Under MIT License, see LICENSE.txt
-
+from Game.Field import FieldSide
 from RULEngine.Util.constant import ROBOT_RADIUS
 from RULEngine.Util.geometry import *
 from ai.states.game_state import GameState
-import time
 
 class PlayerPosition(object):
     def __init__(self, player, distance):
@@ -50,7 +49,7 @@ def is_ball_moving(min_speed=0.1):
 
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
-    if GameState().field.our_side == 0: # POSITIVE
+    if GameState().field.our_side == FieldSide.POSITIVE: # POSITIVE
         return GameState().get_ball_position().x > 0
     else:
         return GameState().get_ball_position().x < 0

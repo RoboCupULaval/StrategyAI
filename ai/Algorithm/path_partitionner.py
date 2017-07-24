@@ -169,7 +169,7 @@ class PathPartitionner(Pathfinder):
                 self.path = self.remove_redundant_points()
 
         else:
-            self.path = Path(self.player.pose.position.conv_2_np(), pose_target.position.conv_2_np(), 0, self.end_speed)
+            self.path = Path(self.player.pose.position, pose_target.position, 0, self.end_speed)
             #print(self.path.speeds)
             if self.path.get_path_length() < 0.1:
                 """
