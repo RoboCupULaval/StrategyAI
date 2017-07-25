@@ -17,6 +17,8 @@ from ai.STA.Strategy.penalty_defense import PenaltyDefense
 from ai.STA.Strategy.penalty_offense import PenaltyOffense
 from ai.STA.Strategy.prepare_kickoff_defense import PrepareKickOffDefense
 from ai.STA.Strategy.prepare_kickoff_offense import PrepareKickOffOffense
+from ai.STA.Strategy.prepare_penalty_defense import PreparePenaltyDefense
+from ai.STA.Strategy.prepare_penalty_offense import PreparePenaltyOffense
 from ai.STA.Strategy.robocup_choreography import RobocupChoreography
 from ai.STA.Strategy.bamba_follow import BambaFollow
 from ai.STA.Strategy.stay_away import StayAway
@@ -47,9 +49,10 @@ class StrategyBook(object):
                               'PrepareKickOffDefense': PrepareKickOffDefense,
                               'PenaltyDefense': PenaltyDefense,
                               'PenaltyOffense': PenaltyOffense,
-                              'PrepareKickOffDefense': PrepareKickOffDefense,
                               'DirectFreeKick': DirectFreeKick,
-                              'IndirectFreeKick': IndirectFreeKick
+                              'IndirectFreeKick': IndirectFreeKick,
+                              'PreparePenaltyDefense': PreparePenaltyDefense,
+                              'PreparePenaltyOffense': PreparePenaltyOffense
                               }
 
     def get_strategies_name_list(self) -> List[str]:

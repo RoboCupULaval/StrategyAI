@@ -179,13 +179,13 @@ class SimpleAutoPlay(AutoPlay):
             # Penalty
             SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE: 'DoNothing',
             SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE: 'DoNothing',
-            SimpleAutoPlayState.OFFENSE_PENALTY: 'DoNothing',
-            SimpleAutoPlayState.DEFENSE_PENALTY: 'DefenseWall',
+            SimpleAutoPlayState.OFFENSE_PENALTY: 'PenaltyOffense',
+            SimpleAutoPlayState.DEFENSE_PENALTY: 'PenaltyDefense',
 
             # Freekicks
             SimpleAutoPlayState.DIRECT_FREE_DEFENSE: 'DefenseWall',
-            SimpleAutoPlayState.DIRECT_FREE_OFFENSE: 'DoNothing',
+            SimpleAutoPlayState.DIRECT_FREE_OFFENSE: 'DirectFreeKick',
             SimpleAutoPlayState.INDIRECT_FREE_DEFENSE: 'DefenseWall',
-            SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'DoNothing'
+            SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'IndirectFreeKick'
 
         }.get(state, SimpleAutoPlayState.HALT)
