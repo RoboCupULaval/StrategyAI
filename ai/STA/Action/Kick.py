@@ -30,16 +30,9 @@ class Kick(Action):
         Execute the kick command
         :return: Un AIcommand
         """
-        target = self.target.position
-        player = self.player.pose.position
-        player_to_target = target - player
-        #if player_to_target.norm() > 0:
-        player_to_target = self.target.position
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
 
-        # else:
-        #     player_to_target = SpeedPose()
 
         cmd_params = {"pose_goal": Pose(ball_position, orientation),
                       "kick": True,
@@ -47,5 +40,4 @@ class Kick(Action):
                       "kick_strength": self.force,
                       "cruise_speed": 0.1,
                       "end_speed": self.end_speed}
-
         return AICommand(self.player, AICommandType.MOVE, **cmd_params)

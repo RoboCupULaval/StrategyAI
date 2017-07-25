@@ -109,7 +109,11 @@ class GoKick(Tactic):
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
         return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation),
+<<<<<<< HEAD
                                       cruise_speed=0.2, end_speed=0.1)
+=======
+                                     cruise_speed=0.2, end_speed=0.1)
+>>>>>>> e12bd5e5a7e72f844a26119269da89522a010f59
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
