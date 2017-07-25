@@ -234,7 +234,7 @@ class PathPartitionner(Pathfinder):
                             (self.player.ai_command.pose_goal.position - self.player.pose.position).norm() * factor:
                     self.pose_obstacle[i, :] = player.pose.position
                     self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position, self.gap_proxy))
-                    #i += 1
+                    i += 1
 
             self.pose_obstacle = self.pose_obstacle[0:i, :]
             if not(self.optional_collision is None):
