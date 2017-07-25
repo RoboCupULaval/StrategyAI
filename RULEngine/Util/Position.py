@@ -12,7 +12,7 @@ class Position(np.ndarray):
         obj.x = obj[0]
         obj.y = obj[1]
         obj.z = z
-        obj.abs_tol = abs_tol
+        obj._abs_tol = abs_tol
 
         return obj
 
@@ -20,7 +20,7 @@ class Position(np.ndarray):
         if obj is None:
             return
         self.z = getattr(obj, 'z', 0)
-        self.abs_tol = getattr(obj, 'abs_tol', 0.01)
+        self._abs_tol = getattr(obj, 'abs_tol', 0.01)
 
     @property
     def x(self):
@@ -37,6 +37,14 @@ class Position(np.ndarray):
     @y.setter
     def y(self, y):
         self[1] = y
+
+    @property
+    def abs_tol(self):
+        return getattr(self, '_abs_tol', 0.01)
+
+    @abs_tol.setter
+    def abs_tol(self, abs_tol):
+        self._abs_tol = abs_tol
 
     def norm(self):
         """Return the distance of the point from the origin"""
