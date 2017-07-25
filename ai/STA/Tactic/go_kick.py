@@ -109,11 +109,7 @@ class GoKick(Tactic):
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
         return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation),
-<<<<<<< HEAD
                                       cruise_speed=0.2, end_speed=0.1)
-=======
-                                     cruise_speed=0.2, end_speed=0.1)
->>>>>>> e12bd5e5a7e72f844a26119269da89522a010f59
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
@@ -123,6 +119,10 @@ class GoKick(Tactic):
 
     def validate_kick(self):
         if self.game_state.get_ball_velocity().norm() > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
+            if self.auto_update_target:
+                if self.tentative_target_id:
+                    for player in self.game_state.my_team.available_players.values():
+                        player.receiver_pass_flag = False
             self.next_state = self.halt
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
             self.next_state = self.kick
@@ -153,12 +153,12 @@ class GoKick(Tactic):
         assignation_delay = (time.time() - self.target_assignation_last_time)
 
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
-            tentative_target_id = best_passing_option(self.player, self.consider_goal_as_target)
-            if tentative_target_id is None:
+            self.tentative_target_id = best_passing_option(self.player, self.consider_goal_as_target)
+            if self.tentative_target_id is None:
                 self.target = Pose(best_goal_score_option(self.player))
             else:
-                self.target = Pose(GameState().get_player_position(tentative_target_id))
-                self.game_state.get_player(tentative_target_id).receiver_pass_flag = True
+                self.target = Pose(GameState().get_player_position(self.tentative_target_id))
+                self.game_state.get_player(self.tentative_target_id).receiver_pass_flag = True
 
             # print("Target player/goal : ", tentative_target_id, self.target)
             self.target_assignation_last_time = time.time()
