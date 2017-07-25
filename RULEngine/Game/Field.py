@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from ai.Algorithm.path_partitionner import CollisionBody
+from ai.Algorithm.path_partitionner import CollisionBody, CollisionType
 from RULEngine.Debug.debug_interface import DebugInterface
 from config.config_service import ConfigService
 from RULEngine.Util.area import *
@@ -21,8 +21,9 @@ class Field:
             self.constant = negative_side_constant
         x1 = self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
         x2 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
-        self.field_collision_body = [CollisionBody(Position(x1 + 500, 0), Position(0, 0), 1500, "zone"),
-                                     CollisionBody(Position(x2 - 500, 0), Position(0, 0), 1500, "zone")]
+        # FIXME: JAPAN  Only work on a field of 9x6m
+        self.field_collision_body = [CollisionBody(Position(x1 + 500, 0), Position(0, 0), 1500, CollisionType.ZONE),
+                                     CollisionBody(Position(x2 - 500, 0), Position(0, 0), 1500, CollisionType.ZONE)]
         debug_interface = DebugInterface()
         debug_interface.add_circle((x1 + 500, 0), radius=1500, timeout=0, color=(255, 0, 0))
         debug_interface.add_circle((x2 - 500, 0), radius=1500, timeout=0, color=(255, 0, 0))
@@ -166,12 +167,11 @@ class Field:
                 self.constant["FIELD_GOAL_RADIUS"] = self._defense_radius
                 self.constant["FIELD_GOAL_SEGMENT"] = self._defense_stretch
                 self.constant["FIELD_GOAL_WIDTH"] = self._goal_width
+                self.constant["FIELD_GOAL_WALL_WIDTH"] = self._goal_wall_width
 
                 self.constant["FIELD_GOAL_Y_TOP"] = self._defense_radius + (self._defense_stretch / 2)
                 self.constant["FIELD_GOAL_Y_BOTTOM"] = -self.constant["FIELD_GOAL_Y_TOP"]
 
-                self.constant["FIELD_GOAL_WIDTH"] = self._goal_width
-                self.constant["FIELD_GOAL_WALL_WIDTH"] = self._goal_wall_width
 
                 if self.our_side == FieldSide.POSITIVE:
                     self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self.constant["FIELD_X_NEGATIVE"]

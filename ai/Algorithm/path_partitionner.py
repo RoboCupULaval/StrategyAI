@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List
 
 from RULEngine.Game.OurPlayer import OurPlayer
@@ -7,7 +8,6 @@ from RULEngine.Util.geometry import get_distance, conv_position_2_list, remove_d
 from ai.Algorithm.IntelligentModule import Pathfinder
 import numpy as np
 import numpy.matlib
-from profilehooks import profile
 
 
 class Path:
@@ -74,8 +74,15 @@ class Path:
         return self.generate_path_from_points(self.points, self.speeds, 50)
 
 
+class CollisionType(Enum):
+    PLAYER = 0
+    BALL = 1
+    ZONE = 2
+
 class CollisionBody:
-    def __init__(self, body_position, body_velocity, body_avoid_radius=150, type="player"):
+    UNCOLLIDABLE = 0
+    COLLIDABLE = 1
+    def __init__(self, body_position, body_velocity, body_avoid_radius=150, type:CollisionType=CollisionType.PLAYER):
         self.position = body_position
         self.velocity = body_velocity
         self.avoid_radius = body_avoid_radius
@@ -122,7 +129,6 @@ class PathPartitionner(Pathfinder):
             path = path_1.join_segments(path_2)
         return path
 
-    # @profile(immediate=False)
     def get_path(self, player: OurPlayer, pose_target: Pose=Pose(), cruise_speed: [int, float]=1,
                  old_path=None, old_raw_path=Path(Position(99999, 99999), Position(99999, -99999)),
                  end_speed=0, ball_collision=False, optional_collision=None):
@@ -210,6 +216,7 @@ class PathPartitionner(Pathfinder):
                                        len(self.game_state.other_team.available_players) - 1
             self.pose_obstacle = np.zeros((lenght_pose_obstacle, 2))
 
+            # FIXME: Find better name that is less confusing between self.player and player
             for player in self.game_state.my_team.available_players.values():
                 if player.id != self.player.id:
                     # print((self.path.start - player.pose.position).norm() + (self.path.goal - player.pose.position).norm() - \
@@ -232,7 +239,7 @@ class PathPartitionner(Pathfinder):
                 ball_position = self.game_state.get_ball_position()
                 self.pose_obstacle[i, :] += ball_position
                 self.collision_body.append(CollisionBody(ball_position, Position(0, 0),
-                                                         110, type="ball"))
+                                                         110, type=CollisionType.BALL))
             self.pose_obstacle = self.pose_obstacle[0:i, :]
             if not(self.optional_collision is None):
                 # for idx, collision_body in enumerate(self.optional_collision):
@@ -316,11 +323,7 @@ class PathPartitionner(Pathfinder):
             tolerances = self.avoid_radius - self.avoid_radius / tolerance
         if path.start == path.goal or len(obstacles) == 0:
             return False
-        #print(path.points)
-        # points = np.vstack(np.array(path.points))
         points = np.array(path.points)
-        # print(points)
-        # print(points_dummy)
         points_start = points[:-1]
         points_target = points[1:]
         paths_len = np.sqrt(((points_target - points_start) * (points_target - points_start)).sum(axis=1))
@@ -373,7 +376,6 @@ class PathPartitionner(Pathfinder):
                 return True
             return False
 
-    #@profile(immediate=False)
     def find_closest_obstacle_legacy(self, point, path):
         assert(isinstance(point, Position))
         dist_point_obs = np.inf
@@ -412,6 +414,7 @@ class PathPartitionner(Pathfinder):
         path.goal = point
         return self.is_path_collide(path, tolerance=None, flag_closest_obs=True)
 
+    # TODO: Remove when the new one is well tested
     def verify_sub_target_legacy(self, sub_target):
         for collision_body in self.collision_body:
             pose_obs = collision_body.position
@@ -447,7 +450,7 @@ class PathPartitionner(Pathfinder):
             cruise_speed = self.player.velocity.position.conv_2_np()
             self.closest_obs_speed = closest_collision_body.velocity
             avoid_dir = -vec_perp
-            if closest_collision_body.type == "ball" or closest_collision_body.type == "zone":
+            if closest_collision_body.type == CollisionType.BALL or closest_collision_body.type == CollisionType.ZONE:
                 avoid_dir = -vec_perp
                 sub_target_1 = np.array(conv_position_2_list(pose_robot)) + \
                     direction * len_along_path + vec_perp * self.res

@@ -20,13 +20,9 @@ AIcommands = List[AICommand]
 
 def create_pathfinder(game_state, type_of_pathfinder):
     assert isinstance(type_of_pathfinder, str)
-    assert type_of_pathfinder.lower() in ["rrt", "astar", "path_part"]
+    assert type_of_pathfinder.lower() in ["path_part"]
 
-    # if type_of_pathfinder.lower() == "astar":
-    # return AsPathManager(self.ws, ConfigService().config_dict["GAME"]["type"] == "sim")
-    if type_of_pathfinder.lower() == "rrt":
-        return PathfinderRRT(game_state)
-    elif type_of_pathfinder.lower() == "path_part":
+    if type_of_pathfinder.lower() == "path_part":
         return PathPartitionner(game_state)
     else:
         raise TypeError("Couldn't init a pathfinder with the type of ",
@@ -40,8 +36,8 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
     if player.ai_command is None or not player.ai_command.pathfinder_on:
         return None
     if player.pathfinder_history.last_pose_goal is not None:
-        if (player.pathfinder_history.last_pose_goal - player.ai_command.pose_goal.position).norm() < 200:
-            # player.pathfinder_history.last_pose_goal = player.ai_command.pose_goal.position
+        MIN_CHANGE_IN_GOAL = 200
+        if (player.pathfinder_history.last_pose_goal - player.ai_command.pose_goal.position).norm() < MIN_CHANGE_IN_GOAL:
             last_path = player.pathfinder_history.last_path
             last_raw_path = player.pathfinder_history.last_raw_path
     pathfinder = create_pathfinder(game_state, type_pathfinder)
@@ -58,8 +54,8 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
                                              end_speed=player.ai_command.end_speed,
                                              ball_collision=player.ai_command.collision_ball,
                                              optional_collision=collision_body)
-
-        if path.get_path_length() < 100:
+        MIN_CHANGE_FOR_RECALCULATE = 100
+        if path.get_path_length() < MIN_CHANGE_FOR_RECALCULATE:
             player.pathfinder_history.last_path = None
             player.pathfinder_history.last_pose_goal = path.goal
         else:
@@ -102,38 +98,6 @@ class PathfinderModule(Executor):
         for path in paths:
             if path is not None:
                 self.draw_path(path)
-        # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        #     future_to_path = {executor.submit(self._pathfind_ai_commands(player), player): player for player in
-        #                       self.ws.game_state.my_team.available_players.values()}
-        #     # for future in concurrent.futures.as_completed(future_to_path):
-        #     #     url = future_to_path[future]
-        #     #     try:
-        #     #         data = future.result()
-        #     #     except Exception as exc:
-        #     #         print('%r generated an exception: %s' % (url, exc))
-        #     #     else:
-        #     #         print('%r page is %d bytes' % (url, len(data)))
-        # for player in self.ws.game_state.my_team.available_players.values():
-        #     self._pathfind_ai_commands(player)
-        # self._modify_path_for_cinematic_constraints(ai_commands)
-
-
-    # TODO find what this does? MGL 2017/05/17
-    """
-    def _modify_path_for_cinematic_constraints(self, ai_commandes: list):
-        for cmd in ai_commandes:
-            target = self._find_intermediate_target(cmd.robot_id, cmd.path)
-            self.ws.debug_interface.add_log(3, "Target feed in CinePath: {}".format(target))
-            cmd.path = self.cinematic_pathfinder.get_path(cmd.robot_id, target)
-
-    def _find_intermediate_target(self, robot_id, path):
-        default_target = path[0]
-        player_pst = self.ws.game_state.get_player_pose(robot_id).position
-        for target in path:
-            if get_distance(player_pst, target) > INTERMEDIATE_DISTANCE_THRESHOLD:
-                return target
-        return default_target
-    """
 
     def change_pathfinder(self, type_of_pathfinder):
         assert isinstance(type_of_pathfinder, str)
