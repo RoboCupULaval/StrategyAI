@@ -46,6 +46,12 @@ def closest_player_to_point(point: Position, our_team=None):
 def is_ball_moving(min_speed=0.1):
     return GameState().get_ball_velocity().norm() > min_speed
 
+def is_ball_kicked(player, min_distance=150, min_speed=1000):
+    if (player.pose.position - GameState.get_ball_position()).norm() > min_distance and \
+                    GameState.get_ball_velocity().norm() > min_speed:
+        return True
+    else:
+        return False
 
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
@@ -255,8 +261,8 @@ def score_strategy_other_team():
     player_our_team = player_with_ball(our_team=True)
 
     if player_their_team is not None and player_our_team is not None:
-        their_player_to_ball = GameState().get_ball_position() - player_their_team
-        our_player_to_ball = GameState().get_ball_position() - player_our_team
+        their_player_to_ball = GameState().get_ball_position() - player_their_team.pose.position
+        our_player_to_ball = GameState().get_ball_position() - player_our_team.pose.position
         score += their_player_to_ball.norm() - our_player_to_ball.norm()
 
     return score

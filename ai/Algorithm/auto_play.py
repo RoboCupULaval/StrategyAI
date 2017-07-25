@@ -18,6 +18,7 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
         self.selected_strategy = None
         self.current_state = None
         self.next_state = None
+        self.last_state = None
 
     def get_selected_strategy(self):
         return self.selected_strategy
@@ -91,7 +92,12 @@ class SimpleAutoPlay(AutoPlay):
         pass
 
     def _analyse_game(self):
-        print('scoreeeeeeeeeeeeeeeeeeeeee', score_strategy_other_team())
+        if self.current_state is SimpleAutoPlayState.OFFENSE_KICKOFF or \
+            self.current_state is SimpleAutoPlayState.DEFENSE_KICKOFF or \
+            self.current_state is SimpleAutoPlayState.OFFENSE_PENALTY or \
+                self.current_state is SimpleAutoPlayState.DEFENSE_PENALTY:
+            if not is_ball_moving(300):
+                return self.current_state
         if score_strategy_other_team() < 0:
             return SimpleAutoPlayState.NORMAL_DEFENSE
         else:
@@ -173,8 +179,8 @@ class SimpleAutoPlay(AutoPlay):
             # Kickoff
             SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE: 'PrepareKickOffOffense',
             SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE: 'PrepareKickOffDefense',
-            SimpleAutoPlayState.OFFENSE_KICKOFF: 'Offense',
-            SimpleAutoPlayState.DEFENSE_KICKOFF: 'DefenseWall',
+            SimpleAutoPlayState.OFFENSE_KICKOFF: 'OffenseKickOff',
+            SimpleAutoPlayState.DEFENSE_KICKOFF: 'DoNothing',
 
             # Penalty
             SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE: 'PreparePenaltyOffense',

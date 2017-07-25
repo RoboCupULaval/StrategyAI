@@ -11,6 +11,7 @@ from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Strategy.indiana_jones import IndianaJones
 from ai.STA.Strategy.HumanControl import HumanControl
 from ai.STA.Strategy.DoNothing import DoNothing
+from ai.STA.Strategy.offense_kickoff import OffenseKickOff
 from ai.STA.Strategy.passes_with_decisions import PassesWithDecisions
 from ai.STA.Strategy.pathfinder_benchmark import Pathfinder_Benchmark
 from ai.STA.Strategy.penalty_defense import PenaltyDefense
@@ -52,7 +53,8 @@ class StrategyBook(object):
                               'DirectFreeKick': DirectFreeKick,
                               'IndirectFreeKick': IndirectFreeKick,
                               'PreparePenaltyDefense': PreparePenaltyDefense,
-                              'PreparePenaltyOffense': PreparePenaltyOffense
+                              'PreparePenaltyOffense': PreparePenaltyOffense,
+                              'OffenseKickOff': OffenseKickOff
                               }
 
     def get_strategies_name_list(self) -> List[str]:
