@@ -12,6 +12,8 @@ import threading
 import time
 import warnings
 
+from profilehooks import profile
+
 from RULEngine.Communication.sender.uidebug_robot_monitor import UIDebugRobotMonitor
 from RULEngine.Command.command import Stop
 from RULEngine.Communication.protobuf import \
@@ -132,8 +134,6 @@ class Framework(object):
 
         self._wait_for_first_frame()
         self._wait_for_first_geometry_packet()
-        print(self.vision_routine)
-        # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
         while not self.thread_terminate.is_set():
             self.time_stamp = time.time()
             self.vision_routine()
