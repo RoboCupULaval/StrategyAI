@@ -47,5 +47,5 @@ class Kick(Action):
                       "kick_strength": self.force,
                       "cruise_speed": 0.1,
                       "end_speed": self.end_speed}
-        # print("command kick")
+
         return AICommand(self.player, AICommandType.MOVE, **cmd_params)

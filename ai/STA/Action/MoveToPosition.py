@@ -27,20 +27,11 @@ class MoveToPosition(Action):
         self.end_speed = end_speed
 
     def exec(self):
-        if self.charge_kick:
-            return AICommand(self.player,
-                             AICommandType.MOVE,
-                             pose_goal=self.destination,
-                             pathfinder_on=self.pathfinder_on,
-                             cruise_speed=self.cruise_speed,
-                             collision_ball=self.collision_ball,
-                             charge_kick=self.charge_kick,
-                             end_speed=self.end_speed)
-        else:
-            return AICommand(self.player,
-                             AICommandType.MOVE,
-                             pose_goal=self.destination,
-                             pathfinder_on=self.pathfinder_on,
-                             cruise_speed=self.cruise_speed,
-                             collision_ball=self.collision_ball,
-                             end_speed=self.end_speed)
+        return AICommand(self.player,
+                         AICommandType.MOVE,
+                         pose_goal=self.destination,
+                         pathfinder_on=self.pathfinder_on,
+                         cruise_speed=self.cruise_speed,
+                         collision_ball=self.collision_ball,
+                         charge_kick=self.charge_kick,
+                         end_speed=self.end_speed)

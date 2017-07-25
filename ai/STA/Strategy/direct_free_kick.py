@@ -1,18 +1,21 @@
-# Under MIT license, see LICENSE.txt
-from functools import partial
+# Under MIT License, see LICENSE.txt
 
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
+from functools import partial
+from RULEngine.Util.Pose import Position, Pose
 from ai.Algorithm.evaluation_module import closest_player_to_point
+from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.tactic_constants import Flags
+from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.position_for_pass import PositionForPass
-from ai.states.game_state import GameState
-from ai.STA.Strategy.Strategy import Strategy
+from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.role import Role
+from ai.states.game_state import GameState
 
-class Offense(Strategy):
+
+class DirectFreeKick(Strategy):
+
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
         ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)

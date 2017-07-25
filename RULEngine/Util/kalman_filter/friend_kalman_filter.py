@@ -2,7 +2,9 @@ import numpy as np
 import warnings
 
 from RULEngine.Util.Position import Position
+from RULEngine.Util.Pose import Pose
 from config.config_service import ConfigService
+from profilehooks import profile
 
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
@@ -49,7 +51,8 @@ class FriendKalmanFilter:
         values += [10 ** (-1) for _ in range(ncameras)]
         self.R = np.diag(values)  # Pose * ncameras
         # Initial state covariance
-        self.P = 10 ** 6 * np.eye(6)
+        self.eye = np.eye(6)
+        self.P = 10 ** 6 * self.eye
         self.x = np.array([9999, 9999, 0, 0, 0, 0])
 
     def predict(self, command):
@@ -57,10 +60,12 @@ class FriendKalmanFilter:
             self.x = np.dot(self.F, self.x)
         else:
             conversion_m_to_mm = 1000
-            command_xy = conversion_m_to_mm * Position(command[0], command[1]).rotate(self.x[4])
-            self.x = np.dot(self.F, self.x) + np.dot(self.B, np.array([command_xy.x, command_xy.y, command[2]]))
+            command = Pose(*command).scale(conversion_m_to_mm)
+            command.position = command.position.rotate(self.x[4])
+            self.x = np.dot(self.F, self.x) + np.dot(self.B, command.to_array())
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
 
+    # @profile(immediate=False)
     def update(self, observation):
         obsx = []
         obsy = []
@@ -90,9 +95,14 @@ class FriendKalmanFilter:
             y[idx::] = (y[idx::] + np.pi) % (2 * np.pi) - np.pi
 
             S = np.dot(np.dot(H, self.P), np.transpose(H)) + R
-            K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
+
+            S_inv = S
+            S_inv[0, 0] = 1 / S_inv[0, 0]
+            S_inv[1, 1] = 1 / S_inv[1, 1]
+            S_inv[2, 2] = 1 / S_inv[2, 2]
+            K = np.dot(np.dot(self.P, np.transpose(H)), S_inv)
             self.x = self.x + np.dot(K, np.transpose(y))
-            self.P = np.dot((np.eye(self.P.shape[0]) - np.dot(K, H)), self.P)
+            self.P = np.dot((self.eye - np.dot(K, H)), self.P)
 
     def transition_model_with_command(self, dt):
         self.F = np.array([[1, 0, dt, 0, 0, 0],  # Position x

@@ -38,11 +38,11 @@ class MotionExecutor(Executor):
 
             cmd = player.ai_command
             r_id = player.id
-            player.collision_body_mask[0] = 1
+            player.collision_body_mask[0] = CollisionBody.COLLIDABLE
             if player is not self.ws.game_state.get_player_by_role(Role.GOALKEEPER):
-                player.collision_body_mask[1] = 1
+                player.collision_body_mask[1] = CollisionBody.COLLIDABLE
             else:
-                player.collision_body_mask[1] = 0
+                player.collision_body_mask[1] = CollisionBody.UNCOLLIDABLE
 
             if self.last_goal[r_id] is not None and cmd.path != []:
                 if self.last_goal[r_id] != cmd.path[0]:
@@ -257,7 +257,7 @@ class RobotMotion(object):
             new_speed = Position(0, 0)
         return new_speed
 
-    def limit_angular_acceleration(self, orientation_cmd: int):
+    def limit_angular_acceleration(self, orientation_cmd: float):
         delta_speed = orientation_cmd - self.last_translation_cmd
         if delta_speed.norm() > 0:
             self.current_acceleration = float(np.sqrt(np.sum(np.square(delta_speed))) / self.dt)
@@ -273,7 +273,7 @@ class RobotMotion(object):
             translation_speed = clamp(translation_speed, 0, self.setting.translation.max_speed)
             new_speed = translation_cmd.normalized() * translation_speed
         else:
-            new_speed = Position(0, 0)
+            new_speed = Position(0.0, 0.0)
         return new_speed
 
     def target_reached(self, boost_factor=1) -> bool:
