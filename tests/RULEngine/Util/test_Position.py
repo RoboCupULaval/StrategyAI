@@ -20,8 +20,6 @@ class TestPosition(unittest.TestCase):
         self.assertEqual(Position(), Position(0, 0))
         self.assertTrue(Position().z == 0)
         self.assertTrue(Position(0, 0).z == 0)
-        pos0 = Position(z=1)
-        self.assertTrue(pos0.z == 1)
 
         # Init from positional argument
         pos1 = Position(0, 0)
@@ -94,25 +92,19 @@ class TestPosition(unittest.TestCase):
 
     def test_get_set(self):
 
-        pos = Position(1, 2, z=3, abs_tol=4)
+        pos = Position(1, 2)
 
         self.assertTrue(hasattr(pos, 'x'))
         self.assertTrue(hasattr(pos, 'y'))
 
         self.assertTrue(pos.x == 1)
         self.assertTrue(pos.y == 2)
-        self.assertTrue(pos.z == 3)
-        self.assertTrue(pos.abs_tol == 4)
         self.assertTrue(pos[0] == 1)
         self.assertTrue(pos[1] == 2)
         pos.x = 4
         pos.y = 3
-        pos.z = 2
-        pos.abs_tol = 1
         self.assertTrue(pos.x == 4)
         self.assertTrue(pos.y == 3)
-        self.assertTrue(pos.z == 2)
-        self.assertTrue(pos.abs_tol == 1)
         self.assertTrue(pos[0] == 4)
         self.assertTrue(pos[1] == 3)
 
@@ -166,20 +158,4 @@ class TestPosition(unittest.TestCase):
         self.assertFalse(pos3 == pos5)
         self.assertFalse(pos3 == pos6)
 
-        pos7 = Position(0.5, 0.0, abs_tol=1)
-        pos8 = Position(0.0, -0.5, abs_tol=1)
-        pos9 = Position(1.0, -1.0, abs_tol=1)
-        self.assertTrue(pos7 == pos8)
-        self.assertTrue(pos7 == pos9)
-
-        pos10 = Position(0.5, 0.0, abs_tol=1)
-        pos11 = Position(-0.5, 0.0, abs_tol=1)
-        pos12 = Position(1.0, 0.0, abs_tol=1)
-        self.assertTrue(pos10 == pos11)
-        self.assertTrue(pos10 == pos12)
-
-        pos11.abs_tol = 0.1
-        pos10.abs_tol = 0.1
-        self.assertFalse(pos11 == pos10)
-        self.assertFalse(pos10 == pos11)
 

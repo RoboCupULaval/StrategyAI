@@ -9,7 +9,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from RULEngine.Util.geometry import get_distance, compare_angle, wrap_to_pi
-from ai.Algorithm.evaluation_module import best_passing_option
+from ai.Algorithm.evaluation_module import best_passing_option, best_goal_score_option
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
@@ -72,7 +72,6 @@ class GoKick(Tactic):
         self.grab_ball_tries = 0
 
     def kick_charge(self):
-
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
             self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
@@ -110,7 +109,7 @@ class GoKick(Tactic):
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
         return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation),
-                                     cruise_speed=0.2, end_speed=0.1)
+                                      cruise_speed=0.2, end_speed=0.1)
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
@@ -152,11 +151,15 @@ class GoKick(Tactic):
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
             tentative_target_id = best_passing_option(self.player, self.consider_goal_as_target)
             if tentative_target_id is None:
-                self.target = Pose(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0, 0)
+                self.target = Pose(best_goal_score_option(self.player))
             else:
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
+                self.game_state.get_player(tentative_target_id).receiver_pass_flag = True
 
+            # print("Target player/goal : ", tentative_target_id, self.target)
             self.target_assignation_last_time = time.time()
+
+
 
     def get_destination_behind_ball(self):
         """
