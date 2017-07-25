@@ -1,14 +1,17 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.Game.Ball import Ball
+from ai.Algorithm.path_partitionner import CollisionBody, CollisionType
 from config.config_service import ConfigService
-from ..Util.area import *
+from RULEngine.Util.area import *
+from RULEngine.Debug.debug_interface import DebugInterface
+
 
 class FieldSide(Enum):
     POSITIVE = 0
     NEGATIVE = 1
 
+
 class Field:
-    def __init__(self, ball: Ball):
+    def __init__(self, ball):
         self.ball = ball
         cfg = ConfigService()            
         if cfg.config_dict["GAME"]["our_side"] == "positive":
@@ -17,6 +20,14 @@ class Field:
         else:
             self.our_side = FieldSide.NEGATIVE
             self.constant = negative_side_constant
+        x1 = self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
+        x2 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
+        # FIXME: JAPAN  Only work on a field of 9x6m
+        self.field_collision_body = [CollisionBody(Position(x1 + 500, 0), Position(0, 0), 1500, CollisionType.ZONE),
+                                     CollisionBody(Position(x2 - 500, 0), Position(0, 0), 1500, CollisionType.ZONE)]
+        debug_interface = DebugInterface()
+        debug_interface.add_circle((x1 + 500, 0), radius=1500, timeout=0, color=(255, 0, 0))
+        debug_interface.add_circle((x2 - 500, 0), radius=1500, timeout=0, color=(255, 0, 0))
 
     def move_ball(self, position, delta):
         self.ball.set_position(position, delta)
@@ -156,6 +167,7 @@ class Field:
 
                 self.constant["FIELD_GOAL_RADIUS"] = self._defense_radius
                 self.constant["FIELD_GOAL_SEGMENT"] = self._defense_stretch
+                self.constant["FIELD_GOAL_WIDTH"] = self._goal_width
 
                 self.constant["FIELD_GOAL_Y_TOP"] = self._defense_radius + (self._defense_stretch / 2)
                 self.constant["FIELD_GOAL_Y_BOTTOM"] = -self.constant["FIELD_GOAL_Y_TOP"]
@@ -219,7 +231,7 @@ positive_side_constant = {
     "FIELD_GOAL_SEGMENT": 500,
 
     # Goal Parameters
-    "GOAL_WIDTH": 1000,
+    "FIELD_GOAL_WIDTH": 1000,
     "FIELD_GOAL_Y_TOP": 1250,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
     "FIELD_GOAL_Y_BOTTOM": -1250,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
     "FIELD_OUR_GOAL_X_EXTERNAL": 4500,  # FIELD_X_LEFT
@@ -298,7 +310,7 @@ negative_side_constant = {
 
 
     # Goal Parameters
-    "GOAL_WIDTH": 1000,
+    "FIELD_GOAL_WIDTH": 1000,
     "FIELD_GOAL_Y_TOP": 1250,  # FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2
     "FIELD_GOAL_Y_BOTTOM": -1250,  # (FIELD_GOAL_RADIUS + FIELD_GOAL_SEGMENT / 2) * -1
     "FIELD_OUR_GOAL_X_EXTERNAL": -4500,  # FIELD_X_LEFT

@@ -1,6 +1,7 @@
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Game.Team import Team
 from RULEngine.Util.constant import TeamColor, PLAYER_PER_TEAM
+from config.config_service import ConfigService
 
 
 class OurTeam(Team):
@@ -10,7 +11,8 @@ class OurTeam(Team):
         # It is our team so we use our player!
         for player_id in range(PLAYER_PER_TEAM):
             self.players[player_id] = OurPlayer(self, player_id)
-            if 1 <= player_id <= 6:
+            if (ConfigService().config_dict["GAME"]["type"] == "sim" and 0 <= player_id <= 5)\
+                    or (ConfigService().config_dict["GAME"]["type"] == "real" and 1 <= player_id <= 6):
                 self.players[player_id].in_play = True  # TODO : check if useless
                 self.available_players[player_id] = self.players[player_id]
 

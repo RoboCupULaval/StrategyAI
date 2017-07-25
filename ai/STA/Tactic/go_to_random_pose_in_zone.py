@@ -63,7 +63,7 @@ class GoToRandomPosition(Tactic):
         if self.check_success():
             self.current_position_index_to_go = random.randint(0, len(self.grid_of_positions) - 1)
             self.current_position_to_go = self.grid_of_positions[self.current_position_index_to_go]
-            self.current_angle_to_go = random.randint(0, 100) * np.pi / 100.
+            self.current_angle_to_go = random.randint(-100, 100) * np.pi / 100.
             self.next_pose = Pose(self.current_position_to_go, self.current_angle_to_go)
         self.next_state = self.exec
 
