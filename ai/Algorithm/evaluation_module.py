@@ -124,7 +124,7 @@ def line_of_sight_clearance(player, targets):
                 score *= trajectory_score(player.pose.position, targets[condition], j.pose.position)
     for j in GameState().other_team.available_players.values():
         # Obstacle : les players ennemis
-        score *= trajectory_score(player.pose.position, targets, np.array(j.pose.position))
+        score *= trajectory_score(player.pose.position, targets, j.pose.position)
     return score
 
 

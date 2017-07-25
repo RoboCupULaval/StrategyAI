@@ -2,6 +2,7 @@ import numpy as np
 import warnings
 
 from RULEngine.Util.Position import Position
+from RULEngine.Util.Pose import Pose
 from config.config_service import ConfigService
 from profilehooks import profile
 
@@ -59,8 +60,9 @@ class FriendKalmanFilter:
             self.x = np.dot(self.F, self.x)
         else:
             conversion_m_to_mm = 1000
-            command_xy = conversion_m_to_mm * Position(command[0], command[1]).rotate(self.x[4])
-            self.x = np.dot(self.F, self.x) + np.dot(self.B, np.array([command_xy.x, command_xy.y, command[2]]))
+            command = Pose(*command).scale(conversion_m_to_mm)
+            command.position = command.position.rotate(self.x[4])
+            self.x = np.dot(self.F, self.x) + np.dot(self.B, command.to_array())
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
 
     # @profile(immediate=False)

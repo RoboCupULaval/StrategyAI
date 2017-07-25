@@ -72,7 +72,6 @@ class Position(np.ndarray):
 
     def __eq__(self, other):
         return (self - other).norm() < self.abs_tol
-        #return np.allclose(self, other, atol=POSITION_ABS_TOL)
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -103,13 +102,3 @@ class Position(np.ndarray):
 
     def __hash__(self):
         return hash(str(self))
-
-
-def position_builder(args):
-    if not args:
-        obj = np.zeros(2)
-    elif not isinstance(args, (int, float)):
-        obj = np.asarray(args).flatten().copy()
-    else:
-        raise ValueError
-    return obj

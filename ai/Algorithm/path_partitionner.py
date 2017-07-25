@@ -114,7 +114,7 @@ class PathPartitionner(Pathfinder):
         self.optional_collision = None
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None):
-        self.get_pertinent_collision_objects(False)
+        #self.get_pertinent_collision_objects(first_call=False)
         if self.is_path_collide(path) and depth < self.max_recurs and not(path.start == path.goal):
             sub_target, avoid_dir = self.search_point(path, avoid_dir)
             if sub_target == path.goal or sub_target == path.start:
@@ -138,6 +138,8 @@ class PathPartitionner(Pathfinder):
         self.ball_collision = ball_collision
         self.optional_collision = optional_collision
 
+        if ball_collision:
+            print("J'essaie deviter la balle")
         self.get_pertinent_collision_objects()
         # Debug code pls no remove
         # if old_path is not None:
@@ -236,6 +238,7 @@ class PathPartitionner(Pathfinder):
                     self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position, self.gap_proxy))
                     i += 1
             if self.ball_collision:
+                print("Adding ball has collision body")
                 ball_position = self.game_state.get_ball_position()
                 self.pose_obstacle[i, :] += ball_position
                 self.collision_body.append(CollisionBody(ball_position, Position(0, 0),
@@ -244,13 +247,10 @@ class PathPartitionner(Pathfinder):
             if not(self.optional_collision is None):
                 # for idx, collision_body in enumerate(self.optional_collision):
                 for idx, mask in enumerate(self.player.collision_body_mask):
-                    if mask == 1:
+                    if mask == CollisionBody.COLLIDABLE:
                         self.pose_obstacle = np.concatenate((self.pose_obstacle, self.optional_collision[idx].position.reshape(1, 2)))
                         self.collision_body.append(self.optional_collision[idx])
             self.avoid_radius = np.array([obj.avoid_radius for obj in self.collision_body])
-            # print(self.pose_obstacle.shape)
-            # print(len(self.collision_body))
-            # print(self.avoid_radius)
         else:
             factor = 1.1
             temp = (self.path.start - self.pose_obstacle) + (self.path.goal - self.pose_obstacle)
