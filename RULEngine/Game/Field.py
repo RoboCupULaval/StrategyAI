@@ -1,14 +1,13 @@
 # Under MIT License, see LICENSE.txt
+
 from ai.Algorithm.path_partitionner import CollisionBody, CollisionType
+from RULEngine.Debug.debug_interface import DebugInterface
 from config.config_service import ConfigService
 from RULEngine.Util.area import *
-from RULEngine.Debug.debug_interface import DebugInterface
-
 
 class FieldSide(Enum):
     POSITIVE = 0
     NEGATIVE = 1
-
 
 class Field:
     def __init__(self, ball):
@@ -168,9 +167,11 @@ class Field:
                 self.constant["FIELD_GOAL_RADIUS"] = self._defense_radius
                 self.constant["FIELD_GOAL_SEGMENT"] = self._defense_stretch
                 self.constant["FIELD_GOAL_WIDTH"] = self._goal_width
+                self.constant["FIELD_GOAL_WALL_WIDTH"] = self._goal_wall_width
 
                 self.constant["FIELD_GOAL_Y_TOP"] = self._defense_radius + (self._defense_stretch / 2)
                 self.constant["FIELD_GOAL_Y_BOTTOM"] = -self.constant["FIELD_GOAL_Y_TOP"]
+
 
                 if self.our_side == FieldSide.POSITIVE:
                     self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self.constant["FIELD_X_NEGATIVE"]
