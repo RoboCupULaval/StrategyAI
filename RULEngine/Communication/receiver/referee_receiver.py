@@ -9,6 +9,6 @@ class RefereeReceiver(ProtobufPacketReceiver):
 
     def __init__(self):
         cfg = ConfigService()
-        host = cfg.config_dict["COMMUNICATION"]["udp_address"]
+        host = cfg.config_dict["COMMUNICATION"]["referee_udp_address"]
         port = int(cfg.config_dict["COMMUNICATION"]["referee_port"])
         super(RefereeReceiver, self).__init__(host, port, ssl_referee.SSL_Referee)
