@@ -26,6 +26,15 @@ class Strategy(metaclass=ABCMeta):
         players = [p for p in self.game_state.my_team.available_players.values()]
         roles = [r for r in Role]
         role_mapping = dict(zip(roles, players))
+        # Magnifique hack pour bypasser un mapping de goalkeeper
+        current_goaler = p_game_state.get_player_by_role(Role.GOALKEEPER)
+        if current_goaler is not None:
+            new_goaler = role_mapping[Role.GOALKEEPER]
+            new_goaler_old_role = p_game_state.get_role_by_player_id(new_goaler.id)
+            role_mapping[Role.GOALKEEPER] = current_goaler
+            role_mapping[new_goaler_old_role] = new_goaler
+
+
         self.game_state.map_players_to_roles_by_player(role_mapping)
 
 

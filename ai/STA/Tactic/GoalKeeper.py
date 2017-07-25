@@ -65,7 +65,8 @@ class GoalKeeper(Tactic):
 
     def protect_goal(self):
         if not self.penalty_kick:
-            if self.player == closest_player_to_point(GameState().get_ball_position()).player:
+            if self.player == closest_player_to_point(GameState().get_ball_position()).player and\
+                            self._get_distance_from_ball() < 100:
                 self.next_state = self.go_behind_ball
             else:
                 self.next_state = self.protect_goal

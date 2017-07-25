@@ -32,10 +32,25 @@ class RoleMapperTests(TestCase):
         with self.assertRaises(ValueError):
             state.map_players_to_roles_by_player(inverted_roles)
 
+    def test_givenLockedRole_whenUpdateLockedRole_thenSwapsRobots(self):
+        state = GameState()
+        state.map_players_to_roles_by_player(basic_roles)
+        state.update_id_for_locked_role(1, Role.GOALKEEPER)
+        self.assertDictEqual(state.get_role_mapping(), goalkeeper_swapped)
+
 
 basic_roles = {
     Role.GOALKEEPER: 0,
     Role.FIRST_DEFENCE: 1,
+    Role.SECOND_DEFENCE: 2,
+    Role.MIDDLE: 3,
+    Role.FIRST_ATTACK: 4,
+    Role.SECOND_ATTACK: 5
+}
+
+goalkeeper_swapped = {
+    Role.GOALKEEPER: 1,
+    Role.FIRST_DEFENCE: 0,
     Role.SECOND_DEFENCE: 2,
     Role.MIDDLE: 3,
     Role.FIRST_ATTACK: 4,
