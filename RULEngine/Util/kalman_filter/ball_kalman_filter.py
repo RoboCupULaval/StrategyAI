@@ -1,6 +1,9 @@
 import numpy as np
 import warnings
 
+from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
+from ai.Algorithm.evaluation_module import closest_players_to_point
+from ai.states.game_state import GameState
 from config.config_service import ConfigService
 
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
@@ -11,7 +14,7 @@ class BallKalmanFilter:
         cfg = ConfigService()
         self.default_dt = float(cfg.config_dict["GAME"]["ai_timestamp"])
         ncameras = int(cfg.config_dict["IMAGE"]["number_of_camera"])
-
+        self.game_state = GameState()
         # Transition model
         self.transition_model(self.default_dt)
 
@@ -37,6 +40,7 @@ class BallKalmanFilter:
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
 
     def update(self, observation):
+
         obsx = []
         obsy = []
         for obs in observation:
@@ -69,11 +73,29 @@ class BallKalmanFilter:
                            [0, 0, 0, 1]])  # Speed y
 
     def filter(self, observation=None, dt=0.05):
+        last_ball_pose = self.game_state.field.ball.position
         if not dt:
             dt = self.default_dt
         self.transition_model(dt)
         if observation is not None:
             self.update(observation)
+        else:
+            players_my_team = closest_players_to_point(last_ball_pose)
+            players_their_team = closest_players_to_point(last_ball_pose, False)
+            if players_my_team[0].player_distance < players_their_team[0].player_distance:
+                closest_player = players_my_team[0].player
+                closest_player_distance_to_ball = players_my_team[0].player_distance
+            else:
+                closest_player = players_their_team[0].player
+                closest_player_distance_to_ball = players_their_team[0].player_distance
+            if closest_player_distance_to_ball < 150:
+                #self.x[2] = closest_player.velocity.position[0]
+                #self.x[3] = closest_player.velocity.position[1]
+                player_to_ball = (last_ball_pose - closest_player.position).normalized() * (BALL_RADIUS + ROBOT_RADIUS)
+                self.x[0] = closest_player.position[0] + player_to_ball.x
+                self.x[1] = closest_player.position[1] + player_to_ball.y
+
         self.predict()
         output_state = self.x
+        #print("speed", self.x[2], self.x[3])
         return output_state

@@ -29,7 +29,7 @@ class PID(object):
 
         self.wrap_err = wrap_err
 
-    def update(self, err: float) -> float:
+    def update(self, err: float, dt = 1) -> float:
         d_err = err - self.last_err
         self.last_err = err
         self.err_sum += err
@@ -44,7 +44,7 @@ class PID(object):
             self.old_err[self.antiwindup_idx] = err
             self.antiwindup_idx = (self.antiwindup_idx + 1) % self.antiwindup_size
 
-        return (err * self.kp) + (self.err_sum * self.ki) + (d_err * self.kd)
+        return (err * self.kp) + (self.err_sum * self.ki * dt) + (d_err * self.kd / dt)
 
     def reset(self):
         if self.antiwindup_active:
