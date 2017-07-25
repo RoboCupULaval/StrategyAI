@@ -177,8 +177,8 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.DEFENSE_KICKOFF: 'DefenseWall',
 
             # Penalty
-            SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE: 'DoNothing',
-            SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE: 'DoNothing',
+            SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE: 'PreparePenaltyOffense',
+            SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE: 'PreparePenaltyDefense',
             SimpleAutoPlayState.OFFENSE_PENALTY: 'PenaltyOffense',
             SimpleAutoPlayState.DEFENSE_PENALTY: 'PenaltyDefense',
 
