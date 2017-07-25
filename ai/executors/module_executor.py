@@ -19,9 +19,9 @@ class ModuleExecutor(Executor):
 
         :return: None
         """
-        self.t1 = threading.Thread(target=self.exec_pathfinder_module())
-        self.t2 = threading.Thread(target=self.exec_display_player_kalman())
-        self.t3 = threading.Thread(target=self.exec_display_ball_kalman())
+        self.t1 = threading.Thread(target=self.exec_pathfinder_module)
+        self.t2 = threading.Thread(target=self.exec_display_player_kalman)
+        self.t3 = threading.Thread(target=self.exec_display_ball_kalman)
         for module in self.ws.module_state.modules.values():
             module.update()
         self.t1.start()
