@@ -228,11 +228,7 @@ class PathPartitionner(Pathfinder):
                     self.pose_obstacle[i, :] = player.pose.position
                     self.collision_body.append(CollisionBody(player.pose.position, player.velocity.position, self.gap_proxy))
                     i += 1
-            if self.ball_collision:
-                ball_position = self.game_state.get_ball_position()
-                self.pose_obstacle[i, :] += ball_position
-                self.collision_body.append(CollisionBody(ball_position, Position(0, 0),
-                                                         110, type="ball"))
+
             self.pose_obstacle = self.pose_obstacle[0:i, :]
             if not(self.optional_collision is None):
                 # for idx, collision_body in enumerate(self.optional_collision):
@@ -240,19 +236,22 @@ class PathPartitionner(Pathfinder):
                     if mask == 1:
                         self.pose_obstacle = np.concatenate((self.pose_obstacle, self.optional_collision[idx].position.reshape(1, 2)))
                         self.collision_body.append(self.optional_collision[idx])
+            if self.ball_collision:
+                ball_position = self.game_state.get_ball_position()
+                self.pose_obstacle = np.concatenate((self.pose_obstacle, ball_position.reshape(1, 2)))
+                self.collision_body.append(CollisionBody(ball_position, Position(0, 0),
+                                                         110, type="ball"))
+
             self.avoid_radius = np.array([obj.avoid_radius for obj in self.collision_body])
-            # print(self.pose_obstacle.shape)
-            # print(len(self.collision_body))
-            # print(self.avoid_radius)
         else:
             factor = 1.1
             temp = (self.path.start - self.pose_obstacle) + (self.path.goal - self.pose_obstacle)
             norm = np.sqrt((temp * temp).sum(axis=1))
-            conditon = norm < (self.path.goal - self.path.start).norm() * factor
+            conditon = norm < (self.path.goal - self.path.start).norm()
             self.pose_obstacle = self.pose_obstacle[conditon, :]
             self.collision_body = np.array(self.collision_body)[conditon]
             self.avoid_radius = self.avoid_radius[conditon]
-
+            
     def get_raw_path(self, pose_target=Position()):
         # sans path_reshaper
         i = 0
