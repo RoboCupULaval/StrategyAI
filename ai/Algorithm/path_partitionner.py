@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List
 
 from RULEngine.Game.OurPlayer import OurPlayer
@@ -74,8 +75,15 @@ class Path:
         return self.generate_path_from_points(self.points, self.speeds, 50)
 
 
+class CollisionType(Enum):
+    PLAYER = 0
+    BALL = 1
+    ZONE = 2
+
 class CollisionBody:
-    def __init__(self, body_position, body_velocity, body_avoid_radius=150, type="player"):
+    UNCOLLIDABLE = 0
+    COLLIDABLE = 1
+    def __init__(self, body_position, body_velocity, body_avoid_radius=150, type:CollisionType=CollisionType.PLAYER):
         self.position = body_position
         self.velocity = body_velocity
         self.avoid_radius = body_avoid_radius
@@ -208,10 +216,9 @@ class PathPartitionner(Pathfinder):
                                    len(self.game_state.other_team.available_players) - 1
         self.pose_obstacle = np.zeros((lenght_pose_obstacle, 2))
 
+        # FIXME: Find better name that is less confusing between self.player and player
         for player in self.game_state.my_team.available_players.values():
             if player.id != self.player.id:
-                # print((self.path.start - player.pose.position).norm() + (self.path.goal - player.pose.position).norm() - \
-                #         (self.path.goal - self.path.start).norm(), (self.path.goal - self.path.start).norm())
                 if (self.player.pose.position - player.pose.position).norm() + \
                         (self.player.ai_command.pose_goal.position - player.pose.position).norm() < \
                         (self.player.ai_command.pose_goal.position - self.player.pose.position).norm() * factor:
@@ -230,7 +237,7 @@ class PathPartitionner(Pathfinder):
             ball_position = self.game_state.get_ball_position()
             self.pose_obstacle[i, :] += ball_position
             self.collision_body.append(CollisionBody(ball_position, Position(0, 0),
-                                                     110, type="ball"))
+                                                     110, type=CollisionType.BALL))
         self.pose_obstacle = self.pose_obstacle[0:i, :]
         if not(self.optional_collision is None):
             # for idx, collision_body in enumerate(self.optional_collision):
@@ -239,9 +246,6 @@ class PathPartitionner(Pathfinder):
                     self.pose_obstacle = np.vstack((self.pose_obstacle, self.optional_collision[idx].position))
                     self.collision_body.append(self.optional_collision[idx])
         self.avoid_radius = np.array([obj.avoid_radius for obj in self.collision_body])
-        # print(self.pose_obstacle.shape)
-        # print(len(self.collision_body))
-        # print(self.avoid_radius)
 
     def get_raw_path(self, pose_target=Position()):
         # sans path_reshaper
@@ -399,7 +403,7 @@ class PathPartitionner(Pathfinder):
             cruise_speed = self.player.velocity.position.conv_2_np()
             self.closest_obs_speed = closest_collision_body.velocity
             avoid_dir = -vec_perp
-            if closest_collision_body.type == "ball" or closest_collision_body.type == "zone":
+            if closest_collision_body.type == CollisionType.BALL or closest_collision_body.type == CollisionType.ZONE:
                 avoid_dir = -vec_perp
                 sub_target_1 = np.array(conv_position_2_list(pose_robot)) + \
                     direction * len_along_path + vec_perp * self.res

@@ -38,11 +38,11 @@ class MotionExecutor(Executor):
 
             cmd = player.ai_command
             r_id = player.id
-            player.collision_body_mask[0] = 1
+            player.collision_body_mask[0] = CollisionBody.COLLIDABLE
             if player is not self.ws.game_state.get_player_by_role(Role.GOALKEEPER):
-                player.collision_body_mask[1] = 1
+                player.collision_body_mask[1] = CollisionBody.COLLIDABLE
             else:
-                player.collision_body_mask[1] = 0
+                player.collision_body_mask[1] = CollisionBody.UNCOLLIDABLE
 
             if self.last_goal[r_id] is not None and cmd.path != []:
                 if self.last_goal[r_id] != cmd.path[0]:
