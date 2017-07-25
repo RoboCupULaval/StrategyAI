@@ -21,8 +21,6 @@ def create_pathfinder(game_state, type_of_pathfinder):
     assert isinstance(type_of_pathfinder, str)
     assert type_of_pathfinder.lower() in ["rrt", "astar", "path_part"]
 
-    # if type_of_pathfinder.lower() == "astar":
-    # return AsPathManager(self.ws, ConfigService().config_dict["GAME"]["type"] == "sim")
     if type_of_pathfinder.lower() == "rrt":
         return PathfinderRRT(game_state)
     elif type_of_pathfinder.lower() == "path_part":
@@ -92,26 +90,12 @@ class PathfinderModule(Executor):
     #@profile(immediate=True)
     def exec(self):
         callback = partial(pathfind_ai_commands, self.type_of_pathfinder.lower(), self.game_state)
-        paths = [callback(player) for player in list(self.ws.game_state.my_team.available_players.values())[0:5]]
+        paths = [callback(player) for player in list(self.ws.game_state.my_team.available_players.values())]
         #print(len(self.ws.game_state.my_team.available_players.values()))
         #paths = self.pool.map(callback, self.game_state.my_team.available_players.values())
         for path in paths:
             if path is not None:
                 self.draw_path(path)
-        # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        #     future_to_path = {executor.submit(self._pathfind_ai_commands(player), player): player for player in
-        #                       self.ws.game_state.my_team.available_players.values()}
-        #     # for future in concurrent.futures.as_completed(future_to_path):
-        #     #     url = future_to_path[future]
-        #     #     try:
-        #     #         data = future.result()
-        #     #     except Exception as exc:
-        #     #         print('%r generated an exception: %s' % (url, exc))
-        #     #     else:
-        #     #         print('%r page is %d bytes' % (url, len(data)))
-        # for player in self.ws.game_state.my_team.available_players.values():
-        #     self._pathfind_ai_commands(player)
-        # self._modify_path_for_cinematic_constraints(ai_commands)
 
 
     # TODO find what this does? MGL 2017/05/17
