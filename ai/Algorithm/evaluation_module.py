@@ -13,8 +13,8 @@ class PlayerPosition(object):
 def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS):
     # Retourne le joueur qui possède la balle, NONE si balle libre
     closest_player = closest_player_to_point(GameState().get_ball_position())
-    if closest_player[0][1] < min_dist_from_ball:
-        return closest_player[0][0]
+    if closest_player.distance < min_dist_from_ball:
+        return closest_player.player
     else:
         return None
 
@@ -40,7 +40,7 @@ def closest_players_to_point(point: Position, our_team=None):
 def closest_player_to_point(point: Position, our_team=None):
     # Retourne le player le plus proche,
     # our_team pour obtenir une liste contenant une équipe en particulier
-    return closest_players_to_point(point, our_team)[0].player
+    return closest_players_to_point(point, our_team)[0]
 
 
 def is_ball_moving(min_speed=0.1):

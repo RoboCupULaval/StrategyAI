@@ -156,7 +156,6 @@ class GoKick(Tactic):
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
                 self.game_state.get_player(tentative_target_id).receiver_pass_flag = True
 
-
             # print("Target player/goal : ", tentative_target_id, self.target)
             self.target_assignation_last_time = time.time()
 
