@@ -4,6 +4,8 @@
 from typing import List
 
 from ai.STA.Strategy.DefenseWall import DefenseWall
+from ai.STA.Strategy.direct_free_kick import DirectFreeKick
+from ai.STA.Strategy.indirect_free_kick import IndirectFreeKick
 from ai.STA.Strategy.offense import Offense
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Strategy.indiana_jones import IndianaJones
@@ -11,6 +13,8 @@ from ai.STA.Strategy.HumanControl import HumanControl
 from ai.STA.Strategy.DoNothing import DoNothing
 from ai.STA.Strategy.passes_with_decisions import PassesWithDecisions
 from ai.STA.Strategy.pathfinder_benchmark import Pathfinder_Benchmark
+from ai.STA.Strategy.penalty_defense import PenaltyDefense
+from ai.STA.Strategy.penalty_offense import PenaltyOffense
 from ai.STA.Strategy.prepare_kickoff_defense import PrepareKickOffDefense
 from ai.STA.Strategy.prepare_kickoff_offense import PrepareKickOffOffense
 from ai.STA.Strategy.robocup_choreography import RobocupChoreography
@@ -40,7 +44,12 @@ class StrategyBook(object):
                               'Pathfinder_Benchmark': Pathfinder_Benchmark,
                               'PrepareKickOffOffense': PrepareKickOffOffense,
                               'StayAway': StayAway,
-                              'PrepareKickOffDefense': PrepareKickOffDefense
+                              'PrepareKickOffDefense': PrepareKickOffDefense,
+                              'PenaltyDefense': PenaltyDefense,
+                              'PenaltyOffense': PenaltyOffense,
+                              'PrepareKickOffDefense': PrepareKickOffDefense,
+                              'DirectFreeKick': DirectFreeKick,
+                              'IndirectFreeKick': IndirectFreeKick
                               }
 
     def get_strategies_name_list(self) -> List[str]:

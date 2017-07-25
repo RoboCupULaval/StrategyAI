@@ -223,3 +223,6 @@ def wrap_to_pi(angle):
 def compare_angle(angle1, angle2, abs_tol=0.004):
     return m.isclose(Pose.wrap_to_pi(angle1 - angle2), 0, abs_tol=abs_tol, rel_tol=0)
 
+
+def clamp(val: float, min_val: float, max_val: float) -> float:
+    return max(min(val, max_val), min_val)
