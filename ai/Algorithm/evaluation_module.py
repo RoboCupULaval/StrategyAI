@@ -140,6 +140,7 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
         #print(scores_temp)
     return scores
 
+
 def line_of_sight_clearance_ball_legacy(player, target: Position):
     # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
     # (plus c'est dégagé plus le score est petit)
@@ -157,7 +158,7 @@ def line_of_sight_clearance_ball_legacy(player, target: Position):
 
 def trajectory_score(pointA, pointsB, obstacle):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
-    proportion_max = 15 # Proportion du triangle rectancle derrière les robots obstacles
+    proportion_max = 15  # Proportion du triangle rectancle derrière les robots obstacles
     if len(pointsB.shape) == 1:
         scores = np.array([0])
     else:
@@ -181,6 +182,7 @@ def trajectory_score(pointA, pointsB, obstacle):
         temp[temp < 1] = 1
         scores[scores == 0] = temp
     return scores
+
 
 def is_player_facing_target(player, target_position: Position, tolerated_angle: float) -> bool:
     """
@@ -210,7 +212,6 @@ def best_position_in_region(player, A, B):
     bottom_left = Position(min(A.x, B.x), min(A.y, B.y))
     top_right = Position(max(A.x, B.x), max(A.y, B.y))
     ball_position = GameState().get_ball_position()
-
 
     positions = []
     for i in range(ncounts):

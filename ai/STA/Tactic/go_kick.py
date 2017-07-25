@@ -1,24 +1,18 @@
 # Under MIT licence, see LICENCE.txt
 import math as m
 from typing import List, Union
-import numpy as np
 import time
 
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
-from RULEngine.Util.geometry import get_distance, compare_angle, wrap_to_pi
+from RULEngine.Util.geometry import are_collinear
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.rotate_around import RotateAround
-from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ai_command import AICommandType
-from ai.STA.Action.GoBehind import GoBehind
 from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
@@ -46,13 +40,16 @@ class GoKick(Tactic):
         target: Position à laquelle faire face après avoir pris la balle
     """
 
-    def __init__(self, game_state: GameState, player: OurPlayer,
+    def __init__(self,
+                 game_state: GameState,
+                 player: OurPlayer,
                  target: Pose=Pose(),
                  args: List[str]=None,
                  kick_force: Union[int, float]=3,
                  auto_update_target=False):
 
         Tactic.__init__(self, game_state, player, target, args)
+
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge
         self.kick_last_time = time.time()
@@ -148,11 +145,9 @@ class GoKick(Tactic):
     def _get_distance_from_ball(self):
         return (self.player.pose.position - self.game_state.get_ball_position()).norm()
 
-    def _is_player_towards_ball_and_target(self, abs_tol=m.pi/20):
+    def _is_player_towards_ball_and_target(self):
         ball_position = self.game_state.get_ball_position()
-        target_to_ball = ball_position - self.target.position
-        ball_to_player = self.player.pose.position - ball_position
-        return compare_angle(target_to_ball.angle(), ball_to_player.angle(), abs_tol=abs_tol)
+        return are_collinear(self.player.pose.position, ball_position, self.target.position, abs_tol=m.pi/20)
 
     def _find_best_passing_option(self):
 

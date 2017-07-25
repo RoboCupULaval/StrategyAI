@@ -164,7 +164,7 @@ class PathPartitionner(Pathfinder):
                 self.path = self.remove_redundant_points()
 
         else:
-            self.path = Path(self.player.pose.position.conv_2_np(), pose_target.position.conv_2_np())
+            self.path = Path(self.player.pose.position, pose_target.position)
             if self.path.get_path_length() < 1:
                 """
                 hack shady pour eviter une erreur shady (trop fatiguer pour dealer ak ste shit la)

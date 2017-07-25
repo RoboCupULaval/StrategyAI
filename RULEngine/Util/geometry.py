@@ -198,16 +198,8 @@ def get_closest_point_on_segment(reference: Position,
     return position_on_segment
 
 
-def get_angle_between_three_points(pointA : Position, pointO : Position, pointB : Position):
-    A = pointA.conv_2_np()
-    B = pointB.conv_2_np()
-    O = pointO.conv_2_np()
-    AO = O - A
-    OB = B - O
-    if np.linalg.norm(AO) != 0 and np.linalg.norm(OB) != 0 :
-        AO /= np.linalg.norm(AO)
-        OB /= np.linalg.norm(OB)
-    return np.arccos(np.linalg.dot(AO, OB))
+def get_angle_between_three_points(start: Position, mid: Position, end: Position):
+    return abs((mid - start).angle() - (end - mid).angle())
 
 
 def conv_position_2_list(position: Position):
@@ -218,6 +210,10 @@ def conv_position_2_list(position: Position):
     """
 
     return [position.x, position.y]
+
+
+def are_collinear(pos1: Position, pos2: Position, pos3: Position, abs_tol=m.pi/30):
+    return compare_angle((pos2 - pos3).angle(), (pos1 - pos2).angle(), abs_tol=abs_tol)
 
 
 def wrap_to_pi(angle):
