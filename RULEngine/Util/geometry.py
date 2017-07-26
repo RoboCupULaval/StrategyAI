@@ -201,7 +201,7 @@ def get_closest_point_on_segment(reference: Position,
 
 
 def get_angle_between_three_points(start: Position, mid: Position, end: Position):
-    return abs((mid - start).angle() - (end - mid).angle())
+    return abs(wrap_to_pi((mid - start).angle() - (end - mid).angle()))
 
 
 def conv_position_2_list(position: Position):
