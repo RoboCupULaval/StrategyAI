@@ -346,6 +346,7 @@ class Framework(object):
         try:
             self.vision_redirection_routine(pb_sslwrapper.SerializeToString())
         except:
+            print("fuck you2")
             pass
 
     def _sigint_handler(self, *args):
