@@ -44,12 +44,16 @@ class BallKalmanFilter:
         obsx = []
         obsy = []
         for obs in observation:
-            if obs is not None:
-                obsx.append(obs.x)
-                obsy.append(obs.y)
-            if obs is None:
+            if obs is None or not (obs.x < 0 and obs.y < 0):
                 obsx.append(None)
                 obsy.append(None)
+                print('ball is outside')
+
+            elif obs is not None:
+                obsx.append(obs.x)
+                obsy.append(obs.y)
+                print('ball is inside')
+
         observation = np.array(obsx + obsy)
 
         mask = np.array([obs is not None for obs in observation])

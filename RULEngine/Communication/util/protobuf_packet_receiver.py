@@ -10,7 +10,7 @@ from socketserver import BaseRequestHandler
 
 import time
 
-from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2
+from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2, google
 from RULEngine.Communication.util.threaded_udp_server import ThreadedUDPServer
 
 
@@ -30,10 +30,14 @@ class ProtobufPacketReceiver(object):
         class ThreadedUDPRequestHandler(BaseRequestHandler):
 
             def handle(self):
-                data = self.request[0]
-                packet = packet_type()
-                packet.ParseFromString(data)
-                packet_list.append(packet)
+                try:
+                    data = self.request[0]
+                    packet = packet_type()
+                    packet.ParseFromString(data)
+                    packet_list.append(packet)
+                except google.protobuf.message.DecodeError:
+                    print("fuck you")
+                    pass
 
         return ThreadedUDPRequestHandler
 

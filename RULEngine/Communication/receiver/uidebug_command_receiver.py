@@ -32,8 +32,11 @@ class UIDebugCommandReceiver(object):
                     Récupère la request et unpickle le paquet brute dans la
                     deque.
                 """
-                data = self.request[0]
-                p_packet_list.append(pickle.loads(data))
+                try:
+                    data = self.request[0]
+                    p_packet_list.append(pickle.loads(data))
+                except:
+                    pass
         return ThreadedUDPRequestHandler
 
     def receive_command(self):
