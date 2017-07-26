@@ -47,6 +47,8 @@ class DebugExecutor(Executor):
 
         elif cmd.is_auto_play_cmd():
             self.ws.play_state.autonomous_flag = cmd.data['status']
+            if not self.ws.play_state.autonomous_flag:
+                self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy("DoNothing")(self.ws.game_state))
 
         else:
             pass
