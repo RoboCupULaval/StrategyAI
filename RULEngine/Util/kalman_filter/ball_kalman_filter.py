@@ -44,7 +44,7 @@ class BallKalmanFilter:
         obsx = []
         obsy = []
         for obs in observation:
-            if obs is None:
+            if obs is None or not(obs.x > 0 and obs.y > 0):
                 obsx.append(None)
                 obsy.append(None)
 
