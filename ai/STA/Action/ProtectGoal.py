@@ -1,12 +1,11 @@
 # Under MIT licence, see LICENCE.txt
 
-import math
 
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.area import stayInsideCircle, stayOutsideCircle
-from RULEngine.Util.geometry import get_angle, get_closest_point_on_line, get_closest_point_on_segment
+from RULEngine.Util.area import stayInsideCircle
+from RULEngine.Util.geometry import get_closest_point_on_segment
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
 from ai.states.game_state import GameState

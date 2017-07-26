@@ -1,14 +1,13 @@
 # Under MIT license, see LICENSE.txt
 
 import unittest
-from math import pi, atan, sqrt
+from math import pi, sqrt
 
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Position import Position
-from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Game.Referee import Referee
-from RULEngine.Util.team_color_service import TeamColorService, TeamColor
+from RULEngine.Util.team_color_service import TeamColorService
 from RULEngine.Game.Game import Game
 from config.config_service import ConfigService
 from RULEngine.Util.Pose import Pose
@@ -59,9 +58,10 @@ class TestActions(unittest.TestCase):
                                       "cruise_speed": A_CRUISE_SPEED}))
 
     def test_idle(self):
-        self.idle = Idle(self.game_state,self.a_player)
-        current_pose = None
-        current_pose_string = AICommand(self.a_player, AICommandType.STOP)
+        self.idle = Idle(self.game_state, self.a_player)
+        current_pose_string = AICommand(self.a_player, AICommandType.MOVE,
+                                        pose_goal=SpeedPose(0, 0, 0),
+                                        control_loop_type=AIControlLoopType.SPEED)
         self.assertEqual(Idle.exec(self.idle), current_pose_string)
 
     def test_GrabBall(self):
@@ -69,7 +69,7 @@ class TestActions(unittest.TestCase):
         self.game_state.set_ball_position(Position(5, 0), A_DELTA_T)
         ai_cmd = self.grab_ball.exec()
         ball_position = self.game_state.get_ball_position()
-        destination_orientation = get_angle(self.a_player.pose.position, ball_position)
+        destination_orientation = (ball_position - self.a_player.pose.position).angle()
         destination_pose = Pose(ball_position, destination_orientation)
         ai_cmd_expected = AICommand(self.a_player, AICommandType.MOVE,
                                     **{"pose_goal": destination_pose})

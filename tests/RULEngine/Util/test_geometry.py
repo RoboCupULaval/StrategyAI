@@ -6,6 +6,7 @@ import RULEngine.Util.geometry
 
 __author__ = 'RoboCupULaval'
 
+
 class TestGeometry(unittest.TestCase):
 
     def setUp(self):
@@ -26,11 +27,11 @@ class TestGeometry(unittest.TestCase):
         self.assertAlmostEqual(approx_dist, compValue) # On veut quelle précision pour geo?
 
     def test_get_angle(self):
-        self.assertEqual(RULEngine.Util.geometry.get_angle(self.position, self.positionN), (m.pi)/2)
-        self.assertEqual(RULEngine.Util.geometry.get_angle(self.position, self.positionNE), (m.pi)/4)
-        self.assertEqual(RULEngine.Util.geometry.get_angle(self.position, self.positionNO), 3*(m.pi)/4)
-        self.assertEqual(RULEngine.Util.geometry.get_angle(self.position, self.positionSE), -1*(m.pi)/4)
-        self.assertEqual(RULEngine.Util.geometry.get_angle(self.position, self.positionSO), -3*(m.pi)/4)
+        self.assertEqual((self.positionN - self.position).angle(), m.pi/2)
+        self.assertEqual((self.positionNE - self.position).angle(), m.pi/4)
+        self.assertEqual((self.positionNO - self.position).angle(), 3*m.pi/4)
+        self.assertEqual((self.positionSE - self.position).angle(), -1*m.pi/4)
+        self.assertEqual((self.positionSO - self.position).angle(), -3*m.pi/4)
 
     def test_get_nearest(self):
         # Cas où on a des distances égales
