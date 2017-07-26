@@ -10,14 +10,15 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Util.team_color_service import TeamColorService, TeamColor
+
+from ai.STA.Action.Idle import Idle
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
 from ai.Algorithm.Graph.Vertex import Vertex
-from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ai_command import AICommand, AICommandType
+from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
 from ai.states.game_state import GameState
 from config.config_service import ConfigService
 
@@ -109,10 +110,10 @@ class TestGraph(unittest.TestCase):
         self.graph1.remove_vertex(0, 1)
         self.assertEqual(len(self.graph1.nodes[0].vertices), 0)
 
-    #@unittest.skip("I don't know whuy the fuck it is broken here.")
     def test_exec(self):
         next_ai_command = self.graph1.exec()
-        expected_ai_command = AICommand(self.a_player, AICommandType.STOP)
+        expected_ai_command = Idle(self.game_state, self.a_player).exec()
+
         self.assertEqual(self.graph1.current_node, 1)
         self.assertEqual(next_ai_command, expected_ai_command)
 
@@ -124,13 +125,13 @@ class TestGraph(unittest.TestCase):
 
         next_ai_command = self.empty_graph.exec()
         expected_ai_command = GoToPositionNoPathfinder(self.game_state, self.a_player,
-                                             Pose(Position(500, 0), 0)).exec()
+                                                       Pose(Position(500, 0), 0)).exec()
         self.assertEqual(self.empty_graph.current_node, 0)
         self.assertEqual(next_ai_command, expected_ai_command)
 
         next_ai_command = self.empty_graph.exec()
         expected_ai_command = GoToPositionNoPathfinder(self.game_state, self.a_player,
-                                             Pose(Position(500, 0), 0)).exec()
+                                                       Pose(Position(500, 0), 0)).exec()
         self.assertEqual(self.empty_graph.current_node, 0)
         self.assertEqual(next_ai_command, expected_ai_command)
 
