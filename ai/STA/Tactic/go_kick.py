@@ -58,8 +58,6 @@ class GoKick(Tactic):
         self.kick_tries = 0
         self.kick_succeed = False
 
-
-        self.current_state = self.kick_charge
         self.next_state = self.kick_charge
 
     def kick_charge(self):
@@ -92,8 +90,12 @@ class GoKick(Tactic):
     def grab_ball(self):
         self.status_flag = Flags.WIP
 
+        print(self.player.pose.compare_orientation(self._get_aiming(), abs_tol=m.pi/20))
+        print(self._get_aiming(), self.player.pose.orientation)
+        print(self._get_distance_from_ball())
+
         if self._get_distance_from_ball() < KICK_DISTANCE and \
-                self.player.pose.compare_orientation(self._get_aiming(), abs_tol=m.pi / 20):
+                self.player.pose.compare_orientation(self._get_aiming(), abs_tol=m.pi/20):
             self.next_state = self.kick
         else:
             self.next_state = self.grab_ball
@@ -101,7 +103,7 @@ class GoKick(Tactic):
         return MoveToPosition(self.game_state,
                               self.player,
                               Pose(self.game_state.get_ball_position(), self._get_aiming()),
-                              cruise_speed=0.2,
+                              cruise_speed=1,
                               end_speed=0.1)
 
     def validate_kick(self):
@@ -114,11 +116,14 @@ class GoKick(Tactic):
                 if self.tentative_target_id:
                     for player in self.game_state.my_team.available_players.values():
                         player.receiver_pass_flag = False
+
             self.next_state = self.halt
             self.kick_succeed = True
+
         elif time.time() - self.kick_last_time < VALIDATE_KICK_DELAY:
-            self.next_state = self.kick
+            self.next_state = self.validate_kick
             self.kick_succeed = False
+
         else:
             self.next_state = self.go_behind_ball
             self.kick_succeed = False
