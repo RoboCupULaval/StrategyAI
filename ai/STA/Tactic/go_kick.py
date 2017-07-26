@@ -80,7 +80,7 @@ class GoKick(Tactic):
         else:
             self.next_state = self.go_behind_ball
 
-        collision_ball_flag = False if self.has_kick else True
+        collision_ball_flag = not self.has_kick
 
         return MoveToPosition(self.game_state,
                               self.player,
