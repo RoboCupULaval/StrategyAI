@@ -61,7 +61,6 @@ class AlignToDefenseWall(Tactic):
             if self.player == player:
                 self.player_number_in_formation = idx
                 break
-        print(self.robots_in_formation)
         if len(self.robots_in_formation) == 0:
             self.next_state = self.halt
             self.number_of_robots = 0

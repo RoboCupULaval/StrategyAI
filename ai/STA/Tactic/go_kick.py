@@ -46,6 +46,8 @@ class GoKick(Tactic):
         self.auto_update_target = auto_update_target
         self.consider_goal_as_target = consider_goal_as_target
 
+        self.target_assignation_last_time = 0
+
         if self.auto_update_target:
             self._find_best_passing_option()
 
@@ -56,7 +58,6 @@ class GoKick(Tactic):
         self.kick_tries = 0
         self.kick_succeed = False
 
-        self.target_assignation_last_time = 0
 
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge
