@@ -1,8 +1,10 @@
 from abc import abstractmethod, ABCMeta
+from enum import IntEnum
 
 from RULEngine.Game.Referee import RefereeCommand
 from ai.Algorithm.IntelligentModule import IntelligentModule
 
+from ai.Algorithm.evaluation_module import *
 
 class AutoPlay(IntelligentModule, metaclass=ABCMeta):
     """
@@ -16,6 +18,7 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
         self.selected_strategy = None
         self.current_state = None
         self.next_state = None
+        self.last_state = None
 
     def get_selected_strategy(self):
         return self.selected_strategy
@@ -28,7 +31,7 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
         }
 
     @abstractmethod
-    def update(self):
+    def update(self, available_players_changed: bool):
         """ Effectue la mise à jour du module """
         pass
 
@@ -40,6 +43,28 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
             log.
         """
 
+class SimpleAutoPlayState(IntEnum):
+    HALT = 0
+    STOP = 1
+    GOAL_US = 2
+    GOAL_THEM = 3
+    BALL_PLACEMENT_THEM = 4
+    BALL_PLACEMENT_US = 5
+    NORMAL_OFFENSE = 6
+    NORMAL_DEFENSE = 7
+    TIMEOUT = 8
+    PREPARE_KICKOFF_OFFENSE = 9
+    PREPARE_KICKOFF_DEFENSE = 10
+    OFFENSE_KICKOFF = 11
+    DEFENSE_KICKOFF = 12
+    PREPARE_PENALTY_OFFENSE = 13
+    PREPARE_PENALTY_DEFENSE = 14
+    OFFENSE_PENALTY = 15
+    DEFENSE_PENALTY = 16
+    DIRECT_FREE_OFFENSE = 17
+    DIRECT_FREE_DEFENSE = 18
+    INDIRECT_FREE_OFFENSE = 19
+    INDIRECT_FREE_DEFENSE = 20
         
 class SimpleAutoPlay(AutoPlay):
     """
@@ -49,14 +74,14 @@ class SimpleAutoPlay(AutoPlay):
         super().__init__(worldstate)
         self.last_ref_command = RefereeCommand.HALT
         
-    def update(self):
+    def update(self, available_players_changed: bool):
         self.next_state = self._select_next_state()
 
         if self.next_state is None:
-            self.next_state = 'HALT'
+            self.next_state = SimpleAutoPlayState.HALT
             self.selected_strategy = self._get_new_strategy(self.next_state)
 
-        elif self.next_state != self.current_state:
+        elif self.next_state != self.current_state or available_players_changed:
             self.selected_strategy = self._get_new_strategy(self.next_state)
 
         self.current_state = self.next_state
@@ -65,65 +90,65 @@ class SimpleAutoPlay(AutoPlay):
     
     def str(self):
         pass
-    
+
+    def _analyse_game(self):
+        if self.current_state is SimpleAutoPlayState.OFFENSE_KICKOFF or \
+            self.current_state is SimpleAutoPlayState.DEFENSE_KICKOFF or \
+            self.current_state is SimpleAutoPlayState.OFFENSE_PENALTY or \
+                self.current_state is SimpleAutoPlayState.DEFENSE_PENALTY:
+            if not is_ball_moving(300):
+                return self.current_state
+        if score_strategy_other_team() < 0:
+            return SimpleAutoPlayState.NORMAL_DEFENSE
+        else:
+            return SimpleAutoPlayState.NORMAL_OFFENSE
+
+    def _normal_start(self):
+        return {
+            RefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.OFFENSE_KICKOFF,
+            RefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.DEFENSE_KICKOFF,
+            RefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.OFFENSE_PENALTY,
+            RefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.DEFENSE_PENALTY,
+            RefereeCommand.NORMAL_START: self._analyse_game()
+        }.get(self.last_ref_command, RefereeCommand.NORMAL_START)
+
     def _select_next_state(self):
         referee = self.ws.game_state.game.referee
         next_state = self.current_state
+        # On command change
         if self.last_ref_command != referee.command:
-            if referee.command == RefereeCommand.HALT:
-                self.debug_interface.add_log(1, "Halt robots!")
-                next_state = 'HALT'
+            next_state = {
+                RefereeCommand.HALT: SimpleAutoPlayState.HALT,
 
-            elif referee.command == RefereeCommand.STOP or\
-                    referee.command == RefereeCommand.GOAL_US or\
-                    referee.command == RefereeCommand.GOAL_THEM or\
-                    referee.command == RefereeCommand.BALL_PLACEMENT_THEM:
-                self.debug_interface.add_log(1, "Game stopped : Robots must keep 50 cm from the ball")
-                next_state = 'STOP'
+                RefereeCommand.STOP: SimpleAutoPlayState.STOP,
+                RefereeCommand.GOAL_US: self.current_state,
+                RefereeCommand.GOAL_THEM: self.current_state,
+                RefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
 
-            elif referee.command == RefereeCommand.BALL_PLACEMENT_US:
-                self.debug_interface.add_log(1, "Ball placement : we need to place the ball at : " + str(referee.ball_placement_point))
-                self.next_state = 'HALT' #TODO send ball new position to strategy...
+                RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.HALT, #TODO send ball new position to strategy...
 
-            elif referee.command == RefereeCommand.FORCE_START:
-                self.debug_interface.add_log(1, "Force start : ball is free!")
-                next_state = 'FORCE_START'
+                RefereeCommand.FORCE_START: self._analyse_game(),
+                RefereeCommand.NORMAL_START: self._normal_start(),
 
-            elif referee.command == RefereeCommand.NORMAL_START:
-                self.debug_interface.add_log(1, "Normal start")
-                if self.last_ref_command == RefereeCommand.PREPARE_KICKOFF_US:
-                    next_state = 'OFFENSE_KICKOFF'
-                elif self.last_ref_command == RefereeCommand.PREPARE_KICKOFF_THEM:
-                    next_state = 'DEFENSE_KICKOFF'
-                elif self.last_ref_command == RefereeCommand.PREPARE_PENALTY_US:
-                    next_state = 'OFFENSE_PENALTY'
-                elif self.last_ref_command == RefereeCommand.PREPARE_PENALTY_THEM:
-                    next_state = 'DEFENSE_PENALTY'
+                RefereeCommand.TIMEOUT_THEM: SimpleAutoPlayState.TIMEOUT,
+                RefereeCommand.TIMEOUT_US: SimpleAutoPlayState.TIMEOUT,
 
-            elif referee.command == RefereeCommand.TIMEOUT_BLUE or\
-                referee.command == RefereeCommand.TIMEOUT_YELLOW:
-                self.debug_interface.add_log(1, "Timeout!")
-                next_state = 'TIMEOUT'
+                RefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE,
+                RefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE,
+                RefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE,
+                RefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE,
 
-            elif referee.command == RefereeCommand.PREPARE_KICKOFF_US:
-                self.debug_interface.add_log(1, "Prepare kickoff offense!")
-                next_state = 'PREPARE_KICKOFF_OFFENSE'
+                RefereeCommand.DIRECT_FREE_US: SimpleAutoPlayState.DIRECT_FREE_OFFENSE,
+                RefereeCommand.DIRECT_FREE_THEM: SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
+                RefereeCommand.INDIRECT_FREE_US: SimpleAutoPlayState.INDIRECT_FREE_OFFENSE,
+                RefereeCommand.INDIRECT_FREE_THEM: SimpleAutoPlayState.INDIRECT_FREE_DEFENSE
 
-            elif referee.command == RefereeCommand.PREPARE_KICKOFF_THEM:
-                self.debug_interface.add_log(1, "Prepare kickoff defense!")
-                next_state = 'PREPARE_KICKOFF_DEFENSE'
+            }.get(referee.command, RefereeCommand.HALT)
 
-            elif referee.command == RefereeCommand.PREPARE_PENALTY_US:
-                self.debug_interface.add_log(1, "Prepare penalty offense!")
-                next_state = 'PREPARE_PENALTY_OFFENSE'
-
-            elif referee.command == RefereeCommand.PREPARE_PENALTY_THEM:
-                self.debug_interface.add_log(1, "Prepare penalty defense!")
-                next_state = 'PREPARE_PENALTY_DEFENSE'
-
-            else:
-                self.debug_interface.add_log(1, "Unknown command... halting all the robots")
-                next_state = 'HALT'
+        # During the game
+        elif referee.command == RefereeCommand.FORCE_START or\
+            referee.command == RefereeCommand.NORMAL_START:
+            next_state = self._analyse_game()
 
         self.last_ref_command = referee.command
         return next_state
@@ -133,33 +158,40 @@ class SimpleAutoPlay(AutoPlay):
         return self.ws.play_state.get_new_strategy(name)(self.ws.game_state)
 
     def _get_strategy_name(self, state):
-        # TODO change this
-        autonomousStrategies = {
+        return {
             # Robots must be stopped
-            'HALT': 'DoNothing',
+            SimpleAutoPlayState.HALT: 'DoNothing',
 
             # Robots must stay 50 cm from the ball
-            'STOP': 'DoNothing',
-            'GOAL_US': 'DoNothing',
-            'GOAL_THEM': 'DoNothing',
-            'BALL_PLACEMENT_THEM': 'DoNothing',
+            SimpleAutoPlayState.STOP: 'StayAway',
+            SimpleAutoPlayState.GOAL_US: 'StayAway',
+            SimpleAutoPlayState.GOAL_THEM: 'StayAway',
+            SimpleAutoPlayState.BALL_PLACEMENT_THEM: 'StayAway',
 
             # Place the ball to the designated position
-            'BALL_PLACEMENT_US': 'DoNothing',
+            SimpleAutoPlayState.BALL_PLACEMENT_US: 'DoNothing',
 
-            # The ball is free to take
-            'FORCE_START': 'DoNothing',
+            SimpleAutoPlayState.NORMAL_OFFENSE: 'Offense',
+            SimpleAutoPlayState.NORMAL_DEFENSE: 'DefenseWall',
 
-            'TIMEOUT': 'DoNothing',
+            SimpleAutoPlayState.TIMEOUT: 'DoNothing',
 
-            'PREPARE_KICKOFF_OFFENSE': 'DoNothing',
-            'PREPARE_KICKOFF_DEFENSE': 'DoNothing',
-            'OFFENSE_KICKOFF': 'DoNothing',
-            'DEFENSE_KICKOFF': 'DoNothing',
+            # Kickoff
+            SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE: 'PrepareKickOffOffense',
+            SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE: 'PrepareKickOffDefense',
+            SimpleAutoPlayState.OFFENSE_KICKOFF: 'OffenseKickOff',
+            SimpleAutoPlayState.DEFENSE_KICKOFF: 'DoNothing',
 
-            'PREPARE_PENALTY_OFFENSE': 'DoNothing',
-            'PREPARE_PENALTY_DEFENSE': 'DoNothing',
-            'OFFENSE_PENALTY': 'DoNothing',
-            'DEFENSE_PENALTY': 'DoNothing'
-        }
-        return autonomousStrategies[state]
+            # Penalty
+            SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE: 'PreparePenaltyOffense',
+            SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE: 'PreparePenaltyDefense',
+            SimpleAutoPlayState.OFFENSE_PENALTY: 'PenaltyOffense',
+            SimpleAutoPlayState.DEFENSE_PENALTY: 'PenaltyDefense',
+
+            # Freekicks
+            SimpleAutoPlayState.DIRECT_FREE_DEFENSE: 'DefenseWall',
+            SimpleAutoPlayState.DIRECT_FREE_OFFENSE: 'DirectFreeKick',
+            SimpleAutoPlayState.INDIRECT_FREE_DEFENSE: 'DefenseWall',
+            SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'IndirectFreeKick'
+
+        }.get(state, SimpleAutoPlayState.HALT)

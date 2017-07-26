@@ -108,6 +108,11 @@ class GoKick(Tactic):
 
         if self.game_state.get_ball_velocity().norm() > KICK_SUCCEED_SPEED_THRESHOLD or \
                 self._get_distance_from_ball() > KICK_SUCCEED_DISTANCE_THRESHOLD:
+
+            if self.auto_update_target:
+                if self.tentative_target_id:
+                    for player in self.game_state.my_team.available_players.values():
+                        player.receiver_pass_flag = False
             self.next_state = self.halt
             self.kick_succeed = True
         elif time.time() - self.kick_last_time < VALIDATE_KICK_DELAY:
@@ -174,11 +179,11 @@ class GoKick(Tactic):
         assignation_delay = (time.time() - self.target_assignation_last_time)
 
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
-            tentative_target_id = best_passing_option(self.player, self.consider_goal_as_target)
-            if tentative_target_id is None:
+            self.tentative_target_id = best_passing_option(self.player, self.consider_goal_as_target)
+            if self.tentative_target_id is None:
                 self.target = Pose(best_goal_score_option(self.player))
             else:
-                self.target = Pose(GameState().get_player_position(tentative_target_id))
-                self.game_state.get_player(tentative_target_id).receiver_pass_flag = True
+                self.target = Pose(GameState().get_player_position(self.tentative_target_id))
+                self.game_state.get_player(self.tentative_target_id).receiver_pass_flag = True
 
             self.target_assignation_last_time = time.time()

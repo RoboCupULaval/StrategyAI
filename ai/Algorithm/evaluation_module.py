@@ -11,9 +11,9 @@ class PlayerPosition(object):
         self.distance = distance
 
 
-def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS):
+def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
     # Retourne le joueur qui possède la balle, NONE si balle libre
-    closest_player = closest_player_to_point(GameState().get_ball_position())
+    closest_player = closest_player_to_point(GameState().get_ball_position(), our_team)
     if closest_player.distance < min_dist_from_ball:
         return closest_player.player
     else:
@@ -47,6 +47,12 @@ def closest_player_to_point(point: Position, our_team=None):
 def is_ball_moving(min_speed=0.1):
     return GameState().get_ball_velocity().norm() > min_speed
 
+def is_ball_kicked(player, min_distance=150, min_speed=1000):
+    if (player.pose.position - GameState.get_ball_position()).norm() > min_distance and \
+                    GameState.get_ball_velocity().norm() > min_speed:
+        return True
+    else:
+        return False
 
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
@@ -178,7 +184,7 @@ def trajectory_score(pointA, pointsB, obstacle):
     # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
     normsAB = np.sqrt(np.transpose((AB*AB)).sum(axis=0))
     normsAC = np.divide(np.dot(AB, AO), normsAB)
-    normsOC = np.sqrt(np.linalg.norm(AO) ** 2 - normsAC ** 2)
+    normsOC = np.sqrt(np.abs(np.linalg.norm(AO) ** 2 - normsAC ** 2))
     if scores.size == 1:
         if normsAC < 0 or normsAC > 1.1 * normsAB:
             scores = 1
@@ -236,8 +242,42 @@ def best_position_in_region(player, A, B):
     positions = positions[dists_from_ball > 1000, :]
     dists_from_ball = dists_from_ball[dists_from_ball > 1000]
     scores = line_of_sight_clearance_ball(player, positions, dists_from_ball)
+    our_side = GameState().field.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
+    if abs(A.x - our_side) < abs(B.x - our_side):
+        x_closest_to_our_side = A.x
+    else:
+        x_closest_to_our_side = B.x
+
+    width = abs(A.x - B.x)
+
+    saturation_modifier = np.clip((positions[:, 0] - x_closest_to_our_side) / width, 0.05, 1)
+    scores /= saturation_modifier
     best_score_index = np.argmin(scores)
     best_position = positions[best_score_index, :]
 
     return best_position
+
+def score_strategy_other_team():
+    # Retourne le score de l'équipe ennemie (négatif = ils sont en offensive, positif = ils sont en défensive)
+    i = 0
+    x_sum = 0
+    for player in GameState().other_team.available_players.values():
+        x_sum += player.pose.position.x
+        i += 1
+    if GameState().field.our_side == FieldSide.POSITIVE:
+        score = -x_sum/i - GameState().get_ball_position().x
+    else:
+        score = x_sum/i + GameState().get_ball_position().x
+
+    player_their_team = player_with_ball(our_team=False)
+    player_our_team = player_with_ball(our_team=True)
+
+    if player_their_team is not None and player_our_team is not None:
+        their_player_to_ball = GameState().get_ball_position() - player_their_team.pose.position
+        our_player_to_ball = GameState().get_ball_position() - player_our_team.pose.position
+        score += their_player_to_ball.norm() - our_player_to_ball.norm()
+
+    return score
+
+
 

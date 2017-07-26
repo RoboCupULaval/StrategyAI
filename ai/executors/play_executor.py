@@ -4,6 +4,7 @@ import time
 from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Game.Referee import RefereeCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
+from ai.Util.role import Role
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 from config.config_service import ConfigService
@@ -22,6 +23,8 @@ class PlayExecutor(Executor):
         self.auto_play = SimpleAutoPlay(self.ws)
         self.ws.play_state.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
         self.last_time = 0
+        self.last_available_players = {}
+        self.goalie_id = -1
 
     def exec(self) -> None:
         """
@@ -29,9 +32,11 @@ class PlayExecutor(Executor):
 
         :return: None
         """
-
         if self.ws.play_state.autonomous_flag:
-            self.auto_play.update()
+            if self.ws.game_state.game.referee.team_info['ours']['goalie'] != self.goalie_id:
+                self.goalie_id = self.ws.game_state.game.referee.team_info['ours']['goalie']
+                self.ws.game_state.update_player_for_locked_role(self.goalie_id, Role.GOALKEEPER)
+            self.auto_play.update(self._has_available_players_changed())
 
         self._execute_strategy()
 
@@ -39,10 +44,10 @@ class PlayExecutor(Executor):
             # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
             self._send_books()
             self.ws.debug_interface.send_team_color()
-
-            self._send_robots_status()
-            self._send_auto_state()
             self.last_time = time.time()
+
+        self._send_robots_status()
+        self._send_auto_state()
 
 
     def _execute_strategy(self) -> None:
@@ -95,3 +100,18 @@ class PlayExecutor(Executor):
                        get_tactics_name_list(),
                        'action': ['None']}
         self.ws.debug_interface.send_books(cmd_tactics)
+
+    def _has_available_players_changed(self) -> bool:
+        available_players = self.ws.game_state.my_team.available_players
+        player_change = False
+        for i in available_players:
+            if i not in self.last_available_players:
+                player_change = True
+                break
+        if not player_change:
+            for i in self.last_available_players:
+                if i not in available_players:
+                    player_change = True
+                    break
+        self.last_available_players = available_players.copy()
+        return player_change

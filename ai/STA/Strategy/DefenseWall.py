@@ -32,7 +32,7 @@ class DefenseWall(Strategy):
         #     })
 
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
-        self.robots = [player for _, player in role_by_robots]
+        self.robots = [player for _, player in role_by_robots if player is not None]
         for role, player in role_by_robots:
             if player:
                 self.add_tactic(role, AlignToDefenseWall(self.game_state, player, self.robots))
@@ -59,8 +59,8 @@ class DefenseWall(Strategy):
         return not(self.is_closest(player))
 
     def is_not_one_of_the_closests(self, player):
-        print(player.id)
-        print(not(self.is_closest(player) or self.is_second_closest(player)))
+        # print(player.id)
+        # print(not(self.is_closest(player) or self.is_second_closest(player)))
         return not(self.is_closest(player) or self.is_second_closest(player))
 
     def has_kicked(self, player):

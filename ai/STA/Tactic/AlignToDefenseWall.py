@@ -154,20 +154,20 @@ class AlignToDefenseWall(Tactic):
                          self.vec_ball_2_goal.normalized() * 3. * ROBOT_RADIUS * 0.9
 
             self.positions_in_formations = [position_0, position_1, position_2, position_3, position_4]
-        print(self.positions_in_formations)
+        # print(self.positions_in_formations)
 
     def exec(self):
         self.define_center_of_formation()
         self.compute_positions_in_formation()
-        print(self.player_number_in_formation)
+        # print(self.player_number_in_formation)
         for idx, player in enumerate(self.robots_in_formation):
             if not self.is_not_one_of_the_closests(player):
                 self.get_players_in_formation()
                 self.define_center_of_formation()
                 self.compute_positions_in_formation()
                 break
-        print(self.robots_in_formation)
-        print(self.player_number_in_formation)
+        # print(self.robots_in_formation)
+        # print(self.player_number_in_formation)
         if self.check_success():
             return self.halt
         else:

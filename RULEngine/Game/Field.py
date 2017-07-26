@@ -1,18 +1,21 @@
 # Under MIT License, see LICENSE.txt
 
 from ai.Algorithm.path_partitionner import CollisionBody, CollisionType
-from RULEngine.Debug.debug_interface import DebugInterface
 from config.config_service import ConfigService
+from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Util.area import *
+
 
 class FieldSide(Enum):
     POSITIVE = 0
     NEGATIVE = 1
 
 class Field:
-    def __init__(self, ball):
+    def __init__(self, ball: 'Ball'):
         self.ball = ball
-        cfg = ConfigService()            
+        self.debug_interface = DebugInterface()
+        cfg = ConfigService()
+
         if cfg.config_dict["GAME"]["our_side"] == "positive":
             self.our_side = FieldSide.POSITIVE
             self.constant = positive_side_constant
@@ -187,6 +190,10 @@ class Field:
                     self.constant["FIELD_OUR_GOAL_TOP_CIRCLE"] = Position(self.constant["FIELD_X_POSITIVE"], self.constant["FIELD_GOAL_SEGMENT"] / 2)
                     self.constant["FIELD_OUR_GOAL_BOTTOM_CIRCLE"] = Position(self.constant["FIELD_X_POSITIVE"], -self.constant["FIELD_GOAL_SEGMENT"] / 2)
                     self.constant["FIELD_OUR_GOAL_MID_GOAL"] = Position(self.constant["FIELD_X_POSITIVE"], 0)
+
+                    self.constant["FIELD_DEFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_POSITIVE"] - self._penalty_spot_from_field_line_dist, 0)
+                    self.constant["FIELD_OFFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_NEGATIVE"] + self._penalty_spot_from_field_line_dist, 0)
+                    self.constant["FIELD_PENALTY_KICKER_POSE"] = Pose(Position(self.constant["FIELD_OFFENSE_PENALTY_MARK"].x + 200, 0), m.pi)
                 else:
                     self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] = self.constant["FIELD_X_NEGATIVE"]
                     self.constant["FIELD_OUR_GOAL_X_INTERNAL"] = self.constant["FIELD_X_NEGATIVE"] + self.constant["FIELD_GOAL_RADIUS"]
@@ -201,6 +208,10 @@ class Field:
                     self.constant["FIELD_THEIR_GOAL_TOP_CIRCLE"] = Position(self.constant["FIELD_X_POSITIVE"], self.constant["FIELD_GOAL_SEGMENT"] / 2)
                     self.constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"] = Position(self.constant["FIELD_X_POSITIVE"], -self.constant["FIELD_GOAL_SEGMENT"] / 2)
                     self.constant["FIELD_THEIR_GOAL_MID_GOAL"] = Position(self.constant["FIELD_X_POSITIVE"], 0)
+
+                    self.constant["FIELD_DEFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_NEGATIVE"] + self._penalty_spot_from_field_line_dist, 0)
+                    self.constant["FIELD_OFFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_POSITIVE"] - self._penalty_spot_from_field_line_dist, 0)
+                    self.constant["FIELD_PENALTY_KICKER_POSE"] = Pose(Position(self.constant["FIELD_OFFENSE_PENALTY_MARK"].x - 200, 0), 0)
                 return True
             else:
                 return False
@@ -239,6 +250,9 @@ positive_side_constant = {
     "FIELD_OUR_GOAL_X_INTERNAL": 3500,  # FIELD_X_LEFT + FIELD_GOAL_RADIUS
     "FIELD_THEIR_GOAL_X_INTERNAL": -3500,  # FIELD_X_RIGHT - FIELD_GOAL_RADIUS
     "FIELD_THEIR_GOAL_X_EXTERNAL": -4500,  # FIELD_X_RIGHT
+
+    "FIELD_DEFENSE_PENALTY_MARK": Position(1, 0),
+    "FIELD_OFFENSE_PENALTY_MARK": Position(1, 0),
 
     # Field Positions
     "FIELD_OUR_GOAL_TOP_CIRCLE": Position(4500, 250),  # FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2)
@@ -318,6 +332,9 @@ negative_side_constant = {
     "FIELD_OUR_GOAL_X_INTERNAL": -3500,  # FIELD_X_LEFT + FIELD_GOAL_RADIUS
     "FIELD_THEIR_GOAL_X_INTERNAL": 3500,  # FIELD_X_RIGHT - FIELD_GOAL_RADIUS
     "FIELD_THEIR_GOAL_X_EXTERNAL": 4500,  # FIELD_X_RIGHT
+
+    "FIELD_DEFENSE_PENALTY_MARK": Position(1, 0),
+    "FIELD_OFFENSE_PENALTY_MARK": Position(1, 0),
 
     # Field Positions
     "FIELD_OUR_GOAL_TOP_CIRCLE": Position(-4500, 250),  # FIELD_X_LEFT, FIELD_GOAL_SEGMENT / 2)
