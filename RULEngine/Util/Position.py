@@ -49,7 +49,7 @@ class Position(np.ndarray):
 
     def norm(self):
         """Return the distance of the point from the origin"""
-        return math.sqrt(self[0] ** 2 + self[1] ** 2)
+        return math.sqrt(self[0] ** 2 + self[1] ** 2)  # Faster than np.linalg.norm()
 
     def angle(self):
         """Return the angle of the point from the x-axis between -pi and pi"""
@@ -67,10 +67,11 @@ class Position(np.ndarray):
         return self / self.norm()
 
     def perpendicular(self):
-        """Retourne la normale unitaire entre le vecteur et la normal au plan np.array([0,0,1]). Right hand rule."""
+        """Return the orthonormal vector to the np.array([0,0,1]) with right hand rule."""
         return Position(self[1], -self[0]).normalized()
 
     def is_close(self, other, abs_tol=POSITION_ABS_TOL):
+        """Compare two position with a variable tolerance."""
         return (self - other).norm() < abs_tol
 
     def __eq__(self, other):

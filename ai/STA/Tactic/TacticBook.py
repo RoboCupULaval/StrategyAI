@@ -13,8 +13,6 @@ from ai.STA.Tactic.intercept import Intercept
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.robot_ident import RobotIdent
 from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
-from ai.STA.Tactic.test_turn_on_you import TestTurnOnYou
-from ai.STA.Tactic.GoGetBall import GoGetBall
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.ProtectZone import ProtectZone
@@ -39,14 +37,12 @@ class TacticBook(object):
         self.tactic_book = {'FaceTarget': FaceTarget,
                             'GoalKeeper': GoalKeeper,
                             'CoverZone': ProtectZone,
-                            'GoGetBall': GoGetBall,
                             'DemoFollowBall': DemoFollowBall,
                             'DemoFollowRobot': DemoFollowRobot,
                             'Stop': Stop,
                             'GoToPositionNoPathfinder': GoToPositionNoPathfinder,
                             'GoToPositionPathfinder': GoToPositionPathfinder,
                             'GoKick': GoKick,
-                            'TestTurnOnYou': TestTurnOnYou,
                             'RotateAroundPosition': RotateAroundPosition,
                             'RotateAroundBall': RotateAroundBall,
                             'RobotIdent': RobotIdent,

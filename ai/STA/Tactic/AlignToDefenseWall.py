@@ -86,7 +86,6 @@ class AlignToDefenseWall(Tactic):
         propriété des triangles semblables.
         """
 
-
         self.ball_position = self.game_state.get_ball_position()
         self.vec_ball_2_goal = self.goal_middle - self.ball_position
         """
@@ -190,7 +189,7 @@ class AlignToDefenseWall(Tactic):
         return False
 
     @staticmethod
-    def is_closest(self, player):
+    def is_closest(player):
         if player == closest_players_to_point(GameState().get_ball_position(), True)[0].player:
             return True
         return False
