@@ -30,6 +30,8 @@ class GoToPositionPathfinder(Tactic):
             self.status_flag = Flags.SUCCESS
         else:
             self.status_flag = Flags.WIP
+        if self.player.id == 4:
+            print(self.player.receiver_pass_flag)
         if self.charge_kick:
             return MoveToPosition(self.game_state,
                                   self.player,

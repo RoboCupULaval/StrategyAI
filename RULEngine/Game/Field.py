@@ -1,18 +1,21 @@
 # Under MIT License, see LICENSE.txt
 
 from ai.Algorithm.path_partitionner import CollisionBody, CollisionType
-from RULEngine.Debug.debug_interface import DebugInterface
 from config.config_service import ConfigService
+from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Util.area import *
+
 
 class FieldSide(Enum):
     POSITIVE = 0
     NEGATIVE = 1
 
 class Field:
-    def __init__(self, ball):
+    def __init__(self, ball: 'Ball'):
         self.ball = ball
-        cfg = ConfigService()            
+        self.debug_interface = DebugInterface()
+        cfg = ConfigService()
+
         if cfg.config_dict["GAME"]["our_side"] == "positive":
             self.our_side = FieldSide.POSITIVE
             self.constant = positive_side_constant

@@ -171,29 +171,40 @@ class TestActions(unittest.TestCase):
     def test_kick(self):
 
         # test avec la valeur 0 (nulle)
-        self.kick = Kick(self.game_state, self.a_player, 0)
+        target = Pose(Position(1,1))
+        self.kick = Kick(self.game_state, self.a_player, p_force=0, target=target)
+        ball_position = Position(5, 0)
+        self.game_state.set_ball_position(ball_position, A_DELTA_T)
+        orientation = (target.position - ball_position).angle()
         expected_cmd = AICommand(self.a_player, AICommandType.MOVE,
-                                 **{"pose_goal": SpeedPose(self.a_player.pose),
+                                 **{"pose_goal": Pose(ball_position, orientation),
                                     "kick": True,
-                                    "control_loop_type": AIControlLoopType.SPEED})
+                                    "pathfinder_on": True,
+                                    "cruise_speed": 0.1,
+                                    "end_speed": 0
+                                    })
         return_cmd = self.kick.exec()
         self.assertEqual(expected_cmd, return_cmd)
 
         # test avec la valeur 1 (force maximale)
-        self.kick = Kick(self.game_state,self.a_player, 1)
+        self.kick = Kick(self.game_state,self.a_player, 1, target=target)
         self.assertEqual(self.kick.exec(), AICommand(self.a_player, AICommandType.MOVE,
-                                           **{"pose_goal": SpeedPose(self.a_player.pose),
+                                           **{"pose_goal": Pose(ball_position, orientation),
                                               "kick": True,
-                                              "control_loop_type": AIControlLoopType.SPEED,
-                                              "kick_strength": 1}))
+                                              "kick_strength": 1,
+                                              "pathfinder_on": True,
+                                              "cruise_speed": 0.1,
+                                              "end_speed": 0}))
 
         # test avec la valeur 0.3 (force intermediaire)
-        self.kick = Kick(self.game_state,self.a_player, 0.3)
+        self.kick = Kick(self.game_state,self.a_player, 0.3, target=target)
         self.assertEqual(self.kick.exec(), AICommand(self.a_player, AICommandType.MOVE,
-                                           **{"pose_goal": SpeedPose(self.a_player.pose),
+                                           **{"pose_goal": Pose(ball_position, orientation),
                                               "kick": True,
-                                              "control_loop_type": AIControlLoopType.SPEED,
-                                              "kick_strength": 0.3}))
+                                              "kick_strength": 0.3,
+                                              "pathfinder_on": True,
+                                              "cruise_speed": 0.1,
+                                              "end_speed": 0}))
 
     @unittest.skip("I got lazy, didn't want to review all of the protectgoal.")
     def test_ProtectGoal(self):

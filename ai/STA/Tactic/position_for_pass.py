@@ -61,10 +61,10 @@ class PositionForPass(Tactic):
         return GoToPositionPathfinder(self.game_state, self.player, self._get_destination_pose())
 
     def _get_destination_pose(self):
-        if time.time() - self.last_time > DELAY:
-            if self.player.receiver_pass_flag is False:
-                self.target_position = self._find_best_player_position()
-            self.last_time = time.time()
+        # if time.time() - self.last_time > DELAY:
+        if self.player.receiver_pass_flag is False:
+            self.target_position = self._find_best_player_position()
+        self.last_time = time.time()
         destination_orientation = (self.game_state.get_ball_position() - self.player.pose.position).angle()
         self.game_state.debug_interface.add_point(self.target_position, COLOR_ID_MAP[4], width=5,
                                                   timeout=0.1)
@@ -85,7 +85,7 @@ class PositionForPass(Tactic):
                 their_side_center_field_limit = pad
 
             role = GameState().get_role_by_player_id(self.player.id)
-            offense_offset = self.compute_offence_offset()
+            offense_offset = 0
             defense_offset = self.compute_defense_offset()
             if role is Role.FIRST_DEFENCE:  # role is 'top_defence':
                 A = Position(our_goal_field_limit, GameState().const["FIELD_Y_TOP"]-pad) + defense_offset

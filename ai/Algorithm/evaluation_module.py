@@ -182,7 +182,7 @@ def trajectory_score(pointA, pointsB, obstacle):
     # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
     normsAB = np.sqrt(np.transpose((AB*AB)).sum(axis=0))
     normsAC = np.divide(np.dot(AB, AO), normsAB)
-    normsOC = np.sqrt(np.linalg.norm(AO) ** 2 - normsAC ** 2)
+    normsOC = np.sqrt(np.abs(np.linalg.norm(AO) ** 2 - normsAC ** 2))
     if scores.size == 1:
         if normsAC < 0 or normsAC > 1.1 * normsAB:
             scores = 1
@@ -226,7 +226,6 @@ def best_position_in_region(player, A, B):
     top_right = Position(max(A.x, B.x), max(A.y, B.y))
     ball_position = GameState().get_ball_position()
 
-
     positions = []
     for i in range(ncounts):
         x_point = bottom_left.x + i * (top_right.x - bottom_left.x) / (ncounts - 1)
@@ -240,6 +239,16 @@ def best_position_in_region(player, A, B):
     positions = positions[dists_from_ball > 1000, :]
     dists_from_ball = dists_from_ball[dists_from_ball > 1000]
     scores = line_of_sight_clearance_ball(player, positions, dists_from_ball)
+    our_side = GameState().field.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
+    if abs(A.x - our_side) < abs(B.x - our_side):
+        x_closest_to_our_side = A.x
+    else:
+        x_closest_to_our_side = B.x
+
+    width = abs(A.x - B.x)
+
+    saturation_modifier = np.clip((positions[:, 0] - x_closest_to_our_side) / width, 0.05, 1)
+    scores /= saturation_modifier
     best_score_index = np.argmin(scores)
     best_position = positions[best_score_index, :]
 
