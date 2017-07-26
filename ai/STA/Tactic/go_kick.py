@@ -22,12 +22,12 @@ __author__ = 'RoboCupULaval'
 
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
-MAX_KICK_TRIES = 10
+MAX_KICK_TRIES = 100000
 
 GO_BEHIND_SPACING = 200
 GRAB_BALL_SPACING = 220
 APPROACH_SPEED = 100
-KICK_DISTANCE = 110
+KICK_DISTANCE = 140
 KICK_SUCCEED_DISTANCE_THRESHOLD = 600
 KICK_SUCCEED_SPEED_THRESHOLD = 1000
 COMMAND_DELAY = 0.5
@@ -146,7 +146,8 @@ class GoKick(Tactic):
         return Kick(self.game_state,
                     self.player,
                     self.kick_force,
-                    self.target)
+                    self.target,
+                    )
 
     def halt(self):
         if self.status_flag == Flags.INIT:

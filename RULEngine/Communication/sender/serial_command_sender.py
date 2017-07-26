@@ -9,7 +9,7 @@ except ImportError:
 
 from RULEngine.Command.command import *
 
-COMMUNICATION_SLEEP = 0.01
+COMMUNICATION_SLEEP = 0.001
 MOVE_COMMAND_SLEEP = 0.05
 
 
@@ -31,7 +31,8 @@ class SerialCommandSender(object):
         count = 0
         self.speed_time = time.time()
         while not self.terminate.is_set():
-            if time.time() - self.last_time > MOVE_COMMAND_SLEEP:
+            dt = time.time() - self.last_time
+            if dt > MOVE_COMMAND_SLEEP:
                 self.last_time = time.time()
                 for _, next_command in self.command_dict.items():
                     if isinstance(next_command, Move):
@@ -46,7 +47,7 @@ class SerialCommandSender(object):
                 if next_command:
                     count += 1
                     self._package_commands(next_command)
-                time.sleep(COMMUNICATION_SLEEP)
+                    time.sleep(COMMUNICATION_SLEEP)
             if count > PACKET_FREQ:
                 timelapse = time.time() - self.speed_time
                 self.speed_time = time.time()

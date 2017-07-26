@@ -36,6 +36,7 @@ class UIDebugCommandReceiver(object):
                     data = self.request[0]
                     p_packet_list.append(pickle.loads(data))
                 except:
+                    print("fuck you1")
                     pass
         return ThreadedUDPRequestHandler
 
