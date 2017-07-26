@@ -23,16 +23,18 @@ class Kick(Action):
         self.target = target
 
     def exec(self):
+        if self.target is None:
+            new_position = self.player.pose.position
+            orientation = self.player.pose.orientation
+        else:
+            new_position = self.game_state.get_ball_position()
+            orientation = (self.target.position - ball_position).angle()
 
-        ball_position = self.game_state.get_ball_position()
-        orientation = (self.target.position - ball_position).angle()
-
-        cmd_params = {"pose_goal": Pose(ball_position, orientation),
+        cmd_params = {"pose_goal": Pose(new_position, orientation),
                       "kick": True,
                       "pathfinder_on": True,
                       "kick_strength": self.force,
                       "cruise_speed": 0,
                       "end_speed": 0}
-        #print("kick!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
         return AICommand(self.player, AICommandType.MOVE, **cmd_params)
