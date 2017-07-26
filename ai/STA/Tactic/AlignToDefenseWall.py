@@ -7,9 +7,7 @@ from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS, TeamColor
-from RULEngine.Util.geometry import get_angle
 from ai.Algorithm.evaluation_module import closest_players_to_point
-from ai.STA.Action.PathfindToPosition import PathfindToPosition
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
@@ -24,7 +22,7 @@ DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
 COMMAND_DELAY = 1.0
 
 
-class AllignToDefenseWall(Tactic):
+class AlignToDefenseWall(Tactic):
     def __init__(self, game_state: GameState, player: OurPlayer, robots_in_formation: List[OurPlayer], auto_pick=False,
                  args: List[str]=None):
         assert isinstance(robots_in_formation[0], OurPlayer)
@@ -52,9 +50,6 @@ class AllignToDefenseWall(Tactic):
         self.player_number_in_formation = None
         self.number_of_robots = 0
         self.get_players_in_formation()
-
-
-
 
     def get_players_in_formation(self):
         self.player_number_in_formation = None
@@ -177,8 +172,8 @@ class AllignToDefenseWall(Tactic):
         if self.check_success():
             return self.halt
         else:
-            destination_orientation = get_angle(self.positions_in_formations[self.player_number_in_formation],
-                                                self.ball_position)
+            destination_orientation = (self.ball_position -
+                                       self.positions_in_formations[self.player_number_in_formation]).angle()
             return GoToPositionPathfinder(self.game_state, self.player,
                                           Pose(self.positions_in_formations[self.player_number_in_formation],
                                                destination_orientation)).exec()
@@ -194,11 +189,13 @@ class AllignToDefenseWall(Tactic):
             return True
         return False
 
+    @staticmethod
     def is_closest(self, player):
         if player == closest_players_to_point(GameState().get_ball_position(), True)[0].player:
             return True
         return False
 
+    @staticmethod
     def is_second_closest(self, player):
         if player == closest_players_to_point(GameState().get_ball_position(), True)[1].player:
             return True

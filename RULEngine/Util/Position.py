@@ -70,8 +70,11 @@ class Position(np.ndarray):
         """Retourne la normale unitaire entre le vecteur et la normal au plan np.array([0,0,1]). Right hand rule."""
         return Position(self[1], -self[0]).normalized()
 
+    def is_close(self, other, abs_tol=POSITION_ABS_TOL):
+        return (self - other).norm() < abs_tol
+
     def __eq__(self, other):
-        return (self - other).norm() < self.abs_tol
+        return self.is_close(other)
 
     def __ne__(self, other):
         return not self.__eq__(other)

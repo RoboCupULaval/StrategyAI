@@ -1,5 +1,6 @@
 # Under MIT License, see LICENSE.txt
 import math as m
+from typing import Union
 
 import numpy as np
 import warnings
@@ -165,6 +166,7 @@ def get_closest_point_on_line(reference: Position,
 
     return Position(pos_x, pos_y)
 
+
 def get_closest_point_on_segment(reference: Position,
                                 position1: Position,
                                 position2: Position) -> Position:
@@ -212,7 +214,11 @@ def conv_position_2_list(position: Position):
     return [position.x, position.y]
 
 
-def are_collinear(pos1: Position, pos2: Position, pos3: Position, abs_tol=m.pi/30):
+def get_position_behind_point(point: Position, aiming: Position, spacing: Union[int, float]) -> Position:
+    return point - spacing * (aiming - point).normalized()
+
+
+def are_collinear(pos1: Position, pos2: Position, pos3: Position, abs_tol=m.pi/30) -> bool:
     return compare_angle((pos2 - pos3).angle(), (pos1 - pos2).angle(), abs_tol=abs_tol)
 
 

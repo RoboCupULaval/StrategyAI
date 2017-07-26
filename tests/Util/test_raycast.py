@@ -5,13 +5,11 @@ from math import pi
 
 from ai.Util.Raycast import *
 from ai.states.game_state import GameState
-from RULEngine.Util.geometry import get_angle
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Game.Referee import Referee
 from RULEngine.Util.team_color_service import TeamColorService, TeamColor
 from RULEngine.Game.Game import Game
 from RULEngine.Game.Ball import Ball
-from config.config_service import ConfigService
 
 __author__ = 'RoboCupULaval'
 
@@ -19,7 +17,6 @@ __author__ = 'RoboCupULaval'
 # TODO : Tester de façon plus exhaustive
 class TestRaycast(unittest.TestCase):
     def setUp(self):
-        config_service = ConfigService().load_file("config/sim_standard.cfg")
         self.game_state = GameState()
         self.game = Game()
         self.game.set_referee(Referee())

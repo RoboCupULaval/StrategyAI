@@ -4,6 +4,7 @@ from RULEngine.Util.constant import ROBOT_RADIUS
 from RULEngine.Util.geometry import *
 from ai.states.game_state import GameState
 
+
 class PlayerPosition(object):
     def __init__(self, player, distance):
         self.player = player
