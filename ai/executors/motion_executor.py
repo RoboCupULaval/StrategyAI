@@ -14,7 +14,7 @@ from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 from config.config_service import ConfigService
 
-MIN_DISTANCE_TO_REACH_TARGET_SPEED = 0.25
+MIN_DISTANCE_TO_REACH_TARGET_SPEED = 0.5
 
 
 class DotDict(dict):
@@ -124,10 +124,10 @@ class RobotMotion(object):
         rotation_cmd = self.apply_rotation_constraints(rotation_cmd)
 
         # Translation control
+        self.position_flag = False
         if self.position_error.norm() < MIN_DISTANCE_TO_REACH_TARGET_SPEED * max(1.0, self.cruise_speed):
-            self.position_flag = True
-        else:
-            self.position_flag = False
+            if self.target_speed < 0.01:
+                self.position_flag = True
 
         if self.position_flag:
             translation_cmd = Position(self.x_controller.update(self.pose_error.position.x, dt=self.dt),
@@ -139,7 +139,7 @@ class RobotMotion(object):
         translation_cmd = translation_cmd.rotate(-self.current_pose.orientation)
         translation_cmd = self.apply_translation_constraints(translation_cmd)
 
-        self.debug(translation_cmd, rotation_cmd)
+        # self.debug(translation_cmd, rotation_cmd)
 
         return SpeedPose(translation_cmd, rotation_cmd)
 
@@ -198,7 +198,7 @@ class RobotMotion(object):
         return value
 
     def limit_speed(self, translation_cmd: Position) -> Position:
-        if translation_cmd.norm() > 0.0:
+        if translation_cmd.norm() != 0.0:
             translation_speed = float(np.sqrt(np.sum(np.square(translation_cmd))))
             translation_speed = clamp(translation_speed, 0, self.setting.translation.max_speed)
             new_speed = translation_cmd.normalized() * translation_speed
@@ -207,7 +207,7 @@ class RobotMotion(object):
         return new_speed
 
     def limit_angular_speed(self, angular_speed: float) -> float:
-        if m.fabs(angular_speed) > 0:
+        if m.fabs(angular_speed) != 0.0:
             rotation_sign = m.copysign(1, angular_speed)
             angular_speed = clamp(m.fabs(angular_speed), 0.0, self.setting.translation.max_speed)
             new_speed = m.copysign(angular_speed, rotation_sign) * angular_speed
@@ -239,14 +239,13 @@ class RobotMotion(object):
 
         # Desired parameters
         if cmd.path:
-            current_path_position = cmd.path[0] / 1000
+            current_path_position = Position(cmd.path[0] / 1000)
             if not self.last_position.is_close(current_path_position, 0.1):
                 self.reset()
                 self.last_position = current_path_position
 
             self.target_pose = Pose(cmd.path[0], cmd.pose_goal.orientation).scale(1 / 1000)
             self.target_speed = cmd.path_speeds[1] / 1000
-            print(cmd.path_speeds)
 
         else:  # No pathfinder case
             self.target_pose = cmd.pose_goal.scale(1 / 1000)
@@ -256,7 +255,7 @@ class RobotMotion(object):
         self.pose_error = self.target_pose - self.current_pose  # Pose are always wrap to pi
         self.position_error = self.pose_error.position
         self.angle_error = self.pose_error.orientation
-        if self.position_error.norm() > 0.0:
+        if self.position_error.norm() != 0.0:
             self.target_direction = self.position_error.normalized()
 
         self.cruise_speed = cmd.cruise_speed
@@ -287,7 +286,7 @@ def get_control_setting(is_sim: bool):
 
     if is_sim:
         translation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
-        rotation = {"kp": 2, "ki": 0, "kd": 0.05, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        rotation = {"kp": 1, "ki": 0, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
         translation = {"kp": 1, "ki": 0.0, "kd": 5, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0.01}
         rotation = {"kp": 0.5, "ki": 0.25, "kd": 0.05, "antiwindup": 20, "deadzone": 0.3, "sensibility": 0.1}
