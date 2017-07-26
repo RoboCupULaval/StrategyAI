@@ -56,4 +56,4 @@ class AICommand(object):
         return self.__dict__ == other.__dict__
 
     def __str__(self):
-        return str(self.player.id)+"  " + str(self.player.team.team_color) + "  ->  "+str(id(self))
+        return str(self.player.id)+"  " + str(self.player.team.name) + "  ->  "+str(id(self))

@@ -58,9 +58,10 @@ class TestActions(unittest.TestCase):
                                       "cruise_speed": A_CRUISE_SPEED}))
 
     def test_idle(self):
-        self.idle = Idle(self.game_state,self.a_player)
-        current_pose = None
-        current_pose_string = AICommand(self.a_player, AICommandType.STOP)
+        self.idle = Idle(self.game_state, self.a_player)
+        current_pose_string = AICommand(self.a_player, AICommandType.MOVE,
+                                        pose_goal=SpeedPose(0, 0, 0),
+                                        control_loop_type=AIControlLoopType.SPEED)
         self.assertEqual(Idle.exec(self.idle), current_pose_string)
 
     def test_GrabBall(self):
