@@ -25,11 +25,11 @@ class Field:
         x1 = self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
         x2 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
         # FIXME: JAPAN  Only work on a field of 9x6m
-        self.field_collision_body = [CollisionBody(Position(x1 + 500, 0), Position(0, 0), 1500, CollisionType.ZONE),
-                                     CollisionBody(Position(x2 - 500, 0), Position(0, 0), 1500, CollisionType.ZONE)]
+        self.field_collision_body = [CollisionBody(Position(x1 + x1 / 9, 0), Position(0, 0), 1500, CollisionType.ZONE),
+                                     CollisionBody(Position(x2 + x2 / 9, 0), Position(0, 0), 1500, CollisionType.ZONE)]
         debug_interface = DebugInterface()
-        debug_interface.add_circle((x1 + 500, 0), radius=1500, timeout=0, color=(255, 0, 0))
-        debug_interface.add_circle((x2 - 500, 0), radius=1500, timeout=0, color=(255, 0, 0))
+        debug_interface.add_circle((x1 + x1 / 9, 0), radius=1500, timeout=0, color=(255, 0, 0))
+        debug_interface.add_circle((x2 + x2 / 9, 0), radius=1500, timeout=0, color=(255, 0, 0))
 
     def move_ball(self, position, delta):
         self.ball.set_position(position, delta)
