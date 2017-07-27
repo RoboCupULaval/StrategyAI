@@ -1,7 +1,6 @@
 # Under MIT license, see LICENSE.txt
 
 from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.Pose import Pose
 
 from ai.states.game_state import GameState
@@ -30,13 +29,17 @@ class Kick(Action):
         Execute the kick command
         :return: Un AIcommand
         """
-        target = self.target.position
-        player = self.player.pose.position
-        player_to_target = target - player
-        #if player_to_target.norm() > 0:
-        player_to_target = self.target.position
-        ball_position = self.game_state.get_ball_position()
-        orientation = (self.target.position - ball_position).angle()
+        if self.target is not None:
+            target = self.target.position
+            player = self.player.pose.position
+            player_to_target = target - player
+            #if player_to_target.norm() > 0:
+            player_to_target = self.target.position
+            ball_position = self.game_state.get_ball_position()
+            orientation = (self.target.position - ball_position).angle()
+        else:
+            ball_position = self.player.pose.position
+            orientation = self.player.pose.orientation
 
         # else:
         #     player_to_target = SpeedPose()
