@@ -240,7 +240,7 @@ class RobotMotion(object):
         # Desired parameters
         if cmd.path:
             current_path_position = Position(cmd.path[0] / 1000)
-            if not self.last_position.is_close(current_path_position, 0.1):
+            if not self.last_position.is_close(current_path_position, 0.1) and self.target_speed < 0.2:
                 self.reset()
                 self.last_position = current_path_position
 

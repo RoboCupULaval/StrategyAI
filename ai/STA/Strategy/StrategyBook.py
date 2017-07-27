@@ -3,6 +3,7 @@
 """ Livre des stratégies. """
 from typing import List
 
+from ai.STA.Strategy.DefenseWallNoKick import DefenseWallNoKick
 from ai.STA.Strategy.DefenseWall import DefenseWall
 from ai.STA.Strategy.direct_free_kick import DirectFreeKick
 from ai.STA.Strategy.indirect_free_kick import IndirectFreeKick
@@ -54,7 +55,8 @@ class StrategyBook(object):
                               'IndirectFreeKick': IndirectFreeKick,
                               'PreparePenaltyDefense': PreparePenaltyDefense,
                               'PreparePenaltyOffense': PreparePenaltyOffense,
-                              'OffenseKickOff': OffenseKickOff
+                              'OffenseKickOff': OffenseKickOff,
+                              'DefenseWallNoKick': DefenseWallNoKick
                               }
 
     def get_strategies_name_list(self) -> List[str]:

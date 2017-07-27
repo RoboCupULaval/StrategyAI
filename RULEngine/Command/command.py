@@ -103,6 +103,7 @@ class Dribbler(Command):
         # todo ask embedded about dribbler strength MGL 2017/05/29
 
     def package_command(self, mcu_communicator: McuCommunicator) -> None:
+        print("in package command dribble")
         #if self.activate:
         mcu_communicator.turnOnDribbler(self.player.id)
         # else:

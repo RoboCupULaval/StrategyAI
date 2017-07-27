@@ -15,7 +15,7 @@ class MoveToPosition(Action):
                  collision_ball=False,
                  charge_kick=False,
                  end_speed=0,
-                 dribbler_on=True):
+                 dribbler_on=False):
 
         Action.__init__(self, game_state, player)
 
