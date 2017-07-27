@@ -194,7 +194,7 @@ class AlignToDefenseWall(Tactic):
         return False
 
     @staticmethod
-    def is_second_closest(self, player):
+    def is_second_closest(player):
         if player == closest_players_to_point(GameState().get_ball_position(), True)[1].player:
             return True
         return False

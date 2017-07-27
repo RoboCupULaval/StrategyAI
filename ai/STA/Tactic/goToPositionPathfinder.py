@@ -13,7 +13,7 @@ from RULEngine.Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 
 class GoToPositionPathfinder(Tactic):
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose,
-                 args: List[str]=None, collision_ball=False, cruise_speed=1, charge_kick=False, end_speed=0):
+                 args: List[str]=None, collision_ball=False, cruise_speed=2, charge_kick=False, end_speed=0):
         super().__init__(game_state, player, target, args)
         self.target = target
         self.status_flag = Flags.INIT

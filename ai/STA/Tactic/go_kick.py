@@ -101,10 +101,10 @@ class GoKick(Tactic):
         #     go_behind_ball_speed = distance_to_goal / 150
         if self.tries_flag == 0:
             return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                          collision_ball=True, cruise_speed=1)
+                                          collision_ball=True, cruise_speed=2)
         else:
             return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                          collision_ball=False, cruise_speed=1)
+                                          collision_ball=False, cruise_speed=2)
         # return RotateAround(self.game_state,
         #                     self.player,
         #                     Pose(ball_position, orientation),
@@ -144,7 +144,7 @@ class GoKick(Tactic):
         else:
             go_behind_ball_speed = distance_to_goal / 150
         return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation),
-                                     cruise_speed=0.2, charge_kick=True, end_speed=0.1)
+                                     cruise_speed=2, charge_kick=True, end_speed=0.2)
         # return AllStar(self.game_state,
         #                self.player,
         #                charge_kick=True,
@@ -171,7 +171,7 @@ class GoKick(Tactic):
         # print(self.tries_flag % 10)
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
-        return Kick(self.game_state, self.player, self.kick_force, self.target, cruise_speed=0.1, end_speed=0.1)
+        return Kick(self.game_state, self.player, self.kick_force, self.target, cruise_speed=2, end_speed=0.2)
 
     def validate_kick(self):
         if self.game_state.get_ball_velocity().norm() > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
