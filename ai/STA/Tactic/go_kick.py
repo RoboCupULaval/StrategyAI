@@ -161,6 +161,7 @@ class GoKick(Tactic):
         #                     approach=True)
 
     def kick(self):
+        print('KICKKKK')
         self.ball_spacing = GRAB_BALL_SPACING
         self.next_state = self.validate_kick
         # if not self._is_player_towards_ball_and_target():
