@@ -79,7 +79,7 @@ class Kick(Command):
         mcu_communicator.kick(self.player.id, self.kick_speed)
 
 
-class Stop(Command):
+class Stop(Command):MAX_KICK_DISTANCE_FORCE
     def __init__(self, player: OurPlayer):
         super().__init__(player)
         self.speed_repr = Pose()
