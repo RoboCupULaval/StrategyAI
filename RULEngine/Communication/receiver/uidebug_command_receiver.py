@@ -42,6 +42,8 @@ class UIDebugCommandReceiver(object):
                 # try:
                 if len(data) > 6:
                     p_packet_list.append(pickle.loads(data))
+                else:
+                    raise RuntimeError("Received a legacy ref message on the ui debug port, change port of the ui debug")
                 succes = True
                 # except:
                 #     print("Fuckyou                                                    ",''.join('{:02x} '.format(x) for x in data))
