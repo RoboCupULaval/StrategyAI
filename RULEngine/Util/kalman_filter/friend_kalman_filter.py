@@ -73,14 +73,14 @@ class FriendKalmanFilter:
         obsy = []
         obsth = []
         for obs in observation:
-            # if obs is not None:
-            #     obsx.append(obs.position.x)
-            #     obsy.append(obs.position.y)
-            #     obsth.append(obs.orientation)
-            # if obs is None:
-            obsx.append(None)
-            obsy.append(None)
-            obsth.append(None)
+            if obs is not None:
+                obsx.append(obs.position.x)
+                obsy.append(obs.position.y)
+                obsth.append(obs.orientation)
+            if obs is None:
+                obsx.append(None)
+                obsy.append(None)
+                obsth.append(None)
         observation = np.array(obsx + obsy + obsth)
 
         observation = np.array(observation)
