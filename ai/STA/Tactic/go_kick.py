@@ -32,6 +32,8 @@ APPROACH_SPEED = 100
 KICK_DISTANCE = 110
 KICK_SUCCEED_THRESHOLD = 600
 COMMAND_DELAY = 0.5
+MIN_KICK_DISTANCE_FORCE = 1000
+MAX_KICK_DISTANCE_FORCE = 4000
 
 
 class GoKick(Tactic):
@@ -211,8 +213,12 @@ class GoKick(Tactic):
             tentative_target_id = best_passing_option(self.player)
             if tentative_target_id is None:
                 self.target = Pose(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0, 0)
+                self.kick_force = 5
             else:
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
+                self.kick_force = m.ceil(((3 * (self.target - self.player.pose.position).norm()
+                                           - MIN_KICK_DISTANCE_FORCE)) /
+                                         (MAX_KICK_DISTANCE_FORCE - MIN_KICK_DISTANCE_FORCE)) + 1
                 for player in self.game_state.my_team.available_players.values():
                     if player.id == tentative_target_id:
                         player.receiver_pass_flag = True
