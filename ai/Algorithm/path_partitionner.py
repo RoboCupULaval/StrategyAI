@@ -247,7 +247,7 @@ class PathPartitionner(Pathfinder):
                 ball_position = self.game_state.get_ball_position()
                 self.pose_obstacle = np.concatenate((self.pose_obstacle, ball_position.reshape(1, 2)))
                 self.collision_body.append(CollisionBody(ball_position, Position(0, 0),
-                                                         130, type=CollisionType.BALL))
+                                                         150, type=CollisionType.BALL))
 
             self.avoid_radius = np.array([obj.avoid_radius for obj in self.collision_body])
         else:
