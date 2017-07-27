@@ -36,7 +36,7 @@ class AICommand(object):
         self.player = player
         self.robot_id = player.id
         self.command = command_type
-        self.dribbler_on = other_args.get("dribbler_on", 0)
+        self.dribbler_on = other_args.get("dribbler_on", False)
         self.pathfinder_on = other_args.get("pathfinder_on", False)
         self.kick_strength = other_args.get("kick_strength", 20)
         self.charge_kick = other_args.get("charge_kick", False)

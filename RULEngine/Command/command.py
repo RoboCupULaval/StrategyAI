@@ -79,7 +79,7 @@ class Kick(Command):
         mcu_communicator.kick(self.player.id, self.kick_speed)
 
 
-class Stop(Command):MAX_KICK_DISTANCE_FORCE
+class Stop(Command):
     def __init__(self, player: OurPlayer):
         super().__init__(player)
         self.speed_repr = Pose()
@@ -103,7 +103,7 @@ class Dribbler(Command):
         # todo ask embedded about dribbler strength MGL 2017/05/29
 
     def package_command(self, mcu_communicator: McuCommunicator) -> None:
-        if self.activate:
-            mcu_communicator.turnOnDribbler(self.player.id)
-        else:
-            mcu_communicator.turnOffDribbler(self.player.id)
+        #if self.activate:
+        mcu_communicator.turnOnDribbler(self.player.id)
+        # else:
+        #     mcu_communicator.turnOffDribbler(self.player.id)

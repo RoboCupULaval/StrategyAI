@@ -146,7 +146,7 @@ class GoKick(Tactic):
         else:
             go_behind_ball_speed = distance_to_goal / 150
         return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation),
-                                     cruise_speed=2, charge_kick=True, end_speed=0.2)
+                                     cruise_speed=2, charge_kick=True, end_speed=0.2, dribbler_on=True)
         # return AllStar(self.game_state,
         #                self.player,
         #                charge_kick=True,
@@ -216,12 +216,13 @@ class GoKick(Tactic):
                 self.kick_force = 5
             else:
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
-                self.kick_force = m.ceil(((3 * (self.target - self.player.pose.position).norm()
+                self.kick_force = m.ceil(((3 * (self.target.position - self.player.pose.position).norm()
                                            - MIN_KICK_DISTANCE_FORCE)) /
                                          (MAX_KICK_DISTANCE_FORCE - MIN_KICK_DISTANCE_FORCE)) + 1
                 for player in self.game_state.my_team.available_players.values():
                     if player.id == tentative_target_id:
                         player.receiver_pass_flag = True
+
                     else:
                         player.receiver_pass_flag = False
 

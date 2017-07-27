@@ -14,7 +14,8 @@ class MoveToPosition(Action):
                  cruise_speed: [int, float]=1,
                  collision_ball=False,
                  charge_kick=False,
-                 end_speed=0):
+                 end_speed=0,
+                 dribbler_on=True):
 
         Action.__init__(self, game_state, player)
 
@@ -27,6 +28,7 @@ class MoveToPosition(Action):
         self.collision_ball = collision_ball
         self.charge_kick = charge_kick
         self.end_speed = end_speed
+        self.dribbler_on = dribbler_on
 
     def exec(self):
         return AICommand(self.player,
@@ -36,4 +38,5 @@ class MoveToPosition(Action):
                          cruise_speed=self.cruise_speed,
                          collision_ball=self.collision_ball,
                          charge_kick=self.charge_kick,
-                         end_speed=self.end_speed)
+                         end_speed=self.end_speed,
+                         dribbler_on=self.dribbler_on)

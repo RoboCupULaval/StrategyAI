@@ -13,13 +13,14 @@ from RULEngine.Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 
 class GoToPositionPathfinder(Tactic):
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose,
-                 args: List[str]=None, collision_ball=False, cruise_speed=2, charge_kick=False, end_speed=0):
+                 args: List[str]=None, collision_ball=False, cruise_speed=2, charge_kick=False, end_speed=0, dribbler_on=False):
         super().__init__(game_state, player, target, args)
         self.target = target
         self.status_flag = Flags.INIT
         self.collision_ball = collision_ball
         self.charge_kick = charge_kick
         self.end_speed = end_speed
+        self.dribbler_on = dribbler_on
         if len(self.args) > 0:
             self.cruise_speed = float(args[0])
         else:
@@ -38,14 +39,16 @@ class GoToPositionPathfinder(Tactic):
                                   cruise_speed=self.cruise_speed,
                                   collision_ball=self.collision_ball,
                                   charge_kick=self.charge_kick,
-                                  end_speed=self.end_speed).exec()
+                                  end_speed=self.end_speed,
+                                  dribbler_on=self.dribbler_on).exec()
         else:
             return MoveToPosition(self.game_state,
                                   self.player,
                                   self.target, pathfinder_on=True,
                                   cruise_speed=self.cruise_speed,
                                   collision_ball=self.collision_ball,
-                                  end_speed=self.end_speed).exec()
+                                  end_speed=self.end_speed,
+                                  dribbler_on=self.dribbler_on).exec()
 
     def check_success(self):
         distance = (self.player.pose - self.target).position.norm()
