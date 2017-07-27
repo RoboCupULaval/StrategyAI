@@ -47,7 +47,6 @@ class BallKalmanFilter:
             if obs is None:
                 obsx.append(None)
                 obsy.append(None)
-
             elif obs is not None:
                 obsx.append(obs.x)
                 obsy.append(obs.y)

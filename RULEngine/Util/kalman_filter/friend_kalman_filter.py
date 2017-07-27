@@ -11,7 +11,10 @@ warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
 class FriendKalmanFilter:
     def __init__(self):
+        self.matrix_flag = False
         cfg = ConfigService()
+        if cfg.config_dict["GAME"]["kalman_matrix_flag"] == "true":
+            self.matrix_flag = True
         self.default_dt = float(cfg.config_dict["GAME"]["ai_timestamp"])
         self.tau_x = 0.3
         self.tau_y = 0.3
@@ -69,18 +72,24 @@ class FriendKalmanFilter:
 
     # @profile(immediate=False)
     def update(self, observation):
+
         obsx = []
         obsy = []
         obsth = []
         for obs in observation:
-            if obs is not None:
-                obsx.append(obs.position.x)
-                obsy.append(obs.position.y)
-                obsth.append(obs.orientation)
-            if obs is None:
+            if self.matrix_flag:
                 obsx.append(None)
                 obsy.append(None)
                 obsth.append(None)
+            else:
+                if obs is not None:
+                    obsx.append(obs.position.x)
+                    obsy.append(obs.position.y)
+                    obsth.append(obs.orientation)
+                if obs is None:
+                    obsx.append(None)
+                    obsy.append(None)
+                    obsth.append(None)
         observation = np.array(obsx + obsy + obsth)
 
         observation = np.array(observation)
