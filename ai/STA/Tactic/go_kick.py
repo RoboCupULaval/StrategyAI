@@ -176,6 +176,8 @@ class GoKick(Tactic):
     def validate_kick(self):
         if self.game_state.get_ball_velocity().norm() > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.halt
+            for player in self.game_state.my_team.available_players.values():
+                player.receiver_pass_flag = False
             #print(self._get_distance_from_ball())
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
             self.next_state = self.kick
@@ -211,6 +213,11 @@ class GoKick(Tactic):
                 self.target = Pose(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0, 0)
             else:
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
+                for player in self.game_state.my_team.available_players.values():
+                    if player.id == tentative_target_id:
+                        player.receiver_pass_flag = True
+                    else:
+                        player.receiver_pass_flag = False
 
             self.target_assignation_last_time = time.time()
 
