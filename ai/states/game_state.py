@@ -13,7 +13,7 @@ from RULEngine.Util.constant import TeamColor, ROBOT_RADIUS
 from RULEngine.Util.singleton import Singleton
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Debug.debug_interface import DebugInterface, COLOR_ID_MAP
+from RULEngine.Debug.debug_interface import DebugInterface, COLOR_ID_MAP, ORANGE
 from ai.Util.role import Role
 from ai.Util.role_mapper import RoleMapper
 
@@ -176,4 +176,4 @@ class GameState(object, metaclass=Singleton):
 
     def display_ball_kalman(self):
         position = self.game.ball.position
-        self.debug_interface.add_circle(center=(position[0], position[1]), radius=90, timeout=0.06)
+        self.debug_interface.add_circle(center=(position[0], position[1]), color=ORANGE.repr(), radius=90, timeout=0.06)

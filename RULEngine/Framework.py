@@ -226,7 +226,7 @@ class Framework(object):
             # Communication
             self._send_robot_commands(robot_commands)
             self._send_debug_commands()
-            self._send_new_vision_packet()
+            #self._send_new_vision_packet()
 
             if time_delta > self.ai_timestamp * 1.3:
                 warnings.warn("Update loop took {:5.3f}s instead of {}s!".format(time_delta, self.ai_timestamp),
@@ -346,8 +346,7 @@ class Framework(object):
         try:
             self.vision_redirection_routine(pb_sslwrapper.SerializeToString())
         except:
-            print("fuck you2")
-            pass
+            print("Fail to send in vision redirection")
 
     def _sigint_handler(self, *args):
         self.stop_game()
