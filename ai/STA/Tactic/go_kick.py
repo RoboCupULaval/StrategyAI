@@ -71,7 +71,6 @@ class GoKick(Tactic):
         self.grab_ball_tries = 0
 
     def kick_charge(self):
-        print('charge')
 
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
             self.next_state = self.go_behind_ball
@@ -219,13 +218,14 @@ class GoKick(Tactic):
                 self.kick_force = m.ceil(((3 * (self.target.position - self.player.pose.position).norm()
                                            - MIN_KICK_DISTANCE_FORCE)) /
                                          (MAX_KICK_DISTANCE_FORCE - MIN_KICK_DISTANCE_FORCE)) + 1
+            if self.kick_force > 2:
+                self.kick_force = 2
                 for player in self.game_state.my_team.available_players.values():
                     if player.id == tentative_target_id:
                         player.receiver_pass_flag = True
 
                     else:
                         player.receiver_pass_flag = False
-
             self.target_assignation_last_time = time.time()
 
     def get_destination_behind_ball(self):
