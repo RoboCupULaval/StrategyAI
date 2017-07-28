@@ -47,6 +47,20 @@ class BallKalmanFilter:
             if obs is None:
                 obsx.append(None)
                 obsy.append(None)
+                continue
+
+            play_zone = ConfigService().config_dict["GAME"]["play_zone"]
+            in_play_zone = False
+            if play_zone == "full":
+                in_play_zone = True
+            elif play_zone == "positive" and obs.x >= 0:
+                in_play_zone = True
+            elif play_zone == "negative" and obs.x <= 0:
+                in_play_zone = True
+
+            if not in_play_zone:
+                obsx.append(None)
+                obsy.append(None)
             elif obs is not None:
                 obsx.append(obs.x)
                 obsy.append(obs.y)
