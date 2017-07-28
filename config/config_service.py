@@ -40,6 +40,12 @@ class ConfigService(metaclass=Singleton):
         field_port = {s: dict(config_parser.items(s)) for s in config_parser.sections()}
         self.config_dict["COMMUNICATION"] = field_port["COMMUNICATION"]
 
+        if "play_zone" not in self.config_dict["GAME"]:
+            self.config_dict["GAME"]["play_zone"] = "full"
+        if self.config_dict["GAME"]["play_zone"] not in ["full", "positive", "negative"]:
+            raise RuntimeError("play_zone is either full, positive or negative")
+
+
         # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
         if self.config_dict["GAME"]["our_color"] == "blue":
             self.config_dict["COMMUNICATION"]["ui_cmd_sender_port"] = 14444    # DO NOT TOUCH
@@ -56,7 +62,8 @@ default_dict = {"GAME": {"type": "sim",
                          "their_color": "yellow",
                          "our_side": "positive",
                          "autonomous_play": "false",
-                         "ai_timestamp": "0.05"},
+                         "ai_timestamp": "0.05",
+                         "play_zone":"full"},
                 "COMMUNICATION": {"type": "sim",
                                   "redirect": "true",
                                   "referee_udp_address": "224.5.23.2",
