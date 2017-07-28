@@ -213,7 +213,7 @@ class Field:
                 self.constant["FIELD_DEFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_NEGATIVE"] + self._penalty_spot_from_field_line_dist, 0)
                 self.constant["FIELD_OFFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_POSITIVE"] - self._penalty_spot_from_field_line_dist, 0)
                 self.constant["FIELD_PENALTY_KICKER_POSE"] = Pose(Position(self.constant["FIELD_OFFENSE_PENALTY_MARK"].x - 200, 0), 0)
-                return True
+            return True
 
 
 

@@ -36,10 +36,10 @@ class Kick(Action):
             #if player_to_target.norm() > 0:
             player_to_target = self.target.position
             ball_position = self.game_state.get_ball_position()
-            orientation = (self.target.position - ball_position).angle()
+            orientation = (self.target.position - self.player.pose.position).angle()
         else:
             ball_position = self.player.pose.position
-            orientation = self.player.pose.orientation
+            orientation = (self.target.position - self.player.pose.position).angle()
 
         # else:
         #     player_to_target = SpeedPose()
