@@ -7,10 +7,10 @@ from ai.Util.pathfinder_history import PathfinderHistory
 
 
 class OurPlayer(Player):
-    max_speed = 3
+    max_speed = 2.5
     max_angular_speed = 3.14
     max_acc = 2
-    max_angular_acc = 0.3
+    max_angular_acc = 0.5
 
     def __init__(self, team, id: int):
         super().__init__(team=team, id=id)
