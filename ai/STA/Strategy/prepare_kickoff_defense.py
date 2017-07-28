@@ -33,10 +33,11 @@ class PrepareKickOffDefense(Strategy):
         attack_bottom_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
                                                GameState().const["FIELD_Y_TOP"] * 3 / 5))
         middle_position = Pose(Position(center_offset + GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10, 0))
+
         defense_top_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                             GameState().const["FIELD_Y_TOP"] / 3))
+                                             GameState().const["FIELD_Y_TOP"] / 10))
         defense_bottom_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                                GameState().const["FIELD_Y_BOTTOM"] / 3))
+                                                GameState().const["FIELD_Y_BOTTOM"] / 10))
 
         our_goal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
 
