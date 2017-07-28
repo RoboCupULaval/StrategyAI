@@ -20,6 +20,36 @@ class ConfigService(metaclass=Singleton):
 
         self.config_dict = {s: dict(config_parser.items(s)) for s in config_parser.sections()}
 
+        if  "field_port_file" not in self.config_dict["COMMUNICATION"]:
+            raise RuntimeError("field_port_file must now be specify and point to the port of vision and ref")
+        if "vision_port" in self.config_dict["COMMUNICATION"]:
+            raise RuntimeError("The vision_port must be specify in the 'field_port_file' file")
+
+        if "ui_cmd_sender_port" in self.config_dict["COMMUNICATION"] or \
+           "ui_cmd_receiver_port" in self.config_dict["COMMUNICATION"]:
+            raise RuntimeError("The ui_cmd_sender_port and ui_cmd_receiver_port are hardcoded base on the our team color, removed them from config file")
+        field_port_file = self.config_dict["COMMUNICATION"]['field_port_file']
+        try:
+            config_parser.read_file(open(field_port_file))
+        except FileNotFoundError:
+            print("Impossible de lire le fichier de configuration.\nLoading default simulation with kalman settings")
+            config_parser.read_dict(default_dict)
+        except ParsingError:
+            print("Le fichier de configuration est mal configuré.\nExiting!")
+            exit(1)
+        field_port = {s: dict(config_parser.items(s)) for s in config_parser.sections()}
+        self.config_dict["COMMUNICATION"] = field_port["COMMUNICATION"]
+
+        # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
+        if self.config_dict["GAME"]["our_color"] == "blue":
+            self.config_dict["COMMUNICATION"]["ui_cmd_sender_port"] = 14444    # DO NOT TOUCH
+            self.config_dict["COMMUNICATION"]["ui_cmd_receiver_port"] = 15555  # DO NOT TOUCH
+        else:
+            self.config_dict["COMMUNICATION"]["ui_cmd_sender_port"] = 16666    # DO NOT TOUCH
+            self.config_dict["COMMUNICATION"]["ui_cmd_receiver_port"] = 17777  # DO NOT TOUCH
+
+        [print(key,":" ,value) for key, value in self.config_dict["COMMUNICATION"].items()]
+
 
 default_dict = {"GAME": {"type": "sim",
                          "our_color": "blue",

@@ -22,7 +22,6 @@ from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
-from RULEngine.Communication.sender.uidebug_vision_sender import UIDebugVisionSender
 from RULEngine.Communication.util.robot_command_sender_factory import RobotCommandSenderFactory
 from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Game.Game import Game
@@ -121,10 +120,6 @@ class Framework(object):
                 # Monitor robot if we are communicating with an actual robot
                 self.uidebug_robot_monitor = UIDebugRobotMonitor(self.robot_command_sender,
                                                                  self.debug)
-                # are we redirecting the vision to the uidebug!
-                if self.cfg.config_dict["COMMUNICATION"]["redirect"] == "true":
-                    self.uidebug_vision_sender = UIDebugVisionSender()
-                    self.vision_redirection_routine = self.uidebug_vision_sender.send_packet
 
         else:
             self.stop_game()
