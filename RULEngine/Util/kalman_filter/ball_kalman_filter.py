@@ -47,7 +47,6 @@ class BallKalmanFilter:
             if obs is None:
                 obsx.append(None)
                 obsy.append(None)
-
             elif obs is not None:
                 obsx.append(obs.x)
                 obsy.append(obs.y)
@@ -96,7 +95,8 @@ class BallKalmanFilter:
                 player_to_ball = (last_ball_pose - closest_player.position).normalized() * (BALL_RADIUS + ROBOT_RADIUS)
                 self.x[0] = closest_player.position[0] + player_to_ball.x
                 self.x[1] = closest_player.position[1] + player_to_ball.y
-
+                self.x[2] = 0
+                self.x[3] = 0
         self.predict()
         output_state = self.x
         #print("speed", self.x[2], self.x[3])

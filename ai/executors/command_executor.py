@@ -47,7 +47,8 @@ class CommandExecutor(Executor):
             if player.ai_command.charge_kick:
                 temp.append(StartChargingKick(player))
 
-            if player.ai_command.dribbler_on > 0:
+            if player.ai_command.dribbler_on:
+                print("in command executor dribble")
                 temp.append(Dribbler(player))
 
             if player.ai_command.kick:

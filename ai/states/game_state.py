@@ -169,10 +169,23 @@ class GameState(object, metaclass=Singleton):
         self.const = self.game.field.constant
 
     def display_player_kalman(self):
+        if self.our_team_color == TeamColor.YELLOW:
+            our_color_rgb = (181, 137, 0)
+            their_color_rgb = (38, 139, 210)
+        else:
+            our_color_rgb = (38, 139, 210)
+            their_color_rgb = (181, 137, 0)
         for player in self.my_team.available_players.values():
             if player.check_if_on_field():
                 pose = player.pose
-                self.debug_interface.add_circle(center=(pose[0], pose[1]), radius=ROBOT_RADIUS, timeout=0.06)
+                self.debug_interface.add_circle(center=(pose[0], pose[1]), radius=ROBOT_RADIUS, timeout=0.06,
+                                                color=our_color_rgb)
+
+        for player in self.other_team.available_players.values():
+            if player.check_if_on_field():
+                pose = player.pose
+                self.debug_interface.add_circle(center=(pose[0], pose[1]), radius=ROBOT_RADIUS, timeout=0.06,
+                                                color=their_color_rgb)
 
     def display_ball_kalman(self):
         position = self.game.ball.position

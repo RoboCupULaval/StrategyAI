@@ -1,8 +1,11 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
 
+import math
+import numpy as np
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
+from ai.Algorithm.evaluation_module import closest_player_to_point
 
 from ai.states.game_state import GameState
 from ai.STA.Tactic.Tactic import Tactic
@@ -11,11 +14,13 @@ from ai.STA.Action.MoveToPosition import MoveToPosition
 from RULEngine.Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 
 
-class GoToPositionPathfinder(Tactic):
+class FaceOpponent(Tactic):
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose,
-                 args: List[str]=None, collision_ball=False, cruise_speed=1, charge_kick=False, end_speed=0, dribbler_on=False):
+                 args: List[str]=None, distance=500, collision_ball=False,
+                 cruise_speed=2, charge_kick=False, end_speed=0, dribbler_on=False):
         super().__init__(game_state, player, target, args)
         self.target = target
+        self.distance = distance
         self.status_flag = Flags.INIT
         self.collision_ball = collision_ball
         self.charge_kick = charge_kick
@@ -27,6 +32,14 @@ class GoToPositionPathfinder(Tactic):
             self.cruise_speed = cruise_speed
 
     def exec(self):
+        self.target_player = closest_player_to_point(self.game_state.get_ball_position(), our_team=False).player
+        orientation_opponent = np.array([math.cos(self.target_player.pose.orientation),
+                                         math.sin(self.target_player.pose.orientation)])
+        destination_position = self.target_player.pose.position + self.distance * orientation_opponent
+        ball_to_player = self.game_state.get_ball_position() - self.player.pose.orientation
+        destination_orientation = ball_to_player.angle()
+        destination_pose = Pose(destination_position, destination_orientation)
+
         if self.check_success():
             self.status_flag = Flags.SUCCESS
         else:
@@ -35,7 +48,7 @@ class GoToPositionPathfinder(Tactic):
         if self.charge_kick:
             return MoveToPosition(self.game_state,
                                   self.player,
-                                  self.target, pathfinder_on=True,
+                                  destination_pose, pathfinder_on=True,
                                   cruise_speed=self.cruise_speed,
                                   collision_ball=self.collision_ball,
                                   charge_kick=self.charge_kick,
@@ -44,7 +57,7 @@ class GoToPositionPathfinder(Tactic):
         else:
             return MoveToPosition(self.game_state,
                                   self.player,
-                                  self.target, pathfinder_on=True,
+                                  destination_pose, pathfinder_on=True,
                                   cruise_speed=self.cruise_speed,
                                   collision_ball=self.collision_ball,
                                   end_speed=self.end_speed,

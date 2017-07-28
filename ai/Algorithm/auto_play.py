@@ -95,7 +95,9 @@ class SimpleAutoPlay(AutoPlay):
         if self.current_state is SimpleAutoPlayState.OFFENSE_KICKOFF or \
             self.current_state is SimpleAutoPlayState.DEFENSE_KICKOFF or \
             self.current_state is SimpleAutoPlayState.OFFENSE_PENALTY or \
-                self.current_state is SimpleAutoPlayState.DEFENSE_PENALTY:
+                self.current_state is SimpleAutoPlayState.DEFENSE_PENALTY or \
+                self.current_state is SimpleAutoPlayState.DIRECT_FREE_DEFENSE or \
+                self.current_state is SimpleAutoPlayState.INDIRECT_FREE_DEFENSE:
             if not is_ball_moving(300):
                 return self.current_state
         if score_strategy_other_team() < 0:
@@ -189,9 +191,9 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.DEFENSE_PENALTY: 'PenaltyDefense',
 
             # Freekicks
-            SimpleAutoPlayState.DIRECT_FREE_DEFENSE: 'DefenseWall',
+            SimpleAutoPlayState.DIRECT_FREE_DEFENSE: 'DefenseWallNoKick',
             SimpleAutoPlayState.DIRECT_FREE_OFFENSE: 'DirectFreeKick',
-            SimpleAutoPlayState.INDIRECT_FREE_DEFENSE: 'DefenseWall',
+            SimpleAutoPlayState.INDIRECT_FREE_DEFENSE: 'DefenseWallNoKick',
             SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'IndirectFreeKick'
 
         }.get(state, SimpleAutoPlayState.HALT)
