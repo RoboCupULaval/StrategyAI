@@ -10,6 +10,12 @@ class FieldSide(Enum):
     POSITIVE = 0
     NEGATIVE = 1
 
+
+class FieldCircularArc:
+    pass
+class FieldLineSegment:
+    pass
+
 class Field:
     def __init__(self, ball: 'Ball'):
         self.ball = ball
@@ -131,6 +137,7 @@ class Field:
         new_position = self.stay_outside_goal_area(position, our_goal=False)
         return self.stay_inside_play_field(new_position)
 
+
     def update_field_dimensions(self, packets):
         if not packets:
             return False
@@ -139,20 +146,27 @@ class Field:
             if not packet.HasField("geometry"):
                 return False
             field = packet.geometry.field
-            self._line_width = field.line_width
-            self._field_length = field.field_length
-            self._field_width = field.field_width
-            self._boundary_width = field.boundary_width
-            self._referee_width = field.referee_width
-            self._goal_width = field.goal_width
-            self._goal_depth = field.goal_depth
-            self._goal_wall_width = field.goal_wall_width
-            self._center_circle_radius = field.center_circle_radius
-            self._defense_radius = field.defense_radius
-            self._defense_stretch = field.defense_stretch
-            self._free_kick_from_defense_dist = field.free_kick_from_defense_dist
-            self._penalty_spot_from_field_line_dist = field.penalty_spot_from_field_line_dist
-            self._penalty_line_from_spot_dist = field.penalty_line_from_spot_dist
+            if len(field.field_lines) == 0:
+                raise RuntimeError("Receiving legacy geometry message instead of the new geometry message. Update your grsim or check your vision port.")
+            #print(packet)
+
+            self.field_lines = self._convert_field_line_segments(field.field_lines)
+            self.field_arcs = self._convert_field_circular_arc(field.field_arcs)
+
+            #self._line_width = field.line_width
+            self._field_length = field.field_length #
+            self._field_width = field.field_width #
+            self._boundary_width = field.boundary_width #
+            #self._referee_width = field.referee_width
+            self._goal_width = field.goal_width #
+            self._goal_depth = field.goal_depth #
+            #self._goal_wall_width = field.goal_wall_width
+            self._center_circle_radius = self.field_arcs['CenterCircle'].radius
+            self._defense_radius = self.field_arcs['RightFieldLeftPenaltyArc'].radius
+            self._defense_stretch = self.field_lines['LeftPenaltyStretch'].length
+            #self._free_kick_from_defense_dist = field.free_kick_from_defense_dist
+            #self._penalty_spot_from_field_line_dist = field.penalty_spot_from_field_line_dist
+            #self._penalty_line_from_spot_dist = field.penalty_line_from_spot_dist
 
             self.constant["FIELD_Y_TOP"] = self._field_width / 2
             self.constant["FIELD_Y_BOTTOM"] = -self._field_width / 2
@@ -171,7 +185,6 @@ class Field:
             self.constant["FIELD_GOAL_RADIUS"] = self._defense_radius
             self.constant["FIELD_GOAL_SEGMENT"] = self._defense_stretch
             self.constant["FIELD_GOAL_WIDTH"] = self._goal_width
-            self.constant["FIELD_GOAL_WALL_WIDTH"] = self._goal_wall_width
 
             self.constant["FIELD_GOAL_Y_TOP"] = self._defense_radius + (self._defense_stretch / 2)
             self.constant["FIELD_GOAL_Y_BOTTOM"] = -self.constant["FIELD_GOAL_Y_TOP"]
@@ -192,9 +205,9 @@ class Field:
                 self.constant["FIELD_OUR_GOAL_BOTTOM_CIRCLE"] = Position(self.constant["FIELD_X_POSITIVE"], -self.constant["FIELD_GOAL_SEGMENT"] / 2)
                 self.constant["FIELD_OUR_GOAL_MID_GOAL"] = Position(self.constant["FIELD_X_POSITIVE"], 0)
 
-                self.constant["FIELD_DEFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_POSITIVE"] - self._penalty_spot_from_field_line_dist, 0)
-                self.constant["FIELD_OFFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_NEGATIVE"] + self._penalty_spot_from_field_line_dist, 0)
-                self.constant["FIELD_PENALTY_KICKER_POSE"] = Pose(Position(self.constant["FIELD_OFFENSE_PENALTY_MARK"].x + 200, 0), m.pi)
+                # self.constant["FIELD_DEFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_POSITIVE"] - self._penalty_spot_from_field_line_dist, 0)
+                # self.constant["FIELD_OFFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_NEGATIVE"] + self._penalty_spot_from_field_line_dist, 0)
+                # self.constant["FIELD_PENALTY_KICKER_POSE"] = Pose(Position(self.constant["FIELD_OFFENSE_PENALTY_MARK"].x + 200, 0), m.pi)
             else:
                 self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] = self.constant["FIELD_X_NEGATIVE"]
                 self.constant["FIELD_OUR_GOAL_X_INTERNAL"] = self.constant["FIELD_X_NEGATIVE"] + self.constant["FIELD_GOAL_RADIUS"]
@@ -210,11 +223,35 @@ class Field:
                 self.constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"] = Position(self.constant["FIELD_X_POSITIVE"], -self.constant["FIELD_GOAL_SEGMENT"] / 2)
                 self.constant["FIELD_THEIR_GOAL_MID_GOAL"] = Position(self.constant["FIELD_X_POSITIVE"], 0)
 
-                self.constant["FIELD_DEFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_NEGATIVE"] + self._penalty_spot_from_field_line_dist, 0)
-                self.constant["FIELD_OFFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_POSITIVE"] - self._penalty_spot_from_field_line_dist, 0)
-                self.constant["FIELD_PENALTY_KICKER_POSE"] = Pose(Position(self.constant["FIELD_OFFENSE_PENALTY_MARK"].x - 200, 0), 0)
+                # self.constant["FIELD_DEFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_NEGATIVE"] + self._penalty_spot_from_field_line_dist, 0)
+                # self.constant["FIELD_OFFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_POSITIVE"] - self._penalty_spot_from_field_line_dist, 0)
+                # self.constant["FIELD_PENALTY_KICKER_POSE"] = Pose(Position(self.constant["FIELD_OFFENSE_PENALTY_MARK"].x - 200, 0), 0)
                 return True
+    def _convert_field_circular_arc(self, field_arcs):
+        result = {}
+        for arc in field_arcs:
+            center = Position(arc.center.x, arc.center.y)
+            result[arc.name] = FieldCircularArc()
+            result[arc.name].center      = center
+            result[arc.name].radius      = arc.radius
+            result[arc.name].angle_start = arc.a1 # Counter clockwise order
+            result[arc.name].angle_ened  = arc.a2
+            result[arc.name].thickness   = arc.thickness
+        return result
 
+    def _convert_field_line_segments(self, field_lines):
+        result = {}
+        for line in field_lines:
+            p1 = Position(line.p1.x, line.p1.y)
+            p2 = Position(line.p2.x, line.p2.y)
+            length = (p2 - p1).norm()
+            result[line.name] = FieldLineSegment()
+            result[line.name].p1        = p1
+            result[line.name].p2        = p2
+            result[line.name].length    = length
+            result[line.name].thickness = line.thickness
+
+        return result
 
 
 positive_side_constant = {
