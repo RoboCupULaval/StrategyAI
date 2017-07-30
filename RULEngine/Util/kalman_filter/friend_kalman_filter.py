@@ -49,8 +49,8 @@ class FriendKalmanFilter:
                            10 ** (-1)]) # Orientation Covariance was 0.01, SB
         self.Q = np.diag(values)
         # Observation covariance
-        values = [10 ** (1) for _ in range(ncameras)]
-        values += [10 ** (1) for _ in range(ncameras)]
+        values = [10 ** (-1) for _ in range(ncameras)]
+        values += [10 ** (-1) for _ in range(ncameras)]
         values += [10 ** (-1) for _ in range(ncameras)]
         self.R = np.diag(values)  # Pose * ncameras
         # Initial state covariance
