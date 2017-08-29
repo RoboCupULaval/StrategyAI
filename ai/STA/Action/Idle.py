@@ -2,8 +2,8 @@
 from RULEngine.Game.OurPlayer import OurPlayer
 from ai.states.game_state import GameState
 from .Action import Action
-from ai.Util.ai_command import AICommand, AICommandType
-
+from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
+from RULEngine.Util.SpeedPose import SpeedPose
 
 class Idle(Action):
     """
@@ -22,4 +22,7 @@ class Idle(Action):
         """
         Exécute l'arrêt
         """
-        return AICommand(self.player, AICommandType.STOP)
+        return AICommand(self.player,
+                         AICommandType.MOVE,
+                         pose_goal=SpeedPose(0, 0, 0),
+                         control_loop_type=AIControlLoopType.SPEED)

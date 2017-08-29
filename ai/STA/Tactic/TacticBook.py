@@ -1,28 +1,32 @@
 # Under MIT License, see LICENSE.txt
 from typing import List
+import sys
 
 from ai.STA.Tactic.DemoFollowRobot import DemoFollowRobot
+from ai.STA.Tactic.MeasureLoopDelay import MeasureLoopDelay
 from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
+from ai.STA.Tactic.RotateAroundBall import RotateAroundBall
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.bumb import Bump
-from ai.STA.Tactic.capture import Capture
+from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 from ai.STA.Tactic.intercept import Intercept
-from ai.STA.Tactic.mark import Mark
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.robot_ident import RobotIdent
-from ai.STA.Tactic.test_turn_on_you import TestTurnOnYou
-from ai.STA.Tactic.va_et_vient import VaEtVient
-from ai.STA.Tactic.GoGetBall import GoGetBall
+from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.PassBall import PassBall
-from ai.STA.Tactic.ReceivePass import ReceivePass
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.ProtectZone import ProtectZone
 from ai.STA.Tactic.DemoFollowBall import DemoFollowBall
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.Joystick import Joystick
+from ai.STA.Tactic.face_target import FaceTarget
+
+try:
+    from ai.STA.Tactic.Joystick import Joystick
+except ImportError:
+    import warnings
+    warnings.warn('Pygame is not installed, disabling Joystick tactic.', stacklevel=1)
 
 
 class TacticBook(object):
@@ -30,28 +34,27 @@ class TacticBook(object):
         """
         Initialise le dictionnaire des tactiques présentées au reste de l'IA.
         """
-        self.tactic_book = {'PassBall': PassBall,
-                            'ReceivePass': ReceivePass,
+        self.tactic_book = {'FaceTarget': FaceTarget,
                             'GoalKeeper': GoalKeeper,
                             'CoverZone': ProtectZone,
-                            'GoGetBall': GoGetBall,
                             'DemoFollowBall': DemoFollowBall,
                             'DemoFollowRobot': DemoFollowRobot,
                             'Stop': Stop,
                             'GoToPositionNoPathfinder': GoToPositionNoPathfinder,
                             'GoToPositionPathfinder': GoToPositionPathfinder,
                             'GoKick': GoKick,
-                            "TestTurnOnYou": TestTurnOnYou,
                             'RotateAroundPosition': RotateAroundPosition,
-                            "VaEtVient": VaEtVient,
-                            'Joystick': Joystick,
+                            'RotateAroundBall': RotateAroundBall,
                             'RobotIdent': RobotIdent,
                             'PositionForPass': PositionForPass,
-                            'Capture': Capture,
-                            'Mark': Mark,
                             'Bump': Bump,
-                            'Intercept': Intercept
+                            'Intercept': Intercept,
+                            'GoToRandomPosition': GoToRandomPosition,
+                            'StayAwayFromBall': StayAwayFromBall,
+                            'MeasureLoopDelay': MeasureLoopDelay
                             }
+        if 'Joystick' in sys.modules:
+            self.tactic_book['Joystick'] = Joystick
 
     def get_tactics_name_list(self) -> List[str]:
         """

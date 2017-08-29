@@ -47,6 +47,8 @@ class DebugExecutor(Executor):
 
         elif cmd.is_auto_play_cmd():
             self.ws.play_state.autonomous_flag = cmd.data['status']
+            if not self.ws.play_state.autonomous_flag:
+                self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy("DoNothing")(self.ws.game_state))
 
         else:
             pass
@@ -80,7 +82,11 @@ class DebugExecutor(Executor):
         # FIXME this pid thingy is getting out of control
         # find the player id in question
         # get the player if applicable!
-        this_player = self.ws.game_state.get_player(cmd.data['id'])
+        try:
+            this_player = self.ws.game_state.get_player(cmd.data['id'])
+        except KeyError as id:
+            print("Invalid player id: {}".format(cmd.data['id']))
+            return
         player_id = this_player.id
         tactic_name = cmd.data['tactic']
         # TODO ui must send better packets back with the args.

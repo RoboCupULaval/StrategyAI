@@ -1,7 +1,9 @@
 # Under MIT License, see LICENSE.txt
 import math as m
+from typing import Union
 
 import numpy as np
+import warnings
 
 from ..Util.Position import Position
 from ..Util.Pose import Pose
@@ -41,6 +43,7 @@ def get_distance(position_1: Position, position_2: Position) -> float:
     """
     # assert isinstance(position_1, Position)
     # assert isinstance(position_2, Position)
+    warnings.warn('(position_1 - position_2).norm() should be use instead.', stacklevel=2)
     return m.sqrt((position_2.x - position_1.x) ** 2 +
                   (position_2.y - position_1.y) ** 2)
 
@@ -57,55 +60,10 @@ def get_angle(main_position: Position, other: Position) -> float:
     """
     assert isinstance(main_position, Position), "TypeError main_position"
     assert isinstance(other, Position), "TypeError other"
-
+    warnings.warn('(position_1 - position_2).angle() should be use instead.', stacklevel=2)
     position_x = float(other.x - main_position.x)
     position_y = float(other.y - main_position.y)
     return m.atan2(position_y, position_x)
-
-
-def cvt_angle_360(orientation: float) -> float:
-    """
-        Convertit un angle en radians en degrés 0-359.
-        Args:
-            orientation: L'angle à convertir, en radians.
-        Returns:
-            L'angle entre 0 et 359 degrés.
-    """
-    assert isinstance(orientation, (int, float)), "TypeError orientation"
-    orientation = m.degrees(orientation)
-
-    if orientation < 0:
-        while True:
-            if orientation >= 0:
-                break
-            else:
-                orientation += 360
-    elif orientation > 359:
-        while True:
-            if orientation < 360:
-                break
-            else:
-                orientation -= 360
-    return orientation
-
-
-def cvt_angle_180(orientation):
-    """
-        Convertit un angle en radians en degrés [-180, 180].
-        Args:
-            orientation: L'angle en radians.
-        Returns:
-            L'angle entre  -179 et 180 degrés.
-    """
-    assert isinstance(orientation, (int, float)), "TypeError orientation"
-
-    orientation = cvt_angle_360(orientation)
-    if orientation > 180:
-        return orientation-360
-    elif orientation <= -180:
-        return orientation+360
-    else:
-        return orientation
 
 
 def get_nearest(ref_position: Position, list_of_position: list, number=1):
@@ -141,35 +99,6 @@ def get_nearest(ref_position: Position, list_of_position: list, number=1):
             return list_sorted
 
 
-def get_milliseconds(time_sec: float) -> int:
-    """
-        Convertit un temps en secondes sous forme de float en millisecondes
-        sous forme d'un int.
-        Args:
-            time_sec: Le temps en secondes.
-        Returns:
-            Le temps en millisecondes.
-    """
-    assert isinstance(time_sec, float)
-    return int(round(time_sec * 1000))
-
-
-def det(pos_a: Position, pos_b: Position) -> float:
-    """
-        Calcul le déterminant de la matrice
-        [a.x  a.y]
-        [b.x  b.y]
-        Args:
-            pos_a: La première position.
-            pos_b: La seconde position.
-        Returns
-            Le déterminant.
-    """
-    assert isinstance(pos_a, Position)
-    assert isinstance(pos_b, Position)
-    return pos_a.x * pos_b.y - pos_a.y * pos_b.x
-
-
 def get_line_equation(position1: Position, position2: Position) -> tuple:
     """
         Calcul l'équation de la droite formée par deux positions.
@@ -185,61 +114,12 @@ def get_line_equation(position1: Position, position2: Position) -> tuple:
     assert isinstance(position1, Position)
     assert isinstance(position2, Position)
 
-    delta_x = position2.x - position1.x
-    delta_y = position2.y - position1.y
+    delta = position2 - position1
 
-    pente = delta_y / delta_x
-    ordonnee = position1.y - pente * position1.x
+    slope = delta.y / delta.x
+    origin = position1.y - slope * position1.x
 
-    return pente, ordonnee
-
-
-def get_lines_intersection(position_a1: Position, position_a2: Position,
-                           position_b1: Position, position_b2: Position):
-    """
-        Calcul la position de l'intersection de deux lignes, données chacune
-        par deux positions.
-        Args:
-            position_a1: Position 1 sur la ligne A.
-            position_a2: Position 2 sur la ligne A.
-            position_b1: Position 1 sur la ligne B.
-            position_b2: Position 2 sur la ligne B.
-        Returns:
-            Position: La position de l'intersection des deux lignes.
-                      La position est située à l'infinie si les lignes sont
-                      parallèles.
-    """
-    assert isinstance(position_a1, Position)
-    assert isinstance(position_a2, Position)
-    assert isinstance(position_b1, Position)
-    assert isinstance(position_b2, Position)
-
-    delta_x_a = position_a1.x - position_a2.x
-    delta_y_a = position_a1.y - position_a2.y
-    delta_x_b = position_b1.x - position_b2.x
-    delta_y_b = position_b1.y - position_b2.y
-
-    denominator = delta_x_a * delta_y_b - delta_y_a * delta_x_b
-    if denominator == 0:
-        # Les lignes sont parallèles
-        return Position(m.inf, m.inf)
-
-    a = np.matrix([[delta_x_a, -delta_x_b], [delta_y_a, -delta_y_b]])
-    b = np.matrix([[position_b1.x - position_a1.x], [position_b1.y - position_a1.y]])
-
-    scale = np.linalg.solve(a, b)
-
-    intersection1 = np.matrix([[position_a1.x], [position_a1.y]]) + scale.item((0, 0))*np.matrix([[delta_x_a],
-                                                                                                  [delta_y_a]])
-    intersection2 = np.matrix([[position_b1.x], [position_b1.y]]) + scale.item((1, 0))*np.matrix([[delta_x_b],
-                                                                                                  [delta_y_b]])
-
-    assert np.allclose(intersection1, intersection2)
-
-    x = intersection1.item((0, 0))
-    y = intersection1.item((1, 0))
-
-    return Position(x, y)
+    return slope, origin
 
 
 def get_closest_point_on_line(reference: Position,
@@ -287,124 +167,68 @@ def get_closest_point_on_line(reference: Position,
     return Position(pos_x, pos_y)
 
 
-def get_time_to_travel(dist: float, speed: float, accel: float) -> float:
+def get_closest_point_on_segment(reference: Position,
+                                position1: Position,
+                                position2: Position) -> Position:
     """
-        Calcul le temps nécessaire pour parcourir la distance, en fonction de
-        la vitesse et de l'accélération actuelles.
+        Calcul la position du point sur un segment le plus près d'une position de
+        référence. Le segment est donné par deux positions. La ligne reliant la
+        position recherchée et la position de référence est perpendiculaire à
+        la droite représentant le segment.
         Args:
-            dist: La distance à parcourir.
-            speed: La vitesse actuelle.
-            accel: L'accélération actuelle.
+            reference: La position de référence
+            position1: Le premier point formant la droite
+            position2: Le second point formant la droite
         Returns:
-            Le temps nécessaire pour parcourir la distance.
+            La position du point de la droite le plus proche de la position de
+            référence.
     """
-    assert isinstance(dist, (int, float))
-    assert isinstance(speed, (int, float))
-    assert isinstance(accel, (int, float))
 
-    if accel == 0:
-        if speed == 0:
-            return m.inf
+    position_on_line = get_closest_point_on_line(reference, position1, position2)
+    position_on_segment = position_on_line
+
+    # This handle the case where the projection is not between the two points
+    outside_x = (reference.x > position1.x and reference.x > position2.x) or \
+                (reference.x < position1.x and reference.x < position2.x)
+    outside_y = (reference.y > position1.y and reference.y > position2.y) or \
+                (reference.y < position1.y and reference.y < position2.y)
+    if outside_x or outside_y:
+        if (position1 - reference).norm() < (position2 - reference).norm():
+            position_on_segment = position1
         else:
-            return dist / speed
-    else:
-        time1 = (-speed + m.sqrt(speed ** 2 + 4 * accel * dist)) / (2 * accel)
-        time2 = (-speed - m.sqrt(speed ** 2 + 4 * accel * dist)) / (2 * accel)
-
-        return time2 if time1 < time2 else time1
+            position_on_segment = position2
+    return position_on_segment
 
 
-def get_first_to_arrive(distance1: float,
-                        speed1: float,
-                        acceleration1: float,
-                        distance2: float,
-                        speed2: float,
-                        acceleration2: float):
-    """
-        Détermine quel objet va arriver en premier à sa destination.
-        Args:
-            distance1: La distance que l'objet 1 doit franchir.
-            speed1: La vitesse actuelle de l'objet 1.
-            acceleration1: L'accélération actuelle de l'objet 1.
-            distance2: La distance que l'objet 2 doit franchir.
-            speed2: La vitesse actuelle de l'objet 2.
-            acceleration2: L'accélération actuelle de l'objet 2.
-        Returns:
-            1 si l'objet 1 va arriver en premier à sa destination, 2 sinon.
-    """
-    assert isinstance(distance1, (int, float))
-    assert isinstance(speed1, (int, float))
-    assert isinstance(acceleration1, (int, float))
-    assert isinstance(distance2, (int, float))
-    assert isinstance(speed2, (int, float))
-    assert isinstance(acceleration2, (int, float))
+def get_angle_between_three_points(start: Position, mid: Position, end: Position):
+    return abs(wrap_to_pi((mid - start).angle() - (end - mid).angle()))
 
-    time1 = get_time_to_travel(distance1, speed1, acceleration1)
-    time2 = get_time_to_travel(distance2, speed2, acceleration2)
-
-    if time1 == time2:
-        return 0
-    else:
-        return 1 if time1 < time2 else 2
-
-
-def is_facing_point_and_target(player_position: Position,
-                               point_position: Position,
-                               target_position:
-                               Position,
-                               tolerated_angle: float) -> bool:
-    """
-        Détermine si l'angle entre le joueur et le point est suffisamment proche
-        de celui du point à la cible. En d'autres mots, lorsqu'utilisé avec la balle
-        comme point, on détermine si le joueur va botter la balle à sa cible.
-        Dans ce cas, la stratégie doit assumer que le joueur est suffisamment
-        près de la balle.
-        Args:
-            player_position: La position du joueur
-            point_position: La position du point (possiblement la balle)
-            target_position: La position où le joueur veut botter la balle
-            tolerated_angle: Angle en radians pour que le botter soit possible
-        Returns:
-            Si le joueur est capable de faire le botté ou non.
-    """
-    assert isinstance(point_position, Position), "ball_position is not a Position"
-    assert isinstance(player_position, Position), "player_position is not a Position"
-    assert isinstance(target_position, Position), "target_position is not a Position"
-    assert isinstance(tolerated_angle, (int, float)), "tolerated_angle is neither a int nor a float"
-
-    angle_player_to_ball = get_angle(player_position, point_position)
-    angle_ball_to_target = get_angle(point_position, target_position)
-    angle_difference = abs(angle_player_to_ball - angle_ball_to_target)
-    return angle_difference < tolerated_angle
-
-def is_path_clear(origin: Position, target: Position, player: Position) -> bool:
-    rayon_ref = 1.1 * np.linalg.norm(origin.conv_2_np() - target.conv_2_np())
-    rayon_player = np.linalg.norm(origin.conv_2_np() - player.conv_2_np()) + np.linalg.norm(target.conv_2_np() - player.conv_2_np())
-    return rayon_player > rayon_ref
-
-def rotate_point_around_origin(point, origin, angle):
-    # TODO: ajouter des unit tests
-    sine = m.sin(angle)
-    cos = m.cos(angle)
-
-    x = point.x - origin.x
-    y = point.y - origin.y
-
-    new_x = x * cos - y * sine
-    new_y = x * sine + y * cos
-
-    new_x += origin.x
-    new_y += origin.y
-
-    new_point = Position(new_x, new_y)
-
-    return new_point
 
 def conv_position_2_list(position: Position):
     """
-    converti les datas d'un objet position en liste
+    convertit les datas d'un objet position en liste
     :param position:
     :return: liste des datas de l'objet
     """
 
     return [position.x, position.y]
+
+
+def get_position_behind_point(point: Position, aiming: Position, spacing: Union[int, float]) -> Position:
+    return point - spacing * (aiming - point).normalized()
+
+
+def are_collinear(pos1: Position, pos2: Position, pos3: Position, abs_tol=m.pi/30) -> bool:
+    return compare_angle((pos2 - pos3).angle(), (pos1 - pos2).angle(), abs_tol=abs_tol)
+
+
+def wrap_to_pi(angle):
+    return (angle + np.pi) % (2 * np.pi) - np.pi
+
+
+def compare_angle(angle1, angle2, abs_tol=0.004):
+    return m.isclose(Pose.wrap_to_pi(angle1 - angle2), 0, abs_tol=abs_tol, rel_tol=0)
+
+
+def clamp(val: float, min_val: float, max_val: float) -> float:
+    return max(min(val, max_val), min_val)

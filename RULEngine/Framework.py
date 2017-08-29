@@ -10,8 +10,12 @@
 import signal
 import threading
 import time
+import warnings
 
-from RULEngine.Command.command import Stop, Dribbler
+from profilehooks import profile
+
+from RULEngine.Communication.sender.uidebug_robot_monitor import UIDebugRobotMonitor
+from RULEngine.Command.command import Stop
 from RULEngine.Communication.protobuf import \
     messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
 from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
@@ -63,6 +67,7 @@ class Framework(object):
         self.uidebug_command_sender = None
         self.uidebug_command_receiver = None
         self.uidebug_vision_sender = None
+        self.uidebug_robot_monitor = None
         # because this thing below is a callable! can be used without being set
         self.vision_redirection_routine = lambda *args: None
         self.vision_routine = self._sim_vision  # self._normal_vision # self._test_vision self._redirected_vision
@@ -113,6 +118,9 @@ class Framework(object):
             if self.cfg.config_dict["DEBUG"]["using_debug"] == "true":
                 self.uidebug_command_sender = UIDebugCommandSender()
                 self.uidebug_command_receiver = UIDebugCommandReceiver()
+                # Monitor robot if we are communicating with an actual robot
+                self.uidebug_robot_monitor = UIDebugRobotMonitor(self.robot_command_sender,
+                                                                 self.debug)
                 # are we redirecting the vision to the uidebug!
                 if self.cfg.config_dict["COMMUNICATION"]["redirect"] == "true":
                     self.uidebug_vision_sender = UIDebugVisionSender()
@@ -125,8 +133,7 @@ class Framework(object):
         """ Fonction exécuté et agissant comme boucle principale. """
 
         self._wait_for_first_frame()
-        print(self.vision_routine)
-        # TODO: Faire arrêter quand l'arbitre signal la fin de la partie
+        self._wait_for_first_geometry_packet()
         while not self.thread_terminate.is_set():
             self.time_stamp = time.time()
             self.vision_routine()
@@ -206,8 +213,10 @@ class Framework(object):
         new_image_packet = self.image_transformer.update(vision_frames)
         referee_frames = self.referee_command_receiver.pop_frames()
         self.game.referee.update(referee_frames)
-        if time.time() - self.time_of_last_loop > self.ai_timestamp:
-            time_delta = time.time() - self.time_of_last_loop
+        new_time_delta = time.time() - self.time_of_last_loop
+        if new_time_delta > self.ai_timestamp:
+            time_delta = new_time_delta
+            self.time_of_last_loop = time.time()
             self.game.update(new_image_packet, time_delta)
             self.game.field.update_field_dimensions(vision_frames)
 
@@ -216,10 +225,12 @@ class Framework(object):
 
             # Communication
             self._send_robot_commands(robot_commands)
-            self.game.set_command(robot_commands)
             self._send_debug_commands()
             self._send_new_vision_packet()
-            self.time_of_last_loop = time.time()
+
+            if time_delta > self.ai_timestamp * 1.3:
+                warnings.warn("Update loop took {:5.3f}s instead of {}s!".format(time_delta, self.ai_timestamp),
+                              RuntimeWarning, stacklevel=2)
 
     """
     def _test_vision(self):
@@ -253,15 +264,15 @@ class Framework(object):
         self.ia_running_thread.join()
         self.thread_terminate.clear()
         self.robot_command_sender.stop()
+        if self.uidebug_robot_monitor:
+            self.uidebug_robot_monitor.stop()
         try:
             team = self.game.friends
 
-            # FIXME: hack real life
+            # FIXME: hack for grsim
             for player in team.available_players.values():
                 if player.ai_command is not None:
                     command = Stop(player)
-                    self.robot_command_sender.send_command(command)
-                    command = Dribbler(player, False)
                     self.robot_command_sender.send_command(command)
         except Exception as e:
             print("Could not stop players")
@@ -271,8 +282,14 @@ class Framework(object):
 
     def _wait_for_first_frame(self):
         while not self.vision.get_latest_frame() and not self.thread_terminate.is_set():
-            time.sleep(0.01)
+            time.sleep(0.1)
             print("En attente d'une image de la vision.")
+
+    def _wait_for_first_geometry_packet(self):
+        while not self.game.field.update_field_dimensions(self.vision.pop_frames()) and\
+                not self.thread_terminate.is_set():
+            time.sleep(0.01)
+            print("En attente du premier packet de géométrie du terrain.")
 
     def _send_robot_commands(self, commands):
         """ Envoi les commades des robots au serveur. """
@@ -303,7 +320,7 @@ class Framework(object):
         pck_ball.pixel_x = self.game.field.ball.position.x
         pck_ball.pixel_y = self.game.field.ball.position.y
 
-        for p in self.game.blue_team.players.values():
+        for p in self.game.blue_team.available_players.values():
             packet_robot = pb_sslwrapper.detection.robots_blue.add()
             packet_robot.confidence = 0.999
             packet_robot.robot_id = p.id
@@ -313,7 +330,7 @@ class Framework(object):
             packet_robot.pixel_x = 0.
             packet_robot.pixel_y = 0.
 
-        for p in self.game.yellow_team.players.values():
+        for p in self.game.yellow_team.available_players.values():
             packet_robot = pb_sslwrapper.detection.robots_yellow.add()
             packet_robot.confidence = 0.999
             packet_robot.robot_id = p.id

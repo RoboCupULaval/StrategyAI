@@ -6,7 +6,7 @@ from RULEngine.Util.area import isInsideSquare, stayInsideSquare
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import ROBOT_RADIUS
-from RULEngine.Util.geometry import get_angle
+
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.GoBetween import GoBetween
@@ -81,8 +81,8 @@ class ProtectZone(Tactic):
 
         destination = stayInsideSquare(self.game_state.get_ball_position(), self.y_top, self.y_bottom, self.x_left,
                                        self.x_right)
-        destination = self.game_state.game.field.stay_outside_goal_area(destination, self.is_yellow)
-        orientation = get_angle(destination, self.game_state.get_ball_position())
+        destination = self.game_state.game.field.stay_outside_goal_area(destination, our_goal=True)
+        orientation = (self.game_state.get_ball_position()- destination).angle()
         return MoveToPosition(self.game_state, self.player, Pose(destination, orientation))
 
     def get_enemy_in_zone(self):

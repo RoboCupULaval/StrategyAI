@@ -15,6 +15,6 @@ class VisionReceiver(ProtobufPacketReceiver):
 
     def __init__(self):
         cfg = ConfigService()
-        host = cfg.config_dict["COMMUNICATION"]["udp_address"]
+        host = cfg.config_dict["COMMUNICATION"]["vision_udp_address"]
         port = int(cfg.config_dict["COMMUNICATION"]["vision_port"])
         super(VisionReceiver, self).__init__(host, port, ssl_wrapper.SSL_WrapperPacket)
