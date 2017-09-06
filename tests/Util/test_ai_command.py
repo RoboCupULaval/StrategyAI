@@ -110,7 +110,7 @@ class AICommandGetSetTest(AICommandTestCase):
 
     def test_locked_keys(self):
         ai_cmd = AICommand(self.player)
-        with self.assertRaise(KeyError):
+        with self.assertRaises(KeyError):
             ai_cmd.player = ()
 
 if __name__ == '__main__':
