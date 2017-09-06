@@ -24,7 +24,7 @@ _locked_keys = ['player', 'robot_id']
 _default_keys = {
     'player': None,
     'robot_id': None,
-    'command_type': None,
+    'command': None,
     'dribbler_on': False,
     'pathfinder_on': False,
     'kick_strength': 0,
@@ -43,7 +43,7 @@ _default_keys = {
 _keys_type = {
     'player': OurPlayer,
     'robot_id': (int, float),
-    'command_type': AICommandType,
+    'command': AICommandType,
     'dribbler_on': bool,
     'pathfinder_on': bool,
     'kick_strength': (int, float),
@@ -64,12 +64,12 @@ class AICommand(ChainMap):
     """
     Contains the AI state of a robot before sending it.
     """
-    def __init__(self, player: OurPlayer, command_type: AICommandType=AICommandType.STOP, **kwargs):
+    def __init__(self, player: OurPlayer, command: AICommandType=AICommandType.STOP, **kwargs):
         """
         """
         kwargs['player'] = player
         kwargs['robot_id'] = player.id
-        kwargs['command_type'] = command_type
+        kwargs['command'] = command
         AICommand._test_input_args(**kwargs)
         super().__init__(kwargs, _default_keys)
 

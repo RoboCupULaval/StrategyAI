@@ -68,12 +68,12 @@ class AICommandInitTest(AICommandTestCase):
         ai_cmd = AICommand(self.player)
         self.assertEqual(self.player, ai_cmd.player)
         self.assertEqual(self.robot_id, ai_cmd.robot_id)
-        self.assertEqual(self.STOP, ai_cmd.command_type)
+        self.assertEqual(self.STOP, ai_cmd.command)
 
     def test_2_args(self):
         ai_cmd = AICommand(self.player, self.MOVE)
         self.assertEqual(self.robot_id, ai_cmd.robot_id)
-        self.assertEqual(self.MOVE, ai_cmd.command_type)
+        self.assertEqual(self.MOVE, ai_cmd.command)
 
     def test_3_args(self):
         with self.assertRaises(TypeError):
@@ -83,7 +83,7 @@ class AICommandInitTest(AICommandTestCase):
         ai_cmd = AICommand(self.player, **self.new_keys)
         self.assertEqual(self.player, ai_cmd.player)
         self.assertEqual(self.robot_id, ai_cmd.robot_id)
-        self.assertEqual(self.STOP, ai_cmd.command_type)
+        self.assertEqual(self.STOP, ai_cmd.command)
 
         for key, val in self.new_keys.items():
             self.assertEqual(ai_cmd[key], val)
