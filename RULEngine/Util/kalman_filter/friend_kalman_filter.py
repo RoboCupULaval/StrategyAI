@@ -4,7 +4,7 @@ import warnings
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from config.config_service import ConfigService
-from profilehooks import profile
+# from profilehooks import profile
 
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
