@@ -2,6 +2,8 @@
 
 from enum import IntEnum
 
+from RULEngine.Util.constant import TeamColor
+from RULEngine.Util.team_color_service import TeamColorService
 from config.config_service import ConfigService
 
 
@@ -68,7 +70,6 @@ class Referee:
         self.stage = Stage.NORMAL_FIRST_HALF_PRE
         self.stage_time_left = 0
         self.ball_placement_point = (0, 0)
-        self.our_color = ConfigService().config_dict["GAME"]["our_color"]
         self.team_info = {"ours": {
                             "name": "",
                             "score": 0,
@@ -123,7 +124,7 @@ class Referee:
 
     def _parse_team_info(self, frame):
         info = {}
-        if self.our_color == 'yellow':
+        if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW:
             info['ours'] = frame.yellow
             info['theirs'] = frame.blue
         else:
@@ -143,20 +144,20 @@ class Referee:
             self.team_info[key]['goalie'] = info[key].goalie
 
     def _convert_raw_to_us(self, command):
-        if self.our_color == 'yellow':
+        if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW:
             return command + 30
         else:
             return command + 29
 
     def _convert_raw_to_them(self, command):
-        if self.our_color == 'yellow':
+        if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW:
             return command + 30
         else:
             return command + 31
 
     def _is_our_team_command(self, command):
-        return (self._is_yellow_command(command) and self.our_color == 'yellow') or\
-                (self._is_blue_command(command) and self.our_color == 'blue')
+        return (self._is_yellow_command(command) and TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW) or\
+                (self._is_blue_command(command) and TeamColorService().OUR_TEAM_COLOR is TeamColor.BLUE)
 
     def _is_yellow_command(self, command):
         return (command % 2) == 0 # even commands are yellow commands
