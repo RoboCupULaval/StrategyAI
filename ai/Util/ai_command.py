@@ -5,8 +5,6 @@ from enum import Enum
 
 from collections import ChainMap
 
-__all__ = ['AICommandType', 'AIControlLoopType', 'AICommand']
-
 
 class AICommandType(Enum):
     STOP = 0
@@ -70,14 +68,12 @@ class AICommand(ChainMap):
         kwargs['player'] = player
         kwargs['robot_id'] = player.id
         kwargs['command'] = command
-        AICommand._test_input_args(**kwargs)
+        AICommand._test_keys_value_type(**kwargs)
         super().__init__(kwargs, _default_keys)
 
     @staticmethod
-    def _test_input_args(**kwargs):
+    def _test_keys_value_type(**kwargs):
         for key, value in kwargs.items():
-            if key not in _default_keys:
-                raise KeyError('The following given key does not exist: ' + key)
             if not isinstance(value, _keys_type[key]):
                 raise TypeError('The value of the key `{}` need to be of the type: {}.\n'.format(key, _keys_type[key])
                                 + 'Type received: {}'.format(type(value)))
@@ -92,3 +88,6 @@ class AICommand(ChainMap):
             self.__setitem__(key, value)
         else:
             return super().__setattr__(key, value)
+
+    def __missing__(self, key):
+        raise KeyError('The following given key does not exist: ' + key)
