@@ -5,7 +5,6 @@ from RULEngine.Util.SpeedPose import SpeedPose
 from enum import Enum
 
 
-
 class AICommandType(Enum):
     STOP = 0
     MOVE = 1
