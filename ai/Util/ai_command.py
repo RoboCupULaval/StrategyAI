@@ -68,11 +68,11 @@ class AICommand(ChainMap):
         kwargs['player'] = player
         kwargs['robot_id'] = player.id
         kwargs['command'] = command
-        AICommand._test_keys_value_type(**kwargs)
+        AICommand._validate_keys_value_type(**kwargs)
         super().__init__(kwargs, _default_keys)
 
     @staticmethod
-    def _test_keys_value_type(**kwargs):
+    def _validate_keys_value_type(**kwargs):
         for key, value in kwargs.items():
             if not isinstance(value, _keys_type[key]):
                 raise TypeError('The value of the key `{}` need to be of the type: {}.\n'.format(key, _keys_type[key])
