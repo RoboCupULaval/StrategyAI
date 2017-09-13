@@ -11,7 +11,7 @@ from ai.executors.command_executor import CommandExecutor
 from ai.executors.motion_executor import MotionExecutor
 from config.config_service import ConfigService
 import time
-
+from profilehooks import profile
 class Coach(object):
 
     def __init__(self):
@@ -55,6 +55,8 @@ class Coach(object):
         end_debug_interface = start_play_executor = time.time()
         self.play_executor.exec()
         end_play_executor = start_module_executor = time.time()
+
+
         self.module_executor.exec()
         end_module_executor = start_motion_executor = time.time()
         self.motion_executor.exec()
@@ -71,12 +73,12 @@ class Coach(object):
 
         # Profiling code for debuging, DO NOT REMOVE
         print("[{:4.1f}ms total] debug_inter:{:4.1f}ms/{:4.1f}% | play_exec:{:4.1f}ms/{:4.1f}% | module_exec:{:4.1f}ms/{:4.1f}% | motion_exec:{:4.1f}ms/{:4.1f}% | robot_cmd:{:4.1f}ms/{:3.1f}%"
-              .format(sum*1000,
-                      dt_debug*1000, dt_debug/sum*100.0,
-                      dt_play_exe*1000, dt_play_exe/sum*100.0,
-                      dt_module_exe*1000, dt_module_exe/sum*100.0,
-                      dt_motion_exe*1000, dt_motion_exe/sum*100.0,
-                      dt_robot_cmd*1000, dt_robot_cmd/sum*100.0))
+             .format(sum*1000,
+                     dt_debug*1000, dt_debug/sum*100.0,
+                     dt_play_exe*1000, dt_play_exe/sum*100.0,
+                     dt_module_exe*1000, dt_module_exe/sum*100.0,
+                     dt_motion_exe*1000, dt_motion_exe/sum*100.0,
+                     dt_robot_cmd*1000, dt_robot_cmd/sum*100.0))
 
         return robot_commands
 

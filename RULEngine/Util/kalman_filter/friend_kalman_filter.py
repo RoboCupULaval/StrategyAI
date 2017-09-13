@@ -64,6 +64,8 @@ class FriendKalmanFilter:
             command.position = command.position.rotate(self.x[4])
             self.x = np.dot(self.F, self.x) + np.dot(self.B, command.to_array())
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
+        if self.P[0][0] is np.nan:
+            exit(0)
 
     # @profile(immediate=False)
     def update(self, observation):
@@ -96,11 +98,7 @@ class FriendKalmanFilter:
 
             S = np.dot(np.dot(H, self.P), np.transpose(H)) + R
 
-            S_inv = S
-            S_inv[0, 0] = 1 / S_inv[0, 0]
-            S_inv[1, 1] = 1 / S_inv[1, 1]
-            S_inv[2, 2] = 1 / S_inv[2, 2]
-            K = np.dot(np.dot(self.P, np.transpose(H)), S_inv)
+            K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
             self.x = self.x + np.dot(K, np.transpose(y))
             self.P = np.dot((self.eye - np.dot(K, H)), self.P)
 

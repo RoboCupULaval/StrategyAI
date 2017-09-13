@@ -44,12 +44,13 @@ class BallKalmanFilter:
         obsx = []
         obsy = []
         for obs in observation:
-            if obs is not None:
-                obsx.append(obs.x)
-                obsy.append(obs.y)
             if obs is None:
                 obsx.append(None)
                 obsy.append(None)
+            else:
+                obsx.append(obs.x)
+                obsy.append(obs.y)
+
         observation = np.array(obsx + obsy)
 
         mask = np.array([obs is not None for obs in observation])

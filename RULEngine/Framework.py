@@ -343,8 +343,8 @@ class Framework(object):
         self.frame_number += 1
         pb_sslwrapper.detection.t_capture = 0
         pb_sslwrapper.detection.frame_number = self.frame_number
-
         self.vision_redirection_routine(pb_sslwrapper.SerializeToString())
+
 
     def _sigint_handler(self, *args):
         self.stop_game()
