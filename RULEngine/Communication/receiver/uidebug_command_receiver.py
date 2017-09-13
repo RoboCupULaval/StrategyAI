@@ -33,7 +33,23 @@ class UIDebugCommandReceiver(object):
                     deque.
                 """
                 data = self.request[0]
-                p_packet_list.append(pickle.loads(data))
+                # if data[2:3] == "\x00\x00\x01":
+                #     print(''.join('{:02x} '.format(x) for x in data))
+                # if data[2:3] == "\x00\x01\x00":
+                #     print(''.join('{:02x} '.format(x) for x in data))
+                # else:
+                succes = False
+                # try:
+                if len(data) > 6:
+                    p_packet_list.append(pickle.loads(data))
+                else:
+                    print("Fuckyou")
+                succes = True
+                # except:
+                #     print("Fuckyou                                                    ",''.join('{:02x} '.format(x) for x in data))
+                #     pass
+                # if succes:
+                #     print("yeah                                                    ",''.join('{:02x} '.format(x) for x in data))
         return ThreadedUDPRequestHandler
 
     def receive_command(self):
