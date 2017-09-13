@@ -22,14 +22,19 @@ class Field:
         else:
             self.our_side = FieldSide.NEGATIVE
             self.constant = negative_side_constant
-        x1 = self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
-        x2 = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
-        # FIXME: JAPAN  Only work on a field of 9x6m
-        self.field_collision_body = [CollisionBody(Position(x1 + x1 / 9, 0), Position(0, 0), 1500, CollisionType.ZONE),
-                                     CollisionBody(Position(x2 + x2 / 9, 0), Position(0, 0), 1500, CollisionType.ZONE)]
-        debug_interface = DebugInterface()
-        debug_interface.add_circle((x1 + x1 / 9, 0), radius=1500, timeout=0, color=(255, 0, 0))
-        debug_interface.add_circle((x2 + x2 / 9, 0), radius=1500, timeout=0, color=(255, 0, 0))
+
+
+    def set_collision_body(self):
+        x_their_goal = self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
+        x_our_goal = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
+        radius = self.constant["FIELD_GOAL_RADIUS"]
+
+        self.field_collision_body = [CollisionBody(Position(x_their_goal, 0), Position(0, 0), radius, CollisionType.ZONE),
+                                     CollisionBody(Position(x_our_goal, 0), Position(0, 0), radius, CollisionType.ZONE)]
+
+        self.debug_interface.add_circle((x_their_goal, 0), radius=radius, timeout=0, color=(255, 0, 0))
+        self.debug_interface.add_circle((x_our_goal, 0), radius=radius, timeout=0, color=(255, 0, 0))
+
 
     def move_ball(self, position, delta):
         self.ball.set_position(position, delta)
@@ -47,7 +52,6 @@ class Field:
             else self.constant["FIELD_THEIR_GOAL_TOP_CIRCLE"]
         bot_circle = self.constant["FIELD_OUR_GOAL_BOTTOM_CIRCLE"] if our_goal\
             else self.constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"]
-
         if isInsideSquare(position, self.constant["FIELD_GOAL_Y_TOP"], self.constant["FIELD_GOAL_Y_BOTTOM"],
                           x_left, x_right):
             if is_inside_circle(position, top_circle, self.constant["FIELD_GOAL_RADIUS"] + dist_from_goal_area):
@@ -212,6 +216,8 @@ class Field:
                     self.constant["FIELD_DEFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_NEGATIVE"] + self._penalty_spot_from_field_line_dist, 0)
                     self.constant["FIELD_OFFENSE_PENALTY_MARK"] = Position(self.constant["FIELD_X_POSITIVE"] - self._penalty_spot_from_field_line_dist, 0)
                     self.constant["FIELD_PENALTY_KICKER_POSE"] = Pose(Position(self.constant["FIELD_OFFENSE_PENALTY_MARK"].x - 200, 0), 0)
+
+                self.set_collision_body()
                 return True
             else:
                 return False

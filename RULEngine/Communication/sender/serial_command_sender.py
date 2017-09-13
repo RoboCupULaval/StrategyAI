@@ -48,7 +48,7 @@ class SerialCommandSender(object):
                 if next_command:
                     count += 1
                     self._package_commands(next_command)
-                time.sleep(COMMUNICATION_SLEEP)
+            time.sleep(COMMUNICATION_SLEEP)
             if count > PACKET_FREQ:
                 timelapse = time.time() - self.speed_time
                 self.speed_time = time.time()
