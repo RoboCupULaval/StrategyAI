@@ -28,9 +28,6 @@ class SerialCommandSender(object):
         self.comm_thread.start()
 
     def send_loop(self):
-        #PACKET_FREQ = 50
-        #self.speed_time = time.time()
-
         def loop_send_packets(sc):
             if not self.terminate.is_set():
                 sc.enter(MOVE_COMMAND_SLEEP, 1, loop_send_packets, (sc,))
