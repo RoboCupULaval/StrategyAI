@@ -92,14 +92,16 @@ class SimpleAutoPlay(AutoPlay):
         pass
 
     def _analyse_game(self):
-        if self.current_state is SimpleAutoPlayState.OFFENSE_KICKOFF or \
-            self.current_state is SimpleAutoPlayState.DEFENSE_KICKOFF or \
-            self.current_state is SimpleAutoPlayState.OFFENSE_PENALTY or \
-                self.current_state is SimpleAutoPlayState.DEFENSE_PENALTY or \
-                self.current_state is SimpleAutoPlayState.DIRECT_FREE_DEFENSE or \
-                self.current_state is SimpleAutoPlayState.INDIRECT_FREE_DEFENSE:
-            if not is_ball_moving(300):
-                return self.current_state
+        accepted_states = [
+            SimpleAutoPlayState.OFFENSE_KICKOFF,
+            SimpleAutoPlayState.DEFENSE_KICKOFF,
+            SimpleAutoPlayState.OFFENSE_PENALTY,
+            SimpleAutoPlayState.DEFENSE_PENALTY,
+            SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
+            SimpleAutoPlayState.INDIRECT_FREE_DEFENSE
+        ]
+        if self.current_state in accepted_states and not is_ball_moving(300):
+            return self.current_state
         if score_strategy_other_team() < 0:
             return SimpleAutoPlayState.NORMAL_DEFENSE
         else:

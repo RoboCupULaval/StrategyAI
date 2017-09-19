@@ -25,17 +25,18 @@ class PrepareKickOffOffense(Strategy):
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
 
         # Positions objectifs des joueurs
-        attack_top_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15,
-                                            GameState().const["FIELD_Y_BOTTOM"] * 3 / 5))
-        attack_bottom_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15,
-                                               GameState().const["FIELD_Y_TOP"] * 3 / 5))
-        middle_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15, 0))
-        defense_top_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                             GameState().const["FIELD_Y_TOP"] / 3))
-        defense_bottom_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                                GameState().const["FIELD_Y_BOTTOM"] / 3))
+        # TODO: Why are those constant different in kickoff_offense and kickoff_defense
+        attack_top_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15,
+                                   GameState().const["FIELD_Y_BOTTOM"] * 3 / 5)
+        attack_bottom_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15,
+                                      GameState().const["FIELD_Y_TOP"] * 3 / 5)
+        middle_position = Pose((GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15, 0))
+        defense_top_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
+                                    GameState().const["FIELD_Y_TOP"] / 3)
+        defense_bottom_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
+                                       GameState().const["FIELD_Y_BOTTOM"] / 3)
 
-        our_goal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
+        our_goal = Pose((GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
 
         self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, our_goal))
 

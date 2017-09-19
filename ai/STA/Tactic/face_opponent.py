@@ -45,26 +45,16 @@ class FaceOpponent(Tactic):
         else:
             self.status_flag = Flags.WIP
 
-        if self.charge_kick:
-            return MoveToPosition(self.game_state,
-                                  self.player,
-                                  destination_pose, pathfinder_on=True,
-                                  cruise_speed=self.cruise_speed,
-                                  collision_ball=self.collision_ball,
-                                  charge_kick=self.charge_kick,
-                                  end_speed=self.end_speed,
-                                  dribbler_on=self.dribbler_on).exec()
-        else:
-            return MoveToPosition(self.game_state,
-                                  self.player,
-                                  destination_pose, pathfinder_on=True,
-                                  cruise_speed=self.cruise_speed,
-                                  collision_ball=self.collision_ball,
-                                  end_speed=self.end_speed,
-                                  dribbler_on=self.dribbler_on).exec()
+        return MoveToPosition(self.game_state,
+                              self.player,
+                              destination_pose, pathfinder_on=True,
+                              cruise_speed=self.cruise_speed,
+                              collision_ball=self.collision_ball,
+                              charge_kick=self.charge_kick,
+                              end_speed=self.end_speed,
+                              dribbler_on=self.dribbler_on).exec()
 
     def check_success(self):
         distance = (self.player.pose - self.target).position.norm()
-        if distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.target, abs_tol=ANGLE_TO_HALT):
-            return True
-        return False
+        return distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.target, abs_tol=ANGLE_TO_HALT)
+
