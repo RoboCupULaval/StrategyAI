@@ -33,8 +33,10 @@ class UIDebugCommandReceiver(object):
                     deque.
                 """
                 data = self.request[0]
-                packet_list.append(pickle.loads(data))
-
+                if len(data) > 6:
+                    packet_list.append(pickle.loads(data))
+                else:
+                    raise RuntimeError("Received a legacy ref message on the ui debug port, change port of the ui debug")
         return ThreadedUDPRequestHandler
 
     def receive_command(self):

@@ -77,7 +77,7 @@ class FriendKalmanFilter:
                 obsx.append(obs.position.x)
                 obsy.append(obs.position.y)
                 obsth.append(obs.orientation)
-            if obs is None:
+            else:
                 obsx.append(None)
                 obsy.append(None)
                 obsth.append(None)

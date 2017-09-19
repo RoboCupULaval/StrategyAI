@@ -69,8 +69,6 @@ class GoKick(Tactic):
         self.grab_ball_tries = 0
 
     def kick_charge(self):
-        print('charge')
-
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
             self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
