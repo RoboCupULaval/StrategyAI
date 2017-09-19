@@ -75,8 +75,7 @@ class Kick(Command):
         self.kick_speed = self.player.ai_command.kick_strength
 
     def package_command(self, mcu_communicator: McuCommunicator) -> None:
-        print("kick sended")
-        mcu_communicator.kick(self.player.id)
+        mcu_communicator.kick(self.player.id, self.kick_speed)
 
 
 class Stop(Command):

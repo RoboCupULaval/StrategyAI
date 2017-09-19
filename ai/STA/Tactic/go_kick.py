@@ -69,8 +69,6 @@ class GoKick(Tactic):
         self.grab_ball_tries = 0
 
     def kick_charge(self):
-        print('charge')
-
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
             self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
@@ -161,7 +159,6 @@ class GoKick(Tactic):
         #                     approach=True)
 
     def kick(self):
-        print('KICKKKK')
         self.ball_spacing = GRAB_BALL_SPACING
         self.next_state = self.validate_kick
         # if not self._is_player_towards_ball_and_target():
