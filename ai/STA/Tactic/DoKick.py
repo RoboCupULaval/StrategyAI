@@ -21,9 +21,5 @@ class DoKick(Tactic):
 
     def kick(self):
         self.next_state = self.halt
-        return Kick(self.game_state,
-                    self.player,
-                    self.kick_force,
-                    None,
-                    )
+        return Kick(self.game_state, self.player, self.kick_force, None,)
 
