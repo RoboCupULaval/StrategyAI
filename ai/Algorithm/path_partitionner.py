@@ -160,7 +160,7 @@ class PathPartitionner(Pathfinder):
         if (old_path is not None) and (not self.is_path_collide(old_raw_path,
                                                                 tolerance=1.5)) and \
                 ((pose_target.position - old_raw_path.goal).norm() < hysteresis):
-            if (pose_target.position - old_raw_path.goal).norm() > 20:
+            if False:
                 old_raw_path.quick_update_path(self.player)
                 self.path_appendice = Path(old_raw_path.goal, self.path.goal)
                 self.path_appendice = self.fastpathplanner(self.path_appendice)
@@ -177,7 +177,7 @@ class PathPartitionner(Pathfinder):
                 #self.path = self.remove_redundant_points()
 
         else:
-            self.path = Path(self.player.pose.position, pose_target.position, 0, self.end_speed)
+            self.path = Path(self.player.pose.position, pose_target.position, 0, self.end_speed * 1000)
             #print(self.path.speeds)
             if self.path.get_path_length() < 0.1:
                 """
@@ -247,7 +247,7 @@ class PathPartitionner(Pathfinder):
                 ball_position = self.game_state.get_ball_position()
                 self.pose_obstacle = np.concatenate((self.pose_obstacle, ball_position.reshape(1, 2)))
                 self.collision_body.append(CollisionBody(ball_position, Position(0, 0),
-                                                         130, type=CollisionType.BALL))
+                                                         200, type=CollisionType.BALL))
 
             self.avoid_radius = np.array([obj.avoid_radius for obj in self.collision_body])
         else:

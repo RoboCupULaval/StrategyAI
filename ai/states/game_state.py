@@ -13,7 +13,7 @@ from RULEngine.Util.constant import TeamColor, ROBOT_RADIUS
 from RULEngine.Util.singleton import Singleton
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Debug.debug_interface import DebugInterface, COLOR_ID_MAP
+from RULEngine.Debug.debug_interface import DebugInterface, COLOR_ID_MAP, ORANGE
 from ai.Util.role import Role
 from ai.Util.role_mapper import RoleMapper
 
@@ -169,11 +169,24 @@ class GameState(object, metaclass=Singleton):
         self.const = self.game.field.constant
 
     def display_player_kalman(self):
+        if self.our_team_color == TeamColor.YELLOW:
+            our_color_rgb = (181, 137, 0)
+            their_color_rgb = (38, 139, 210)
+        else:
+            our_color_rgb = (38, 139, 210)
+            their_color_rgb = (181, 137, 0)
         for player in self.my_team.available_players.values():
             if player.check_if_on_field():
                 pose = player.pose
-                self.debug_interface.add_circle(center=(pose[0], pose[1]), radius=ROBOT_RADIUS, timeout=0.06)
+                self.debug_interface.add_circle(center=(pose[0], pose[1]), radius=ROBOT_RADIUS, timeout=0.06,
+                                                color=our_color_rgb)
+
+        for player in self.other_team.available_players.values():
+            if player.check_if_on_field():
+                pose = player.pose
+                self.debug_interface.add_circle(center=(pose[0], pose[1]), radius=ROBOT_RADIUS, timeout=0.06,
+                                                color=their_color_rgb)
 
     def display_ball_kalman(self):
         position = self.game.ball.position
-        self.debug_interface.add_circle(center=(position[0], position[1]), radius=90, timeout=0.06)
+        self.debug_interface.add_circle(center=(position[0], position[1]), color=ORANGE.repr(), radius=90, timeout=0.06)

@@ -71,8 +71,8 @@ class GoalKeeper(Tactic):
             else:
                 self.next_state = self.protect_goal
             return ProtectGoal(self.game_state, self.player, self.is_yellow,
-                               minimum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"]-250,
-                               maximum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"])
+                               minimum_distance=300,
+                               maximum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"]/2)
         else:
             our_goal = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
             opponent_kicker = player_with_ball(2*ROBOT_RADIUS)

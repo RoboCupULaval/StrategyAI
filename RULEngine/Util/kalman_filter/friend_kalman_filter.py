@@ -11,7 +11,10 @@ warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
 class FriendKalmanFilter:
     def __init__(self):
+        self.matrix_flag = False
         cfg = ConfigService()
+        if cfg.config_dict["GAME"]["kalman_matrix_flag"] == "true":
+            self.matrix_flag = True
         self.default_dt = float(cfg.config_dict["GAME"]["ai_timestamp"])
         self.tau_x = 0.3
         self.tau_y = 0.3
@@ -38,16 +41,16 @@ class FriendKalmanFilter:
         self.H += [[0, 0, 0, 0, 1, 0] for _ in range(ncameras)]  # Orientation
         self.H = np.array(self.H)
         # Process covariance
-        values = np.array([10 ** 3,
-                           10 ** 3,
-                           10 ** 3,
-                           10 ** 3,
+        values = np.array([10 ** 1,
+                           10 ** 1,
+                           10 ** 2,
+                           10 ** 2,
                            10 ** (-1),
                            10 ** (-1)]) # Orientation Covariance was 0.01, SB
         self.Q = np.diag(values)
         # Observation covariance
-        values = [10 ** (-3) for _ in range(ncameras)]
-        values += [10 ** (-3) for _ in range(ncameras)]
+        values = [10 ** (2) for _ in range(ncameras)]
+        values += [10 ** (2) for _ in range(ncameras)]
         values += [10 ** (-1) for _ in range(ncameras)]
         self.R = np.diag(values)  # Pose * ncameras
         # Initial state covariance
@@ -69,18 +72,19 @@ class FriendKalmanFilter:
 
     # @profile(immediate=False)
     def update(self, observation):
+
         obsx = []
         obsy = []
         obsth = []
         for obs in observation:
-            if obs is not None:
-                obsx.append(obs.position.x)
-                obsy.append(obs.position.y)
-                obsth.append(obs.orientation)
-            else:
+            if self.matrix_flag or obs is None:
                 obsx.append(None)
                 obsy.append(None)
                 obsth.append(None)
+            else:
+                obsx.append(obs.position.x)
+                obsy.append(obs.position.y)
+                obsth.append(obs.orientation)
         observation = np.array(obsx + obsy + obsth)
 
         observation = np.array(observation)
