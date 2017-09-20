@@ -15,7 +15,7 @@ from ai.states.game_state import GameState
 from . Strategy import Strategy
 
 class DefenseWallNoKick(Strategy):
-    def __init__(self, game_state: GameState, number_of_players: int = 4, hard_code=True):
+    def __init__(self, game_state: GameState, number_of_players: int = 4):
         super().__init__(game_state)
         self.number_of_players = number_of_players
         self.robots = []
@@ -24,14 +24,6 @@ class DefenseWallNoKick(Strategy):
 
         roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE,
                              Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
-        # if hard_code:
-        #     game_state.map_players_to_roles_by_player_id({
-        #         Role.FIRST_ATTACK: 2,
-        #         Role.SECOND_ATTACK: 3,
-        #         Role.MIDDLE: 4,
-        #         Role.FIRST_DEFENCE: 5,
-        #         Role.SECOND_DEFENCE: 1,
-        #     })
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
 

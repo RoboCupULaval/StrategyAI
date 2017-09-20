@@ -36,8 +36,8 @@ class ProtobufPacketReceiver(object):
                     packet.ParseFromString(data)
                     packet_list.append(packet)
                 except google.protobuf.message.DecodeError:
-                    print("fuck you")
-                    pass
+                    print("Error parsing receiving packet, maybe you are listening to the wrong port?")
+                    raise
 
         return ThreadedUDPRequestHandler
 
