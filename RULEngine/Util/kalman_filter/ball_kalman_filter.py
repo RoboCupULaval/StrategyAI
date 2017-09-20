@@ -1,6 +1,9 @@
 import numpy as np
 import warnings
 
+from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
+from ai.Algorithm.evaluation_module import closest_players_to_point
+from ai.states.game_state import GameState
 from config.config_service import ConfigService
 
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
@@ -9,38 +12,35 @@ warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 class BallKalmanFilter:
     def __init__(self):
         cfg = ConfigService()
-        self.default_dt = cfg.config_dict["GAME"]["ai_timestamp"]
+        self.default_dt = float(cfg.config_dict["GAME"]["ai_timestamp"])
         ncameras = int(cfg.config_dict["IMAGE"]["number_of_camera"])
-
+        self.game_state = GameState()
         # Transition model
-        self.F = np.array([[1, 0, self.default_dt, 0, 0, 0],  # Position x
-                           [0, 1, 0, self.default_dt, 0, 0],  # Position y
-                           [0, 0, 1, 0, 0, 0],  # Speed x
-                           [0, 0, 0, 1, 0, 0],  # Speed y
-                           [0, 0, 0, 0, 1, self.default_dt],  # Orientation
-                           [0, 0, 0, 0, 0, 1]])  # Speed w
+        self.transition_model(self.default_dt)
+
         # Observation model
         self.H = [[1, 0, 0, 0] for _ in range(ncameras)]  # Position x
         self.H += [[0, 1, 0, 0] for _ in range(ncameras)]  # Position y
         self.H = np.array(self.H)
+
         # Process covariance
-        values = np.array([10 ** 0, 10 ** 0, 10 ** 0, 10 ** 0])
-        self.Q = np.diag(values)
+        self.Q = np.diag([10 ** 0, 10 ** 0, 10 ** 0, 10 ** 0])
+
         # Observation covariance
-        values = [10 ** 0 for _ in range(ncameras)]
-        values += [10 ** 0 for _ in range(ncameras)]
-        self.R = np.diag(values)  # Pose * ncameras
+        self.R = 10 ** 0 * np.eye(2*ncameras)  # Pose * ncameras
+
         # Initial state covariance
         self.P = 10 ** 3 * np.eye(4)
+
         # Initial state estimation
-        # self.x = np.array([observation.x, observation.y, 0, 0])
-        self.x = np.array([0, 0, 0, 0])
+        self.x = np.zeros(4)
 
     def predict(self):
         self.x = np.dot(self.F, self.x)
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
 
     def update(self, observation):
+
         obsx = []
         obsy = []
         for obs in observation:
@@ -52,7 +52,6 @@ class BallKalmanFilter:
                 obsy.append(None)
         observation = np.array(obsx + obsy)
 
-        observation = np.array(observation)
         mask = np.array([obs is not None for obs in observation])
         observation_wmask = observation[mask]
         if len(observation_wmask) != 0:
@@ -74,11 +73,29 @@ class BallKalmanFilter:
                            [0, 0, 0, 1]])  # Speed y
 
     def filter(self, observation=None, dt=0.05):
+        last_ball_pose = self.game_state.field.ball.position
         if not dt:
             dt = self.default_dt
         self.transition_model(dt)
         if observation is not None:
             self.update(observation)
+        else:
+            players_my_team = closest_players_to_point(last_ball_pose)
+            players_their_team = closest_players_to_point(last_ball_pose, False)
+            if players_my_team[0].player_distance < players_their_team[0].player_distance:
+                closest_player = players_my_team[0].player
+                closest_player_distance_to_ball = players_my_team[0].player_distance
+            else:
+                closest_player = players_their_team[0].player
+                closest_player_distance_to_ball = players_their_team[0].player_distance
+            if closest_player_distance_to_ball < 150:
+                #self.x[2] = closest_player.velocity.position[0]
+                #self.x[3] = closest_player.velocity.position[1]
+                player_to_ball = (last_ball_pose - closest_player.position).normalized() * (BALL_RADIUS + ROBOT_RADIUS)
+                self.x[0] = closest_player.position[0] + player_to_ball.x
+                self.x[1] = closest_player.position[1] + player_to_ball.y
+
         self.predict()
         output_state = self.x
+        #print("speed", self.x[2], self.x[3])
         return output_state

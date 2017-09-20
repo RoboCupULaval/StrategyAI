@@ -5,6 +5,8 @@ from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
 
+# TODO remove this and use MoveToPosition (Simon B)
+
 
 class PathfindToPosition(Action):
     """
@@ -32,7 +34,6 @@ class PathfindToPosition(Action):
                      où Pose est la destination du joueur
                         kick est faux (on ne botte pas)
         """
-        move_destination = self.destination
-        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": move_destination,
+        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.destination,
                                                              "pathfinder_on": True,
                                                              "cruise_speed": self.cruise_speed})

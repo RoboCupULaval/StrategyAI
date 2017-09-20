@@ -19,8 +19,7 @@ class TestGameStateManager(unittest.TestCase):
         self.game = Game()
         self.referee = Referee
         self.game.set_referee(self.referee)
-        self.tcsvc = TeamColorService(TeamColor.BLUE_TEAM)
-        self.game.set_our_team_color(self.tcsvc.OUR_TEAM_COLOR)
+        self.tcsvc = TeamColorService(TeamColor.BLUE)
         self.game_world_OK = ReferenceTransferObject(self.game)
         self.game_world_OK.set_team_color_svc(self.tcsvc)
 
@@ -60,27 +59,6 @@ class TestGameStateManager(unittest.TestCase):
         game_world_nok.set_team_color_svc(self.tcsvc)
         self.assertRaises(AssertionError,
                           game_state_manager.set_reference, game_world_nok)
-
-    def test_get_player_pose(self):
-        self.assertIs(self.GameStateManager1.get_player_pose(0, True),
-                      self.game.friends.players[0].pose)
-        self.assertIs(self.GameStateManager2.get_player_pose(0, False),
-                      self.game.enemies.players[0].pose)
-        self.assertIsNot(self.GameStateManager1.get_player_pose(0, True),
-                         self.game.friends.players[1].pose)
-        self.assertIsNot(self.GameStateManager2.get_player_pose(0, False),
-                         self.game.enemies.players[1].pose)
-        self.assertIsNot(self.GameStateManager1.get_player_pose(0, True),
-                         self.game.enemies.players[0].pose)
-        self.assertIsNot(self.GameStateManager2.get_player_pose(0, False),
-                         self.game.friends.players[0].pose)
-
-    def test_get_player_position(self):
-        self.assertIs(self.GameStateManager1.get_player_position(0, True),
-                      self.game.friends.players[0].pose.position)
-        self.assertIs(self.GameStateManager2.get_player_position(0, False),
-                      self.game.enemies.players[0].pose.position)
-
 
 
 class TestModuleManager(unittest.TestCase):

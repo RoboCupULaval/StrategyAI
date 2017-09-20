@@ -9,8 +9,9 @@ warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 class EnemyKalmanFilter:
     def __init__(self):
         cfg = ConfigService()
-        self.default_dt = cfg.config_dict["GAME"]["ai_timestamp"]
+        self.default_dt = float(cfg.config_dict["GAME"]["ai_timestamp"])
         ncameras = int(cfg.config_dict["IMAGE"]["number_of_camera"])
+        self.frames_to_extrapolate = int(cfg.config_dict["IMAGE"]["frames_to_extrapolate"])
 
         # Transition model
         self.F = np.array([[1, 0, self.default_dt, 0, 0, 0],  # Position x
@@ -37,6 +38,8 @@ class EnemyKalmanFilter:
 
         self.x = np.array([9999, 9999, 0, 0, 0, 0])
 
+        self.empty_frames_counter = 0
+
     def predict(self):
         self.x = np.dot(self.F, self.x)
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
@@ -45,8 +48,10 @@ class EnemyKalmanFilter:
         obsx = []
         obsy = []
         obsth = []
+        observation_is_useful = False
         for obs in observation:
             if obs is not None:
+                observation_is_useful = True
                 obsx.append(obs.position.x)
                 obsy.append(obs.position.y)
                 obsth.append(obs.orientation)
@@ -54,25 +59,29 @@ class EnemyKalmanFilter:
                 obsx.append(None)
                 obsy.append(None)
                 obsth.append(None)
-        observation = np.array(obsx + obsy + obsth)
+        if observation_is_useful:
+            self.empty_frames_counter = 0
+            observation = np.array(obsx + obsy + obsth)
 
-        observation = np.array(observation)
-        mask = np.array([obs is not None for obs in observation])
-        observation_wmask = observation[mask]
-        if len(observation_wmask) != 0:
-            H = self.H[mask]
-            R = np.transpose(self.R[mask])
-            R = np.transpose(R[mask])
+            observation = np.array(observation)
+            mask = np.array([obs is not None for obs in observation])
+            observation_wmask = observation[mask]
+            if len(observation_wmask) != 0:
+                H = self.H[mask]
+                R = np.transpose(self.R[mask])
+                R = np.transpose(R[mask])
 
-            y = np.array(observation_wmask) - np.dot(H, self.x)
+                y = np.array(observation_wmask) - np.dot(H, self.x)
 
-            idx = int(2*len(y)/3)
-            y[idx::] = (y[idx::] + np.pi) % (2 * np.pi) - np.pi
+                idx = int(2*len(y)/3)
+                y[idx::] = (y[idx::] + np.pi) % (2 * np.pi) - np.pi
 
-            S = np.dot(np.dot(H, self.P), np.transpose(H)) + R
-            K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
-            self.x = self.x + np.dot(K, np.transpose(y))
-            self.P = np.dot((np.eye(self.P.shape[0]) - np.dot(K, H)), self.P)
+                S = np.dot(np.dot(H, self.P), np.transpose(H)) + R
+                K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
+                self.x = self.x + np.dot(K, np.transpose(y))
+                self.P = np.dot((np.eye(self.P.shape[0]) - np.dot(K, H)), self.P)
+        else:
+            self.empty_frames_counter += 1
 
     def transition_model(self, dt):
         self.F = np.array([[1, 0, dt, 0, 0, 0],  # Position x
@@ -89,6 +98,9 @@ class EnemyKalmanFilter:
         if observation is not None:
             self.update(observation)
         self.predict()
-        output_state = self.x
-        output_state[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
+        self.x[4] = (self.x[4] + np.pi) % (2 * np.pi) - np.pi
+        output_state = self.x.tolist()
+        if self.empty_frames_counter > self.frames_to_extrapolate:
+            output_state = [0, 0, 0, 0, 0, 0]
+        # TODO: State should be returned as Position and a velocity, not has the raw state vector
         return output_state

@@ -3,20 +3,27 @@
 """ Livre des stratégies. """
 from typing import List
 
+from ai.STA.Strategy.DefenseWall import DefenseWall
+from ai.STA.Strategy.direct_free_kick import DirectFreeKick
+from ai.STA.Strategy.indirect_free_kick import IndirectFreeKick
+from ai.STA.Strategy.offense import Offense
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Strategy.indiana_jones import IndianaJones
 from ai.STA.Strategy.HumanControl import HumanControl
-from ai.STA.Strategy.SimpleDefense import SimpleDefense
-from ai.STA.Strategy.SimpleOffense import SimpleOffense
 from ai.STA.Strategy.DoNothing import DoNothing
-from ai.STA.Strategy.WeirdmovementStrategy import WeirdmovementStrategy
-from ai.STA.Strategy.TestTransitions import TestTransitions
-from ai.STA.Strategy.PerpetualMovement import PerpetualMovement
-from ai.STA.Strategy.TestPasses import TestPasses
-from ai.STA.Strategy.TestRotateAround import TestRotateAround
+from ai.STA.Strategy.offense_kickoff import OffenseKickOff
 from ai.STA.Strategy.passes_with_decisions import PassesWithDecisions
+from ai.STA.Strategy.pathfinder_benchmark import Pathfinder_Benchmark
+from ai.STA.Strategy.penalty_defense import PenaltyDefense
+from ai.STA.Strategy.penalty_offense import PenaltyOffense
+from ai.STA.Strategy.prepare_kickoff_defense import PrepareKickOffDefense
+from ai.STA.Strategy.prepare_kickoff_offense import PrepareKickOffOffense
+from ai.STA.Strategy.prepare_penalty_defense import PreparePenaltyDefense
+from ai.STA.Strategy.prepare_penalty_offense import PreparePenaltyOffense
 from ai.STA.Strategy.robocup_choreography import RobocupChoreography
 from ai.STA.Strategy.bamba_follow import BambaFollow
+from ai.STA.Strategy.stay_away import StayAway
+
 
 class StrategyBook(object):
     """
@@ -29,19 +36,25 @@ class StrategyBook(object):
         """
         Initialise le dictionnaire des stratégies présentées au reste de l'IA.
         """
-        self.strategy_book = {'SimpleDefense': SimpleDefense,
-                              'SimpleOffense': SimpleOffense,
+        self.strategy_book = {'Offense': Offense,
                               'HumanControl': HumanControl,
                               'DoNothing': DoNothing,
-                              'TestTransitions': TestTransitions,
-                              'PerpetualMovement': PerpetualMovement,
-                              'WeirdmovementStrategy': WeirdmovementStrategy,
                               "IndianaJones": IndianaJones,
-                              "TestRotateAround": TestRotateAround,
-                              'TestPasses': TestPasses,
                               'RobocupChoreography': RobocupChoreography,
                               'BambaFollow': BambaFollow,
-                              'PassesWithDecisions': PassesWithDecisions
+                              'PassesWithDecisions': PassesWithDecisions,
+                              'DefenseWall': DefenseWall,
+                              'Pathfinder_Benchmark': Pathfinder_Benchmark,
+                              'PrepareKickOffOffense': PrepareKickOffOffense,
+                              'StayAway': StayAway,
+                              'PrepareKickOffDefense': PrepareKickOffDefense,
+                              'PenaltyDefense': PenaltyDefense,
+                              'PenaltyOffense': PenaltyOffense,
+                              'DirectFreeKick': DirectFreeKick,
+                              'IndirectFreeKick': IndirectFreeKick,
+                              'PreparePenaltyDefense': PreparePenaltyDefense,
+                              'PreparePenaltyOffense': PreparePenaltyOffense,
+                              'OffenseKickOff': OffenseKickOff
                               }
 
     def get_strategies_name_list(self) -> List[str]:

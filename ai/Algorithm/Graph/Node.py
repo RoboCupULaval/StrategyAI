@@ -25,6 +25,7 @@ class Node:
         """
         :param p_tactic: La tactique du noeud.
         """
+        # print(p_tactic)
         assert isinstance(p_tactic, Tactic)
         self.tactic = p_tactic
         self.vertices = []
@@ -69,7 +70,7 @@ class Node:
 
     def set_flag(self, status_flag):
         """
-        Modifie l'attribut status flag de la tactique du moeud.
+        Modifie l'attribut status flag de la tactique du noeud.
         :param status_flag: Une valeur de l'enum Flags de tactic_constant
         """
         assert isinstance(status_flag, Flags)
@@ -79,7 +80,7 @@ class Node:
         """
         :return: Une représentation du noeud sous forme d'une chaîne de caractères.
         """
-        output_string = "Tactic: " + str(self.tactic) + "    Vertices: "
+        output_string = "Tactic: " + str(self.tactic) + "/ Vertices: "
         for vertex in self.vertices:
             output_string += "\n    " + str(vertex)
         return output_string

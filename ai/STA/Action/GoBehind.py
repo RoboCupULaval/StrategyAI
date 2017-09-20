@@ -5,8 +5,7 @@ import numpy as np
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.geometry import get_angle
-from RULEngine.Util.constant import TeamColor
+from RULEngine.Util.geometry import wrap_to_pi
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
@@ -28,7 +27,8 @@ class GoBehind(Action):
                     (exemple: le but)
     """
     def __init__(self, game_state: GameState, player: OurPlayer, position1: Position, position2: Position=None,
-                 distance_behind: int=250, cruise_speed: int=1, pathfinding: bool=False, orientation: str= 'front'):
+                 distance_behind: [int, float]=250, cruise_speed: [int, float]=1,
+                 pathfinder_on: bool=False, orientation: str= 'front'):
         """
             :param game_state: L'état courant du jeu.
             :param player: Instance du joueur qui doit se déplacer
@@ -43,20 +43,14 @@ class GoBehind(Action):
         self.position1 = position1
         self.position2 = position2
         self.distance_behind = distance_behind
-        self.pathfind = pathfinding
+        self.pathfinder_on = pathfinder_on
         self.rayon_avoid = 300  # (mm)
         self.cruise_speed = cruise_speed
         self.orientation = orientation
 
-        if self.distance_behind is None:
-            self.distance_behind = 250
-
         # TODO find something better MGL 2017/05/22
         if self.position2 is None:
-            if game_state.get_our_team_color() == TeamColor.YELLOW_TEAM:  # yellow
-                self.position2 = game_state.const["FIELD_GOAL_BLUE_MID_GOAL"]
-            else:
-                self.position2 = game_state.const["FIELD_GOAL_YELLOW_MID_GOAL"]
+            self.position2 = game_state.const["FIELD_THEIR_GOAL_MID_GOAL"]
 
     def get_destination(self):
         """
@@ -78,6 +72,7 @@ class GoBehind(Action):
         norm_position1_2_position2 = math.sqrt((self.position1.x - self.position2.x) ** 2 +
                                                (self.position1.y - self.position2.y) ** 2)
 
+        # TODO: Remove this part of the logic, since we have a pathfinder to do all of that...
         if norm_player_2_position2 < norm_position1_2_position2:
             # on doit contourner l'objectif
 
@@ -111,9 +106,9 @@ class GoBehind(Action):
         # TODO why?!? MGL 2017/05/22
         destination_orientation = 0
         if self.orientation == 'front':
-            destination_orientation = get_angle(destination_position, self.position1)
+            destination_orientation = (self.position1 - destination_position).angle()
         elif self.orientation == 'back':
-            destination_orientation = get_angle(destination_position, self.position1) + np.pi
+            destination_orientation = wrap_to_pi((self.position1 - destination_position).angle() + np.pi)
 
         destination_pose = Pose(destination_position, destination_orientation)
         return destination_pose
@@ -121,4 +116,4 @@ class GoBehind(Action):
     def exec(self):
         return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.get_destination(),
                                                              "cruise_speed": self.cruise_speed,
-                                                             "pathfinder_on": self.pathfind})
+                                                             "pathfinder_on": self.pathfinder_on})

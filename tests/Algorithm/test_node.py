@@ -2,6 +2,7 @@
 
 import unittest
 
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Game.Ball import Ball
 from RULEngine.Game.Game import Game
 from RULEngine.Game.Referee import Referee
@@ -30,6 +31,8 @@ def foo2():
     return False
 
 
+A_GOAL_PLAYER_ID = 0
+A_PLAYER_ID = 1
 class TestNode(unittest.TestCase):
     def setUp(self):
         config_service = ConfigService().load_file("config/sim_standard.cfg")
@@ -38,11 +41,11 @@ class TestNode(unittest.TestCase):
         self.game.set_referee(Referee())
         self.game.ball = Ball()
         game_world = ReferenceTransferObject(self.game)
-        game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW_TEAM))
+        game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW))
         self.game_state.set_reference(game_world)
-        self.game_state.game.friends.players[0].update(Pose(Position(-4450, 0), 0))
-        self.tactic1 = GoalKeeper(self.game_state, 0)
-        self.tactic2 = Stop(self.game_state, 1)
+        self.game_state.game.friends.players[0].pose = Pose(Position(-4450, 0), 0)
+        self.tactic1 = GoalKeeper(self.game_state, self.game_state.game.friends.players[A_GOAL_PLAYER_ID])
+        self.tactic2 = Stop(self.game_state, self.game_state.game.friends.players[A_PLAYER_ID])
         self.node1 = Node(self.tactic1)
         self.node2 = Node(self.tactic2)
         self.vertex1 = Vertex(0, foo)
@@ -88,13 +91,6 @@ class TestNode(unittest.TestCase):
         self.assertEqual(next_ai_command, expected_aicmd)
         self.assertEqual(next_node, -1)
 
-    def test_str(self):
-        self.node1.add_vertex(self.vertex1)
-        self.node1.add_vertex(self.vertex2)
-        expected_string = "Tactic: GoalKeeper    Vertices: "
-        for vertex in self.node1.vertices:
-            expected_string += "\n    " + str(vertex)
-        self.assertEqual(str(self.node1), expected_string)
 
     def test_set_flag(self):
         self.assertRaises(AssertionError, self.node1.set_flag, "not a flag")

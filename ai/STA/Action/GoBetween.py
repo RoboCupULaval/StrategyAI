@@ -4,6 +4,7 @@ import numpy as np
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
+from RULEngine.Util.geometry import get_closest_point_on_segment
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
@@ -49,86 +50,18 @@ class GoBetween(Action):
         Calcul le point le plus proche du robot sur la droite entre les deux positions
         :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
         """
-        player = self.player.pose.position.conv_2_np()
-        pt1 = self.position1.conv_2_np()
-        pt2 = self.position2.conv_2_np()
-        delta = self.minimum_distance * (pt2 - pt1) / np.linalg.norm(pt2 - pt1)
+        pt1 = self.position1
+        pt2 = self.position2
+        target = self.target
+        delta = self.minimum_distance * (pt2 - pt1).normalized()
         pt1 = pt1 + delta
         pt2 = pt2 - delta
 
-        pt1_to_player = player - pt1
-        pt2_to_player = player - pt2
-        pt1_to_pt2 = pt2 - pt1
+        destination = get_closest_point_on_segment(target, pt1, pt2)
+        dest_to_target = target - destination
+        destination_orientation = dest_to_target.angle()
 
-        destination = np.cross(pt1_to_player, pt1_to_pt2) / np.linalg.norm(pt1_to_pt2) + player
-        outside_x = (destination[0] > pt1[0] and destination[0] > pt2[0]) or \
-                    (destination[0] < pt1[0] and destination[0] < pt2[0])
-        outside_y = (destination[1] > pt1[1] and destination[1] > pt2[1]) or \
-                    (destination[1] < pt1[1] and destination[1] < pt2[1])
-        if outside_x or outside_y:
-            if np.linalg.norm(pt1_to_player) > np.linalg.norm(pt2_to_player):
-                destination = pt1
-            else:
-                destination = pt2
-        target = self.target.conv_2_np()
-        player_to_target = target - player
-        destination_orientation = np.arctan2(player_to_target[1], player_to_target[0])
-
-        # TODO remove MGL 2017/05/23
-        '''
-        delta_x = self.position2.x - self.position1.x
-        delta_y = self.position2.y - self.position1.y
-
-        if delta_x != 0 and delta_y != 0:   # droite quelconque
-            # Équation de la droite reliant les deux positions
-            a1 = delta_y / delta_x                                  # pente
-            b1 = self.position1.y - a1*self.position1.x             # ordonnée à l'origine
-
-            # Équation de la droite perpendiculaire
-            a2 = -1/a1                                              # pente perpendiculaire à a1
-            b2 = robot_position.y - a2*robot_position.x             # ordonnée à l'origine
-
-            # Calcul des coordonnées de la destination
-            x = (b2 - b1)/(a1 - a2)                                 # a1*x + b1 = a2*x + b2
-            y = a1*x + b1
-        elif delta_x == 0:  # droite verticale
-            x = self.position1.x
-            y = robot_position.y
-        elif delta_y == 0: # droite horizontale
-            x = robot_position.x
-            y = self.position1.y
-
-        destination_position = Position(x, y)
-
-        # Vérification que destination_position se trouve entre position1 et position2
-        distance_positions = math.sqrt(delta_x**2 + delta_y**2)
-        distance_dest_pos1 = get_distance(self.position1, destination_position)
-        distance_dest_pos2 = get_distance(self.position2, destination_position)
-
-        if distance_dest_pos1 >= distance_positions and distance_dest_pos1 > distance_dest_pos2:
-            # Si position2 est entre position1 et destination_position
-            new_x = self.position2.x - self.minimum_distance * delta_x / distance_positions
-            new_y = self.position2.y - self.minimum_distance * delta_y / distance_positions
-            destination_position = Position(new_x, new_y)
-        elif distance_dest_pos2 >= distance_positions and distance_dest_pos2 > distance_dest_pos1:
-            # Si position1 est entre position2 et destination_position
-            new_x = self.position1.x + self.minimum_distance * delta_x / distance_positions
-            new_y = self.position1.y + self.minimum_distance * delta_y / distance_positions
-            destination_position = Position(new_x, new_y)
-
-        # Vérification que destination_position respecte la distance minimale
-        if distance_dest_pos1 <= distance_dest_pos2:
-            destination_position = stayOutsideCircle(destination_position, self.position1, self.minimum_distance)
-        else:
-            destination_position = stayOutsideCircle(destination_position, self.position2, self.minimum_distance)
-
-        # Calcul de l'orientation de la pose de destination
-        destination_orientation = get_angle(destination_position, self.target)
-
-        destination_pose = {"pose_goal": Pose(destination_position, destination_orientation)}
-        kick_strength = 0
-        '''
-        return Pose(Position.from_np(destination), destination_orientation)
+        return Pose(destination, destination_orientation)
 
     def exec(self):
         return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.get_destination(),

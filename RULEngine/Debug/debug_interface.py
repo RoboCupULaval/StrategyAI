@@ -1,7 +1,12 @@
 # Under MIT License, see LICENSE.txt
+import time
 
 from RULEngine.Debug.debug_command import DebugCommand
 from RULEngine.Util.singleton import Singleton
+from RULEngine.Util.team_color_service import TeamColorService
+from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.Util.Position import Position
+from config.config_service import ConfigService
 
 
 class Color(object):
@@ -12,7 +17,7 @@ class Color(object):
         self.b = b
 
     def repr(self):
-        return (self.r, self.g, self.b)
+        return self.r, self.g, self.b
 
 # Solarized color definition
 YELLOW = Color(181, 137, 0)
@@ -58,8 +63,8 @@ def wrap_command(raw_command):
 class DebugInterface(metaclass=Singleton):
 
     def __init__(self):
-
         self.debug_state = []
+        self.send_team_color()
 
     def add_log(self, level, message):
         log = DebugCommand(2, {'level': level, 'message': message})
@@ -86,12 +91,12 @@ class DebugInterface(metaclass=Singleton):
         point = DebugCommand(3005, data, p_link=link)
         self.debug_state.append(point)
 
-    def add_circle(self, center, radius):
+    def add_circle(self, center, radius, color=CYAN.repr(), is_fill=True, timeout=DEFAULT_DEBUG_TIMEOUT):
         data = {'center': center,
                 'radius': radius,
-                'color': CYAN.repr(),
-                'is_fill': True,
-                'timeout': 0}
+                'color': color,
+                'is_fill': is_fill,
+                'timeout': timeout}
         circle = DebugCommand(3003, data)
         self.debug_state.append(circle)
 
@@ -99,6 +104,18 @@ class DebugInterface(metaclass=Singleton):
         data = {'start': start_point,
                 'end': end_point,
                 'color': MAGENTA.repr(),
+                'timeout': timeout}
+        command = DebugCommand(3001, data)
+        self.debug_state.append(command)
+
+    def add_vector(self, vector: Position(), start_point=Position(), timeout=DEFAULT_DEBUG_TIMEOUT):
+
+        end_point = start_point + vector
+        start_point = (start_point.x, start_point.y)
+        end_point = (end_point.x, end_point.y)
+        data = {'start': start_point,
+                'end': end_point,
+                'color': CYAN.repr(),
                 'timeout': timeout}
         command = DebugCommand(3001, data)
         self.debug_state.append(command)
@@ -146,11 +163,35 @@ class DebugInterface(metaclass=Singleton):
         cmd = DebugCommand(1001, cmd_tactics_dict)
         self.debug_state.append(cmd)
 
-    def send_robot_status(self, player_id, tactic, action, target="not implemented"):
-        data = {'blue': {player_id: {'tactic': tactic,
-                                     'action': action,
-                                     'target': target}}}
+    def send_robot_strategic_state(self, player: OurPlayer, tactic: str, action: str, target: str="not implemented"):
+        teamcolor_str = player.team.team_color.__str__()
+        data = {teamcolor_str: {player.id: {'tactic': tactic,
+                                            'action': action,
+                                            'target': target}}}
         cmd = DebugCommand(1002, data)
         self.debug_state.append(cmd)
 
+    def send_robot_state(self, player_id, battery_volt, time_last_response):
+        MAX_BAT = 16.4
+        MIN_BAT = 12.0
+        battery_lvl = (battery_volt - MIN_BAT) / (MAX_BAT - MIN_BAT) * 100
+        time_since_last_response = time.time() - time_last_response
+        if time_since_last_response > 5.0:
+            battery_lvl = 0
+        data = {'blue': {player_id: {'battery_lvl': battery_lvl,
+                                     'time_since_last_response': time_since_last_response
+                                     }}}
+        cmd = DebugCommand(1006, data)
+        self.debug_state.append(cmd)
+
+    def send_team_color(self):
+        cmd = DebugCommand(1004, {'team_color': TeamColorService().OUR_TEAM_COLOR.name.lower()})
+        self.debug_state.append(cmd)
+
+    def send_play_info(self, referee_info, referee_team_info, auto_play_info, auto_flag):
+        cmd = DebugCommand(1005, {'referee': referee_info,
+                                  'referee_team': referee_team_info,
+                                  'auto_play': auto_play_info,
+                                  'auto_flag': auto_flag})
+        self.debug_state.append(cmd)
 

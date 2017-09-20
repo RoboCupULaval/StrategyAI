@@ -32,7 +32,7 @@ class PathfinderRRT(Pathfinder):
         Une méthode permet de récupérer la trajectoire d'un robot spécifique.
     """
 
-    def __init__(self, p_worldstate):
+    def __init__(self, gamestate):
         """
             Constructeur, appel le constructeur de la classe mère pour assigner
             la référence sur l'InfoManager.
