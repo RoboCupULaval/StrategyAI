@@ -35,7 +35,7 @@ class GrSimCommandSender(object):
         grsim_command.velnormal = command.player.ai_command.speed.position.y
         grsim_command.velangular = command.player.ai_command.speed.orientation
         grsim_command.spinner = True
-        grsim_command.kickspeedx = command.player.ai_command.kick_strength
+        grsim_command.kickspeedx = command.player.ai_command.kick_strength if command.player.ai_command.kick else 0
         grsim_command.kickspeedz = 0
 
         self._send_packet(packet)
