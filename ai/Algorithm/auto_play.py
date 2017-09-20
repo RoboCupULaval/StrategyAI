@@ -102,7 +102,7 @@ class SimpleAutoPlay(AutoPlay):
         ]
         if self.current_state in accepted_states and not is_ball_moving(300):
             return self.current_state
-        if score_strategy_other_team() < 0:
+        if is_ball_our_side():
             return SimpleAutoPlayState.NORMAL_DEFENSE
         else:
             return SimpleAutoPlayState.NORMAL_OFFENSE

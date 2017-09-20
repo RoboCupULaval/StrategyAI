@@ -27,7 +27,7 @@ VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
 
 GO_BEHIND_SPACING = 200
-GRAB_BALL_SPACING = 220
+GRAB_BALL_SPACING = 100
 APPROACH_SPEED = 100
 KICK_DISTANCE = 110
 KICK_SUCCEED_THRESHOLD = 600
@@ -84,9 +84,9 @@ class GoKick(Tactic):
 
 
         ball_position = self.game_state.get_ball_position()
-        orientation = (self.target.position - ball_position).angle()
-        distance_behind = self.get_destination_behind_ball()
-        if (self.player.pose.position - distance_behind).norm() < 40:
+        orientation = (self.target.position - self.player.pose.position).angle()
+        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3)
+        if (self.player.pose.position - distance_behind).norm() < 50:
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -133,16 +133,16 @@ class GoKick(Tactic):
         #     self.grab_ball_tries = self.grab_ball_tries + 1
 
         ball_position = self.game_state.get_ball_position()
-        orientation = (self.target.position - ball_position).angle()
+        orientation = (self.target.position - self.player.pose.position).angle()
         # orientation = (ball_position - self.player.pose.position).angle()
-        distance_behind = self.get_destination_behind_ball()
-        distance_to_goal = (distance_behind - self.player.pose.position).norm()
-        if distance_to_goal > 150:
-            go_behind_ball_speed = 1
-        else:
-            go_behind_ball_speed = distance_to_goal / 150
-        return GoToPositionPathfinder(self.game_state, self.player, Pose(ball_position, orientation),
-                                     cruise_speed=0.2, charge_kick=True, end_speed=0.1)
+        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
+        #distance_to_goal = (distance_behind - self.player.pose.position).norm()
+        # if distance_to_goal > 150:
+        #     go_behind_ball_speed = 1
+        # else:
+        #     go_behind_ball_speed = distance_to_goal / 150
+        return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
+                                     cruise_speed=2, charge_kick=True, end_speed=0.2)
         # return AllStar(self.game_state,
         #                self.player,
         #                charge_kick=True,
@@ -167,8 +167,8 @@ class GoKick(Tactic):
         self.tries_flag += 1
         # print(self.tries_flag % 10)
         ball_position = self.game_state.get_ball_position()
-        orientation = (self.target.position - ball_position).angle()
-        return Kick(self.game_state, self.player, self.kick_force, self.target, cruise_speed=0.1, end_speed=0.1)
+        orientation = (self.target.position - self.player.pose.position).angle()
+        return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, end_speed=0.2)
 
     def validate_kick(self):
         if self.game_state.get_ball_velocity().norm() > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
@@ -211,7 +211,7 @@ class GoKick(Tactic):
 
             self.target_assignation_last_time = time.time()
 
-    def get_destination_behind_ball(self):
+    def get_destination_behind_ball(self, ball_spacing):
         """
             Calcule le point situé à  x pixels derrière la position 1 par rapport à la position 2
             :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
@@ -221,8 +221,8 @@ class GoKick(Tactic):
         delta_y = self.target.position.y - self.game_state.get_ball_position().y
         theta = np.math.atan2(delta_y, delta_x)
 
-        x = self.game_state.get_ball_position().x - self.ball_spacing * np.math.cos(theta)
-        y = self.game_state.get_ball_position().y - self.ball_spacing * np.math.sin(theta)
+        x = self.game_state.get_ball_position().x - ball_spacing * np.math.cos(theta)
+        y = self.game_state.get_ball_position().y - ball_spacing * np.math.sin(theta)
 
         player_x = self.player.pose.position.x
         player_y = self.player.pose.position.y

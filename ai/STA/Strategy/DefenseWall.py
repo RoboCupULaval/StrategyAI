@@ -34,7 +34,7 @@ class DefenseWall(Strategy):
         for role, player in role_by_robots:
             if player:
                 self.add_tactic(role, AlignToDefenseWall(self.game_state, player, self.robots))
-                self.add_tactic(role, GoKick(self.game_state, player, auto_update_target=True))
+                self.add_tactic(role, GoKick(self.game_state, player, target=self.theirgoal))
                 self.add_tactic(role, FaceOpponent(self.game_state, player, Pose()))
 
                 self.add_condition(role, 0, 1, partial(self.is_closest, player))
