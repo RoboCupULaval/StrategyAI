@@ -39,10 +39,7 @@ class AlignToDefenseWall(Tactic):
         self.field_goal_segment = self.game_state.const["FIELD_GOAL_SEGMENT"]
         self.keep_out_distance = self.field_goal_radius + np.divide(self.field_goal_segment, 2.)
         self.goal_width = self.game_state.const["FIELD_GOAL_WIDTH"]
-        if self.player.team.team_color is TeamColor.BLUE:
-            self.goal_middle = Position(-self.game_state.field.constant["FIELD_X_RIGHT"], 0)
-        else:
-            self.goal_middle = Position(self.game_state.field.constant["FIELD_X_RIGHT"], 0)
+        self.goal_middle = Position(self.game_state.field.constant["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
         self.position_middle_formation = Position(0, 0)
         self.positions_in_formations = []
         self.vec_ball_2_goal = Position(1, 0)
@@ -194,7 +191,7 @@ class AlignToDefenseWall(Tactic):
         return False
 
     @staticmethod
-    def is_second_closest(self, player):
+    def is_second_closest(player):
         if player == closest_players_to_point(GameState().get_ball_position(), True)[1].player:
             return True
         return False
