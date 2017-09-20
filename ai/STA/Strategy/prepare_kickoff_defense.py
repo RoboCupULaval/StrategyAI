@@ -28,18 +28,18 @@ class PrepareKickOffDefense(Strategy):
             else -GameState().const["CENTER_CENTER_RADIUS"]
 
         # Positions objectifs des joueurs
-        attack_top_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
-                                            GameState().const["FIELD_Y_BOTTOM"] * 3 / 5))
-        attack_bottom_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
-                                               GameState().const["FIELD_Y_TOP"] * 3 / 5))
-        middle_position = Pose(Position(center_offset + GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10, 0))
+        attack_top_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
+                                   GameState().const["FIELD_Y_BOTTOM"] * 3 / 5)
+        attack_bottom_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
+                                      GameState().const["FIELD_Y_TOP"] * 3 / 5)
+        middle_position = Pose(center_offset + GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10, 0)
 
-        defense_top_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                             GameState().const["FIELD_Y_TOP"] / 10))
-        defense_bottom_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                                GameState().const["FIELD_Y_BOTTOM"] / 10))
+        defense_top_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
+                                    GameState().const["FIELD_Y_TOP"] / 10)
+        defense_bottom_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
+                                       GameState().const["FIELD_Y_BOTTOM"] / 10)
 
-        our_goal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
+        our_goal = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0, 0)
 
         self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, our_goal))
 

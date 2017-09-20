@@ -22,7 +22,7 @@ class UIDebugCommandReceiver(object):
         handler = self.get_udp_handler(self.packet_list)
         self.server = ThreadedUDPServer(host, port, handler)
 
-    def get_udp_handler(self, p_packet_list):
+    def get_udp_handler(self, packet_list):
         """ Retourne la classe pour reçevoir async les paquets """
 
         class ThreadedUDPRequestHandler(BaseRequestHandler):
@@ -34,7 +34,7 @@ class UIDebugCommandReceiver(object):
                 """
                 data = self.request[0]
                 if len(data) > 6:
-                    p_packet_list.append(pickle.loads(data))
+                    packet_list.append(pickle.loads(data))
                 else:
                     raise RuntimeError("Received a legacy ref message on the ui debug port, change port of the ui debug")
         return ThreadedUDPRequestHandler

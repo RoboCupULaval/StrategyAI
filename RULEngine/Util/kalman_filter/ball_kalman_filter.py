@@ -61,7 +61,7 @@ class BallKalmanFilter:
             if not in_play_zone:
                 obsx.append(None)
                 obsy.append(None)
-            elif obs is not None:
+            else:
                 obsx.append(obs.x)
                 obsy.append(obs.y)
 

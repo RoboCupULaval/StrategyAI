@@ -36,8 +36,8 @@ class ProtobufPacketReceiver(object):
                     packet.ParseFromString(data)
                     packet_list.append(packet)
                 except google.protobuf.message.DecodeError:
-                    print("fuck you")
-                    pass
+                    print("Error parsing receiving packet, maybe you are listening to the wrong port?")
+                    raise
 
         return ThreadedUDPRequestHandler
 
@@ -45,7 +45,6 @@ class ProtobufPacketReceiver(object):
     def pop_frames(self)->messages_robocup_ssl_wrapper_pb2:
         """ Retourne une frame de la deque. """
         new_list = list(self.packet_list)
-        new_list.reverse()
 
         self.packet_list.clear()
         return new_list

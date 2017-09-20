@@ -14,7 +14,7 @@ from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
 from config.config_service import ConfigService
 
-MIN_DISTANCE_TO_REACH_TARGET_SPEED = 0.4
+MIN_DISTANCE_TO_REACH_TARGET_SPEED = 0.5
 
 
 class DotDict(dict):
@@ -126,7 +126,7 @@ class RobotMotion(object):
         # Translation control
         self.position_flag = False
         if self.position_error.norm() < MIN_DISTANCE_TO_REACH_TARGET_SPEED * max(1.0, self.cruise_speed):
-            if self.target_speed < 0.1:
+            if self.target_speed < 0.01:
                 self.position_flag = True
 
         if self.position_flag:
@@ -240,7 +240,7 @@ class RobotMotion(object):
         # Desired parameters
         if cmd.path != []:
             current_path_position = Position(cmd.path[0] / 1000)
-            if not self.last_position.is_close(current_path_position, 0.1) and self.target_speed < 0.2:
+            if not self.last_position.is_close(current_path_position, 0.1):
                 self.reset()
                 self.last_position = current_path_position
 
@@ -288,8 +288,8 @@ def get_control_setting(is_sim: bool):
         translation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
         rotation = {"kp": 1, "ki": 0, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
-        translation = {"kp": 1, "ki": 0.5, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
-        rotation = {"kp": 1, "ki": 0.35, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        translation = {"kp": 1, "ki": 0.0, "kd": 0, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0.01}
+        rotation = {"kp": 1, "ki": 0.25, "kd": 0.01, "antiwindup": 20, "deadzone": 0.3, "sensibility": 0.1}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
