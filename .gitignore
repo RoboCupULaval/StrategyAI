@@ -70,3 +70,6 @@ IMBoard
 filtered.txt
 unfiltered.txt
 *.csv
+
+# Config custom
+*.custom.cfg

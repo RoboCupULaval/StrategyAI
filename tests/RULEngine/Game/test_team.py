@@ -13,7 +13,7 @@ class TestTeam(unittest.TestCase):
 
     def setUp(self):
         # TODO: Because player require a KF, we need to load file config for a unitest... This is terrible.
-        ConfigService().load_file("config/sim_kalman_redirect.cfg")
+        ConfigService().load_file("config/sim.cfg")
         self.team = Team(TeamColor.YELLOW)
         self.team_blue = Team(TeamColor.BLUE)
         self.first_player = self.team.players[0]

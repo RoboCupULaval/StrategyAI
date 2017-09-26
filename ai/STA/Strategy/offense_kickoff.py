@@ -24,7 +24,7 @@ class OffenseKickOff(Strategy):
 
         middle_player = self.game_state.get_player_by_role(Role.MIDDLE)
 
-        self.add_tactic(Role.MIDDLE, GoKick(self.game_state, middle_player, self.theirgoal, auto_update_target=True))
+        self.add_tactic(Role.MIDDLE, GoKick(self.game_state, middle_player, self.theirgoal))
 
         for index, player in role_by_robots:
             if player:

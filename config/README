@@ -11,11 +11,15 @@ Bon, si vous êtes ici, c'est pacre que vous êtes aussi n00b que moi!
 
 pour launch l'IA en monde simulation avec Kalaman, comme un 1337 H4XOR, voilà la commande:
 
-    python main.py config/sim_kalman_redirect.cfg
+    python main.py config/sim.cfg
 
-Pour les autres modes, faites juste remplacer le nom du ficher .cfg pour la config que vous voullez!
+Pour les autres modes, faites juste remplacer le nom du ficher .cfg pour la config que vous voulez!
 
 				-Philippe Lebel, the not so 1337 H4XOR.
+
+Si vous avez des configurations personnelles aka à NE PAS commiter, mettez .custom.cfg comme extension.
+
+                -Philippe Babin 2017/09/26
 
 Vous pouvez vous créer votre propre fichier à partir de template.cfg
 

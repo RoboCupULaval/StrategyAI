@@ -111,11 +111,9 @@ def best_passing_option(passing_player, consider_goal=True):
 def best_goal_score_option(passing_player):
     # Retourne la meilleure position dans le but pour kick
     goalA = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"],
-                     GameState().field.constant["FIELD_GOAL_WIDTH"]/2 -
-                     GameState().field.constant["FIELD_GOAL_WALL_WIDTH"])
+                     GameState().field.constant["FIELD_GOAL_WIDTH"]/2)
     goalB = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"],
-                     -GameState().field.constant["FIELD_GOAL_WIDTH"] / 2 +
-                     GameState().field.constant["FIELD_GOAL_WALL_WIDTH"])
+                     -GameState().field.constant["FIELD_GOAL_WIDTH"] / 2)
     best_position = best_position_option(passing_player, goalA, goalB)
     return best_position
 
