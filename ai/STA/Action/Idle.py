@@ -23,6 +23,4 @@ class Idle(Action):
         Exécute l'arrêt
         """
         return AICommand(self.player,
-                         AICommandType.MOVE,
-                         pose_goal=SpeedPose(0, 0, 0),
-                         control_loop_type=AIControlLoopType.SPEED)
+                         AICommandType.STOP)

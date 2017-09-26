@@ -63,8 +63,6 @@ class AICommand(ChainMap):
     Contains the AI state of a robot before sending it.
     """
     def __init__(self, player: OurPlayer, command: AICommandType=AICommandType.STOP, **kwargs):
-        """
-        """
         kwargs['player'] = player
         kwargs['robot_id'] = player.id
         kwargs['command'] = command

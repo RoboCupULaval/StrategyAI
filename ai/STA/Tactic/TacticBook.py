@@ -3,11 +3,13 @@ from typing import List
 import sys
 
 from ai.STA.Tactic.DemoFollowRobot import DemoFollowRobot
+from ai.STA.Tactic.DoKick import DoKick
 from ai.STA.Tactic.MeasureLoopDelay import MeasureLoopDelay
 from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
 from ai.STA.Tactic.RotateAroundBall import RotateAroundBall
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.bumb import Bump
+from ai.STA.Tactic.face_opponent import FaceOpponent
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 from ai.STA.Tactic.intercept import Intercept
 from ai.STA.Tactic.position_for_pass import PositionForPass
@@ -51,7 +53,9 @@ class TacticBook(object):
                             'Intercept': Intercept,
                             'GoToRandomPosition': GoToRandomPosition,
                             'StayAwayFromBall': StayAwayFromBall,
-                            'MeasureLoopDelay': MeasureLoopDelay
+                            'MeasureLoopDelay': MeasureLoopDelay,
+                            'DoKick': DoKick,
+                            'FaceOpponent': FaceOpponent
                             }
         if 'Joystick' in sys.modules:
             self.tactic_book['Joystick'] = Joystick
