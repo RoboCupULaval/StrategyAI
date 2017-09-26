@@ -11,7 +11,7 @@ from RULEngine.Util.team_color_service import TeamColor
 class TestPlayer(unittest.TestCase):
 
     def setUp(self):
-        ConfigService().load_file("config/sim_kalman_redirect.cfg")
+        ConfigService().load_file("config/sim.cfg")
         self.team = Team(TeamColor.BLUE)
         self.player1 = Player(self.team, 1)
         self.player2 = Player(self.team, 2)

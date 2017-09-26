@@ -36,7 +36,6 @@ class AICommand(object):
         self.player = player
         self.robot_id = player.id
         self.command = command_type
-        self.dribbler_on = other_args.get("dribbler_on", 0)
         self.pathfinder_on = other_args.get("pathfinder_on", False)
         self.kick_strength = other_args.get("kick_strength", 0)
         self.charge_kick = other_args.get("charge_kick", False)
@@ -45,6 +44,7 @@ class AICommand(object):
         self.speed = other_args.get("speed", SpeedPose())
         self.cruise_speed = other_args.get("cruise_speed", 1)
         self.end_speed = other_args.get("end_speed", 0)
+        self.dribbler_on = other_args.get("dribbler_on", False)
         self.collision_ball = other_args.get("collision_ball", False)
         self.control_loop_type = other_args.get("control_loop_type", AIControlLoopType.POSITION)
 

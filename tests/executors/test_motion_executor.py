@@ -12,7 +12,7 @@ from RULEngine.Game.OurPlayer import OurPlayer
 class TestRobotMotion(unittest.TestCase):
 
     def setUp(self):
-        ConfigService().load_file('../../config/sim_kalman_redirect.cfg')
+        ConfigService().load_file('../../config/sim.cfg')
         self.ws = WorldState()
         self.rm = RobotMotion(self.ws, 0)
         self.rm.setting.rotation.deadzone = 0.1

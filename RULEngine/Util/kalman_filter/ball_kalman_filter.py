@@ -44,12 +44,27 @@ class BallKalmanFilter:
         obsx = []
         obsy = []
         for obs in observation:
-            if obs is not None:
-                obsx.append(obs.x)
-                obsy.append(obs.y)
             if obs is None:
                 obsx.append(None)
                 obsy.append(None)
+                continue
+
+            play_zone = ConfigService().config_dict["GAME"]["play_zone"]
+            in_play_zone = False
+            if play_zone == "full":
+                in_play_zone = True
+            elif play_zone == "positive" and obs.x >= 0:
+                in_play_zone = True
+            elif play_zone == "negative" and obs.x <= 0:
+                in_play_zone = True
+
+            if not in_play_zone:
+                obsx.append(None)
+                obsy.append(None)
+            else:
+                obsx.append(obs.x)
+                obsy.append(obs.y)
+
         observation = np.array(obsx + obsy)
 
         mask = np.array([obs is not None for obs in observation])
@@ -94,7 +109,8 @@ class BallKalmanFilter:
                 player_to_ball = (last_ball_pose - closest_player.position).normalized() * (BALL_RADIUS + ROBOT_RADIUS)
                 self.x[0] = closest_player.position[0] + player_to_ball.x
                 self.x[1] = closest_player.position[1] + player_to_ball.y
-
+                self.x[2] = 0
+                self.x[3] = 0
         self.predict()
         output_state = self.x
         #print("speed", self.x[2], self.x[3])
