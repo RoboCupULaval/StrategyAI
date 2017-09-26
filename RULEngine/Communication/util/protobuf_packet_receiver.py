@@ -10,7 +10,7 @@ from socketserver import BaseRequestHandler
 
 import time
 
-from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2, google
+from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2
 from RULEngine.Communication.util.threaded_udp_server import ThreadedUDPServer
 
 
