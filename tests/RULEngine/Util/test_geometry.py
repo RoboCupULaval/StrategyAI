@@ -22,7 +22,7 @@ class TestGeometry(unittest.TestCase):
         dist = RULEngine.Util.geometry.get_distance(self.position, self.positionN)
         self.assertEqual(dist, 10000)
 
-        approx_dist = RULEngine.Util.geometry.get_distance(self.positionNE, self.positionSO)
+        approx_dist = (self.positionNE - self.positionSO).norm()
         compValue = m.sqrt(2*(20000**2))
         self.assertAlmostEqual(approx_dist, compValue) # On veut quelle précision pour geo?
 
@@ -34,8 +34,6 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual((self.positionSO - self.position).angle(), -3*m.pi/4)
 
     def test_get_nearest(self):
-        # Cas où on a des distances égales
-        # Cas normal
         list_of_positions = [self.positionNE, self.positionSE, self.positionSO, self.positionN]
         nearest = RULEngine.Util.geometry.get_nearest(self.position, list_of_positions)
         self.assertEqual(nearest[0], self.positionN)

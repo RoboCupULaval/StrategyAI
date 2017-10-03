@@ -9,9 +9,7 @@ from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Game.Referee import Referee
 from RULEngine.Util.team_color_service import TeamColorService
 from RULEngine.Game.Game import Game
-from config.config_service import ConfigService
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.constant import *
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GoBetween import GoBetween
@@ -29,7 +27,6 @@ A_PLAYER_ID = 1
 class TestActions(unittest.TestCase):
     def setUp(self):
         # ToDo : Use mock instead of actual objects
-        ConfigService().load_file("config/sim_standard.cfg")
         self.game_state = GameState()
         self.game = Game()
         self.game.set_referee(Referee())
@@ -58,11 +55,13 @@ class TestActions(unittest.TestCase):
                                       "cruise_speed": A_CRUISE_SPEED}))
 
     def test_idle(self):
-        self.idle = Idle(self.game_state, self.a_player)
-        current_pose_string = AICommand(self.a_player, AICommandType.MOVE,
-                                        pose_goal=SpeedPose(0, 0, 0),
-                                        control_loop_type=AIControlLoopType.SPEED)
-        self.assertEqual(Idle.exec(self.idle), current_pose_string)
+        idle = Idle(self.game_state, self.a_player)
+        expected_command = AICommand(self.a_player,
+                                        AICommandType.STOP,
+                                        pose_goal=Pose(0, 0, 0),
+                                        control_loop_type=AIControlLoopType.POSITION)
+        actual_command = Idle.exec(idle)
+        self.assertEqual(actual_command, expected_command)
 
     def test_GrabBall(self):
         self.grab_ball = GetBall(self.game_state,self.a_player)
@@ -135,7 +134,6 @@ class TestActions(unittest.TestCase):
         self.assertRaises(AssertionError, GoBetween, self.game_state,self.a_player, Position(1, 1),
                           Position(-1, -1), 50)
 
-    @unittest.skip("There is some obstacle avoidance that was added to goBehind that broke it in some case. We should wait before the pathfinder handle a collidable-ball before fixing it")
     def test_GoBehind(self):
         # TODO: faire davantage de cas de test
         distance_behind = 500
@@ -145,8 +143,7 @@ class TestActions(unittest.TestCase):
                                   distance_behind)
         aicmd_obtenu = self.go_behind.exec()
         aicmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                **{"pose_goal": Pose(Position(1000, -249), 1.5707)})
-        # AICommand(Pose(Position(1000, -249), 1.5707), 0)
+                                **{"pose_goal": Pose(Position(1000, -249.700), 1.5707)})
         self.assertEqual(aicmd_obtenu, aicmd_expected)
 
 
@@ -155,8 +152,8 @@ class TestActions(unittest.TestCase):
                                   distance_behind)
         aicmd_obtenu = self.go_behind.exec()
         aicmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                   **{"pose_goal": Pose(Position(-273, -415), 0.9882)})
-        # AICommand(Pose(Position(-273, -415), 0.9882), 0)
+                                   **{"pose_goal": Pose(Position(-273.579, -415.230), 0.9882)})
+
         self.assertEqual(aicmd_obtenu, aicmd_expected)
 
         # test avec une droite horizontale
@@ -164,47 +161,34 @@ class TestActions(unittest.TestCase):
                                   distance_behind)
         aicmd_obtenu = GoBehind.exec(self.go_behind)
         aicmd_cible = AICommand(self.a_player, AICommandType.MOVE,
-                                **{"pose_goal": Pose(Position(675, -200), -3.1415)})
+                                **{"pose_goal": Pose(Position(675.800, 99.660), -2.601)})
         self.assertEqual(aicmd_obtenu, aicmd_cible)
 
-    @unittest.skip("Minor change to the aicommand returned by Kick(), please fix later")
     def test_kick(self):
-
         # test avec la valeur 0 (nulle)
         target = Pose(Position(1,1))
-        self.kick = Kick(self.game_state, self.a_player, p_force=0, target=target)
         ball_position = Position(5, 0)
         self.game_state.set_ball_position(ball_position, A_DELTA_T)
-        orientation = (target.position - ball_position).angle()
         expected_cmd = AICommand(self.a_player, AICommandType.MOVE,
-                                 **{"pose_goal": Pose(ball_position, orientation),
+                                 **{"pose_goal": Pose(ball_position, 0.785),
+                                    "charge_kick": True,
                                     "kick": True,
                                     "pathfinder_on": True,
                                     "cruise_speed": 0.1,
                                     "end_speed": 0
                                     })
-        return_cmd = self.kick.exec()
+        return_cmd = Kick(self.game_state, self.a_player, force=0, target=target).exec()
         self.assertEqual(expected_cmd, return_cmd)
 
         # test avec la valeur 1 (force maximale)
-        self.kick = Kick(self.game_state,self.a_player, 1, target=target)
-        self.assertEqual(self.kick.exec(), AICommand(self.a_player, AICommandType.MOVE,
-                                           **{"pose_goal": Pose(ball_position, orientation),
-                                              "kick": True,
-                                              "kick_strength": 1,
-                                              "pathfinder_on": True,
-                                              "cruise_speed": 0.1,
-                                              "end_speed": 0}))
+        expected_cmd.kick_strength = 1
+        return_cmd = Kick(self.game_state,self.a_player, 1, target=target).exec()
+        self.assertEqual(return_cmd, expected_cmd)
 
         # test avec la valeur 0.3 (force intermediaire)
-        self.kick = Kick(self.game_state,self.a_player, 0.3, target=target)
-        self.assertEqual(self.kick.exec(), AICommand(self.a_player, AICommandType.MOVE,
-                                           **{"pose_goal": Pose(ball_position, orientation),
-                                              "kick": True,
-                                              "kick_strength": 0.3,
-                                              "pathfinder_on": True,
-                                              "cruise_speed": 0.1,
-                                              "end_speed": 0}))
+        expected_cmd.kick_strength = 0.3
+        return_cmd = Kick(self.game_state,self.a_player, 0.3, target=target).exec()
+        self.assertEqual(return_cmd, expected_cmd)
 
     @unittest.skip("I got lazy, didn't want to review all of the protectgoal.")
     def test_ProtectGoal(self):
@@ -220,6 +204,3 @@ class TestActions(unittest.TestCase):
 
         # test distance max < distance min
         self.assertRaises(AssertionError, ProtectGoal, self.game_state, 0, True, 50, 40)
-
-if __name__ == "__main__":
-    unittest.main()
