@@ -25,20 +25,8 @@ COMMAND_DELAY = 1.5
 
 
 class PassToPlayer(Tactic):
-    """
-    méthodes:
-        exec(self) : Exécute une Action selon l'état courant
-    attributs:
-        game_state: L'état courant du jeu.
-        player : Instance du joueur auquel est assigné la tactique
-        current_state : L'état courant de la tactique
-        next_state : L'état suivant de la tactique
-        status_flag : L'indicateur de progression de la tactique
-        target: Position à laquelle faire face après avoir pris la balle
-    """
-
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), target_id=1, args=None):
-        Tactic.__init__(self, game_state, player, target, args)
+        super().__init__(game_state, player, target, args)
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge
         self.last_time = time.time()

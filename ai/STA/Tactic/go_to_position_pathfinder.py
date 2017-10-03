@@ -20,10 +20,7 @@ class GoToPositionPathfinder(Tactic):
         self.collision_ball = collision_ball
         self.charge_kick = charge_kick
         self.end_speed = end_speed
-        if len(self.args) > 0:
-            self.cruise_speed = float(args[0])
-        else:
-            self.cruise_speed = cruise_speed
+        self.cruise_speed = float(args[0]) if len(self.args) > 0 else cruise_speed
 
     def exec(self):
         if self.check_success():
@@ -41,6 +38,4 @@ class GoToPositionPathfinder(Tactic):
 
     def check_success(self):
         distance = (self.player.pose - self.target).position.norm()
-        if distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.target, abs_tol=ANGLE_TO_HALT):
-            return True
-        return False
+        return distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.target, abs_tol=ANGLE_TO_HALT)

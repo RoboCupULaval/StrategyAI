@@ -1,12 +1,9 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
-import numpy as np
 
 from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.rotate_around import RotateAround
 from ai.states.game_state import GameState
 

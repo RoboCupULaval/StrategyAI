@@ -4,8 +4,8 @@ import math
 from RULEngine.Game.Field import FieldSide
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.goalkeeper import GoalKeeper
+from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.go_kick import GoKick
 from ai.states.game_state import GameState
 from ai.STA.Strategy.Strategy import Strategy

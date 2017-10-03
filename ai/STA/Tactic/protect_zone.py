@@ -38,7 +38,7 @@ class ProtectZone(Tactic):
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None,
                  p_y_top: [int, float]=3000, p_y_bottom: [int, float]=-3000, p_x_left: [int, float]=-4500,
                  p_x_right: [int, float]=4500, p_is_yellow: bool=False):
-        Tactic.__init__(self, game_state, player, target, args)
+        super().__init__(game_state, player, target, args)
         assert isinstance(p_y_top, (int, float))
         assert isinstance(p_y_bottom, (int, float))
         assert isinstance(p_x_left, (int, float))

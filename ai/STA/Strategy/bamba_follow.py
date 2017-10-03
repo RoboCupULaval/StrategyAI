@@ -4,8 +4,8 @@ from functools import partial
 from random import shuffle
 
 from ai.STA.Strategy.Strategy import Strategy
-from ai.STA.Tactic.DemoFollowBall import DemoFollowBall
-from ai.STA.Tactic.DemoFollowRobot import DemoFollowRobot
+from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
+from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot
 from ai.Util.role import Role
 
 

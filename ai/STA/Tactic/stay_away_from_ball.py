@@ -1,15 +1,12 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
-import numpy as np
 
 from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.area import stayOutsideCircle
 from ai.Algorithm.path_partitionner import CollisionBody
 from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
-from ai.STA.Tactic.tactic_constants import Flags
+from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.states.game_state import GameState
 
 
@@ -28,5 +25,4 @@ class StayAwayFromBall(Tactic):
         position = stayOutsideCircle(self.player.pose.position,
                                      self.game_state.get_ball_position(),
                                      self.keepout_radius)
-        return GoToPositionPathfinder(self.game_state, self.player,
-                                      Pose(position, self.player.pose.orientation))
+        return GoToPositionPathfinder(self.game_state, self.player, Pose(position, self.player.pose.orientation))

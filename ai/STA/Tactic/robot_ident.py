@@ -29,7 +29,7 @@ class RobotIdent(Tactic):
                 self.commands.append(cmd)
 
         with open(self.output_filename, 'w') as f:
-            f.write('time,cmd_vx,px,vx,cmd_vy,py,vy,cmd_vt,pt,vt\n')
+            f.write('time,px,vx,py,vy,pt,vt\n')
 
     def exec(self):
         if self.status_flag is not Flags.FAILURE and self.cmd_id < len(self.commands) - 1:
@@ -52,7 +52,7 @@ class RobotIdent(Tactic):
             t = time.time() - self.start_time
 
             with open(self.output_filename, 'a') as f:
-                f.write('{},{},{},{},{},{},{},{},{},{}\n'.format(t, cmd_vx, px, vx, cmd_vy, py, vy, cmd_vt, pt, vt))
+                f.write('{},{},{},{},{},{},{}\n'.format(t, px, vx, py, vy, pt, vt))
 
             next_action = AICommand(self.player, AICommandType.MOVE, **{"pose_goal": speed_pose,
                                                                         "control_loop_type": AIControlLoopType.OPEN})
