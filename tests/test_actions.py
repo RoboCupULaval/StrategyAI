@@ -58,7 +58,6 @@ class TestActions(unittest.TestCase):
         idle = Idle(self.game_state, self.a_player)
         expected_command = AICommand(self.a_player,
                                         AICommandType.STOP,
-                                        pose_goal=Pose(0, 0, 0),
                                         control_loop_type=AIControlLoopType.POSITION)
         actual_command = Idle.exec(idle)
         self.assertEqual(actual_command, expected_command)

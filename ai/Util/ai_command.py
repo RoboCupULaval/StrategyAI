@@ -1,9 +1,9 @@
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
 from RULEngine.Util.SpeedPose import SpeedPose
 from enum import Enum
 
+from collections import ChainMap
 
 
 class AICommandType(Enum):
@@ -17,43 +17,75 @@ class AIControlLoopType(Enum):
     SPEED = 1
     POSITION = 2
 
+_locked_keys = ['player', 'robot_id']
 
-class AICommand(object):
+_default_keys = {
+    'player': None,
+    'robot_id': None,
+    'command': None,
+    'dribbler_on': False,
+    'pathfinder_on': False,
+    'kick_strength': 0,
+    'charge_kick': False,
+    'kick': False,
+    'pose_goal': None,
+    'speed': SpeedPose(),
+    'cruise_speed': 1.0,
+    'end_speed': 0.0,
+    'collision_ball': False,
+    'control_loop_type': AIControlLoopType.POSITION,
+    'path': [],
+    'path_speeds': [0.0, 0.0],
+}
+
+_keys_type = {
+    'player': OurPlayer,
+    'robot_id': (int, float),
+    'command': AICommandType,
+    'dribbler_on': bool,
+    'pathfinder_on': bool,
+    'kick_strength': (int, float),
+    'charge_kick': bool,
+    'kick': bool,
+    'pose_goal': Pose,
+    'speed': SpeedPose,
+    'cruise_speed': (int, float),
+    'end_speed': (int, float),
+    'collision_ball': bool,
+    'control_loop_type': AIControlLoopType,
+    'path': list,
+    'path_speeds': list,
+}
+
+
+class AICommand(ChainMap):
     """
-    Sert a emmagasiner les états demandés par l'IA
-    avant transformation en commandes d'envoie aux robots
+    Contains the AI state of a robot before sending it.
     """
-    def __init__(self, player: OurPlayer, command_type=AICommandType.STOP, **other_args):
-        """
-        Initialise.
+    def __init__(self, player: OurPlayer, command: AICommandType=AICommandType.STOP, **kwargs):
+        kwargs['player'] = player
+        kwargs['robot_id'] = player.id
+        kwargs['command'] = command
+        AICommand._validate_keys_value_type(**kwargs)
+        super().__init__(kwargs, _default_keys)
 
-        :param player: (OurPlayer) l'instance de notre player à qui appartient cette ai_commande
-        :param p_command: (AICommandType) le type de AICommand
-        :param other_args: (Dict) les flags et arguments à passer
-        """
-        assert isinstance(player, OurPlayer), "ai_command object need OurPlayer object."
-        assert isinstance(command_type, AICommandType), "ai_command object need a AiCommandType."
-        self.player = player
-        self.robot_id = player.id
-        self.command = command_type
-        self.pathfinder_on = other_args.get("pathfinder_on", False)
-        self.kick_strength = other_args.get("kick_strength", 0)
-        self.charge_kick = other_args.get("charge_kick", False)
-        self.kick = other_args.get("kick", False)
-        self.pose_goal = other_args.get("pose_goal", Pose())
-        self.speed = other_args.get("speed", SpeedPose())
-        self.cruise_speed = other_args.get("cruise_speed", 1)
-        self.end_speed = other_args.get("end_speed", 0)
-        self.dribbler_on = other_args.get("dribbler_on", False)
-        self.collision_ball = other_args.get("collision_ball", False)
-        self.control_loop_type = other_args.get("control_loop_type", AIControlLoopType.POSITION)
+    @staticmethod
+    def _validate_keys_value_type(**kwargs):
+        for key, value in kwargs.items():
+            if not isinstance(value, _keys_type[key]):
+                raise TypeError('The value of the key `{}` need to be of the type: {}.\n'.format(key, _keys_type[key])
+                                + 'Type received: {}'.format(type(value)))
 
-        # this is for the pathfinder only no direct assignation
-        self.path = []
-        self.path_speeds = [0, 0]
+    def __getattr__(self, key):
+        return self.__getitem__(key)
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
+    def __setattr__(self, key, value):
+        if key in _locked_keys:
+            raise KeyError('The key `{}` is immutable.')
+        elif key in _default_keys:
+            self.__setitem__(key, value)
+        else:
+            return super().__setattr__(key, value)
 
-    def __str__(self):
-        return str(self.player.id)+"  " + str(self.player.team.name) + "  ->  "+str(id(self))
+    def __missing__(self, key):
+        raise KeyError('The following given key does not exist: ' + key)
