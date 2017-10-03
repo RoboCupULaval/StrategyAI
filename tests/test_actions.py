@@ -9,7 +9,6 @@ from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Game.Referee import Referee
 from RULEngine.Util.team_color_service import TeamColorService
 from RULEngine.Game.Game import Game
-from config.config_service import ConfigService
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.constant import *
@@ -29,7 +28,6 @@ A_PLAYER_ID = 1
 class TestActions(unittest.TestCase):
     def setUp(self):
         # ToDo : Use mock instead of actual objects
-        ConfigService().load_file("config/sim_standard.cfg")
         self.game_state = GameState()
         self.game = Game()
         self.game.set_referee(Referee())
@@ -58,11 +56,13 @@ class TestActions(unittest.TestCase):
                                       "cruise_speed": A_CRUISE_SPEED}))
 
     def test_idle(self):
-        self.idle = Idle(self.game_state, self.a_player)
-        current_pose_string = AICommand(self.a_player, AICommandType.MOVE,
-                                        pose_goal=SpeedPose(0, 0, 0),
-                                        control_loop_type=AIControlLoopType.SPEED)
-        self.assertEqual(Idle.exec(self.idle), current_pose_string)
+        idle = Idle(self.game_state, self.a_player)
+        expected_command = AICommand(self.a_player,
+                                        AICommandType.STOP,
+                                        pose_goal=Pose(0, 0, 0),
+                                        control_loop_type=AIControlLoopType.POSITION)
+        actual_command = Idle.exec(idle)
+        self.assertEqual(actual_command, expected_command)
 
     def test_GrabBall(self):
         self.grab_ball = GetBall(self.game_state,self.a_player)
@@ -220,6 +220,3 @@ class TestActions(unittest.TestCase):
 
         # test distance max < distance min
         self.assertRaises(AssertionError, ProtectGoal, self.game_state, 0, True, 50, 40)
-
-if __name__ == "__main__":
-    unittest.main()
