@@ -4,12 +4,9 @@ from functools import partial
 import numpy as np
 
 from RULEngine.Game.OurPlayer import OurPlayer
-from ai.Algorithm.evaluation_module import closest_players_to_point, Pose, Position
+from ai.Algorithm.evaluation_module import Pose, Position
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
 from ai.STA.Tactic.goalkeeper import GoalKeeper
-from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.position_for_pass import PositionForPass
-from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.role import Role
 from ai.states.game_state import GameState
 from . Strategy import Strategy
