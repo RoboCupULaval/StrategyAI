@@ -5,7 +5,6 @@ from enum import Enum
 
 from collections import ChainMap
 
-
 class AICommandType(Enum):
     STOP = 0
     MOVE = 1

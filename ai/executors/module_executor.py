@@ -40,7 +40,11 @@ class ModuleExecutor(Executor):
         return self.ws.module_state.pathfinder_module.exec()
 
     def exec_display_player_kalman(self):
-        return self.ws.game_state.display_player_kalman()
+        for player in self.ws.game_state.my_team.available_players.values():
+            if player.check_if_on_field():
+                pose = player.pose
+                self.ws.debug_interface.add_circle(center=(pose[0], pose[1]), radius=ROBOT_RADIUS, timeout=0.06)
 
     def exec_display_ball_kalman(self):
-        return self.ws.game_state.display_ball_kalman()
+        position = self.ws.game_state.game.ball.position
+        self.ws.debug_interface.add_circle(center=(position[0], position[1]), radius=90, timeout=0.06)
