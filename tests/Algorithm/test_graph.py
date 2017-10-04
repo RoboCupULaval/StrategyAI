@@ -20,8 +20,6 @@ from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
-__author__ = 'RoboCupULaval'
-
 
 def foo():
     return True
