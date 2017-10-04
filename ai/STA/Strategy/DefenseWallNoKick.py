@@ -1,15 +1,10 @@
 # Under MIT license, see LICENSE.txt
-from functools import partial
-
-import numpy as np
-
-from RULEngine.Game.OurPlayer import OurPlayer
 from ai.Algorithm.evaluation_module import Pose, Position
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
-from ai.STA.Tactic.goalkeeper import GoalKeeper
+from ..Tactic.goalkeeper import GoalKeeper
 from ai.Util.role import Role
 from ai.states.game_state import GameState
-from . Strategy import Strategy
+from .Strategy import Strategy
 
 class DefenseWallNoKick(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4):
