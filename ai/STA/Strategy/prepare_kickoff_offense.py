@@ -3,7 +3,7 @@
 from functools import partial
 from RULEngine.Util.Pose import Position, Pose
 from ai.STA.Strategy.Strategy import Strategy
-from ai.STA.Tactic.goalkeeper import GoalKeeper
+from ai.STA.Tactic.GoalKeeper import GoalKeeper
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags

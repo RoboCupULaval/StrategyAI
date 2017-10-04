@@ -16,7 +16,7 @@ from .intercept import Intercept
 from .position_for_pass import PositionForPass
 from .robot_ident import RobotIdent
 from .stay_away_from_ball import StayAwayFromBall
-from .goalkeeper import GoalKeeper
+from .GoalKeeper import GoalKeeper
 from .stop import Stop
 from .protect_zone import ProtectZone
 from .demo_follow_ball import DemoFollowBall
