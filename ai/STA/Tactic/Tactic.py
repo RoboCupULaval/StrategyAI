@@ -11,7 +11,7 @@ from ai.states.game_state import GameState
 __author__ = 'RobocupULaval'
 
 
-class Tactic:
+class Tactic(object):
     """
         Classe mère de toutes les tactiques
     """
