@@ -12,8 +12,8 @@ from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Util.team_color_service import TeamColorService, TeamColor
 from ai.Algorithm.Graph.Node import Node
 from ai.Algorithm.Graph.Vertex import Vertex
-from ai.STA.Tactic.goalkeeper import GoalKeeper
-from ai.STA.Tactic.stop import Stop
+from ai.STA.Tactic.placeholder_goalkeeper import GoalKeeper
+from ai.STA.Tactic.placehlder_stop import Stop
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommand, AICommandType

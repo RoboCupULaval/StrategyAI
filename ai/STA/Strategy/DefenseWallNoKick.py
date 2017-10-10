@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from ai.Algorithm.evaluation_module import Pose, Position
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
-from ai.STA.Tactic.goalkeeper import GoalKeeper
+from ai.STA.Tactic.placeholder_goalkeeper import GoalKeeper
 from ai.Util.role import Role
 from ai.states.game_state import GameState
 from .Strategy import Strategy

@@ -16,8 +16,8 @@ from ai.STA.Tactic.intercept import Intercept
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.robot_ident import RobotIdent
 from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
-from ai.STA.Tactic.goalkeeper import GoalKeeper
-from ai.STA.Tactic.stop import Stop
+from ai.STA.Tactic.placeholder_goalkeeper import GoalKeeper
+from ai.STA.Tactic.placehlder_stop import Stop
 from ai.STA.Tactic.protect_zone import ProtectZone
 from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
 from ai.STA.Tactic.go_to_position_no_pathfinder import GoToPositionNoPathfinder
@@ -27,7 +27,7 @@ from ai.STA.Tactic.face_target import FaceTarget
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
 
 try:
-    from ai.STA.Tactic.joystick import Joystick
+    from ai.STA.Tactic.placeholder_joystick import Joystick
 except ImportError:
     import warnings
     warnings.warn('Pygame is not installed, disabling Joystick tactic.', stacklevel=1)
