@@ -8,7 +8,7 @@ from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.grab import Grab
-from ai.STA.Tactic.enter_random_name_here import Tactic
+from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.GoBehind import GoBehind
 from ai.states.game_state import GameState

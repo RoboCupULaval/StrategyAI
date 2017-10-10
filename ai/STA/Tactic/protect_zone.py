@@ -7,7 +7,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import ROBOT_RADIUS
 
-from ai.STA.Tactic.enter_random_name_here import Tactic
+from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.MoveToPosition import MoveToPosition
