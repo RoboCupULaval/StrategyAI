@@ -3,7 +3,7 @@ from functools import partial
 
 from ai.Algorithm.evaluation_module import closest_players_to_point, Pose, Position
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
-from ai.STA.Tactic.placeholder_goalkeeper import GoalKeeper
+from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.face_opponent import FaceOpponent
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.tactic_constants import Flags

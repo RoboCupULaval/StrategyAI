@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-from ai.STA.Tactic.placehlder_stop import Stop
+from ai.STA.Tactic.stop import Stop
 from ai.Util.role import Role
 from . Strategy import Strategy
 

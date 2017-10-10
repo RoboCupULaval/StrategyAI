@@ -2,7 +2,7 @@
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from ai.STA.Tactic.placeholder_goalkeeper import GoalKeeper
+from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.states.game_state import GameState
 from ai.STA.Strategy.Strategy import Strategy
