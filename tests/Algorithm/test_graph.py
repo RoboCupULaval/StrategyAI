@@ -16,7 +16,7 @@ from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
 from ai.Algorithm.Graph.Vertex import Vertex
 from ai.STA.Tactic.go_to_position_no_pathfinder import GoToPositionNoPathfinder
-from ai.STA.Tactic.Stop import Stop
+from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
