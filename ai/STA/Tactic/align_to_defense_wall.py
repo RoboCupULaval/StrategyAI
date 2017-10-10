@@ -8,7 +8,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS, TeamColor
 from ai.Algorithm.evaluation_module import closest_players_to_point
-from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.enter_random_name_here import Tactic
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState

@@ -8,7 +8,7 @@ from ai.STA.Tactic.do_kick import DoKick
 from ai.STA.Tactic.measure_loop_delay import MeasureLoopDelay
 from ai.STA.Tactic.rotate_around_position import RotateAroundPosition
 from ai.STA.Tactic.rotate_around_ball import RotateAroundBall
-from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.enter_random_name_here import Tactic
 from ai.STA.Tactic.bump import Bump
 from ai.STA.Tactic.face_opponent import FaceOpponent
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition

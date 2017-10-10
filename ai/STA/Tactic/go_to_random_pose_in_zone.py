@@ -6,7 +6,7 @@ from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
-from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.enter_random_name_here import Tactic
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.states.game_state import GameState
 import random

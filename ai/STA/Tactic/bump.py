@@ -13,7 +13,7 @@ from RULEngine.Util.constant import ROBOT_RADIUS
 from RULEngine.Util.geometry import get_distance
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
-from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.enter_random_name_here import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.GoBehind import GoBehind
 from ai.Util.ai_command import AICommandType
