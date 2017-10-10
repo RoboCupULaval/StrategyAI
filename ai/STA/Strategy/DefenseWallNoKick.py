@@ -4,7 +4,7 @@ from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.Util.role import Role
 from ai.states.game_state import GameState
-from .Strategy import Strategy
+from ai.STA.Strategy.Strategy import Strategy
 
 class DefenseWallNoKick(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4):
