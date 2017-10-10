@@ -8,7 +8,7 @@ from ai.STA.Tactic.do_kick import DoKick
 from ai.STA.Tactic.measure_loop_delay import MeasureLoopDelay
 from ai.STA.Tactic.rotate_around_position import RotateAroundPosition
 from ai.STA.Tactic.rotate_around_ball import RotateAroundBall
-from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.bump import Bump
 from ai.STA.Tactic.face_opponent import FaceOpponent
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
@@ -16,8 +16,8 @@ from ai.STA.Tactic.intercept import Intercept
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.robot_ident import RobotIdent
 from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
-from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.Stop import Stop
+from ai.STA.Tactic.goalkeeper import GoalKeeper
+from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.protect_zone import ProtectZone
 from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
 from ai.STA.Tactic.go_to_position_no_pathfinder import GoToPositionNoPathfinder

@@ -7,8 +7,8 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.singleton import Singleton
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Strategy.StrategyBook import StrategyBook
-from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.TacticBook import TacticBook
+from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.tactic_book import TacticBook
 from ai.states.game_state import GameState
 
 

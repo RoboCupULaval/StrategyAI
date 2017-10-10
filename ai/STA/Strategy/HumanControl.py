@@ -2,8 +2,8 @@
 from ai.Util.role import Role
 from ai.states.game_state import GameState
 from . Strategy import Strategy
-from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.Stop import Stop
+from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.stop import Stop
 
 
 class HumanControl(Strategy):

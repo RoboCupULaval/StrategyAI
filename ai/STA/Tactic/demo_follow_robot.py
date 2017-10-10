@@ -6,7 +6,7 @@ from RULEngine.Util.geometry import get_distance
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
 from ai.STA.Action.PathfindToPosition import PathfindToPosition
-from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
