@@ -1,4 +1,4 @@
-# Under MIT License, see LICENSE.txt
+# Under MIT License, see LICENSE.txtRefereeReceiver
 """
     Regroupe les services utilisant l'UDP pour la communication. Ceux-ci
     permettent l'envoie et la réceptions de paquets pour le débogage, ainsi que
@@ -12,6 +12,7 @@ import time
 
 from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2
 from RULEngine.Communication.util.threaded_udp_server import ThreadedUDPServer
+from google.protobuf.message import DecodeError
 
 
 class ProtobufPacketReceiver(object):
@@ -35,7 +36,7 @@ class ProtobufPacketReceiver(object):
                     packet = packet_type()
                     packet.ParseFromString(data)
                     packet_list.append(packet)
-                except google.protobuf.message.DecodeError:
+                except DecodeError:
                     print("Error parsing receiving packet, maybe you are listening to the wrong port?")
                     raise
 
@@ -56,5 +57,3 @@ class ProtobufPacketReceiver(object):
             return self.packet_list[-1]
         except IndexError:
             return None
-
-

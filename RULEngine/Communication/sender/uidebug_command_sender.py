@@ -26,7 +26,7 @@ class UIDebugCommandSender(object):
             # FIXME: hack
             pass
 
-    def send_command(self, p_packets):
+    def send_packets(self, p_packets):
         """ Reçoit une liste de paquets et les envoies. """
         for packet in p_packets:
             self._send_packet(packet)

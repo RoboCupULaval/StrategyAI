@@ -20,7 +20,6 @@ from RULEngine.Communication.protobuf import \
     messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
 from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
-from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 from RULEngine.Communication.util.robot_command_sender_factory import RobotCommandSenderFactory
 from RULEngine.Debug.debug_interface import DebugInterface
@@ -30,6 +29,9 @@ from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.Util.image_transformer.image_transformer_factory import ImageTransformerFactory
 from RULEngine.Util.team_color_service import TeamColorService
 from config.config_service import ConfigService
+
+from multiprocessing import Process, Pipe
+from RULEngine.Communication.trackbots.VisionManager import VisionManager
 
 
 class Framework(object):
@@ -61,12 +63,12 @@ class Framework(object):
 
         # Communication
         self.robot_command_sender = None
-        self.vision = None
         self.referee_command_receiver = None
         self.uidebug_command_sender = None
         self.uidebug_command_receiver = None
         self.uidebug_vision_sender = None
         self.uidebug_robot_monitor = None
+        self.parent_pipe, self.child_pipe = Pipe()
         # because this thing below is a callable! can be used without being set
         self.vision_redirection_routine = lambda *args: None
         self.vision_routine = self._sim_vision  # self._normal_vision # self._test_vision self._redirected_vision
@@ -99,6 +101,12 @@ class Framework(object):
 
         # self.debug.add_log(1, "Framework started in {} s".format(time.time() - self.time_stamp))
 
+        self.launch_worker()
+
+    def launch_worker(self):
+        self.vision_manager.start()
+        self.parent_pipe.send("sadfasfsdf")
+
     def _choose_vision_routines(self):
         if self.cfg.config_dict["IMAGE"]["kalman"] == "true":
             self.vision_routine = self._kalman_vision
@@ -111,7 +119,12 @@ class Framework(object):
             # Referee
             self.referee_command_receiver = RefereeReceiver()
             # Vision
-            self.vision = VisionReceiver()
+            # self.vision = VisionReceiver()
+            self.vision_manager = VisionManager(self.child_pipe,
+                                                (self.cfg.config_dict["COMMUNICATION"]["vision_udp_address"],
+                                                 int(self.cfg.config_dict["COMMUNICATION"]["vision_port"])),
+                                                (self.cfg.config_dict["COMMUNICATION"]["ui_debug_address"],
+                                                 int(self.cfg.config_dict["COMMUNICATION"]["ui_cmd_sender_port"])))
 
             # do we use the UIDebug?
             if self.cfg.config_dict["DEBUG"]["using_debug"] == "true":
@@ -222,7 +235,7 @@ class Framework(object):
             self._send_robot_commands(robot_commands)
             self._send_debug_commands()
             #self._send_new_vision_packet()
-
+            self.parent_pipe.send("helllo")
             if time_delta > self.ai_timestamp * 1.3:
                 warnings.warn("Update loop took {:5.3f}s instead of {}s!".format(time_delta, self.ai_timestamp),
                               RuntimeWarning, stacklevel=2)
@@ -268,7 +281,7 @@ class Framework(object):
             for player in team.available_players.values():
                 if player.ai_command is not None:
                     command = Stop(player)
-                    self.robot_command_sender.send_command(command)
+                    self.robot_command_sender.send_packets(command)
         except Exception as e:
             print("Could not stop players")
             print("Au nettoyage il a été impossible d'arrêter les joueurs.")
@@ -289,13 +302,13 @@ class Framework(object):
     def _send_robot_commands(self, commands):
         """ Envoi les commades des robots au serveur. """
         for command in commands:
-            self.robot_command_sender.send_command(command)
+            self.robot_command_sender.send_packets(command)
 
     def _send_debug_commands(self):
         """ Envoie les commandes de debug au serveur. """
         packet_represented_commands = [c.get_packet_repr() for c in self.outgoing_debug]
         if self.uidebug_command_sender is not None:
-            self.uidebug_command_sender.send_command(packet_represented_commands)
+            self.uidebug_command_sender.send_packets(packet_represented_commands)
 
         self.incoming_debug.clear()
         self.outgoing_debug.clear()

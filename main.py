@@ -25,6 +25,8 @@ if __name__ == '__main__':
     parser = set_arg_parser()
     args = parser.parse_args()
 
+
+
     config_service = ConfigService().load_file(args.config_file)
     # ai init
     ai_coach = Coach()
