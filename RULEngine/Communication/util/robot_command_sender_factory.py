@@ -9,9 +9,9 @@ class RobotCommandSenderFactory(object):
     def get_sender():
         type_of_connection = ConfigService().config_dict["COMMUNICATION"]["type"]
         if type_of_connection == "sim":
-            return GrSimCommandSender("127.0.0.1", 20011)
+            return GrSimCommandSender, ("127.0.0.1", 20011)
         elif type_of_connection == "serial":
-            return SerialCommandSender()
+            return SerialCommandSender, ()
         elif type_of_connection == "disabled":
             class FakeRobotCommandSender:
                 @staticmethod
@@ -20,7 +20,7 @@ class RobotCommandSenderFactory(object):
                 
                 def stop(self):
                     pass
-            return FakeRobotCommandSender()
+            return FakeRobotCommandSender, ()
         else:
             raise TypeError("Tentative de création d'un RobotCommandSender de "
                             "mauvais type.")

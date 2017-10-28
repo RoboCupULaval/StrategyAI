@@ -17,7 +17,7 @@ class RobotStatus:
         self.time_since_last_reading = 0
 
 
-class UIDebugRobotMonitor(object):
+class DebugRobotMonitor(object):
     """
         Service pour loguer l'état du robot (niveau batterie, packet lost, etc.) et l'envoyer à l'uidebug
     """

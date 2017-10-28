@@ -23,6 +23,7 @@ class ProtobufPacketReceiver(object):
     """
 
     def __init__(self, host, port, packet_type):
+        self.packet_type = packet_type
         self.packet_list = deque(maxlen=100)
         handler = self.get_udp_handler(self.packet_list, packet_type)
         self.server = ThreadedUDPServer(host, port, handler)
@@ -42,16 +43,14 @@ class ProtobufPacketReceiver(object):
 
         return ThreadedUDPRequestHandler
 
-    # TODO change the typing here in case of refereeMGL 2017/02/24
-    def pop_frames(self)->messages_robocup_ssl_wrapper_pb2:
+    def pop_frames(self):
         """ Retourne une frame de la deque. """
         new_list = list(self.packet_list)
 
         self.packet_list.clear()
         return new_list
 
-    # TODO change the typing here in case of referee MGL 2017/02/24
-    def get_latest_frame(self)->messages_robocup_ssl_wrapper_pb2:
+    def get_latest_frame(self):
         """ Retourne sans erreur la dernière frame reçu. """
         try:
             return self.packet_list[-1]

@@ -9,7 +9,7 @@ from RULEngine.Util.constant import DEBUG_RECEIVE_BUFFER_SIZE
 from config.config_service import ConfigService
 
 
-class UIDebugCommandReceiver(object):
+class DebugCommandReceiver(object):
     """
         Service capable d'écouter un port multicast UDP, de reçevoir et de
         traiter les paquets brutes envoyer par le serveur de débogage.

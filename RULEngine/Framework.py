@@ -14,13 +14,13 @@ import warnings
 
 from profilehooks import profile
 
-from RULEngine.Communication.sender.uidebug_robot_monitor import UIDebugRobotMonitor
+from RULEngine.Communication.sender.debug_robot_monitor import DebugRobotMonitor
 from RULEngine.Command.command import Stop
 from RULEngine.Communication.protobuf import \
     messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
 from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
-from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
-from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
+from RULEngine.Communication.receiver.debug_command_receiver import DebugCommandReceiver
+from RULEngine.Communication.sender.debug_command_sender import DebugCommandSender
 from RULEngine.Communication.util.robot_command_sender_factory import RobotCommandSenderFactory
 from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Game.Game import Game
@@ -31,7 +31,7 @@ from RULEngine.Util.team_color_service import TeamColorService
 from config.config_service import ConfigService
 
 from multiprocessing import Process, Pipe
-from RULEngine.Communication.trackbots.VisionManager import VisionManager
+from RULEngine.Communication.trackbots.vision_manager import VisionManager
 
 
 class Framework(object):
@@ -128,11 +128,11 @@ class Framework(object):
 
             # do we use the UIDebug?
             if self.cfg.config_dict["DEBUG"]["using_debug"] == "true":
-                self.uidebug_command_sender = UIDebugCommandSender()
-                self.uidebug_command_receiver = UIDebugCommandReceiver()
+                self.uidebug_command_sender = DebugCommandSender()
+                self.uidebug_command_receiver = DebugCommandReceiver()
                 # Monitor robot if we are communicating with an actual robot
-                self.uidebug_robot_monitor = UIDebugRobotMonitor(self.robot_command_sender,
-                                                                 self.debug)
+                self.uidebug_robot_monitor = DebugRobotMonitor(self.robot_command_sender,
+                                                               self.debug)
 
         else:
             self.stop_game()

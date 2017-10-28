@@ -6,7 +6,7 @@ from RULEngine.Communication.util.udp_socket import udp_socket
 from config.config_service import ConfigService
 
 
-class UIDebugCommandSender(object):
+class DebugCommandSender(object):
     """
         Définition du service capable d'envoyer des paquets de débogages au
         serveur et à l'interface de débogage. S'occupe de la sérialisation.
