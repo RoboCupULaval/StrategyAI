@@ -8,7 +8,7 @@ from ai.STA.Strategy.DefenseWall import DefenseWall
 from ai.STA.Strategy.direct_free_kick import DirectFreeKick
 from ai.STA.Strategy.indirect_free_kick import IndirectFreeKick
 from ai.STA.Strategy.offense import Offense
-from ai.STA.Strategy.strategy_placehlder import Strategy
+from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.indiana_jones import IndianaJones
 from ai.STA.Strategy.HumanControl import HumanControl
 from ai.STA.Strategy.DoNothing import DoNothing

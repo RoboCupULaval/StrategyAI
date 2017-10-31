@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from ai.Util.role import Role
 from ai.states.game_state import GameState
-from ai.STA.Strategy.strategy_placehlder import Strategy
+from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.stop import Stop
 
