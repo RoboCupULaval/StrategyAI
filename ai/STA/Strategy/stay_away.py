@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 
 from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
-from ai.STA.Strategy.Strategy import Strategy
+from ai.STA.Strategy.strategy_placehlder import Strategy
 from ai.Util.role import Role
 
 class StayAway(Strategy):

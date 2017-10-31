@@ -9,7 +9,7 @@ from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.role import Role
 from ai.states.game_state import GameState
-from ai.STA.Strategy.Strategy import Strategy
+from ai.STA.Strategy.strategy_placehlder import Strategy
 
 class DefenseWall(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4):

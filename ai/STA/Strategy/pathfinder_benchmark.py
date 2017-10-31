@@ -2,7 +2,7 @@
 from RULEngine.Util.Position import Position
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 from ai.Util.role import Role
-from ai.STA.Strategy.Strategy import Strategy
+from ai.STA.Strategy.strategy_placehlder import Strategy
 
 
 
