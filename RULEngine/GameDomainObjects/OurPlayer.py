@@ -1,4 +1,4 @@
-from RULEngine.Game.Player import Player
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.Position import Position

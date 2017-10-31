@@ -2,10 +2,10 @@
 
 import unittest
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Game.Ball import Ball
-from RULEngine.Game.Game import Game
-from RULEngine.Game.Referee import Referee
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Ball import Ball
+from RULEngine.GameDomainObjects.Game import Game
+from RULEngine.GameDomainObjects.Referee import Referee
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject

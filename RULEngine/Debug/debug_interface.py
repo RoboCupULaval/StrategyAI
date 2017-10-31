@@ -4,9 +4,8 @@ import time
 from RULEngine.Debug.debug_command import DebugCommand
 from RULEngine.Util.singleton import Singleton
 from RULEngine.Util.team_color_service import TeamColorService
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.Util.Position import Position
-from config.config_service import ConfigService
 
 
 class Color(object):
@@ -52,12 +51,6 @@ DEFAULT_TEXT_COLOR = Color(0, 0, 0)
 # Debug timeout (seconds)
 DEFAULT_DEBUG_TIMEOUT = 1
 DEFAULT_PATH_TIMEOUT = 0
-
-
-def wrap_command(raw_command):
-    command = DebugCommand(raw_command['type'], raw_command['link'], raw_command['data'])
-    command.name = 'ui'
-    return command
 
 
 class DebugInterface(metaclass=Singleton):

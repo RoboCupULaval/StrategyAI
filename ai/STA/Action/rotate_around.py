@@ -2,7 +2,7 @@
 
 import math as m
 
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import compare_angle, wrap_to_pi
 

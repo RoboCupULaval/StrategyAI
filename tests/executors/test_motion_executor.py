@@ -6,7 +6,7 @@ from ai.states.world_state import WorldState
 from ai.executors.motion_executor import RobotMotion
 from RULEngine.Util.Position import Position
 from config.config_service import ConfigService
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 
 
 class TestRobotMotion(unittest.TestCase):

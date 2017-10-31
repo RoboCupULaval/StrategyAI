@@ -1,9 +1,10 @@
 from multiprocessing import Process, Event, Queue
+from queue import Empty
+from time import sleep
 
 from RULEngine.Communication.util.robot_command_sender_factory import RobotCommandSenderFactory
-from config.config_service import ConfigService
-from RULEngine.Communication.protobuf import referee_pb2 as ssl_referee
-from RULEngine.Communication.util.protobuf_packet_receiver import ProtobufPacketReceiver
+
+TIME_BETWEEN_CMD_SEND = 0
 
 
 class RobotCommandSenderCommunicationManager(Process):
@@ -15,11 +16,17 @@ class RobotCommandSenderCommunicationManager(Process):
 
     def initialize(self):
         self.server, args = RobotCommandSenderFactory.get_sender()
-        self.server(args)
+        self.server(*args)
 
     def loop(self):
         while not self.stop_event.is_set():
-            self.server.send_command(self.robot_cmds_queue.get())
+            sleep(TIME_BETWEEN_CMD_SEND)
+            try:
+                robot_cmd = self.robot_cmds_queue.get(block=False)
+            except Empty:
+                continue
+            if robot_cmd is not None:
+                self.server.send_command(robot_cmd)
 
     def run(self):
         self.initialize()

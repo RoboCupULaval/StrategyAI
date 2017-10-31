@@ -6,10 +6,10 @@ from math import pi
 from ai.Util.Raycast import *
 from ai.states.game_state import GameState
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
-from RULEngine.Game.Referee import Referee
+from RULEngine.GameDomainObjects.Referee import Referee
 from RULEngine.Util.team_color_service import TeamColorService, TeamColor
-from RULEngine.Game.Game import Game
-from RULEngine.Game.Ball import Ball
+from RULEngine.GameDomainObjects.Game import Game
+from RULEngine.GameDomainObjects.Ball import Ball
 
 __author__ = 'RoboCupULaval'
 

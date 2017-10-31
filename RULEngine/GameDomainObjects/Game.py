@@ -2,15 +2,15 @@
 from typing import List
 
 from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2
-from RULEngine.Game.OurTeam import OurTeam
+from RULEngine.GameDomainObjects.OurTeam import OurTeam
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.team_color_service import TeamColor
 from RULEngine.Util.constant import PLAYER_PER_TEAM
-from RULEngine.Game.Team import Team
-from RULEngine.Game.Ball import Ball
-from RULEngine.Game.Field import Field
-from RULEngine.Game.Referee import Referee
+from RULEngine.GameDomainObjects.Team import Team
+from RULEngine.GameDomainObjects.Ball import Ball
+from RULEngine.GameDomainObjects.Field import Field
+from RULEngine.GameDomainObjects.Referee import Referee
 from config.config_service import ConfigService
 
 

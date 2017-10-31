@@ -1,8 +1,10 @@
 import pickle
+from time import sleep
 from multiprocessing import Process, Event, Queue
+from queue import Empty
 
-from RULEngine.Communication.util.udp_socket import udp_socket
 from config.config_service import ConfigService
+from RULEngine.Communication.util.udp_socket import udp_socket
 
 
 class DebugCommandSenderCommunicationManager(Process):
@@ -20,7 +22,16 @@ class DebugCommandSenderCommunicationManager(Process):
 
     def loop(self):
         while not self.stop_event.is_set():
-            self.client._send_packet(self.debug_cmds_queue.get())
+            sleep(0)
+            # todo check if we can send it in batch MGL 2017/10/28<
+            try:
+                debug_cmd = self.debug_cmds_queue.get(False)
+            except Empty:
+                # todo find a better way to do this MGL 2017/10/28
+                continue
+            self._send_packet(debug_cmd)
+
+        self.client.close()
 
     def run(self):
         self.initialize()

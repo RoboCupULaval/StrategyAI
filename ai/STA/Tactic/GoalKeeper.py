@@ -5,8 +5,8 @@ from math import tan, pi
 import time
 
 from RULEngine.Util.constant import ROBOT_RADIUS
-from RULEngine.Game.Field import FieldSide
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Field import FieldSide
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import clamp, compare_angle, wrap_to_pi

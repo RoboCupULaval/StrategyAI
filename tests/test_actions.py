@@ -3,12 +3,12 @@
 import unittest
 from math import pi, sqrt
 
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.Util.Position import Position
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
-from RULEngine.Game.Referee import Referee
+from RULEngine.GameDomainObjects.Referee import Referee
 from RULEngine.Util.team_color_service import TeamColorService
-from RULEngine.Game.Game import Game
+from RULEngine.GameDomainObjects.Game import Game
 from config.config_service import ConfigService
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.SpeedPose import SpeedPose

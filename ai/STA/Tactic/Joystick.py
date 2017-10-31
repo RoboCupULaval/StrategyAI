@@ -2,7 +2,7 @@
 from typing import List
 import pygame
 
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.STA.Action.AllStar import AllStar

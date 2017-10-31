@@ -24,13 +24,7 @@ if __name__ == '__main__':
     # parser for command line arguments
     parser = set_arg_parser()
     args = parser.parse_args()
+    ConfigService().load_file(args.config_file)
 
-
-
-    config_service = ConfigService().load_file(args.config_file)
-    # ai init
-    ai_coach = Coach()
     # RULEngine init
     framework = Framework()
-    # Starting point
-    framework.start_game(ai_coach.main_loop, ai_coach.set_reference)

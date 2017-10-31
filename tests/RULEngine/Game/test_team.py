@@ -1,8 +1,8 @@
 import unittest
 
 from config.config_service import ConfigService
-from RULEngine.Game.Player import Player
-from RULEngine.Game.Team import Team
+from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.Team import Team
 from RULEngine.Util.constant import PLAYER_PER_TEAM, MAX_PLAYER_ON_FIELD_PER_TEAM
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose

@@ -2,7 +2,7 @@
 from typing import List
 
 from RULEngine.Command.command import *
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.Util.SpeedPose import SpeedPose
 from ai.executors.executor import Executor
 from ai.Util.ai_command import AICommandType, AICommand

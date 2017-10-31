@@ -5,7 +5,7 @@ from time import sleep, time
 from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Communication.sender.serial_command_sender import SerialCommandSender
 from RULEngine.Command.command import GetBattery
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 
 PERIOD_BETWEEN_BAT_MONITORING = 0.5

@@ -1,5 +1,5 @@
 # Under MIT license, see LICENSE.txt
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from ai.states.game_state import GameState
 from .Action import Action
 from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType

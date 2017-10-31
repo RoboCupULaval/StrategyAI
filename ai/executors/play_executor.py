@@ -2,7 +2,7 @@
 import time
 
 from RULEngine.Debug.debug_interface import DebugInterface
-from RULEngine.Game.Referee import RefereeCommand
+from RULEngine.GameDomainObjects.Referee import RefereeCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.Util.role import Role
 from ai.executors.executor import Executor

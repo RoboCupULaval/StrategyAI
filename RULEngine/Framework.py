@@ -7,31 +7,18 @@
     frames de la vision. Cette boucle est la boucle principale et appel le
     prochain état du **Coach**.
 """
-import signal
-import threading
+import signal       # so we can stop gracefully
+import threading    # to stop while runnig the ia and not be obligated to check every loop if we received a stop signal
 import time
 import warnings
+import logging
 
-from profilehooks import profile
-
-from RULEngine.Communication.sender.debug_robot_monitor import DebugRobotMonitor
-from RULEngine.Command.command import Stop
-from RULEngine.Communication.protobuf import \
-    messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
-from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
-from RULEngine.Communication.receiver.debug_command_receiver import DebugCommandReceiver
-from RULEngine.Communication.sender.debug_command_sender import DebugCommandSender
-from RULEngine.Communication.util.robot_command_sender_factory import RobotCommandSenderFactory
-from RULEngine.Debug.debug_interface import DebugInterface
-from RULEngine.Game.Game import Game
-from RULEngine.Game.Referee import Referee
-from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
-from RULEngine.Util.image_transformer.image_transformer_factory import ImageTransformerFactory
-from RULEngine.Util.team_color_service import TeamColorService
 from config.config_service import ConfigService
-
-from multiprocessing import Process, Pipe
-from RULEngine.Communication.trackbots.vision_manager import VisionManager
+from coach import Coach
+from RULEngine.GameDomainObjects.Game import Game
+from RULEngine.GameDomainObjects.Referee import Referee
+from RULEngine.Util.team_color_service import TeamColorService
+from RULEngine.Communication.communication_manager import CommunicationManager
 
 
 class Framework(object):
@@ -47,6 +34,9 @@ class Framework(object):
         construit les objets qui sont toujours necéssaire à son fonctionnement
         correct.
         """
+        # logger
+        logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+
         # config
         self.cfg = ConfigService()
 
@@ -57,128 +47,74 @@ class Framework(object):
         self.time_of_last_loop = time.time()
         self.ai_timestamp = float(self.cfg.config_dict["GAME"]["ai_timestamp"])
 
-        # thread
-        self.ia_running_thread = None
-        self.thread_terminate = threading.Event()
-
+        # thread - do not touch without a good reason / see the team before hand
+        self.main_thread = None
+        self.main_thread_terminating_event = threading.Event()
         # Communication
-        self.robot_command_sender = None
-        self.referee_command_receiver = None
-        self.uidebug_command_sender = None
-        self.uidebug_command_receiver = None
-        self.uidebug_vision_sender = None
-        self.uidebug_robot_monitor = None
-        self.parent_pipe, self.child_pipe = Pipe()
-        # because this thing below is a callable! can be used without being set
-        self.vision_redirection_routine = lambda *args: None
-        self.vision_routine = self._sim_vision  # self._normal_vision # self._test_vision self._redirected_vision
-        self._choose_vision_routines()
+        logging.info("Initializing communication.")
+        self.communication_manager = CommunicationManager()
+        self.communication_manager.start()
+        self.vq = self.communication_manager.vision_queue
+        logging.info("Communication initialized.")
 
-        # Debug
-        self.incoming_debug = []
-        self.debug = DebugInterface()
-        self.outgoing_debug = self.debug.debug_state
-        self._init_communication()
+        self.start_game()
 
-        # Game elements
-        self.reference_transfer_object = None
-        self.game = None
-        self.ai_coach = None
-        self.referee = None
-        self.team_color_service = None
+        self.ai = Coach()
+        # # Debug
+        # self.incoming_debug = []
+        # self.debug = DebugInterface()
+        # self.outgoing_debug = self.debug.debug_state
 
-        self._create_game_world()
-
-        # VISION
-        self.image_transformer = ImageTransformerFactory.get_image_transformer()
-
-        # ia couplage
-        self.ia_coach_mainloop = None
-        self.ia_coach_initializer = None
-
+        # # GameDomainObjects elements
+        # self.ai_coach = Coach()
+        # self.team_color_service = None
+        #
+        # self._create_game_world()
+        #
+        # # ia couplage
+        # self.ia_coach_mainloop = None
+        # self.ia_coach_initializer = None
+        #
         # for testing purposes
-        self.frame_number = 0
-
-        # self.debug.add_log(1, "Framework started in {} s".format(time.time() - self.time_stamp))
-
-        self.launch_worker()
-
-    def launch_worker(self):
-        self.vision_manager.start()
-        self.parent_pipe.send("sadfasfsdf")
-
-    def _choose_vision_routines(self):
-        if self.cfg.config_dict["IMAGE"]["kalman"] == "true":
-            self.vision_routine = self._kalman_vision
-
-    def _init_communication(self):
-        # first make sure we are not already running
-        if self.ia_running_thread is None:
-            # where do we send the robots command (serial for bluetooth and rf)
-            self.robot_command_sender = RobotCommandSenderFactory.get_sender()
-            # Referee
-            self.referee_command_receiver = RefereeReceiver()
-            # Vision
-            # self.vision = VisionReceiver()
-            self.vision_manager = VisionManager(self.child_pipe,
-                                                (self.cfg.config_dict["COMMUNICATION"]["vision_udp_address"],
-                                                 int(self.cfg.config_dict["COMMUNICATION"]["vision_port"])),
-                                                (self.cfg.config_dict["COMMUNICATION"]["ui_debug_address"],
-                                                 int(self.cfg.config_dict["COMMUNICATION"]["ui_cmd_sender_port"])))
-
-            # do we use the UIDebug?
-            if self.cfg.config_dict["DEBUG"]["using_debug"] == "true":
-                self.uidebug_command_sender = DebugCommandSender()
-                self.uidebug_command_receiver = DebugCommandReceiver()
-                # Monitor robot if we are communicating with an actual robot
-                self.uidebug_robot_monitor = DebugRobotMonitor(self.robot_command_sender,
-                                                               self.debug)
-
-        else:
-            self.stop_game()
 
     def game_thread_main_loop(self):
         """ Fonction exécuté et agissant comme boucle principale. """
 
-        self._wait_for_first_frame()
-        self._wait_for_first_geometry_packet()
-        while not self.thread_terminate.is_set():
-            self.time_stamp = time.time()
-            self.vision_routine()
+        while not self.main_thread_terminating_event.is_set():
+            try:
+                print(self.vq.pop())
+            except:
+                pass
             time.sleep(0)
+        self.communication_manager.stop()
 
-    def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer):
+
+    def start_game(self):
         """ Démarrage du moteur de l'IA initial, ajustement de l'équipe de l'ia
         et démarrage du/des thread/s"""
 
-        # IA COUPLING
-        self.ia_coach_mainloop = p_ia_coach_mainloop
-        self.ia_coach_initializer = p_ia_coach_initializer
+
+
+
 
         # GAME_WORLD TEAM ADJUSTMENT
-        self.team_color_service = TeamColorService()
-        self.reference_transfer_object.team_color_svc = self.team_color_service
         print("Framework partie avec équipe", self.cfg.config_dict["GAME"]["our_color"])
-
-        self.ia_coach_initializer(self.reference_transfer_object)
-
         signal.signal(signal.SIGINT, self._sigint_handler)
-        self.ia_running_thread = threading.Thread(target=self.game_thread_main_loop)
-        self.ia_running_thread.start()
-        self.ia_running_thread.join()
+        self.main_thread = threading.Thread(target=self.game_thread_main_loop)
+        self.main_thread.start()
+        time.sleep(65)
+        self.stop_game()
 
     def _create_game_world(self):
         """
             Créé le GameWorld pour contenir les éléments d'une partie normale:
-             l'arbitre, la Game (Field, teams, players).
+             l'arbitre, la GameDomainObjects (Field, teams, players).
              C'est un data transfer object pour les références du RULEngine vers l'IA
         """
 
         self.referee = Referee()
         self.game = Game()
         self.game.set_referee(self.referee)
-        self.reference_transfer_object = ReferenceTransferObject(self.game)
-        self.reference_transfer_object.set_debug(self.incoming_debug)
 
     def _update_players_and_ball(self, vision_frame):
         """ Met à jour le GameState selon la frame de vision obtenue. """
@@ -201,160 +137,23 @@ class Framework(object):
         # FIXME: hack
         return time_delta
 
-    def _update_debug_info(self):
-        self.incoming_debug += self.uidebug_command_receiver.receive_command()
-
     def _sim_vision(self):
         vision_frame = self._acquire_last_vision_frame()
         if vision_frame.detection.frame_number != self.last_frame_number:
             time_delta = self._compute_vision_time_delta(vision_frame)
             self.game.update(vision_frame, time_delta)
-            self._update_debug_info()
-            robot_commands = self.ia_coach_mainloop()
-
-            # Communication
-            self._send_robot_commands(robot_commands)
-            self._send_debug_commands()
-
-    def _kalman_vision(self):
-        vision_frames = self.vision.pop_frames()
-        new_image_packet = self.image_transformer.update(vision_frames)
-        referee_frames = self.referee_command_receiver.pop_frames()
-        self.game.referee.update(referee_frames)
-        new_time_delta = time.time() - self.time_of_last_loop
-        if new_time_delta > self.ai_timestamp:
-            time_delta = new_time_delta
-            self.time_of_last_loop = time.time()
-            self.game.update(new_image_packet, time_delta)
-            self.game.field.update_field_dimensions(vision_frames)
-
-            self._update_debug_info()
-            robot_commands = self.ia_coach_mainloop()
-
-            # Communication
-            self._send_robot_commands(robot_commands)
-            self._send_debug_commands()
-            #self._send_new_vision_packet()
-            self.parent_pipe.send("helllo")
-            if time_delta > self.ai_timestamp * 1.3:
-                warnings.warn("Update loop took {:5.3f}s instead of {}s!".format(time_delta, self.ai_timestamp),
-                              RuntimeWarning, stacklevel=2)
-
-    """
-    def _test_vision(self):
-        vision_frames = self.vision.pop_frames()
-        new_image_packet = self.image_transformer.update(vision_frames)
-        if time.time() - self.last_loop > 0.05:
-            time_delta = time.time() - self.last_time
-            self.game.update_kalman(new_image_packet, time_delta)
-            self._update_debug_info()
-            robot_commands = self.ia_coach_mainloop()
-            # Communication
-
-            self._send_robot_commands(robot_commands)
-            self.game.set_command(robot_commands)
-            self._send_debug_commands()
-            self.last_loop = time.time()
-        time.sleep(0)
-    """
-
-    def _acquire_last_vision_frame(self):
-        return self.vision.get_latest_frame()
-
-    def _acquire_all_vision_frames(self):
-        return self.vision.pop_frames()
 
     def stop_game(self):
         """
             Nettoie les ressources acquises pour pouvoir terminer l'exécution.
         """
-        self.thread_terminate.set()
-        self.ia_running_thread.join()
-        self.thread_terminate.clear()
-        self.robot_command_sender.stop()
-        if self.uidebug_robot_monitor:
-            self.uidebug_robot_monitor.stop()
-        try:
-            team = self.game.friends
+        self.main_thread_terminating_event.set()
+        self.communication_manager.stop()
+        self.communication_manager.join()
+        self.main_thread.join()
+        # send stop command to all robots
+        # stop communication
 
-            # FIXME: hack for grsim
-            for player in team.available_players.values():
-                if player.ai_command is not None:
-                    command = Stop(player)
-                    self.robot_command_sender.send_packets(command)
-        except Exception as e:
-            print("Could not stop players")
-            print("Au nettoyage il a été impossible d'arrêter les joueurs.")
-            raise e
-            # raise StopPlayerError("Au nettoyage il a été impossible d'arrêter les joueurs.")
-
-    def _wait_for_first_frame(self):
-        while not self.vision.get_latest_frame() and not self.thread_terminate.is_set():
-            time.sleep(0.1)
-            print("En attente d'une image de la vision.")
-
-    def _wait_for_first_geometry_packet(self):
-        while not self.game.field.update_field_dimensions(self.vision.pop_frames()) and\
-                not self.thread_terminate.is_set():
-            time.sleep(0.01)
-            print("En attente du premier packet de géométrie du terrain.")
-
-    def _send_robot_commands(self, commands):
-        """ Envoi les commades des robots au serveur. """
-        for command in commands:
-            self.robot_command_sender.send_packets(command)
-
-    def _send_debug_commands(self):
-        """ Envoie les commandes de debug au serveur. """
-        packet_represented_commands = [c.get_packet_repr() for c in self.outgoing_debug]
-        if self.uidebug_command_sender is not None:
-            self.uidebug_command_sender.send_packets(packet_represented_commands)
-
-        self.incoming_debug.clear()
-        self.outgoing_debug.clear()
-
-    # for testing purposes
-    def _send_new_vision_packet(self):
-        pb_sslwrapper = ssl_wrapper.SSL_WrapperPacket()
-        pb_sslwrapper.detection.camera_id = 0
-        pb_sslwrapper.detection.t_sent = 0
-
-        pck_ball = pb_sslwrapper.detection.balls.add()
-        pck_ball.x = self.game.field.ball.position.x
-        pck_ball.y = self.game.field.ball.position.y
-        pck_ball.z = self.game.field.ball.position.z
-        # required for the packet no use for us at this stage
-        pck_ball.confidence = 0.999
-        pck_ball.pixel_x = self.game.field.ball.position.x
-        pck_ball.pixel_y = self.game.field.ball.position.y
-
-        for p in self.game.blue_team.available_players.values():
-            packet_robot = pb_sslwrapper.detection.robots_blue.add()
-            packet_robot.confidence = 0.999
-            packet_robot.robot_id = p.id
-            packet_robot.x = p.pose.position.x
-            packet_robot.y = p.pose.position.y
-            packet_robot.orientation = p.pose.orientation
-            packet_robot.pixel_x = 0.
-            packet_robot.pixel_y = 0.
-
-        for p in self.game.yellow_team.available_players.values():
-            packet_robot = pb_sslwrapper.detection.robots_yellow.add()
-            packet_robot.confidence = 0.999
-            packet_robot.robot_id = p.id
-            packet_robot.x = p.pose.position.x
-            packet_robot.y = p.pose.position.y
-            packet_robot.orientation = p.pose.orientation
-            packet_robot.pixel_x = 0.
-            packet_robot.pixel_y = 0.
-
-        self.frame_number += 1
-        pb_sslwrapper.detection.t_capture = 0
-        pb_sslwrapper.detection.frame_number = self.frame_number
-        try:
-            self.vision_redirection_routine(pb_sslwrapper.SerializeToString())
-        except:
-            print("Fail to send in vision redirection")
-
+    # noinspection PyUnusedLocal
     def _sigint_handler(self, *args):
         self.stop_game()

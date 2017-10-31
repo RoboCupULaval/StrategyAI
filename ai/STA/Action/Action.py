@@ -2,7 +2,7 @@
 
 from abc import abstractmethod
 
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from ai.Util.ai_command import AICommand
 from ai.states.game_state import GameState
 

@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from RULEngine.Game.Player import Player
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from RULEngine.Util.team_color_service import TeamColor
 from config.config_service import ConfigService

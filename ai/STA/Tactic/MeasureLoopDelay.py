@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from typing import List, Optional
 
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 

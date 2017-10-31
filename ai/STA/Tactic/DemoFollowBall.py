@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
 
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.Util.geometry import get_distance
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import POSITION_DEADZONE, ROBOT_RADIUS

@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.Game.Field import FieldSide
+from RULEngine.GameDomainObjects.Field import FieldSide
 from RULEngine.Util.constant import ROBOT_RADIUS
 from RULEngine.Util.geometry import *
 from ai.states.game_state import GameState

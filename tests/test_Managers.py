@@ -1,8 +1,8 @@
 # Under MIT License, see LICENSE.txt
 import unittest
 
-from RULEngine.Game.Game import Game
-from RULEngine.Game.Referee import Referee
+from RULEngine.GameDomainObjects.Game import Game
+from RULEngine.GameDomainObjects.Referee import Referee
 from RULEngine.Util.team_color_service import TeamColor, TeamColorService
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from ai.states.game_state import GameState

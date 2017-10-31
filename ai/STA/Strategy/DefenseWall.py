@@ -3,7 +3,7 @@ from functools import partial
 
 import numpy as np
 
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from ai.Algorithm.evaluation_module import closest_players_to_point, Pose, Position
 from ai.STA.Tactic.AlignToDefenseWall import AlignToDefenseWall
 from ai.STA.Tactic.GoalKeeper import GoalKeeper

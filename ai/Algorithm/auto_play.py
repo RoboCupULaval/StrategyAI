@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABCMeta
 from enum import IntEnum
 
-from RULEngine.Game.Referee import RefereeCommand
+from RULEngine.GameDomainObjects.Referee import RefereeCommand
 from ai.Algorithm.IntelligentModule import IntelligentModule
 
 from ai.Algorithm.evaluation_module import *

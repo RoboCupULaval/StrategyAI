@@ -12,7 +12,7 @@ class ThreadedUDPServer(ThreadingMixIn, UDPServer):
     allow_reuse_address = True
 
     def __init__(self, host, port, handler):
-        super(ThreadedUDPServer, self).__init__(('', port), handler)
+        super(ThreadedUDPServer, self).__init__((host, port), handler)
         if ip_address(host).is_multicast:
             self.register_multicast_membership(host)
         self._start()

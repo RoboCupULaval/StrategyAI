@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 import math
 
-from RULEngine.Game.Field import FieldSide
+from RULEngine.GameDomainObjects.Field import FieldSide
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.STA.Tactic.GoalKeeper import GoalKeeper

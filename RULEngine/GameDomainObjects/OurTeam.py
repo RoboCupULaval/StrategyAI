@@ -1,5 +1,5 @@
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Game.Team import Team
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Team import Team
 from RULEngine.Util.constant import TeamColor, PLAYER_PER_TEAM
 from config.config_service import ConfigService
 

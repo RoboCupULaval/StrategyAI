@@ -11,7 +11,7 @@ from abc import abstractmethod
 import threading
 from pyhermes import McuCommunicator
 
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 
 

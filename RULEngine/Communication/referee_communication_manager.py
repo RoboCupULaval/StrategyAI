@@ -1,4 +1,6 @@
 from multiprocessing import Process, Event, Queue
+from time import sleep
+
 from config.config_service import ConfigService
 from RULEngine.Communication.protobuf import referee_pb2 as ssl_referee
 from RULEngine.Communication.util.protobuf_packet_receiver import ProtobufPacketReceiver
@@ -20,8 +22,10 @@ class RefereeCommunicationManager(Process):
 
     def loop(self):
         while not self.stop_event.is_set():
-            packet = self.server.get_latest_packet()
-            self.queue.put(packet)
+            packet = self.server.get_latest_frame()
+            if packet is not None:
+                self.queue.put(packet, False)
+            sleep(0)
 
     def run(self):
         self.initialize()

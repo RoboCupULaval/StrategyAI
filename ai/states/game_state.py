@@ -6,9 +6,8 @@
 """
 from typing import Union
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Game.Player import Player
-from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.constant import TeamColor, ROBOT_RADIUS
 from RULEngine.Util.singleton import Singleton
 from RULEngine.Util.Pose import Pose
@@ -146,27 +145,6 @@ class GameState(object, metaclass=Singleton):
             :return: float: le timestamp
         """
         return self.game.delta_t
-
-    def set_reference(self, reference_transfer_object: ReferenceTransferObject) -> None:
-        """
-        Ajoute les références des objets du monde.
-
-        :param reference_transfer_object: reference_transfer_object instance avec les références mise dedans
-        :return: None.
-        """
-        assert isinstance(reference_transfer_object, ReferenceTransferObject), \
-            "setting reference to the gamestate require an instance of RULEngine.Util.GameWorld"
-        assert reference_transfer_object.game.referee is not None, \
-            "setting the game_state reference with an invalid (None) referee!"
-        assert reference_transfer_object.team_color_svc is not None, \
-            "setting the game_state reference with an invalid (None) team_color_service!"
-
-        self.game = reference_transfer_object.game
-        self.field = self.game.field
-        self.my_team = self.game.friends
-        self.other_team = self.game.enemies
-        self.our_team_color = reference_transfer_object.team_color_svc.OUR_TEAM_COLOR
-        self.const = self.game.field.constant
 
     def display_player_kalman(self):
         if self.our_team_color == TeamColor.YELLOW:

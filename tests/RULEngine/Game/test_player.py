@@ -2,8 +2,8 @@ import unittest
 
 from RULEngine.Util.kalman_filter.enemy_kalman_filter import EnemyKalmanFilter
 from config.config_service import ConfigService
-from RULEngine.Game.Player import Player
-from RULEngine.Game.Team import Team
+from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.Team import Team
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.team_color_service import TeamColor

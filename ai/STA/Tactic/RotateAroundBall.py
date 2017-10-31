@@ -2,7 +2,7 @@
 from typing import List
 import numpy as np
 
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from ai.STA.Tactic.Tactic import Tactic

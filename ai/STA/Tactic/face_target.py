@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
 
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 from ai.states.game_state import GameState
 from ai.STA.Tactic.Tactic import Tactic
