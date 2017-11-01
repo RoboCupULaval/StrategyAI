@@ -54,7 +54,7 @@ class ConfigService(metaclass=Singleton):
             self.config_dict["COMMUNICATION"]["ui_cmd_sender_port"] = 16666    # DO NOT TOUCH
             self.config_dict["COMMUNICATION"]["ui_cmd_receiver_port"] = 17777  # DO NOT TOUCH
 
-        [print(key,":" ,value) for key, value in self.config_dict["COMMUNICATION"].items()]
+        # [print(key,":" ,value) for key, value in self.config_dict["COMMUNICATION"].items()]
 
 
 default_dict = {"GAME": {"type": "sim",

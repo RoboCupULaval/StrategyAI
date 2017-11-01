@@ -10,7 +10,7 @@ from RULEngine.Communication.referee_communication_manager import RefereeCommuni
 from RULEngine.Communication.robot_cmds_sender_communication_manager import RobotCommandSenderCommunicationManager
 
 
-class CommunicationManager(Process):
+class CommunicationManager():
     VISION_QUEUE_MAXSIZE = 100
     ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
@@ -18,13 +18,19 @@ class CommunicationManager(Process):
     REFEREE_QUEUE_MAXSIZE = 100
 
     def __init__(self):
-        super().__init__()
-
         self.stop_event = Event()
         self.vision_queue = None
         self.vision_communication_manager = None
 
     def initialize(self):
+        logging.debug("Communication Manager initializing")
+
+        self.vision_queue = Queue(self.VISION_QUEUE_MAXSIZE)
+        self.vision_communication_manager = Process(target=VisionCommunicationManager, args=(self.vision_queue,
+                                                                                             self.stop_event),
+                                                    name="RobocupULaval - Vision Comm Manager")
+        self.vision_communication_manager.start()
+        print(self.vision_communication_manager)
 
         # self.robot_command_sender_queue = Queue(self.ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE)
         # self.robot_command_sender = RobotCommandSenderCommunicationManager(self.robot_command_sender_queue,
@@ -35,31 +41,13 @@ class CommunicationManager(Process):
         #                                                                       self.stop_event)
         #
         # self.ui_debug_command_receiver_queue = Queue(self.UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE)
-        # self.ui_debug_command_receiver = DebugCommandReceiverCommunicationManager(self.ui_debug_command_receiver_queue,
+        # self.ui_debug_command_receiver = DebugCommandReceiverCommunicationManager(self.ui_debug_command_receiver_queu
         #                                                                           self.stop_event)
         #
         # self.referee_queue = Queue(self.REFEREE_QUEUE_MAXSIZE)
         # self.referee_communication_manager = RefereeCommunicationManager(self.referee_queue,
         #                                                                  self.stop_event)
         logging.debug("Communication Manager initialized")
-
-    def run(self):
-        logging.debug("Communication Manager initializing")
-
-        self.vision_queue = Queue(self.VISION_QUEUE_MAXSIZE)
-        self.vision_communication_manager = Process(target=VisionCommunicationManager(self.vision_queue,
-                                                                       self.stop_event).start())
-        print(self.vision_communication_manager.pid)
-        logging.debug("Vision Communication Manager started")
-        # self.referee_communication_manager.start()
-        # logging.debug("Referee Communication Manager started")
-        # self.robot_command_sender.start()
-        # logging.debug("Robot Commands Sender Communication Manager started")
-        # self.ui_debug_command_sender.start()
-        # logging.debug("UI-Debug Commands Sender Communication Manager started")
-        # self.ui_debug_command_receiver.start()
-        # logging.debug("UI-Debug Receiver Communication Manager started")
-
 
     def stop(self):
         self.stop_event.set()

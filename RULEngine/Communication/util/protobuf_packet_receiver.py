@@ -4,9 +4,9 @@
     permettent l'envoie et la réceptions de paquets pour le débogage, ainsi que
     l'envoie des commandes aux robots au niveau des systèmes embarqués.
 """
-
-from collections import deque
-from socketserver import BaseRequestHandler
+import logging
+from queue import Queue, Full
+from socketserver import BaseRequestHandler, UDPServer
 
 import time
 
@@ -22,9 +22,10 @@ class ProtobufPacketReceiver(object):
         async.
     """
 
-    def __init__(self, host, port, packet_type):
+    def __init__(self, host: str, port: int, packet_type, packet_queue: Queue):
+        self.logger = logging.getLogger(__name__)
         self.packet_type = packet_type
-        self.packet_list = deque(maxlen=100)
+        self.packet_list = packet_queue
         handler = self.get_udp_handler(self.packet_list, packet_type)
         self.server = ThreadedUDPServer(host, port, handler)
 
@@ -36,10 +37,13 @@ class ProtobufPacketReceiver(object):
                     data = self.request[0]
                     packet = packet_type()
                     packet.ParseFromString(data)
-                    packet_list.append(packet)
+                    packet_list.put(packet, block=True, timeout=0.1)
                 except DecodeError:
                     print("Error parsing receiving packet, maybe you are listening to the wrong port?")
                     raise
+                except Full:
+                    logging.error("ThreadeUDPSrver with packet type {0} couldn't put a new packet within 0.1s".
+                                  format(packet_type))
 
         return ThreadedUDPRequestHandler
 
@@ -47,12 +51,13 @@ class ProtobufPacketReceiver(object):
         """ Retourne une frame de la deque. """
         new_list = list(self.packet_list)
 
-        self.packet_list.clear()
         return new_list
 
     def get_latest_frame(self):
         """ Retourne sans erreur la dernière frame reçu. """
         try:
-            return self.packet_list[-1]
-        except IndexError:
+            return self.packet_list.get(timeout=0.1)
+        except Full:
+            logging.error("ProtobufPacketReceiver with packet type {0} couldn't get a new packet within 0.1s".
+                          format(self.packet_type))
             return None

@@ -35,7 +35,7 @@ class Framework(object):
         correct.
         """
         # logger
-        logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG)
 
         # config
         self.cfg = ConfigService()
@@ -53,7 +53,7 @@ class Framework(object):
         # Communication
         logging.info("Initializing communication.")
         self.communication_manager = CommunicationManager()
-        self.communication_manager.start()
+        self.communication_manager.initialize()
         self.vq = self.communication_manager.vision_queue
         logging.info("Communication initialized.")
 
@@ -86,21 +86,16 @@ class Framework(object):
             except:
                 pass
             time.sleep(0)
-        self.communication_manager.stop()
-
+        logging.debug("method game_thread_main_loop has exited.")
 
     def start_game(self):
         """ Démarrage du moteur de l'IA initial, ajustement de l'équipe de l'ia
         et démarrage du/des thread/s"""
 
-
-
-
-
         # GAME_WORLD TEAM ADJUSTMENT
         print("Framework partie avec équipe", self.cfg.config_dict["GAME"]["our_color"])
         signal.signal(signal.SIGINT, self._sigint_handler)
-        self.main_thread = threading.Thread(target=self.game_thread_main_loop)
+        self.main_thread = threading.Thread(target=self.game_thread_main_loop, name="game_thread_main_loop")
         self.main_thread.start()
         time.sleep(65)
         self.stop_game()
@@ -148,9 +143,9 @@ class Framework(object):
             Nettoie les ressources acquises pour pouvoir terminer l'exécution.
         """
         self.main_thread_terminating_event.set()
-        self.communication_manager.stop()
-        self.communication_manager.join()
         self.main_thread.join()
+        self.communication_manager.stop()
+        exit(0)
         # send stop command to all robots
         # stop communication
 
