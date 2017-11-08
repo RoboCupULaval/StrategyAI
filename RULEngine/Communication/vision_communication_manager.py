@@ -1,53 +1,56 @@
 import logging
 from multiprocessing import Process, Event, Queue as MQueue
-
-from queue import Full, Queue
+from queue import Queue, Full, Empty
 from time import sleep
 
-from RULEngine.Communication.protobuf import messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
-from RULEngine.Communication.util.protobuf_packet_receiver import ProtobufPacketReceiver
+from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
+from RULEngine.Communication.trackbots.tracker.field import Field
 from config.config_service import ConfigService
 
 
 class VisionCommunicationManager(Process):
     def __init__(self, vision_queue: MQueue, stop_event: Event):
-        super().__init__()
+        super(VisionCommunicationManager, self).__init__()
         self.logger = logging.getLogger(__name__)
 
         # cfg = ConfigService()
         self.host = "224.5.23.2"   # cfg.config_dict["COMMUNICATION"]["referee_udp_address"]
         self.port = 10227  # int(cfg.config_dict["COMMUNICATION"]["referee_port"])
 
-        self.vision_queue = vision_queue
-        self.frame_queue = Queue(maxsize=100)
+        self.vision_frame_queue = vision_queue
+        self.observation_queue = Queue()
 
         self.stop_event = stop_event
-        self.server = ProtobufPacketReceiver(self.host, self.port, ssl_wrapper.SSL_WrapperPacket, self.frame_queue)
 
+        self.receiver = VisionReceiver(self.host, self.port, self.observation_queue)
+
+        self.field = Field()
         self.logger.debug("Vision Initialized")
 
-    def loop(self):
-        while not self.stop_event.is_set():
-            cmd = self.frame_queue.get(block=True, timeout=0.1)
-            print(cmd)
+    def manage_vision(self):
+        while True:
             try:
-                if cmd is not None:
-                    self.vision_queue.put(cmd, False)
+                self.observation_queue.get(block=True, timeout=0.5)
             except Full:
-                pass  # todo Do something here maybe? MGL 2017/10/28
-            sleep(0.0001)
+                self.logger.debug("Observation queue couldn't retrive within the time limit")
+            except Empty:
+                pass
 
     def run(self):
         self.logger.debug("Vision started with pid {0}".format(1))
-        self.loop()
+        self.manage_vision()
 
 
 if __name__ == "__main__":
     q = MQueue()
     e = Event()
-    p = Process(target=VisionCommunicationManager, args=(q, e, ))
+    p = VisionCommunicationManager(q, e)
     print(p)
     p.start()
     print(p)
+    print(p)
+    sleep(0.1)
+    print(p)
     while not e.is_set():
         print(q.get())
+        print(p)

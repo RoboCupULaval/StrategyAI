@@ -85,7 +85,7 @@ def get_nearest(ref_position: Position, list_of_position: list, number=1):
 
     dict_position_distance = {}
     for bot_position in list_of_position:
-        dst = get_distance(ref_position, bot_position)
+        dst = (ref_position - bot_position).norm()
 
         while dst in dict_position_distance.keys():
             dst += 0.1

@@ -12,6 +12,7 @@ import threading    # to stop while runnig the ia and not be obligated to check 
 import time
 import warnings
 import logging
+from multiprocessing import Event
 
 from config.config_service import ConfigService
 from coach import Coach
@@ -52,9 +53,9 @@ class Framework(object):
         self.main_thread_terminating_event = threading.Event()
         # Communication
         logging.info("Initializing communication.")
-        self.communication_manager = CommunicationManager()
-        self.communication_manager.initialize()
-        self.vq = self.communication_manager.vision_queue
+        self.stop_event = Event()
+        self.communication_manager = CommunicationManager(self.stop_event)
+        self.communication_manager.start()
         logging.info("Communication initialized.")
 
         self.start_game()

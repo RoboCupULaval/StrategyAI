@@ -1,6 +1,5 @@
 import unittest
 
-from config.config_service import ConfigService
 from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.GameDomainObjects.Team import Team
 from RULEngine.Util.constant import PLAYER_PER_TEAM, MAX_PLAYER_ON_FIELD_PER_TEAM
@@ -12,8 +11,6 @@ from RULEngine.Util.team_color_service import TeamColor
 class TestTeam(unittest.TestCase):
 
     def setUp(self):
-        # TODO: Because player require a KF, we need to load file config for a unitest... This is terrible.
-        ConfigService().load_file("config/sim.cfg")
         self.team = Team(TeamColor.YELLOW)
         self.team_blue = Team(TeamColor.BLUE)
         self.first_player = self.team.players[0]

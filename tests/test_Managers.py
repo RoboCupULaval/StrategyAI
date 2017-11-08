@@ -7,7 +7,6 @@ from RULEngine.Util.team_color_service import TeamColor, TeamColorService
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from ai.states.game_state import GameState
 from ai.states.module_state import ModuleState
-from config.config_service import ConfigService
 
 
 class TestGameStateManager(unittest.TestCase):
@@ -15,7 +14,6 @@ class TestGameStateManager(unittest.TestCase):
         Teste les différentes fonctionnalités du GameStateManager
     """
     def setUp(self):
-        config_service = ConfigService().load_file("config/sim_standard.cfg")
         self.game = Game()
         self.referee = Referee
         self.game.set_referee(self.referee)
@@ -62,16 +60,9 @@ class TestGameStateManager(unittest.TestCase):
 
 
 class TestModuleManager(unittest.TestCase):
-    """
-        Teste les différentes fonctionnalités du ModuleManager
-    """
     def setUp(self):
-        self.ModuleManager1 = ModuleState()
-        self.ModuleManager2 = ModuleState()
+        self.manager = ModuleState()
 
     def test_singleton(self):
-        """
-            Teste si le Manager est un singleton,
-             i.e. s'il ne peut y avoir qu'une seule instance du manager
-        """
-        self.assertTrue(self.ModuleManager1 is self.ModuleManager2)
+        other_manager= ModuleState()
+        self.assertTrue(self.manager is other_manager)

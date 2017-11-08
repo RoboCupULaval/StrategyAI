@@ -18,9 +18,7 @@ from ai.Algorithm.Graph.Vertex import Vertex
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
 from ai.states.game_state import GameState
-from config.config_service import ConfigService
 
 __author__ = 'RoboCupULaval'
 
@@ -36,7 +34,6 @@ def foo2():
 A_PLAYER_ID = 1
 class TestGraph(unittest.TestCase):
     def setUp(self):
-        config_service = ConfigService().load_file("config/sim_standard.cfg")
         self.game_state = GameState()
         self.game = Game()
         self.game.set_referee(Referee())

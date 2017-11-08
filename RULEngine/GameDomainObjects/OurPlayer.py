@@ -18,7 +18,6 @@ class OurPlayer(Player):
         self.kf = FriendKalmanFilter()
         self.ai_command = None
         self.pid = None  # for the moment
-        self.in_play = False
         self.update = self._friend_kalman_update
         self.pathfinder_history = PathfinderHistory()
         self.collision_body_mask = [0, 0]

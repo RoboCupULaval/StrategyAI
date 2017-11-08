@@ -1,17 +1,16 @@
 import unittest
 
 from RULEngine.Util.kalman_filter.enemy_kalman_filter import EnemyKalmanFilter
-from config.config_service import ConfigService
 from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.GameDomainObjects.Team import Team
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.team_color_service import TeamColor
 
+
 class TestPlayer(unittest.TestCase):
 
     def setUp(self):
-        ConfigService().load_file("config/sim.cfg")
         self.team = Team(TeamColor.BLUE)
         self.player1 = Player(self.team, 1)
         self.player2 = Player(self.team, 2)

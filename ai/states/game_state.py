@@ -12,14 +12,13 @@ from RULEngine.Util.constant import TeamColor, ROBOT_RADIUS
 from RULEngine.Util.singleton import Singleton
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Debug.debug_interface import DebugInterface, COLOR_ID_MAP, ORANGE
 from ai.Util.role import Role
 from ai.Util.role_mapper import RoleMapper
 
 
 class GameState(object, metaclass=Singleton):
 
-    def __init__(self, for_unitest_pls_remove_debug_interface_oh_god=True):
+    def __init__(self):
         """
         initialise le GameState, initialise les variables avec des valeurs nulles
         """
@@ -30,9 +29,6 @@ class GameState(object, metaclass=Singleton):
         self.other_team = None
         self.timestamp = 0
         self.const = None
-        # FIXME: Gamestate should not have a debug interface
-        if for_unitest_pls_remove_debug_interface_oh_god:
-            self.debug_interface = DebugInterface()
         self._role_mapper = RoleMapper()
 
     def get_player_by_role(self, role: Role) -> OurPlayer:
@@ -45,11 +41,6 @@ class GameState(object, metaclass=Singleton):
 
     def bind_random_available_players_to_role(self) -> OurPlayer:
         pass
-
-    def print_role_mapping(self):
-        # Testing purposes only
-        for key, value in self._role_mapper.roles_translation.items():
-            print(key, value)
 
     def map_players_to_roles_by_player_id(self, mapping_by_player_id):
         mapping_by_player = {role: self.my_team.available_players[player_id] for role, player_id in mapping_by_player_id.items()}
@@ -67,14 +58,6 @@ class GameState(object, metaclass=Singleton):
 
     def _get_player_from_all_possible_player(self, player_id):
         return self.my_team.players[player_id]
-
-    def get_our_team_color(self) -> TeamColor:
-        """
-        Retourne la couleur de notre équipe TeamColor Enum
-
-        :return: TeamColor(Enum) la couleur de notre équipe
-        """
-        return self.our_team_color
 
     def get_player(self, player_id: int, is_my_team=True) -> Player:
         """

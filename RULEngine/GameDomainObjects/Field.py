@@ -19,12 +19,15 @@ class FieldCircularArc:
         self.angle_start = protobuf_arc.a1 # Counter clockwise order
         self.angle_ened  = protobuf_arc.a2
         self.thickness   = protobuf_arc.thickness
+
+
 class FieldLineSegment:
     def __init__(self, protobuf_line):
         self.p1 = Position(protobuf_line.p1.x, protobuf_line.p1.y)
         self.p2 = Position(protobuf_line.p2.x, protobuf_line.p2.y)
         self.length = (self.p2 - self.p1).norm()
         self.thickness = protobuf_line.thickness
+
 
 class Field:
     def __init__(self, ball: 'Ball'):

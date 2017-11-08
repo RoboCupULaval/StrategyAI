@@ -23,9 +23,8 @@ class StayAwayFromBall(Tactic):
         self.player.collision_body_mask.append(CollisionBody.COLLIDABLE)
 
     def stay_out_of_circle(self):
-        self.game_state.field.field_collision_body.append(CollisionBody(self.game_state.get_ball_position(),
-                                                                        self.game_state.get_ball_velocity(),
-                                                                        500))
+        self.game_state.field.field_collision_body.append(
+            CollisionBody(self.game_state.get_ball_position(), self.game_state.get_ball_velocity(), 500))
         position = stayOutsideCircle(self.player.pose.position,
                                      self.game_state.get_ball_position(),
                                      self.keepout_radius)

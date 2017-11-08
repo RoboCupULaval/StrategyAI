@@ -66,8 +66,8 @@ class PositionForPass(Tactic):
             self.target_position = self._find_best_player_position()
         self.last_time = time.time()
         destination_orientation = (self.game_state.get_ball_position() - self.player.pose.position).angle()
-        self.game_state.debug_interface.add_point(self.target_position, COLOR_ID_MAP[4], width=5,
-                                                  timeout=0.1)
+        # self.game_state.debug_interface.add_point(self.target_position, COLOR_ID_MAP[4], width=5,
+        #                                           timeout=0.1)
         return Pose(self.target_position, destination_orientation)
 
     def _find_best_player_position(self):

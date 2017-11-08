@@ -187,7 +187,8 @@ def trajectory_score(pointA, pointsB, obstacle):
         if normsAC < 0 or normsAC > 1.1 * normsAB:
             scores = 1
         else:
-            scores = max(1, min(normsAC / normsOC, proportion_max))
+            min_proportion = proportion_max if normsOC == 0 else min(normsAC / normsOC, proportion_max)
+            scores = max(1, min_proportion)
     else:
         scores[normsAC < 0] = 1
         scores[normsAC > 1.1 * normsAB] = 1

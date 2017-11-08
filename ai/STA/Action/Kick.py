@@ -34,7 +34,7 @@ class Kick(Action):
             orientation = (self.target.position - self.player.pose.position).angle()
         else:
             ball_position = self.player.pose.position
-            orientation = (self.target.position - self.player.pose.position).angle()
+            orientation = self.player.pose.orientation
 
         cmd_params = {"pose_goal": Pose(ball_position, orientation),
                       "kick": True,

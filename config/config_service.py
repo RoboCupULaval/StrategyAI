@@ -5,7 +5,7 @@ from RULEngine.Util.singleton import Singleton
 class ConfigService(metaclass=Singleton):
 
     def __init__(self):
-        self.config_dict = {}
+        self.config_dict = self._load_defaults()
 
     def load_file(self, input_config_file) -> None:
         config_parser = ConfigParser(allow_no_value=False)
@@ -56,6 +56,13 @@ class ConfigService(metaclass=Singleton):
 
         # [print(key,":" ,value) for key, value in self.config_dict["COMMUNICATION"].items()]
 
+    def _load_defaults(self):
+        config_parser = ConfigParser(allow_no_value=False)
+        config_parser.read_dict(default_dict)
+        return {s: dict(config_parser.items(s)) for s in config_parser.sections()}
+
+
+
 
 default_dict = {"GAME": {"type": "sim",
                          "our_color": "blue",
@@ -63,7 +70,8 @@ default_dict = {"GAME": {"type": "sim",
                          "our_side": "positive",
                          "autonomous_play": "false",
                          "ai_timestamp": "0.05",
-                         "play_zone":"full"},
+                         "play_zone":"full",
+                         "kalman_matrix_flag": "false"},
                 "COMMUNICATION": {"type": "sim",
                                   "redirect": "true",
                                   "referee_udp_address": "224.5.23.2",

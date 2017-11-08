@@ -37,7 +37,7 @@ class ProtobufPacketReceiver(object):
                     data = self.request[0]
                     packet = packet_type()
                     packet.ParseFromString(data)
-                    packet_list.put(packet, block=True, timeout=0.1)
+                    packet_list.put(packet)
                 except DecodeError:
                     print("Error parsing receiving packet, maybe you are listening to the wrong port?")
                     raise
