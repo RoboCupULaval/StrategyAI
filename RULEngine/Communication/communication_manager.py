@@ -24,19 +24,25 @@ class CommunicationManager(Process):
         self.stop_event = stop_event
 
         self.vision_queue = Queue(self.VISION_QUEUE_MAXSIZE)
+        self.vision_communication_manager = None
+        self.logger.debug("Communication Manager initialized")
+
+    def initialize_subprocess(self):
         self.vision_communication_manager = VisionCommunicationManager(self.vision_queue, self.stop_event)
         self.vision_communication_manager.start()
 
-        self.logger.debug("Communication Manager initialized")
-
     def orchestrate_communication(self):
         while not self.stop_event.is_set():
-            sleep(0.001)
+            pass
 
         self.stop()
 
     def run(self):
-        self.orchestrate_communication()
+        self.initialize_subprocess()
+        try:
+            self.orchestrate_communication()
+        except KeyboardInterrupt:
+            pass
 
     def stop(self):
         self.vision_communication_manager.join()

@@ -1,22 +1,28 @@
 import logging
 from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY
 from queue import Queue
-from threading import Thread
 from ipaddress import ip_address
 from struct import pack
+from threading import Thread
 
 from RULEngine.Communication.protobuf.messages_robocup_ssl_wrapper_pb2 import SSL_WrapperPacket
+from RULEngine.Communication.util.observations import BallObservation, RobotObservation, DetectionFrame
 
 
 class VisionReceiver(Thread):
     def __init__(self, host: str, port: int, detection_queue: Queue):
         super(VisionReceiver, self).__init__()
-
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger("VisionReceiver")
 
         self.host = host
         self.port = port
 
+        self.socket = None
+        self._detection_frame_queue = detection_queue
+
+        self.logger.debug("Vision receiver initialized to {} {}".format(self.host, self.port))
+
+    def initialize_server(self):
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.bind((self.host, self.port))
 
@@ -25,11 +31,10 @@ class VisionReceiver(Thread):
                                    IP_ADD_MEMBERSHIP,
                                    pack("=4sl", inet_aton(self.host), INADDR_ANY))
 
-        self._detection_frame_queue = detection_queue
-
     def run(self):
+
         self.logger.info('Starting vision receiver thread.')
-        self._wait_for_geometry()
+        self.initialize_server()
         self.receive_packet()
 
     def receive_packet(self):
@@ -40,17 +45,7 @@ class VisionReceiver(Thread):
             if packet.HasField('detection'):
                 self.create_detection_frame(packet)
             if packet.HasField('geometry'):
-                self._detection_frame_queue.put(packet)
-
-    def _wait_for_geometry(self):
-        self.logger.info('Waiting for geometry from {}:{}'.format(self.host, self.port))
-        packet = SSL_WrapperPacket()
-        while self.field.geometry is None:
-            data, _ = self.socket.recvfrom(2048)
-            packet.ParseFromString(data)
-            if packet.HasField('geometry'):
-                self.logger.info('Geometry packet received.')
-                self.field.update(packet.geometry)
+                self._detection_frame_queue.put("thing")
 
     def create_detection_frame(self, packet):
         balls = []
@@ -73,7 +68,7 @@ class VisionReceiver(Thread):
         frame_fields['robots_blue'] = robots_blue
         frame_fields['robots_yellow'] = robots_yellow
 
-        self._detection_frame_queue.put(DetectionFrame(**frame_fields))
+        self._detection_frame_queue.put("THINGD")
 
     @staticmethod
     def parse_proto(proto_packet):

@@ -37,6 +37,7 @@ class Framework(object):
         """
         # logger
         logging.basicConfig(level=logging.DEBUG)
+        self.logger = logging.getLogger("Framework")
 
         # config
         self.cfg = ConfigService()
@@ -52,11 +53,11 @@ class Framework(object):
         self.main_thread = None
         self.main_thread_terminating_event = threading.Event()
         # Communication
-        logging.info("Initializing communication.")
+        self.logger.info("Initializing communication.")
         self.stop_event = Event()
         self.communication_manager = CommunicationManager(self.stop_event)
         self.communication_manager.start()
-        logging.info("Communication initialized.")
+        self.logger.info("Communication initialized.")
 
         self.start_game()
 
@@ -87,7 +88,7 @@ class Framework(object):
             except:
                 pass
             time.sleep(0)
-        logging.debug("method game_thread_main_loop has exited.")
+        self.logger.debug("method game_thread_main_loop has exited.")
 
     def start_game(self):
         """ Démarrage du moteur de l'IA initial, ajustement de l'équipe de l'ia
@@ -145,7 +146,7 @@ class Framework(object):
         """
         self.main_thread_terminating_event.set()
         self.main_thread.join()
-        self.communication_manager.stop()
+        self.communication_manager.join()
         exit(0)
         # send stop command to all robots
         # stop communication
