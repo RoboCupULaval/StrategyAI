@@ -3,22 +3,24 @@ from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, i
 from queue import Queue
 from ipaddress import ip_address
 from struct import pack
-from threading import Thread
+from threading import Thread, Event
+from protobuf_to_dict import protobuf_to_dict
 
 from RULEngine.Communication.protobuf.messages_robocup_ssl_wrapper_pb2 import SSL_WrapperPacket
 from RULEngine.Communication.util.observations import BallObservation, RobotObservation, DetectionFrame
 
 
 class VisionReceiver(Thread):
-    def __init__(self, host: str, port: int, detection_queue: Queue):
+    def __init__(self, host: str, port: int, detection_queue: Queue, stop_event: Event):
         super(VisionReceiver, self).__init__()
         self.logger = logging.getLogger("VisionReceiver")
 
         self.host = host
         self.port = port
+        self.detection_frame_queue = detection_queue
+        self.stop_event = stop_event
 
         self.socket = None
-        self._detection_frame_queue = detection_queue
 
         self.logger.debug("Vision receiver initialized to {} {}".format(self.host, self.port))
 
@@ -39,37 +41,11 @@ class VisionReceiver(Thread):
 
     def receive_packet(self):
         packet = SSL_WrapperPacket()
-        while True:
-            data, _ = self.socket.recvfrom(2048)
+        while not self.stop_event.is_set():
+            try:
+                data, _ = self.socket.recvfrom(2048)
+            except Exception as e:
+                self.logger.debug(e)
+                exit(0)
             packet.ParseFromString(data)
-            if packet.HasField('detection'):
-                self.create_detection_frame(packet)
-            if packet.HasField('geometry'):
-                self._detection_frame_queue.put("thing")
-
-    def create_detection_frame(self, packet):
-        balls = []
-        for ball in packet.detection.balls:
-            ball_fields = VisionReceiver.parse_proto(ball)
-            balls.append(BallObservation(**ball_fields))
-
-        robots_blue = []
-        for robot in packet.detection.robots_blue:
-            robot_fields = VisionReceiver.parse_proto(robot)
-            robots_blue.append(RobotObservation(**robot_fields))
-
-        robots_yellow = []
-        for robot in packet.detection.robots_yellow:
-            robot_fields = VisionReceiver.parse_proto(robot)
-            robots_yellow.append(RobotObservation(**robot_fields))
-
-        frame_fields = VisionReceiver.parse_proto(packet.detection)
-        frame_fields['balls'] = balls
-        frame_fields['robots_blue'] = robots_blue
-        frame_fields['robots_yellow'] = robots_yellow
-
-        self._detection_frame_queue.put("THINGD")
-
-    @staticmethod
-    def parse_proto(proto_packet):
-        return dict(map(lambda f: (f[0].name, f[1]), proto_packet.ListFields()))
+            self.detection_frame_queue.put(protobuf_to_dict(packet))

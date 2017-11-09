@@ -19,17 +19,19 @@ class CommunicationManager(Process):
     def __init__(self, stop_event: Event):
         super(CommunicationManager, self).__init__(name=__name__)
 
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger("CommunicationManager")
 
         self.stop_event = stop_event
 
         self.vision_queue = Queue(self.VISION_QUEUE_MAXSIZE)
         self.vision_communication_manager = None
-        self.logger.debug("Communication Manager initialized")
 
     def initialize_subprocess(self):
         self.vision_communication_manager = VisionCommunicationManager(self.vision_queue, self.stop_event)
         self.vision_communication_manager.start()
+
+        self.logger.debug(" All communications subprocesses are initialized.")
+
 
     def orchestrate_communication(self):
         while not self.stop_event.is_set():
@@ -46,7 +48,7 @@ class CommunicationManager(Process):
 
     def stop(self):
         self.vision_communication_manager.join()
-        logging.debug("Vision Communication Manager joined")
+        self.logger.debug("Vision Communication Manager joined")
         # self.referee_communication_manager.join()
         # logging.debug("Referee Communication Manager joined")
         # self.robot_command_sender.join()

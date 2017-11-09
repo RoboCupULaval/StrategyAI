@@ -12,7 +12,7 @@ import threading    # to stop while runnig the ia and not be obligated to check 
 import time
 import warnings
 import logging
-from multiprocessing import Event
+import multiprocessing
 
 from config.config_service import ConfigService
 from coach import Coach
@@ -52,13 +52,15 @@ class Framework(object):
         # thread - do not touch without a good reason / see the team before hand
         self.main_thread = None
         self.main_thread_terminating_event = threading.Event()
-        # Communication
-        self.logger.info("Initializing communication.")
-        self.stop_event = Event()
-        self.communication_manager = CommunicationManager(self.stop_event)
-        self.communication_manager.start()
-        self.logger.info("Communication initialized.")
+        self.communication_terminating_event = multiprocessing.Event()
 
+        # Communication
+        self.logger.debug("Initializing communication.")
+        self.communication_manager = CommunicationManager(self.communication_terminating_event)
+        self.communication_manager.start()
+        self.logger.debug("Communication initialized.")
+
+        self.logger.debug("Starting AI")
         self.start_game()
 
         self.ai = Coach()
@@ -84,7 +86,7 @@ class Framework(object):
 
         while not self.main_thread_terminating_event.is_set():
             try:
-                print(self.vq.pop())
+                pass
             except:
                 pass
             time.sleep(0)
@@ -95,11 +97,10 @@ class Framework(object):
         et démarrage du/des thread/s"""
 
         # GAME_WORLD TEAM ADJUSTMENT
-        print("Framework partie avec équipe", self.cfg.config_dict["GAME"]["our_color"])
         signal.signal(signal.SIGINT, self._sigint_handler)
-        self.main_thread = threading.Thread(target=self.game_thread_main_loop, name="game_thread_main_loop")
+        self.main_thread = threading.Thread(target=self.game_thread_main_loop, name="AI")
         self.main_thread.start()
-        time.sleep(65)
+        time.sleep(10)
         self.stop_game()
 
     def _create_game_world(self):
@@ -145,6 +146,7 @@ class Framework(object):
             Nettoie les ressources acquises pour pouvoir terminer l'exécution.
         """
         self.main_thread_terminating_event.set()
+        self.communication_terminating_event.set()
         self.main_thread.join()
         self.communication_manager.join()
         exit(0)

@@ -11,7 +11,6 @@ __author__ = 'RoboCupULaval'
 
 
 def set_arg_parser():
-    # TODO add mode debug, redirect, pathfinder!
     prog_desc = "Module de l'intelligence artificielle. L'option est de charger un fichier de configuration."
     arg_parser = argparse.ArgumentParser(prog="RobocupULaval's Team ULtron AI", description=prog_desc)
 
@@ -19,6 +18,7 @@ def set_arg_parser():
                             default="config/sim.cfg")
 
     return arg_parser
+
 
 if __name__ == '__main__':
     # parser for command line arguments

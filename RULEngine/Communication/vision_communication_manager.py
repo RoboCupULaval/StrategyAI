@@ -1,4 +1,5 @@
 import logging
+import threading
 from multiprocessing import Process, Event, Queue
 from queue import Full, Empty
 from time import sleep
@@ -22,6 +23,7 @@ class VisionCommunicationManager(Process):
         self.observation_queue = Queue()
 
         self.stop_event = stop_event
+        self.server_stop_event = threading.Event()
 
         self.receiver = None
 
@@ -29,7 +31,7 @@ class VisionCommunicationManager(Process):
         self.logger.debug("Vision Initialized")
 
     def initialize_server(self):
-        self.receiver = VisionReceiver(self.host, self.port, self.observation_queue)
+        self.receiver = VisionReceiver(self.host, self.port, self.observation_queue, self.server_stop_event)
         self.receiver.start()
 
     def manage_vision(self):
@@ -39,12 +41,13 @@ class VisionCommunicationManager(Process):
                 print(self.observation_queue.get())
                 # print(self.receiver)
             except Full:
-                self.logger.debug("Observation queue couldn't retrive within the time limit")
+                pass
             except Empty:
                 pass
 
+        self.server_stop_event.set()
+
     def run(self):
-        self.logger.debug("Vision started with pid {0}".format(1))
         self.initialize_server()
 
         try:
