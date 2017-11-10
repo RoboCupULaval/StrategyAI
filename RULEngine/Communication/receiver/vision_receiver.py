@@ -1,6 +1,6 @@
 import logging
 from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY
-from queue import Queue
+from queue import Queue, Empty
 from ipaddress import ip_address
 from struct import pack
 from threading import Thread, Event
@@ -24,7 +24,7 @@ class VisionReceiver(Thread):
 
         self.logger.debug("Vision receiver initialized to {} {}".format(self.host, self.port))
 
-    def initialize_server(self):
+    def initialize(self):
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.bind((self.host, self.port))
 
@@ -36,7 +36,7 @@ class VisionReceiver(Thread):
     def run(self):
 
         self.logger.info('Starting vision receiver thread.')
-        self.initialize_server()
+        self.initialize()
         self.receive_packet()
 
     def receive_packet(self):
@@ -44,8 +44,13 @@ class VisionReceiver(Thread):
         while not self.stop_event.is_set():
             try:
                 data, _ = self.socket.recvfrom(2048)
+                packet.ParseFromString(data)
+                self.detection_frame_queue.put(protobuf_to_dict(packet))
             except Exception as e:
-                self.logger.debug(e)
-                exit(0)
-            packet.ParseFromString(data)
-            self.detection_frame_queue.put(protobuf_to_dict(packet))
+                self.logger.debug("{}".format(e))
+
+        self.finalize()
+
+    def finalize(self):
+        self.logger.debug("has exited gracefully finalized")
+        exit(0)

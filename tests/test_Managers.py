@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 import unittest
 
-from RULEngine.GameDomainObjects.Game import Game
+from RULEngine.GameDomainObjects.GameState import GameState
 from RULEngine.GameDomainObjects.Referee import Referee
 from RULEngine.Util.team_color_service import TeamColor, TeamColorService
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
@@ -14,7 +14,7 @@ class TestGameStateManager(unittest.TestCase):
         Teste les différentes fonctionnalités du GameStateManager
     """
     def setUp(self):
-        self.game = Game()
+        self.game = GameState()
         self.referee = Referee
         self.game.set_referee(self.referee)
         self.tcsvc = TeamColorService(TeamColor.BLUE)
@@ -45,14 +45,14 @@ class TestGameStateManager(unittest.TestCase):
         game_state_manager = GameState()
         self.assertRaises(AssertionError,
                           game_state_manager.set_reference, None)
-        game = Game()
+        game = GameState()
         game_world_nok = ReferenceTransferObject(game)
         self.assertRaises(AssertionError,
                           game_state_manager.set_reference, game_world_nok)
         game_world_nok.game.set_referee(self.referee)
         self.assertRaises(AssertionError,
                           game_state_manager.set_reference, game_world_nok)
-        game = Game()
+        game = GameState()
         game_world_nok = ReferenceTransferObject(game)
         game_world_nok.set_team_color_svc(self.tcsvc)
         self.assertRaises(AssertionError,

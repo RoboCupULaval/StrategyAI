@@ -10,16 +10,12 @@
 import signal       # so we can stop gracefully
 import threading    # to stop while runnig the ia and not be obligated to check every loop if we received a stop signal
 import time
-import warnings
 import logging
 import multiprocessing
 
 from config.config_service import ConfigService
 from coach import Coach
-from RULEngine.GameDomainObjects.Game import Game
-from RULEngine.GameDomainObjects.Referee import Referee
-from RULEngine.Util.team_color_service import TeamColorService
-from RULEngine.Communication.communication_manager import CommunicationManager
+from RULEngine.Communication.engine import Engine
 
 
 class Framework(object):
@@ -35,10 +31,12 @@ class Framework(object):
         construit les objets qui sont toujours necéssaire à son fonctionnement
         correct.
         """
-        # logger
-        logging.basicConfig(level=logging.DEBUG)
-        self.logger = logging.getLogger("Framework")
+        # endsignal - do you like to stop gracefully?
+        signal.signal(signal.SIGINT, self._sigint_handler)
 
+        # logger
+        logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
+        self.logger = logging.getLogger("Framework")
         # config
         self.cfg = ConfigService()
 
@@ -50,36 +48,20 @@ class Framework(object):
         self.ai_timestamp = float(self.cfg.config_dict["GAME"]["ai_timestamp"])
 
         # thread - do not touch without a good reason / see the team before hand
-        self.main_thread = None
-        self.main_thread_terminating_event = threading.Event()
+
+        self.main_thread_terminating_event = multiprocessing.Event()
         self.communication_terminating_event = multiprocessing.Event()
 
-        # Communication
+        # Communication - do not touch without a good reason / see the team before hand
         self.logger.debug("Initializing communication.")
-        self.communication_manager = CommunicationManager(self.communication_terminating_event)
+        self.communication_manager = Engine(self.communication_terminating_event)
         self.communication_manager.start()
         self.logger.debug("Communication initialized.")
 
-        self.logger.debug("Starting AI")
-        self.start_game()
+        self.main_thread = multiprocessing.Process(target=self.game_thread_main_loop, name="AI")
+        self.main_thread.start()
 
-        self.ai = Coach()
-        # # Debug
-        # self.incoming_debug = []
-        # self.debug = DebugInterface()
-        # self.outgoing_debug = self.debug.debug_state
-
-        # # GameDomainObjects elements
-        # self.ai_coach = Coach()
-        # self.team_color_service = None
-        #
-        # self._create_game_world()
-        #
-        # # ia couplage
-        # self.ia_coach_mainloop = None
-        # self.ia_coach_initializer = None
-        #
-        # for testing purposes
+        signal.pause()
 
     def game_thread_main_loop(self):
         """ Fonction exécuté et agissant comme boucle principale. """
@@ -89,69 +71,28 @@ class Framework(object):
                 pass
             except:
                 pass
-            time.sleep(0)
+            time.sleep(1)
+
         self.logger.debug("method game_thread_main_loop has exited.")
-
-    def start_game(self):
-        """ Démarrage du moteur de l'IA initial, ajustement de l'équipe de l'ia
-        et démarrage du/des thread/s"""
-
-        # GAME_WORLD TEAM ADJUSTMENT
-        signal.signal(signal.SIGINT, self._sigint_handler)
-        self.main_thread = threading.Thread(target=self.game_thread_main_loop, name="AI")
-        self.main_thread.start()
-        time.sleep(10)
-        self.stop_game()
-
-    def _create_game_world(self):
-        """
-            Créé le GameWorld pour contenir les éléments d'une partie normale:
-             l'arbitre, la GameDomainObjects (Field, teams, players).
-             C'est un data transfer object pour les références du RULEngine vers l'IA
-        """
-
-        self.referee = Referee()
-        self.game = Game()
-        self.game.set_referee(self.referee)
-
-    def _update_players_and_ball(self, vision_frame):
-        """ Met à jour le GameState selon la frame de vision obtenue. """
-        time_delta = self._compute_vision_time_delta(vision_frame)
-        # print(time_delta)
-        self.game.update(vision_frame, time_delta)
-
-    def _is_frame_number_different(self, vision_frame):
-        # print(vision_frame.detection.frame_number)
-        if vision_frame is not None:
-            return vision_frame.detection.frame_number != self.last_frame_number
-        else:
-            return False
-
-    def _compute_vision_time_delta(self, vision_frame):
-        self.last_frame_number = vision_frame.detection.frame_number
-        this_time = vision_frame.detection.t_capture  # time.time()  # vision_frame.detection.t_capture
-        time_delta = this_time - self.last_camera_time
-        self.last_camera_time = this_time
-        # FIXME: hack
-        return time_delta
-
-    def _sim_vision(self):
-        vision_frame = self._acquire_last_vision_frame()
-        if vision_frame.detection.frame_number != self.last_frame_number:
-            time_delta = self._compute_vision_time_delta(vision_frame)
-            self.game.update(vision_frame, time_delta)
+        exit(0)
 
     def stop_game(self):
         """
             Nettoie les ressources acquises pour pouvoir terminer l'exécution.
         """
         self.main_thread_terminating_event.set()
-        self.communication_terminating_event.set()
+        print(self.main_thread)
+        print(self.main_thread)
+        print(self.main_thread)
+        print(self.main_thread)
+
         self.main_thread.join()
+        self.logger.debug("{}".format(self.main_thread.exitcode))
+
+        self.communication_terminating_event.set()
+        self.logger.debug("Main")
         self.communication_manager.join()
         exit(0)
-        # send stop command to all robots
-        # stop communication
 
     # noinspection PyUnusedLocal
     def _sigint_handler(self, *args):

@@ -14,7 +14,7 @@ from RULEngine.GameDomainObjects.Referee import Referee
 from config.config_service import ConfigService
 
 
-class Game:
+class GameState:
     def __init__(self):
         self.ball = Ball()
         self.field = Field(self.ball)

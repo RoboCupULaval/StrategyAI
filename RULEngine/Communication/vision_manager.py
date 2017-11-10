@@ -10,9 +10,9 @@ from RULEngine.Communication.trackbots.tracker.field import Field
 from RULEngine.Communication.util.observations import BallObservation, RobotObservation, DetectionFrame
 
 
-class VisionCommunicationManager(Process):
+class VisionManager(Process):
     def __init__(self, vision_queue: Queue, stop_event: Event):
-        super(VisionCommunicationManager, self).__init__()
+        super(VisionManager, self).__init__()
         self.logger = logging.getLogger("VisionCommunicationManager")
 
         cfg = ConfigService()
@@ -20,9 +20,9 @@ class VisionCommunicationManager(Process):
         self.port = int(cfg.config_dict["COMMUNICATION"]["referee_port"])
 
         self.vision_frame_queue = vision_queue
-        self.observation_queue = Queue()
-
         self.stop_event = stop_event
+
+        self.observation_queue = None
         self.server_stop_event = threading.Event()
 
         self.receiver = None
@@ -31,6 +31,8 @@ class VisionCommunicationManager(Process):
         self.logger.debug("Vision Initialized")
 
     def initialize_server(self):
+        self.observation_queue = Queue()
+        self.server_stop_event = threading.Event()
         self.receiver = VisionReceiver(self.host, self.port, self.observation_queue, self.server_stop_event)
         self.receiver.start()
 
@@ -38,14 +40,12 @@ class VisionCommunicationManager(Process):
         while not self.stop_event.is_set():
             try:
                 pass
-                print(self.observation_queue.get())
+                # print(self.observation_queue.qsize())
                 # print(self.receiver)
             except Full:
                 pass
             except Empty:
                 pass
-
-        self.server_stop_event.set()
 
     def run(self):
         self.initialize_server()
@@ -54,3 +54,11 @@ class VisionCommunicationManager(Process):
             self.manage_vision()
         except KeyboardInterrupt:
             pass
+        self.finalize()
+
+    def finalize(self):
+        self.server_stop_event.set()
+        self.receiver.join()
+        self.logger.debug("VisionReceiver join achived")
+        self.logger.debug("Exiting")
+        exit(0)

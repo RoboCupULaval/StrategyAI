@@ -4,7 +4,7 @@ import unittest
 
 from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.GameDomainObjects.Ball import Ball
-from RULEngine.GameDomainObjects.Game import Game
+from RULEngine.GameDomainObjects.GameState import GameState
 from RULEngine.GameDomainObjects.Referee import Referee
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
@@ -35,7 +35,7 @@ A_PLAYER_ID = 1
 class TestGraph(unittest.TestCase):
     def setUp(self):
         self.game_state = GameState()
-        self.game = Game()
+        self.game = GameState()
         self.game.set_referee(Referee())
         self.game.ball = Ball()
         game_world = ReferenceTransferObject(self.game)
