@@ -49,16 +49,16 @@ class Framework(object):
 
         # thread - do not touch without a good reason / see the team before hand
 
-        self.main_thread_terminating_event = multiprocessing.Event()
+        self.main_thread_terminating_event = threading.Event()
         self.communication_terminating_event = multiprocessing.Event()
 
         # Communication - do not touch without a good reason / see the team before hand
-        self.logger.debug("Initializing communication.")
-        self.communication_manager = Engine(self.communication_terminating_event)
-        self.communication_manager.start()
-        self.logger.debug("Communication initialized.")
+        self.engine = Engine(self.communication_terminating_event)
+        self.logger.debug("Engine is {0}".format(self.engine))
+        self.engine.start()
+        self.logger.debug("Engine started {0}".format(self.engine))
 
-        self.main_thread = multiprocessing.Process(target=self.game_thread_main_loop, name="AI")
+        self.main_thread = threading.Thread(target=self.game_thread_main_loop, name="AI", daemon=True)
         self.main_thread.start()
 
         signal.pause()
@@ -71,7 +71,6 @@ class Framework(object):
                 pass
             except:
                 pass
-            time.sleep(1)
 
         self.logger.debug("method game_thread_main_loop has exited.")
         exit(0)
@@ -80,18 +79,15 @@ class Framework(object):
         """
             Nettoie les ressources acquises pour pouvoir terminer l'exécution.
         """
-        self.main_thread_terminating_event.set()
-        print(self.main_thread)
-        print(self.main_thread)
-        print(self.main_thread)
-        print(self.main_thread)
-
-        self.main_thread.join()
-        self.logger.debug("{}".format(self.main_thread.exitcode))
-
         self.communication_terminating_event.set()
-        self.logger.debug("Main")
-        self.communication_manager.join()
+        self.logger.debug("Engine before join = {0}".format(self.engine))
+        self.engine.join()
+        self.logger.debug("Engine after join = {0}".format(self.engine))
+        self.main_thread_terminating_event.set()
+        self.logger.debug("Ai before join = {0}".format(self.main_thread))
+        self.main_thread.join()
+        self.logger.debug("Ai after join = {0}".format(self.main_thread))
+        self.logger.debug("Main is alive? {}".format(self.main_thread.is_alive()))
         exit(0)
 
     # noinspection PyUnusedLocal

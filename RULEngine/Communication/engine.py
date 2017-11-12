@@ -46,6 +46,8 @@ class Engine(Process):
         exit(0)
 
     def stop(self):
+        self.logger.debug("VisionCommunicationManager before join {0}".
+                          format(self.vision_communication_manager.exitcode))
         self.vision_communication_manager.join()
         self.logger.debug("VisionCommunicationManager joined with {0}".
                           format(self.vision_communication_manager.exitcode))

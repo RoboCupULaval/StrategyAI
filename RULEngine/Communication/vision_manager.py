@@ -40,7 +40,7 @@ class VisionManager(Process):
         while not self.stop_event.is_set():
             try:
                 pass
-                # print(self.observation_queue.qsize())
+                # print(self.observation_queue.get())
                 # print(self.receiver)
             except Full:
                 pass
