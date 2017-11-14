@@ -4,7 +4,7 @@ from functools import partial
 
 from RULEngine.Util.Pose import Position, Pose
 from ai.Algorithm.evaluation_module import best_passing_option
-from ai.STA.Strategy.Strategy import Strategy
+from ai.STA.Strategy.strategy import Strategy
 from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.go_kick import GoKick

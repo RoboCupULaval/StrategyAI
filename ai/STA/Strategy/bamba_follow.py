@@ -1,9 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from functools import partial
-from random import shuffle
-
-from ai.STA.Strategy.Strategy import Strategy
+from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
 from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot
 from ai.Util.role import Role
