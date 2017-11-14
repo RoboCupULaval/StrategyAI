@@ -5,13 +5,12 @@ from RULEngine.Util.Pose import Pose
 
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
+from ai.Util.ai_command import AICommand, AICommandType
 
 
 class Kick(Action):
 
-    def __init__(self, game_state: GameState, player: OurPlayer, force: [int, float], target: Pose=Pose(), end_speed=0,
-                 cruise_speed=0.1):
+    def __init__(self, game_state: GameState, player: OurPlayer, force: [int, float], target: Pose=Pose(), end_speed=0):
         """
             :param game_state: Current state of the game
             :param player: Instance of the player

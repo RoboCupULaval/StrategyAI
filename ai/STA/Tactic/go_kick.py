@@ -92,7 +92,7 @@ class GoKick(Tactic):
         self.tries_flag += 1
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - self.player.pose.position).angle()
-        return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, end_speed=0.2)
+        return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), end_speed=0.2)
 
     def validate_kick(self):
         if self.game_state.get_ball_velocity().norm() > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
