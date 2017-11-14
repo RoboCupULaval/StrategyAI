@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
-from profilehooks import profile
-
+from RULEngine.Debug import debug_interface
+from RULEngine.Util.constant import ROBOT_RADIUS
 from ai.executors.executor import Executor
 from ai.executors.pathfinder_module import PathfinderModule
 from ai.states.world_state import WorldState
@@ -47,4 +47,4 @@ class ModuleExecutor(Executor):
 
     def exec_display_ball_kalman(self):
         position = self.ws.game_state.game.ball.position
-        self.ws.debug_interface.add_circle(center=(position[0], position[1]), radius=90, timeout=0.06)
+        self.ws.debug_interface.add_circle(center=(position[0], position[1]), color=debug_interface.ORANGE.repr(), radius=90, timeout=0.06)

@@ -132,7 +132,7 @@ class Framework(object):
         while not self.thread_terminate.is_set():
             self.time_stamp = time.time()
             self.vision_routine()
-            time.sleep(0)
+            time.sleep(0.01)
 
     def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer):
         """ Démarrage du moteur de l'IA initial, ajustement de l'équipe de l'ia
