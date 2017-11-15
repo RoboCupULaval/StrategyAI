@@ -79,7 +79,7 @@ class PositionForPass(Tactic):
                 A = Position(our_goal_field_limit+1000, (self.game_state.const["FIELD_Y_BOTTOM"] / 3)+pad) + defense_offset
                 B = Position(our_side_center_field_limit, self.game_state.const["FIELD_Y_TOP"] / 3-pad) + defense_offset
             elif role is Role.GOALKEEPER:  # player.role is 'center':
-                A = Position(their_goal_field_limit, self.game_state.const["FIELD_Y_BOTTOM"]+pad)
+                A = Position(their_goal_field_limit, GameState().const["FIELD_Y_BOTTOM"]+pad)
                 B = Position(their_side_center_field_limit, pad)
             return best_position_in_region(self.player, A, B)
         else:
