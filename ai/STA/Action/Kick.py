@@ -5,13 +5,12 @@ from RULEngine.Util.Pose import Pose
 
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
+from ai.Util.ai_command import AICommand, AICommandType
 
 
 class Kick(Action):
 
-    def __init__(self, game_state: GameState, player: OurPlayer, force: [int, float], target: Pose=Pose(), end_speed=0,
-                 cruise_speed=0.1):
+    def __init__(self, game_state: GameState, player: OurPlayer, force: [int, float], target=Pose(), end_speed=0):
         """
             :param game_state: Current state of the game
             :param player: Instance of the player
@@ -25,16 +24,8 @@ class Kick(Action):
         self.end_speed = end_speed
 
     def exec(self):
-        """
-        Execute the kick command
-        :return: Un AIcommand
-        """
-        if self.target is not None:
-            ball_position = self.game_state.get_ball_position()
-            orientation = (self.target.position - self.player.pose.position).angle()
-        else:
-            ball_position = self.player.pose.position
-            orientation = self.player.pose.orientation
+        ball_position = self.player.pose.position if self.target is None else self.game_state.get_ball_position()
+        orientation = (self.target.position - self.player.pose.position).angle()
 
         cmd_params = {"pose_goal": Pose(ball_position, orientation),
                       "kick": True,
