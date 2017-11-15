@@ -3,15 +3,15 @@
 """ Livre des stratégies. """
 from typing import List
 
-from ai.STA.Strategy.DefenseWallNoKick import DefenseWallNoKick
-from ai.STA.Strategy.DefenseWall import DefenseWall
+from ai.STA.Strategy.defense_wall_no_kick import DefenseWallNoKick
+from ai.STA.Strategy.defense_wall import DefenseWall
 from ai.STA.Strategy.direct_free_kick import DirectFreeKick
 from ai.STA.Strategy.indirect_free_kick import IndirectFreeKick
 from ai.STA.Strategy.offense import Offense
-from ai.STA.Strategy.Strategy import Strategy
+from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.indiana_jones import IndianaJones
-from ai.STA.Strategy.HumanControl import HumanControl
-from ai.STA.Strategy.DoNothing import DoNothing
+from ai.STA.Strategy.human_control import HumanControl
+from ai.STA.Strategy.do_nothing import DoNothing
 from ai.STA.Strategy.offense_kickoff import OffenseKickOff
 from ai.STA.Strategy.passes_with_decisions import PassesWithDecisions
 from ai.STA.Strategy.pathfinder_benchmark import Pathfinder_Benchmark

@@ -16,7 +16,7 @@ from ai.Algorithm.evaluation_module import closest_player_to_point, best_passing
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.grab import Grab
-from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.ProtectGoal import ProtectGoal
@@ -33,22 +33,12 @@ class GoalKeeper(Tactic):
     Tactique du gardien de but standard. Le gardien doit se placer entre la balle et le but, tout en restant à
     l'intérieur de son demi-cercle. Si la balle entre dans son demi-cercle, le gardien tente d'aller en prendre
     possession.
-    méthodes:
-        exec(self) : Exécute une Action selon l'état courant
-    attributs:
-        game_state: L'état courant du jeu.
-        player_id : Identifiant du gardien de but
-        current_state : L'état courant de la tactique
-        next_state : L'état suivant de la tactique
-        status_flag : L'indicateur de progression de la tactique
-        is_yellow : un booléen indiquant si le gardien est dans l'équipe des jaunes, ce qui détermine quel but est
-        protégé. Les jaunes protègent le but de droite et les bleus, le but de gauche.
     """
     # TODO: À complexifier pour prendre en compte la position des joueurs adverses et la vitesse de la balle.
 
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(),
                  penalty_kick=False, args: List[str]=None,):
-        Tactic.__init__(self, game_state, player, target, args)
+        super().__init__(game_state, player, target, args)
         self.is_yellow = self.player.team.team_color == TeamColor.YELLOW
         self.current_state = self.protect_goal
         self.next_state = self.protect_goal
@@ -65,7 +55,7 @@ class GoalKeeper(Tactic):
 
     def protect_goal(self):
         if not self.penalty_kick:
-            if self.player == closest_player_to_point(GameState().get_ball_position()).player and\
+            if self.player == closest_player_to_point(self.game_state.get_ball_position()).player and\
                             self._get_distance_from_ball() < 100:
                 self.next_state = self.go_behind_ball
             else:
@@ -74,7 +64,7 @@ class GoalKeeper(Tactic):
                                minimum_distance=300,
                                maximum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"]/2)
         else:
-            our_goal = Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
+            our_goal = Position(self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
             opponent_kicker = player_with_ball(2*ROBOT_RADIUS)
             ball_position = self.game_state.get_ball_position()
             if opponent_kicker is not None:
@@ -88,24 +78,17 @@ class GoalKeeper(Tactic):
                     goalkeeper_orientation = opponent_kicker_orientation
 
                 y_position_on_line = ball_to_goal * tan(opponent_kicker_orientation)
-                y_position_on_line = clamp(y_position_on_line,
-                                           -GameState().const["FIELD_GOAL_WIDTH"]/4,
-                                           GameState().const["FIELD_GOAL_WIDTH"]/4)
+                width = self.game_state.const["FIELD_GOAL_WIDTH"]
+                y_position_on_line = clamp(y_position_on_line, -width, width)
 
-                return MoveToPosition(self.game_state,
-                              self.player,
-                              Pose(our_goal.x, y_position_on_line, goalkeeper_orientation),
-                              pathfinder_on=True,
-                              cruise_speed=2)
+                destination = Pose(our_goal.x, y_position_on_line, goalkeeper_orientation)
+
             else:
-                return MoveToPosition(self.game_state,
-                              self.player,
-                              Pose(our_goal),
-                              pathfinder_on=True,
-                              cruise_speed=2)
+                destination = Pose(our_goal)
+            return MoveToPosition(self.game_state, self.player, destination, pathfinder_on=True, cruise_speed=2)
 
     def go_behind_ball(self):
-        if not self.player == closest_player_to_point(GameState().get_ball_position()).player:
+        if not self.player == closest_player_to_point(self.game_state.get_ball_position()).player:
             self.next_state = self.protect_goal
         elif self._is_player_towards_ball_and_target():
             self.next_state = self.grab_ball
@@ -116,7 +99,7 @@ class GoalKeeper(Tactic):
                         self.target.position, 250, pathfinder_on=True)
 
     def grab_ball(self):
-        if not self.player == closest_player_to_point(GameState().get_ball_position()).player:
+        if not self.player == closest_player_to_point(self.game_state.get_ball_position()).player:
             self.next_state = self.protect_goal
         elif self._get_distance_from_ball() < 120:
             self.next_state = self.kick
@@ -127,7 +110,7 @@ class GoalKeeper(Tactic):
         return Grab(self.game_state, self.player)
 
     def kick(self):
-        if not self.player == closest_player_to_point(GameState().get_ball_position()).player:
+        if not self.player == closest_player_to_point(self.game_state.get_ball_position()).player:
             self.next_state = self.protect_goal
         else:
             self.next_state = self.kick_charge
@@ -143,11 +126,13 @@ class GoalKeeper(Tactic):
         return compare_angle(target_to_ball.angle(), ball_to_player.angle(), abs_tol=abs_tol)
 
     def _find_best_passing_option(self):
-        if self.target_assignation_last_time is None \
-                or time.time() - self.target_assignation_last_time > TARGET_ASSIGNATION_DELAY:
+        if (self.target_assignation_last_time is None
+                or time.time() - self.target_assignation_last_time > TARGET_ASSIGNATION_DELAY):
+
             tentative_target_id = best_passing_option(self.player)
             if tentative_target_id is None:
-                self.target = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
+                self.target = Pose(Position(self.game_state.const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
             else:
-                self.target = Pose(GameState().get_player_position(tentative_target_id))
+                self.target = Pose(self.game_state.get_player_position(tentative_target_id))
+
             self.target_assignation_last_time = time.time()

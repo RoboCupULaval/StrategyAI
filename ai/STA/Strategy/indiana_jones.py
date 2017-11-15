@@ -3,10 +3,8 @@
 from functools import partial
 
 from RULEngine.Util.Pose import Position, Pose
-from ai.STA.Strategy.Strategy import Strategy
-from RULEngine.Util.constant import PLAYER_PER_TEAM
-from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
-from ai.STA.Tactic.Stop import Stop
+from ai.STA.Strategy.strategy import Strategy
+from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.role import Role
 

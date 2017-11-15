@@ -8,7 +8,7 @@ from RULEngine.Util.Pose import Pose
 from ai.Algorithm.evaluation_module import closest_player_to_point
 
 from ai.states.game_state import GameState
-from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from RULEngine.Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
@@ -26,10 +26,7 @@ class FaceOpponent(Tactic):
         self.charge_kick = charge_kick
         self.end_speed = end_speed
         self.dribbler_on = dribbler_on
-        if len(self.args) > 0:
-            self.cruise_speed = float(args[0])
-        else:
-            self.cruise_speed = cruise_speed
+        self.cruise_speed = float(args[0]) if len(self.args > 0) else cruise_speed
 
     def exec(self):
         self.target_player = closest_player_to_point(self.game_state.get_ball_position(), our_team=False).player

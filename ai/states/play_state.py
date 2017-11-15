@@ -5,13 +5,11 @@ from typing import List, Tuple, Callable, Any
 from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.singleton import Singleton
-from ai.Algorithm.auto_play import SimpleAutoPlay
-from ai.STA.Strategy.Strategy import Strategy
-from ai.STA.Strategy.StrategyBook import StrategyBook
-from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.TacticBook import TacticBook
+from ai.STA.Strategy.strategy import Strategy
+from ai.STA.Strategy.strategy_book import StrategyBook
+from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.tactic_book import TacticBook
 from ai.states.game_state import GameState
-from config.config_service import ConfigService
 
 
 class PlayState(object, metaclass=Singleton):
