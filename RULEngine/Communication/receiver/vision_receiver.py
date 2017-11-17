@@ -1,12 +1,11 @@
 import logging
-from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY
-from queue import Queue, Full
+from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY, timeout
+from queue import Full
 from ipaddress import ip_address
 from struct import pack
-from multiprocessing import Process, Event
+from multiprocessing import Process, Event, Queue
 from protobuf_to_dict import protobuf_to_dict
 from google.protobuf.message import DecodeError
-
 
 from RULEngine.Communication.protobuf.messages_robocup_ssl_wrapper_pb2 import SSL_WrapperPacket
 
@@ -33,6 +32,7 @@ class VisionReceiver(Process):
             self.socket.setsockopt(IPPROTO_IP,
                                    IP_ADD_MEMBERSHIP,
                                    pack("=4sl", inet_aton(self.host), INADDR_ANY))
+        self.socket.settimeout(0.2)
         self.logger.debug("Socket initialized")
 
     def run(self):
@@ -58,7 +58,9 @@ class VisionReceiver(Process):
             except DecodeError:
                 self.logger.error("Vision receiver had trouble decoding a packet! Are you listening "
                                   "to the correct port")
+            except timeout:
+                self.logger.error("Socket timed out after {}, Are you listening to the correct port?".format(0.2))
 
     def finalize(self):
-        self.logger.debug("has exited gracefully finalized")
-        exit(0)
+        self.logger.debug("has exited gracefully")
+        # exit(0)

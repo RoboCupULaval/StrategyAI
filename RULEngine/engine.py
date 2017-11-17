@@ -2,11 +2,14 @@ import logging
 from multiprocessing import Process, Queue, Event
 from time import sleep
 
+from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.vision_manager import VisionManager
 from RULEngine.Communication.debug_cmds_receiver_communication_manager import DebugCommandReceiverCommunicationManager
 from RULEngine.Communication.debug_cmds_sender_communication_manager import DebugCommandSenderCommunicationManager
 from RULEngine.Communication.referee_communication_manager import RefereeCommunicationManager
 from RULEngine.Communication.robot_cmds_sender_communication_manager import RobotCommandSenderCommunicationManager
+from RULEngine.tracker import Tracker
+from config.config_service import ConfigService
 
 
 class Engine(Process):
@@ -19,38 +22,45 @@ class Engine(Process):
     def __init__(self, stop_event: Event):
         super(Engine, self).__init__(name=__name__)
 
-        self.logger = logging.getLogger("CommunicationManager")
+        self.logger = logging.getLogger("Engine")
+        self.cfg = ConfigService()
 
         self.stop_event = stop_event
 
         self.vision_queue = Queue(self.VISION_QUEUE_MAXSIZE)
-        self.vision_communication_manager = None
+        self.ui_debug_sender = None
+        self.tracker = Tracker(self.vision_queue)
+
+        self.vision_receiver = None
 
     def initialize_subprocess(self):
-        self.vision_communication_manager = VisionManager(self.vision_queue, self.stop_event)
-        self.vision_communication_manager.start()
+        host = self.cfg.config_dict["COMMUNICATION"]["referee_udp_address"]
+        port = int(self.cfg.config_dict["COMMUNICATION"]["referee_port"])
 
-        self.logger.debug("Engine has initialized.")
+        self.vision_receiver = VisionReceiver(host, port, self.vision_queue, self.stop_event)
+        self.vision_receiver.start()
 
-    def orchestrate_communication(self):
+        self.logger.debug("has initialized.")
+
+    def loop(self):
         while not self.stop_event.is_set():
             sleep(0.01)
 
     def run(self):
         self.initialize_subprocess()
         try:
-            self.orchestrate_communication()
+            self.loop()
         except KeyboardInterrupt:
             pass
         self.stop()
         exit(0)
 
     def stop(self):
-        self.logger.debug("VisionCommunicationManager before join {0}".
-                          format(self.vision_communication_manager.exitcode))
-        self.vision_communication_manager.join()
+        self.logger.debug(" before join {0}".
+                          format(self.vision_receiver.is_alive()))
+        self.vision_receiver.join()
         self.logger.debug("VisionCommunicationManager joined with {0}".
-                          format(self.vision_communication_manager.exitcode))
+                          format(self.vision_receiver.is_alive()))
         # self.referee_communication_manager.join()
         # logging.debug("Referee Communication Manager joined")
         # self.robot_command_sender.join()
