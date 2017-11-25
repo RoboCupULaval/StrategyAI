@@ -1,10 +1,9 @@
 import logging
 import time
+import numpy as np
 from multiprocessing import Queue
-import threading
 from typing import Dict, List
 
-import numpy as np
 from RULEngine.Util.filters.robot_kalman_filter import RobotFilter
 from RULEngine.Util.multiballservice import MultiBallService
 
@@ -22,9 +21,6 @@ class Tracker:
     def __init__(self, vision_queue: Queue):
         self.logger = logging.getLogger('Tracker')
 
-        self.thread_terminate = threading.Event()
-        self._thread = threading.Thread(target=self.tracker_main_loop)
-
         self.last_sending_time = time.time()
 
         self.vision_queue = vision_queue
@@ -35,12 +31,7 @@ class Tracker:
 
         self._current_timestamp = None
 
-    def start(self):
-        self._thread.start()
-
     def tracker_main_loop(self):
-        while not self.thread_terminate.is_set():
-
             detection_frame = self.vision_queue.get()
             self._current_timestamp = detection_frame["t_capture"]
 

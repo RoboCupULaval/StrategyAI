@@ -1,18 +1,16 @@
-from tracker.filters.kalman_filter import KalmanFilter
 import numpy as np
-from tracker.constants import BallConst
+from RULEngine.Util.filters.kalman_filter import KalmanFilter
 
 
 class BallFilter(KalmanFilter):
+    INITIAL_CONFIDENCE = 20
 
-    INITIAL_CONFIDENCE = BallConst.INITIAL_CONFIDENCE
+    INITIAL_STATE_COVARIANCE = 1000
 
-    INITIAL_STATE_COVARIANCE = BallConst.INITIAL_STATE_COVARIANCE
+    POSITION_PROCESS_COVARIANCE = 1
+    VELOCITY_PROCESS_COVARIANCE = 10
 
-    POSITION_PROCESS_COVARIANCE = BallConst.POSITION_PROCESS_COVARIANCE
-    VELOCITY_PROCESS_COVARIANCE = BallConst.VELOCITY_PROCESS_COVARIANCE
-
-    POSITION_OBSERVATION_COVARIANCE = BallConst.POSITION_OBSERVATION_COVARIANCE
+    POSITION_OBSERVATION_COVARIANCE = 2
 
     def __init__(self):
         self.confidence = BallFilter.INITIAL_CONFIDENCE

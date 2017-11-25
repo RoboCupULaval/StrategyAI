@@ -11,6 +11,8 @@ from RULEngine.Communication.protobuf.messages_robocup_ssl_wrapper_pb2 import SS
 
 
 class VisionReceiver(Process):
+    TIME_OUT = 0.01
+
     def __init__(self, host: str, port: int, detection_queue: Queue, stop_event: Event):
         super(VisionReceiver, self).__init__()
         self.logger = logging.getLogger("VisionReceiver")
@@ -32,7 +34,7 @@ class VisionReceiver(Process):
             self.socket.setsockopt(IPPROTO_IP,
                                    IP_ADD_MEMBERSHIP,
                                    pack("=4sl", inet_aton(self.host), INADDR_ANY))
-        self.socket.settimeout(0.2)
+        self.socket.settimeout(self.TIME_OUT)
         self.logger.debug("Socket initialized")
 
     def run(self):
@@ -59,8 +61,9 @@ class VisionReceiver(Process):
                 self.logger.error("Vision receiver had trouble decoding a packet! Are you listening "
                                   "to the correct port")
             except timeout:
-                self.logger.error("Socket timed out after {}, Are you listening to the correct port?".format(0.2))
+                self.logger.error("Socket timed out after {}, Are you listening to the correct port?".
+                                  format(self.TIME_OUT))
 
     def finalize(self):
         self.logger.debug("has exited gracefully")
-        # exit(0)
+        exit(0)

@@ -13,7 +13,7 @@ from config.config_service import ConfigService
 
 
 class Engine(Process):
-    VISION_QUEUE_MAXSIZE = 100
+    VISION_QUEUE_MAXSIZE = 20
     ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
@@ -38,13 +38,14 @@ class Engine(Process):
         port = int(self.cfg.config_dict["COMMUNICATION"]["referee_port"])
 
         self.vision_receiver = VisionReceiver(host, port, self.vision_queue, self.stop_event)
+        self.vision_receiver.daemon = True
         self.vision_receiver.start()
 
         self.logger.debug("has initialized.")
 
     def loop(self):
         while not self.stop_event.is_set():
-            sleep(0.01)
+            print(self.vision_queue.qsize())
 
     def run(self):
         self.initialize_subprocess()
@@ -56,11 +57,9 @@ class Engine(Process):
         exit(0)
 
     def stop(self):
-        self.logger.debug(" before join {0}".
-                          format(self.vision_receiver.is_alive()))
-        self.vision_receiver.join()
-        self.logger.debug("VisionCommunicationManager joined with {0}".
-                          format(self.vision_receiver.is_alive()))
+        self.vision_receiver.join(0.3)  # timeout needed for some reason even though the process exit gracefully
+        self.logger.debug("VisionCommunicationManager joined now is -> {0}".
+                          format("alive" if self.vision_receiver.is_alive() else "dead"))
         # self.referee_communication_manager.join()
         # logging.debug("Referee Communication Manager joined")
         # self.robot_command_sender.join()
