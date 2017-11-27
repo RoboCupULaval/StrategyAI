@@ -8,7 +8,7 @@ from RULEngine.Util.Position import Position
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 from RULEngine.GameDomainObjects.Referee import Referee
 from RULEngine.Util.team_color_service import TeamColorService
-from RULEngine.GameDomainObjects.GameState import GameState
+from RULEngine.GameDomainObjects.Game import Game
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import *
 from ai.STA.Action.GoBehind import GoBehind
@@ -28,8 +28,8 @@ A_PLAYER_ID = 1
 class TestActions(unittest.TestCase):
     def setUp(self):
         # ToDo : Use mock instead of actual objects
-        self.game_state = GameState()
-        self.game = GameState()
+        self.game_state = Game()
+        self.game = Game()
         self.game.set_referee(Referee())
         game_world = ReferenceTransferObject(self.game)
         game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW))

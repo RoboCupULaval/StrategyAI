@@ -1,9 +1,11 @@
 from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.SpeedPose import SpeedPose
 from enum import Enum
 
 from collections import ChainMap
+
 
 class AICommandType(Enum):
     STOP = 0
@@ -15,6 +17,7 @@ class AIControlLoopType(Enum):
     OPEN = 0
     SPEED = 1
     POSITION = 2
+
 
 _locked_keys = ['player', 'robot_id']
 
@@ -61,7 +64,7 @@ class AICommand(ChainMap):
     """
     Contains the AI state of a robot before sending it.
     """
-    def __init__(self, player: OurPlayer, command: AICommandType=AICommandType.STOP, **kwargs):
+    def __init__(self, player: Player, command: AICommandType=AICommandType.STOP, **kwargs):
         kwargs['player'] = player
         kwargs['robot_id'] = player.id
         kwargs['command'] = command

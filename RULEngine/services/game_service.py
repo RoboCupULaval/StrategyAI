@@ -1,5 +1,5 @@
-from RULEngine.GameDomainObjects.Field import Field
-from RULEngine.GameDomainObjects.GameState import GameState
+from RULEngine.GameDomainObjects.Shitty_Field import Shitty_Field
+from RULEngine.GameDomainObjects.Game import Game
 from RULEngine.GameDomainObjects.Referee import Referee
 from RULEngine.Util.singleton import Singleton
 
@@ -12,6 +12,6 @@ class WorldService:
         self.field = None
 
     def create_game(self):
-        self.game = GameState()
+        self.game = Game()
         self.referee = Referee()
-        self.field = Field()
+        self.field = Shitty_Field()

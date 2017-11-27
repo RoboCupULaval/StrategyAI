@@ -19,16 +19,13 @@ class IntelligentModule(object, metaclass=ABCMeta):
         Actuellement ne défini que l'attribut *state*
     """
 
-    def __init__(self, world_state):
+    def __init__(self):
         """
             Reçoit une référence vers InfoManager. Cette référence est renomée
             comme étant *state*.
 
             :param world_state: (WorldState) Référence vers le worldstate.
         """
-
-        self.ws = world_state
-        self.debug_interface = DebugInterface()
 
     @abstractmethod
     def update(self):
@@ -53,8 +50,8 @@ class Pathfinder(IntelligentModule, metaclass=ABCMeta):
         La valeur associée est une liste de *Pose*.
     """
     # TODO Make this class better please!
-    def __init__(self, worldstate):
-        super().__init__(worldstate)
+    def __init__(self):
+        super().__init__()
 
         # TODO see if we can remove this part!
         self.paths = {}
@@ -70,31 +67,5 @@ class Pathfinder(IntelligentModule, metaclass=ABCMeta):
 
     @abstractmethod
     def update(self):
-        """
-            Prepare le pathfinder pour retourner les paths voulues. ie.
-            calcule toutes les paths activés
-        :return:
-        """
-
-    @abstractmethod
-    def get_path(self, player: OurPlayer, target=Pose(), cruise_speed=1) -> List[Pose]:
-        """
-            Si l'ID est précisé, retourne la liste des *Pose* pour le chemin
-            de ce robot. Autrement, retourne le dictionnaire.
-
-            :param player: Player une instance de robot de notre équipe
-            :param target: LEGACY -> a etre supprimer dans versin future.
-            :param cruise_speed: asdf->dsf
-            :return: [Pose, Pose, ...]
-        """
-
-    @abstractmethod
-    def get_next_point(self, robot_id=None):
-        """
-            Si l'ID est précisé, retourne le prochain point *Pose* pour le
-            chemin de ce robot. Autrement, retourne dictionaire des
-            prochains points avec clé l'id des robots.
-            :param robot_id: int entre 0 à 11 représentant l'id des robots de
-                             l'équipe alliée
-            :return: {id : Pose, ... }
-        """
+        """ Effectue la mise à jour du module """
+        pass

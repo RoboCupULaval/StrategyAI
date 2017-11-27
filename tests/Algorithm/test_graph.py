@@ -4,7 +4,7 @@ import unittest
 
 from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.GameDomainObjects.Ball import Ball
-from RULEngine.GameDomainObjects.GameState import GameState
+from RULEngine.GameDomainObjects.Game import Game
 from RULEngine.GameDomainObjects.Referee import Referee
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
@@ -34,14 +34,14 @@ def foo2():
 A_PLAYER_ID = 1
 class TestGraph(unittest.TestCase):
     def setUp(self):
-        self.game_state = GameState()
-        self.game = GameState()
+        self.game_state = Game()
+        self.game = Game()
         self.game.set_referee(Referee())
         self.game.ball = Ball()
         game_world = ReferenceTransferObject(self.game)
         game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW))
         self.game_state.set_reference(game_world)
-        self.game_state = GameState()
+        self.game_state = Game()
         self.empty_graph = Graph()
         self.graph1 = Graph()
         self.a_player = OurPlayer(TeamColor.YELLOW, A_PLAYER_ID)

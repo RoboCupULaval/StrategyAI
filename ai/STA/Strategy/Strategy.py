@@ -11,8 +11,6 @@ from ai.Util.role import Role
 from ai.states.game_state import GameState
 
 
-# Pour l'instant, les stratégies n'optimisent pas la gestion des ressources (ex: toujours le même robot qui va chercher
-# la balle et non le plus proche). TODO: À optimiser
 class Strategy(metaclass=ABCMeta):
     """ Définie l'interface commune aux stratégies. """
     def __init__(self, p_game_state: GameState):
@@ -34,9 +32,7 @@ class Strategy(metaclass=ABCMeta):
             role_mapping[Role.GOALKEEPER] = current_goaler
             role_mapping[new_goaler_old_role] = new_goaler
 
-
         self.game_state.map_players_to_roles_by_player(role_mapping)
-
 
     def add_tactic(self, role: Role, tactic: Tactic) -> None:
         """

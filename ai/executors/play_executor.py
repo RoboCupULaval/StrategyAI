@@ -1,27 +1,26 @@
 # Under MIT License, see LICENSE.txt
 import time
 
-from RULEngine.Debug.debug_interface import DebugInterface
-from RULEngine.GameDomainObjects.Referee import RefereeCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.Util.role import Role
 from ai.executors.executor import Executor
-from ai.states.world_state import WorldState
+from ai.states.game_state import GameState
+from ai.states.play_state import PlayState
 from config.config_service import ConfigService
 
 
 class PlayExecutor(Executor):
 
-    def __init__(self, p_world_state: WorldState):
+    def __init__(self):
         """
         initialise le PlayExecutor
 
         :param p_world_state: (WorldState) instance du worldstate
         """
-        super().__init__(p_world_state)
+        super().__init__()
         cfg = ConfigService()
-        self.auto_play = SimpleAutoPlay(self.ws)
-        self.ws.play_state.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
+        self.auto_play = SimpleAutoPlay()
+        PlayState().autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
         self.last_time = 0
         self.last_available_players = {}
         self.goalie_id = -1
@@ -32,23 +31,15 @@ class PlayExecutor(Executor):
 
         :return: None
         """
-        if self.ws.play_state.autonomous_flag:
-            if self.ws.game_state.game.referee.team_info['ours']['goalie'] != self.goalie_id:
-                self.goalie_id = self.ws.game_state.game.referee.team_info['ours']['goalie']
-                self.ws.game_state.update_player_for_locked_role(self.goalie_id, Role.GOALKEEPER)
+        if PlayState().autonomous_flag:
+            if GameState().game.referee.team_info['ours']['goalie'] != self.goalie_id:
+                self.goalie_id = GameState().game.referee.team_info['ours']['goalie']
+                GameState().update_player_for_locked_role(self.goalie_id, Role.GOALKEEPER)
             self.auto_play.update(self._has_available_players_changed())
 
         self._execute_strategy()
 
-        if time.time() - self.last_time > 0.25:
-            # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
-            self._send_books()
-            self.ws.debug_interface.send_team_color()
-            self.last_time = time.time()
-
-        self._send_robots_status()
-        self._send_auto_state()
-
+        # self._send_auto_state()
 
     def _execute_strategy(self) -> None:
         """
@@ -58,51 +49,33 @@ class PlayExecutor(Executor):
         """
         # Applique un stratégie par défault s'il n'en a pas (lors du démarage par exemple)
         # TODO change this so we don't send humancontrol when nothing is set/ Donothing would be better
-        if self.ws.play_state.current_strategy is None:
-            self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy("HumanControl")(self.ws.game_state))
+        if PlayState().current_strategy is None:
+            PlayState().set_strategy(PlayState().get_new_strategy("HumanControl")(GameState()))
         # L'éxécution en tant que telle
-        self.ws.play_state.current_strategy.exec()
+        PlayState().current_strategy.exec()
         # self.ws.play_state.current_ai_commands = self.ws.play_state.current_strategy.exec()
 
-    def _send_robots_status(self) -> None:
-        """
-        Envoie le status des robots (id, nom tactic + flag de status,
-         nom action (phase tactic), target) par le debug interface.
+    # def _send_auto_state(self) -> None:
+    #     self.ws.debug_interface.send_play_info(self.ws.game_state.game.referee.info,
+    #                                             self.ws.game_state.game.referee.team_info,
+    #                                             self.auto_play.info,
+    #                                             self.ws.play_state.autonomous_flag)
 
-        :return: None
-        """
-        states = self.ws.play_state.get_current_tactical_state()
-        for state in states:
-            player_id = state[0]
-            tactic_name = state[1]
-            action_name = state[2]
-            target = (int(state[3].position.x), int(state[3].position.y))
-            self.ws.debug_interface.send_robot_strategic_state(player_id,
-                                                               tactic_name,
-                                                               action_name,
-                                                               target)
-
-    def _send_auto_state(self) -> None:
-        self.ws.debug_interface.send_play_info(self.ws.game_state.game.referee.info,
-                                                self.ws.game_state.game.referee.team_info,
-                                                self.auto_play.info,
-                                                self.ws.play_state.autonomous_flag)
-
-    def _send_books(self) -> None:
-        """
-        Envoie les livres de stratégies et de tactiques
-
-        :return: None
-        """
-        cmd_tactics = {'strategy': self.ws.play_state.
-                       strategy_book.get_strategies_name_list(),
-                       'tactic': self.ws.play_state.tactic_book.
-                       get_tactics_name_list(),
-                       'action': ['None']}
-        self.ws.debug_interface.send_books(cmd_tactics)
+    # def _send_books(self) -> None:
+    #     """
+    #     Envoie les livres de stratégies et de tactiques
+    #
+    #     :return: None
+    #     """
+    #     cmd_tactics = {'strategy': self.ws.play_state.
+    #                    strategy_book.get_strategies_name_list(),
+    #                    'tactic': self.ws.play_state.tactic_book.
+    #                    get_tactics_name_list(),
+    #                    'action': ['None']}
+    #     self.ws.debug_interface.send_books(cmd_tactics)
 
     def _has_available_players_changed(self) -> bool:
-        available_players = self.ws.game_state.my_team.available_players
+        available_players = GameState().my_team.available_players
         player_change = False
         for i in available_players:
             if i not in self.last_available_players:

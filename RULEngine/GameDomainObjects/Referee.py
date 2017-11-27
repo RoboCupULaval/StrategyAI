@@ -1,7 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
 from enum import IntEnum
+from typing import Dict
 
+from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import TeamColor
 from RULEngine.Util.team_color_service import TeamColorService
 from config.config_service import ConfigService
@@ -29,21 +31,22 @@ class RefereeCommand(IntEnum):
     BALL_PLACEMENT_YELLOW = 16
     BALL_PLACEMENT_BLUE = 17
 
-    # internal commands
-    PREPARE_KICKOFF_US = 34
-    PREPARE_KICKOFF_THEM = 35
-    PREPARE_PENALTY_US = 36
-    PREPARE_PENALTY_THEM = 37
-    DIRECT_FREE_US = 38
-    DIRECT_FREE_THEM = 39
-    INDIRECT_FREE_US = 40
-    INDIRECT_FREE_THEM = 41
-    TIMEOUT_US = 42
-    TIMEOUT_THEM = 43
-    GOAL_US = 44
-    GOAL_THEM = 45
-    BALL_PLACEMENT_US = 46
-    BALL_PLACEMENT_THEM = 47
+
+class InternalRefereeCommand(IntEnum):
+    PREPARE_KICKOFF_US = 4
+    PREPARE_KICKOFF_THEM = 5
+    PREPARE_PENALTY_US = 6
+    PREPARE_PENALTY_THEM = 7
+    DIRECT_FREE_US = 8
+    DIRECT_FREE_THEM = 9
+    INDIRECT_FREE_US = 10
+    INDIRECT_FREE_THEM = 11
+    TIMEOUT_US = 12
+    TIMEOUT_THEM = 13
+    GOAL_US = 14
+    GOAL_THEM = 15
+    BALL_PLACEMENT_US = 16
+    BALL_PLACEMENT_THEM = 17
 
 
 class Stage(IntEnum):
@@ -63,55 +66,45 @@ class Stage(IntEnum):
     POST_GAME = 13
 
 
+new_team_info = {"name": "",
+                 "score": 0,
+                 "red_cards": 0,
+                 "yellow_cards": 0,
+                 "yellow_card_times": [],
+                 "timeouts": 4,
+                 "timeout_time": 0,
+                 "goalie": 0}
+
+
 class Referee:
+
+
     def __init__(self):
         self.command = RefereeCommand.STOP
-        self.prepare_command = None
         self.stage = Stage.NORMAL_FIRST_HALF_PRE
         self.stage_time_left = 0
-        self.ball_placement_point = (0, 0)
-        self.team_info = {"ours": {
-                            "name": "",
-                            "score": 0,
-                            "red_cards": 0,
-                            "yellow_cards": 0,
-                            "yellow_card_times": [],
-                            "timeouts": 4,
-                            "timeout_time": 0,
-                            "goalie": 0
-                        },
-                        "theirs": {
-                            "name": "",
-                            "score": 0,
-                            "red_cards": 0,
-                            "yellow_cards": 0,
-                            "yellow_card_times": [],
-                            "timeouts": 4,
-                            "timeout_time": 0,
-                            "goalie": 0
-                        }}
+        self.ball_placement_point = Position()
+        self.team_info = {"ours": dict(new_team_info), "theirs": dict(new_team_info)}
 
     @property
-    def info(self):
-        return {
-            "command": str(self.command),
-            "stage": str(self.stage),
-            "stage_time_left": self.stage_time_left
-        }
+    def info(self) -> str:
+        return "command {}\nstage {}\nstage_time_left {}".format(str(self.command),
+                                                                 str(self.stage),
+                                                                 self.stage_time_left)
 
-    def update(self, frames):
-        if frames:
-            self.stage = Stage(frames[-1].stage)
-            self.stage_time_left = frames[-1].stage_time_left
+    def update(self, referee_info: Dict) -> None:
 
-            raw_command = RefereeCommand(frames[-1].command)
-            self.command = self._parse_command(raw_command)
-            if self.command == RefereeCommand.BALL_PLACEMENT_US or self.command == RefereeCommand.BALL_PLACEMENT_THEM:
-                self.ball_placement_point = (frames[-1].point.x, frames[-1].point.y)
+        self.stage = Stage(referee_info["stage"])
+        self.stage_time_left = referee_info["stage_time_left"]
 
-            self._parse_team_info(frames[-1])
+        raw_command = RefereeCommand(referee_info["command"])
+        self.command = self._parse_command(raw_command)
+        if self.command == RefereeCommand.BALL_PLACEMENT_US or self.command == RefereeCommand.BALL_PLACEMENT_THEM:
+            self.ball_placement_point = (referee_info["point"]["x"], referee_info["point"]["y"])
 
-    def _parse_command(self, command):
+        self._parse_team_info(referee_info)
+
+    def _parse_command(self, command: RefereeCommand):
         # Color wise commands
         parsed_cmd = command
         if command >= RefereeCommand.PREPARE_KICKOFF_YELLOW:
@@ -143,24 +136,25 @@ class Referee:
             self.team_info[key]['timeout_time'] = info[key].timeout_time
             self.team_info[key]['goalie'] = info[key].goalie
 
-    def _convert_raw_to_us(self, command):
-        if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW:
-            return command + 30
-        else:
-            return command + 29
+    # TODO
+    # def _convert_raw_to_us(self, command):
+    #     if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW:
+    #         return command + 30
+    #     else:
+    #         return command + 29
+    #
+    # def _convert_raw_to_them(self, command):
+    #     if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW:
+    #         return command + 30
+    #     else:
+    #         return command + 31
 
-    def _convert_raw_to_them(self, command):
-        if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW:
-            return command + 30
-        else:
-            return command + 31
-
-    def _is_our_team_command(self, command):
-        return (self._is_yellow_command(command) and TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW) or\
-                (self._is_blue_command(command) and TeamColorService().OUR_TEAM_COLOR is TeamColor.BLUE)
-
-    def _is_yellow_command(self, command):
-        return (command % 2) == 0 # even commands are yellow commands
-
-    def _is_blue_command(self, command):
-        return not self._is_yellow_command(command)
+    # def _is_our_team_command(self, command):
+    #     return (self._is_yellow_command(command) and TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW) or\
+    #             (self._is_blue_command(command) and TeamColorService().OUR_TEAM_COLOR is TeamColor.BLUE)
+    #
+    # def _is_yellow_command(self, command):
+    #     return (command % 2) == 0 # even commands are yellow commands
+    #
+    # def _is_blue_command(self, command):
+    #     return not self._is_yellow_command(command)

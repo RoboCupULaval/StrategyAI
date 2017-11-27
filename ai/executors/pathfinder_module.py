@@ -3,16 +3,12 @@ from typing import List
 
 from RULEngine.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 from RULEngine.Util.Position import Position
-from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Algorithm.path_partitionner import PathPartitionner, Path
 from ai.Util.ai_command import AICommand
 from ai.executors.executor import Executor
-from ai.states.world_state import WorldState
+from ai.states.game_state import GameState
 from config.config_service import ConfigService
-import concurrent.futures
-from multiprocessing import Pool
 from functools import partial
-from profilehooks import profile
 
 INTERMEDIATE_DISTANCE_THRESHOLD = 540
 AIcommands = List[AICommand]
@@ -77,12 +73,12 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
 
 class PathfinderModule(Executor):
 
-    def __init__(self, world_state: WorldState):
-        super().__init__(world_state)
+    def __init__(self):
+        super().__init__()
         self.type_of_pathfinder = ConfigService().config_dict["STRATEGY"]["pathfinder"]
         self.last_time_pathfinding_for_robot = {}
         self.last_frame = time.time()
-        self.game_state = world_state.game_state
+        self.game_state = GameState()
 
     def exec(self):
 
@@ -100,13 +96,6 @@ class PathfinderModule(Executor):
             x = path_element.x
             y = path_element.y
             points.append((x, y))
-            if self.type_of_pathfinder.lower() == "path_part":
-                if idx == 0:
-                    pass
-                else:
-                    self.ws.debug_interface.add_line(points[idx - 1], points[idx], timeout=0.1)
 
         #    print(points)
-        #self.ws.debug_interface.add_multi_line(points)
-        self.ws.debug_interface.add_multiple_points(points[1:], COLOR_ID_MAP[pid], width=5, link="path - " + str(pid),
-                                                    timeout=DEFAULT_PATH_TIMEOUT)
+        # self.ws.debug_interface.add_multi_line(points)

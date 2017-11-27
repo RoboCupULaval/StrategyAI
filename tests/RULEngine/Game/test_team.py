@@ -20,7 +20,6 @@ class TestTeam(unittest.TestCase):
     def test_init(self):
         self.assertEqual(PLAYER_PER_TEAM, len(self.team.players))
         self.assertEqual(0, len(self.team.available_players))
-        self.assertEqual(0, self.team.score)
         self.assertFalse(self.team.exiting_players)
         self.assertFalse(self.team.entering_players)
         self.assertEqual(TeamColor.YELLOW, self.team.team_color)

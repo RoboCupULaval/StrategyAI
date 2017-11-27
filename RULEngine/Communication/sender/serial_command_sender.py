@@ -49,7 +49,6 @@ class SerialCommandSender(object):
         sc.enter(MOVE_COMMAND_SLEEP, 1, loop_send_packets, (sc,))
         sc.run()
 
-
     def send_command(self, command: Command):
         # self.command_queue.append(command)
         # print("({}) Command deque length: {}".format(time.time(), len(self.command_queue)))

@@ -1,0 +1,66 @@
+# Under MIT License, see LICENSE.txt
+
+import logging
+from multiprocessing import Process, Queue, Event
+
+from ai.executors.debug_executor import DebugExecutor
+from ai.executors.play_executor import PlayExecutor
+from ai.states.game_state import GameState
+from ai.states.play_state import PlayState
+from config.config_service import ConfigService
+
+
+class Coach(Process):
+
+    def __init__(self, game_state_queue: Queue, player_cmds_queue: Queue, stop_event: Event):
+        """
+        Initialise l'IA.
+        Celui-ci s'occupe d'appeler tout les morceaux de l'ia dans le bon ordre pour prendre une décision de jeu
+        """
+        super(Coach, self).__init__(name=__name__)
+
+        self.logger = logging.getLogger("Coach")
+        self.cfg = ConfigService()
+
+        cfg = ConfigService()
+        self.mode_debug_active = cfg.config_dict["DEBUG"]["using_debug"] == "true"
+        self.is_simulation = cfg.config_dict["GAME"]["type"] == "sim"
+
+        # Queues for interprocess communication with the engine
+        self.game_state_queue = game_state_queue
+        self.player_cmds_queue = player_cmds_queue
+
+        # Event to know when to stop
+        self.stop_event = stop_event
+
+        # init the states
+        self.game_state = None
+        self.play_state = None
+        self.module_state = None
+
+        # init the executors
+        self.debug_executor = None
+        self.play_executor = None
+
+    def initialize(self) -> None:
+        self.game_state = GameState()
+        self.play_state = PlayState()
+
+        self.debug_executor = DebugExecutor()
+        self.play_executor = PlayExecutor()
+
+    def main_loop(self) -> None:
+        """
+        Execute un tour de boucle de l'IA
+
+        :return: List(_Command) les commandes des robots
+        """
+        # main loop de l'IA
+        # debug code! no remostart_play_executorve pls (au moins pas avant le Japon)
+
+        self.debug_executor.exec()
+        self.play_executor.exec()
+
+    def run(self) -> None:
+        self.initialize()
+        self.main_loop()

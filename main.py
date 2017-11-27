@@ -4,7 +4,6 @@
 import argparse
 
 from RULEngine.Framework import Framework
-from coach import Coach
 from config.config_service import ConfigService
 
 __author__ = 'RoboCupULaval'

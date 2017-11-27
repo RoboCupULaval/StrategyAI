@@ -1,35 +1,51 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.Util.kalman_filter.enemy_kalman_filter import EnemyKalmanFilter
-from config.config_service import ConfigService
+from RULEngine.GameDomainObjects.Team import Team
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
 
 
 class Player:
 
-    def __init__(self, team, id):
-        self.id = id
-        self.team = team
-        self.pose = Pose()
-        self.velocity = Pose()
-        self.kf = EnemyKalmanFilter()
-        self.update = self._update
-        if ConfigService().config_dict["IMAGE"]["kalman"] == "true":
-            self.update = self._kalman_update
+    def __init__(self, number_id: int, team: Team):
+        assert isinstance(number_id, int)
+        assert number_id in [x for x in range(1, 13)]
+
+        self._id = number_id
+        self._team = team
+        self._pose = Pose()
+        self._velocity = Pose()
 
     def has_id(self, pid):
         return self.id == pid
 
-    def _update(self, pose):
-        self.pose = pose
-
-    def _kalman_update(self, poses, delta):
-        ret = self.kf.filter(poses, delta)
-        self.pose = Pose(Position(ret[0], ret[1]), ret[4])
-        self.velocity = Pose(Position(ret[2], ret[3]), ret[5])
-
-    def check_if_on_field(self):
-        return not self.pose == Pose()
-
     def __str__(self):
-        return str(self.team.team_color.name)+" "+str(self.id)+"   "
+        return str(self.team.team_color.name)+" "+str(self.id)
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def team(self):
+        return self._team
+
+    @property
+    def pose(self):
+        return self._pose
+
+    @pose.setter
+    def pose(self, value):
+        assert isinstance(value, Pose)
+        self._pose = value
+
+    @property
+    def velocity(self):
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value):
+        assert isinstance(value, Pose)
+        self._velocity = value
+
+    @property
+    def team_color(self):
+        return self.team.team_color

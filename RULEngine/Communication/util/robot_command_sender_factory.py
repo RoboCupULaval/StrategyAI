@@ -1,5 +1,5 @@
 from RULEngine.Communication.sender.grsim_command_sender import GrSimCommandSender
-from RULEngine.Communication.sender.serial_command_sender import SerialCommandSender
+# from RULEngine.Communication.sender.serial_command_sender import SerialCommandSender
 from config.config_service import ConfigService
 
 
@@ -11,7 +11,7 @@ class RobotCommandSenderFactory(object):
         if type_of_connection == "sim":
             return GrSimCommandSender, ("127.0.0.1", 20011)
         elif type_of_connection == "serial":
-            return SerialCommandSender, ()
+            return None # SerialCommandSender, ()
         elif type_of_connection == "disabled":
             class FakeRobotCommandSender:
                 @staticmethod

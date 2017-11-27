@@ -5,14 +5,13 @@ from RULEngine.Debug.ui_debug_command import UIDebugCommand
 from RULEngine.Util.Pose import Pose, Position
 from ai.STA.Strategy.HumanControl import HumanControl
 from ai.executors.executor import Executor
-from ai.states.world_state import WorldState
 
 
 class DebugExecutor(Executor):
 
-    def __init__(self, p_world_state: WorldState):
+    def __init__(self):
         """initialise"""
-        super().__init__(p_world_state)
+        super().__init__()
         self.debug_in = []
 
     def exec(self):

@@ -4,7 +4,7 @@ import unittest
 
 from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
 from RULEngine.GameDomainObjects.Ball import Ball
-from RULEngine.GameDomainObjects.GameState import GameState
+from RULEngine.GameDomainObjects.Game import Game
 from RULEngine.GameDomainObjects.Referee import Referee
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
@@ -34,8 +34,8 @@ A_GOAL_PLAYER_ID = 0
 A_PLAYER_ID = 1
 class TestNode(unittest.TestCase):
     def setUp(self):
-        self.game_state = GameState()
-        self.game = GameState()
+        self.game_state = Game()
+        self.game = Game()
         self.game.set_referee(Referee())
         self.game.ball = Ball()
         game_world = ReferenceTransferObject(self.game)

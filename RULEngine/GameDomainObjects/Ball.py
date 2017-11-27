@@ -1,14 +1,26 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.Util.kalman_filter.ball_kalman_filter import BallKalmanFilter
-from ..Util.Position import Position
+from RULEngine.Util.Position import Position
 
 
 class Ball:
-    kalman_type = 'ball'
-
     def __init__(self):
-        self.position = Position()
-        self.velocity = Position()
+        self._position = Position()
+        self._velocity = Position()
 
-    def update(self, poses, delta):
-        pass
+    @property
+    def position(self) -> Position:
+        return self._position
+
+    @position.setter
+    def position(self, value) -> None:
+        assert isinstance(value, Position)
+        self._position = value
+
+    @property
+    def velocity(self) -> Position:
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value) -> None:
+        assert isinstance(value, Position)
+        self._velocity = value

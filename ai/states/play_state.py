@@ -5,7 +5,6 @@ from typing import List, Tuple, Callable, Any
 from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.singleton import Singleton
-from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.STA.Strategy.Strategy import Strategy
 from ai.STA.Strategy.StrategyBook import StrategyBook
 from ai.STA.Tactic.Tactic import Tactic

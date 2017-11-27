@@ -1,6 +1,7 @@
 from enum import Enum
 
 from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import conv_position_2_list, remove_duplicates
@@ -91,9 +92,8 @@ class CollisionBody:
         self.type = collision_type
 
 
-class PathPartitionner(Pathfinder):
+class PathPartitionner:
     def __init__(self, gamestate):
-        super().__init__(None)
         self.game_state = gamestate
         self.path = Path(Position(0, 0), Position(0, 0))
         self.raw_path = Path(Position(0, 0), Position(0, 0))
@@ -131,7 +131,7 @@ class PathPartitionner(Pathfinder):
             path = path_1.join_segments(path_2)
         return path
 
-    def get_path(self, player: OurPlayer, pose_target: Pose=Pose(), cruise_speed: [int, float]=1,
+    def get_path(self, player: Player, pose_target: Pose=Pose(), cruise_speed: [int, float]=1,
                  old_path=None, old_raw_path=Path(Position(99999, 99999), Position(99999, -99999)),
                  end_speed=0, ball_collision=False, optional_collision=None):
         self.cruise_speed = cruise_speed
@@ -488,7 +488,7 @@ class PathPartitionner(Pathfinder):
             return Path().generate_path_from_points(self.path.points, self.path.speeds)
 
 
-def reshape_path(path, player: OurPlayer, vel_cruise: [int, float]=1000):
+def reshape_path(path, player: Player, vel_cruise: [int, float]=1000):
     path = path
     player = player
     cmd = player.ai_command

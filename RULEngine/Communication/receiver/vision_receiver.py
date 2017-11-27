@@ -11,7 +11,7 @@ from RULEngine.Communication.protobuf.messages_robocup_ssl_wrapper_pb2 import SS
 
 
 class VisionReceiver(Process):
-    TIME_OUT = 0.01
+    TIME_OUT = 0.05
 
     def __init__(self, host: str, port: int, detection_queue: Queue, stop_event: Event):
         super(VisionReceiver, self).__init__()

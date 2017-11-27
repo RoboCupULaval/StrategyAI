@@ -1,6 +1,7 @@
 from collections import Counter
 from .role import Role
 
+
 class RoleMapper(object):
     LOCKED_ROLES = [Role.GOALKEEPER]
 

@@ -8,12 +8,13 @@
     prochain état du **Coach**.
 """
 import logging
-import multiprocessing
+from multiprocessing import Process, Event, Queue
 import signal  # so we can stop gracefully
 import threading  # to stop while runnig the ia and not be obligated to check every loop if we received a stop signal
 import time
 
 from RULEngine.engine import Engine
+from ai.coach import Coach
 from config.config_service import ConfigService
 
 
@@ -37,41 +38,31 @@ class Framework(object):
         # config
         self.cfg = ConfigService()
 
-        # time
-        self.last_frame_number = 0
-        self.time_stamp = None  # time.time()
-        self.last_camera_time = time.time()
-        self.time_of_last_loop = time.time()
-        self.ai_timestamp = float(self.cfg.config_dict["GAME"]["ai_timestamp"])
+        # Events
+        self.ai_terminating_event = Event()
+        self.engine_terminating_event = Event()
 
-        # thread - do not touch without a good reason / see the team before hand
+        # Queues
+        self.game_state_queue = Queue()
+        self.player_cdms_queue = Queue()
+        self.uidebug_queue = Queue()
 
-        self.main_thread_terminating_event = threading.Event()
-        self.engine_terminating_event = multiprocessing.Event()
-
-        # Communication - do not touch without a good reason / see the team before hand
-        self.engine = Engine(self.engine_terminating_event)
+        # Engine
+        self.engine = Engine(self.engine_terminating_event, self.uidebug_queue)
         self.logger.debug("Engine is {0}".format(self.engine))
         self.engine.start()
         self.logger.debug("Engine started {0}".format(self.engine))
 
-        # self.main_thread = threading.Thread(target=self.game_thread_main_loop, name="AI", daemon=True)
-        # self.main_thread.start()
+        # AI
+        self.coach = Coach(self.game_state_queue, self.player_cdms_queue, self.ai_terminating_event)
+        self.logger.debug("Coach is {0}".format(self.engine))
+        self.coach.start()
+        self.logger.debug("Coach started {0}".format(self.engine))
 
         # endsignal - do you like to stop gracefully? DO NOT MOVE! MUST BE PLACED AFTER PROCESSES
         signal.signal(signal.SIGINT, self._sigint_handler)
-
+        # stop until someone manually stop us / we receive interrupt signal from os
         signal.pause()
-
-    def game_thread_main_loop(self):
-        """ Fonction exécuté et agissant comme boucle principale. """
-
-        while not self.main_thread_terminating_event.is_set():
-                pass
-                pass
-
-        self.logger.debug("method game_thread_main_loop has exited.")
-        exit(0)
 
     def stop_game(self):
         """
@@ -79,13 +70,9 @@ class Framework(object):
         """
         self.engine_terminating_event.set()
         self.logger.debug("Engine before join = {0}".format(self.engine))
-        self.engine.join()
+        self.engine.join(1)
         self.logger.debug("Engine after join = {0}".format(self.engine))
-        self.main_thread_terminating_event.set()
-        #self.logger.debug("Ai before join = {0}".format(self.main_thread))
-        #self.main_thread.join()
-        #self.logger.debug("Ai after join = {0}".format(self.main_thread))
-        #self.logger.debug("Main is alive? {}".format(self.main_thread.is_alive()))
+        self.ai_terminating_event.set()
         exit(0)
 
     # noinspection PyUnusedLocal
