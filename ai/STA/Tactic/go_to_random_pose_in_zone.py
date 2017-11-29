@@ -2,7 +2,7 @@
 from typing import List
 import numpy as np
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
@@ -35,7 +35,7 @@ class GoToRandomPosition(Tactic):
         target: Position à laquelle faire face après avoir pris la balle
     """
 
-    def __init__(self, game_state: GameState, player: OurPlayer, center_of_zone: Position, height_of_zone,
+    def __init__(self, game_state: GameState, player: Player, center_of_zone: Position, height_of_zone,
                  width_of_zone, args: List[str]=None,
                  auto_position=False):
         Tactic.__init__(self, game_state, player, args=args)

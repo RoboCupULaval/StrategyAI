@@ -6,7 +6,7 @@ import time
 
 from RULEngine.Util.constant import ROBOT_RADIUS
 from RULEngine.GameDomainObjects.Shitty_Field import FieldSide
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import clamp, compare_angle, wrap_to_pi
@@ -46,7 +46,7 @@ class GoalKeeper(Tactic):
     """
     # TODO: À complexifier pour prendre en compte la position des joueurs adverses et la vitesse de la balle.
 
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(),
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(),
                  penalty_kick=False, args: List[str]=None,):
         Tactic.__init__(self, game_state, player, target, args)
         self.is_yellow = self.player.team.team_color == TeamColor.YELLOW

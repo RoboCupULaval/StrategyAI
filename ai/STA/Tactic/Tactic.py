@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic_constants import Flags
@@ -18,7 +18,7 @@ class Tactic:
     # IM SORRY MGL 2017/06/16
     initialized = False
 
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List=None):
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List=None):
         """
         Initialise la tactic avec des valeurs
 
@@ -27,7 +27,7 @@ class Tactic:
         :param target: Pose général pouvant être utilisé par les classes enfants comme elles veulent
         """
         assert isinstance(game_state, GameState), "Le game_state doit être un GameState"
-        assert isinstance(player, OurPlayer), "Le player doit être un OurPlayer {}".format(player)
+        assert isinstance(player, Player), "Le player doit être un Player {}".format(player)
         assert isinstance(target, Pose), "La target devrait être une Pose"
         # assert isinstance(args, list) or isinstance(args, None), "Le paramètre args doit être une liste"
 

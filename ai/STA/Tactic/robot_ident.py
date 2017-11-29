@@ -3,7 +3,7 @@ import csv
 import time
 from typing import List
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.SpeedPose import SpeedPose
 from ai.STA.Action.Idle import Idle
@@ -14,7 +14,7 @@ from ai.states.game_state import GameState
 
 
 class RobotIdent(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose, args: List[str]):
+    def __init__(self, game_state: GameState, player: Player, target: Pose, args: List[str]):
         super().__init__(game_state, player, target, args)
         self.status_flag = Flags.INIT
         self.cmd_filename = str(args[0])

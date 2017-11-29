@@ -48,7 +48,7 @@ class Framework(object):
         self.uidebug_queue = Queue()
 
         # Engine
-        self.engine = Engine(self.engine_terminating_event, self.uidebug_queue)
+        self.engine = Engine(self.engine_terminating_event, self.uidebug_queue, self.player_cdms_queue)
         self.logger.debug("Engine is {0}".format(self.engine))
         self.engine.start()
         self.logger.debug("Engine started {0}".format(self.engine))
@@ -73,6 +73,10 @@ class Framework(object):
         self.engine.join(1)
         self.logger.debug("Engine after join = {0}".format(self.engine))
         self.ai_terminating_event.set()
+        self.logger.debug("Coach before join = {0}".format(self.coach))
+        self.coach.join(1)
+        self.logger.debug("Coach after join = {0}".format(self.coach))
+
         exit(0)
 
     # noinspection PyUnusedLocal

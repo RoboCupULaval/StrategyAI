@@ -1,6 +1,6 @@
 from enum import Enum
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
@@ -511,7 +511,7 @@ def reshape_path(path, player: Player, vel_cruise: [int, float]=1000):
         i = idx + 1
         p2 = point
         p3 = path.points[i+1]
-        radius_at_const_speed = vel_cruise ** 2 / (OurPlayer.max_acc * 1000)
+        radius_at_const_speed = vel_cruise ** 2 / (Player.max_acc * 1000)
         theta = abs(np.math.atan2(p3[1]-p2[1], p3[0]-p2[0]) - np.math.atan2(p1[1]-p2[1], p1[0]-p2[0]))
         try:
             dist_deviation = (radius_at_const_speed/(np.math.sin(theta/2)))-radius_at_const_speed
@@ -521,7 +521,7 @@ def reshape_path(path, player: Player, vel_cruise: [int, float]=1000):
         radius = radius_at_const_speed
         while dist_deviation > dist_from_path:
             speed *= 0.4
-            radius = speed ** 2 / (OurPlayer.max_acc * 1000)
+            radius = speed ** 2 / (Player.max_acc * 1000)
             dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
         if (p1-p2).norm() < 0.001 or (p2-p3).norm() < 0.001 or (p1-p3).norm() < 0.001:
             # on traite tout le cas ou le problème dégènere
@@ -565,7 +565,7 @@ def reshape_path(path, player: Player, vel_cruise: [int, float]=1000):
         if (point_list[i] - point_list[i+1]).norm() < 10:
             continue
         if False:
-            min_dist = abs(0.5 * (np.square(speed_list[i]) - np.square(speed_list[i + 1])) / (OurPlayer.max_acc * 1000))
+            min_dist = abs(0.5 * (np.square(speed_list[i]) - np.square(speed_list[i + 1])) / (Player.max_acc * 1000))
             if min_dist > (point_list[i] - point_list[i+1]).norm():
                 if speed_list[i] > speed_list[i + 1]:
                     speed_list[i] *= (point_list[i] - point_list[i+1]).norm() / min_dist

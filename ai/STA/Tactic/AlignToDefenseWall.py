@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 import time
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS, TeamColor
@@ -23,9 +23,9 @@ COMMAND_DELAY = 1.0
 
 
 class AlignToDefenseWall(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, robots_in_formation: List[OurPlayer], auto_pick=False,
+    def __init__(self, game_state: GameState, player: Player, robots_in_formation: List[Player], auto_pick=False,
                  args: List[str]=None):
-        assert isinstance(robots_in_formation[0], OurPlayer)
+        assert isinstance(robots_in_formation[0], Player)
         Tactic.__init__(self, game_state, player, args=args)
         self.current_state = self.define_center_of_formation
         self.next_state = self.get_players_in_formation

@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.geometry import get_distance
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
@@ -24,7 +24,7 @@ class DemoFollowBall(Tactic):
         game_state: état courant du jeu
         player : Instance du joueur auquel est assigné la tactique
     """
-    def __init__(self, game_state: GameState, player: OurPlayer, p_target: Pose=Pose(), args: List[str]=None):
+    def __init__(self, game_state: GameState, player: Player, p_target: Pose=Pose(), args: List[str]=None):
         Tactic.__init__(self, game_state, player, p_target, args)
         self.current_state = self.halt
         self.next_state = self.halt

@@ -3,7 +3,7 @@ from typing import List
 
 import math
 import numpy as np
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from ai.Algorithm.evaluation_module import closest_player_to_point
 
@@ -15,7 +15,7 @@ from RULEngine.Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 
 
 class FaceOpponent(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose,
+    def __init__(self, game_state: GameState, player: Player, target: Pose,
                  args: List[str]=None, distance=500, collision_ball=False,
                  cruise_speed=2, charge_kick=False, end_speed=0, dribbler_on=False):
         super().__init__(game_state, player, target, args)

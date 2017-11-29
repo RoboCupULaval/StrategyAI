@@ -2,7 +2,7 @@
 
 from typing import List
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from ai.states.game_state import GameState
 from .Tactic import Tactic
@@ -13,7 +13,7 @@ from RULEngine.Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 
 
 class GoToPositionNoPathfinder(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose, args: List[str]=None):
+    def __init__(self, game_state: GameState, player: Player, target: Pose, args: List[str]=None):
         super().__init__(game_state, player, target, args)
         self.target = target
         self.status_flag = Flags.INIT

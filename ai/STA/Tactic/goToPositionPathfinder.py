@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 
 from ai.states.game_state import GameState
@@ -12,7 +12,7 @@ from RULEngine.Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 
 
 class GoToPositionPathfinder(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose,
+    def __init__(self, game_state: GameState, player: Player, target: Pose,
                  args: List[str]=None, collision_ball=False, cruise_speed=1, charge_kick=False, end_speed=0):
         super().__init__(game_state, player, target, args)
         self.target = target

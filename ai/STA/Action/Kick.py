@@ -1,6 +1,6 @@
 # Under MIT license, see LICENSE.txt
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 
 from ai.states.game_state import GameState
@@ -10,7 +10,7 @@ from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
 
 class Kick(Action):
 
-    def __init__(self, game_state: GameState, player: OurPlayer, force: [int, float], target: Pose=Pose(), end_speed=0,
+    def __init__(self, game_state: GameState, player: Player, force: [int, float], target: Pose=Pose(), end_speed=0,
                  cruise_speed=0.1):
         """
             :param game_state: Current state of the game

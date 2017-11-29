@@ -1,9 +1,6 @@
 # Under MIT License, see LICENSE.txt
 from RULEngine.GameDomainObjects.Game import Game
-from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.singleton import Singleton
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
 from ai.Util.role import Role
 from ai.Util.role_mapper import RoleMapper
 
@@ -14,7 +11,7 @@ class GameState(object, metaclass=Singleton):
         """
         initialise le GameState, initialise les variables avec des valeurs nulles
         """
-        self.game = Game()
+        self._game = Game()
         self.our_team_color = None
         self.field = None
         self.my_team = None
@@ -22,17 +19,15 @@ class GameState(object, metaclass=Singleton):
         self.timestamp = 0
         self.const = None
         self._role_mapper = RoleMapper()
+        self.delta_t = None
 
-    def get_player_by_role(self, role: Role) -> OurPlayer:
+    def get_player_by_role(self, role: Role):
         return self._role_mapper.roles_translation[role]
 
-    def get_role_by_player_id(self, player_id: int) -> Union[Role, None]:
+    def get_role_by_player_id(self, player_id: int):
         for r, p in self._role_mapper.roles_translation.items():
             if p.id == player_id:
                 return r
-
-    def bind_random_available_players_to_role(self) -> OurPlayer:
-        pass
 
     def map_players_to_roles_by_player_id(self, mapping_by_player_id):
         mapping_by_player = {role: self.my_team.available_players[player_id] for role, player_id in mapping_by_player_id.items()}
@@ -51,72 +46,15 @@ class GameState(object, metaclass=Singleton):
     def _get_player_from_all_possible_player(self, player_id):
         return self.my_team.players[player_id]
 
-    def get_player(self, player_id: int, is_my_team=True) -> Player:
-        """
-        Retourne l'instance du joueur avec id player_id dans l'équipe choisit
+    @property
+    def delta_t(self):
+        return self._delta_t
 
-        :param player_id: id of the desired player
-        :param is_my_team: True for ally team, False for opponent team
-        :return: the player instance
-        """
-        try:
-            if is_my_team:
-                return self.my_team.available_players[player_id]
-            else:
-                return self.other_team.available_players[player_id]
-        except Exception as e:
-            print(e)
-            raise e
+    @delta_t.setter
+    def delta_t(self, value):
 
-    def get_player_pose(self, player_id: int, is_my_team=True) -> Pose:
-        """
-            Retourne la pose d'un joueur d'une équipe
+        self._delta_t = value
 
-            :param is_my_team: Booléen avec valeur vrai par défaut, l'équipe du joueur est mon équipe
-            :param player_id: identifiant du joueur, en int
-            :return: L'instance Pose de la pose du joueur
-        """
-        if is_my_team:
-            return self.my_team.available_players[player_id].pose
-        else:
-            return self.other_team.available_players[player_id].pose
-
-    def get_player_position(self, player_id: int, is_my_team=True) -> Position:
-        """
-            Retourne la position d'un joueur d'une équipe
-
-            :param is_my_team: Booléen avec valeur vrai par défaut, l'équipe du joueur est mon équipe
-            :param player_id: identifiant du joueur, en int
-            :return: L'instance Position de la position du joueur
-        """
-        if is_my_team:
-            return self.my_team.available_players[player_id].pose.position
-        else:
-            return self.other_team.available_players[player_id].pose.position
-
-    def get_ball_position(self) -> Position:
-        """
-            Retourne la position de la balle
-            :return: L'instance de Position, la position de la balle
-        """
-        return self.field.ball.position
-
-    def set_ball_position(self, newPosition: Position, delta_t) -> None:
-        self.field.ball.set_position(newPosition, delta_t)
-
-    def get_ball_velocity(self) -> Position:
-        """
-        Retourne le vecteur vélocité de la balle.
-        Use with care, probably not implemented correctly
-
-        :return: la vélocité de la balle.
-        """
-        return self.field.ball.velocity
-
-    def get_delta_t(self) -> float:
-        """
-            Retourne le delta_t de la state
-
-            :return: float: le timestamp
-        """
-        return self.game.delta_t
+    @property
+    def game(self):
+        return self._game

@@ -2,14 +2,15 @@
 
 import unittest
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
+
 from RULEngine.GameDomainObjects.Ball import Ball
 from RULEngine.GameDomainObjects.Game import Game
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.GameDomainObjects.Referee import Referee
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
-from RULEngine.Util.team_color_service import TeamColorService, TeamColor
+from RULEngine.services.team_color_service import TeamColorService, TeamColor
 from ai.Algorithm.Graph.Node import Node
 from ai.Algorithm.Graph.Vertex import Vertex
 from ai.STA.Tactic.GoalKeeper import GoalKeeper
@@ -17,7 +18,6 @@ from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.Tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.ai_command import AICommand, AICommandType
-from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
 
@@ -48,7 +48,7 @@ class TestNode(unittest.TestCase):
         self.node2 = Node(self.tactic2)
         self.vertex1 = Vertex(0, foo)
         self.vertex2 = Vertex(1, foo2)
-        self.a_player = OurPlayer(TeamColor.BLUE, 0)
+        self.a_player = Player(TeamColor.BLUE, 0)
 
     def test_init(self):
         self.assertRaises(AssertionError, Node, "not a tactic")

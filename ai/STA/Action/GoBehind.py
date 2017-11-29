@@ -2,7 +2,7 @@
 import math
 import numpy as np
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import wrap_to_pi
@@ -26,7 +26,7 @@ class GoBehind(Action):
         position2 : La position par rapport à laquelle le robot doit être "derrière" l'objet de la position 1
                     (exemple: le but)
     """
-    def __init__(self, game_state: GameState, player: OurPlayer, position1: Position, position2: Position=None,
+    def __init__(self, game_state: GameState, player: Player, position1: Position, position2: Position=None,
                  distance_behind: [int, float]=250, cruise_speed: [int, float]=1,
                  pathfinder_on: bool=False, orientation: str= 'front'):
         """

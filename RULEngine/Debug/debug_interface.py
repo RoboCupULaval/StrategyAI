@@ -2,10 +2,10 @@
 import time
 
 from RULEngine.Debug.debug_command import DebugCommand
-from RULEngine.Util.singleton import Singleton
-from RULEngine.Util.team_color_service import TeamColorService
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Position import Position
+from RULEngine.Util.singleton import Singleton
+from RULEngine.services.team_color_service import TeamColorService
 
 
 class Color(object):
@@ -156,7 +156,7 @@ class DebugInterface(metaclass=Singleton):
         cmd = DebugCommand(1001, cmd_tactics_dict)
         self.debug_state.append(cmd)
 
-    def send_robot_strategic_state(self, player: OurPlayer, tactic: str, action: str, target: str="not implemented"):
+    def send_robot_strategic_state(self, player: Player, tactic: str, action: str, target: str="not implemented"):
         teamcolor_str = player.team.team_color.__str__()
         data = {teamcolor_str: {player.id: {'tactic': tactic,
                                             'action': action,
@@ -178,7 +178,7 @@ class DebugInterface(metaclass=Singleton):
         self.debug_state.append(cmd)
 
     def send_team_color(self):
-        cmd = DebugCommand(1004, {'team_color': TeamColorService().OUR_TEAM_COLOR.name.lower()})
+        cmd = DebugCommand(1004, {'team_color': TeamColorService().our_team_color.name.lower()})
         self.debug_state.append(cmd)
 
     def send_play_info(self, referee_info, referee_team_info, auto_play_info, auto_flag):

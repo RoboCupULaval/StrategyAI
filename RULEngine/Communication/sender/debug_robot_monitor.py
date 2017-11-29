@@ -5,7 +5,7 @@
 # from RULEngine.Debug.debug_interface import DebugInterface
 # # from RULEngine.Communication.sender.serial_command_sender import SerialCommandSender
 # # from RULEngine.Command.command import GetBattery
-# # from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+# # from RULEngine.GameDomainObjects.Player import Player
 # from RULEngine.Util.constant import PLAYER_PER_TEAM
 #
 # PERIOD_BETWEEN_BAT_MONITORING = 0.5
@@ -40,7 +40,7 @@
 #             for robot_id in range(PLAYER_PER_TEAM):
 #
 #                     # Ask for batterie level
-#                     cmd = GetBattery(OurPlayer(None, robot_id), self.pause_cond)
+#                     cmd = GetBattery(Player(None, robot_id), self.pause_cond)
 #                     response = self.serial_com.send_responding_command(cmd)
 #                     if response:
 #                         # print("Response from id {} with bat lvl {}V".format(robot_id, response))

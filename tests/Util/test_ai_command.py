@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import Mock
 
 from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType, _default_keys, _keys_type
-from RULEngine.Game.OurPlayer import OurPlayer
+from RULEngine.Game.Player import Player
 from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.Pose import Pose
 
@@ -13,7 +13,7 @@ class AICommandTestCase(unittest.TestCase):
 
     def setUp(self):
         self.robot_id = 1
-        self.player = Mock(return_value=None, id=self.robot_id, spec=OurPlayer)
+        self.player = Mock(return_value=None, id=self.robot_id, spec=Player)
 
         self.STOP = AICommandType.STOP
         self.MOVE = AICommandType.MOVE

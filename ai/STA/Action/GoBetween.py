@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 import numpy as np
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import get_closest_point_on_segment
@@ -24,7 +24,7 @@ class GoBetween(Action):
         target : La position vers laquelle le robot devrait s'orienter
         minimum_distance : La distance minimale qu'il doit y avoir entre le robot et chacun des points
     """
-    def __init__(self, game_state: GameState, player: OurPlayer, position1: Position, position2: Position,
+    def __init__(self, game_state: GameState, player: Player, position1: Position, position2: Position,
                  target: Position, p_minimum_distance: [int, float]=0):
         """
             :param game_state: L'état courant du jeu.

@@ -6,7 +6,7 @@ import numpy as np
 import time
 
 from RULEngine.Debug.debug_interface import DebugInterface
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import ROBOT_RADIUS
@@ -35,7 +35,7 @@ class Bump(Tactic):
         target: Position à laquelle faire face après avoir pris la balle
     """
 
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None):
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None):
         Tactic.__init__(self, game_state, player, target, args)
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball

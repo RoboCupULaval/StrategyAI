@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 import time
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.Algorithm.evaluation_module import best_position_in_region
@@ -38,7 +38,7 @@ class PositionForPass(Tactic):
         target: Position à laquelle faire face après avoir pris la balle
     """
 
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None,
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None,
                  auto_position=False):
         Tactic.__init__(self, game_state, player, target, args)
         self.current_state = self.move_to_pass_position

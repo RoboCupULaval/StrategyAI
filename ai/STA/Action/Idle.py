@@ -1,9 +1,9 @@
 # Under MIT license, see LICENSE.txt
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from ai.states.game_state import GameState
 from .Action import Action
 from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
-from RULEngine.Util.SpeedPose import SpeedPose
+
 
 class Idle(Action):
     """
@@ -11,7 +11,7 @@ class Idle(Action):
     Méthodes :
         exec(self): Retourne une ai_command STOP
     """
-    def __init__(self, game_state: GameState, player: OurPlayer):
+    def __init__(self, game_state: GameState, player: Player):
         """
             :param game_state: L'état courant du jeu.
             :param player: Instance du joueur qui s'arrête

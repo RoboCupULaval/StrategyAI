@@ -2,23 +2,22 @@
 
 import unittest
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
+
 from RULEngine.GameDomainObjects.Ball import Ball
 from RULEngine.GameDomainObjects.Game import Game
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.GameDomainObjects.Referee import Referee
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
-from RULEngine.Util.team_color_service import TeamColorService, TeamColor
-
-from ai.STA.Action.Idle import Idle
+from RULEngine.services.team_color_service import TeamColorService, TeamColor
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
 from ai.Algorithm.Graph.Vertex import Vertex
+from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
 from ai.STA.Tactic.Stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
 
@@ -44,7 +43,7 @@ class TestGraph(unittest.TestCase):
         self.game_state = Game()
         self.empty_graph = Graph()
         self.graph1 = Graph()
-        self.a_player = OurPlayer(TeamColor.YELLOW, A_PLAYER_ID)
+        self.a_player = Player(TeamColor.YELLOW, A_PLAYER_ID)
         self.tactic1 = Stop(self.game_state, self.a_player)
         self.tactic2 = GoToPositionNoPathfinder(self.game_state, self.a_player, Pose(Position(500, 0), 0))
         self.node1 = Node(self.tactic1)

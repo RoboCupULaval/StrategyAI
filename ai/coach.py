@@ -33,12 +33,11 @@ class Coach(Process):
         # Event to know when to stop
         self.stop_event = stop_event
 
-        # init the states
+        # the states
         self.game_state = None
         self.play_state = None
-        self.module_state = None
 
-        # init the executors
+        # the executors
         self.debug_executor = None
         self.play_executor = None
 
@@ -47,20 +46,16 @@ class Coach(Process):
         self.play_state = PlayState()
 
         self.debug_executor = DebugExecutor()
-        self.play_executor = PlayExecutor()
+        # self.play_executor = PlayExecutor()
 
     def main_loop(self) -> None:
-        """
-        Execute un tour de boucle de l'IA
-
-        :return: List(_Command) les commandes des robots
-        """
-        # main loop de l'IA
-        # debug code! no remostart_play_executorve pls (au moins pas avant le Japon)
-
-        self.debug_executor.exec()
-        self.play_executor.exec()
+        while not self.stop_event.is_set():
+            self.debug_executor.exec()
+        # self.play_executor.exec()
 
     def run(self) -> None:
         self.initialize()
-        self.main_loop()
+        try:
+            self.main_loop()
+        except KeyboardInterrupt:
+            pass

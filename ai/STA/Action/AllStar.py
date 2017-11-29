@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from typing import Dict
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.GameDomainObjects.Player import Player
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action

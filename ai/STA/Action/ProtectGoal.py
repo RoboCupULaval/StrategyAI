@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.area import stayInsideCircle
@@ -25,7 +25,7 @@ class ProtectGoal(Action):
         minimum_distance : La distance minimale qu'il doit y avoir entre le gardien et le centre du but.
         maximum_distance : La distance maximale qu'il doit y avoir entre le gardien et le centre du but.
     """
-    def __init__(self, game_state: GameState, player: OurPlayer, is_right_goal: bool=True,
+    def __init__(self, game_state: GameState, player: Player, is_right_goal: bool=True,
                  minimum_distance: [int, float]=150 / 2, maximum_distance: [int, float, None]=None):
         """
         :param game_state: L'état courant du jeu.

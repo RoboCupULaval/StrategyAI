@@ -3,8 +3,7 @@ import unittest
 
 from RULEngine.GameDomainObjects.Game import Game
 from RULEngine.GameDomainObjects.Referee import Referee
-from RULEngine.Util.team_color_service import TeamColor, TeamColorService
-from ai.states.game_state import GameState
+from RULEngine.services.team_color_service import TeamColor, TeamColorService
 
 
 class TestGameStateManager(unittest.TestCase):

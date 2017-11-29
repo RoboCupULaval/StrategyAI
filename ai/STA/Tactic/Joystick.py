@@ -2,7 +2,7 @@
 from typing import List
 import pygame
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.STA.Action.AllStar import AllStar
@@ -15,7 +15,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 
 
 class Joystick(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None):
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None):
         super().__init__(game_state, player, target, args)
         self.status_flag = Flags.INIT
 

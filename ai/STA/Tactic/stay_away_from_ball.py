@@ -2,7 +2,7 @@
 from typing import List
 import numpy as np
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.area import stayOutsideCircle
@@ -14,7 +14,7 @@ from ai.states.game_state import GameState
 
 
 class StayAwayFromBall(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose = Pose(),
+    def __init__(self, game_state: GameState, player: Player, target: Pose = Pose(),
                  keepout_radius: int = 500, args: List[str]=None):
         super().__init__(game_state, player, target, args)
         self.current_state = self.stay_out_of_circle

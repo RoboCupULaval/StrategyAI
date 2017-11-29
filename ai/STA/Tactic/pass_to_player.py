@@ -2,7 +2,7 @@
 import numpy as np
 import time
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
@@ -37,7 +37,7 @@ class PassToPlayer(Tactic):
         target: Position à laquelle faire face après avoir pris la balle
     """
 
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), target_id=1, args=None):
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), target_id=1, args=None):
         Tactic.__init__(self, game_state, player, target, args)
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge
