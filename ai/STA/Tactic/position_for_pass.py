@@ -2,7 +2,7 @@
 from typing import List
 import time
 
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from ai.Algorithm.evaluation_module import best_position_in_region

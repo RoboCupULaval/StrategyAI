@@ -1,6 +1,6 @@
 from RULEngine.GameDomainObjects.Shitty_Field import Shitty_Field
-from RULEngine.GameDomainObjects.Game import Game
-from RULEngine.GameDomainObjects.Referee import Referee
+from RULEngine.GameDomainObjects.game import Game
+from RULEngine.GameDomainObjects.referee import Referee
 from RULEngine.Util.singleton import Singleton
 
 

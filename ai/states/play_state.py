@@ -2,7 +2,7 @@
 
 from typing import List, Tuple, Callable, Any
 
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.singleton import Singleton
 from ai.STA.Strategy.strategy import Strategy

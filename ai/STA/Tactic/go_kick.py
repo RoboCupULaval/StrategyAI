@@ -3,7 +3,7 @@ from typing import List, Union
 import numpy as np
 import time
 
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import compare_angle

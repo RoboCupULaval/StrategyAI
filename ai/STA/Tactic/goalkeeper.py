@@ -6,7 +6,7 @@ import time
 
 from RULEngine.Util.constant import ROBOT_RADIUS
 from RULEngine.GameDomainObjects.Shitty_Field import FieldSide
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import clamp, compare_angle, wrap_to_pi

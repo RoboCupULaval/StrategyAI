@@ -6,7 +6,7 @@ import numpy as np
 import time
 
 from RULEngine.Debug.debug_interface import DebugInterface
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import ROBOT_RADIUS

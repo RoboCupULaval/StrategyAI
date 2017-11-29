@@ -1,10 +1,10 @@
 # Under MIT License, see LICENSE.txt
 import logging
 
-from RULEngine.GameDomainObjects.Ball import Ball
-from RULEngine.GameDomainObjects.Field import Field
-from RULEngine.GameDomainObjects.Referee import Referee
-from RULEngine.GameDomainObjects.Team import Team
+from RULEngine.GameDomainObjects.ball import Ball
+from RULEngine.GameDomainObjects.field import Field
+from RULEngine.GameDomainObjects.referee import Referee
+from RULEngine.GameDomainObjects.team import Team
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.singleton import Singleton

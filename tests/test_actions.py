@@ -5,9 +5,9 @@ from math import pi, sqrt
 
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 
-from RULEngine.GameDomainObjects.Game import Game
-from RULEngine.GameDomainObjects.Player import Player
-from RULEngine.GameDomainObjects.Referee import Referee
+from RULEngine.GameDomainObjects.game import Game
+from RULEngine.GameDomainObjects.player import Player
+from RULEngine.GameDomainObjects.referee import Referee
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import *

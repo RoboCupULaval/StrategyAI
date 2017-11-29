@@ -3,7 +3,7 @@ from typing import List
 
 import math
 import numpy as np
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from ai.Algorithm.evaluation_module import closest_player_to_point
 

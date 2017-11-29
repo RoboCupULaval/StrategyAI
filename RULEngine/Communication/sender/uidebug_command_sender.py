@@ -8,7 +8,7 @@ from RULEngine.Communication.util.udp_socket import udp_socket
 
 
 class UIDebugCommandSender(Process):
-    def __init__(self, host: str, port: int, stop_event: Event, uidebug_queue: Queue):
+    def __init__(self, host: str, port: int, uidebug_queue: Queue, stop_event: Event):
         super(UIDebugCommandSender, self).__init__(name=__name__)
         self.logger = logging.getLogger("DebugCommandSender")
 

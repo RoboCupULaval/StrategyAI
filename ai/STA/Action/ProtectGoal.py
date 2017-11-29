@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.area import stayInsideCircle

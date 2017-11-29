@@ -4,10 +4,10 @@ import unittest
 
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 
-from RULEngine.GameDomainObjects.Ball import Ball
-from RULEngine.GameDomainObjects.Game import Game
-from RULEngine.GameDomainObjects.Player import Player
-from RULEngine.GameDomainObjects.Referee import Referee
+from RULEngine.GameDomainObjects.ball import Ball
+from RULEngine.GameDomainObjects.game import Game
+from RULEngine.GameDomainObjects.player import Player
+from RULEngine.GameDomainObjects.referee import Referee
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.services.team_color_service import TeamColorService, TeamColor

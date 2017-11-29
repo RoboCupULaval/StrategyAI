@@ -9,7 +9,7 @@ from RULEngine.Communication.util.udp_socket import udp_socket
 
 
 class GrSimCommandSender(Process):
-    def __init__(self, host, port, stop_event: Event, robot_cmd_queue: Queue):
+    def __init__(self, host, port, robot_cmd_queue: Queue, stop_event: Event):
         super(GrSimCommandSender, self).__init__(name=__name__)
         self.logger = logging.getLogger("GrSimCommandSender")
 

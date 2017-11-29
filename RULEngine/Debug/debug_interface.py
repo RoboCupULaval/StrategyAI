@@ -2,7 +2,7 @@
 import time
 
 from RULEngine.Debug.debug_command import DebugCommand
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Position import Position
 from RULEngine.Util.singleton import Singleton
 from RULEngine.services.team_color_service import TeamColorService

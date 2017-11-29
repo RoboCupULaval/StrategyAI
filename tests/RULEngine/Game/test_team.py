@@ -1,7 +1,7 @@
 import unittest
 
-from RULEngine.GameDomainObjects.Player import Player
-from RULEngine.GameDomainObjects.Team import Team
+from RULEngine.GameDomainObjects.player import Player
+from RULEngine.GameDomainObjects.team import Team
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import PLAYER_PER_TEAM, MAX_PLAYER_ON_FIELD_PER_TEAM

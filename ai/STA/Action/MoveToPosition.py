@@ -1,5 +1,5 @@
 # Under MIT license, see LICENSE.txt
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType

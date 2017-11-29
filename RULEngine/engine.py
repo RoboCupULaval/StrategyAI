@@ -48,7 +48,7 @@ class Engine(Process):
         self.vision_receiver = VisionReceiver(vision_host, vision_port, self.vision_queue, self.stop_event)
         self.vision_receiver.daemon = True
 
-        self.uidebug_sender = UIDebugCommandSender(uidebug_host, uidebug_port, self.stop_event, self.uidebug_queue)
+        self.uidebug_sender = UIDebugCommandSender(uidebug_host, uidebug_port, self.uidebug_queue, self.stop_event)
 
         self.robot_cmds_sender, args = RobotCommandSenderFactory.get_sender()
         # self.robot_cmds_sender(args)

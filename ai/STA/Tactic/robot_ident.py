@@ -3,7 +3,7 @@ import csv
 import time
 from typing import List
 
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.SpeedPose import SpeedPose
 from ai.STA.Action.Idle import Idle

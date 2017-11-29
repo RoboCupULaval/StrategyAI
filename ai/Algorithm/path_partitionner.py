@@ -1,7 +1,7 @@
 from enum import Enum
 
-from RULEngine.GameDomainObjects.Player import Player
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.geometry import conv_position_2_list, remove_duplicates

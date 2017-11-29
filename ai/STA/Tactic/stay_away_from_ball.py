@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
 
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.area import stayOutsideCircle
 from ai.Algorithm.path_partitionner import CollisionBody

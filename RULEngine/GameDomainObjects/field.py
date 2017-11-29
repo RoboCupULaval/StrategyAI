@@ -1,4 +1,4 @@
-from RULEngine.GameDomainObjects.Ball import Ball
+from RULEngine.GameDomainObjects.ball import Ball
 from RULEngine.Util.Position import Position
 
 
