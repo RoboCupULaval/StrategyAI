@@ -2,30 +2,32 @@
 from typing import List
 import sys
 
-from ai.STA.Tactic.DemoFollowRobot import DemoFollowRobot
-from ai.STA.Tactic.DoKick import DoKick
-from ai.STA.Tactic.MeasureLoopDelay import MeasureLoopDelay
-from ai.STA.Tactic.RotateAroundPosition import RotateAroundPosition
-from ai.STA.Tactic.RotateAroundBall import RotateAroundBall
-from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.bumb import Bump
+from ai.STA.Tactic.pass_to_player import PassToPlayer
+from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot
+from ai.STA.Tactic.do_kick import DoKick
+from ai.STA.Tactic.measure_loop_delay import MeasureLoopDelay
+from ai.STA.Tactic.rotate_around_position import RotateAroundPosition
+from ai.STA.Tactic.rotate_around_ball import RotateAroundBall
+from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.bump import Bump
 from ai.STA.Tactic.face_opponent import FaceOpponent
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 from ai.STA.Tactic.intercept import Intercept
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.robot_ident import RobotIdent
 from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
-from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.Stop import Stop
-from ai.STA.Tactic.ProtectZone import ProtectZone
-from ai.STA.Tactic.DemoFollowBall import DemoFollowBall
-from ai.STA.Tactic.GoToPositionNoPathfinder import GoToPositionNoPathfinder
-from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.goalkeeper import GoalKeeper
+from ai.STA.Tactic.stop import Stop
+from ai.STA.Tactic.protect_zone import ProtectZone
+from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
+from ai.STA.Tactic.go_to_position_no_pathfinder import GoToPositionNoPathfinder
+from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.face_target import FaceTarget
+from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
 
 try:
-    from ai.STA.Tactic.Joystick import Joystick
+    from ai.STA.Tactic.joystick import Joystick
 except ImportError:
     import warnings
     warnings.warn('Pygame is not installed, disabling Joystick tactic.', stacklevel=1)
@@ -36,27 +38,30 @@ class TacticBook(object):
         """
         Initialise le dictionnaire des tactiques présentées au reste de l'IA.
         """
-        self.tactic_book = {'FaceTarget': FaceTarget,
-                            'GoalKeeper': GoalKeeper,
-                            'CoverZone': ProtectZone,
-                            'DemoFollowBall': DemoFollowBall,
-                            'DemoFollowRobot': DemoFollowRobot,
-                            'Stop': Stop,
-                            'GoToPositionNoPathfinder': GoToPositionNoPathfinder,
-                            'GoToPositionPathfinder': GoToPositionPathfinder,
-                            'GoKick': GoKick,
-                            'RotateAroundPosition': RotateAroundPosition,
-                            'RotateAroundBall': RotateAroundBall,
-                            'RobotIdent': RobotIdent,
-                            'PositionForPass': PositionForPass,
-                            'Bump': Bump,
-                            'Intercept': Intercept,
-                            'GoToRandomPosition': GoToRandomPosition,
-                            'StayAwayFromBall': StayAwayFromBall,
-                            'MeasureLoopDelay': MeasureLoopDelay,
-                            'DoKick': DoKick,
-                            'FaceOpponent': FaceOpponent
-                            }
+        self.tactic_book = {
+            'AlignToDefenseWall': AlignToDefenseWall,
+            'Bump': Bump,
+            'DemoFollowBall': DemoFollowBall,
+            'DemoFollowRobot': DemoFollowRobot,
+            'DoKick': DoKick,
+            'FaceOpponent': FaceOpponent,
+            'FaceTarget': FaceTarget,
+            'GoalKeeper': GoalKeeper,
+            'GoKick': GoKick,
+            'GoToPositionNoPathfinder': GoToPositionNoPathfinder,
+            'GoToPositionPathfinder': GoToPositionPathfinder,
+            'GoToRandomPosition': GoToRandomPosition,
+            'Intercept': Intercept,
+            'MeasureLoopDelay': MeasureLoopDelay,
+            'PassToPlayer': PassToPlayer,
+            'PositionForPass': PositionForPass,
+            'ProtectZone': ProtectZone,
+            'RobotIdent': RobotIdent,
+            'RotateAroundBall': RotateAroundBall,
+            'RotateAroundPosition': RotateAroundPosition,
+            'StayAwayFromBall': StayAwayFromBall,
+            'Stop': Stop,
+        }
         if 'Joystick' in sys.modules:
             self.tactic_book['Joystick'] = Joystick
 
@@ -76,7 +81,6 @@ class TacticBook(object):
         :return: (bool) true si la tactique existe dans le livre, false sinon.
         """
         assert isinstance(tactic_name, str)
-
         return tactic_name in self.tactic_book
 
     def get_tactic(self, tactic_name: str) -> Tactic:

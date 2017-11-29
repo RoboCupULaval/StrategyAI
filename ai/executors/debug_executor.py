@@ -3,7 +3,7 @@ import math
 
 from RULEngine.Debug.ui_debug_command import UIDebugCommand
 from RULEngine.Util.Pose import Pose, Position
-from ai.STA.Strategy.HumanControl import HumanControl
+from ai.STA.Strategy.human_control import HumanControl
 from ai.executors.executor import Executor
 
 

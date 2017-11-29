@@ -6,7 +6,7 @@ from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 
 from ai.states.game_state import GameState
-from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle

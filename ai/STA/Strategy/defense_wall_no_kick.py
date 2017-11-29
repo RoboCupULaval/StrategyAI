@@ -12,7 +12,7 @@ from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.role import Role
 from ai.states.game_state import GameState
-from . Strategy import Strategy
+from ai.STA.Strategy.strategy import Strategy
 
 class DefenseWallNoKick(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4):

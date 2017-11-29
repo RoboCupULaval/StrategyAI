@@ -11,7 +11,7 @@ from ai.states.game_state import GameState
 __author__ = 'RobocupULaval'
 
 
-class Tactic:
+class Tactic(object):
     """
         Classe mère de toutes les tactiques
     """
@@ -29,7 +29,6 @@ class Tactic:
         assert isinstance(game_state, GameState), "Le game_state doit être un GameState"
         assert isinstance(player, Player), "Le player doit être un Player {}".format(player)
         assert isinstance(target, Pose), "La target devrait être une Pose"
-        # assert isinstance(args, list) or isinstance(args, None), "Le paramètre args doit être une liste"
 
         self.game_state = game_state
         self.player = player

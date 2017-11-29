@@ -5,8 +5,8 @@ from typing import List
 from RULEngine.GameDomainObjects.Player import Player
 from RULEngine.Util.Pose import Pose
 from ai.states.game_state import GameState
-from .Tactic import Tactic
-from . tactic_constants import Flags
+from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.MoveToPosition import MoveToPosition
 
 from RULEngine.Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
@@ -17,10 +17,7 @@ class GoToPositionNoPathfinder(Tactic):
         super().__init__(game_state, player, target, args)
         self.target = target
         self.status_flag = Flags.INIT
-        if self.args:
-            self.cruise_speed = float(args[0])
-        else:
-            self.cruise_speed = 1
+        self.cruise_speed = float(args[0]) if self.args else 1
 
     def exec(self):
         if self.check_success():
@@ -36,6 +33,4 @@ class GoToPositionNoPathfinder(Tactic):
 
     def check_success(self):
         distance = (self.player.pose - self.target).position.norm()
-        if distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.target, abs_tol=ANGLE_TO_HALT):
-            return True
-        return False
+        return distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.target, abs_tol=ANGLE_TO_HALT)
