@@ -285,8 +285,8 @@ class RobotMotion(object):
 def get_control_setting(is_sim: bool):
 
     if is_sim:
-        translation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
-        rotation = {"kp": 1, "ki": 0, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        translation = {"kp": 1, "ki": 0.5, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        rotation = {"kp": 2, "ki": 1, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
         translation = {"kp": 1, "ki": 0.5, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
         rotation = {"kp": 1, "ki": 0.35, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
