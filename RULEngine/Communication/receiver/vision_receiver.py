@@ -26,7 +26,7 @@ class VisionReceiver(Process):
 
         self.logger.debug("initialized to {} {}".format(self.host, self.port))
 
-    def initialize(self):
+    def _initialize(self):
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.bind((self.host, self.port))
 
@@ -39,16 +39,16 @@ class VisionReceiver(Process):
 
     def run(self):
         self.logger.info('Starting process.')
-        self.initialize()
+        self._initialize()
 
         try:
-            self.receive_packet()
+            self._receive_packet()
         except KeyboardInterrupt:
             pass
 
-        self.finalize()
+        self._stop()
 
-    def receive_packet(self):
+    def _receive_packet(self):
         packet = SSL_WrapperPacket()
         while not self.stop_event.is_set():
             try:
@@ -64,6 +64,6 @@ class VisionReceiver(Process):
                 self.logger.error("Socket timed out after {}, Are you listening to the correct port?".
                                   format(self.TIME_OUT))
 
-    def finalize(self):
+    def _stop(self):
         self.logger.debug("has exited gracefully")
         exit(0)

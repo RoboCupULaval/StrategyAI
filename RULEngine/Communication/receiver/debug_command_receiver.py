@@ -1,43 +1,59 @@
 # Under MIT License, see LICENSE.txt
 
-import pickle
-from collections import deque
-from socketserver import BaseRequestHandler
+import logging
+from multiprocessing import Process, Queue, Event
+from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY, timeout
+from queue import Full
+from ipaddress import ip_address
+from struct import pack
+from pickle import loads
 
-from RULEngine.Communication.util.threaded_udp_server import ThreadedUDPServer
-from RULEngine.Util.constant import DEBUG_RECEIVE_BUFFER_SIZE
-from config.config_service import ConfigService
 
+class UIDebugCommandReceiver(Process):
+    TIME_OUT = 0.05
 
-class DebugCommandReceiver(object):
-    """
-        Service capable d'écouter un port multicast UDP, de reçevoir et de
-        traiter les paquets brutes envoyer par le serveur de débogage.
-    """
-    def __init__(self):
-        cfg = ConfigService()
-        host = cfg.config_dict["COMMUNICATION"]["ui_debug_address"]
-        port = int(cfg.config_dict["COMMUNICATION"]["ui_cmd_receiver_port"])
-        self.packet_list = deque(maxlen=DEBUG_RECEIVE_BUFFER_SIZE)
-        handler = self.get_udp_handler(self.packet_list)
-        self.server = ThreadedUDPServer(host, port, handler)
+    def __init__(self, host: str, port: int, uidebug_cmds_queue: Queue, stop_event: Event):
+        super(UIDebugCommandReceiver, self).__init__(name=__name__)
+        self.logger = logging.getLogger("VisionReceiver")
+        self.host = host
+        self.port = port
+        self.uidebug_cmds_queue = uidebug_cmds_queue
+        self.stop_event = stop_event
 
-    def get_udp_handler(self, packet_list):
-        """ Retourne la classe pour reçevoir async les paquets """
+        self.socket = None
 
-        class ThreadedUDPRequestHandler(BaseRequestHandler):
-            """ Contient la logique pour traiter en callback une request. """
-            def handle(self):
-                """
-                    Récupère la request et unpickle le paquet brute dans la
-                    deque.
-                """
-                data = self.request[0]
-                packet_list.append(pickle.loads(data))
-        return ThreadedUDPRequestHandler
+    def _initialize(self):
+        self.socket = socket(AF_INET, SOCK_DGRAM)
+        self.socket.bind((self.host, self.port))
 
-    def get_commands(self):
-        """ Vide la file et retourne une liste des paquets brutes. """
+        if ip_address(self.host).is_multicast:
+            self.socket.setsockopt(IPPROTO_IP,
+                                   IP_ADD_MEMBERSHIP,
+                                   pack("=4sl", inet_aton(self.host), INADDR_ANY))
+        self.socket.settimeout(self.TIME_OUT)
+        self.logger.debug("Socket initialized")
 
-        for _ in range(len(self.packet_list)):
-            yield self.packet_list.pop()
+    def run(self):
+        self.logger.info('Starting process.')
+        self._initialize()
+
+        try:
+            self._receive_packet()
+        except KeyboardInterrupt:
+            pass
+
+        self._stop()
+
+    def _receive_packet(self):
+        while not self.stop_event.is_set():
+            try:
+                data, _ = self.socket.recvfrom(2048)
+                self.uidebug_cmds_queue.put(loads(data))
+            except Full as e:
+                self.logger.debug("{}".format(e))
+            except timeout:
+                pass
+
+    def _stop(self):
+        self.logger.debug("has exited gracefully")
+        exit(0)

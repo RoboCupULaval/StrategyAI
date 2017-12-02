@@ -46,7 +46,6 @@ class UIDebugCommandSender(Process):
                 self.logger.debug(str(e))
                 raise e
 
-
     def _stop(self):
         self.logger.debug("has exited.")
         exit(0)
