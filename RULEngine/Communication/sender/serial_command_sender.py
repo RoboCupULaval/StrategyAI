@@ -34,7 +34,7 @@ class SerialCommandSender(Process):
     def _stop(self):
         pass
 
-
+    # TODO HERHE
 
     def send_loop(self):
         def loop_send_packets(sc):
