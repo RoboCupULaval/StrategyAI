@@ -148,7 +148,7 @@ class PathPartitionner(Pathfinder):
         if (old_path is not None) and (not self.is_path_collide(old_raw_path,
                                                                 tolerance=1.5)) and \
                 ((pose_target.position - old_raw_path.goal).norm() < hysteresis):
-            if False:
+            if (pose_target.position - old_raw_path.goal).norm() > 20:
                 old_raw_path.quick_update_path(self.player)
                 self.path_appendice = Path(old_raw_path.goal, self.path.goal)
                 self.path_appendice = self.fastpathplanner(self.path_appendice)

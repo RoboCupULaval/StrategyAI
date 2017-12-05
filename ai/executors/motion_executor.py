@@ -240,7 +240,7 @@ class RobotMotion(object):
         # Desired parameters
         if cmd.path != []:
             current_path_position = Position(cmd.path[0] / 1000)
-            if not self.last_position.is_close(current_path_position, 0.1):
+            if not self.last_position.is_close(current_path_position, 0.1) and self.target_speed < 0.2:
                 self.reset()
                 self.last_position = current_path_position
 
@@ -285,11 +285,11 @@ class RobotMotion(object):
 def get_control_setting(is_sim: bool):
 
     if is_sim:
-        translation = {"kp": 1, "ki": 0, "kd": 0, "antiwindup": 20, "deadzone": 0, "sensibility": 0}
-        rotation = {"kp": 1, "ki": 0, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        translation = {"kp": 1, "ki": 0.5, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        rotation = {"kp": 2, "ki": 1, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
-        translation = {"kp": 1, "ki": 0.0, "kd": 0, "antiwindup": 20, "deadzone": 0.1, "sensibility": 0.01}
-        rotation = {"kp": 1, "ki": 0.25, "kd": 0.01, "antiwindup": 20, "deadzone": 0.3, "sensibility": 0.1}
+        translation = {"kp": 1, "ki": 0.5, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        rotation = {"kp": 1, "ki": 0.35, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)
