@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.GameDomainObjects.Ball import Ball
+from RULEngine.GameDomainObjects.ball import Ball
 from ai.Algorithm.path_partitionner import CollisionBody, CollisionType
 from config.config_service import ConfigService
 # from RULEngine.Debug.debug_interface import DebugInterface

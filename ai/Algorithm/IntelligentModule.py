@@ -6,8 +6,8 @@ from abc import abstractmethod, ABCMeta
 from typing import List
 
 from RULEngine.Debug.debug_interface import DebugInterface
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 
 __author__ = 'RoboCupULaval'

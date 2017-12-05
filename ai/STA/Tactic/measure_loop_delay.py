@@ -1,12 +1,12 @@
 # Under MIT license, see LICENSE.txt
 from typing import List, Optional
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 
 from ai.states.game_state import GameState
-from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.Idle import Idle
@@ -17,7 +17,7 @@ MOVING_THRESHOLD = 10  # mm
 
 
 class MeasureLoopDelay(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose, args: Optional[List[str]]=None):
+    def __init__(self, game_state: GameState, player: Player, target: Pose, args: Optional[List[str]]=None):
         super().__init__(game_state, player, target, args)
         self.target = target
         self.status_flag = Flags.INIT

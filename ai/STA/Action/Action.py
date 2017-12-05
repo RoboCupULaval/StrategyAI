@@ -2,7 +2,7 @@
 
 from abc import abstractmethod
 
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from ai.Util.ai_command import AICommand
 from ai.states.game_state import GameState
 
@@ -16,10 +16,10 @@ class Action:
     def __init__(self, game_state: GameState, player: Player):
         """
             :param game_state: L'état courant du jeu.
-            :param player: (OurPlayer) instance du joueur qui execute l'action
+            :param player: (Player) instance du joueur qui execute l'action
         """
         assert isinstance(game_state, GameState), "action classe mère doit avoir un p_game_state objet GameState"
-        assert isinstance(player, Player), "action classe mère doit avoir pour player une instance de OurPlayer"
+        assert isinstance(player, Player), "action classe mère doit avoir pour player une instance de Player"
         self.game_state = game_state
         self.player = player
 

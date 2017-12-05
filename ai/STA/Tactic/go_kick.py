@@ -3,22 +3,17 @@ from typing import List, Union
 import numpy as np
 import time
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
-from RULEngine.Util.geometry import get_distance, compare_angle, wrap_to_pi
+from RULEngine.Util.geometry import compare_angle
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
-from ai.STA.Action.rotate_around import RotateAround
-from ai.STA.Action.grab import Grab
-from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ai_command import AICommandType, AICommand
-from ai.STA.Action.GoBehind import GoBehind
 from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
@@ -35,25 +30,13 @@ COMMAND_DELAY = 0.5
 
 
 class GoKick(Tactic):
-    """
-    méthodes:
-        exec(self) : Exécute une Action selon l'état courant
-    attributs:
-        game_state: L'état courant du jeu.
-        player : Instance du joueur auquel est assigné la tactique
-        current_state : L'état courant de la tactique
-        next_state : L'état suivant de la tactique
-        status_flag : L'indicateur de progression de la tactique
-        target: Position à laquelle faire face après avoir pris la balle
-    """
-
-    def __init__(self, game_state: GameState, player: OurPlayer,
+    def __init__(self, game_state: GameState, player: Player,
                  target: Pose=Pose(),
                  args: List[str]=None,
                  kick_force: Union[int, float]=5,
                  auto_update_target=False):
 
-        Tactic.__init__(self, game_state, player, target, args)
+        super().__init__(game_state, player, target, args)
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge
         self.cmd_last_time = time.time()
@@ -72,18 +55,12 @@ class GoKick(Tactic):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
             self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
-        return AllStar(self.game_state,
-                       self.player,
-                       charge_kick=True)
+        tentative_command = {'charge_kick':True}
+        return AllStar(self.game_state, self.player, other_args=tentative_command)
 
     def go_behind_ball(self):
         self.ball_spacing = GRAB_BALL_SPACING
         self.status_flag = Flags.WIP
-
-
-
-
-        ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - self.player.pose.position).angle()
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3)
         if (self.player.pose.position - distance_behind).norm() < 50:
@@ -92,80 +69,27 @@ class GoKick(Tactic):
             self.next_state = self.go_behind_ball
             if self.auto_update_target:
                 self._find_best_passing_option()
-        distance_to_goal = (distance_behind - self.player.pose.position).norm()
-        # if distance_to_goal > 150:
-        #     go_behind_ball_speed = 1
-        # else:
-        #     go_behind_ball_speed = distance_to_goal / 150
-        if self.tries_flag == 0:
-            return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                          collision_ball=True, cruise_speed=1)
-        else:
-            return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                          collision_ball=False, cruise_speed=1)
-        # return RotateAround(self.game_state,
-        #                     self.player,
-        #                     Pose(ball_position, orientation),
-        #                     GO_BEHIND_SPACING,
-        #                     pathfinder_on=True,
-        #                     aiming=self.target,
-        #                     rotation_speed=3 * m.pi,
-        #                     speed_mode=True,
-        #                     behind_target=distance_behind)
+        collision_ball = self.tries_flag == 0
+        return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
+                                      collision_ball=collision_ball, cruise_speed=1)
 
     def grab_ball(self):
         if self.grab_ball_tries == 0:
             if self._get_distance_from_ball() < KICK_DISTANCE:
                 self.next_state = self.kick
-        # elif not self._is_player_towards_ball_and_target():
-        #     self.next_state = self.go_behind_ball
-        #     self.grab_ball_tries = 0
-        #     self.status_flag = Flags.INIT
         else:
             if (self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10)):
                 self.next_state = self.kick
 
-
-
-        # else:
-        #     self.tries_flag = self.tries_flag + 1
-        #     self.next_state = self.grab_ball
-        #     self.grab_ball_tries = self.grab_ball_tries + 1
-
-        ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - self.player.pose.position).angle()
-        # orientation = (ball_position - self.player.pose.position).angle()
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
-        #distance_to_goal = (distance_behind - self.player.pose.position).norm()
-        # if distance_to_goal > 150:
-        #     go_behind_ball_speed = 1
-        # else:
-        #     go_behind_ball_speed = distance_to_goal / 150
         return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
                                      cruise_speed=2, charge_kick=True, end_speed=0.2)
-        # return AllStar(self.game_state,
-        #                self.player,
-        #                charge_kick=True,
-        #                pose_goal=Pose(ball_position, orientation))
-        # return RotateAround(self.game_state,
-        #                     self.player,
-        #                     Pose(ball_position, orientation),
-        #                     self.ball_spacing,
-        #                     aiming=self.target,
-        #                     rotation_speed=m.pi,
-        #                     pathfinder_on=True,
-        #                     speed_mode=True,
-        #                     behind_target=distance_behind,
-        #                     approach=True)
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
         self.next_state = self.validate_kick
-        # if not self._is_player_towards_ball_and_target():
-        #     self.next_state = self.go_behind_ball
-        #     self.status_flag = Flags.INIT
         self.tries_flag += 1
-        # print(self.tries_flag % 10)
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - self.player.pose.position).angle()
         return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, end_speed=0.2)
@@ -173,7 +97,6 @@ class GoKick(Tactic):
     def validate_kick(self):
         if self.game_state.get_ball_velocity().norm() > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.halt
-            #print(self._get_distance_from_ball())
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
             self.next_state = self.kick
         else:
@@ -199,7 +122,6 @@ class GoKick(Tactic):
         return compare_angle(target_to_ball.angle(), ball_to_player.angle(), abs_tol=abs_tol)
 
     def _find_best_passing_option(self):
-
         assignation_delay = (time.time() - self.target_assignation_last_time)
 
         if assignation_delay > TARGET_ASSIGNATION_DELAY:

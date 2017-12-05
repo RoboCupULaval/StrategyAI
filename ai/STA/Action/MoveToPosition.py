@@ -1,5 +1,5 @@
 # Under MIT license, see LICENSE.txt
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
@@ -8,7 +8,7 @@ from ai.states.game_state import GameState
 
 class MoveToPosition(Action):
 
-    def __init__(self, game_state: GameState, player: OurPlayer,
+    def __init__(self, game_state: GameState, player: Player,
                  destination: Pose,
                  pathfinder_on=True,
                  cruise_speed: [int, float]=1,

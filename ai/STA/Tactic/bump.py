@@ -6,14 +6,14 @@ import numpy as np
 import time
 
 from RULEngine.Debug.debug_interface import DebugInterface
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import ROBOT_RADIUS
 from RULEngine.Util.geometry import get_distance
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
-from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.GoBehind import GoBehind
 from ai.Util.ai_command import AICommandType
@@ -23,20 +23,8 @@ __author__ = 'RoboCupULaval'
 
 
 class Bump(Tactic):
-    """
-    méthodes:
-        exec(self) : Exécute une Action selon l'état courant
-    attributs:
-        game_state: L'état courant du jeu.
-        player : Instance du joueur auquel est assigné la tactique
-        current_state : L'état courant de la tactique
-        next_state : L'état suivant de la tactique
-        status_flag : L'indicateur de progression de la tactique
-        target: Position à laquelle faire face après avoir pris la balle
-    """
-
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None):
-        Tactic.__init__(self, game_state, player, target, args)
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None):
+        super().__init__(game_state, player, target, args)
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball
         self.debug_interface = DebugInterface()
@@ -68,7 +56,7 @@ class Bump(Tactic):
             # self.debug.add_log(4, "Distance from ball: {}".format(dist))
             self.next_state = self.get_behind_ball
         return GoBehind(self.game_state, self.player, self.game_state.get_ball_position(), self.target.position,
-                        120, pathfinding=True, orientation='back')
+                        120, pathfinder_on=True, orientation='back')
 
     def push_ball(self):
         # self.debug.add_log(1, "Grab ball called")

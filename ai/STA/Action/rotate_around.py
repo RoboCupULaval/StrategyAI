@@ -2,7 +2,7 @@
 
 import math as m
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.geometry import compare_angle, wrap_to_pi
 
@@ -18,7 +18,7 @@ DEFAULT_RADIUS = 150  # mm
 
 class RotateAround(Action):
     def __init__(self, game_state: GameState,
-                 player: OurPlayer,
+                 player: Player,
                  target: Pose,
                  radius: Union[int, float]=DEFAULT_RADIUS,
                  is_clockwise: Union[bool, None]=None,
@@ -37,7 +37,7 @@ class RotateAround(Action):
             go backward since the robot cannot be at the right radius (Ball is moving with the robot)
 
             :param game_state: current game state
-            :param player: Instance of the player (OurPlayer)
+            :param player: Instance of the player (Player)
             :param target: Position of the center of rotation
             :param radius: Radius of the rotation around target position
             :param is_clockwise: Sense of rotation flag

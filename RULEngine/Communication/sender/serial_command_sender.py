@@ -1,7 +1,8 @@
 # Under MIT License, see LICENSE.txt
-import sched
 import time
-from collections import deque
+import logging
+from multiprocessing import Process, Queue, Event
+
 try:
     from pyhermes import McuCommunicator
 except ImportError:
@@ -14,18 +15,26 @@ COMMUNICATION_SLEEP = 0.001
 MOVE_COMMAND_SLEEP = 0.05
 
 
-class SerialCommandSender(object):
-    def __init__(self):
+class SerialCommandSender(Process):
+    def __init__(self, robot_cmds_queue: Queue, stop_event: Event):
+        super(SerialCommandSender, self).__init__()
+        self.logger = logging.getLogger("SerialCommandSender")
+
         self.mcu_com = McuCommunicator(timeout=0.1)
 
-        self.last_time = 0
-        self.command_queue = deque()
 
-        self.command_dict = {}
+    def _initialize(self):
+        pass
 
-        self.terminate = threading.Event()
-        self.comm_thread = threading.Thread(target=self.send_loop, name="SerialCommandSender")
-        self.comm_thread.start()
+    def run(self):
+        pass
+
+    def serve(self):
+
+    def _stop(self):
+        pass
+
+
 
     def send_loop(self):
         def loop_send_packets(sc):

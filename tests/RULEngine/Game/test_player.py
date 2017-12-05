@@ -1,11 +1,11 @@
 import unittest
 
-from RULEngine.Util.kalman_filter.enemy_kalman_filter import EnemyKalmanFilter
-from RULEngine.GameDomainObjects.Player import Player
-from RULEngine.GameDomainObjects.Team import Team
-from RULEngine.Util.Position import Position
+from RULEngine.GameDomainObjects.player import Player
+from RULEngine.GameDomainObjects.team import Team
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.team_color_service import TeamColor
+from RULEngine.Util.Position import Position
+from RULEngine.Util.kalman_filter.enemy_kalman_filter import EnemyKalmanFilter
+from RULEngine.services.team_color_service import TeamColor
 
 
 class TestPlayer(unittest.TestCase):

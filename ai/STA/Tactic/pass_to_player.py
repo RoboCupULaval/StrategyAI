@@ -2,7 +2,7 @@
 import numpy as np
 import time
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
@@ -11,7 +11,7 @@ from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.grab import Grab
-from ai.STA.Tactic.Tactic import Tactic
+from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.STA.Action.GoBehind import GoBehind
 from ai.states.game_state import GameState
@@ -25,20 +25,8 @@ COMMAND_DELAY = 1.5
 
 
 class PassToPlayer(Tactic):
-    """
-    méthodes:
-        exec(self) : Exécute une Action selon l'état courant
-    attributs:
-        game_state: L'état courant du jeu.
-        player : Instance du joueur auquel est assigné la tactique
-        current_state : L'état courant de la tactique
-        next_state : L'état suivant de la tactique
-        status_flag : L'indicateur de progression de la tactique
-        target: Position à laquelle faire face après avoir pris la balle
-    """
-
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), target_id=1, args=None):
-        Tactic.__init__(self, game_state, player, target, args)
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), target_id=1, args=None):
+        super().__init__(game_state, player, target, args)
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge
         self.last_time = time.time()

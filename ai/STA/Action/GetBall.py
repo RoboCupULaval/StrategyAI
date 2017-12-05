@@ -1,5 +1,5 @@
 # Under MIT licence, see LICENCE.txt
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
@@ -16,7 +16,7 @@ class GetBall(Action):
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur
     """
-    def __init__(self, game_state: GameState, player: OurPlayer):
+    def __init__(self, game_state: GameState, player: Player):
         """
             :param game_state: L'état courant du jeu.
             :param player: Joueur qui prend le contrôle de la balle

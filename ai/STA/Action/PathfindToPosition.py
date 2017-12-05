@@ -1,5 +1,5 @@
 # Under MIT license, see LICENSE.txt
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from ai.states.game_state import GameState
 from ai.STA.Action.Action import Action
@@ -16,7 +16,7 @@ class PathfindToPosition(Action):
     Attributs (en plus de ceux de Action):
         destination : La destination (pose) que le joueur doit atteindre
     """
-    def __init__(self, game_state: GameState, player: OurPlayer, p_destination: Pose, cruise_speed: [int, float]=0.2):
+    def __init__(self, game_state: GameState, player: Player, p_destination: Pose, cruise_speed: [int, float]=0.2):
         """
             :param game_state: L'état courant du jeu.
             :param player: Instance du joueur qui se déplace

@@ -19,7 +19,7 @@ class Engine(Process):
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
     REFEREE_QUEUE_MAXSIZE = 100
 
-    def __init__(self, stop_event: Event, uidebug_queue: Queue):
+    def __init__(self, stop_event: Event, uidebug_queue: Queue, player_cmds_queue: Queue):
         super(Engine, self).__init__(name=__name__)
 
         self.logger = logging.getLogger("Engine")
@@ -28,6 +28,7 @@ class Engine(Process):
         self.stop_event = stop_event
         self.vision_queue = Queue(self.VISION_QUEUE_MAXSIZE)
         self.uidebug_queue = uidebug_queue
+        self.player_cmds_queue = player_cmds_queue
 
         self.tracker = None
         self.controller = None
@@ -36,7 +37,7 @@ class Engine(Process):
         self.robot_cmds_sender = None
         self.uidebug_sender = None
 
-    def initialize_subprocess(self):
+    def _initialize_subprocess(self):
         vision_host = self.cfg.config_dict["COMMUNICATION"]["vision_udp_address"]
         vision_port = int(self.cfg.config_dict["COMMUNICATION"]["vision_port"])
 
@@ -47,13 +48,13 @@ class Engine(Process):
         self.vision_receiver = VisionReceiver(vision_host, vision_port, self.vision_queue, self.stop_event)
         self.vision_receiver.daemon = True
 
-        self.uidebug_sender = UIDebugCommandSender(uidebug_host, uidebug_port, self.stop_event, self.uidebug_queue)
+        self.uidebug_sender = UIDebugCommandSender(uidebug_host, uidebug_port, self.uidebug_queue, self.stop_event)
 
-        self.robot_cmds_sender, args = RobotCommandSenderFactory.get_sender()
-        self.robot_cmds_sender(args[0], args[1])
+        # self.robot_cmds_sender, args = RobotCommandSenderFactory.get_sender()
+        # self.robot_cmds_sender(args)
 
         self.tracker = Tracker(self.vision_queue)
-        self.controller = Controller(None)
+        self.controller = Controller(self.player_cmds_queue)
 
         self.vision_receiver.start()
         self.uidebug_sender.start()
@@ -65,7 +66,7 @@ class Engine(Process):
             sleep(0)
 
     def run(self):
-        self.initialize_subprocess()
+        self._initialize_subprocess()
         try:
             self.loop()
         except KeyboardInterrupt:
@@ -78,6 +79,6 @@ class Engine(Process):
         self.vision_receiver.join(0.3)  # timeout needed for some reason even though the process exit gracefully
         self.logger.debug("VisionReceiver joined now is -> {0}".
                           format("alive" if self.vision_receiver.is_alive() else "dead"))
-        self.uidebug_sender.join()
+        self.uidebug_sender.join(0.3)
         logging.debug("UIDebugSender joined now is -> {0}".
                       format("alive" if self.uidebug_sender.is_alive() else "dead"))

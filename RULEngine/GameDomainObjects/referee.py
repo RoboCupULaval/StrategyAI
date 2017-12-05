@@ -5,8 +5,7 @@ from typing import Dict
 
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import TeamColor
-from RULEngine.Util.team_color_service import TeamColorService
-from config.config_service import ConfigService
+from RULEngine.services.team_color_service import TeamColorService
 
 
 class RefereeCommand(IntEnum):
@@ -117,7 +116,7 @@ class Referee:
 
     def _parse_team_info(self, frame):
         info = {}
-        if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW:
+        if TeamColorService().our_team_color is TeamColor.YELLOW:
             info['ours'] = frame.yellow
             info['theirs'] = frame.blue
         else:

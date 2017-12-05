@@ -1,14 +1,14 @@
 # Under MIT License, see LICENSE.txt
 import logging
 
-from RULEngine.GameDomainObjects.Field import Field
+from RULEngine.GameDomainObjects.ball import Ball
+from RULEngine.GameDomainObjects.field import Field
+from RULEngine.GameDomainObjects.referee import Referee
+from RULEngine.GameDomainObjects.team import Team
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.singleton import Singleton
-from RULEngine.Util.team_color_service import TeamColor
-from RULEngine.GameDomainObjects.Team import Team
-from RULEngine.GameDomainObjects.Ball import Ball
-from RULEngine.GameDomainObjects.Referee import Referee
+from RULEngine.services.team_color_service import TeamColor
 
 
 class Game(metaclass=Singleton):
@@ -16,7 +16,7 @@ class Game(metaclass=Singleton):
         self.logger = logging.getLogger("Game - DomainObject")
 
         self._ball = Ball()
-        self._field = Field(self.ball)
+        self._field = Field(self._ball)
         self._referee = Referee()
         self._blue_team = Team(team_color=TeamColor.BLUE)
         self._yellow_team = Team(team_color=TeamColor.YELLOW)
@@ -35,7 +35,7 @@ class Game(metaclass=Singleton):
 
     @property
     def ball(self):
-        return self._field.ball
+        return self.field.ball
 
     @property
     def referee(self):
@@ -60,3 +60,7 @@ class Game(metaclass=Singleton):
     @property
     def our_team_color(self):
         return self._our_team.team_color
+
+    @property
+    def field(self):
+        return self._field

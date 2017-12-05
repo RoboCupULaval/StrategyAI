@@ -1,5 +1,4 @@
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
-from RULEngine.GameDomainObjects.Player import Player
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.SpeedPose import SpeedPose
 from enum import Enum
@@ -41,7 +40,7 @@ _default_keys = {
 }
 
 _keys_type = {
-    'player': OurPlayer,
+    'player': Player,
     'robot_id': (int, float),
     'command': AICommandType,
     'dribbler_on': bool,

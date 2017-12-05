@@ -3,13 +3,13 @@ from typing import List
 import numpy as np
 import time
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS, TeamColor
 from ai.Algorithm.evaluation_module import closest_players_to_point
-from ai.STA.Tactic.Tactic import Tactic
-from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 from ai.STA.Action.Idle import Idle
@@ -23,10 +23,10 @@ COMMAND_DELAY = 1.0
 
 
 class AlignToDefenseWall(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, robots_in_formation: List[OurPlayer], auto_pick=False,
+    def __init__(self, game_state: GameState, player: Player, robots_in_formation: List[Player], auto_pick=False,
                  args: List[str]=None):
-        assert isinstance(robots_in_formation[0], OurPlayer)
-        Tactic.__init__(self, game_state, player, args=args)
+        assert isinstance(robots_in_formation[0], Player)
+        super().__init__(game_state, player, args=args)
         self.current_state = self.define_center_of_formation
         self.next_state = self.get_players_in_formation
         self.game_state = game_state

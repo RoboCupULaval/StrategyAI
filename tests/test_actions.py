@@ -3,22 +3,22 @@
 import unittest
 from math import pi, sqrt
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
-from RULEngine.Util.Position import Position
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
-from RULEngine.GameDomainObjects.Referee import Referee
-from RULEngine.Util.team_color_service import TeamColorService
-from RULEngine.GameDomainObjects.Game import Game
+
+from RULEngine.GameDomainObjects.game import Game
+from RULEngine.GameDomainObjects.player import Player
+from RULEngine.GameDomainObjects.referee import Referee
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.Position import Position
 from RULEngine.Util.constant import *
+from RULEngine.services.team_color_service import TeamColorService
+from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GoBetween import GoBetween
-from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.ProtectGoal import ProtectGoal
-from ai.states.game_state import GameState
 from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
 
 A_DELTA_T = 1
@@ -34,7 +34,7 @@ class TestActions(unittest.TestCase):
         game_world = ReferenceTransferObject(self.game)
         game_world.set_team_color_svc(TeamColorService(TeamColor.YELLOW))
         self.game_state.set_reference(game_world)
-        self.a_player = OurPlayer(TeamColor.YELLOW, A_PLAYER_ID)
+        self.a_player = Player(TeamColor.YELLOW, A_PLAYER_ID)
 
     def test_move_to(self):
         A_CRUISE_SPEED = 0.1

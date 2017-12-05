@@ -11,7 +11,7 @@ class RobotCommandSenderFactory(object):
         if type_of_connection == "sim":
             return GrSimCommandSender, ("127.0.0.1", 20011)
         elif type_of_connection == "serial":
-            return None # SerialCommandSender, ()
+            return None  # SerialCommandSender, ()
         elif type_of_connection == "disabled":
             class FakeRobotCommandSender:
                 @staticmethod

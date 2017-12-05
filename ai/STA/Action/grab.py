@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 import numpy as np
 
-from RULEngine.GameDomainObjects.OurPlayer import OurPlayer
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from ai.STA.Action.Action import Action
 from ai.Util.ai_command import AICommand, AICommandType
@@ -11,7 +11,7 @@ __author__ = 'Robocup ULaval'
 
 
 class Grab(Action):
-    def __init__(self, game_state: GameState, player: OurPlayer):
+    def __init__(self, game_state: GameState, player: Player):
         """
             :param game_state: L'etat courant du jeu.
             :param player: Instance du joueur qui se deplace

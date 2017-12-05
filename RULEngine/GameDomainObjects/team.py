@@ -1,8 +1,7 @@
 # Under MIT License, see LICENSE.txt
 from typing import Dict
 
-
-from RULEngine.Util.team_color_service import TeamColor
+from RULEngine.services.team_color_service import TeamColor
 
 
 class Team:

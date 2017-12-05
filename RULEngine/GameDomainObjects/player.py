@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.GameDomainObjects.Team import Team
+from RULEngine.GameDomainObjects.team import Team
 from RULEngine.Util.Pose import Pose
 
 
