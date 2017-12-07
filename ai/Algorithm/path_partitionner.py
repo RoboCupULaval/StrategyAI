@@ -11,6 +11,7 @@ import numpy.matlib
 
 
 class Path:
+    # FIXME remove speed from pathfinder, it shouldn't be its concern
     def __init__(self, start=Position(),  end=Position(), start_speed=0, end_speed=0):
 
         self.start = start
@@ -469,12 +470,6 @@ class PathPartitionner:
             sub_target = Position(pose_target[0], pose_target[1])
         sub_target = Position(sub_target[0], sub_target[1])
         return [sub_target, avoid_dir]
-
-    def get_next_point(self, robot_id=None):
-        pass
-
-    def update(self):
-        pass
 
     def remove_redundant_points(self):
         if len(self.path.points) > 2:

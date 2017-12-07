@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+__author__ = "Maxime Gagnon-Legault, and others"
 
 SENDER_NAME = "AI"
 
@@ -53,4 +54,3 @@ class DebugCommand(object):
 class InvalidDebugType(Exception):
     """ Est levée si un paquet de débogage n'a pas le bon type. """
     pass
-

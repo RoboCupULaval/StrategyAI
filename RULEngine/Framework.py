@@ -1,17 +1,9 @@
 # Under MIT License, see LICENSE.txt
-"""
-    Point de départ du moteur pour l'intelligence artificielle. Construit les
-    objets nécessaires pour maintenir l'état du jeu, acquiert les frames de la
-    vision et appelle la stratégie. Ensuite, la stratégie est exécutée et un
-    thread est lancé qui contient une boucle qui se charge de l'acquisition des
-    frames de la vision. Cette boucle est la boucle principale et appel le
-    prochain état du **Coach**.
-"""
+__author__ = "Maxime Gagnon-Legault"
+
 import logging
-from multiprocessing import Process, Event, Queue
+from multiprocessing import Event, Queue
 import signal  # so we can stop gracefully
-import threading  # to stop while runnig the ia and not be obligated to check every loop if we received a stop signal
-import time
 
 from RULEngine.engine import Engine
 from ai.coach import Coach

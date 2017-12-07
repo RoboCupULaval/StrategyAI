@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+__author__ = "Maxime Gagnon-Legault, and others"
 
 
 class Singleton(type):

@@ -1,6 +1,7 @@
 # Under MIT license, see LICENSE.txt
-
 """ Livre des stratégies. """
+__author__ = "Maxime Gagnon-Legault, and others"
+
 from typing import List
 
 from ai.STA.Strategy.defense_wall_no_kick import DefenseWallNoKick

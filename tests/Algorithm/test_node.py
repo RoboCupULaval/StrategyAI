@@ -2,7 +2,6 @@
 
 import unittest
 
-from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 
 from RULEngine.GameDomainObjects.ball import Ball
 from RULEngine.GameDomainObjects.game import Game

@@ -5,7 +5,7 @@ from typing import List
 import numpy as np
 import time
 
-from RULEngine.Debug.debug_interface import DebugInterface
+from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
@@ -27,7 +27,7 @@ class Bump(Tactic):
         super().__init__(game_state, player, target, args)
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball
-        self.debug_interface = DebugInterface()
+        self.debug_interface = UIDebugCommandFactory()
         self.move_action = self._generate_move_to()
         self.move_action.status_flag = Flags.SUCCESS
         self.last_ball_position = self.game_state.get_ball_position()

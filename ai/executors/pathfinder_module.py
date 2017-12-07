@@ -1,7 +1,7 @@
 import time
 from typing import List
 
-from RULEngine.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
+from RULEngine.Debug.uidebug_command_factory import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
 from RULEngine.Util.Position import Position
 from ai.Algorithm.path_partitionner import PathPartitionner, Path
 from ai.Util.ai_command import AICommand

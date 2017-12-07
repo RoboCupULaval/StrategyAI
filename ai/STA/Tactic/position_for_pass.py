@@ -10,7 +10,7 @@ from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.states.game_state import GameState
 
-from RULEngine.Debug.debug_interface import COLOR_ID_MAP
+from RULEngine.Debug.uidebug_command_factory import COLOR_ID_MAP
 from ai.Util.role import Role
 
 __author__ = 'RoboCupULaval'
