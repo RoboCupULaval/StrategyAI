@@ -16,6 +16,7 @@ class Path:
         self.goal = end
         self.points = [start, end]
         self.speeds = [start_speed, end_speed]
+        self.turns = self.points
 
     def join_segments(self, other):
         new_path = Path()
@@ -40,7 +41,7 @@ class Path:
         return path_1, path_2
 
     @staticmethod
-    def generate_path_from_points(points_list, speed_list=None, threshold=None):
+    def generate_path_from_points(points_list, speed_list=None, threshold=None, turns_list=None):
 
         if speed_list is None:
             speed_list = [0, 0]
@@ -57,8 +58,11 @@ class Path:
         new_path = Path()
         new_path.start = points_list[0]
         new_path.goal = points_list[-1]
+        if turns_list is None:
+            turns_list = [new_path.start, new_path.goal]
         new_path.points = points_list
         new_path.speeds = speed_list
+        new_path.turns = turns_list
 
         return new_path
 
@@ -505,6 +509,7 @@ def reshape_path(path, player: OurPlayer, vel_cruise: [int, float]=1000):
     p1 = path.points[0]
     point_list = [p1]
     speed_list = [path.speeds[0]]
+    turns_list = [p1]
 
     for idx, point in enumerate(path.points[1:-1]):
         dist_from_path = 50  # mm
@@ -527,6 +532,7 @@ def reshape_path(path, player: OurPlayer, vel_cruise: [int, float]=1000):
             # on traite tout le cas ou le problème dégènere
             point_list += [p2]
             speed_list += [vel_cruise]
+            turns_list += [p2]
         else:
             p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) *\
                       (p1 - p2) / (p1 - p2).norm()
@@ -535,6 +541,7 @@ def reshape_path(path, player: OurPlayer, vel_cruise: [int, float]=1000):
             if (p4-p5).norm() > (p3-p1).norm():
                 point_list += [p2]
                 speed_list += [vel_cruise]
+                turns_list += [p2]
             elif (p1 - p2).norm() < (p4 - p2).norm():
                 radius *= (p1 - p2).norm() / (p4 - p2).norm()
                 dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
@@ -542,6 +549,9 @@ def reshape_path(path, player: OurPlayer, vel_cruise: [int, float]=1000):
                 p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p3 - p2) / (p3 - p2).norm()
                 point_list += [p4, p5]
                 speed_list += [speed, speed]
+                speed_list += [speed, speed]
+                centre_rotation = ((p4 + p5 - 2 * p2) / 2) * (1 + (radius / dist_deviation))
+                turns_list += [centre_rotation, p3]
             elif (p3 - p2).norm() < (p5 - p2).norm():
                 radius *= (p3 - p2).norm() / (p5 - p2).norm()
                 dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
@@ -549,6 +559,9 @@ def reshape_path(path, player: OurPlayer, vel_cruise: [int, float]=1000):
                 p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p3 - p2) / (p3 - p2).norm()
                 point_list += [p4, p5]
                 speed_list += [speed, speed]
+                speed_list += [speed, speed]
+                centre_rotation = ((p4 + p5 - 2 * p2) / 2) * (1 + (radius / dist_deviation))
+                turns_list += [centre_rotation, p3]
             else:
                 point_list += [p4, p5]
                 speed_list += [speed, speed]
@@ -556,10 +569,12 @@ def reshape_path(path, player: OurPlayer, vel_cruise: [int, float]=1000):
 
     speed_list += [path.speeds[-1]]
     point_list += [path.goal]
+    turns_list += [path.goal]
     # on s'assure que le path est bel et bien réalisable par un robot et on
     # merge les points qui sont trop proches les un des autres.
     position_list = [point_list[0]]
     new_speed_list = [speed_list[0]]
+    new_turns_list = [turns_list[0]]
     for idx, point in enumerate(point_list[1:-1]):
         i = idx + 1
         if (point_list[i] - point_list[i+1]).norm() < 10:
@@ -572,6 +587,8 @@ def reshape_path(path, player: OurPlayer, vel_cruise: [int, float]=1000):
 
         position_list += [point_list[i]]
         new_speed_list += [speed_list[i]]
+        new_turns_list += [turns_list[i]]
     position_list += [point_list[-1]]
     new_speed_list += [speed_list[-1]]
-    return Path().generate_path_from_points(position_list, new_speed_list)
+    new_turns_list += [turns_list[-1]]
+    return Path().generate_path_from_points(position_list, new_speed_list, new_turns_list)
