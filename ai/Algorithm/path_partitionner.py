@@ -143,14 +143,30 @@ class PathPartitionner(Pathfinder):
         self.player = player
         self.ball_collision = ball_collision
         self.optional_collision = optional_collision
-
+        # Debug code pls no remove
+        # if old_path is not None:
         self.get_pertinent_collision_objects()
+
+        if old_raw_path is not None:
+            print(old_raw_path.points)
+            # start_1 = time.time()
+            # self.is_path_collide(old_raw_path, tolerance=self.gap_proxy-50)
+            # end_1 = time.time()
+            # start_2 = time.time()
+            # self.is_path_collide_legacy(old_raw_path, tolerance=self.gap_proxy - 50)
+            # end_2 = time.time()
+            #print(end_1 - start_1, end_2 - start_2)
+            print("is_path_colide", self.is_path_collide(old_raw_path, tolerance=0.3))
+            # print("meme goal?", (np.linalg.norm(pose_target.position - old_raw_path.goal) < 200))
+            # print("quel goal?", pose_target.position, old_raw_path.goal)
+
+
         if self.end_speed == 0:
             hysteresis = 50 * cruise_speed
         else:
             hysteresis = 50 * cruise_speed
         if (old_path is not None) and (not self.is_path_collide(old_raw_path,
-                                                                tolerance=1.5)) and \
+                                                                tolerance=0.3)) and \
                 ((pose_target.position - old_raw_path.goal).norm() < hysteresis):
             if (pose_target.position - old_raw_path.goal).norm() > 20:
                 old_raw_path.quick_update_path(self.player)
@@ -549,9 +565,8 @@ def reshape_path(path, player: OurPlayer, vel_cruise: [int, float]=1000):
                 p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p3 - p2) / (p3 - p2).norm()
                 point_list += [p4, p5]
                 speed_list += [speed, speed]
-                speed_list += [speed, speed]
                 centre_rotation = ((p4 + p5 - 2 * p2) / 2) * (1 + (radius / dist_deviation))
-                turns_list += [centre_rotation, p3]
+                turns_list += [p4, centre_rotation]
             elif (p3 - p2).norm() < (p5 - p2).norm():
                 radius *= (p3 - p2).norm() / (p5 - p2).norm()
                 dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
@@ -559,12 +574,13 @@ def reshape_path(path, player: OurPlayer, vel_cruise: [int, float]=1000):
                 p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p3 - p2) / (p3 - p2).norm()
                 point_list += [p4, p5]
                 speed_list += [speed, speed]
-                speed_list += [speed, speed]
                 centre_rotation = ((p4 + p5 - 2 * p2) / 2) * (1 + (radius / dist_deviation))
-                turns_list += [centre_rotation, p3]
+                turns_list += [p4, centre_rotation]
             else:
                 point_list += [p4, p5]
                 speed_list += [speed, speed]
+                centre_rotation = ((p4 + p5 - 2 * p2) / 2) * (1 + (radius / dist_deviation))
+                turns_list += [p4, centre_rotation]
         p1 = point_list[-1]
 
     speed_list += [path.speeds[-1]]
@@ -591,4 +607,4 @@ def reshape_path(path, player: OurPlayer, vel_cruise: [int, float]=1000):
     position_list += [point_list[-1]]
     new_speed_list += [speed_list[-1]]
     new_turns_list += [turns_list[-1]]
-    return Path().generate_path_from_points(position_list, new_speed_list, new_turns_list)
+    return Path().generate_path_from_points(position_list, new_speed_list, threshold=None, turns_list=new_turns_list)
