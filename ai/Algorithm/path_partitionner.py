@@ -148,7 +148,7 @@ class PathPartitionner(Pathfinder):
         self.get_pertinent_collision_objects()
 
         if old_raw_path is not None:
-            print(old_raw_path.points)
+            # print(old_raw_path.points)
             # start_1 = time.time()
             # self.is_path_collide(old_raw_path, tolerance=self.gap_proxy-50)
             # end_1 = time.time()
@@ -156,7 +156,7 @@ class PathPartitionner(Pathfinder):
             # self.is_path_collide_legacy(old_raw_path, tolerance=self.gap_proxy - 50)
             # end_2 = time.time()
             #print(end_1 - start_1, end_2 - start_2)
-            print("is_path_colide", self.is_path_collide(old_raw_path, tolerance=0.3))
+            print("is_path_colide", self.is_path_collide(old_raw_path, tolerance=8))
             # print("meme goal?", (np.linalg.norm(pose_target.position - old_raw_path.goal) < 200))
             # print("quel goal?", pose_target.position, old_raw_path.goal)
 
@@ -166,9 +166,9 @@ class PathPartitionner(Pathfinder):
         else:
             hysteresis = 50 * cruise_speed
         if (old_path is not None) and (not self.is_path_collide(old_raw_path,
-                                                                tolerance=0.3)) and \
+                                                                tolerance=8)) and \
                 ((pose_target.position - old_raw_path.goal).norm() < hysteresis):
-            if (pose_target.position - old_raw_path.goal).norm() > 20:
+            if False:
                 old_raw_path.quick_update_path(self.player)
                 self.path_appendice = Path(old_raw_path.goal, self.path.goal)
                 self.path_appendice = self.fastpathplanner(self.path_appendice)
@@ -312,7 +312,7 @@ class PathPartitionner(Pathfinder):
         if tolerance is None:
             tolerances = self.avoid_radius
         else:
-            tolerances = self.avoid_radius - self.avoid_radius / tolerance
+            tolerances = self.avoid_radius / tolerance
         if path.start == path.goal or len(obstacles) == 0:
             return False
         points = np.array(path.points)
