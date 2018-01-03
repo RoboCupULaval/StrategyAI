@@ -9,6 +9,7 @@ from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Game.Player import Player
 from RULEngine.Util.Pose import Pose
+from ai.Algorithm.path_partitionner import CollisionBody
 
 __author__ = 'RoboCupULaval'
 
@@ -77,7 +78,7 @@ class Pathfinder(IntelligentModule, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_path(self, player: OurPlayer, target=Pose(), cruise_speed=1) -> List[Pose]:
+    def get_path(self, player: CollisionBody, target: CollisionBody, cruise_speed=1) -> List[Pose]:
         """
             Si l'ID est précisé, retourne la liste des *Pose* pour le chemin
             de ce robot. Autrement, retourne le dictionnaire.
