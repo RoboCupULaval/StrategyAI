@@ -25,7 +25,7 @@ def create_pathfinder(game_state, type_of_pathfinder):
     assert type_of_pathfinder.lower() in ["path_part"]
 
     if type_of_pathfinder.lower() == "path_part":
-        return PathPartitionner(game_state)
+        return PathPartitionner()
     else:
         raise TypeError("Couldn't init a pathfinder with the type of ",
                         type_of_pathfinder, "!")
@@ -50,7 +50,7 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
         optionnal_collision_bodies = field.field_collision_body
         collision_bodies = get_pertinent_collision_objects(player, game_state, optionnal_collision_bodies)
         player_collision_object = CollisionBody(player.pose.position, player.velocity.position, 150, body_pose=player.pose,
-                                                 max_acc=OurPlayer.max_acc, ident_num=player.id)
+                                                max_acc=OurPlayer.max_acc, ident_num=player.id)
         target = CollisionBody(body_position=player.ai_command.pose_goal.position,
                                body_pose=player.ai_command.pose_goal,
                                body_avoid_radius=1)
