@@ -2,6 +2,7 @@ import time
 from typing import List
 
 from RULEngine.Debug.debug_interface import COLOR_ID_MAP, DEFAULT_PATH_TIMEOUT
+from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Position import Position
 from ai.Algorithm.PathfinderRRT import PathfinderRRT
 from ai.Algorithm.path_partitionner import PathPartitionner, Path, CollisionBody
@@ -48,14 +49,18 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
                                                player.ai_command.pose_goal.position[1]))
         optionnal_collision_bodies = field.field_collision_body
         collision_bodies = get_pertinent_collision_objects(player, game_state, optionnal_collision_bodies)
-        path, raw_path = pathfinder.get_path(player,
-                                             player.ai_command.pose_goal,
+        player_collision_object = CollisionBody(player.pose.position, player.velocity.position, 150, body_pose=player.pose,
+                                                 max_acc=OurPlayer.max_acc, ident_num=player.id)
+        target = CollisionBody(body_position=player.ai_command.pose_goal.position,
+                               body_pose=player.ai_command.pose_goal,
+                               body_avoid_radius=1)
+        path, raw_path = pathfinder.get_path(player_collision_object,
+                                             target,
                                              player.ai_command.cruise_speed,
                                              last_path,
                                              last_raw_path,
                                              end_speed=player.ai_command.end_speed,
-                                             ball_collision=player.ai_command.collision_ball,
-                                             optional_collision=collision_body)
+                                             collidable_objects=collision_bodies)
         MIN_CHANGE_FOR_RECALCULATE = 100
         if path.get_path_length() < MIN_CHANGE_FOR_RECALCULATE:
             player.pathfinder_history.last_path = None
@@ -82,6 +87,7 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
 def get_pertinent_collision_objects(commanded_player, game_state, optionnal_collision_bodies=None):
     factor = 1.1
     collision_bodies = []
+    gap_proxy = 150
     # FIXME: Find better name that is less confusing between self.player and player
     for player in game_state.my_team.available_players.values():
         if player.id != commanded_player.id:
@@ -89,13 +95,13 @@ def get_pertinent_collision_objects(commanded_player, game_state, optionnal_coll
                     (commanded_player.ai_command.pose_goal.position - player.pose.position).norm() < \
                     (commanded_player.ai_command.pose_goal.position - commanded_player.pose.position).norm() * factor:
                 collision_bodies.append(
-                    CollisionBody(player.pose.position, player.velocity.position, commanded_player.gap_proxy))
+                    CollisionBody(player.pose.position, player.velocity.position, gap_proxy))
     for player in game_state.other_team.available_players.values():
         if (commanded_player.pose.position - player.pose.position).norm() + \
                     (commanded_player.ai_command.pose_goal.position - player.pose.position).norm() < \
                     (commanded_player.ai_command.pose_goal.position - commanded_player.pose.position).norm() * factor:
             collision_bodies.append(
-                CollisionBody(player.pose.position, player.velocity.position, commanded_player.gap_proxy))
+                CollisionBody(player.pose.position, player.velocity.position, gap_proxy))
     if optionnal_collision_bodies is None:
 
         return collision_bodies

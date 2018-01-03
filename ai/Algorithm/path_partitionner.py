@@ -128,7 +128,7 @@ class PathPartitionner(Pathfinder):
         self.pose_target = CollisionBody(body_avoid_radius=1)
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None):
-        self.get_pertinent_collision_objects(False)
+        self.get_pertinent_collision_objects_new(False)
         if self.is_path_collide(path) and depth < self.max_recurs and not(path.start == path.goal):
             sub_target, avoid_dir = self.search_point(path, avoid_dir)
             if sub_target == path.goal or sub_target == path.start:
@@ -144,7 +144,7 @@ class PathPartitionner(Pathfinder):
         return path
 
     def get_path(self, player: CollisionBody, pose_target: CollisionBody, cruise_speed=1,
-                 old_path=None, old_raw_path=None, end_speed=0, collidable_objects=None):
+                 old_path=None, old_raw_path=Path(), end_speed=0, collidable_objects=None):
         self.cruise_speed = cruise_speed
         self.pose_target = pose_target
         self.collidable_objects = collidable_objects
@@ -155,8 +155,10 @@ class PathPartitionner(Pathfinder):
         self.optional_collision = None
         # Debug code pls no remove
         # if old_path is not None:
-        self.get_pertinent_collision_objects()
-
+        self.get_pertinent_collision_objects_new()
+        self.path = Path(self.player.position, self.pose_target.position, 0, self.end_speed * 1000)
+        if len(self.collision_body) <= 0:
+            return self.path, self.path
         if old_raw_path is not None:
             # print(old_raw_path.points)
             # start_1 = time.time()
@@ -191,7 +193,6 @@ class PathPartitionner(Pathfinder):
                 self.path = reshape_path(self.raw_path, self.player, self.cruise_speed)
 
         else:
-            self.path = Path(self.player.position, self.pose_target.position, 0, self.end_speed * 1000)
             if self.path.get_path_length() < 0.1:
                 """
                 hack shady pour eviter une erreur shady (trop fatiguer pour dealer ak ste shit la)
@@ -273,10 +274,8 @@ class PathPartitionner(Pathfinder):
                 if (self.player.position - collidable_object.position).norm() + \
                         (self.pose_target.position - collidable_object.position).norm() < \
                         (self.pose_target.position - self.player.position).norm() * factor:
-                    self.pose_obstacle.append(collidable_object.position)
-                    self.collision_body.append(
-                        CollisionBody(collidable_object.position, collidable_object.velocity, self.gap_proxy))
-
+                    self.collision_body.append(collidable_object)
+            self.pose_obstacle = np.array([obj.position for obj in self.collision_body])
             self.avoid_radius = np.array([obj.avoid_radius for obj in self.collision_body])
         else:
             temp = (self.path.start - self.pose_obstacle) + (self.path.goal - self.pose_obstacle)
@@ -427,6 +426,8 @@ class PathPartitionner(Pathfinder):
         assert(isinstance(point, Position))
         dist_point_obs = np.inf
         closest_obs = None
+        if len(self.collision_body) <= 0:
+            return False
         closest_collision_body = self.collision_body[0].position
         if (path.start - path.goal).norm() < 0.001:
             return [closest_obs, dist_point_obs, closest_collision_body]
@@ -545,6 +546,7 @@ class PathPartitionner(Pathfinder):
 def reshape_path(path, player: CollisionBody, vel_cruise: [int, float]=1000):
     path = path
     positions_list = [path.points[0]]
+    vel_cruise *= 1000
     for idx, point in enumerate(path.points[1:-1]):
         i = idx + 1
         if (path.points[i] - path.points[i+1]).norm() < 10:
