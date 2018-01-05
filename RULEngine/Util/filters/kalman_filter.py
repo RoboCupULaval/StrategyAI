@@ -8,40 +8,23 @@ class KalmanFilter:
 
         self.is_active = False
         self.last_t_capture = 0
-        self.last_observation = None
-        self.last_prediction = None
-
-        self.F = self.transition_model()
-        self.H = self.observation_model()
+        self.dt = 0
 
         self.state_number = int(np.size(self.F, 0))
         self.observable_state = int(np.size(self.H, 0))
-
-        self.B = self.control_input_model()
 
         self.R = self.observation_covariance()
         self.Q = self.process_covariance()
         self.P = self.initial_state_covariance()
 
-        self.S = np.zeros((self.observable_state, self.observable_state))
         self.x = np.zeros(self.state_number)
-        self.u = np.zeros(self.observable_state)
-
-    @abstractmethod
-    def pose(self):
-        pass
-
-    @abstractmethod
-    def velocity(self):
-        pass
 
     @abstractmethod
     def transition_model(self, dt):
         pass
 
-    @abstractmethod
     def control_input_model(self, dt):
-        pass
+        return 0
 
     @abstractmethod
     def observation_model(self):
@@ -59,10 +42,39 @@ class KalmanFilter:
     def observation_covariance(self):
         pass
 
-    @abstractmethod
-    def update(self, observation, t_capture) -> None:
-        pass
+    def _update(self, error, t_capture):
 
-    @abstractmethod
-    def predict(self, dt):
-        pass
+        self.is_active = True
+        dt = t_capture - self.last_t_capture
+        if dt < 0:
+            return
+
+        self.dt = dt
+        self.last_t_capture = t_capture
+
+        # Compute Kalman gain from states covariance and observation model
+        gain = self.P @ self.observation_model.T \
+            @ np.linalg.inv(self.observation_model @ self.P @ self.observation_model.T + self.R)
+
+        # Update the states vector
+        self.x = self.x + gain @ error
+
+        # Update the states covariance matrix
+        self.P = (np.eye(self.state_number) - gain @ self.observation_model) @ self.P
+
+    def _predict(self, input_command):
+        if not self.is_active:
+            return
+
+        # Predict the next state from states vector and input commands
+        self.x = self.transition_model @ self.x + self.control_input_model @ input_command
+
+        # Update the state covariance matrix from the transition model
+        self.P = self.transition_model @ self.P @ self.transition_model.T + self.Q
+
+    def update(self, observation, t_capture) -> None:
+        error = observation - self.observation_model @ self.x
+        self._update(error, t_capture)
+
+    def predict(self, input_command=0):
+        self._predict(input_command)

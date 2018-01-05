@@ -38,15 +38,15 @@ class Tracker:
             for robot_obs in detection_frame["robots_blue"]:
                 obs_state = np.array([robot_obs["x"], robot_obs["y"], robot_obs["orientation"]])
                 self._blue_team[robot_obs["robot_id"]].update(obs_state, self._current_timestamp)
-                self._blue_team[robot_obs["robot_id"]].predict(Tracker.STATE_PREDICTION_TIME)
+                self._blue_team[robot_obs["robot_id"]].predict()
 
             for robot_obs in detection_frame.robots_yellow:
                 obs_state = np.array([robot_obs["x"], robot_obs["y"], robot_obs["orientation"]])
-                self._yellow_team[robot_obs["robot_id"]].update(obs_state, detection_frame["t_capture"])
-                self._yellow_team[robot_obs["robot_id"]].predict(Tracker.STATE_PREDICTION_TIME)
+                self._yellow_team[robot_obs["robot_id"]].update(obs_state, self._current_timestamp)
+                self._yellow_team[robot_obs["robot_id"]].predict()
 
-            for ball_obs in detection_frame.balls:
-                self._balls.update_with_observation(ball_obs, detection_frame.t_capture)
+            # for ball_obs in detection_frame.balls:
+                # self._balls.update_with_observation(ball_obs, detection_frame.t_capture)
 
             self.remove_undetected_robot()
 
@@ -79,15 +79,15 @@ class Tracker:
 
     @staticmethod
     def format_list(entities: List):
-        format_list = []
+        formatted_list = []
         for entity_id, entity in enumerate(entities):
             if entity.is_active:
                 fields = dict()
                 fields['pose'] = tuple(entity.pose)
                 fields['velocity'] = tuple(entity.velocity)
                 fields['id'] = entity_id
-                format_list.append(fields)
-        return format_list
+                formatted_list.append(fields)
+        return formatted_list
 
     def stop(self):
         self.thread_terminate.set()
