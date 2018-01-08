@@ -36,22 +36,23 @@ class Framework(object):
 
         # Queues
         self.game_state_queue = Queue()
-        self.AI_queue = Queue()
-        self.uidebug_queue = Queue()
+        self.ai_queue = Queue()
+        self.ui_send_queue = Queue()
+        self.ui_recv_queue = Queue()
 
         # Engine
-        self.engine = Engine(self.game_state_queue, self.AI_queue, self.uidebug_queue, self.engine_terminating_event)
+        self.engine = Engine(self.game_state_queue, self.ai_queue, self.ui_send_queue, self.ui_recv_queue, self.engine_terminating_event)
         self.logger.debug("Engine is {0}".format(self.engine))
         self.engine.start()
         self.logger.debug("Engine started {0}".format(self.engine))
 
         # AI
-        self.coach = Coach(self.game_state_queue, self.AI_queue, self.ai_terminating_event)
+        self.coach = Coach(self.game_state_queue, self.ai_queue, self.ui_send_queue, self.ui_recv_queue, self.ai_terminating_event)
         self.logger.debug("Coach is {0}".format(self.engine))
         self.coach.start()
         self.logger.debug("Coach started {0}".format(self.engine))
 
-        # endsignal - do you like to stop gracefully? DO NOT MOVE! MUST BE PLACED AFTER PROCESSES
+        # end signal - do you like to stop gracefully? DO NOT MOVE! MUST BE PLACED AFTER PROCESSES
         signal.signal(signal.SIGINT, self._sigint_handler)
         # stop until someone manually stop us / we receive interrupt signal from os
         signal.pause()

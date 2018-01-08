@@ -30,12 +30,13 @@ class SerialCommandSender(Process):
         pass
 
     def serve(self):
+        pass
 
     def _stop(self):
         pass
 
     # TODO HERHE
-
+"""
     def send_loop(self):
         def loop_send_packets(sc):
             if not self.terminate.is_set():
@@ -68,9 +69,6 @@ class SerialCommandSender(Process):
             self.command_queue.append(command)
 
     def send_responding_command(self, command: ResponseCommand):
-        """
-        Pause le thread appelant jusqu'à qu'une réponse est reçu
-        """
         self.command_queue.append(command)
         command.pause_thread()
 
@@ -88,3 +86,4 @@ class SerialCommandSender(Process):
             if isinstance(command, ResponseCommand):
                 command.response = response
                 command.wakeup_thread()
+"""
