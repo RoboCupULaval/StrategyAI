@@ -20,10 +20,10 @@ class KalmanFilter:
         self.x = np.zeros(self.state_number)
 
     @abstractmethod
-    def transition_model(self, dt):
+    def transition_model(self):
         pass
 
-    def control_input_model(self, dt):
+    def control_input_model(self):
         return 0
 
     @abstractmethod

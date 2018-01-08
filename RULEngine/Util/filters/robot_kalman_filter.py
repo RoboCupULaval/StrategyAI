@@ -15,9 +15,7 @@ class RobotFilter(KalmanFilter):
             return self.x[1::2]
 
     def get_orientation(self):
-        if not self.is_active:
-            return None
-        else:
+        if self.is_active:
             return self.x[4]
 
     @property
