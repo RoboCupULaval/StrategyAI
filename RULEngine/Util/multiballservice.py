@@ -19,7 +19,7 @@ class MultiBallService(list):
         self.max_ball = max_ball
         self._current_timestamp = None
 
-        self.logger.info(' initiated with {} _balls'.format(max_ball))
+        self.logger.info(' initiated with {} balls'.format(max_ball))
         super().__init__(BallFilter for _ in range(max_ball))
         
     def update(self, obs: np.array, timestamp: float) -> None:

@@ -13,8 +13,8 @@ class KalmanFilter:
         self.last_t_capture = 0
         self.dt = 0
 
-        self.state_number = int(np.size(self.F, 0))
-        self.observable_state = int(np.size(self.H, 0))
+        self.state_number = int(np.size(self.transition_model, 0))
+        self.observable_state = int(np.size(self.observation_model, 0))
 
         self.R = self.observation_covariance()
         self.Q = self.process_covariance()

@@ -1,12 +1,14 @@
 # Under MIT License, see LICENSE.txt
 import logging
 import pickle
+import ipaddress, struct
 from multiprocessing import Process, Event, Queue
 from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY, timeout
 
 
 class UIDebugCommandReceiver(Process):
-    TIME_OUT
+
+    TIME_OUT = 0
 
     def __init__(self, host: str, port: int, uidebug_cmds_queue: Queue, stop_event: Event):
         super(UIDebugCommandReceiver, self).__init__()
@@ -23,11 +25,11 @@ class UIDebugCommandReceiver(Process):
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.bind((self.host, self.port))
 
-        if ip_address(self.host).is_multicast:
+        if ipaddress(self.host).is_multicast:
             self.socket.setsockopt(IPPROTO_IP,
                                    IP_ADD_MEMBERSHIP,
-                                   pack("=4sl", inet_aton(self.host), INADDR_ANY))
-        self.socket.settimeout(self.TIME_OUT)
+                                   struct.pack("=4sl", inet_aton(self.host), INADDR_ANY))
+        self.socket.settimeout(UIDebugCommandReceiver.TIME_OUT)
 
         pass
 
