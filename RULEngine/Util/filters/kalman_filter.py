@@ -2,6 +2,9 @@ from abc import abstractmethod
 import numpy as np
 
 
+MAX_DT = 1
+
+
 class KalmanFilter:
 
     def __init__(self):
@@ -48,7 +51,8 @@ class KalmanFilter:
         dt = t_capture - self.last_t_capture
         if dt < 0:
             return
-
+        elif dt > MAX_DT:
+            dt = MAX_DT
         self.dt = dt
         self.last_t_capture = t_capture
 
@@ -78,3 +82,8 @@ class KalmanFilter:
 
     def predict(self, input_command=0):
         self._predict(input_command)
+
+    def reset(self):
+        self.is_active = False
+        self.P = self.initial_state_covariance
+        self.x = np.zeros(self.state_number)

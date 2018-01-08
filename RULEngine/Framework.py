@@ -40,7 +40,7 @@ class Framework(object):
         self.uidebug_queue = Queue()
 
         # Engine
-        self.engine = Engine(self.engine_terminating_event, self.uidebug_queue, self.player_cdms_queue)
+        self.engine = Engine(self.game_state_queue, self.player_cdms_queue, self.uidebug_queue, self.engine_terminating_event)
         self.logger.debug("Engine is {0}".format(self.engine))
         self.engine.start()
         self.logger.debug("Engine started {0}".format(self.engine))

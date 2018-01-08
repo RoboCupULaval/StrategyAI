@@ -21,8 +21,6 @@ class Tracker:
     def __init__(self, vision_queue: Queue):
         self.logger = logging.getLogger('Tracker')
 
-        self.last_sending_time = time.time()
-
         self.vision_queue = vision_queue
 
         self._blue_team = [RobotFilter() for _ in range(Tracker.MAX_ROBOT_PER_TEAM)]
@@ -33,27 +31,35 @@ class Tracker:
 
     def tracker_main_loop(self):
             detection_frame = self.vision_queue.get()
-            self._current_timestamp = detection_frame["t_capture"]
+            self._current_timestamp = detection_frame['t_capture']
 
-            for robot_obs in detection_frame["robots_blue"]:
-                obs_state = np.array([robot_obs["x"], robot_obs["y"], robot_obs["orientation"]])
-                self._blue_team[robot_obs["robot_id"]].update(obs_state, self._current_timestamp)
-                self._blue_team[robot_obs["robot_id"]].predict()
+            self.update(detection_frame)
+            self.predict()
+            self.remove_undetected()
 
-            for robot_obs in detection_frame.robots_yellow:
-                obs_state = np.array([robot_obs["x"], robot_obs["y"], robot_obs["orientation"]])
-                self._yellow_team[robot_obs["robot_id"]].update(obs_state, self._current_timestamp)
-                self._yellow_team[robot_obs["robot_id"]].predict()
+    def update(self, detection_frame: Dict):
+        for robot_obs in detection_frame['robots_blue']:
+            obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
+            self._blue_team[robot_obs['robot_id']].update(obs, self._current_timestamp)
 
-            # for ball_obs in detection_frame.balls:
-                # self._balls.update_with_observation(ball_obs, detection_frame.t_capture)
+        for robot_obs in detection_frame['robots_yellow']:
+            obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
+            self._yellow_team[robot_obs['robot_id']].update(obs, self._current_timestamp)
 
-            self.remove_undetected_robot()
+        for ball_obs in detection_frame['balls']:
+            obs = np.array([ball_obs['x'], ball_obs['y']])
+            self._balls.update(obs, self._current_timestamp)
 
-    def remove_undetected_robot(self):
+    def predict(self):
+        map(lambda robot: robot.predict(), self._yellow_team)
+        map(lambda robot: robot.predict(), self._blue_team)
+        self._balls.predict()
+
+    def remove_undetected(self):
         for robot in self._yellow_team + self._blue_team:
-            if robot.last_t_capture + Tracker.MAX_UNDETECTED_DELAY < self._current_timestamp:
-                robot.is_active = False
+            if self._current_timestamp - robot.last_t_capture < Tracker.MAX_UNDETECTED_DELAY:
+                robot.reset()
+        self._balls.remove_undetected()
 
     @property
     def track_frame(self) -> Dict:
@@ -66,19 +72,19 @@ class Tracker:
         return track_fields
 
     @property
-    def balls(self) -> List:
+    def balls(self) -> List[Dict]:
         return Tracker.format_list(self._balls)
 
     @property
-    def blue_team(self) -> List:
+    def blue_team(self) -> List[Dict]:
         return Tracker.format_list(self._blue_team)
 
     @property
-    def yellow_team(self) -> List:
+    def yellow_team(self) -> List[Dict]:
         return Tracker.format_list(self._yellow_team)
 
     @staticmethod
-    def format_list(entities: List):
+    def format_list(entities: List) -> List[Dict]:
         formatted_list = []
         for entity_id, entity in enumerate(entities):
             if entity.is_active:
@@ -88,8 +94,3 @@ class Tracker:
                 fields['id'] = entity_id
                 formatted_list.append(fields)
         return formatted_list
-
-    def stop(self):
-        self.thread_terminate.set()
-        self._thread.join()
-        self.thread_terminate.clear()

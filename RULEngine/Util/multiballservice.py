@@ -6,88 +6,55 @@ import numpy as np
 from RULEngine.Util.filters.ball_kalman_filter import BallFilter
 
 
-class MultiBallService:
+class MultiBallService(list):
 
     MAX_BALL_ON_FIELD = 1
     BALL_CONFIDENCE_THRESHOLD = 1
     BALL_SEPARATION_THRESHOLD = 1000
     STATE_PREDICTION_TIME = 0.1
+    MAX_UNDETECTED_DELAY = 1
 
-    def __init__(self, n_ball=1):
+    def __init__(self, max_ball: int=1):
         self.logger = logging.getLogger('MultiBallService')
+        self.max_ball = max_ball
+        self._current_timestamp = None
 
-        self.n_ball = n_ball
-        self.balls = []
-        self.considered_balls = []
+        self.logger.info(' initiated with {} _balls'.format(max_ball))
+        super().__init__(BallFilter for _ in range(max_ball))
+        
+    def update(self, obs: np.array, timestamp: float) -> None:
+        self._current_timestamp = timestamp
+        closest_ball = self.find_closest_ball_to_observation(obs)
 
-        self.logger.info(' initiated with {} balls'.format(n_ball))
-
-    def update_with_observation(self, obs: Dict, t_capture):
-        obs_state = np.array([obs["x"], obs["y"]])
-        closest_ball = self.find_closest_ball_to_observation(obs_state)
-
-        if closest_ball is None:  # No ball or every balls are too far.
-            self.considered_balls.append(BallFilter())
-            self.considered_balls[-1].update(obs_state, t_capture)
-            self.logger.info('New ball detected: {}.'.format(id(self.considered_balls[-1])))
+        if closest_ball is not None:
+            closest_ball.update(obs, self._current_timestamp)
         else:
-            closest_ball.update(obs_state, t_capture)
+            self.logger.info('New ball detected')
+            inactive_balls = iter(ball for ball in self if not ball.is_active)
+            next(inactive_balls).update(obs, self._current_timestamp)
 
-        self.remove_undetected()
-        self.select_best_balls()
-        self.predict_next_states()
+    def predict(self) -> None:
+        map(lambda ball: ball.predict(), self)
 
-    def predict_next_states(self):
-        for ball in self.considered_balls:
-            ball.predict(self.STATE_PREDICTION_TIME)
+    def remove_undetected(self) -> None:
+        undetected_balls = [ball for ball in self
+                            if self._current_timestamp - ball.last_t_capture > MultiBallService.MAX_UNDETECTED_DELAY]
 
-    def remove_undetected(self):
-        for ball in self.considered_balls:
-            if ball.confidence < self.BALL_CONFIDENCE_THRESHOLD:
-                self.considered_balls.remove(ball)
-                self.logger.info('Removing ball {}.'.format(id(ball)))
+        map(lambda ball: ball.reset(), undetected_balls)
+        self.logger.info('Deactivating {} ball(s)'.format(len(undetected_balls)))
 
-    def select_best_balls(self):
-        if len(self.considered_balls) > 0:
-            self.considered_balls.sort(key=lambda x: x.confidence, reverse=True)
-            max_ball = min(self.MAX_BALL_ON_FIELD, len(self.considered_balls))
-            self.balls = self.considered_balls[0:max_ball]
-        else:
-            self.balls.clear()
-
-    def find_closest_ball_to_observation(self, obs: np.ndarray):
-
+    def find_closest_ball_to_observation(self, obs: np.ndarray) -> BallFilter:
         position_differences = self.compute_distances_ball_to_observation(obs)
 
         closest_ball = None
-        if position_differences is not None:
-            min_diff = float(min(position_differences))
-            if min_diff < self.BALL_SEPARATION_THRESHOLD:
-                closest_ball_idx = position_differences.index(min_diff)
-                closest_ball = self.considered_balls[closest_ball_idx]
+        if position_differences is not None and np.min(position_differences) < self.BALL_SEPARATION_THRESHOLD:
+            idx = np.argmin(position_differences)
+            closest_ball = self[idx]
 
         return closest_ball
 
-    def compute_distances_ball_to_observation(self, obs_state: np.ndarray):
-        position_differences = []
-        for ball in self.considered_balls:
-            if ball.last_prediction is not None:
-                position_differences.append(float(np.linalg.norm(ball.pose() - obs_state)))
-            elif ball.last_observation is not None:  # If we never predict the state, we still need to compare it
-                position_differences.append(float(np.linalg.norm(ball.last_observation - obs_state)))
-            else:  # This should never happens if ball are updated when create
-                position_differences.append(float('inf'))
+    def compute_distances_ball_to_observation(self, obs: np.ndarray) -> np.array:
+        balls_poses = np.array([ball.pose for ball in self if ball.is_active])
+        position_differences = np.linalg.norm(balls_poses - obs)
 
-        if not position_differences:
-            position_differences = None
-        elif len(position_differences) == 1 and position_differences[0] == float('inf'):
-            position_differences = None
-
-        return position_differences
-
-    def __getitem__(self, item):
-        return self.balls[item]
-
-    def __iter__(self):
-        for ball in self.balls:
-            yield ball
+        return position_differences if position_differences else None
