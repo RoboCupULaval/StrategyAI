@@ -29,7 +29,7 @@ class Tracker:
 
         self._current_timestamp = None
 
-    def tracker_main_loop(self):
+    def execute(self):
             detection_frame = self.vision_queue.get()
             self._current_timestamp = detection_frame['t_capture']
 

@@ -19,7 +19,7 @@ class Engine(Process):
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
     REFEREE_QUEUE_MAXSIZE = 100
 
-    def __init__(self, game_state_queue: Queue, player_cmds_queue: Queue, uidebug_queue: Queue, stop_event: Event):
+    def __init__(self, game_state_queue: Queue, ai_queue: Queue, ui_queue: Queue, stop_event: Event):
         super(Engine, self).__init__(name=__name__)
 
         self.logger = logging.getLogger("Engine")
@@ -28,8 +28,8 @@ class Engine(Process):
         self.stop_event = stop_event
 
         self.vision_queue = Queue(self.VISION_QUEUE_MAXSIZE)
-        self.uidebug_queue = uidebug_queue
-        self.player_cmds_queue = player_cmds_queue
+        self.ui_queue = ui_queue
+        self.ai_queue = ai_queue
         self.game_state_queue = game_state_queue
 
         self.tracker = None
@@ -65,6 +65,9 @@ class Engine(Process):
 
     def loop(self):
         while not self.stop_event.is_set():
+            self.tracker.execute()
+            track_frame = self.tracker.track_frame
+            self.game_state_queue.put(track_frame)
             sleep(0)
 
     def run(self):
