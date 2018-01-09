@@ -28,7 +28,7 @@ class Engine(Process):
 
         self.logger = logging.getLogger('Engine')
         self.cfg = ConfigService()
-
+        self.team_color = self.cfg.config_dict['GAME']['our_color']
         self.stop_event = stop_event
 
         self.vision_queue = Queue(self.VISION_QUEUE_MAXSIZE)
@@ -76,7 +76,7 @@ class Engine(Process):
             track_frame = self.tracker.execute()
             self.game_state_queue.put(track_frame)
 
-            self.controller.update(track_frame)
+            self.controller.update(track_frame[self.team_color])
             commands = self.controller.execute()
 
             self.robot_cmds_sender.send_commands(commands)

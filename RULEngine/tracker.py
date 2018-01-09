@@ -70,8 +70,8 @@ class Tracker:
     def track_frame(self) -> Dict:
         track_fields = dict()
         track_fields['timestamp'] = self._current_timestamp
-        track_fields['robots_blue'] = self.blue_team
-        track_fields['robots_yellow'] = self.yellow_team
+        track_fields['blue'] = self.blue_team
+        track_fields['yellow'] = self.yellow_team
         track_fields['balls'] = self.balls
 
         return track_fields

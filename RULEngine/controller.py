@@ -39,13 +39,13 @@ class Controller(list):
 
         super().__init__(Robot(control_setting) for _ in range(MAX_ROBOT))
 
-    def update(self, robot_states: List[Dict]):
+    def update(self, track_frame: List[Dict]):
         ai_commands = self.ai_queue.get()
-        for robot, state, ai_command in zip(self, robot_states, ai_commands):
+        for robot, state, ai_command in zip(self, track_frame, ai_commands):
             robot['pose'] = state['pose']
             robot['velocity'] = state['velocity']
             robot['target'] = ai_command['target']
-            # robot['control_type'] = ai_command['control_type']
+            robot['control_type'] = ai_command['control_type']
 
     def execute(self) -> List[Dict]:
         for robot in self:
@@ -64,7 +64,7 @@ class Robot(dict):
         self['target'] = {'x': None, 'y': None, 'orientation': None}
         self['pose'] = {'x': None, 'y': None, 'orientation': None}
         self['velocity'] = {'x': None, 'y': None, 'orientation': None}
-        # self['control_type'] = {'x': 'position', 'y': 'position', 'orientation': 'position'}
+        self['control_type'] = {'x': 'position', 'y': 'position', 'orientation': 'position'}
 
 
 class MotionControl(object):
