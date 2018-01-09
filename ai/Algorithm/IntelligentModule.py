@@ -77,7 +77,7 @@ class Pathfinder(IntelligentModule, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_path(self, player: OurPlayer, target=Pose(), cruise_speed=1) -> List[Pose]:
+    def get_path(self, player, target, cruise_speed=1) -> List[Pose]:
         """
             Si l'ID est précisé, retourne la liste des *Pose* pour le chemin
             de ce robot. Autrement, retourne le dictionnaire.

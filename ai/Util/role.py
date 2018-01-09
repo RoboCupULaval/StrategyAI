@@ -1,6 +1,5 @@
 from enum import IntEnum
 
-
 class Role(IntEnum):
     """Enum representing the role of one of our player playing on the field"""
     GOALKEEPER = 0
