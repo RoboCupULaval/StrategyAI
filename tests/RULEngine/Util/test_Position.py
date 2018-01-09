@@ -140,8 +140,8 @@ class TestPosition(unittest.TestCase):
         self.assertEqual(Position(12.45, -23.23).normalized(), normalized_vector)
         self.assertTrue(type(Position(12.45, -23.23).normalized()) is Position)
 
-        with self.assertRaises(ZeroDivisionError):
-            Position(0, 0).normalized()
+        # Change this to fix some of motion executer behavior
+        self.assertEquals(Position(0,0), Position(0, 0).normalized())
 
     def test_eq(self):
 
