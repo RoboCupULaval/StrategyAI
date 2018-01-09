@@ -65,6 +65,7 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
 
         player.ai_command.path = path.points[1:]
         player.ai_command.path_speeds = path.speeds
+        player.ai_command.path_turn = path.turns
         return path
 
     else:

@@ -114,6 +114,7 @@ class RobotMotion(object):
                                     wrap_err=True)
         self.position_flag = False
         self.last_position = Position()
+        self.target_turn = self.target_pose.position
 
     def update(self, cmd: AICommand) -> Pose():
 
@@ -245,10 +246,12 @@ class RobotMotion(object):
                 self.last_position = current_path_position
 
             self.target_pose = Pose(cmd.path[0], cmd.pose_goal.orientation).scale(1 / 1000)
+            self.target_turn = cmd.path_turn[1] / 1000
             self.target_speed = cmd.path_speeds[1] / 1000
 
         else:  # No pathfinder case
             self.target_pose = cmd.pose_goal.scale(1 / 1000)
+            self.target_turn = self.target_pose.position
             self.target_speed = 0.0
 
         self.target_angle = self.target_pose.orientation
@@ -256,7 +259,7 @@ class RobotMotion(object):
         self.position_error = self.pose_error.position
         self.angle_error = self.pose_error.orientation
         if self.position_error.norm() != 0.0:
-            self.target_direction = self.position_error.normalized()
+            self.target_direction = (self.target_turn - self.current_pose.position).normalized()
 
         self.cruise_speed = cmd.cruise_speed
 
