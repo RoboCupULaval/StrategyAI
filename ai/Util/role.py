@@ -1,6 +1,5 @@
 from enum import IntEnum
 
-
 class Role(IntEnum):
     """Enum representing the role of one of our player playing on the field"""
     GOALKEEPER = 0
@@ -9,3 +8,4 @@ class Role(IntEnum):
     SECOND_DEFENCE = 3
     FIRST_ATTACK = 4
     SECOND_ATTACK = 5
+    SUPPORT = 6

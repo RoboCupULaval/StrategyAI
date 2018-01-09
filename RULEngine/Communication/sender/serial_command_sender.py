@@ -35,7 +35,6 @@ class SerialCommandSender(object):
             for _, next_command in self.command_dict.items():
                 if isinstance(next_command, Move):
                     self._package_commands(next_command)
-                    time.sleep(COMMUNICATION_SLEEP)
 
             # Handle non-move commands
             while True:
