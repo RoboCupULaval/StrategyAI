@@ -1,0 +1,86 @@
+
+from multiprocessing import Queue
+import logging
+from math import cos, sin
+
+from RULEngine.Util.PID import PID
+
+from config.config_service import ConfigService
+
+from typing import Dict, List
+
+MAX_ROBOT = 12
+
+
+def get_control_setting(game_type: str):
+
+    if game_type == 'sim':
+        translation = {'kp': 1, 'ki': 0.5, 'kd': 0}
+        rotation = {'kp': 2, 'ki': 1, 'kd': 0.01}
+    elif game_type == 'real':
+        translation = {'kp': 1, 'ki': 0.5, 'kd': 0}
+        rotation = {'kp': 1, 'ki': 0.35, 'kd': 0.01}
+    else:
+        raise TypeError('No matching game type found in control setting')
+
+    return {'translation': translation, 'rotation': rotation}
+
+
+class Controller(list):
+    def __init__(self, ai_queue: Queue):
+        self.ai_queue = ai_queue
+
+        logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
+        self.logger = logging.getLogger("Controller")
+
+        self.cfg = ConfigService()
+
+        control_setting = get_control_setting(self.cfg.config_dict['GAME']['type'])
+
+        super().__init__(Robot(control_setting) for _ in range(MAX_ROBOT))
+
+    def update(self, robot_states: List[Dict]):
+        ai_commands = self.ai_queue.get()
+        for robot, state, ai_command in zip(self, robot_states, ai_commands):
+            robot['pose'] = state['pose']
+            robot['velocity'] = state['velocity']
+            robot['target'] = ai_command['target']
+            # robot['control_type'] = ai_command['control_type']
+
+    def execute(self) -> List[Dict]:
+        for robot in self:
+            error = {state: robot['pose'][state] - robot['target'][state] for state in robot['pose']}
+            command = robot['controller'].execute(error)
+            command['x'], command['y'] = rotate(command['x'], command['y'], -robot['pose']['orientation'])
+            robot['command'] = command
+        return [robot['command'] for robot in self]
+
+
+class Robot(dict):
+    def __init__(self, control_setting):
+        super().__init__()
+        self['controller'] = MotionControl(control_setting),
+        self['command'] = {'x': None, 'y': None, 'orientation': None}
+        self['target'] = {'x': None, 'y': None, 'orientation': None}
+        self['pose'] = {'x': None, 'y': None, 'orientation': None}
+        self['velocity'] = {'x': None, 'y': None, 'orientation': None}
+        # self['control_type'] = {'x': 'position', 'y': 'position', 'orientation': 'position'}
+
+
+class MotionControl(object):
+    def __init__(self, control_setting: Dict):
+        self.control_setting = control_setting
+        self.controllers = {'x': PID(**self.control_setting['translation']),
+                            'y': PID(**self.control_setting['translation']),
+                            'orientation': PID(**self.control_setting['rotation'], wrap_error=True)}
+
+    def execute(self, error: Dict) -> Dict:
+        return {state: self.controllers[state].execute(error[state]) for state in self.controllers}
+
+    def reset(self):
+        map(lambda controller: controller.reset(), self.controllers)
+
+
+def rotate(x: float, y: float, angle: float):
+    return [cos(angle) * x - sin(angle) * y, sin(angle) * x + cos(angle) * y]
+

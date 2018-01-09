@@ -1,3 +1,4 @@
+
 import sys
 import logging
 from multiprocessing import Process, Queue, Event
@@ -7,9 +8,9 @@ from time import sleep
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
-# from RULEngine.Communication.util.robot_command_sender_factory import RobotCommandSenderFactory
+from RULEngine.Communication.util.robot_command_sender_factory import RobotCommandSenderFactory
 
-from RULEngine.Controller import Controller
+from RULEngine.controller import Controller
 from RULEngine.tracker import Tracker
 
 from config.config_service import ConfigService
@@ -58,8 +59,7 @@ class Engine(Process):
         self.ui_sender = UIDebugCommandSender(ui_host, ui_port, self.ui_send_queue, self.stop_event)
         self.ui_recver = UIDebugCommandReceiver(ui_host, ui_port, self.ui_recv_queue, self.stop_event)
 
-        # self.robot_cmds_sender, args = RobotCommandSenderFactory.get_sender()
-        # self.robot_cmds_sender(args)
+        self.robot_cmds_sender = RobotCommandSenderFactory.get_sender()
 
         self.tracker = Tracker(self.vision_queue)
         self.controller = Controller(self.ai_queue)
@@ -72,9 +72,15 @@ class Engine(Process):
 
     def loop(self):
         while not self.stop_event.is_set():
-            self.tracker.execute()
-            track_frame = self.tracker.track_frame
+
+            track_frame = self.tracker.execute()
             self.game_state_queue.put(track_frame)
+
+            self.controller.update(track_frame)
+            commands = self.controller.execute()
+
+            self.robot_cmds_sender.send_commands(commands)
+
             sleep(0)
 
     def run(self):

@@ -1,5 +1,6 @@
+
 import logging
-import time
+
 import numpy as np
 from multiprocessing import Queue
 from typing import Dict, List
@@ -19,6 +20,8 @@ class Tracker:
     MAX_UNDETECTED_DELAY = 2
 
     def __init__(self, vision_queue: Queue):
+
+        logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger('Tracker')
 
         self.vision_queue = vision_queue
@@ -29,13 +32,15 @@ class Tracker:
 
         self._current_timestamp = None
 
-    def execute(self):
+    def execute(self) -> Dict:
             detection_frame = self.vision_queue.get()
             self._current_timestamp = detection_frame['t_capture']
 
             self.update(detection_frame)
             self.predict()
             self.remove_undetected()
+
+            return self.track_frame
 
     def update(self, detection_frame: Dict):
         for robot_obs in detection_frame['robots_blue']:
