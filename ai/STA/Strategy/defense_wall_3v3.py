@@ -11,7 +11,7 @@ from ai.Util.role import Role
 from ai.states.game_state import GameState
 from ai.STA.Strategy.strategy import Strategy
 
-class DefenseWall(Strategy):
+class DefenseWall_3v3(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4):
         super().__init__(game_state)
         self.number_of_players = number_of_players
@@ -19,8 +19,7 @@ class DefenseWall(Strategy):
         ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
         self.theirgoal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
 
-        roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE,
-                             Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
+        roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
         self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
