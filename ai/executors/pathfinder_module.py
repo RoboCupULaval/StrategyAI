@@ -102,10 +102,14 @@ def get_pertinent_collision_objects(commanded_player, game_state, optionnal_coll
                     (commanded_player.ai_command.pose_goal.position - commanded_player.pose.position).norm() * factor:
             collision_bodies.append(
                 CollisionBody(player.pose.position, player.velocity.position, gap_proxy))
+
     if optionnal_collision_bodies is None:
 
         return collision_bodies
     else:
+        if commanded_player.ai_command.collision_ball:
+            ball_colision_body = [CollisionBody(game_state.field.ball.position, game_state.field.ball.velocity, gap_proxy)]
+            return collision_bodies + optionnal_collision_bodies + ball_colision_body
         return collision_bodies + optionnal_collision_bodies
 
 class PathfinderModule(Executor):
