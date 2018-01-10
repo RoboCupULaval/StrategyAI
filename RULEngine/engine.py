@@ -64,6 +64,7 @@ class Engine(Process):
         self.vision_receiver.start()
         self.ui_sender.start()
         self.ui_recver.start()
+        self.robot_cmd_sender.start()
 
         self.logger.debug('has initialized.')
 
@@ -75,8 +76,11 @@ class Engine(Process):
 
             self.controller.update(track_frame[self.team_color])
             commands = self.controller.execute()
-            
-            self.robot_cmd_queue.put(commands)
+
+            for cmd in commands:
+                cmd['is_team_yellow'] = True if self.team_color == 'yellow' else False  # TODO add color service
+                cmd['kick'] = 0  # TODO add kick functionality
+                self.robot_cmd_queue.put(cmd)
 
             sleep(0)
 

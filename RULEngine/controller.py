@@ -38,7 +38,7 @@ class Controller(list):
 
         control_setting = get_control_setting(self.cfg.config_dict['GAME']['type'])
 
-        super().__init__(Robot(control_setting) for _ in range(MAX_ROBOT))
+        super().__init__(Robot(control_setting, robot_id) for robot_id in range(MAX_ROBOT))
 
     def update(self, robots_states: List[Dict]):
 
@@ -64,11 +64,12 @@ class Controller(list):
             command = robot['controller'].execute(error)
             command['x'], command['y'] = rotate(command['x'], command['y'], -robot['pose']['orientation'])
             robot['command'] = command
-        return [robot['command'] for robot in self]
+
+        return [robot['command'].update(robot['id']) for robot in self if robot['is_active']]
 
 
 class Robot(dict):
-    def __init__(self, control_setting):
+    def __init__(self, control_setting, id):
         super().__init__()
         self['controller'] = MotionControl(control_setting),
         self['command'] = {'x': None, 'y': None, 'orientation': None}
@@ -77,6 +78,7 @@ class Robot(dict):
         self['velocity'] = {'x': None, 'y': None, 'orientation': None}
         self['control_type'] = {'x': 'position', 'y': 'position', 'orientation': 'position'}
         self['is_active'] = False
+        self['id'] = id
 
 
 class MotionControl(object):

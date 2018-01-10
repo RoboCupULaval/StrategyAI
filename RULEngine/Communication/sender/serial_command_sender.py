@@ -7,20 +7,12 @@ from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
 
 class SerialCommandSender(SenderBaseClass):
 
-    def __init__(self):
-        super(SerialCommandSender, self).__init__()
+    def connect(self, connection_info):
+        return McuCommunicator(timeout=0.1)
 
-        self.mcu_com = McuCommunicator(timeout=0.1)
-
-    def send_packet(self, commands):
+    def send_packet(self):
         pass
 
     def run(self):
-        pass
-
-    def start(self):
-        pass
-
-    def terminate(self):
         pass
 

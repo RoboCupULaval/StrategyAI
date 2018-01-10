@@ -13,6 +13,6 @@ class UIDebugCommandSender(SenderBaseClass):
 
     def send_packet(self):
         try:
-            self.connection.send(pickle.dumps(self.queue.get(block=False)))
+            self.connection.send(pickle.dumps(self.queue.get()))
         finally:
             self.connection.close()

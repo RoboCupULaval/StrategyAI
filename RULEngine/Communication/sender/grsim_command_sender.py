@@ -12,25 +12,25 @@ class GrSimCommandSender(SenderBaseClass):
         return udp_socket(connection_info)
 
     def send_packet(self):
-        try:
-            packet = self._create_protobuf_packet(self.queue.get(block=False))
+        packet = self.queue.get()
+        for cmd in packet:
+            packet = self._create_protobuf_packet(cmd)
             self.connection.send(packet.SerializeToString())
-        finally:
-            self.connection.close()
 
     @staticmethod
     def _create_protobuf_packet(command: Dict) -> grSim_Packet.grSim_Packet:
         packet = grSim_Packet.grSim_Packet()
-        packet.commands.isteamyellow = command["is_team_yellow"]
+        
+        packet.commands.isteamyellow = command['is_team_yellow']
         packet.commands.timestamp = 0
         grsim_command = packet.commands.robot_commands.add()
-        grsim_command.id = command["id"]
+        grsim_command.id = command['id']
         grsim_command.wheelsspeed = False
-        grsim_command.veltangent = command["x"]
-        grsim_command.velnormal = command["y"]
-        grsim_command.velangular = command["orientation"]
+        grsim_command.veltangent = command['x']
+        grsim_command.velnormal = command['y']
+        grsim_command.velangular = command['orientation']
         grsim_command.spinner = True
-        grsim_command.kickspeedx = command["kick"]
+        grsim_command.kickspeedx = command['kick']
         grsim_command.kickspeedz = 0
 
         return packet
