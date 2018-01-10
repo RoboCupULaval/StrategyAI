@@ -1,6 +1,8 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
 
+import math
+
 from RULEngine.Game.OurPlayer import OurPlayer
 from RULEngine.Util.Pose import Pose
 
@@ -15,12 +17,14 @@ class GoToPositionPathfinder(Tactic):
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose,
                  args: List[str]=None, collision_ball=False, cruise_speed=1, charge_kick=False, end_speed=0):
         super().__init__(game_state, player, target, args)
-        self.target = target
+        delta_theta = float(args[0]) if len(self.args) > 0 else 5
+        delta_theta *= math.pi/180
+        self.dest = Pose(self.target.position, self.player.pose.orientation + delta_theta)
         self.status_flag = Flags.INIT
         self.collision_ball = collision_ball
         self.charge_kick = charge_kick
         self.end_speed = end_speed
-        self.cruise_speed = float(args[0]) if len(self.args) > 0 else cruise_speed
+        self.cruise_speed = cruise_speed
 
     def exec(self):
         if self.check_success():
@@ -30,7 +34,7 @@ class GoToPositionPathfinder(Tactic):
 
         return MoveToPosition(self.game_state,
                               self.player,
-                              self.target, pathfinder_on=True,
+                              self.dest, pathfinder_on=True,
                               cruise_speed=self.cruise_speed,
                               collision_ball=self.collision_ball,
                               charge_kick=self.charge_kick,
