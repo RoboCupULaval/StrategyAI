@@ -1,18 +1,15 @@
 
-import sys
 import logging
+import sys
 from multiprocessing import Process, Queue, Event
 from time import sleep
 
-
-from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
-from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
-from RULEngine.Communication.util.robot_command_sender_factory import RobotCommandSenderFactory
-
+from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
+from RULEngine.Communication.sender.robot_command_sender import RobotCommandSender
+from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 from RULEngine.controller import Controller
 from RULEngine.tracker import Tracker
-
 from config.config_service import ConfigService
 
 
@@ -36,30 +33,30 @@ class Engine(Process):
         self.ui_recv_queue = ui_recv_queue
         self.ai_queue = ai_queue
         self.game_state_queue = game_state_queue
+        self.robot_cmd_queue = Queue()
 
         self.tracker = None
         self.controller = None
 
         self.vision_receiver = None
-        self.robot_cmds_sender = None
+        self.robot_cmd_sender = None
         self.ui_sender = None
         self.ui_recver = None
 
     def _initialize_subprocess(self):
-        vision_host = self.cfg.config_dict['COMMUNICATION']['vision_udp_address']
-        vision_port = int(self.cfg.config_dict['COMMUNICATION']['vision_port'])
 
-        # todo
-        ui_host = '127.0.0.1'   # self.cfg.config_dict['COMMUNICATION'][""]
-        ui_port = 15555
+        vision_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'],
+                                  int(self.cfg.config_dict['COMMUNICATION']['vision_port']))
+        self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_queue, self.stop_event)
 
-        self.vision_receiver = VisionReceiver(vision_host, vision_port, self.vision_queue, self.stop_event)
-        self.vision_receiver.daemon = True
+        ui_sender_connection_info = ('127.0.0.1', int(self.cfg.config_dict['COMMUNICATION']['ui_cmd_sender_port']))
+        self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue, self.stop_event)
 
-        self.ui_sender = UIDebugCommandSender(ui_host, ui_port, self.ui_send_queue, self.stop_event)
-        self.ui_recver = UIDebugCommandReceiver(ui_host, ui_port, self.ui_recv_queue, self.stop_event)
+        ui_recver_connection_info = ('127.0.0.1', 12345)  # TODO set the port in the config file
+        self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue, self.stop_event)
 
-        self.robot_cmds_sender = RobotCommandSenderFactory.get_sender()
+        robot_connection_info = ('127.0.0.1', 12346)  # TODO set the port in the config file
+        self.robot_cmd_sender = RobotCommandSender(robot_connection_info, self.robot_cmd_queue, self.stop_event)
 
         self.tracker = Tracker(self.vision_queue)
         self.controller = Controller(self.ai_queue)
@@ -78,8 +75,8 @@ class Engine(Process):
 
             self.controller.update(track_frame[self.team_color])
             commands = self.controller.execute()
-
-            self.robot_cmds_sender.send_commands(commands)
+            
+            self.robot_cmd_queue.put(commands)
 
             sleep(0)
 

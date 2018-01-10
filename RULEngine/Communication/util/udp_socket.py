@@ -1,11 +1,11 @@
 # Under MIT License, see LICENSE.txt
 
 from socket import socket, SOL_SOCKET, AF_INET, SOCK_DGRAM, SO_REUSEADDR
+from typing import Tuple
 
 
-def udp_socket(host: str, port: int) -> socket:
+def udp_socket(connection_info: Tuple) -> socket:
     skt = socket(AF_INET, SOCK_DGRAM)
     skt.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    connection_info = (host, port)
     skt.connect(connection_info)
     return skt

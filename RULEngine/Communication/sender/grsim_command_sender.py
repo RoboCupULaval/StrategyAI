@@ -1,59 +1,22 @@
 # Under MIT License, see LICENSE.txt
-import logging
 from typing import Dict
-from multiprocessing import Process, Event, Queue
-from queue import Empty
 
 from RULEngine.Communication.protobuf import grSim_Packet_pb2 as grSim_Packet
+from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
 from RULEngine.Communication.util.udp_socket import udp_socket
 
 
-class GrSimCommandSender(Process):
-    def __init__(self, host, port, robot_cmd_queue: Queue, stop_event: Event):
-        super(GrSimCommandSender, self).__init__(name=__name__)
-        self.logger = logging.getLogger("GrSimCommandSender")
+class GrSimCommandSender(SenderBaseClass):
 
-        self.host = host
-        self.port = port
+    def connect(self, connection_info):
+        return udp_socket(connection_info)
 
-        self.stop_event = stop_event
-        self.robot_cmd_queue = robot_cmd_queue
-
-        self.server = None
-
-    def _initialize(self) -> None:
-        self.server = udp_socket(self.host, self.port)
-
-    def run(self):
-        self._initialize()
-
+    def send_packet(self):
         try:
-            self._serve()
-        except KeyboardInterrupt:
-            pass
-
-        self._stop()
-
-    def _serve(self):
-        while not self.stop_event.is_set():
-            try:
-                self._send_command(self.robot_cmd_queue.get(block=False))
-            except Empty:
-                pass
-
-    def _send_command(self, command: Dict):
-        try:
-            self._send_packet(self._create_protobuf_packet(command))
-        except KeyError as e:
-            self.logger.error("Dictionnary supplied is missing a key when creating the protobuf for GrSim")
-            raise e
-
-    def _send_packet(self, packet):
-        self.server.send(packet.SerializeToString())
-
-    def _stop(self):
-        self.logger.debug("has exited.")
-        exit(0)
+            packet = self._create_protobuf_packet(self.queue.get(block=False))
+            self.connection.send(packet.SerializeToString())
+        finally:
+            self.connection.close()
 
     @staticmethod
     def _create_protobuf_packet(command: Dict) -> grSim_Packet.grSim_Packet:

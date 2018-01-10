@@ -20,7 +20,7 @@ class MultiBallService(list):
         self._current_timestamp = None
 
         self.logger.info(' initiated with {} balls'.format(max_ball))
-        super().__init__(BallFilter for _ in range(max_ball))
+        super().__init__(BallFilter() for _ in range(max_ball))
         
     def update(self, obs: np.array, timestamp: float) -> None:
         self._current_timestamp = timestamp
@@ -41,7 +41,9 @@ class MultiBallService(list):
                             if self._current_timestamp - ball.last_t_capture > MultiBallService.MAX_UNDETECTED_DELAY]
 
         map(lambda ball: ball.reset(), undetected_balls)
-        self.logger.info('Deactivating {} ball(s)'.format(len(undetected_balls)))
+
+        if undetected_balls:
+            self.logger.info('Deactivating {} ball(s)'.format(len(undetected_balls)))
 
     def find_closest_ball_to_observation(self, obs: np.ndarray) -> BallFilter:
         position_differences = self.compute_distances_ball_to_observation(obs)
@@ -54,7 +56,11 @@ class MultiBallService(list):
         return closest_ball
 
     def compute_distances_ball_to_observation(self, obs: np.ndarray) -> np.array:
+
         balls_poses = np.array([ball.pose for ball in self if ball.is_active])
-        position_differences = np.linalg.norm(balls_poses - obs)
+        if balls_poses.size != 0:
+            position_differences = np.linalg.norm(balls_poses - obs)
+        else:
+            position_differences = None
 
         return position_differences if position_differences else None

@@ -18,7 +18,6 @@ class RobotFilter(KalmanFilter):
         if self.is_active:
             return self.x[4]
 
-    @property
     def transition_model(self):
         return np.array([[1, self.dt, 0, 0,       0,       0],   # Position x
                          [0, 1,       0, 0,       0,       0],   # Speed x
@@ -27,13 +26,11 @@ class RobotFilter(KalmanFilter):
                          [0, 0,       0, 0,       1, self.dt],   # Position Theta
                          [0, 0,       0, 0,       0,       1]])  # Speed Theta
 
-    @property
     def observation_model(self):
         return np.array([[1, 0, 0, 0, 0, 0],   # Position x
                          [0, 0, 1, 0, 0, 0],   # Position y
                          [0, 0, 0, 0, 1, 0]])  # Orientation
 
-    @property
     def control_input_model(self):
         return np.array([[0, 0, 0],   # Position x
                          [1, 0, 0],   # Speed x
@@ -52,7 +49,7 @@ class RobotFilter(KalmanFilter):
         return np.diag([0.05, 0.05, 0.01])
 
     def update(self, observation, t_capture):
-        error = observation - self.observation_model @ self.x
+        error = observation - self.observation_model() @ self.x
         error[2] = RobotFilter.wrap_to_pi(error[2])
 
         self._update(error, t_capture)

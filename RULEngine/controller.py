@@ -1,5 +1,6 @@
 
 from multiprocessing import Queue
+from queue import Empty
 import logging
 from math import cos, sin
 
@@ -39,16 +40,26 @@ class Controller(list):
 
         super().__init__(Robot(control_setting) for _ in range(MAX_ROBOT))
 
-    def update(self, track_frame: List[Dict]):
-        ai_commands = self.ai_queue.get()
-        for robot, state, ai_command in zip(self, track_frame, ai_commands):
-            robot['pose'] = state['pose']
-            robot['velocity'] = state['velocity']
-            robot['target'] = ai_command['target']
-            robot['control_type'] = ai_command['control_type']
+    def update(self, robots_states: List[Dict]):
+
+        for robot_states in robots_states:
+            robot_id = robot_states['id']
+            self[robot_id]['pose'] = robot_states['pose']
+            self[robot_id]['velocity'] = robot_states['velocity']
+
+        try:
+            ai_commands = self.ai_queue.get(block=False)
+            for cmd in ai_commands:
+                robot_id = cmd['id']
+                self[robot_id]['target'] = cmd['target']
+                self[robot_id]['control_type'] = cmd['control_type']
+                self[robot_id]['is_active'] = True
+        except Empty:
+            pass
 
     def execute(self) -> List[Dict]:
-        for robot in self:
+        active_robots = iter(robot for robot in self if robot['is_active'])
+        for robot in active_robots:
             error = {state: robot['pose'][state] - robot['target'][state] for state in robot['pose']}
             command = robot['controller'].execute(error)
             command['x'], command['y'] = rotate(command['x'], command['y'], -robot['pose']['orientation'])
@@ -65,6 +76,7 @@ class Robot(dict):
         self['pose'] = {'x': None, 'y': None, 'orientation': None}
         self['velocity'] = {'x': None, 'y': None, 'orientation': None}
         self['control_type'] = {'x': 'position', 'y': 'position', 'orientation': 'position'}
+        self['is_active'] = False
 
 
 class MotionControl(object):

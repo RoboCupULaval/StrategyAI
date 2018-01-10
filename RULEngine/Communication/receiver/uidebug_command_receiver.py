@@ -1,40 +1,28 @@
 # Under MIT License, see LICENSE.txt
-import logging
-import pickle
-import ipaddress, struct
-from multiprocessing import Process, Event, Queue
-from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY, timeout
+
+from ipaddress import ip_address
+from pickle import loads
+from queue import Full
+from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY
+from struct import pack
+
+from RULEngine.Communication.receiver.receiver_base_class import ReceiverBaseClass
 
 
-class UIDebugCommandReceiver(Process):
+class UIDebugCommandReceiver(ReceiverBaseClass):
 
-    TIME_OUT = 0
+    def connect(self, connection_info):
+        connection = socket(AF_INET, SOCK_DGRAM)
+        connection.bind(connection_info)
+        if ip_address(connection_info[0]).is_multicast:
+            connection.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, pack("=4sl", inet_aton(connection_info[0]), INADDR_ANY))
 
-    def __init__(self, host: str, port: int, uidebug_cmds_queue: Queue, stop_event: Event):
-        super(UIDebugCommandReceiver, self).__init__()
-        self.logger = logging.getLogger("VisionReceiver")
-        self.host = host
-        self.port = port
+        return connection
 
-        self.socket = None
+    def receive_packet(self):
+        try:
+            data, _ = self.connection.recvfrom(2048)
+            self.queue.put(loads(data))
+        except Full as e:
+            self.logger.debug("{}".format(e))
 
-        self.uidebu_cmds_queue = uidebug_cmds_queue
-        self.stop_event = stop_event
-
-    def _initialize(self):
-        self.socket = socket(AF_INET, SOCK_DGRAM)
-        self.socket.bind((self.host, self.port))
-
-        if ipaddress(self.host).is_multicast:
-            self.socket.setsockopt(IPPROTO_IP,
-                                   IP_ADD_MEMBERSHIP,
-                                   struct.pack("=4sl", inet_aton(self.host), INADDR_ANY))
-        self.socket.settimeout(UIDebugCommandReceiver.TIME_OUT)
-
-        pass
-
-    def run(self):
-        pass
-
-    def _stop(self):
-        pass

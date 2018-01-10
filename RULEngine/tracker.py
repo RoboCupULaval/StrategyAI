@@ -33,25 +33,28 @@ class Tracker:
         self._current_timestamp = None
 
     def execute(self) -> Dict:
-            detection_frame = self.vision_queue.get()
-            self._current_timestamp = detection_frame['t_capture']
+        vision_frame = self.vision_queue.get()
+        detection_frame = vision_frame['detection']
 
-            self.update(detection_frame)
-            self.predict()
-            self.remove_undetected()
+        self._current_timestamp = detection_frame['t_capture']
 
-            return self.track_frame
+        self.update(detection_frame)
+        self.predict()
+        self.remove_undetected()
+
+        return self.track_frame
 
     def update(self, detection_frame: Dict):
-        for robot_obs in detection_frame['robots_blue']:
+
+        for robot_obs in detection_frame.get('robots_blue', ()):
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
             self._blue_team[robot_obs['robot_id']].update(obs, self._current_timestamp)
 
-        for robot_obs in detection_frame['robots_yellow']:
+        for robot_obs in detection_frame.get('robots_yellow', ()):
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
             self._yellow_team[robot_obs['robot_id']].update(obs, self._current_timestamp)
 
-        for ball_obs in detection_frame['balls']:
+        for ball_obs in detection_frame.get('balls', ()):
             obs = np.array([ball_obs['x'], ball_obs['y']])
             self._balls.update(obs, self._current_timestamp)
 
