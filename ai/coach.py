@@ -3,8 +3,8 @@
 import logging
 from multiprocessing import Process, Queue, Event
 
-from ai.executors.debug_executor import DebugExecutor
-from ai.executors.play_executor import PlayExecutor
+# from ai.executors.debug_executor import DebugExecutor
+# from ai.executors.play_executor import PlayExecutor
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 from config.config_service import ConfigService
@@ -12,7 +12,7 @@ from config.config_service import ConfigService
 
 class Coach(Process):
 
-    def __init__(self, game_state_queue: Queue, player_cmds_queue: Queue, stop_event: Event):
+    def __init__(self, game_state_queue: Queue, ai_queue: Queue, ui_send_queue: Queue, ui_recv_queue: Queue, stop_event: Event):
         """
         Initialise l'IA.
         Celui-ci s'occupe d'appeler tout les morceaux de l'ia dans le bon ordre pour prendre une décision de jeu
@@ -28,7 +28,9 @@ class Coach(Process):
 
         # Queues for interprocess communication with the engine
         self.game_state_queue = game_state_queue
-        self.player_cmds_queue = player_cmds_queue
+        self.ai_queue = ai_queue
+        self.ui_send_queue = ui_send_queue
+        self.ui_recv_queue = ui_recv_queue
 
         # Event to know when to stop
         self.stop_event = stop_event
@@ -45,12 +47,13 @@ class Coach(Process):
         self.game_state = GameState()
         self.play_state = PlayState()
 
-        self.debug_executor = DebugExecutor() #todo put the queue in when simon will have pushed MGL 2017/01/08
+        # self.debug_executor = DebugExecutor() #todo put the queue in when simon will have pushed MGL 2017/01/08
         # self.play_executor = PlayExecutor()
 
     def main_loop(self) -> None:
-        while not self.stop_event.is_set():
-            self.debug_executor.exec()
+        pass
+        # while not self.stop_event.is_set():
+        #     self.debug_executor.exec()
         # self.play_executor.exec()
 
     def run(self) -> None:

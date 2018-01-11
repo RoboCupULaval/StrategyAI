@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-import enum
+from enum import Enum
 from typing import Dict
 
 __author__ = "Maxime Gagnon-Legault"
@@ -9,11 +9,11 @@ TACTIC_COMMAND_TYPE = 5003
 AUTO_PLAY_COMMAND_TYPE = 5008
 
 
-class STAType(enum):
-    NONE = 0,
-    STRATEGY = 1,
-    TACTIC = 2,
-    ACTION = 3,
+class STAType(Enum):
+    NONE = 0
+    STRATEGY = 1
+    TACTIC = 2
+    ACTION = 3
     AUTONOMOUS_PLAY = 4
 
 

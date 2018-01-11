@@ -1,10 +1,10 @@
 # Under MIT License, see LICENSE.txt
-from ai.Util.sta_change_command import STAChangeCommand
 
 __author__ = "Maxime Gagnon-Legault"
 
 from RULEngine.Util import singleton
 
+from ai.Util.sta_change_command import STAChangeCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.Util.role import Role
 from ai.states.game_state import GameState
