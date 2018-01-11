@@ -50,7 +50,6 @@ class Engine(Process):
         vision_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'],
                                   int(self.cfg.config_dict['COMMUNICATION']['vision_port']))
 
-        print(vision_connection_info)
         self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_queue, self.stop_event)
 
         ui_debug_host = self.cfg.config_dict['COMMUNICATION']['ui_debug_address']

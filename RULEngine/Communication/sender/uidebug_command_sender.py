@@ -39,7 +39,7 @@ class UIDebugCommandSender(SenderBaseClass):
             for ball in track_frame['balls']:
                 self.send_balls_position(ball['pose'], color=(255, 0, 0))
         except ConnectionRefusedError as e:
-            self.logger.error('Can\'t send commands to UI-Debug.')
+            print(e)
 
     def send_robot_position(self, pos, color=(0, 255, 0), color_angle=(0, 0, 0), radius=90):
         player_center = (pos[0], pos[1])
