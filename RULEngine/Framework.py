@@ -69,7 +69,6 @@ class Framework(object):
         self.logger.debug("Coach before join = {0}".format(self.coach))
         self.coach.join(1)
         self.logger.debug("Coach after join = {0}".format(self.coach))
-
         exit(0)
 
     # noinspection PyUnusedLocal

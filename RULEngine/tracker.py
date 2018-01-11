@@ -68,8 +68,9 @@ class Tracker:
 
     def remove_undetected(self):
         for robot in self._yellow_team + self._blue_team:
-            if self._current_timestamp - robot.last_t_capture < Tracker.MAX_UNDETECTED_DELAY:
+            if self._current_timestamp - robot.last_t_capture > Tracker.MAX_UNDETECTED_DELAY:
                 robot.reset()
+
         self._balls.remove_undetected()
 
     @property
@@ -79,7 +80,6 @@ class Tracker:
         track_fields['blue'] = self.blue_team
         track_fields['yellow'] = self.yellow_team
         track_fields['balls'] = self.balls
-
         return track_fields
 
     @property

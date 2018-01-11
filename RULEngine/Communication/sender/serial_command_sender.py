@@ -14,6 +14,3 @@ class SerialCommandSender(SenderBaseClass):
     def send_packet(self):
         pass
 
-    def run(self):
-        pass
-

@@ -30,8 +30,9 @@ class MultiBallService(list):
             closest_ball.update(obs, self._current_timestamp)
         else:
             self.logger.info('New ball detected')
-            inactive_balls = iter(ball for ball in self if not ball.is_active)
-            next(inactive_balls).update(obs, self._current_timestamp)
+            inactive_balls = [ball for ball in self if not ball.is_active]
+            if inactive_balls:
+                inactive_balls[0].update(obs, self._current_timestamp)
 
     def predict(self) -> None:
         map(lambda ball: ball.predict(), self)

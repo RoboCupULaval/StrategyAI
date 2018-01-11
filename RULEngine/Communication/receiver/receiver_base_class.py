@@ -27,9 +27,17 @@ class ReceiverBaseClass(Process, metaclass=ABCMeta):
     def run(self):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.connection = self.connect(self.connection_info)
-        while not self.stop_event.is_set():
-            try:
+        try:
+
+            while not self.stop_event.is_set():
                 self.receive_packet()
-            except Empty:
-                pass
+
+        except KeyboardInterrupt:
+            self.logger.info('Killed')
+        finally:
+            exit(0)
+
+    def terminate(self):
+        print('terminate')
+        super().terminate()
 
