@@ -45,7 +45,7 @@ class Coach(Process):
         self.game_state = GameState()
         self.play_state = PlayState()
 
-        self.debug_executor = DebugExecutor()
+        self.debug_executor = DebugExecutor() #todo put the queue in when simon will have pushed MGL 2017/01/08
         # self.play_executor = PlayExecutor()
 
     def main_loop(self) -> None:

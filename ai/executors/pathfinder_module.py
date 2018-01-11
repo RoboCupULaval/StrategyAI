@@ -5,7 +5,6 @@ from RULEngine.Debug.uidebug_command_factory import COLOR_ID_MAP, DEFAULT_PATH_T
 from RULEngine.Util.Position import Position
 from ai.Algorithm.path_partitionner import PathPartitionner, Path
 from ai.Util.ai_command import AICommand
-from ai.executors.executor import Executor
 from ai.states.game_state import GameState
 from config.config_service import ConfigService
 from functools import partial
@@ -71,7 +70,7 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
         # print(time.time() - start)
         return path
 
-class PathfinderModule(Executor):
+class PathfinderModule:
 
     def __init__(self):
         super().__init__()

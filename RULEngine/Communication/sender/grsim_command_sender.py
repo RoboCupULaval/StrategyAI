@@ -1,4 +1,7 @@
 # Under MIT License, see LICENSE.txt
+
+__author__ = "Maxime Gagnon-Legault"
+
 import logging
 from typing import Dict
 from multiprocessing import Process, Event, Queue

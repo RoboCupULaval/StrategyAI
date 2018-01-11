@@ -1,4 +1,7 @@
 # Under MIT License, see LICENSE.txt
+
+__author__ = "Maxime Gagnon-Legault"
+
 import logging
 import pickle
 from multiprocessing import Process, Queue, Event

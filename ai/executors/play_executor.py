@@ -1,15 +1,18 @@
 # Under MIT License, see LICENSE.txt
-import time
+from ai.Util.sta_change_command import STAChangeCommand
+
+__author__ = "Maxime Gagnon-Legault"
+
+from RULEngine.Util import singleton
 
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.Util.role import Role
-from ai.executors.executor import Executor
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 from config.config_service import ConfigService
 
 
-class PlayExecutor(Executor):
+class PlayExecutor(metaclass=singleton):
 
     def __init__(self):
         """
@@ -21,7 +24,6 @@ class PlayExecutor(Executor):
         cfg = ConfigService()
         self.auto_play = SimpleAutoPlay()
         PlayState().autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
-        self.last_time = 0
         self.last_available_players = {}
         self.goalie_id = -1
 
@@ -41,12 +43,10 @@ class PlayExecutor(Executor):
 
         # self._send_auto_state()
 
-    def _execute_strategy(self) -> None:
-        """
-        Éxecute la stratégie courante.
+    def order_change_of_sta(self, cmd: STAChangeCommand):
+        pass
 
-        :return: None
-        """
+    def _execute_strategy(self) -> None:
         # Applique un stratégie par défault s'il n'en a pas (lors du démarage par exemple)
         # TODO change this so we don't send humancontrol when nothing is set/ Donothing would be better
         if PlayState().current_strategy is None:

@@ -1,5 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
+__author__ = "Maxime Gagnon-Legault"
+
 import logging
 from multiprocessing import Process, Queue, Event
 from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY, timeout

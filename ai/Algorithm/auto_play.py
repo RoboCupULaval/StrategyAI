@@ -153,8 +153,7 @@ class SimpleAutoPlay(AutoPlay):
             }.get(referee.command, RefereeCommand.HALT)
 
         # During the game
-        elif referee.command == RefereeCommand.FORCE_START or\
-            referee.command == RefereeCommand.NORMAL_START:
+        elif referee.command == RefereeCommand.FORCE_START or referee.command == RefereeCommand.NORMAL_START:
             next_state = self._analyse_game()
 
         self.last_ref_command = referee.command
