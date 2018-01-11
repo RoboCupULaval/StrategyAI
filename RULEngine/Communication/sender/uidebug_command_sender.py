@@ -5,17 +5,7 @@ from math import cos, sin
 
 from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
 from RULEngine.Communication.util.udp_socket import udp_socket
-
-
-class DebugCommand(dict):
-
-    def __init__(self, p_type, p_data, p_link=None, p_version="1.0"):
-        super().__init__()
-        self['name'] = 'Engine'
-        self['version'] = p_version
-        self['type'] = p_type
-        self['link'] = p_link
-        self['data'] = p_data
+from RULEngine.Debug.debug_command import DebugCommand
 
 
 class UIDebugCommandSender(SenderBaseClass):
@@ -29,17 +19,17 @@ class UIDebugCommandSender(SenderBaseClass):
             track_frame = self.queue.get()
 
             for robot in track_frame['blue']:
-                self.send_robot_position(robot['pose'], color=(255, 0, 0), radius=10, color_angle=(255, 0, 0))
+                self.send_robot_position(robot['pose'], color=(0, 255, 0))
 
             for robot in track_frame['yellow']:
-                self.send_robot_position(robot['pose'], color=(255, 0, 0), radius=10, color_angle=(255, 0, 0))
+                self.send_robot_position(robot['pose'], color=(255, 255, 0))
 
             for ball in track_frame['balls']:
-                self.send_balls_position(ball['pose'], color=(255, 0, 0))
+                self.send_balls_position(ball['pose'], color=(255, 25, 200))
         except ConnectionRefusedError as e:
-            print(e)
+            pass
 
-    def send_robot_position(self, pos, color=(0, 255, 0), color_angle=(0, 0, 0), radius=90):
+    def send_robot_position(self, pos, color=(0, 255, 0), color_angle=(255, 0, 0), radius=90):
         player_center = (pos[0], pos[1])
         data_circle = {'center': player_center,
                        'radius': radius,

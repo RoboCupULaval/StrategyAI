@@ -95,7 +95,7 @@ class Engine(Process):
         try:
             self.loop()
         except KeyboardInterrupt:
-            pass
+            self.logger.info('Engine interrupted.')
         sys.stdout.flush()
         self.stop()
         exit(0)
