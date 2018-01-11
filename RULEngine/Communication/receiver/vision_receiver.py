@@ -1,7 +1,7 @@
 
 from ipaddress import ip_address
 from queue import Full
-from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY, timeout
+from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY, timeout, SOL_SOCKET, SO_REUSEADDR
 from struct import pack
 
 from google.protobuf.message import DecodeError
@@ -16,6 +16,7 @@ class VisionReceiver(ReceiverBaseClass):
 
     def connect(self, connection_info):
         connection = socket(AF_INET, SOCK_DGRAM)
+        connection.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         connection.bind(connection_info)
         if ip_address(connection_info[0]).is_multicast:
             connection.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, pack("=4sl", inet_aton(connection_info[0]), INADDR_ANY))

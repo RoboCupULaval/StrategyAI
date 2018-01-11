@@ -8,12 +8,13 @@ import logging
 class SenderBaseClass(Process, metaclass=ABCMeta):
 
     def __init__(self, connection_info: Tuple, queue: Queue, stop_event: Event):
+        super().__init__()
         self.queue = queue
         self.stop_event = stop_event
-        self.connection = self.connect(connection_info)
-        super().__init__()
+        self.connection = None
+        self.connection_info = connection_info
         self.daemon = True
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = None
 
     @abstractmethod
     def connect(self, connection_info):
@@ -24,6 +25,8 @@ class SenderBaseClass(Process, metaclass=ABCMeta):
         pass
 
     def run(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.connection = self.connect(self.connection_info)
         while not self.stop_event.is_set():
             try:
                 self.send_packet()
