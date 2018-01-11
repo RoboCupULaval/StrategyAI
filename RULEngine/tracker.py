@@ -33,7 +33,10 @@ class Tracker:
         self._current_timestamp = None
 
     def execute(self) -> Dict:
-        vision_frame = self.vision_queue.get()
+        vision_frame = {}
+        while vision_frame.get('detection', None) is None:
+            vision_frame = self.vision_queue.get()
+
         detection_frame = vision_frame['detection']
 
         self._current_timestamp = detection_frame['t_capture']

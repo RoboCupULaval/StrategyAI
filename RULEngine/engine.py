@@ -3,6 +3,8 @@ import logging
 import sys
 from multiprocessing import Process, Queue, Event
 from time import sleep
+from math import cos, sin
+
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
@@ -47,15 +49,18 @@ class Engine(Process):
 
         vision_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'],
                                   int(self.cfg.config_dict['COMMUNICATION']['vision_port']))
+
+        print(vision_connection_info)
         self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_queue, self.stop_event)
 
-        ui_sender_connection_info = ('127.0.0.1', int(self.cfg.config_dict['COMMUNICATION']['ui_cmd_sender_port']))
-        self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue, self.stop_event)
+        ui_debug_host = self.cfg.config_dict['COMMUNICATION']['ui_debug_address']
+        ui_sender_connection_info = (ui_debug_host, int(self.cfg.config_dict['COMMUNICATION']['ui_cmd_sender_port']))
+        ui_recver_connection_info = (ui_debug_host, int(self.cfg.config_dict['COMMUNICATION']['ui_cmd_receiver_port']))
 
-        ui_recver_connection_info = ('127.0.0.1', 12345)  # TODO set the port in the config file
+        self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue, self.stop_event)
         self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue, self.stop_event)
 
-        robot_connection_info = ('127.0.0.1', 12346)  # TODO set the port in the config file
+        robot_connection_info = ('', 12346)  # TODO set the port in the config file
         self.robot_cmd_sender = RobotCommandSender(robot_connection_info, self.robot_cmd_queue, self.stop_event)
 
         self.tracker = Tracker(self.vision_queue)
@@ -73,6 +78,8 @@ class Engine(Process):
 
             track_frame = self.tracker.execute()
             self.game_state_queue.put(track_frame)
+
+            self.ui_send_queue.put(track_frame)
 
             self.controller.update(track_frame[self.team_color])
             commands = self.controller.execute()
@@ -104,3 +111,4 @@ class Engine(Process):
         self.ui_recver.join(0.3)
         logging.debug('UIDebugReceiver joined now is -> {0}'.
                       format('alive' if self.ui_recver.is_alive() else 'dead'))
+

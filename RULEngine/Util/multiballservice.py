@@ -38,7 +38,8 @@ class MultiBallService(list):
 
     def remove_undetected(self) -> None:
         undetected_balls = [ball for ball in self
-                            if self._current_timestamp - ball.last_t_capture > MultiBallService.MAX_UNDETECTED_DELAY]
+                            if ball.is_active and
+                            self._current_timestamp - ball.last_t_capture > MultiBallService.MAX_UNDETECTED_DELAY]
 
         map(lambda ball: ball.reset(), undetected_balls)
 
