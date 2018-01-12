@@ -11,10 +11,9 @@ class SenderBaseClass(Process, metaclass=ABCMeta):
         super().__init__()
         self.queue = queue
         self.stop_event = stop_event
-        self.connection = None
-        self.connection_info = connection_info
+        self.connection = self.connect(connection_info)
         self.daemon = True
-        self.logger = None
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     @abstractmethod
     def connect(self, connection_info):
@@ -25,15 +24,13 @@ class SenderBaseClass(Process, metaclass=ABCMeta):
         pass
 
     def run(self):
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.connection = self.connect(self.connection_info)
+        self.logger.info('Running')
         try:
 
             while not self.stop_event.is_set():
                 self.send_packet()
 
-        except KeyboardInterrupt:
-            self.logger.info('Killed')
         finally:
+            self.logger.info('Killed')
             exit(0)
 

@@ -8,10 +8,7 @@ from RULEngine.Util.filters.ball_kalman_filter import BallFilter
 
 class MultiBallService(list):
 
-    MAX_BALL_ON_FIELD = 1
-    BALL_CONFIDENCE_THRESHOLD = 1
     BALL_SEPARATION_THRESHOLD = 1000
-    STATE_PREDICTION_TIME = 0.1
     MAX_UNDETECTED_DELAY = 1
 
     def __init__(self, max_ball: int=1):
@@ -24,7 +21,10 @@ class MultiBallService(list):
         
     def update(self, obs: np.array, timestamp: float) -> None:
         self._current_timestamp = timestamp
-        closest_ball = self.find_closest_ball_to_observation(obs)
+        if self.max_ball > 1:
+            closest_ball = self.find_closest_ball_to_observation(obs)
+        else:
+            closest_ball = self[0]
 
         if closest_ball is not None:
             closest_ball.update(obs, self._current_timestamp)

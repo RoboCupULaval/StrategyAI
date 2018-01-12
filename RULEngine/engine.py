@@ -2,8 +2,7 @@
 import logging
 import sys
 from multiprocessing import Process, Queue, Event
-from time import sleep
-from math import cos, sin
+from time import sleep, time
 
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
@@ -37,16 +36,6 @@ class Engine(Process):
         self.game_state_queue = game_state_queue
         self.robot_cmd_queue = Queue()
 
-        self.tracker = None
-        self.controller = None
-
-        self.vision_receiver = None
-        self.robot_cmd_sender = None
-        self.ui_sender = None
-        self.ui_recver = None
-
-    def _initialize_subprocess(self):
-
         vision_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'],
                                   int(self.cfg.config_dict['COMMUNICATION']['vision_port']))
 
@@ -70,44 +59,31 @@ class Engine(Process):
         self.ui_recver.start()
         self.robot_cmd_sender.start()
 
-        self.logger.debug('has initialized.')
-
-    def loop(self):
-        while not self.stop_event.is_set():
-
-            track_frame = self.tracker.execute()
-            self.game_state_queue.put(track_frame)
-
-            self.ui_send_queue.put(track_frame)
-
-            self.controller.update(track_frame[self.team_color])
-            commands = self.controller.execute()
-
-            for cmd in commands:
-                cmd['is_team_yellow'] = True if self.team_color == 'yellow' else False  # TODO add color service
-                cmd['kick'] = 0  # TODO add kick functionality
-                self.robot_cmd_queue.put(cmd)
-
-            sleep(0)
-
     def run(self):
-        self._initialize_subprocess()
-        try:
-            self.loop()
-        except KeyboardInterrupt:
-            self.logger.info('Engine interrupted.')
-        sys.stdout.flush()
-        self.stop()
-        exit(0)
 
-    def stop(self):
-        self.vision_receiver.join(0.3)  # timeout needed for some reason even though the process exit gracefully
-        self.logger.debug('VisionReceiver joined now is -> {0}'.
-                          format('alive' if self.vision_receiver.is_alive() else 'dead'))
-        self.ui_sender.join(0.3)
-        logging.debug('UIDebugSender joined now is -> {0}'.
-                      format('alive' if self.ui_sender.is_alive() else 'dead'))
-        self.ui_recver.join(0.3)
-        logging.debug('UIDebugReceiver joined now is -> {0}'.
-                      format('alive' if self.ui_recver.is_alive() else 'dead'))
+        self.logger.debug('Running')
+        try:
+            while not self.stop_event.is_set():
+
+                track_frame = self.tracker.execute()
+
+                self.game_state_queue.put(track_frame)
+
+                self.ui_send_queue.put(track_frame)
+
+                self.controller.update(track_frame[self.team_color])
+                commands = self.controller.execute()
+
+                for cmd in commands:
+                    cmd['is_team_yellow'] = True if self.team_color == 'yellow' else False  # TODO add color service
+                    cmd['kick'] = 0  # TODO add kick functionality
+                    self.robot_cmd_queue.put(cmd)
+
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self.logger.info('Killed')
+            sys.stdout.flush()
+            exit(0)
+
 

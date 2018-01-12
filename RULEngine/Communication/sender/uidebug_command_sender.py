@@ -26,7 +26,7 @@ class UIDebugCommandSender(SenderBaseClass):
 
             for ball in track_frame['balls']:
                 self.send_balls_position(ball['pose'], color=(255, 25, 200))
-        except ConnectionRefusedError as e:
+        except ConnectionRefusedError:
             pass
 
     def send_robot_position(self, pos, color=(0, 255, 0), color_angle=(255, 0, 0), radius=90):

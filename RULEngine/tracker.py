@@ -4,6 +4,8 @@ import logging
 import numpy as np
 from multiprocessing import Queue
 from typing import Dict, List
+from queue import Empty
+
 
 from RULEngine.Util.filters.robot_kalman_filter import RobotFilter
 from RULEngine.Util.multiballservice import MultiBallService
@@ -33,15 +35,21 @@ class Tracker:
         self._current_timestamp = None
 
     def execute(self) -> Dict:
-        vision_frame = {}
-        while vision_frame.get('detection', None) is None:
-            vision_frame = self.vision_queue.get()
 
-        detection_frame = vision_frame['detection']
+        try:
+            vision_frame = self.vision_queue.get(block=False)
+        except Empty:
+            vision_frame = None
 
-        self._current_timestamp = detection_frame['t_capture']
+        if vision_frame is not None:
+            detection_frame = vision_frame.get('detection', None)
+        else:
+            detection_frame = None
 
-        self.update(detection_frame)
+        if detection_frame is not None:
+            self._current_timestamp = detection_frame['t_capture']
+            self.update(detection_frame)
+
         self.predict()
         self.remove_undetected()
 
@@ -67,7 +75,9 @@ class Tracker:
         self._balls.predict()
 
     def remove_undetected(self):
-        for robot in self._yellow_team + self._blue_team:
+
+        active_robots = iter(robot for robot in self._yellow_team + self._blue_team if robot.is_active)
+        for robot in active_robots:
             if self._current_timestamp - robot.last_t_capture > Tracker.MAX_UNDETECTED_DELAY:
                 robot.reset()
 

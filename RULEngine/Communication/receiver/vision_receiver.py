@@ -19,24 +19,24 @@ class VisionReceiver(ReceiverBaseClass):
         connection.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         connection.bind(connection_info)
         if ip_address(connection_info[0]).is_multicast:
-            connection.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, pack("=4sl", inet_aton(connection_info[0]), INADDR_ANY))
-        connection.settimeout(self.TIME_OUT)
+            connection.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, pack('=4sl', inet_aton(connection_info[0]), INADDR_ANY))
+        # connection.settimeout(self.TIME_OUT)
 
         return connection
 
     def receive_packet(self):
+
         packet = SSL_WrapperPacket()
+        data, _ = self.connection.recvfrom(2048)
 
         try:
-            data, _ = self.connection.recvfrom(2048)
             packet.ParseFromString(data)
+        except DecodeError:
+            self.logger.error('Vision receiver had trouble decoding a packet!')
+            return
+
+        try:
             self.queue.put(protobuf_to_dict(packet))
         except Full as e:
-            self.logger.debug("{}".format(e))
-        except DecodeError:
-            self.logger.error("Vision receiver had trouble decoding a packet! Are you listening "
-                              "to the correct port")
-        except timeout:
-            self.logger.error("Socket timed out after {}, Are you listening to the correct port?".
-                              format(self.TIME_OUT))
+            self.logger.debug('{}'.format(e))
 

@@ -25,10 +25,10 @@ class BallFilter(KalmanFilter):
                          [0, 0, 1, 0]])  # Position y
 
     def initial_state_covariance(self):
-        return 10 ** 3 * np.eye(self.state_number)
+        return 10 ** 6 * np.eye(self.state_number)
 
     def process_covariance(self):
-        return np.diag([1, 10, 1, 10])
+        return np.diag([1000, 100, 1000, 100])
 
     def observation_covariance(self):
-        return 2 * np.eye(self.observable_state)
+        return 20 * np.eye(self.observable_state)
