@@ -113,5 +113,6 @@ class BallKalmanFilter:
                 self.x[3] = 0
         self.predict()
         output_state = self.x
+        #print("pos", self.x[0], self.x[1])
         #print("speed", self.x[2], self.x[3])
         return output_state

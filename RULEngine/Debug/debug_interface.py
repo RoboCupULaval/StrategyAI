@@ -28,6 +28,7 @@ VIOLET = Color(108, 113, 196)
 BLUE = Color(38, 139, 210)
 CYAN = Color(42, 161, 152)
 GREEN = Color(133, 153, 0)
+BLACK = Color(0, 0, 0)
 
 # Alias pour les identifiants des robots
 COLOR_ID0 = YELLOW
@@ -36,13 +37,15 @@ COLOR_ID2 = RED
 COLOR_ID3 = MAGENTA
 COLOR_ID4 = VIOLET
 COLOR_ID5 = BLUE
+COLOR_ID6 = BLACK
 
 COLOR_ID_MAP = {0: COLOR_ID0,
                 1: COLOR_ID1,
                 2: COLOR_ID2,
                 3: COLOR_ID3,
                 4: COLOR_ID4,
-                5: COLOR_ID5}
+                5: COLOR_ID5,
+                6: COLOR_ID6}
 
 DEFAULT_TEXT_SIZE = 14  # px
 DEFAULT_TEXT_FONT = 'Arial'
@@ -100,10 +103,10 @@ class DebugInterface(metaclass=Singleton):
         circle = DebugCommand(3003, data)
         self.debug_state.append(circle)
 
-    def add_line(self, start_point, end_point, timeout=DEFAULT_DEBUG_TIMEOUT):
+    def add_line(self, start_point, end_point, timeout=DEFAULT_DEBUG_TIMEOUT, color=MAGENTA.repr()):
         data = {'start': start_point,
                 'end': end_point,
-                'color': MAGENTA.repr(),
+                'color': color,
                 'timeout': timeout}
         command = DebugCommand(3001, data)
         self.debug_state.append(command)

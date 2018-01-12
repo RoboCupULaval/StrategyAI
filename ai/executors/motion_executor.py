@@ -3,6 +3,7 @@
 import numpy as np
 import math as m
 
+from RULEngine.Debug import debug_interface
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.SpeedPose import SpeedPose
@@ -113,6 +114,7 @@ class RobotMotion(object):
                                     self.setting.rotation.antiwindup,
                                     wrap_err=True)
         self.position_flag = False
+        self.rotation_flag = False
         self.last_position = Position()
         self.target_turn = self.target_pose.position
 
@@ -123,11 +125,12 @@ class RobotMotion(object):
         # Rotation control
         rotation_cmd = self.angle_controller.update(self.pose_error.orientation, dt=self.dt)
         rotation_cmd = self.apply_rotation_constraints(rotation_cmd)
-
+        if abs(self.pose_error.orientation) < 0.2:
+            self.rotation_flag = True
         # Translation control
         self.position_flag = False
         if self.position_error.norm() < MIN_DISTANCE_TO_REACH_TARGET_SPEED * max(1.0, self.cruise_speed):
-            if self.target_speed < 0.01:
+            if self.target_speed < 0.1:
                 self.position_flag = True
 
         if self.position_flag:
@@ -135,9 +138,25 @@ class RobotMotion(object):
                                        self.y_controller.update(self.pose_error.position.y, dt=self.dt))
         else:
             translation_cmd = self.get_next_velocity()
-
         # Adjust command to robot's orientation
-        translation_cmd = translation_cmd.rotate(-self.current_pose.orientation)
+        # self.ws.debug_interface.add_line(start_point=(self.current_pose.position[0] * 1000, self.current_pose.position[1] * 1000),
+        #                                  end_point=(self.current_pose.position[0] * 1000 + translation_cmd[0] * 600, self.current_pose.position[1] * 1000 + translation_cmd[1] * 600),
+        #                                  timeout=0.01, color=debug_interface.CYAN.repr())
+
+        compasation_ref_world = translation_cmd.rotate(self.dt * rotation_cmd)
+        translation_cmd = translation_cmd.rotate(-(self.current_pose.orientation + self.dt * rotation_cmd))
+        if not self.rotation_flag:
+            translation_cmd *= translation_cmd * 0.0
+        if self.position_error.norm() > 0.1 and self.rotation_flag:
+            rotation_cmd = 0
+
+
+
+        # self.ws.debug_interface.add_line(
+        #     start_point=(self.current_pose.position[0] * 1000, self.current_pose.position[1] * 1000),
+        #     end_point=(self.current_pose.position[0] * 1000 + compasation_ref_world[0] * 600,
+        #                self.current_pose.position[1] * 1000 + compasation_ref_world[1] * 600),
+        #     timeout=0.01, color=debug_interface.ORANGE.repr())
         translation_cmd = self.apply_translation_constraints(translation_cmd)
 
         # self.debug(translation_cmd, rotation_cmd)
@@ -159,6 +178,7 @@ class RobotMotion(object):
         else:  # We need to go to the cruising speed
             if self.next_speed < self.cruise_speed:  # Going faster
                 self.next_speed += self.setting.translation.max_acc * self.dt
+                self.next_speed = min(self.cruise_speed, self.next_speed)
 
         self.next_speed = np.clip(self.next_speed, 0.0, self.setting.translation.max_speed)
         next_velocity = Position(self.target_direction * self.next_speed)
@@ -268,6 +288,7 @@ class RobotMotion(object):
         self.x_controller.reset()
         self.y_controller.reset()
         self.position_flag = False
+        self.rotation_flag = False
         self.last_translation_cmd = Position()
         self.next_speed = 0.0
         self.next_angular_speed = 0.0
@@ -291,8 +312,8 @@ def get_control_setting(is_sim: bool):
         translation = {"kp": 1, "ki": 0.5, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
         rotation = {"kp": 2, "ki": 1, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
-        translation = {"kp": 1, "ki": 0.5, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
-        rotation = {"kp": 1, "ki": 0.35, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        translation = {"kp": 1, "ki": 1, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        rotation = {"kp": 3, "ki": 3, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)

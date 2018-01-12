@@ -64,7 +64,7 @@ class GoKick(Tactic):
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3)
-        if (self.player.pose.position - distance_behind).norm() < 50:
+        if (self.player.pose.position - distance_behind).norm() < 200 and abs(orientation - self.player.pose.orientation) < 0.1:
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -72,7 +72,7 @@ class GoKick(Tactic):
                 self._find_best_passing_option()
         collision_ball = self.tries_flag == 0
         return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                      collision_ball=collision_ball, cruise_speed=1)
+                                      collision_ball=collision_ball, cruise_speed=2)
 
     def grab_ball(self):
         if self.grab_ball_tries == 0:
@@ -96,6 +96,9 @@ class GoKick(Tactic):
         return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, end_speed=0.2)
 
     def validate_kick(self):
+        self.ball_spacing = GRAB_BALL_SPACING
+        ball_position = self.game_state.get_ball_position()
+        orientation = (self.target.position - ball_position).angle()
         if self.game_state.get_ball_velocity().norm() > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.halt
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
@@ -104,7 +107,7 @@ class GoKick(Tactic):
             self.status_flag = Flags.INIT
             self.next_state = self.go_behind_ball
 
-        return Idle(self.game_state, self.player)
+        return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, end_speed=0.2)
 
     def halt(self):
         if self.status_flag == Flags.INIT:

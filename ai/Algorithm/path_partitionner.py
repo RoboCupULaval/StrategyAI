@@ -153,7 +153,7 @@ class PathPartitionner(Pathfinder):
         self.path = Path(self.player.position, self.pose_target.position, 0, self.end_speed * 1000)
         if len(self.collision_body) <= 0:
             return self.path, self.path
-        if old_raw_path is not None:
+        #if old_raw_path is not None:
             # print(old_raw_path.points)
             # start_1 = time.time()
             # self.is_path_collide(old_raw_path, tolerance=self.gap_proxy-50)
@@ -162,7 +162,7 @@ class PathPartitionner(Pathfinder):
             # self.is_path_collide_legacy(old_raw_path, tolerance=self.gap_proxy - 50)
             # end_2 = time.time()
             #print(end_1 - start_1, end_2 - start_2)
-            print("is_path_colide", self.is_path_collide(old_raw_path, tolerance=8))
+            #print("is_path_colide", self.is_path_collide(old_raw_path, tolerance=8))
             # print("meme goal?", (np.linalg.norm(pose_target.position - old_raw_path.goal) < 200))
             # print("quel goal?", pose_target.position, old_raw_path.goal)
 
