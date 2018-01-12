@@ -15,10 +15,6 @@ class Tracker:
 
     MAX_ROBOT_PER_TEAM = 12
     MAX_BALL_ON_FIELD = 1
-    SEND_DELAY = 0.02
-    BALL_CONFIDENCE_THRESHOLD = 1
-    BALL_SEPARATION_THRESHOLD = 1000
-    STATE_PREDICTION_TIME = 0.1
     MAX_UNDETECTED_DELAY = 2
 
     def __init__(self, vision_queue: Queue):
@@ -38,17 +34,13 @@ class Tracker:
 
         try:
             vision_frame = self.vision_queue.get(block=False)
-        except Empty:
-            vision_frame = None
-
-        if vision_frame is not None:
-            detection_frame = vision_frame.get('detection', None)
-        else:
-            detection_frame = None
-
-        if detection_frame is not None:
+            detection_frame = vision_frame['detection']
             self._current_timestamp = detection_frame['t_capture']
             self.update(detection_frame)
+        except Empty:
+            pass
+        except KeyError:
+            pass
 
         self.predict()
         self.remove_undetected()
@@ -70,8 +62,8 @@ class Tracker:
             self._balls.update(obs, self._current_timestamp)
 
     def predict(self):
-        map(lambda robot: robot.predict(), self._yellow_team)
-        map(lambda robot: robot.predict(), self._blue_team)
+        for robot in self._yellow_team + self._blue_team:
+            robot.predict()
         self._balls.predict()
 
     def remove_undetected(self):

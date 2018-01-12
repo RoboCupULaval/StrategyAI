@@ -28,7 +28,7 @@ class BallFilter(KalmanFilter):
         return 10 ** 6 * np.eye(self.state_number)
 
     def process_covariance(self):
-        return np.diag([1000, 100, 1000, 100])
+        return np.diag([.1, .1, .1, .1])
 
     def observation_covariance(self):
-        return 20 * np.eye(self.observable_state)
+        return 1 * np.eye(self.observable_state)

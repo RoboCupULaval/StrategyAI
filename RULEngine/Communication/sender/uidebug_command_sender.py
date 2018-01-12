@@ -29,20 +29,20 @@ class UIDebugCommandSender(SenderBaseClass):
         except ConnectionRefusedError:
             pass
 
-    def send_robot_position(self, pos, color=(0, 255, 0), color_angle=(255, 0, 0), radius=90):
+    def send_robot_position(self, pos, color=(0, 255, 0), color_angle=(255, 0, 0), radius=120):
         player_center = (pos[0], pos[1])
         data_circle = {'center': player_center,
                        'radius': radius,
                        'color': color,
                        'is_fill': True,
-                       'timeout': 0.08}
+                       'timeout': 0.05}
 
         end_point = (pos[0] + radius * cos(pos[2]),
                      pos[1] + radius * sin(pos[2]))
         data_line = {'start': player_center,
                      'end': end_point,
                      'color': color_angle,
-                     'timeout': 0.08}
+                     'timeout': 0.05}
 
         self.connection.send(pickle.dumps(DebugCommand(3003, data_circle)))
         self.connection.send(pickle.dumps(DebugCommand(3001, data_line)))
@@ -52,7 +52,7 @@ class UIDebugCommandSender(SenderBaseClass):
                        'radius': 150,
                        'color': color,
                        'is_fill': True,
-                       'timeout': 0.06}
+                       'timeout': 0.05}
 
         self.connection.send(pickle.dumps(DebugCommand(3003, data_circle)))
 

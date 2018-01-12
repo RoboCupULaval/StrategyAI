@@ -35,7 +35,8 @@ class MultiBallService(list):
                 inactive_balls[0].update(obs, self._current_timestamp)
 
     def predict(self) -> None:
-        map(lambda ball: ball.predict(), self)
+        for ball in self:
+            ball.predict()
 
     def remove_undetected(self) -> None:
         undetected_balls = [ball for ball in self

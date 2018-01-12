@@ -40,13 +40,13 @@ class RobotFilter(KalmanFilter):
                          [0, 0, 1]])  # Speed Theta
 
     def initial_state_covariance(self):
-        return 1 ** 6 * np.eye(self.state_number)
+        return 10 ** 6 * np.eye(self.state_number)
 
     def process_covariance(self):
-        return np.diag([100, 1000, 100, 1000, 0.01, 0.1])
+        return np.diag([.1, .1, .1, .1, 0.01, 0.01])
 
     def observation_covariance(self):
-        return np.diag([1, 1, 0.005])
+        return np.diag([1, 1, 0.01])
 
     def update(self, observation, t_capture):
         error = observation - self.observation_model() @ self.x
@@ -54,8 +54,8 @@ class RobotFilter(KalmanFilter):
 
         self._update(error, t_capture)
 
-    def predict(self, input_command=0):
-        self._predict(input_command)
+    def predict(self):
+        self._predict()
         self.x[4] = self.wrap_to_pi(self.x[4])
 
     @staticmethod

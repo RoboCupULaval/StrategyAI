@@ -22,4 +22,3 @@ class RobotCommandSender:
             raise TypeError('{} is not a valid type for a RobotCommandSender.'.format(sender_type))
 
         return instance
-
