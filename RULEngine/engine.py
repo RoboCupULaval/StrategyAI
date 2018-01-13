@@ -62,6 +62,17 @@ class Engine(Process):
     def run(self):
 
         self.logger.debug('Running')
+
+        cmd = {
+            'target': {'x': 0, 'y': 0, 'orientation': 0},
+            'control_type': None,
+            'kick_type': None,
+            'is_active': True,
+            'id': 1
+        }
+
+        self.ai_queue.put([cmd])
+
         try:
             while not self.stop_event.is_set():
 
@@ -74,13 +85,16 @@ class Engine(Process):
                 self.controller.update(track_frame[self.team_color])
                 commands = self.controller.execute()
 
-                for cmd in commands:
+                for robot_id, cmd in commands.items():
                     cmd['is_team_yellow'] = True if self.team_color == 'yellow' else False  # TODO add color service
                     cmd['kick'] = 0  # TODO add kick functionality
-                    self.robot_cmd_queue.put(cmd)
+
+                self.robot_cmd_queue.put(commands)
 
         except KeyboardInterrupt:
             pass
+        except BaseException as e:
+            print(e)
         finally:
             self.logger.info('Killed')
             sys.stdout.flush()

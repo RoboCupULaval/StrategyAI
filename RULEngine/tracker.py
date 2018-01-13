@@ -86,24 +86,24 @@ class Tracker:
 
     @property
     def balls(self) -> List[Dict]:
-        return Tracker.format_list(self._balls)
+        return Tracker.format_list(self._balls, 'x y')
 
     @property
     def blue_team(self) -> List[Dict]:
-        return Tracker.format_list(self._blue_team)
+        return Tracker.format_list(self._blue_team, 'x y orientation')
 
     @property
     def yellow_team(self) -> List[Dict]:
-        return Tracker.format_list(self._yellow_team)
+        return Tracker.format_list(self._yellow_team, 'x y orientation')
 
     @staticmethod
-    def format_list(entities: List) -> List[Dict]:
+    def format_list(entities: List, states) -> List[Dict]:
         formatted_list = []
         for entity_id, entity in enumerate(entities):
             if entity.is_active:
                 fields = dict()
-                fields['pose'] = tuple(entity.pose)
-                fields['velocity'] = tuple(entity.velocity)
+                fields['pose'] = {state: value for state, value in zip(states.split(), entity.pose)}
+                fields['velocity'] = {state: value for state, value in zip(states.split(), entity.velocity)}
                 fields['id'] = entity_id
                 formatted_list.append(fields)
         return formatted_list

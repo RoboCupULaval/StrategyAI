@@ -30,15 +30,15 @@ class UIDebugCommandSender(SenderBaseClass):
             pass
 
     def send_robot_position(self, pos, color=(0, 255, 0), color_angle=(255, 0, 0), radius=120):
-        player_center = (pos[0], pos[1])
+        player_center = (pos['x'], pos['y'])
         data_circle = {'center': player_center,
                        'radius': radius,
                        'color': color,
                        'is_fill': True,
                        'timeout': 0.05}
 
-        end_point = (pos[0] + radius * cos(pos[2]),
-                     pos[1] + radius * sin(pos[2]))
+        end_point = (pos['x'] + radius * cos(pos['orientation']),
+                     pos['y'] + radius * sin(pos['orientation']))
         data_line = {'start': player_center,
                      'end': end_point,
                      'color': color_angle,
@@ -48,7 +48,7 @@ class UIDebugCommandSender(SenderBaseClass):
         self.connection.send(pickle.dumps(DebugCommand(3001, data_line)))
 
     def send_balls_position(self, pose, color=(255, 127, 80)):
-        data_circle = {'center': (pose[0], pose[1]),
+        data_circle = {'center': (pose['x'], pose['y']),
                        'radius': 150,
                        'color': color,
                        'is_fill': True,
