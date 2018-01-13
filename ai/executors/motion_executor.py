@@ -144,10 +144,14 @@ class RobotMotion(object):
         #                                  timeout=0.01, color=debug_interface.CYAN.repr())
 
         compasation_ref_world = translation_cmd.rotate(self.dt * rotation_cmd)
-        translation_cmd = translation_cmd.rotate(-(self.current_pose.orientation + self.dt * rotation_cmd))
+        translation_cmd = translation_cmd.rotate(-(self.current_pose.orientation))
         if not self.rotation_flag:
             translation_cmd *= translation_cmd * 0.0
+            self.next_speed = 0.0
+            self.x_controller.reset()
+            self.y_controller.reset()
         if self.position_error.norm() > 0.1 and self.rotation_flag:
+            self.angle_controller.reset()
             rotation_cmd = 0
 
 
@@ -158,7 +162,8 @@ class RobotMotion(object):
         #                self.current_pose.position[1] * 1000 + compasation_ref_world[1] * 600),
         #     timeout=0.01, color=debug_interface.ORANGE.repr())
         translation_cmd = self.apply_translation_constraints(translation_cmd)
-
+        if not translation_cmd.norm() < 0.01:
+            print(translation_cmd, "self.target_reached()", self.target_reached(), "self.next_speed", self.next_speed,"self.target_speed", self.target_speed )
         # self.debug(translation_cmd, rotation_cmd)
 
         return SpeedPose(translation_cmd, rotation_cmd)
@@ -174,11 +179,14 @@ class RobotMotion(object):
                 if self.next_speed > self.target_speed:  # Next_speed is too fast
                     self.next_speed = self.target_speed
             else:  # Target speed is slower than current speed
-                self.next_speed -= self.setting.translation.max_acc * self.dt
+                self.next_speed -= self.setting.translation.max_acc * self.dt *2
         else:  # We need to go to the cruising speed
             if self.next_speed < self.cruise_speed:  # Going faster
                 self.next_speed += self.setting.translation.max_acc * self.dt
-                self.next_speed = min(self.cruise_speed, self.next_speed)
+                # self.next_speed = min(self.cruise_speed, self.next_speed)
+            else:
+                self.next_speed -= self.setting.translation.max_acc * self.dt * 2
+
 
         self.next_speed = np.clip(self.next_speed, 0.0, self.setting.translation.max_speed)
         next_velocity = Position(self.target_direction * self.next_speed)
@@ -309,10 +317,10 @@ class RobotMotion(object):
 def get_control_setting(is_sim: bool):
 
     if is_sim:
-        translation = {"kp": 1, "ki": 0.5, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
-        rotation = {"kp": 2, "ki": 1, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        translation = {"kp": 1, "ki": 0.1, "kd": 0.5, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        rotation = {"kp": 3, "ki": 3, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
-        translation = {"kp": 1, "ki": 1, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        translation = {"kp": 1, "ki": 0.1, "kd": 0.5, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
         rotation = {"kp": 3, "ki": 3, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
 
     control_setting = DotDict()

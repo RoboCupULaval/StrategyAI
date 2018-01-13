@@ -18,16 +18,17 @@ class Offense_3v3(Strategy):
         ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
         self.theirgoal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
 
-        roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
+        roles_to_consider = [Role.MIDDLE, Role.FIRST_DEFENCE]
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
-
+        self.robots = [player for _, player in role_by_robots if player is not None]
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
-
+        [print(robot) for robot in self.robots]
         self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
 
         for index, player in role_by_robots:
             if player:
-                self.add_tactic(index, PositionForPass(self.game_state, player, auto_position=True))
+                self.add_tactic(index, PositionForPass(self.game_state, player, auto_position=True,
+                                                       robots_in_formation=self.robots))
                 self.add_tactic(index, GoKick(self.game_state, player, auto_update_target=True))
 
                 self.add_condition(index, 0, 1, partial(self.is_closest, player))
