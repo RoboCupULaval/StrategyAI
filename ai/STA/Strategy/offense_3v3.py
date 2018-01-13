@@ -15,11 +15,15 @@ from ai.Util.role import Role
 class Offense_3v3(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
+        role_mapping = {Role.GOALKEEPER: 1, Role.MIDDLE: 2, Role.FIRST_DEFENCE: 3}
+        self.game_state.map_players_to_roles_by_player_id(role_mapping)
         ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
         self.theirgoal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
 
         roles_to_consider = [Role.MIDDLE, Role.FIRST_DEFENCE]
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
+        print(role_by_robots[1])
+        print(self.game_state.get_player_by_role(role_by_robots[1][0]).id)
         self.robots = [player for _, player in role_by_robots if player is not None]
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
         [print(robot) for robot in self.robots]
@@ -29,7 +33,7 @@ class Offense_3v3(Strategy):
             if player:
                 self.add_tactic(index, PositionForPass(self.game_state, player, auto_position=True,
                                                        robots_in_formation=self.robots))
-                self.add_tactic(index, GoKick(self.game_state, player, auto_update_target=True))
+                self.add_tactic(index, GoKick(self.game_state, player, target=self.theirgoal))
 
                 self.add_condition(index, 0, 1, partial(self.is_closest, player))
                 self.add_condition(index, 1, 0, partial(self.is_not_closest, player))

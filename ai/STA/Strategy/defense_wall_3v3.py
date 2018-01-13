@@ -14,6 +14,8 @@ from ai.STA.Strategy.strategy import Strategy
 class DefenseWall_3v3(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4):
         super().__init__(game_state)
+        role_mapping = {Role.GOALKEEPER: 1, Role.FIRST_ATTACK: 2, Role.SECOND_ATTACK: 3}
+        self.game_state.map_players_to_roles_by_player_id(role_mapping)
         self.number_of_players = number_of_players
         self.robots = []
         ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
