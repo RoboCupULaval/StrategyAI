@@ -72,7 +72,7 @@ class GoKick(Tactic):
                 self._find_best_passing_option()
         collision_ball = self.tries_flag == 0
         return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                      collision_ball=collision_ball, cruise_speed=2, end_speed= 0.1)
+                                      collision_ball=collision_ball, cruise_speed=2, end_speed= 0.2)
 
     def grab_ball(self):
         if self.grab_ball_tries == 0:
@@ -85,7 +85,7 @@ class GoKick(Tactic):
         orientation = (self.target.position - ball_position).angle()
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                     cruise_speed=2, charge_kick=True, end_speed=0.7, collision_ball=True)
+                                     cruise_speed=2, charge_kick=True, end_speed=0.3, collision_ball=True)
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
