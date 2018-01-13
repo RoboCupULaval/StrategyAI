@@ -53,6 +53,7 @@ class Controller(list):
                 robot_id = cmd['id']
                 self[robot_id]['target'] = cmd['target']
                 self[robot_id]['control_type'] = cmd['control_type']
+                self[robot_id]['kick_type'] = cmd['kick_type']
                 self[robot_id]['is_active'] = True
         except Empty:
             pass
@@ -77,6 +78,7 @@ class Robot(dict):
         self['pose'] = {'x': None, 'y': None, 'orientation': None}
         self['velocity'] = {'x': None, 'y': None, 'orientation': None}
         self['control_type'] = {'x': 'position', 'y': 'position', 'orientation': 'position'}
+        self['kick_type'] = None
         self['is_active'] = False
         self['id'] = id
 
@@ -92,7 +94,8 @@ class MotionControl(object):
         return {state: self.controllers[state].execute(error[state]) for state in self.controllers}
 
     def reset(self):
-        map(lambda controller: controller.reset(), self.controllers)
+        for controller in self.controllers.values():
+            controller.reset()
 
 
 def rotate(x: float, y: float, angle: float):

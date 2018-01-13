@@ -1,6 +1,6 @@
 import numpy as np
 from RULEngine.Util.filters.kalman_filter import KalmanFilter
-
+from math import fabs
 
 class BallFilter(KalmanFilter):
 
@@ -28,7 +28,12 @@ class BallFilter(KalmanFilter):
         return 10 ** 6 * np.eye(self.state_number)
 
     def process_covariance(self):
-        return np.diag([.1, .1, .1, .1])
+        return np.diag([.5, 5000, .5, 5000])
 
     def observation_covariance(self):
-        return 1 * np.eye(self.observable_state)
+        if fabs(self.x[0]) < 30 or fabs(self.x[2]) < 30:
+            R = np.diag([50, 50])
+        else:
+            R = np.diag([10, 10])
+        return R
+

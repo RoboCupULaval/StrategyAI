@@ -1,5 +1,6 @@
 import numpy as np
 from RULEngine.Util.filters.kalman_filter import KalmanFilter
+from math import fabs
 
 
 class RobotFilter(KalmanFilter):
@@ -43,10 +44,14 @@ class RobotFilter(KalmanFilter):
         return 10 ** 6 * np.eye(self.state_number)
 
     def process_covariance(self):
-        return np.diag([.1, .1, .1, .1, 0.01, 0.01])
+        return np.diag([.000005, .05, 0.000005, .05, 0.0001, 1.0])
 
     def observation_covariance(self):
-        return np.diag([1, 1, 0.01])
+        if fabs(self.x[0]) < 30 or fabs(self.x[2]) < 30:
+            R = np.diag([50, 50, 0.00005])
+        else:
+            R = np.diag([10, 10, 0.00005])
+        return R
 
     def update(self, observation, t_capture):
         error = observation - self.observation_model() @ self.x

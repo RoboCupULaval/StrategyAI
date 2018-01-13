@@ -21,18 +21,10 @@ class MultiBallService(list):
         
     def update(self, obs: np.array, timestamp: float) -> None:
         self._current_timestamp = timestamp
-        if self.max_ball > 1:
-            closest_ball = self.find_closest_ball_to_observation(obs)
-        else:
-            closest_ball = self[0]
+        if self.filter_ball_observation(obs) or not self[0].is_active:
+            self[0].update(obs, self._current_timestamp)
 
-        if closest_ball is not None:
-            closest_ball.update(obs, self._current_timestamp)
-        else:
-            self.logger.info('New ball detected')
-            inactive_balls = [ball for ball in self if not ball.is_active]
-            if inactive_balls:
-                inactive_balls[0].update(obs, self._current_timestamp)
+        self.remove_undetected()
 
     def predict(self) -> None:
         for ball in self:
@@ -43,10 +35,18 @@ class MultiBallService(list):
                             if ball.is_active and
                             self._current_timestamp - ball.last_t_capture > MultiBallService.MAX_UNDETECTED_DELAY]
 
-        map(lambda ball: ball.reset(), undetected_balls)
+        for ball in undetected_balls:
+            ball.reset()
+            self.logger.info('Deactivating ball')
 
-        if undetected_balls:
-            self.logger.info('Deactivating {} ball(s)'.format(len(undetected_balls)))
+    def filter_ball_observation(self, obs: np.ndarray) -> bool:
+        position_differences = self.compute_distances_ball_to_observation(obs)
+
+        is_valid = False
+        if position_differences is not None and np.min(position_differences) < self.BALL_SEPARATION_THRESHOLD:
+            is_valid = True
+
+        return is_valid
 
     def find_closest_ball_to_observation(self, obs: np.ndarray) -> BallFilter:
         position_differences = self.compute_distances_ball_to_observation(obs)

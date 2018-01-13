@@ -16,11 +16,12 @@ class KalmanFilter:
         self.state_number = int(np.size(self.transition_model(), 0))
         self.observable_state = int(np.size(self.observation_model(), 0))
 
+        self.x = np.zeros(self.state_number)
+
         self.R = self.observation_covariance()
         self.Q = self.process_covariance()
         self.P = self.initial_state_covariance()
 
-        self.x = np.zeros(self.state_number)
 
     @abstractmethod
     def transition_model(self):
