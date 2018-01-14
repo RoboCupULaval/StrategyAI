@@ -2,8 +2,7 @@
 import logging
 import sys
 from multiprocessing import Process, Queue, Event
-from time import sleep, time
-
+import time
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
@@ -48,7 +47,7 @@ class Engine(Process):
         self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue, self.stop_event)
         self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue, self.stop_event)
 
-        robot_connection_info = ('', 12346)  # TODO set the port in the config file
+        robot_connection_info = ('224.5.23.2', 20011)  # TODO set the port in the config file
         self.robot_cmd_sender = RobotCommandSender(robot_connection_info, self.robot_cmd_queue, self.stop_event)
 
         self.tracker = Tracker(self.vision_queue)
@@ -77,27 +76,20 @@ class Engine(Process):
             while not self.stop_event.is_set():
 
                 track_frame = self.tracker.execute()
-
                 self.game_state_queue.put(track_frame)
-
                 self.ui_send_queue.put(track_frame)
 
-                self.controller.update(track_frame[self.team_color])
-                commands = self.controller.execute()
-
-                for robot_id, cmd in commands.items():
-                    cmd['is_team_yellow'] = True if self.team_color == 'yellow' else False  # TODO add color service
-                    cmd['kick'] = 0  # TODO add kick functionality
-
-                self.robot_cmd_queue.put(commands)
+                self.controller.update(track_frame)
+                robot_packets = self.controller.execute()
+                if robot_packets['commands']:
+                    self.robot_cmd_queue.put(robot_packets)
 
         except KeyboardInterrupt:
             pass
-        except BaseException as e:
-            print(e)
         finally:
             self.logger.info('Killed')
-            sys.stdout.flush()
-            exit(0)
+
+        sys.stdout.flush()
+        exit(0)
 
 

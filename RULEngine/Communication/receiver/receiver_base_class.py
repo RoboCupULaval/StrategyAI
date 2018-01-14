@@ -33,6 +33,7 @@ class ReceiverBaseClass(Process, metaclass=ABCMeta):
 
         finally:
             self.logger.info('Killed')
-            exit(0)
+
+        exit(0)
 
 
