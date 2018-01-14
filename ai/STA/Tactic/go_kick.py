@@ -64,7 +64,7 @@ class GoKick(Tactic):
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3)
-        if (self.player.pose.position - distance_behind).norm() < 200 and abs(orientation - self.player.pose.orientation) < 0.1:
+        if (self.player.pose.position - distance_behind).norm() < 100 and abs(orientation - self.player.pose.orientation) < 0.1:
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -75,17 +75,17 @@ class GoKick(Tactic):
                                       collision_ball=collision_ball, cruise_speed=2, end_speed=0.2)
 
     def grab_ball(self):
-        if self.grab_ball_tries == 0:
-            if self._get_distance_from_ball() < KICK_DISTANCE:
-                self.next_state = self.kick
-        else:
-            if (self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10)):
-                self.next_state = self.kick
+        distance_to_kick = KICK_DISTANCE + self.grab_ball_tries * 10
+
         ball_position = self.game_state.get_ball_position()
-        orientation = (self.target.position - ball_position).angle()
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
+        orientation = (self.target.position - ball_position).angle()
+
+        if self._get_distance_from_ball() < distance_to_kick:
+            self.next_state = self.kick
+
         return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                     cruise_speed=2, charge_kick=True, end_speed=0.3, collision_ball=True)
+                                     cruise_speed=2, charge_kick=True, end_speed=0.4, collision_ball=False)
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
@@ -93,7 +93,7 @@ class GoKick(Tactic):
         self.tries_flag += 1
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
-        return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, end_speed=0.2)
+        return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, end_speed=0)
 
     def validate_kick(self):
         self.ball_spacing = GRAB_BALL_SPACING

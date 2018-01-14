@@ -22,12 +22,10 @@ class Offense_3v3(Strategy):
 
         roles_to_consider = [Role.MIDDLE, Role.FIRST_DEFENCE]
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
-        print(role_by_robots[1])
-        print(self.game_state.get_player_by_role(role_by_robots[1][0]).id)
         self.robots = [player for _, player in role_by_robots if player is not None]
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
-        [print(robot) for robot in self.robots]
-        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
+
+        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal, penalty_kick=True))
 
         for index, player in role_by_robots:
             if player:
@@ -40,10 +38,10 @@ class Offense_3v3(Strategy):
                 self.add_condition(index, 1, 1, partial(self.has_kicked, player))
 
     def is_closest(self, player):
-        return player == closest_player_to_point(GameState().get_ball_position(), True).player
+        return player == closest_player_to_point(GameState().get_ball_position(), True, robots=self.robots).player
 
     def is_not_closest(self, player):
-        return player != closest_player_to_point(GameState().get_ball_position(), True).player
+        return player != closest_player_to_point(GameState().get_ball_position(), True, robots=self.robots).player
 
     def has_kicked(self, player):
         role = GameState().get_role_by_player_id(player.id)

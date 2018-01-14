@@ -162,8 +162,8 @@ class RobotMotion(object):
         #                self.current_pose.position[1] * 1000 + compasation_ref_world[1] * 600),
         #     timeout=0.01, color=debug_interface.ORANGE.repr())
         translation_cmd = self.apply_translation_constraints(translation_cmd)
-        if not translation_cmd.norm() < 0.01:
-            print(translation_cmd, "self.target_reached()", self.target_reached(), "self.next_speed", self.next_speed,"self.target_speed", self.target_speed )
+        #if not translation_cmd.norm() < 0.01:
+        #    print(translation_cmd, "self.target_reached()", self.target_reached(), "self.next_speed", self.next_speed,"self.target_speed", self.target_speed )
         # self.debug(translation_cmd, rotation_cmd)
 
         return SpeedPose(translation_cmd, rotation_cmd)
