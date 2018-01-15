@@ -47,7 +47,8 @@ class Engine(Process):
         self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue, self.stop_event)
         self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue, self.stop_event)
 
-        robot_connection_info = ('224.5.23.2', 20011)  # TODO set the port in the config file
+        robot_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'], 20011)
+
         self.robot_cmd_sender = RobotCommandSender(robot_connection_info, self.robot_cmd_queue, self.stop_event)
 
         self.tracker = Tracker(self.vision_queue)

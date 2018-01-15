@@ -1,14 +1,14 @@
 # Under MIT License, see LICENSE.txt
-__author__ = "Maxime Gagnon-Legault"
 
 import logging
 from multiprocessing import Event, Queue
 import signal  # so we can stop gracefully
-import time
 
 from RULEngine.engine import Engine
 from ai.coach import Coach
 from config.config_service import ConfigService
+
+__author__ = "Maxime Gagnon-Legault"
 
 
 class Framework(object):
