@@ -150,7 +150,7 @@ class PathPartitionner(Pathfinder):
         # Debug code pls no remove
         # if old_path is not None:
         self.get_pertinent_collision_objects()
-        self.path = Path(self.player.position, self.pose_target.position, 0, self.end_speed * 1000)
+        self.path = Path(self.player.position, self.pose_target.position, self.player.velocity.norm(), self.end_speed * 1000)
         if len(self.collision_body) <= 0:
             return self.path, self.path
         #if old_raw_path is not None:

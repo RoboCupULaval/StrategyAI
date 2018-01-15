@@ -119,7 +119,7 @@ class RobotMotion(object):
         self.target_turn = self.target_pose.position
 
     def update(self, cmd: AICommand) -> Pose():
-
+        #print(cmd.path_speeds)
         self.update_states(cmd)
 
         # Rotation control
@@ -145,7 +145,8 @@ class RobotMotion(object):
 
         compasation_ref_world = translation_cmd.rotate(self.dt * rotation_cmd)
         translation_cmd = translation_cmd.rotate(-(self.current_pose.orientation))
-        if not self.rotation_flag:
+        if not self.rotation_flag and cmd.path[-1] is not cmd.path[0]:
+            print("wut")
             translation_cmd *= translation_cmd * 0.0
             self.next_speed = 0.0
             self.x_controller.reset()
