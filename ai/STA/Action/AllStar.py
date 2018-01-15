@@ -2,11 +2,10 @@
 from typing import Dict
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.GameDomainObjects.player import Player
-from ai.states.game_state import GameState
+from Util import AICommand, AICommandType, AIControlLoopType
+from Util import Pose
 from ai.STA.Action.Action import Action
-from RULEngine.Util.Pose import Pose
-from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
+from ai.states.game_state import GameState
 
 __author__ = 'Robocup ULaval'
 

@@ -3,12 +3,6 @@
     Contient les classes mères pour les modules intelligents.
 """
 from abc import abstractmethod, ABCMeta
-from typing import List
-
-from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
-from RULEngine.GameDomainObjects.player import Player
-from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
 
 __author__ = 'RoboCupULaval'
 

@@ -1,14 +1,12 @@
 
-from multiprocessing import Queue
-from queue import Empty
 import logging
 from math import cos, sin, sqrt
-
-from RULEngine.Util.PID import PID
-
-from config.config_service import ConfigService
-
+from multiprocessing import Queue
+from queue import Empty
 from typing import Dict
+
+from Util.PID import PID
+from config.config_service import ConfigService
 
 MAX_ROBOT = 12
 MAX_LINEAR_SPEED = 2000  # mm/s

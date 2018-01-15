@@ -1,8 +1,7 @@
 # Under MIT License, see LICENSE.txt
-import time
 
+from Util import Role
 from ai.Algorithm.auto_play import SimpleAutoPlay
-from ai.Util.role import Role
 from ai.executors.executor import Executor
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState

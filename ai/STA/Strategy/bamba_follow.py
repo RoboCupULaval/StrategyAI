@@ -1,9 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
+from Util import Role
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
 from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot
-from ai.Util.role import Role
 
 
 class BambaFollow(Strategy):

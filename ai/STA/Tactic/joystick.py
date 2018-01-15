@@ -1,17 +1,18 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
+
 import pygame
+from RULEngine.Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
+from Util import AICommandType, AIControlLoopType
+from Util import Position
+from Util import RobotJoystick
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
-from ai.Util.ai_command import AICommandType, AIControlLoopType
-from ai.Util.joystick.joystick import RobotJoystick
-from ai.states.game_state import GameState
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
+from ai.states.game_state import GameState
 
 
 class Joystick(Tactic):

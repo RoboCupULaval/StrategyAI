@@ -1,13 +1,14 @@
 import unittest
-import numpy as np
-
 from unittest.mock import create_autospec
-from RULEngine.Util.Position import Position
+
+import numpy as np
 from RULEngine.Util.Pose import Pose
+
 from RULEngine.GameDomainObjects.player import Player
 from RULEngine.GameDomainObjects.team import Team
-from ai.states.game_state import GameState
+from Util import Position
 from ai.Algorithm.evaluation_module import line_of_sight_clearance, trajectory_score
+from ai.states.game_state import GameState
 
 
 class TestEvaluationModule(unittest.TestCase):

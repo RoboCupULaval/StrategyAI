@@ -1,13 +1,12 @@
 from enum import Enum
 
-from RULEngine.GameDomainObjects.player import Player
-from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.geometry import conv_position_2_list, remove_duplicates
-from ai.Algorithm.IntelligentModule import Pathfinder
 import numpy as np
 import numpy.matlib
+from RULEngine.Util.Pose import Pose
+
+from RULEngine.GameDomainObjects.player import Player
+from Util import Position
+from Util import conv_position_2_list, remove_duplicates
 
 
 class Path:

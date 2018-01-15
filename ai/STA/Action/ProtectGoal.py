@@ -1,13 +1,14 @@
 # Under MIT licence, see LICENCE.txt
 
 
-from RULEngine.GameDomainObjects.player import Player
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.area import stayInsideCircle
-from RULEngine.Util.geometry import get_closest_point_on_segment
+
+from RULEngine.GameDomainObjects.player import Player
+from Util import AICommand, AICommandType
+from Util import Position
+from Util import get_closest_point_on_segment
+from Util import stayInsideCircle
 from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType
 from ai.states.game_state import GameState
 
 __author__ = 'Robocup ULaval'

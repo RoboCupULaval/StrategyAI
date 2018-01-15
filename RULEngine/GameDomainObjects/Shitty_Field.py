@@ -1,9 +1,8 @@
 # Under MIT License, see LICENSE.txt
 from RULEngine.GameDomainObjects.ball import Ball
 from ai.Algorithm.path_partitionner import CollisionBody, CollisionType
-from config.config_service import ConfigService
 # from RULEngine.Debug.debug_interface import DebugInterface
-from RULEngine.Util.area import *
+from config.config_service import ConfigService
 
 
 class FieldSide(Enum):

@@ -1,19 +1,20 @@
 # Under MIT licence, see LICENCE.txt
-import numpy as np
 import time
 
-from RULEngine.GameDomainObjects.player import Player
+import numpy as np
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
-from RULEngine.Util.geometry import get_distance
+
+from RULEngine.GameDomainObjects.player import Player
+from Util import BALL_RADIUS, ROBOT_RADIUS
+from Util import Position
+from Util import get_distance
 from ai.STA.Action.AllStar import AllStar
+from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.STA.Action.GoBehind import GoBehind
 from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'

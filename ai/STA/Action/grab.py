@@ -1,10 +1,9 @@
 # Under MIT license, see LICENSE.txt
-import numpy as np
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
+from Util import AICommand, AICommandType
+from Util import Pose
 from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType
 from ai.states.game_state import GameState
 
 __author__ = 'Robocup ULaval'

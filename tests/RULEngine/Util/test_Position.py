@@ -1,10 +1,11 @@
-import unittest
-import numpy as np
 import math as m
+import unittest
 
+import numpy as np
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.geometry import compare_angle
+
+from Util import Position
+from Util import compare_angle
 
 
 class TestPosition(unittest.TestCase):

@@ -1,14 +1,15 @@
 # Under MIT License, see LICENSE.txt
 import logging
 
+from RULEngine.Util.Pose import Pose
+
 from RULEngine.GameDomainObjects.ball import Ball
 from RULEngine.GameDomainObjects.field import Field
 from RULEngine.GameDomainObjects.referee import Referee
 from RULEngine.GameDomainObjects.team import Team
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.singleton import Singleton
 from RULEngine.services.team_color_service import TeamColor
+from Util import Position
+from Util.singleton import Singleton
 
 
 class Game(metaclass=Singleton):

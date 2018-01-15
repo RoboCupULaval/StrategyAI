@@ -1,8 +1,9 @@
 # Under MIT license, see LICENSE.txt
 
-from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
+from Util import Role
 from ai.STA.Strategy.strategy import Strategy
-from ai.Util.role import Role
+from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
+
 
 class StayAway(Strategy):
     def __init__(self, p_game_state):

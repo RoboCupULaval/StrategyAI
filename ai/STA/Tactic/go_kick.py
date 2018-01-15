@@ -1,18 +1,19 @@
 import math as m
-from typing import List, Union
-import numpy as np
 import time
+from typing import List, Union
+
+import numpy as np
+from RULEngine.Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.geometry import compare_angle
+from Util import Position
+from Util import compare_angle
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
-from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 

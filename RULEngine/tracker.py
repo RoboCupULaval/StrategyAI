@@ -1,14 +1,13 @@
 
 import logging
+from multiprocessing import Queue
+from queue import Empty
+from typing import Dict, List
 
 import numpy as np
-from multiprocessing import Queue
-from typing import Dict, List
-from queue import Empty
+from RULEngine.Util.filters.multiballservice import MultiBallService
 
-
-from RULEngine.Util.filters.robot_kalman_filter import RobotFilter
-from RULEngine.Util.multiballservice import MultiBallService
+from RULEngine.filters.robot_kalman_filter import RobotFilter
 
 
 class Tracker:

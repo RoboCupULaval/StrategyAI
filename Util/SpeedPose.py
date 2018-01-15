@@ -1,6 +1,8 @@
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
 from typing import Union
+
+from RULEngine.Util.Pose import Pose
+
+from Util import Position
 
 
 class SpeedPose(Pose):

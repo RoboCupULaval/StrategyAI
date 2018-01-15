@@ -1,9 +1,10 @@
-import pygame
-import json
 import time
 from math import fabs
 
-from ai.Util.joystick.joystick_config import configs
+import pygame
+
+from Util.joystick.joystick_config import configs
+
 
 class RobotJoystick:
 

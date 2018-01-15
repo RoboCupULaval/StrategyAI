@@ -2,21 +2,21 @@
 
 import unittest
 
+from RULEngine.Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.ball import Ball
 from RULEngine.GameDomainObjects.game import Game
 from RULEngine.GameDomainObjects.player import Player
 from RULEngine.GameDomainObjects.referee import Referee
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
 from RULEngine.services.team_color_service import TeamColorService, TeamColor
+from Util import AICommand, AICommandType
+from Util import Position
 from ai.Algorithm.Graph.Node import Node
 from ai.Algorithm.Graph.Vertex import Vertex
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ai_command import AICommand, AICommandType
 
 __author__ = 'RoboCupULaval'
 

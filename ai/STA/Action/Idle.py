@@ -1,8 +1,8 @@
 # Under MIT license, see LICENSE.txt
 from RULEngine.GameDomainObjects.player import Player
+from Util import AICommand, AICommandType
 from ai.states.game_state import GameState
 from .Action import Action
-from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
 
 
 class Idle(Action):

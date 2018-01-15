@@ -3,7 +3,7 @@ from typing import Dict
 
 from RULEngine.Communication.protobuf import grSim_Packet_pb2 as grSim_Packet
 from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
-from RULEngine.Communication.util.udp_socket import udp_socket
+from RULEngine.Communication.sender.udp_socket import udp_socket
 
 
 class GrSimCommandSender(SenderBaseClass):

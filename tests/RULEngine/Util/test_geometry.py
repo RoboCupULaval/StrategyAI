@@ -1,8 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
-import unittest
 import math as m
-import RULEngine.Util.geometry
+import unittest
+
+import Util.geometry
 
 __author__ = 'RoboCupULaval'
 
@@ -19,7 +20,7 @@ class TestGeometry(unittest.TestCase):
         self.positionSO = RULEngine.Util.Position.Position(-10000, -10000)
 
     def test_get_distance(self):
-        dist = RULEngine.Util.geometry.get_distance(self.position, self.positionN)
+        dist = Util.geometry.get_distance(self.position, self.positionN)
         self.assertEqual(dist, 10000)
 
         approx_dist = (self.positionNE - self.positionSO).norm()
@@ -35,28 +36,28 @@ class TestGeometry(unittest.TestCase):
 
     def test_get_nearest(self):
         list_of_positions = [self.positionNE, self.positionSE, self.positionSO, self.positionN]
-        nearest = RULEngine.Util.geometry.get_nearest(self.position, list_of_positions)
+        nearest = Util.geometry.get_nearest(self.position, list_of_positions)
         self.assertEqual(nearest[0], self.positionN)
 
         list_of_positions.remove(self.positionN)
         list_of_positions.append(self.positionS)
-        nearest = RULEngine.Util.geometry.get_nearest(self.position, list_of_positions)
+        nearest = Util.geometry.get_nearest(self.position, list_of_positions)
         self.assertEqual(nearest[0], self.positionS)
 
 
     def test_get_line_equation(self):
-        self.assertEqual(RULEngine.Util.geometry.get_line_equation(self.positionNE, self.positionSO), (1, 0))
-        self.assertEqual(RULEngine.Util.geometry.get_line_equation(self.positionNE, self.positionNO), (0, 10000))
+        self.assertEqual(Util.geometry.get_line_equation(self.positionNE, self.positionSO), (1, 0))
+        self.assertEqual(Util.geometry.get_line_equation(self.positionNE, self.positionNO), (0, 10000))
 
     def test_get_closest_point_on_line(self):
         # Quand le point est nul (0, 0)
-        close_null_point = RULEngine.Util.geometry.get_closest_point_on_line(self.positionNE, self.positionSE, self.positionNO)
+        close_null_point = Util.geometry.get_closest_point_on_line(self.positionNE, self.positionSE, self.positionNO)
         self.assertEqual(close_null_point, self.position)
         # Quand le point est sur une position à l'extérieure des deux points
-        close_nonexistent_point = RULEngine.Util.geometry.get_closest_point_on_line(self.positionSE, self.position, self.positionN)
+        close_nonexistent_point = Util.geometry.get_closest_point_on_line(self.positionSE, self.position, self.positionN)
         self.assertEqual(close_nonexistent_point, self.positionS)
         # Point normal
-        close_point = RULEngine.Util.geometry.get_closest_point_on_line(self.positionNE, self.position, self.positionN)
+        close_point = Util.geometry.get_closest_point_on_line(self.positionNE, self.position, self.positionN)
         self.assertEqual(close_point, self.positionN)
 
     # def test_get_required_kick_force(self): # simple calculation

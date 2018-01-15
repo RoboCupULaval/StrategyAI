@@ -1,9 +1,9 @@
-from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.SpeedPose import SpeedPose
+from collections import ChainMap
 from enum import Enum
 
-from collections import ChainMap
+from RULEngine.GameDomainObjects.player import Player
+from Util import Pose
+from Util import SpeedPose
 
 
 class AICommandType(Enum):

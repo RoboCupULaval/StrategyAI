@@ -2,10 +2,10 @@
 from typing import List
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
+from Util import AICommand
+from Util import Pose
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ai_command import AICommand
 from ai.states.game_state import GameState
 
 __author__ = 'RobocupULaval'

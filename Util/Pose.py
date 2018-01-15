@@ -1,10 +1,11 @@
 # Under MIT License, see LICENSE.txt
-import numpy as np
 import math as m
 from typing import Union
 
-from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE
+import numpy as np
+
+from Util import ORIENTATION_ABSOLUTE_TOLERANCE
+from Util import Position
 
 
 class Pose(object):

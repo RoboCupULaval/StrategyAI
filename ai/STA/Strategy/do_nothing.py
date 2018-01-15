@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
-from ai.STA.Tactic.stop import Stop
-from ai.Util.role import Role
+from Util import Role
 from ai.STA.Strategy.strategy import Strategy
+from ai.STA.Tactic.stop import Stop
 
 
 class DoNothing(Strategy):

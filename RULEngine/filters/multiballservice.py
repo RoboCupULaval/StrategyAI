@@ -1,9 +1,8 @@
 import logging
-from typing import Dict
 
 import numpy as np
 
-from RULEngine.Util.filters.ball_kalman_filter import BallFilter
+from RULEngine.filters.ball_kalman_filter import BallFilter
 
 
 class MultiBallService(list):

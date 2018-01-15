@@ -1,6 +1,9 @@
-import numpy as np
-from RULEngine.Util.filters.kalman_filter import KalmanFilter
 from math import fabs
+
+import numpy as np
+
+from RULEngine.filters.kalman_filter import KalmanFilter
+
 
 class BallFilter(KalmanFilter):
 

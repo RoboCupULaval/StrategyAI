@@ -2,15 +2,17 @@
 from functools import partial
 
 from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
+
+from Util import Position
+from Util import Role
 from ai.Algorithm.evaluation_module import closest_player_to_point
-from ai.STA.Tactic.goalkeeper import GoalKeeper
-from ai.STA.Tactic.tactic_constants import Flags
-from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.position_for_pass import PositionForPass
-from ai.states.game_state import GameState
 from ai.STA.Strategy.strategy import Strategy
-from ai.Util.role import Role
+from ai.STA.Tactic.go_kick import GoKick
+from ai.STA.Tactic.goalkeeper import GoalKeeper
+from ai.STA.Tactic.position_for_pass import PositionForPass
+from ai.STA.Tactic.tactic_constants import Flags
+from ai.states.game_state import GameState
+
 
 class Offense(Strategy):
     def __init__(self, p_game_state):

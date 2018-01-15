@@ -3,8 +3,8 @@
 from typing import List, Tuple, Callable, Any
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.singleton import Singleton
+from Util import Pose
+from Util.singleton import Singleton
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.strategy_book import StrategyBook
 from ai.STA.Tactic.tactic import Tactic

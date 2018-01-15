@@ -1,8 +1,8 @@
 # Under MIT License, see LICENSE.txt
 from RULEngine.GameDomainObjects.game import Game
-from RULEngine.Util.singleton import Singleton
-from ai.Util.role import Role
-from ai.Util.role_mapper import RoleMapper
+from Util import Role
+from Util import RoleMapper
+from Util.singleton import Singleton
 
 
 class GameState(object, metaclass=Singleton):

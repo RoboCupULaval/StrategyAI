@@ -1,12 +1,11 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
 
-from ai.STA.Action.Kick import Kick
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from ai.states.game_state import GameState
+from Util import Pose
+from ai.STA.Action.Kick import Kick
 from ai.STA.Tactic.tactic import Tactic
-from ai.STA.Tactic.tactic_constants import Flags
+from ai.states.game_state import GameState
 
 
 class DoKick(Tactic):
