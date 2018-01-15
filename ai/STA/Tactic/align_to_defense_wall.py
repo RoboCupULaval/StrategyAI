@@ -33,7 +33,7 @@ class AlignToDefenseWall(Tactic):
         self.last_time = time.time()
         self.robots_in_formation = robots_in_formation
         self.auto_pick = auto_pick
-        self.robots = robots_in_formation
+        self.robots = robots_in_formation.copy()
         self.player = player
         self.field_goal_radius = self.game_state.const["FIELD_GOAL_RADIUS"]
         self.field_goal_segment = self.game_state.const["FIELD_GOAL_SEGMENT"]
@@ -185,19 +185,19 @@ class AlignToDefenseWall(Tactic):
         return False
 
     @staticmethod
-    def is_closest(player):
-        if player == closest_players_to_point(GameState().get_ball_position(), True)[0].player:
+    def is_closest(robots, player):
+        if player == closest_players_to_point(GameState().get_ball_position(), True, robots)[0].player:
             return True
         return False
 
     @staticmethod
-    def is_second_closest(player):
-        if player == closest_players_to_point(GameState().get_ball_position(), True)[1].player:
+    def is_second_closest(robots, player):
+        if player == closest_players_to_point(GameState().get_ball_position(), True, robots)[1].player:
             return True
         return False
 
     def is_not_closest(self, player):
-        return not(self.is_closest(player))
+        return not(self.is_closest(self.robots, player))
 
     def is_not_one_of_the_closests(self, player):
-        return not(self.is_closest(player) or self.is_second_closest(player))
+        return not(self.is_closest(self.robots, player) or self.is_second_closest(self.robots, player))

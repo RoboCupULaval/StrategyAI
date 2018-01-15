@@ -12,10 +12,12 @@ from ai.states.game_state import GameState
 from ai.STA.Strategy.strategy import Strategy
 
 class DefenseWall_3v3(Strategy):
-    def __init__(self, game_state: GameState, number_of_players: int = 4):
+    def __init__(self, game_state: GameState, number_of_players: int = 3):
         super().__init__(game_state)
-        role_mapping = {Role.GOALKEEPER: 1, Role.FIRST_ATTACK: 2, Role.SECOND_ATTACK: 3}
+
+        role_mapping = {Role.GOALKEEPER: 4, Role.FIRST_ATTACK: 3, Role.SECOND_ATTACK: 2}
         self.game_state.map_players_to_roles_by_player_id(role_mapping)
+
         self.number_of_players = number_of_players
         self.robots = []
         ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
@@ -24,7 +26,7 @@ class DefenseWall_3v3(Strategy):
         roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
-        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
+        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, target=ourgoal))
 
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
         self.robots = [player for _, player in role_by_robots if player is not None]

@@ -40,12 +40,14 @@ class GoalKeeper(Tactic):
     # TODO: À complexifier pour prendre en compte la position des joueurs adverses et la vitesse de la balle.
 
     def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(),
-                 penalty_kick=False, args: List[str]=None,):
+                 args: List[str] = None, penalty_kick=False,):
         super().__init__(game_state, player, target, args)
 
         # TODO: Evil hack to force goalkeeper to be goal
-        role_mapping = {Role.GOALKEEPER: player.id}
-        self.game_state.map_players_to_roles_by_player_id(role_mapping)
+        if len(self.args) > 0:
+            print("Active secret mode")
+            role_mapping = {Role.GOALKEEPER: player.id}
+            self.game_state.map_players_to_roles_by_player_id(role_mapping)
 
         self.is_yellow = self.player.team.team_color == TeamColor.YELLOW
         self.current_state = self.protect_goal
@@ -68,8 +70,9 @@ class GoalKeeper(Tactic):
 
     def protect_goal(self):
         if not self.penalty_kick:
-            if self.player == closest_player_to_point(self.game_state.get_ball_position()).player and\
-                            self._get_distance_from_ball() < ROBOT_RADIUS *3:
+            if not self._is_ball_too_far and \
+                    self.player == closest_player_to_point(self.game_state.get_ball_position()).player and\
+                    self._get_distance_from_ball() < ROBOT_RADIUS *3:
                 self.next_state = self.go_behind_ball
             else:
                 self.next_state = self.protect_goal
@@ -101,6 +104,9 @@ class GoalKeeper(Tactic):
             return MoveToPosition(self.game_state, self.player, destination, pathfinder_on=True, cruise_speed=2)
 
     def go_behind_ball(self):
+        if self._is_ball_too_far():
+            self.next_state = self.protect_goal
+
         self.ball_spacing = GRAB_BALL_SPACING
         self.status_flag = Flags.WIP
         ball_position = self.game_state.get_ball_position()
@@ -116,6 +122,9 @@ class GoalKeeper(Tactic):
                                       collision_ball=collision_ball, cruise_speed=2, end_speed=0.2)
 
     def grab_ball(self):
+        if self._is_ball_too_far():
+            self.next_state = self.protect_goal
+
         if self.grab_ball_tries == 0:
             if self._get_distance_from_ball() < KICK_DISTANCE:
                 self.next_state = self.kick
@@ -152,6 +161,10 @@ class GoalKeeper(Tactic):
 
     def _get_distance_from_ball(self):
         return (self.player.pose.position - self.game_state.get_ball_position()).norm()
+
+    def _is_ball_too_far(self):
+        our_goal = Position(self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
+        return (our_goal - self.game_state.get_ball_position()).norm() > self.game_state.const["FIELD_GOAL_WIDTH"]
 
     def _is_player_towards_ball_and_target(self, abs_tol=pi/30):
         ball_position = self.game_state.get_ball_position()

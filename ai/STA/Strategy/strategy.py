@@ -15,27 +15,28 @@ from ai.states.game_state import GameState
 # la balle et non le plus proche). TODO: À optimiser
 class Strategy(metaclass=ABCMeta):
     """ Définie l'interface commune aux stratégies. """
-    def __init__(self, p_game_state: GameState):
+    def __init__(self, p_game_state: GameState, keep_roles=True):
         """
         Initialise la stratégie en créant un graph vide pour chaque robot de l'équipe.
         :param p_game_state: L'état courant du jeu.
         """
         assert isinstance(p_game_state, GameState)
         self.game_state = p_game_state
-        self.roles_graph = {r: Graph() for r in Role}
-        players = [p for p in self.game_state.my_team.available_players.values()]
-        roles = [r for r in Role]
-        role_mapping = dict(zip(roles, players))
-        # Magnifique hack pour bypasser un mapping de goalkeeper
-        current_goaler = p_game_state.get_player_by_role(Role.GOALKEEPER)
-        if current_goaler is not None:
-            new_goaler = role_mapping[Role.GOALKEEPER]
-            new_goaler_old_role = p_game_state.get_role_by_player_id(new_goaler.id)
-            role_mapping[Role.GOALKEEPER] = current_goaler
-            role_mapping[new_goaler_old_role] = new_goaler
 
+        if keep_roles:
+            self.roles_graph = {r: Graph() for r in Role}
+            players = [p for p in self.game_state.my_team.available_players.values()]
+            roles = [r for r in Role]
+            role_mapping = dict(zip(roles, players))
+            # Magnifique hack pour bypasser un mapping de goalkeeper
+            # current_goaler = p_game_state.get_player_by_role(Role.GOALKEEPER)
+            # if current_goaler is not None:
+            #     new_goaler = role_mapping[Role.GOALKEEPER]
+            #     new_goaler_old_role = p_game_state.get_role_by_player_id(new_goaler.id)
+            #     role_mapping[Role.GOALKEEPER] = current_goaler
+            #     role_mapping[new_goaler_old_role] = new_goaler
 
-        self.game_state.map_players_to_roles_by_player(role_mapping)
+            self.game_state.map_players_to_roles_by_player(role_mapping)
 
 
     def add_tactic(self, role: Role, tactic: Tactic) -> None:

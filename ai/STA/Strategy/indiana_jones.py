@@ -19,7 +19,7 @@ class IndianaJones(Strategy):
             game_state.map_players_to_roles_by_player_id({
                 Role.FIRST_DEFENCE: 3,
                 Role.MIDDLE: 4,
-                Role.SECOND_DEFENCE: 5,
+                Role.SECOND_DEFENCE: 2,
             })
         indiana = self.game_state.get_player_by_role(Role.MIDDLE)
         indiana_role = Role.MIDDLE
@@ -39,22 +39,22 @@ class IndianaJones(Strategy):
         x_left = self.game_state.const["FIELD_X_LEFT"] + 500
         x_right = self.game_state.const["FIELD_X_RIGHT"] - 500
 
-        self.add_tactic(indiana_role, GoToPositionPathfinder(self.game_state, indiana, goal_left))
-        self.add_tactic(indiana_role, GoToPositionPathfinder(self.game_state, indiana, goal_right))
+        self.add_tactic(indiana_role, GoToPositionPathfinder(self.game_state, indiana, goal_left, cruise_speed=2))
+        self.add_tactic(indiana_role, GoToPositionPathfinder(self.game_state, indiana, goal_right, cruise_speed=2))
         self.add_condition(indiana_role, 0, 1, partial(self.condition, indiana_role))
         self.add_condition(indiana_role, 1, 0, partial(self.condition, indiana_role))
 
         self.add_tactic(obs_left_role, GoToPositionPathfinder(self.game_state, obs_left,
-                                                            Pose(Position(x_left/2, y_top))))
+                                                            Pose(Position(x_left/2, y_top)), cruise_speed=2))
         self.add_tactic(obs_left_role, GoToPositionPathfinder(self.game_state, obs_left,
                                                             Pose(Position(x_left/2, y_down))))
         self.add_condition(obs_left_role, 0, 1, partial(self.condition, obs_left_role))
         self.add_condition(obs_left_role, 1, 0, partial(self.condition, obs_left_role))
 
         self.add_tactic(obs_right_role, GoToPositionPathfinder(self.game_state,
-                                                             obs_right, Pose(Position(x_right/2, y_top))))
+                                                             obs_right, Pose(Position(x_right/2, y_top)), cruise_speed=2))
         self.add_tactic(obs_right_role, GoToPositionPathfinder(self.game_state,
-                                                             obs_right, Pose(Position(x_right/2, y_down))))
+                                                             obs_right, Pose(Position(x_right/2, y_down)), cruise_speed=2))
         self.add_condition(obs_right_role, 0, 1, partial(self.condition, obs_right_role))
         self.add_condition(obs_right_role, 1, 0, partial(self.condition, obs_right_role))
 

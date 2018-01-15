@@ -108,8 +108,7 @@ class PositionForPass(Tactic):
                 else:
                     A = Position(their_goal_field_limit, pad) + offense_offset
                     B = Position(their_goal_field_limit,
-                                 (self.game_state.const[
-                                      "FIELD_Y_BOTTOM"] + field_width / self.number_of_defence_players) - pad) + offense_offset
+                                 (self.game_state.const["FIELD_Y_BOTTOM"] + field_width / self.number_of_offense_players) - pad) + offense_offset
             return best_position_in_region(self.player, A, B)
         else:
             return self.target_position

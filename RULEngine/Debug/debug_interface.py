@@ -95,7 +95,7 @@ class DebugInterface(metaclass=Singleton):
         self.debug_state.append(point)
 
     def add_circle(self, center, radius, color=CYAN.repr(), is_fill=True, timeout=DEFAULT_DEBUG_TIMEOUT):
-        data = {'center': center,
+        data = {'center': (int(center[0]), int(center[1])),
                 'radius': radius,
                 'color': color,
                 'is_fill': is_fill,

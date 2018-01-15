@@ -130,7 +130,7 @@ class RobotMotion(object):
         # Translation control
         self.position_flag = False
         if self.position_error.norm() < MIN_DISTANCE_TO_REACH_TARGET_SPEED * max(1.0, self.cruise_speed):
-            if self.target_speed < 0.1:
+            if self.target_speed < 0.01:
                 self.position_flag = True
 
         if self.position_flag:
