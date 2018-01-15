@@ -2,9 +2,11 @@
 from typing import List
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import POSITION_DEADZONE, ROBOT_RADIUS
-from Util import Pose
-from Util import get_distance
+
+from Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
+from Util.Pose import Pose
+from Util.geometry import get_distance
+
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.PathfindToPosition import PathfindToPosition
 from ai.STA.Tactic.tactic import Tactic

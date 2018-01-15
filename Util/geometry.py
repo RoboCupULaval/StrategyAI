@@ -4,7 +4,7 @@ import warnings
 from typing import Union
 
 import numpy as np
-from RULEngine.Util.Pose import Pose
+from Util.Pose import Pose
 
 from Util import Position
 

@@ -2,8 +2,10 @@
 from typing import List
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import AICommand, AICommandType
-from Util import Pose
+
+from Util.ai_command import AICommand, AICommandType
+from Util.Pose import Pose
+
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState

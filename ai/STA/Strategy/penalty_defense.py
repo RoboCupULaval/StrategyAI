@@ -1,9 +1,8 @@
 # Under MIT license, see LICENSE.txt
 
-from RULEngine.Util.Pose import Pose
+from Util.Pose import Pose, Position
 
-from Util import Position
-from Util import Role
+from Util.role import Role
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.goalkeeper import GoalKeeper

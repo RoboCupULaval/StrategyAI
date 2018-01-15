@@ -2,12 +2,12 @@
 import time
 
 import numpy as np
-from RULEngine.Util.Pose import Pose
+from Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import BALL_RADIUS, ROBOT_RADIUS
-from Util import Position
-from Util import get_distance
+from Util.constant import BALL_RADIUS, ROBOT_RADIUS
+from Util.Position import Position
+from Util.geometry import get_distance
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle

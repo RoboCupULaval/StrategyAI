@@ -2,11 +2,11 @@
 from typing import List
 
 import numpy as np
-from RULEngine.Util.Pose import Pose
+from Util.Pose import Pose, Position
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import BALL_RADIUS, ROBOT_RADIUS
-from Util import Position
+from Util.constant import BALL_RADIUS, ROBOT_RADIUS
+
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.grab import Grab

@@ -3,8 +3,8 @@
 from abc import ABCMeta
 from typing import List, Tuple, Callable, Dict
 
-from Util import AICommand
-from Util import Role
+from Util.ai_command import AICommand
+from Util.role import Role
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
 from ai.STA.Tactic.tactic import Tactic

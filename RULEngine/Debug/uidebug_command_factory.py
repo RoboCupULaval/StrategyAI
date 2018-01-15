@@ -5,7 +5,7 @@ from typing import Dict
 
 from RULEngine.GameDomainObjects.player import Player
 from RULEngine.services.team_color_service import TeamColorService
-from Util import TeamColor
+from Util.constant import TeamColor
 from Util.singleton import Singleton
 
 __author__ = "Maxime Gagnon-Legault, Philippe Babin, and others"

@@ -2,8 +2,8 @@
 from typing import Dict
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import AICommand, AICommandType, AIControlLoopType
-from Util import Pose
+from Util.ai_command import AICommand, AICommandType, AIControlLoopType
+from Util.Pose import Pose
 from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
 

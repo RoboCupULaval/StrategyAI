@@ -2,11 +2,11 @@
 import time
 from typing import List
 
-from RULEngine.Util.Pose import Pose
+from Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import Position
-from Util import Role
+from Util.Position import Position
+from Util.role import Role
 from ai.Algorithm.evaluation_module import best_position_in_region
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic

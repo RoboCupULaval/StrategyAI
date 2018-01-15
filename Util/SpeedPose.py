@@ -1,8 +1,8 @@
 from typing import Union
 
-from RULEngine.Util.Pose import Pose
+from Util.Pose import Pose
 
-from Util import Position
+from Util.Position import Position
 
 
 class SpeedPose(Pose):
@@ -20,7 +20,7 @@ class SpeedPose(Pose):
     def orientation(self, angular_speed):
         self._orientation = float(angular_speed)
 
-    def __add__(self, other: Union['SpeedPose', Position]):
+    def __add__(self, other):
         if isinstance(other, SpeedPose):
             res = SpeedPose(self.position + other.position, self.orientation + other.orientation)
         elif isinstance(other, Position):
@@ -29,7 +29,7 @@ class SpeedPose(Pose):
             raise TypeError
         return res
 
-    def __sub__(self, other: Union['SpeedPose', Position]):
+    def __sub__(self, other):
         if isinstance(other, SpeedPose):
             res = SpeedPose(self.position - other.position, self.orientation - other.orientation)
         elif isinstance(other, Position):

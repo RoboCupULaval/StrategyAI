@@ -4,9 +4,11 @@ import time
 from typing import List
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import AICommandType, AICommand, AIControlLoopType
-from Util import Pose
-from Util import SpeedPose
+
+from Util.ai_command import AICommandType, AICommand, AIControlLoopType
+from Util.Pose import Pose
+from Util.SpeedPose import SpeedPose
+
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags

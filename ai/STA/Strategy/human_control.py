@@ -1,5 +1,5 @@
 # Under MIT license, see LICENSE.txt
-from Util import Role
+from Util.role import Role
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic import Tactic

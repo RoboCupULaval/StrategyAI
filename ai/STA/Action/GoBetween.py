@@ -1,11 +1,11 @@
 # Under MIT licence, see LICENCE.txt
 
-from RULEngine.Util.Pose import Pose
-
 from RULEngine.GameDomainObjects.player import Player
-from Util import AICommand, AICommandType
-from Util import Position
-from Util import get_closest_point_on_segment
+
+from Util.Pose import Pose, Position
+from Util.geometry import get_closest_point_on_segment
+from Util.ai_command import AICommand, AICommandType
+
 from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
 

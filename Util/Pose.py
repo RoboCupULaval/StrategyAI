@@ -4,8 +4,8 @@ from typing import Union
 
 import numpy as np
 
-from Util import ORIENTATION_ABSOLUTE_TOLERANCE
-from Util import Position
+from Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE
+from Util.Position import Position
 
 
 class Pose(object):
@@ -33,7 +33,7 @@ class Pose(object):
     def orientation(self, orientation):
         self._orientation = Pose.wrap_to_pi(orientation)
 
-    def __add__(self, other: Union['Pose', Position]):
+    def __add__(self, other):
         if isinstance(other, Pose):
             res = Pose(self.position + other.position, self.orientation + other.orientation)
         elif isinstance(other, Position):
@@ -42,7 +42,7 @@ class Pose(object):
             raise TypeError
         return res
 
-    def __sub__(self, other: Union['Pose', Position]):
+    def __sub__(self, other):
         if isinstance(other, Pose):
             res = Pose(self.position - other.position, self.orientation - other.orientation)
         elif isinstance(other, Position):
@@ -51,7 +51,7 @@ class Pose(object):
             raise TypeError
         return res
 
-    def __eq__(self, other: Union['Pose', Position]):
+    def __eq__(self, other):
         if isinstance(other, Position):
             return self.position == other
         elif isinstance(other, Pose):

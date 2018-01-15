@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 from RULEngine.GameDomainObjects.game import Game
-from Util import Role
-from Util import RoleMapper
+from Util.role import Role
+from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
 
 

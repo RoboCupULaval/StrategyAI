@@ -3,11 +3,11 @@ import time
 from typing import List, Union
 
 import numpy as np
-from RULEngine.Util.Pose import Pose
+from Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import Position
-from Util import compare_angle
+from Util.Position import Position
+from Util.geometry import compare_angle
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.Idle import Idle

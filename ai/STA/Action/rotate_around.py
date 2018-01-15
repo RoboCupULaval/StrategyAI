@@ -4,9 +4,11 @@ import math as m
 from typing import Union
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import AICommand, AICommandType
-from Util import Pose
-from Util import compare_angle, wrap_to_pi
+
+from Util.ai_command import AICommand, AICommandType
+from Util.Pose import Pose
+from Util.geometry import compare_angle, wrap_to_pi
+
 from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
 

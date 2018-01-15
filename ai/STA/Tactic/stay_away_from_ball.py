@@ -2,8 +2,10 @@
 from typing import List
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import Pose
-from Util import stayOutsideCircle
+
+from Util.Pose import Pose
+from Util.area import stayOutsideCircle
+
 from ai.Algorithm.path_partitionner import CollisionBody
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic

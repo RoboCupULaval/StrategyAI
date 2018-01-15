@@ -2,10 +2,10 @@
 import time
 from typing import List, Optional
 
-from RULEngine.Util.Pose import Pose
+from Util.Pose import Pose, Position
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import Position
+
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic

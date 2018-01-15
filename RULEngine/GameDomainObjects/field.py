@@ -1,5 +1,5 @@
 from RULEngine.GameDomainObjects.ball import Ball
-from Util import Position
+from Util.Position import Position
 
 
 class Field:

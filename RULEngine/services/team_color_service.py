@@ -1,5 +1,5 @@
-from Util import TeamColor
-from Util import WrongRobotColorError
+from Util.constant import TeamColor
+from Util.exception import WrongRobotColorError
 from Util.singleton import Singleton
 from config.config_service import ConfigService
 

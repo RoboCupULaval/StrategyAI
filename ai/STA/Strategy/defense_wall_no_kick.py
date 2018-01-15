@@ -1,7 +1,8 @@
 # Under MIT license, see LICENSE.txt
 
-from Util import Role
-from ai.Algorithm.evaluation_module import Pose, Position
+from Util.role import Role
+from Util.Position import Position
+from Util.Pose import Pose
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
 from ai.STA.Tactic.goalkeeper import GoalKeeper

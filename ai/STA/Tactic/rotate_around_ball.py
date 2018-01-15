@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
 
-from RULEngine.Util.Pose import Pose
+from Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.player import Player
 from ai.STA.Action.rotate_around import RotateAround

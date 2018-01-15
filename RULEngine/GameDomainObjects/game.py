@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 import logging
 
-from RULEngine.Util.Pose import Pose
+from Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.ball import Ball
 from RULEngine.GameDomainObjects.field import Field

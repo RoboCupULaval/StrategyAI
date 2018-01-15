@@ -1,6 +1,6 @@
 # Under MIT license, see LICENSE.txt
 from RULEngine.GameDomainObjects.player import Player
-from Util import AICommand, AICommandType
+from Util.ai_command import AICommand, AICommandType
 from ai.states.game_state import GameState
 from .Action import Action
 

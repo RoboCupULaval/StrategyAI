@@ -2,8 +2,8 @@
 
 from functools import partial
 
-from Util import PLAYER_PER_TEAM
-from Util import Position, Pose
+from Util.constant import PLAYER_PER_TEAM
+from Util.Pose import Position, Pose
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick

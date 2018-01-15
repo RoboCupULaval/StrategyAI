@@ -4,14 +4,14 @@ import time
 from math import tan, pi
 from typing import List
 
-from RULEngine.Util.Pose import Pose
+from Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.Shitty_Field import FieldSide
 from RULEngine.GameDomainObjects.player import Player
-from Util import Position
-from Util import ROBOT_RADIUS
-from Util import TeamColor
-from Util import clamp, compare_angle, wrap_to_pi
+from Util.Position import Position
+from Util.constant import ROBOT_RADIUS
+from Util.constant import TeamColor
+from Util.geometry import clamp, compare_angle, wrap_to_pi
 from ai.Algorithm.evaluation_module import closest_player_to_point, best_passing_option, player_with_ball
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.GoBehind import GoBehind

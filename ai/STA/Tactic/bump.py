@@ -4,14 +4,15 @@ import time
 from typing import List
 
 import numpy as np
-from RULEngine.Util.Position import Position
+from Util.Pose import Pose, Position
 
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from RULEngine.GameDomainObjects.player import Player
-from Util import AICommandType
-from Util import Pose
-from Util import ROBOT_RADIUS
-from Util import get_distance
+
+from Util.ai_command import AICommandType
+from Util.constant import ROBOT_RADIUS
+from Util.geometry import get_distance
+
 from ai.STA.Action.AllStar import AllStar
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
