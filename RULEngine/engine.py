@@ -1,16 +1,32 @@
 
 import logging
 import sys
+from collections import namedtuple
 from multiprocessing import Process, Queue, Event
-import time
+from queue import Empty
+
+from Util.Pose import Pose
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.robot_command_sender import RobotCommandSender
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
+
 from RULEngine.controller import Controller
 from RULEngine.tracker import Tracker
+
 from config.config_service import ConfigService
+
+
+class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dribbler_active')):
+
+    __slots__ = ()
+
+    def __new__(cls, robot_id, target=Pose(), kick_type=None, kick_force=0, dribbler_active=False, command=None):
+        return super().__new__(cls, robot_id, target, kick_type, kick_force, dribbler_active)
+
+    def as_dict(self):
+        return self._asdict()
 
 
 class Engine(Process):
@@ -63,26 +79,19 @@ class Engine(Process):
 
         self.logger.debug('Running')
 
-        cmd = {
-            'target': {'x': 0, 'y': 0, 'orientation': 0},
-            'control_type': None,
-            'kick_type': None,
-            'is_active': True,
-            'id': 1
-        }
-
-        self.ai_queue.put([cmd])
+        self.ai_queue.put([AICommand(robot_id=1, target=Pose(0, 0, 0))])
 
         try:
             while not self.stop_event.is_set():
 
                 track_frame = self.tracker.execute()
+
                 self.game_state_queue.put(track_frame)
                 self.ui_send_queue.put(track_frame)
 
                 self.controller.update(track_frame)
                 robot_packets = self.controller.execute()
-                if robot_packets['commands']:
+                if robot_packets.robots_states:
                     self.robot_cmd_queue.put(robot_packets)
 
         except KeyboardInterrupt:

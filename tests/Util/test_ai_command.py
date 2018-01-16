@@ -7,7 +7,7 @@ from RULEngine.Game.Player import Player
 
 from Util import AICommand, AICommandType, AIControlLoopType, _default_keys, _keys_type
 from Util import Pose
-from Util import SpeedPose
+from Util import Velocity
 
 
 class AICommandTestCase(unittest.TestCase):
@@ -24,7 +24,7 @@ class AICommandTestCase(unittest.TestCase):
         self.POSITION = AIControlLoopType.POSITION
 
         pose = Mock(return_value=None, spec=Pose)
-        speed_pose = Mock(return_value=None, spec=SpeedPose)
+        speed_pose = Mock(return_value=None, spec=Velocity)
         self.new_keys = {
             'dribbler_on': True,
             'pathfinder_on': True,

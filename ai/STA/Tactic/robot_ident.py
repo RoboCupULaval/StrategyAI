@@ -7,7 +7,7 @@ from RULEngine.GameDomainObjects.player import Player
 
 from Util.ai_command import AICommandType, AICommand, AIControlLoopType
 from Util.Pose import Pose
-from Util.SpeedPose import SpeedPose
+from Util.Velocity import Velocity
 
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic import Tactic
@@ -38,7 +38,7 @@ class RobotIdent(Tactic):
             self.status_flag = Flags.WIP
 
             # Creating speed pose
-            speed_pose = SpeedPose(self.commands[self.cmd_id])
+            speed_pose = Velocity(self.commands[self.cmd_id])
             self.cmd_id += 1
 
             # Saving data

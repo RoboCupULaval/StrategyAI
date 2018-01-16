@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 from RULEngine.GameDomainObjects.team import Team
-from Util import Pose
+from Util.Pose import Pose
 
 
 class Player:
