@@ -1,6 +1,6 @@
 
 import logging
-from math import cos, sin, sqrt
+
 from multiprocessing import Queue
 from queue import Empty
 from typing import Dict
@@ -8,6 +8,9 @@ from typing import Dict
 from collections import namedtuple
 
 from Util.PID import PID
+from Util.Pose import Pose, Position
+from Util.Velocity import Velocity
+
 from config.config_service import ConfigService
 
 MAX_ROBOT = 12
@@ -116,17 +119,20 @@ class PositionControl:
                             'y': PID(**self.control_setting['translation']),
                             'orientation': PID(**self.control_setting['rotation'], wrap_error=True)}
 
-    def execute(self, target, pose) -> Dict:
+    def execute(self, target: Pose, pose: Pose) -> Velocity:
 
-        error = {state: target[state] - pose[state] for state in pose}
-        command = {state: self.controllers[state].execute(error[state]) for state in self.controllers}
-        command['x'], command['y'] = rotate(command['x'], command['y'], -pose['orientation'])
+        error = target - pose
+        command = Velocity(self.controllers['x'].execute(error.position.x),
+                           self.controllers['y'].execute(error.position.y),
+                           self.controllers['orientation'].execute(error.orientation))
 
-        overspeed_factor = sqrt(command['x'] ** 2 + command['y'] ** 2) / MAX_LINEAR_SPEED
+        command.position = command.position.rotate(-pose['orientation'])
+
+        overspeed_factor = command.position.norm() / MAX_LINEAR_SPEED
         if overspeed_factor > 1:
-            command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / overspeed_factor
+            command = command.scale(1/overspeed_factor)
 
-        return command  # TODO: change dict to Pose
+        return command
 
     def reset(self):
         for controller in self.controllers.values():
@@ -136,6 +142,3 @@ class PositionControl:
 class VelocityControl:
     pass
 
-
-def rotate(x: float, y: float, angle: float):
-    return [cos(angle) * x - sin(angle) * y, sin(angle) * x + cos(angle) * y]

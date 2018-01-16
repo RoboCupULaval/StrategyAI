@@ -18,6 +18,14 @@ class Pose(object):
         self._position = position
 
     @property
+    def x(self) -> Position:
+        return self._position.x
+
+    @property
+    def y(self) -> Position:
+        return self._position.y
+
+    @property
     def position(self) -> Position:
         return self._position
 
