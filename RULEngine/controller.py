@@ -77,8 +77,12 @@ class Controller(list):
 
         for robot in our_robots:
             robot_id = robot['id']
-            self[robot_id].pose = robot['pose']
-            self[robot_id].velocity = robot['velocity']
+            self[robot_id].pose = Pose(robot['pose']['x'],
+                                       robot['pose']['y'],
+                                       robot['pose']['orientation'])
+            self[robot_id].velocity = Velocity(robot['velocity']['x'],
+                                               robot['velocity']['y'],
+                                               robot['velocity']['orientation'])
 
         try:
             ai_commands = self.ai_queue.get(block=False)
@@ -126,7 +130,7 @@ class PositionControl:
                            self.controllers['y'].execute(error.position.y),
                            self.controllers['orientation'].execute(error.orientation))
 
-        command.position = command.position.rotate(-pose['orientation'])
+        command.position = command.position.rotate(-pose.orientation)
 
         overspeed_factor = command.position.norm() / MAX_LINEAR_SPEED
         if overspeed_factor > 1:
