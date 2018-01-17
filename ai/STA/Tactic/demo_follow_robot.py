@@ -32,7 +32,7 @@ class DemoFollowRobot(Tactic):
         else:
             self.next_state = self.move_to_ball
 
-        return PathfindToPosition(self.game_state, self.player, self.target)
+        return PathfindToPosition(self.game_state, self.player, self.target, cruise_speed=2)
 
     def halt(self):
         self.status_flag = Flags.SUCCESS

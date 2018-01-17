@@ -12,7 +12,7 @@ class Pathfinder_Benchmark(Strategy):
         super().__init__(p_game_state, keep_roles=True)
 
         self.roles_graph = {r: Graph() for r in Role}
-        role_mapping = {Role.GOALKEEPER: 4, Role.MIDDLE: 5, Role.FIRST_ATTACK: 2}
+        role_mapping = {Role.GOALKEEPER: 4, Role.MIDDLE: 6}
         self.game_state.map_players_to_roles_by_player_id(role_mapping)
 
         roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE,

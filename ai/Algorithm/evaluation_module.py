@@ -252,8 +252,11 @@ def best_position_in_region(player, A, B):
 
     saturation_modifier = np.clip((positions[:, 0] - x_closest_to_our_side) / width, 0.05, 1)
     scores /= saturation_modifier
-    best_score_index = np.argmin(scores)
-    best_position = positions[best_score_index, :]
+    try:
+        best_score_index = np.argmin(scores)
+        best_position = positions[best_score_index, :]
+    except:
+        best_position = Position()
 
     return best_position
 

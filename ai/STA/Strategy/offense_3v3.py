@@ -19,7 +19,7 @@ class Offense_3v3(Strategy):
 
         # TODO: HARDCODED ID FOR QUALIFICATION, REMOVE LATER
         self.roles_graph = {r: Graph() for r in Role}
-        role_mapping = {Role.GOALKEEPER: 4, Role.MIDDLE: 3, Role.FIRST_ATTACK: 2}
+        role_mapping = {Role.GOALKEEPER: 2, Role.MIDDLE: 4, Role.FIRST_ATTACK: 6}
         self.game_state.map_players_to_roles_by_player_id(role_mapping)
 
         ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
