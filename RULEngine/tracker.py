@@ -14,7 +14,7 @@ class Tracker:
 
     MAX_ROBOT_PER_TEAM = 12
     MAX_BALL_ON_FIELD = 1
-    MAX_UNDETECTED_DELAY = 2
+    MAX_UNDETECTED_DELAY = 1
 
     def __init__(self, vision_queue: Queue):
 
@@ -66,7 +66,6 @@ class Tracker:
         self._balls.predict()
 
     def remove_undetected(self):
-
         active_robots = iter(robot for robot in self._yellow_team + self._blue_team if robot.is_active)
         for robot in active_robots:
             if self._current_timestamp - robot.last_t_capture > Tracker.MAX_UNDETECTED_DELAY:

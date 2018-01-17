@@ -3,9 +3,6 @@ import logging
 import sys
 from collections import namedtuple
 from multiprocessing import Process, Queue, Event
-from queue import Empty
-
-from Util.Pose import Pose
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
@@ -22,15 +19,12 @@ class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dr
 
     __slots__ = ()
 
-    def __new__(cls, robot_id, target=Pose(), kick_type=None, kick_force=0, dribbler_active=False, command=None):
+    def __new__(cls, robot_id, target=None, kick_type=None, kick_force=0, dribbler_active=False, command=None):
         return super().__new__(cls, robot_id, target, kick_type, kick_force, dribbler_active)
-
-    def as_dict(self):
-        return self._asdict()
 
 
 class Engine(Process):
-    VISION_QUEUE_MAXSIZE = 20
+    VISION_QUEUE_MAXSIZE = 4*60
     ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 24
     UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
@@ -79,7 +73,11 @@ class Engine(Process):
 
         self.logger.debug('Running')
 
-        self.ai_queue.put([AICommand(robot_id=1, target=Pose(0, 0, 0))])
+        self.ai_queue.put([AICommand(robot_id=1, target={'x': 0, 'y': -2000, 'orientation': 0}),
+                           AICommand(robot_id=2, target={'x': 0, 'y': -1000, 'orientation': 0}),
+                           AICommand(robot_id=3, target={'x': 0, 'y': 0, 'orientation': 0}),
+                           AICommand(robot_id=4, target={'x': 0, 'y': 1000, 'orientation': 0}),
+                           AICommand(robot_id=5, target={'x': 0, 'y': 2000, 'orientation': 0})])
 
         try:
             while not self.stop_event.is_set():
@@ -93,6 +91,9 @@ class Engine(Process):
                 robot_packets = self.controller.execute()
                 if robot_packets.robots_states:
                     self.robot_cmd_queue.put(robot_packets)
+
+                if self.vision_queue.qsize() == self.VISION_QUEUE_MAXSIZE:
+                    self.logger.info('Vision queue full. Frames will be lost.')
 
         except KeyboardInterrupt:
             pass

@@ -27,9 +27,9 @@ class GrSimCommandSender(SenderBaseClass):
             grsim_command = grsim_packet.commands.robot_commands.add()
             grsim_command.id = robot_state.robot_id
             grsim_command.wheelsspeed = False
-            grsim_command.veltangent = robot_state.command.x/1000
-            grsim_command.velnormal = robot_state.command.y/1000
-            grsim_command.velangular = robot_state.command.orientation
+            grsim_command.veltangent = robot_state.command['x']/1000
+            grsim_command.velnormal = robot_state.command['y']/1000
+            grsim_command.velangular = robot_state.command['orientation']
             grsim_command.spinner = robot_state.dribbler_active
             grsim_command.kickspeedx = robot_state.kick_force
             grsim_command.kickspeedz = 0

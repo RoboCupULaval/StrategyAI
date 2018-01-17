@@ -56,6 +56,7 @@ class RobotFilter(KalmanFilter):
         return R
 
     def update(self, observation, t_capture):
+
         error = observation - self.observation_model() @ self.x
         error[2] = RobotFilter.wrap_to_pi(error[2])
 

@@ -8,8 +8,8 @@ from typing import Dict
 from collections import namedtuple
 
 from Util.PID import PID
-from Util.Pose import Pose, Position
-from Util.Velocity import Velocity
+
+from math import sin, cos, sqrt
 
 from config.config_service import ConfigService
 
@@ -77,12 +77,12 @@ class Controller(list):
 
         for robot in our_robots:
             robot_id = robot['id']
-            self[robot_id].pose = Pose(robot['pose']['x'],
-                                       robot['pose']['y'],
-                                       robot['pose']['orientation'])
-            self[robot_id].velocity = Velocity(robot['velocity']['x'],
-                                               robot['velocity']['y'],
-                                               robot['velocity']['orientation'])
+            self[robot_id].pose = {'x': robot['pose']['x'],
+                                   'y': robot['pose']['y'],
+                                   'orientation': robot['pose']['orientation']}
+            self[robot_id].velocity = {'x': robot['velocity']['x'],
+                                       'y': robot['velocity']['y'],
+                                       'orientation': robot['velocity']['orientation']}
 
         try:
             ai_commands = self.ai_queue.get(block=False)
@@ -106,6 +106,7 @@ class Controller(list):
                              if robot.pose is not None and robot.target is not None)
 
         for robot in active_robots:
+
             command = robot.controller.execute(robot.target, robot.pose)
             packet.robots_states.append(RobotState(robot_id=robot.robot_id,
                                                    command=command,
@@ -123,18 +124,15 @@ class PositionControl:
                             'y': PID(**self.control_setting['translation']),
                             'orientation': PID(**self.control_setting['rotation'], wrap_error=True)}
 
-    def execute(self, target: Pose, pose: Pose) -> Velocity:
+    def execute(self, target, pose):
 
-        error = target - pose
-        command = Velocity(self.controllers['x'].execute(error.position.x),
-                           self.controllers['y'].execute(error.position.y),
-                           self.controllers['orientation'].execute(error.orientation))
+        error = {state: target[state] - pose[state] for state in pose}
+        command = {state: self.controllers[state].execute(error[state]) for state in self.controllers}
+        command['x'], command['y'] = rotate(command['x'], command['y'], -pose['orientation'])
 
-        command.position = command.position.rotate(-pose.orientation)
-
-        overspeed_factor = command.position.norm() / MAX_LINEAR_SPEED
+        overspeed_factor = sqrt(command['x'] ** 2 + command['y'] ** 2) / MAX_LINEAR_SPEED
         if overspeed_factor > 1:
-            command = command.scale(1/overspeed_factor)
+            command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / overspeed_factor
 
         return command
 
@@ -146,3 +144,5 @@ class PositionControl:
 class VelocityControl:
     pass
 
+def rotate(x: float, y: float, angle: float):
+      return [cos(angle) * x - sin(angle) * y, sin(angle) * x + cos(angle) * y]
