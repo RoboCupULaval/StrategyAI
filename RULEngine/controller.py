@@ -14,16 +14,17 @@ from math import sin, cos, sqrt
 from config.config_service import ConfigService
 
 MAX_ROBOT = 12
-MAX_LINEAR_SPEED = 20000  # mm/s
+MAX_LINEAR_SPEED = 3000  # mm/s
 
 
-RobotState = namedtuple('RobotState', 'robot_id command kick_type kick_force dribbler_active')
-RobotPacket = namedtuple('RobotPacket', 'timestamp is_team_yellow robots_states')
+RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active')
+RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow packet')
 
 
 class Robot:
 
-    __slots__ = ('_robot_id', 'controller', 'target', 'pose', 'velocity', 'kick_type', 'kick_force', 'dribbler_active')
+    __slots__ = ('_robot_id', 'controller', 'target', 'pose', 'velocity',
+                 'kick_type', 'kick_force', 'dribbler_active', 'input_command')
 
     def __init__(self, robot_id, controller):
         self._robot_id = robot_id
@@ -34,6 +35,7 @@ class Robot:
         self.kick_type = None
         self.kick_force = 0
         self.dribbler_active = False
+        self.input_command = None
 
     @property
     def robot_id(self):
@@ -96,11 +98,11 @@ class Controller(list):
         except Empty:
             pass
 
-    def execute(self) -> RobotPacket:
+    def execute(self) -> RobotPacketFrame:
 
-        packet = RobotPacket(timestamp=self.timestamp,
-                             is_team_yellow=True if self.team_color == 'yellow' else False,
-                             robots_states=[])
+        packet = RobotPacketFrame(timestamp=self.timestamp,
+                                  is_team_yellow=True if self.team_color == 'yellow' else False,
+                                  packet=[])
 
         active_robots = iter(robot for robot in self
                              if robot.pose is not None and robot.target is not None)
@@ -108,11 +110,11 @@ class Controller(list):
         for robot in active_robots:
 
             command = robot.controller.execute(robot.target, robot.pose)
-            packet.robots_states.append(RobotState(robot_id=robot.robot_id,
-                                                   command=command,
-                                                   kick_type=robot.kick_type,
-                                                   kick_force=robot.kick_force,
-                                                   dribbler_active=robot.dribbler_active))
+            packet.packet.append(RobotPacket(robot_id=robot.robot_id,
+                                             command=command,
+                                             kick_type=robot.kick_type,
+                                             kick_force=robot.kick_force,
+                                             dribbler_active=robot.dribbler_active))
 
         return packet
 

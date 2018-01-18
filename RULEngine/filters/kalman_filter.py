@@ -61,12 +61,15 @@ class KalmanFilter:
         # Update the states covariance matrix
         self.P = self.P - gain @ self.observation_model() @ self.P
 
-    def _predict(self):
+    def _predict(self, input_command):
         self.dt = time() - self.last_predict_time
         self.last_predict_time = time()
 
         # Predict the next state from states vector and input commands
-        self.x = self.transition_model() @ self.x  # + self.control_input_model() @ input_command
+        if np.all(input_command):
+            self.x = self.transition_model() @ self.x + self.control_input_model() @ input_command
+        else:
+            self.x = self.transition_model() @ self.x
 
         # Update the state covariance matrix from the transition model
         self.P = self.transition_model() @ self.P @ self.transition_model().T + self.Q
@@ -75,8 +78,8 @@ class KalmanFilter:
         error = observation - self.observation_model() @ self.x
         self._update(error, t_capture)
 
-    def predict(self):
-        self._predict()
+    def predict(self, input_command=None):
+        self._predict(input_command)
 
     def reset(self):
         self.is_active = False

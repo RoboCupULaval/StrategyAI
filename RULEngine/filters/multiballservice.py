@@ -7,7 +7,7 @@ from RULEngine.filters.ball_kalman_filter import BallFilter
 
 class MultiBallService(list):
 
-    BALL_SEPARATION_THRESHOLD = 1000
+    BALL_SEPARATION_THRESHOLD = 2000
     MAX_UNDETECTED_DELAY = 2
 
     def __init__(self, max_ball: int=1):
@@ -15,15 +15,13 @@ class MultiBallService(list):
         self.max_ball = max_ball
         self._current_timestamp = None
 
-        self.logger.info(' initiated with {} balls'.format(max_ball))
+        self.logger.debug(' initiated with {} balls'.format(max_ball))
         super().__init__(BallFilter() for _ in range(max_ball))
         
     def update(self, obs: np.array, timestamp: float) -> None:
         self._current_timestamp = timestamp
         if self.filter_ball_observation(obs) or not self[0].is_active:
             self[0].update(obs, self._current_timestamp)
-
-        self.remove_undetected()
 
     def predict(self) -> None:
         for ball in self:

@@ -25,7 +25,7 @@ class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dr
 
 class Engine(Process):
     VISION_QUEUE_MAXSIZE = 4
-    ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 24
+    ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
     REFEREE_QUEUE_MAXSIZE = 100
@@ -83,18 +83,25 @@ class Engine(Process):
         try:
             while not self.stop_event.is_set():
 
-                track_frame = self.tracker.execute()
+                track_frame = self.tracker.update()
 
                 self.game_state_queue.put(track_frame)
                 self.ui_send_queue.put(track_frame)
 
                 self.controller.update(track_frame)
-                robot_packets = self.controller.execute()
-                if robot_packets.robots_states:
-                    self.robot_cmd_queue.put(robot_packets)
+                robot_packets_frame = self.controller.execute()
+
+                if robot_packets_frame.packet:
+                    self.robot_cmd_queue.put(robot_packets_frame)
 
                 if self.vision_queue.qsize() == self.VISION_QUEUE_MAXSIZE:
                     self.logger.info('Vision queue full. Frames will be lost.')
+
+                input_commands = [None for _ in range(12)]
+                for packet in robot_packets_frame.packet:
+                    input_commands[packet.robot_id] = packet.command
+
+                self.tracker.predict(input_commands)
 
         except KeyboardInterrupt:
             pass

@@ -9,7 +9,7 @@ import numpy as np
 from RULEngine.filters.multiballservice import MultiBallService
 from RULEngine.filters.robot_kalman_filter import RobotFilter
 
-from profilehooks import profile
+from config.config_service import ConfigService
 
 
 class Tracker:
@@ -23,6 +23,9 @@ class Tracker:
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger('Tracker')
 
+        self.cfg = ConfigService()
+        self.team_color = self.cfg.config_dict['GAME']['our_color']
+
         self.vision_queue = vision_queue
 
         self._blue_team = [RobotFilter() for _ in range(Tracker.MAX_ROBOT_PER_TEAM)]
@@ -31,24 +34,23 @@ class Tracker:
 
         self._current_timestamp = None
 
-    def execute(self) -> Dict:
+    def update(self) -> Dict:
 
         try:
             vision_frame = self.vision_queue.get(block=False)
             detection_frame = vision_frame['detection']
             self._current_timestamp = detection_frame['t_capture']
-            self.update(detection_frame)
+            self._update(detection_frame)
         except Empty:
             pass
         except KeyError:
             pass
 
-        self.predict()
         self.remove_undetected()
 
         return self.track_frame
 
-    def update(self, detection_frame: Dict):
+    def _update(self, detection_frame: Dict):
 
         for robot_obs in detection_frame.get('robots_blue', ()):
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
@@ -62,9 +64,21 @@ class Tracker:
             obs = np.array([ball_obs['x'], ball_obs['y']])
             self._balls.update(obs, self._current_timestamp)
 
-    def predict(self):
-        for robot in self._yellow_team + self._blue_team:
-            robot.predict()
+    def predict(self, input_commands):
+
+        if self.team_color == 'yellow':
+            for robot, input_cmd in zip(self._yellow_team, input_commands):
+                input_cmd = [input_cmd[state] for state in ['x', 'y', 'orientation']] if input_cmd else None
+                robot.predict(np.array(input_cmd))
+            for robot in self._blue_team:
+                robot.predict()
+        else:
+            for robot in self._yellow_team:
+                robot.predict()
+            for robot, input_cmd in zip(self._blue_team, input_commands):
+                input_cmd = [input_cmd[state] for state in ['x', 'y', 'orientation']] if input_cmd else None
+                robot.predict(np.array(input_cmd))
+
         self._balls.predict()
 
     def remove_undetected(self):

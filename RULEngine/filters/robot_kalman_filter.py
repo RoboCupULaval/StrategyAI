@@ -36,11 +36,11 @@ class RobotFilter(KalmanFilter):
 
     def control_input_model(self):
         return np.array([[0, 0, 0],   # Position x
-                         [1, 0, 0],   # Speed x
+                         [.01, 0, 0],   # Speed x
                          [0, 0, 0],   # Position y
-                         [0, 1, 0],   # Speed y
+                         [0, .01, 0],   # Speed y
                          [0, 0, 0],   # Position Theta
-                         [0, 0, 1]])  # Speed Theta
+                         [0, 0, .01]])  # Speed Theta
 
     def initial_state_covariance(self):
         return 10 ** 6 * np.eye(self.state_number)
@@ -56,14 +56,13 @@ class RobotFilter(KalmanFilter):
         return R
 
     def update(self, observation, t_capture):
-
         error = observation - self.observation_model() @ self.x
         error[2] = RobotFilter.wrap_to_pi(error[2])
 
         self._update(error, t_capture)
 
-    def predict(self):
-        self._predict()
+    def predict(self, input_command=None):
+        self._predict(input_command)
         self.x[4] = self.wrap_to_pi(self.x[4])
 
     @staticmethod
