@@ -29,7 +29,8 @@ class SenderBaseClass(Process, metaclass=ABCMeta):
 
             while not self.stop_event.is_set():
                 self.send_packet()
-
+        except KeyboardInterrupt:
+            pass
         finally:
             self.logger.info('Killed')
 

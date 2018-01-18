@@ -24,7 +24,7 @@ class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dr
 
 
 class Engine(Process):
-    VISION_QUEUE_MAXSIZE = 4*60
+    VISION_QUEUE_MAXSIZE = 4
     ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 24
     UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
@@ -73,11 +73,12 @@ class Engine(Process):
 
         self.logger.debug('Running')
 
-        self.ai_queue.put([AICommand(robot_id=1, target={'x': 0, 'y': -2000, 'orientation': 0}),
-                           AICommand(robot_id=2, target={'x': 0, 'y': -1000, 'orientation': 0}),
-                           AICommand(robot_id=3, target={'x': 0, 'y': 0, 'orientation': 0}),
-                           AICommand(robot_id=4, target={'x': 0, 'y': 1000, 'orientation': 0}),
-                           AICommand(robot_id=5, target={'x': 0, 'y': 2000, 'orientation': 0})])
+        self.ai_queue.put([AICommand(robot_id=0, target={'x': -4200, 'y': 0, 'orientation': 0}),
+                           AICommand(robot_id=1, target={'x': -90, 'y': -2000, 'orientation': 0}),
+                           AICommand(robot_id=2, target={'x': -90, 'y': -1000, 'orientation': 0}),
+                           AICommand(robot_id=3, target={'x': -590, 'y': 0, 'orientation': 0}),
+                           AICommand(robot_id=4, target={'x': -90, 'y': 1000, 'orientation': 0}),
+                           AICommand(robot_id=5, target={'x': -90, 'y': 2000, 'orientation': 0})])
 
         try:
             while not self.stop_event.is_set():

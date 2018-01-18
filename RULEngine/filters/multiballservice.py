@@ -8,7 +8,7 @@ from RULEngine.filters.ball_kalman_filter import BallFilter
 class MultiBallService(list):
 
     BALL_SEPARATION_THRESHOLD = 1000
-    MAX_UNDETECTED_DELAY = 1
+    MAX_UNDETECTED_DELAY = 2
 
     def __init__(self, max_ball: int=1):
         self.logger = logging.getLogger('MultiBallService')
@@ -32,7 +32,7 @@ class MultiBallService(list):
     def remove_undetected(self) -> None:
         undetected_balls = [ball for ball in self
                             if ball.is_active and
-                            self._current_timestamp - ball.last_t_capture > MultiBallService.MAX_UNDETECTED_DELAY]
+                            self._current_timestamp - ball.last_update_time > MultiBallService.MAX_UNDETECTED_DELAY]
 
         for ball in undetected_balls:
             ball.reset()

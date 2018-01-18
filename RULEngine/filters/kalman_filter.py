@@ -1,6 +1,6 @@
 from abc import abstractmethod
 import numpy as np
-
+from time import time
 
 MAX_DT = 1
 
@@ -10,7 +10,8 @@ class KalmanFilter:
     def __init__(self):
 
         self.is_active = False
-        self.last_t_capture = 0
+        self.last_update_time = 0
+        self.last_predict_time = time()
         self.dt = 0
 
         self.state_number = int(np.size(self.transition_model(), 0))
@@ -22,35 +23,33 @@ class KalmanFilter:
         self.Q = self.process_covariance()
         self.P = self.initial_state_covariance()
 
-
     @abstractmethod
     def transition_model(self):
-        pass
+        return np.zeros(0)
 
     def control_input_model(self):
-        return 0
+        return np.zeros(0)
 
     @abstractmethod
     def observation_model(self):
-        pass
+        return np.zeros(0)
 
     @abstractmethod
     def initial_state_covariance(self):
-        pass
+        return np.zeros(0)
 
     @abstractmethod
     def process_covariance(self):
-        pass
+        return np.zeros(0)
 
     @abstractmethod
     def observation_covariance(self):
-        pass
+        return np.zeros(0)
 
     def _update(self, error, t_capture):
 
         self.is_active = True
-        self.dt = t_capture - self.last_t_capture
-        self.last_t_capture = t_capture
+        self.last_update_time = t_capture
 
         # Compute Kalman gain from states covariance and observation model
         gain = self.P @ self.observation_model().T \
@@ -63,6 +62,8 @@ class KalmanFilter:
         self.P = self.P - gain @ self.observation_model() @ self.P
 
     def _predict(self):
+        self.dt = time() - self.last_predict_time
+        self.last_predict_time = time()
 
         # Predict the next state from states vector and input commands
         self.x = self.transition_model() @ self.x  # + self.control_input_model() @ input_command

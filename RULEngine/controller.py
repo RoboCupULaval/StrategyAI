@@ -14,7 +14,7 @@ from math import sin, cos, sqrt
 from config.config_service import ConfigService
 
 MAX_ROBOT = 12
-MAX_LINEAR_SPEED = 2000  # mm/s
+MAX_LINEAR_SPEED = 20000  # mm/s
 
 
 RobotState = namedtuple('RobotState', 'robot_id command kick_type kick_force dribbler_active')
@@ -43,8 +43,8 @@ class Robot:
 def get_control_setting(game_type: str):
 
     if game_type == 'sim':
-        translation = {'kp': .7, 'ki': 0.000001, 'kd': 0.001}
-        rotation = {'kp': 0.5, 'ki': 0, 'kd': 0.00001}
+        translation = {'kp': 0.75, 'ki': .10, 'kd': 0}
+        rotation = {'kp': .75, 'ki': 0.15, 'kd': 0}
     elif game_type == 'real':
         translation = {'kp': .01, 'ki': 0.0005, 'kd': 0}
         rotation = {'kp': .01, 'ki': 0.0035, 'kd': 0.0001}
