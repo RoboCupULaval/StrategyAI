@@ -2,7 +2,7 @@
 
 __author__ = "Maxime Gagnon-Legault"
 
-from RULEngine.Util import singleton
+from RULEngine.Util.singleton import Singleton
 
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
@@ -12,7 +12,7 @@ from ai.states.play_state import PlayState
 from config.config_service import ConfigService
 
 
-class PlayExecutor(metaclass=singleton):
+class PlayExecutor(metaclass=Singleton):
 
     def __init__(self):
         """
@@ -33,6 +33,7 @@ class PlayExecutor(metaclass=singleton):
 
         :return: None
         """
+        return
         if PlayState().autonomous_flag:
             if GameState().game.referee.team_info['ours']['goalie'] != self.goalie_id:
                 self.goalie_id = GameState().game.referee.team_info['ours']['goalie']

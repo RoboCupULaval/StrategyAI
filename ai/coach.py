@@ -3,8 +3,8 @@
 import logging
 from multiprocessing import Process, Queue, Event
 
-# from ai.executors.debug_executor import DebugExecutor
-# from ai.executors.play_executor import PlayExecutor
+from ai.executors.debug_executor import DebugExecutor
+from ai.executors.play_executor import PlayExecutor
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 from config.config_service import ConfigService
@@ -19,7 +19,7 @@ class Coach(Process):
         """
         super(Coach, self).__init__(name=__name__)
 
-        self.logger = logging.getLogger("Coach")
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.cfg = ConfigService()
 
         cfg = ConfigService()
@@ -47,14 +47,13 @@ class Coach(Process):
         self.game_state = GameState()
         self.play_state = PlayState()
 
-        # self.debug_executor = DebugExecutor() #todo put the queue in when simon will have pushed MGL 2017/01/08
+        self.debug_executor = DebugExecutor() #todo put the queue in when simon will have pushed MGL 2017/01/08
         # self.play_executor = PlayExecutor()
 
     def main_loop(self) -> None:
-        pass
-        # while not self.stop_event.is_set():
-        #     self.debug_executor.exec()
-        # self.play_executor.exec()
+        while not self.stop_event.is_set():
+            self.debug_executor.exec()
+        self.play_executor.exec()
 
     def run(self) -> None:
         self.initialize()

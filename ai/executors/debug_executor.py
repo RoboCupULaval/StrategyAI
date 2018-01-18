@@ -7,12 +7,12 @@ from multiprocessing import Queue
 from queue import Empty
 from pickle import loads
 
-from RULEngine.Util import singleton
+from RULEngine.Util.singleton import Singleton
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.executors.play_executor import PlayExecutor
 
 
-class DebugExecutor(metaclass=singleton):
+class DebugExecutor(metaclass=Singleton):
     def __init__(self, debug_queue: Queue):
         self.logger = logging.getLogger("DebugExecutor")
         self.debug_queue = debug_queue
