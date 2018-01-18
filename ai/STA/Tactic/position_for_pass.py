@@ -1,17 +1,16 @@
 # Under MIT licence, see LICENCE.txt
-from typing import List
 import time
+from typing import List
+
+from Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
+from Util.Position import Position
+from Util.role import Role
 from ai.Algorithm.evaluation_module import best_position_in_region
-from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
-
-from RULEngine.Debug.uidebug_command_factory import COLOR_ID_MAP
-from ai.Util.role import Role
 
 __author__ = 'RoboCupULaval'
 

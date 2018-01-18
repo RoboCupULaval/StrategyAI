@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from multiprocessing import Process, Event
-from queue import Empty, Queue
+from queue import Queue
 from typing import Tuple
 import logging
 
@@ -9,12 +9,12 @@ class ReceiverBaseClass(Process, metaclass=ABCMeta):
 
     def __init__(self, connection_info: Tuple, queue: Queue, stop_event: Event):
         super().__init__()
+
         self.queue = queue
         self.stop_event = stop_event
-        self.connection = None
-        self.connection_info = connection_info
         self.daemon = True
-        self.logger = None
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.connection = self.connect(connection_info)
 
     @abstractmethod
     def connect(self, connection_info):
@@ -25,19 +25,15 @@ class ReceiverBaseClass(Process, metaclass=ABCMeta):
         pass
 
     def run(self):
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.connection = self.connect(self.connection_info)
+        self.logger.info('Running')
         try:
 
             while not self.stop_event.is_set():
                 self.receive_packet()
 
-        except KeyboardInterrupt:
-            self.logger.info('Killed')
         finally:
-            exit(0)
+            self.logger.info('Killed')
 
-    def terminate(self):
-        print('terminate')
-        super().terminate()
+        exit(0)
+
 

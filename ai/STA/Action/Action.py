@@ -3,7 +3,7 @@
 from abc import abstractmethod
 
 from RULEngine.GameDomainObjects.player import Player
-from ai.Util.ai_command import AICommand
+from Util.ai_command import AICommand
 from ai.states.game_state import GameState
 
 __author__ = 'Robocup ULaval'

@@ -1,18 +1,13 @@
 # Under MIT license, see LICENSE.txt
-from functools import partial
 
-import numpy as np
-
-from RULEngine.GameDomainObjects.player import Player
-from ai.Algorithm.evaluation_module import closest_players_to_point, Pose, Position
+from Util.role import Role
+from Util.Position import Position
+from Util.Pose import Pose
+from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
 from ai.STA.Tactic.goalkeeper import GoalKeeper
-from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.position_for_pass import PositionForPass
-from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.role import Role
 from ai.states.game_state import GameState
-from ai.STA.Strategy.strategy import Strategy
+
 
 class DefenseWallNoKick(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4):

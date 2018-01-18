@@ -1,18 +1,19 @@
 # Under MIT licence, see LICENCE.txt
-from typing import List
-import numpy as np
 import time
+from typing import List
+
+import numpy as np
+from Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS, TeamColor
+from Util.constant import BALL_RADIUS, ROBOT_RADIUS
+from Util.Position import Position
 from ai.Algorithm.evaluation_module import closest_players_to_point
-from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
-from ai.STA.Action.Idle import Idle
 
 __author__ = 'RoboCupULaval'
 

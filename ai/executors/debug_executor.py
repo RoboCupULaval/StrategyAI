@@ -7,7 +7,7 @@ from multiprocessing import Queue
 from queue import Empty
 from pickle import loads
 
-from RULEngine.Util.singleton import Singleton
+from Util.singleton import Singleton
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.executors.play_executor import PlayExecutor
 

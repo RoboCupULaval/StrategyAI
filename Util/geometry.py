@@ -1,12 +1,12 @@
 # Under MIT License, see LICENSE.txt
 import math as m
+import warnings
 from typing import Union
 
 import numpy as np
-import warnings
+from Util.Pose import Pose
 
-from ..Util.Position import Position
-from ..Util.Pose import Pose
+from Util import Position
 
 __author__ = 'RoboCupULaval'
 

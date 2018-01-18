@@ -3,15 +3,15 @@
 import unittest
 from math import pi, sqrt
 
+from RULEngine.Util.Pose import Pose
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 
 from RULEngine.GameDomainObjects.game import Game
 from RULEngine.GameDomainObjects.player import Player
 from RULEngine.GameDomainObjects.referee import Referee
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import *
 from RULEngine.services.team_color_service import TeamColorService
+from Util import AICommand, AICommandType, AIControlLoopType
+from Util import Position
 from ai.STA.Action.GetBall import GetBall
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GoBetween import GoBetween
@@ -19,7 +19,6 @@ from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.ProtectGoal import ProtectGoal
-from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
 
 A_DELTA_T = 1
 A_PLAYER_ID = 1

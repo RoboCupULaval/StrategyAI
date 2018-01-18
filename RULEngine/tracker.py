@@ -1,23 +1,20 @@
 
 import logging
-
-import numpy as np
 from multiprocessing import Queue
+from queue import Empty
 from typing import Dict, List
 
-from RULEngine.Util.filters.robot_kalman_filter import RobotFilter
-from RULEngine.Util.multiballservice import MultiBallService
+import numpy as np
+
+from RULEngine.filters.multiballservice import MultiBallService
+from RULEngine.filters.robot_kalman_filter import RobotFilter
 
 
 class Tracker:
 
     MAX_ROBOT_PER_TEAM = 12
     MAX_BALL_ON_FIELD = 1
-    SEND_DELAY = 0.02
-    BALL_CONFIDENCE_THRESHOLD = 1
-    BALL_SEPARATION_THRESHOLD = 1000
-    STATE_PREDICTION_TIME = 0.1
-    MAX_UNDETECTED_DELAY = 2
+    MAX_UNDETECTED_DELAY = 1
 
     def __init__(self, vision_queue: Queue):
 
@@ -33,15 +30,17 @@ class Tracker:
         self._current_timestamp = None
 
     def execute(self) -> Dict:
-        vision_frame = {}
-        while vision_frame.get('detection', None) is None:
-            vision_frame = self.vision_queue.get()
 
-        detection_frame = vision_frame['detection']
+        try:
+            vision_frame = self.vision_queue.get(block=False)
+            detection_frame = vision_frame['detection']
+            self._current_timestamp = detection_frame['t_capture']
+            self.update(detection_frame)
+        except Empty:
+            pass
+        except KeyError:
+            pass
 
-        self._current_timestamp = detection_frame['t_capture']
-
-        self.update(detection_frame)
         self.predict()
         self.remove_undetected()
 
@@ -62,12 +61,13 @@ class Tracker:
             self._balls.update(obs, self._current_timestamp)
 
     def predict(self):
-        map(lambda robot: robot.predict(), self._yellow_team)
-        map(lambda robot: robot.predict(), self._blue_team)
+        for robot in self._yellow_team + self._blue_team:
+            robot.predict()
         self._balls.predict()
 
     def remove_undetected(self):
-        for robot in self._yellow_team + self._blue_team:
+        active_robots = iter(robot for robot in self._yellow_team + self._blue_team if robot.is_active)
+        for robot in active_robots:
             if self._current_timestamp - robot.last_t_capture > Tracker.MAX_UNDETECTED_DELAY:
                 robot.reset()
 
@@ -84,24 +84,24 @@ class Tracker:
 
     @property
     def balls(self) -> List[Dict]:
-        return Tracker.format_list(self._balls)
+        return Tracker.format_list(self._balls, 'x y')
 
     @property
     def blue_team(self) -> List[Dict]:
-        return Tracker.format_list(self._blue_team)
+        return Tracker.format_list(self._blue_team, 'x y orientation')
 
     @property
     def yellow_team(self) -> List[Dict]:
-        return Tracker.format_list(self._yellow_team)
+        return Tracker.format_list(self._yellow_team, 'x y orientation')
 
     @staticmethod
-    def format_list(entities: List) -> List[Dict]:
+    def format_list(entities: List, states) -> List[Dict]:
         formatted_list = []
         for entity_id, entity in enumerate(entities):
             if entity.is_active:
                 fields = dict()
-                fields['pose'] = tuple(entity.pose)
-                fields['velocity'] = tuple(entity.velocity)
+                fields['pose'] = {state: value for state, value in zip(states.split(), entity.pose)}
+                fields['velocity'] = {state: value for state, value in zip(states.split(), entity.velocity)}
                 fields['id'] = entity_id
                 formatted_list.append(fields)
         return formatted_list

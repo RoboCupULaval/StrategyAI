@@ -1,11 +1,10 @@
 # Under MIT license, see LICENSE.txt
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-
-from ai.states.game_state import GameState
+from Util.ai_command import AICommand, AICommandType
+from Util.Pose import Pose
 from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType, AIControlLoopType
+from ai.states.game_state import GameState
 
 
 class Kick(Action):

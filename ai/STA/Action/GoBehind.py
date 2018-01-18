@@ -1,14 +1,15 @@
 # Under MIT licence, see LICENCE.txt
 import math
+
 import numpy as np
+from Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.geometry import wrap_to_pi
-from ai.states.game_state import GameState
+from Util.ai_command import AICommand, AICommandType
+from Util.Position import Position
+from Util.geometry import wrap_to_pi
 from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType
+from ai.states.game_state import GameState
 
 __author__ = 'Robocup ULaval'
 

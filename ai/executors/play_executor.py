@@ -2,14 +2,13 @@
 
 __author__ = "Maxime Gagnon-Legault"
 
-from RULEngine.Util.singleton import Singleton
-
+from Util.singleton import Singleton
+from Util.role import Role
+from config.config_service import ConfigService
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
-from ai.Util.role import Role
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
-from config.config_service import ConfigService
 
 
 class PlayExecutor(metaclass=Singleton):

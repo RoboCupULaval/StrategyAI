@@ -1,5 +1,5 @@
 
-from .geometry import wrap_to_pi
+from Util.geometry import wrap_to_pi
 
 
 class PID(object):
@@ -27,13 +27,15 @@ class PID(object):
 
     def execute(self, err) -> float:
 
-        d_err = err - self.last_err
-        self.last_err = err
-        self.err_sum += err
-
         if self.wrap_error:
-            d_err = wrap_to_pi(d_err)
+            err = wrap_to_pi(err)
+            d_err = wrap_to_pi(err - self.last_err)
             self.last_err = wrap_to_pi(self.last_err)
+        else:
+            d_err = err - self.last_err
+            self.last_err = err
+
+        self.err_sum += err
 
         return (err * self.kp) + (self.err_sum * self.ki) + (d_err * self.kd)
 

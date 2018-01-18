@@ -1,9 +1,9 @@
-from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.SpeedPose import SpeedPose
+from collections import ChainMap
 from enum import Enum
 
-from collections import ChainMap
+from RULEngine.GameDomainObjects.player import Player
+from Util.Pose import Pose
+from Util.Velocity import Velocity
 
 
 class AICommandType(Enum):
@@ -30,7 +30,7 @@ _default_keys = {
     'charge_kick': False,
     'kick': False,
     'pose_goal': None,
-    'speed': SpeedPose(),
+    'speed': Velocity(),
     'cruise_speed': 1.0,
     'end_speed': 0.0,
     'collision_ball': False,
@@ -49,7 +49,7 @@ _keys_type = {
     'charge_kick': bool,
     'kick': bool,
     'pose_goal': Pose,
-    'speed': SpeedPose,
+    'speed': Velocity,
     'cruise_speed': (int, float),
     'end_speed': (int, float),
     'collision_ball': bool,

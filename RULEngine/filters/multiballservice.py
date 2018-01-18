@@ -1,17 +1,13 @@
 import logging
-from typing import Dict
 
 import numpy as np
 
-from RULEngine.Util.filters.ball_kalman_filter import BallFilter
+from RULEngine.filters.ball_kalman_filter import BallFilter
 
 
 class MultiBallService(list):
 
-    MAX_BALL_ON_FIELD = 1
-    BALL_CONFIDENCE_THRESHOLD = 1
     BALL_SEPARATION_THRESHOLD = 1000
-    STATE_PREDICTION_TIME = 0.1
     MAX_UNDETECTED_DELAY = 1
 
     def __init__(self, max_ball: int=1):
@@ -24,28 +20,32 @@ class MultiBallService(list):
         
     def update(self, obs: np.array, timestamp: float) -> None:
         self._current_timestamp = timestamp
-        closest_ball = self.find_closest_ball_to_observation(obs)
+        if self.filter_ball_observation(obs) or not self[0].is_active:
+            self[0].update(obs, self._current_timestamp)
 
-        if closest_ball is not None:
-            closest_ball.update(obs, self._current_timestamp)
-        else:
-            self.logger.info('New ball detected')
-            inactive_balls = [ball for ball in self if not ball.is_active]
-            if inactive_balls:
-                inactive_balls[0].update(obs, self._current_timestamp)
+        self.remove_undetected()
 
     def predict(self) -> None:
-        map(lambda ball: ball.predict(), self)
+        for ball in self:
+            ball.predict()
 
     def remove_undetected(self) -> None:
         undetected_balls = [ball for ball in self
                             if ball.is_active and
                             self._current_timestamp - ball.last_t_capture > MultiBallService.MAX_UNDETECTED_DELAY]
 
-        map(lambda ball: ball.reset(), undetected_balls)
+        for ball in undetected_balls:
+            ball.reset()
+            self.logger.info('Deactivating ball')
 
-        if undetected_balls:
-            self.logger.info('Deactivating {} ball(s)'.format(len(undetected_balls)))
+    def filter_ball_observation(self, obs: np.ndarray) -> bool:
+        position_differences = self.compute_distances_ball_to_observation(obs)
+
+        is_valid = False
+        if position_differences is not None and np.min(position_differences) < self.BALL_SEPARATION_THRESHOLD:
+            is_valid = True
+
+        return is_valid
 
     def find_closest_ball_to_observation(self, obs: np.ndarray) -> BallFilter:
         position_differences = self.compute_distances_ball_to_observation(obs)

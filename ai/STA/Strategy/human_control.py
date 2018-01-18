@@ -1,9 +1,9 @@
 # Under MIT license, see LICENSE.txt
-from ai.Util.role import Role
-from ai.states.game_state import GameState
+from Util.role import Role
 from ai.STA.Strategy.strategy import Strategy
-from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.stop import Stop
+from ai.STA.Tactic.tactic import Tactic
+from ai.states.game_state import GameState
 
 
 class HumanControl(Strategy):

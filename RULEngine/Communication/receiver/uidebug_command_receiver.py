@@ -20,8 +20,10 @@ class UIDebugCommandReceiver(ReceiverBaseClass):
         return connection
 
     def receive_packet(self):
+
+        data, _ = self.connection.recvfrom(2048)
+
         try:
-            data, _ = self.connection.recvfrom(2048)
             self.queue.put(loads(data))
         except Full as e:
             self.logger.debug("{}".format(e))

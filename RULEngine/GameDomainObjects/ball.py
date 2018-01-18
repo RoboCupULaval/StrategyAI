@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.Util.Position import Position
+from Util.Position import Position
 
 
 class Ball:

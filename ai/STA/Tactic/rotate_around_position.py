@@ -2,9 +2,9 @@
 from typing import List
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from ai.STA.Tactic.tactic import Tactic
+from Util import Pose
 from ai.STA.Action.rotate_around import RotateAround
+from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
 
 

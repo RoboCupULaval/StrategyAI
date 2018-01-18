@@ -1,6 +1,6 @@
-from RULEngine.Util.constant import TeamColor
-from RULEngine.Util.exception import WrongRobotColorError
-from RULEngine.Util.singleton import Singleton
+from Util.constant import TeamColor
+from Util.exception import WrongRobotColorError
+from Util.singleton import Singleton
 from config.config_service import ConfigService
 
 

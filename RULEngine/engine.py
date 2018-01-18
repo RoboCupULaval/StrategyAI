@@ -1,22 +1,30 @@
 
 import logging
 import sys
+from collections import namedtuple
 from multiprocessing import Process, Queue, Event
-from time import sleep
-from math import cos, sin
-
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.robot_command_sender import RobotCommandSender
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
+
 from RULEngine.controller import Controller
 from RULEngine.tracker import Tracker
+
 from config.config_service import ConfigService
 
 
+class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dribbler_active')):
+
+    __slots__ = ()
+
+    def __new__(cls, robot_id, target=None, kick_type=None, kick_force=0, dribbler_active=False, command=None):
+        return super().__new__(cls, robot_id, target, kick_type, kick_force, dribbler_active)
+
+
 class Engine(Process):
-    VISION_QUEUE_MAXSIZE = 20
+    VISION_QUEUE_MAXSIZE = 4*60
     ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 24
     UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
@@ -37,16 +45,6 @@ class Engine(Process):
         self.game_state_queue = game_state_queue
         self.robot_cmd_queue = Queue()
 
-        self.tracker = None
-        self.controller = None
-
-        self.vision_receiver = None
-        self.robot_cmd_sender = None
-        self.ui_sender = None
-        self.ui_recver = None
-
-    def _initialize_subprocess(self):
-
         vision_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'],
                                   int(self.cfg.config_dict['COMMUNICATION']['vision_port']))
 
@@ -59,7 +57,8 @@ class Engine(Process):
         self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue, self.stop_event)
         self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue, self.stop_event)
 
-        robot_connection_info = ('', 12346)  # TODO set the port in the config file
+        robot_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'], 20011)
+
         self.robot_cmd_sender = RobotCommandSender(robot_connection_info, self.robot_cmd_queue, self.stop_event)
 
         self.tracker = Tracker(self.vision_queue)
@@ -70,44 +69,38 @@ class Engine(Process):
         self.ui_recver.start()
         self.robot_cmd_sender.start()
 
-        self.logger.debug('has initialized.')
-
-    def loop(self):
-        while not self.stop_event.is_set():
-
-            track_frame = self.tracker.execute()
-            self.game_state_queue.put(track_frame)
-
-            self.ui_send_queue.put(track_frame)
-
-            self.controller.update(track_frame[self.team_color])
-            commands = self.controller.execute()
-
-            for cmd in commands:
-                cmd['is_team_yellow'] = True if self.team_color == 'yellow' else False  # TODO add color service
-                cmd['kick'] = 0  # TODO add kick functionality
-                self.robot_cmd_queue.put(cmd)
-
-            sleep(0)
-
     def run(self):
-        self._initialize_subprocess()
+
+        self.logger.debug('Running')
+
+        self.ai_queue.put([AICommand(robot_id=1, target={'x': 0, 'y': -2000, 'orientation': 0}),
+                           AICommand(robot_id=2, target={'x': 0, 'y': -1000, 'orientation': 0}),
+                           AICommand(robot_id=3, target={'x': 0, 'y': 0, 'orientation': 0}),
+                           AICommand(robot_id=4, target={'x': 0, 'y': 1000, 'orientation': 0}),
+                           AICommand(robot_id=5, target={'x': 0, 'y': 2000, 'orientation': 0})])
+
         try:
-            self.loop()
+            while not self.stop_event.is_set():
+
+                track_frame = self.tracker.execute()
+
+                self.game_state_queue.put(track_frame)
+                self.ui_send_queue.put(track_frame)
+
+                self.controller.update(track_frame)
+                robot_packets = self.controller.execute()
+                if robot_packets.robots_states:
+                    self.robot_cmd_queue.put(robot_packets)
+
+                if self.vision_queue.qsize() == self.VISION_QUEUE_MAXSIZE:
+                    self.logger.info('Vision queue full. Frames will be lost.')
+
         except KeyboardInterrupt:
-            self.logger.info('Engine interrupted.')
+            pass
+        finally:
+            self.logger.info('Killed')
+
         sys.stdout.flush()
-        self.stop()
         exit(0)
 
-    def stop(self):
-        self.vision_receiver.join(0.3)  # timeout needed for some reason even though the process exit gracefully
-        self.logger.debug('VisionReceiver joined now is -> {0}'.
-                          format('alive' if self.vision_receiver.is_alive() else 'dead'))
-        self.ui_sender.join(0.3)
-        logging.debug('UIDebugSender joined now is -> {0}'.
-                      format('alive' if self.ui_sender.is_alive() else 'dead'))
-        self.ui_recver.join(0.3)
-        logging.debug('UIDebugReceiver joined now is -> {0}'.
-                      format('alive' if self.ui_recver.is_alive() else 'dead'))
 

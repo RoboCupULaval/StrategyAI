@@ -12,5 +12,10 @@ class SerialCommandSender(SenderBaseClass):
         # return McuCommunicator(timeout=0.1)
 
     def send_packet(self):
-        pass
+        packet = self.queue.get()
+        for robot_state in packet:
+            self.connection.sendSpeed(robot_state.robot_id,
+                                      robot_state.command.x/1000,
+                                      robot_state.command.y/1000,
+                                      robot_state.command.orientation)
 

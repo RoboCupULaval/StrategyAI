@@ -1,5 +1,6 @@
 from configparser import ConfigParser, ParsingError
-from RULEngine.Util.singleton import Singleton
+
+from Util.singleton import Singleton
 
 
 class ConfigService(metaclass=Singleton):

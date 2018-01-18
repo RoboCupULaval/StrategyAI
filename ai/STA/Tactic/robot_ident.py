@@ -4,10 +4,12 @@ import time
 from typing import List
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.SpeedPose import SpeedPose
+
+from Util.ai_command import AICommandType, AICommand, AIControlLoopType
+from Util.Pose import Pose
+from Util.Velocity import Velocity
+
 from ai.STA.Action.Idle import Idle
-from ai.Util.ai_command import AICommandType, AICommand, AIControlLoopType
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -36,7 +38,7 @@ class RobotIdent(Tactic):
             self.status_flag = Flags.WIP
 
             # Creating speed pose
-            speed_pose = SpeedPose(self.commands[self.cmd_id])
+            speed_pose = Velocity(self.commands[self.cmd_id])
             self.cmd_id += 1
 
             # Saving data

@@ -1,9 +1,11 @@
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
 from typing import Union
 
+from Util.Pose import Pose
 
-class SpeedPose(Pose):
+from Util.Position import Position
+
+
+class Velocity(Pose):
 
     def __init__(self, *args):
         position, orientation = self._pose_builder(args)
@@ -18,28 +20,28 @@ class SpeedPose(Pose):
     def orientation(self, angular_speed):
         self._orientation = float(angular_speed)
 
-    def __add__(self, other: Union['SpeedPose', Position]):
-        if isinstance(other, SpeedPose):
-            res = SpeedPose(self.position + other.position, self.orientation + other.orientation)
+    def __add__(self, other):
+        if isinstance(other, Velocity):
+            res = Velocity(self.position + other.position, self.orientation + other.orientation)
         elif isinstance(other, Position):
-            res = SpeedPose(self.position + other, self.orientation)
+            res = Velocity(self.position + other, self.orientation)
         else:
             raise TypeError
         return res
 
-    def __sub__(self, other: Union['SpeedPose', Position]):
-        if isinstance(other, SpeedPose):
-            res = SpeedPose(self.position - other.position, self.orientation - other.orientation)
+    def __sub__(self, other):
+        if isinstance(other, Velocity):
+            res = Velocity(self.position - other.position, self.orientation - other.orientation)
         elif isinstance(other, Position):
-            res = SpeedPose(self.position - other, self.orientation)
+            res = Velocity(self.position - other, self.orientation)
         else:
             raise TypeError
         return res
 
-    def __eq__(self, other: Union['SpeedPose', Position]):
+    def __eq__(self, other: Union['Velocity', Position]):
         if isinstance(other, Position):
             return self.position == other
-        elif isinstance(other, SpeedPose):
+        elif isinstance(other, Velocity):
             orientation_equal = self.orientation == other.orientation
             position_equal = self.position == other.position
             return position_equal and orientation_equal
@@ -50,5 +52,5 @@ class SpeedPose(Pose):
         return not self.__eq__(other)
 
     def scale(self, value):
-        return SpeedPose(self.position * value, self.orientation)
+        return Velocity(self.position * value, self.orientation)
 

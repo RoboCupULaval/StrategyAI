@@ -1,5 +1,8 @@
+from math import fabs
+
 import numpy as np
-from RULEngine.Util.filters.kalman_filter import KalmanFilter
+
+from RULEngine.filters.kalman_filter import KalmanFilter
 
 
 class BallFilter(KalmanFilter):
@@ -25,10 +28,15 @@ class BallFilter(KalmanFilter):
                          [0, 0, 1, 0]])  # Position y
 
     def initial_state_covariance(self):
-        return 10 ** 3 * np.eye(self.state_number)
+        return 10 ** 6 * np.eye(self.state_number)
 
     def process_covariance(self):
-        return np.diag([1, 10, 1, 10])
+        return np.diag([.5, 50, .5, 50])
 
     def observation_covariance(self):
-        return 2 * np.eye(self.observable_state)
+        if fabs(self.x[0]) < 30 or fabs(self.x[2]) < 30:
+            R = np.diag([50, 50])
+        else:
+            R = np.diag([10, 10])
+        return R
+

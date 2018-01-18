@@ -1,13 +1,14 @@
 # Under MIT License, see LICENSE.txt
-__author__ = "Maxime Gagnon-Legault, Philippe Babin, and others"
 
+from math import sin, cos
 from typing import Dict
 
-from RULEngine.Debug.debug_command import DebugCommand
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.constant import TeamColor
-from RULEngine.Util.singleton import Singleton
 from RULEngine.services.team_color_service import TeamColorService
+from Util.constant import TeamColor
+from Util.singleton import Singleton
+
+__author__ = "Maxime Gagnon-Legault, Philippe Babin, and others"
 
 
 class Color(object):
@@ -56,10 +57,23 @@ DEFAULT_DEBUG_TIMEOUT = 1
 DEFAULT_PATH_TIMEOUT = 0
 
 
+class DebugCommand(dict):
+
+    def __new__(cls, p_type, p_data, p_link=None, p_version="1.0"):
+        command = dict()
+        command['name'] = 'Engine'
+        command['version'] = p_version
+        command['type'] = p_type
+        command['link'] = p_link
+        command['data'] = p_data
+
+        return command
+
+
 class UIDebugCommandFactory(metaclass=Singleton):
 
     @staticmethod
-    def log_cmd(level: int, message: str) -> DebugCommand:
+    def log_cmd(level: int, message: str):
         assert isinstance(level, int)
         assert isinstance(message, str)
 
@@ -67,7 +81,7 @@ class UIDebugCommandFactory(metaclass=Singleton):
 
     # TODO make this better maybe?
     @staticmethod
-    def send_books(cmd_tactics_dict: Dict) -> DebugCommand:
+    def send_books(cmd_tactics_dict: Dict):
         """
         of the form:
         cmd_tactics = {'strategy': strategybook.get_strategies_name_list(),
@@ -85,16 +99,8 @@ class UIDebugCommandFactory(metaclass=Singleton):
                                             'target': target}}}
         return DebugCommand(1002, data)
 
-    # TODO see what we do with this
-    # def robot_state_cmd(self, player_id: int) -> DebugCommand:
-    #     data = {'blue': {player_id: {'battery_lvl': battery_lvl,
-    #                                  'time_since_last_response': time_since_last_response
-    #                                  }}}
-    #     cmd = DebugCommand(1006, data)
-    #     self.debug_state.append(cmd)
-
     @staticmethod
-    def team_color_cmd(team_color: TeamColor = None) -> DebugCommand:
+    def team_color_cmd(team_color: TeamColor = None):
         assert isinstance(team_color, TeamColor) or team_color is None
 
         if team_color is None:
@@ -102,7 +108,6 @@ class UIDebugCommandFactory(metaclass=Singleton):
 
         return DebugCommand(1004, {'team_color': team_color.name.lower()})
 
-    # TODO this method
     @staticmethod
     def play_info_cmd(referee_info, referee_team_info, auto_play_info, auto_flag):
         return DebugCommand(1005, {'referee': referee_info,
@@ -110,80 +115,30 @@ class UIDebugCommandFactory(metaclass=Singleton):
                                    'auto_play': auto_play_info,
                                    'auto_flag': auto_flag})
 
-    # TODO do the rest
-    # def add_point_cmd(self, point: Position, color=VIOLET, width=5, link=None, timeout=DEFAULT_DEBUG_TIMEOUT):
-    #     int_point = int(point[0]), int(point[1])
-    #     data = {'point': int_point,
-    #             'color': color.repr(),
-    #             'width': width,
-    #             'timeout': timeout}
-    #     point = DebugCommand(3004, data, p_link=link)
-    #     self.debug_state.append(point)
-    #
-    # def add_multiple_points(self,
-    #                         points: Position,
-    #                         color: Color = VIOLET,
-    #                         width: int = 5,
-    #                         link: int = None,
-    #                         timeout: int = DEFAULT_DEBUG_TIMEOUT):
-    #     assert
-    #     points_as_tuple = []
-    #     for point in points:
-    #         points_as_tuple.append((int(point[0]), int(point[1])))
-    #
-    #     data = {'points': points_as_tuple,
-    #             'color': color.repr(),
-    #             'width': width,
-    #             'timeout': timeout}
-    #     point = DebugCommand(3005, data, p_link=link)
-    #     self.debug_state.append(point)
-    #
-    # def add_circle(self, center, radius, color=CYAN.repr(), is_fill=True, timeout=DEFAULT_DEBUG_TIMEOUT):
-    #     data = {'center': center,
-    #             'radius': radius,
-    #             'color': color,
-    #             'is_fill': is_fill,
-    #             'timeout': timeout}
-    #     circle = DebugCommand(3003, data)
-    #     self.debug_state.append(circle)
-    #
-    # def add_line(self, start_point, end_point, timeout=DEFAULT_DEBUG_TIMEOUT):
-    #     data = {'start': start_point,
-    #             'end': end_point,
-    #             'color': MAGENTA.repr(),
-    #             'timeout': timeout}
-    #     command = DebugCommand(3001, data)
-    #     self.debug_state.append(command)
-    #
-    # def add_vector(self, vector: Position(), start_point=Position(), timeout=DEFAULT_DEBUG_TIMEOUT):
-    #
-    #     end_point = start_point + vector
-    #     start_point = (start_point.x, start_point.y)
-    #     end_point = (end_point.x, end_point.y)
-    #     data = {'start': start_point,
-    #             'end': end_point,
-    #             'color': CYAN.repr(),
-    #             'timeout': timeout}
-    #     command = DebugCommand(3001, data)
-    #     self.debug_state.append(command)
-    #
-    # def add_rectangle(self, top_left, bottom_right):
-    #     data = {'top_left': top_left,
-    #             'bottom_right': bottom_right,
-    #             'color': YELLOW.repr(),
-    #             'is_fill': True}
-    #     command = DebugCommand(3006, data)
-    #     self.debug_state.append(command)
-    #
-    # def add_text(self, position, text, color=DEFAULT_TEXT_COLOR):
-    #     data = {'position': position,
-    #             'text': text,
-    #             'size': DEFAULT_TEXT_SIZE,
-    #             'font': DEFAULT_TEXT_FONT,
-    #             'align': DEFAULT_TEXT_ALIGN,
-    #             'color': color,
-    #             'has_bold': False,
-    #             'has_italic': False,
-    #             'timeout': DEFAULT_DEBUG_TIMEOUT}
-    #     text = DebugCommand(3008, data)
-    #     self.debug_state.append(text)
+    @staticmethod
+    def robot(pose: Dict, color=(0, 255, 0), color_angle=(255, 0, 0), radius=120, timeout=0.05):
+        player_center = (pose['x'], pose['y'])
+        data_circle = {'center': player_center,
+                       'radius': radius,
+                       'color': color,
+                       'is_fill': True,
+                       'timeout': timeout}
+
+        end_point = (pose['x'] + radius * cos(pose['orientation']),
+                     pose['y'] + radius * sin(pose['orientation']))
+        data_line = {'start': player_center,
+                     'end': end_point,
+                     'color': color_angle,
+                     'timeout': timeout}
+
+        return DebugCommand(3003, data_circle), DebugCommand(3001, data_line)
+
+    @staticmethod
+    def ball(pose: dict, color=(255, 127, 80), timeout=0.05):
+        data_circle = {'center': (pose['x'], pose['y']),
+                       'radius': 150,
+                       'color': color,
+                       'is_fill': True,
+                       'timeout': timeout}
+
+        return DebugCommand(3003, data_circle)

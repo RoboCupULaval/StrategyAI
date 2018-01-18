@@ -1,26 +1,26 @@
 # Under MIT licence, see LICENCE.txt
 
-from typing import List
-from math import tan, pi
 import time
+from math import tan, pi
+from typing import List
 
-from RULEngine.Util.constant import ROBOT_RADIUS
+from Util.Pose import Pose
+
 from RULEngine.GameDomainObjects.Shitty_Field import FieldSide
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Position import Position
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.geometry import clamp, compare_angle, wrap_to_pi
-from RULEngine.Util.constant import TeamColor
+from Util.Position import Position
+from Util.constant import ROBOT_RADIUS
+from Util.constant import TeamColor
+from Util.geometry import clamp, compare_angle, wrap_to_pi
 from ai.Algorithm.evaluation_module import closest_player_to_point, best_passing_option, player_with_ball
-
 from ai.STA.Action.AllStar import AllStar
+from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Kick import Kick
+from ai.STA.Action.MoveToPosition import MoveToPosition
+from ai.STA.Action.ProtectGoal import ProtectGoal
 from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.tactic import Tactic
-from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.STA.Action.ProtectGoal import ProtectGoal
-from ai.STA.Action.GoBehind import GoBehind
 from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'

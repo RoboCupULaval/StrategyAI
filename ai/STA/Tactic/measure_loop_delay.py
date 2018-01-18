@@ -1,17 +1,16 @@
 # Under MIT license, see LICENSE.txt
+import time
 from typing import List, Optional
 
-from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
+from Util.Pose import Pose, Position
 
-from ai.states.game_state import GameState
+from RULEngine.GameDomainObjects.player import Player
+
+from ai.STA.Action.Idle import Idle
+from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.STA.Action.MoveToPosition import MoveToPosition
-from ai.STA.Action.Idle import Idle
-
-import time
+from ai.states.game_state import GameState
 
 MOVING_THRESHOLD = 10  # mm
 

@@ -1,15 +1,16 @@
 # Under MIT licence, see LICENCE.txt
+import random
 from typing import List
+
 import numpy as np
+from Util.Pose import Pose, Position
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
-from ai.STA.Tactic.tactic import Tactic
+from Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
+
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
-import random
 
 __author__ = 'RoboCupULaval'
 

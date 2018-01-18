@@ -1,6 +1,6 @@
+from RULEngine.Communication.sender.fake_sender import FakeSender
 from RULEngine.Communication.sender.grsim_command_sender import GrSimCommandSender
 from RULEngine.Communication.sender.serial_command_sender import SerialCommandSender
-from RULEngine.Communication.util.fake_sender import FakeSender
 from config.config_service import ConfigService
 
 
@@ -22,4 +22,3 @@ class RobotCommandSender:
             raise TypeError('{} is not a valid type for a RobotCommandSender.'.format(sender_type))
 
         return instance
-

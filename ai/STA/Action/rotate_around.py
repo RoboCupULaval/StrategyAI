@@ -1,16 +1,16 @@
 # Under MIT license, see LICENSE.txt
 
 import math as m
+from typing import Union
 
 from RULEngine.GameDomainObjects.player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.geometry import compare_angle, wrap_to_pi
 
-from ai.states.game_state import GameState
+from Util.ai_command import AICommand, AICommandType
+from Util.Pose import Pose
+from Util.geometry import compare_angle, wrap_to_pi
+
 from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType
-
-from typing import Union
+from ai.states.game_state import GameState
 
 DEFAULT_ROTATION_SPEED = 6*m.pi  # rad/s
 DEFAULT_RADIUS = 150  # mm
