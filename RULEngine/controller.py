@@ -14,7 +14,7 @@ from math import sin, cos, sqrt
 from config.config_service import ConfigService
 
 MAX_ROBOT = 12
-MAX_LINEAR_SPEED = 3000  # mm/s
+MAX_LINEAR_SPEED = 2000  # mm/s
 
 
 RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active')

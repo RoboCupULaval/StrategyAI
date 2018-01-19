@@ -33,6 +33,7 @@ class ReceiverBaseClass(Process, metaclass=ABCMeta):
         except KeyboardInterrupt:
             pass
         finally:
+            self.connection.close()
             self.logger.debug('Killed')
 
         exit(0)

@@ -3,6 +3,7 @@ import logging
 import sys
 from collections import namedtuple
 from multiprocessing import Process, Queue, Event
+from queue import Full
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
@@ -84,8 +85,15 @@ class Engine(Process):
             while not self.stop_event.is_set():
 
                 track_frame = self.tracker.update()
+                if track_frame['balls']:
+                    ball_pose = track_frame['balls'][0]['pose']
+                    ball_pose['orientation'] = 0
+                    self.ai_queue.put([AICommand(robot_id=0, target=ball_pose)])
+                try:
+                    self.game_state_queue.put(track_frame, block=False)
+                except Full:
+                    pass
 
-                self.game_state_queue.put(track_frame)
                 self.ui_send_queue.put(track_frame)
 
                 self.controller.update(track_frame)
@@ -95,7 +103,7 @@ class Engine(Process):
                     self.robot_cmd_queue.put(robot_packets_frame)
 
                 if self.vision_queue.qsize() == self.VISION_QUEUE_MAXSIZE:
-                    self.logger.info('Vision queue full. Frames will be lost.')
+                    self.logger.debug('Vision queue full. Frames will be lost.')
 
                 input_commands = [None for _ in range(12)]
                 for packet in robot_packets_frame.packet:
