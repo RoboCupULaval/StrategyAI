@@ -85,31 +85,12 @@ class Engine(Process):
             while not self.stop_event.is_set():
 
                 track_frame = self.tracker.update()
-                if track_frame['balls']:
-                    ball_pose = track_frame['balls'][0]['pose']
-                    ball_pose['orientation'] = 0
-                    self.ai_queue.put([AICommand(robot_id=0, target=ball_pose)])
-                try:
-                    self.game_state_queue.put(track_frame, block=False)
-                except Full:
-                    pass
+                robot_packets_frame = self.controller.execute(track_frame)
+                self.robot_cmd_queue.put(robot_packets_frame)
+                self.tracker.predict(robot_packets_frame.packet)
 
+                self.follow_ball(track_frame, robot_id=0)
                 self.ui_send_queue.put(track_frame)
-
-                self.controller.update(track_frame)
-                robot_packets_frame = self.controller.execute()
-
-                if robot_packets_frame.packet:
-                    self.robot_cmd_queue.put(robot_packets_frame)
-
-                if self.vision_queue.qsize() == self.VISION_QUEUE_MAXSIZE:
-                    self.logger.debug('Vision queue full. Frames will be lost.')
-
-                input_commands = [None for _ in range(12)]
-                for packet in robot_packets_frame.packet:
-                    input_commands[packet.robot_id] = packet.command
-
-                self.tracker.predict(input_commands)
 
         except KeyboardInterrupt:
             pass
@@ -118,5 +99,15 @@ class Engine(Process):
 
         sys.stdout.flush()
         exit(0)
+
+    def follow_ball(self, track_frame, robot_id):
+        if track_frame['balls']:
+            ball_pose = track_frame['balls'][0]['pose']
+            ball_pose['orientation'] = 0
+            self.ai_queue.put([AICommand(robot_id=robot_id, target=ball_pose)])
+        try:
+            self.game_state_queue.put(track_frame, block=False)
+        except Full:
+            pass
 
 

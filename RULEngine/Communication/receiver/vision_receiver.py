@@ -39,7 +39,7 @@ class VisionReceiver(ReceiverBaseClass):
             self.logger.error('VisionReceiver had trouble decoding a packet!')
             return
         try:
-            self.queue.put(protobuf_to_dict(packet))
-        except Full as e:
-            self.logger.debug('{}'.format(e))
+            self.queue.put(protobuf_to_dict(packet), block=False)
+        except Full:
+            self.logger.debug('Vision queue full. Frames will be lost.')
 

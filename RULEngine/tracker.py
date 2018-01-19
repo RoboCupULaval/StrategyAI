@@ -64,7 +64,11 @@ class Tracker:
             obs = np.array([ball_obs['x'], ball_obs['y']])
             self._balls.update(obs, self._current_timestamp)
 
-    def predict(self, input_commands):
+    def predict(self, robot_packet):
+
+        input_commands = [None for _ in range(12)]
+        for packet in robot_packet:
+            input_commands[packet.robot_id] = packet.command
 
         if self.team_color == 'yellow':
             for robot, input_cmd in zip(self._yellow_team, input_commands):
