@@ -6,7 +6,7 @@ from config.config_service import ConfigService
 
 class RobotCommandSender:
 
-    def __new__(cls, connection_info, queue, stop_event):
+    def __new__(cls, connection_info, queue):
 
         available_sender = {'disabled': FakeSender,
                             'sim':      GrSimCommandSender,
@@ -17,7 +17,7 @@ class RobotCommandSender:
         sender_class = available_sender.get(sender_type, None)
 
         if sender_class is not None:
-            instance = sender_class(connection_info, queue, stop_event)
+            instance = sender_class(connection_info, queue)
         else:
             raise TypeError('{} is not a valid type for a RobotCommandSender.'.format(sender_type))
 

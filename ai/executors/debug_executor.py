@@ -19,7 +19,7 @@ class DebugExecutor(metaclass=Singleton):
         self.play_executor_ref = PlayExecutor()
 
     def exec(self) -> None:
-        while True:
+        while not self.debug_queue.empty():
             try:
                 cmd = self.debug_queue.get(block=False)
                 cmd = STAChangeCommand(loads(cmd))

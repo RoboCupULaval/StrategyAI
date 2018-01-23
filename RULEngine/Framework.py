@@ -11,7 +11,7 @@ from config.config_service import ConfigService
 __author__ = "Maxime Gagnon-Legault"
 
 
-class Framework(object):
+class Framework:
     """
         La classe contient la logique nécessaire pour communiquer avec
         les différentes parties(simulation, vision, uidebug et/ou autres),
@@ -31,10 +31,6 @@ class Framework(object):
         # config
         self.cfg = ConfigService()
 
-        # Events
-        self.ai_terminating_event = Event()
-        self.engine_terminating_event = Event()
-
         # Queues
         self.game_state_queue = Queue()
         self.ai_queue = Queue()
@@ -42,11 +38,17 @@ class Framework(object):
         self.ui_recv_queue = Queue()
 
         # Engine
-        self.engine = Engine(self.game_state_queue, self.ai_queue, self.ui_send_queue, self.ui_recv_queue, self.engine_terminating_event)
+        self.engine = Engine(self.game_state_queue,
+                             self.ai_queue,
+                             self.ui_send_queue,
+                             self.ui_recv_queue)
         self.engine.start()
 
         # AI
-        self.coach = Coach(self.game_state_queue, self.ai_queue, self.ui_send_queue, self.ui_recv_queue, self.ai_terminating_event)
+        self.coach = Coach(self.game_state_queue,
+                           self.ai_queue,
+                           self.ui_send_queue,
+                           self.ui_recv_queue)
         self.coach.start()
 
         # end signal - do you like to stop gracefully? DO NOT MOVE! MUST BE PLACED AFTER PROCESSES
@@ -56,16 +58,14 @@ class Framework(object):
         signal.pause()
 
     def stop_game(self):
-        self.logger.info('STOP GAME')
-
-        self.engine_terminating_event.set()
         self.engine.terminate()
-
-        self.ai_terminating_event.set()
-        self.coach.join(1)
+        self.coach.terminate()
 
         exit(0)
 
     # noinspection PyUnusedLocal
+    # pylint: disable=unused-argument
     def _sigint_handler(self, *args):
+        self.logger.info("*************************")
+        self.logger.info("Received interrupt signal from the os. Starting shutdown sequence")
         self.stop_game()

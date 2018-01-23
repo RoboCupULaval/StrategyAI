@@ -12,7 +12,7 @@ from config.config_service import ConfigService
 
 class Coach(Process):
 
-    def __init__(self, game_state_queue: Queue, ai_queue: Queue, ui_send_queue: Queue, ui_recv_queue: Queue, stop_event: Event):
+    def __init__(self, game_state_queue: Queue, ai_queue: Queue, ui_send_queue: Queue, ui_recv_queue: Queue):
         """
         Initialise l'IA.
         Celui-ci s'occupe d'appeler tout les morceaux de l'ia dans le bon ordre pour prendre une décision de jeu
@@ -32,9 +32,6 @@ class Coach(Process):
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
 
-        # Event to know when to stop
-        self.stop_event = stop_event
-
         # the states
         self.game_state = None
         self.play_state = None
@@ -47,13 +44,13 @@ class Coach(Process):
         self.game_state = GameState()
         self.play_state = PlayState()
 
-        self.debug_executor = DebugExecutor() #todo put the queue in when simon will have pushed MGL 2017/01/08
+        self.debug_executor = DebugExecutor(self.ui_recv_queue)
         # self.play_executor = PlayExecutor()
 
     def main_loop(self) -> None:
-        while not self.stop_event.is_set():
+        while True:
             self.debug_executor.exec()
-        self.play_executor.exec()
+        # self.play_executor.exec()
 
     def run(self) -> None:
         self.initialize()

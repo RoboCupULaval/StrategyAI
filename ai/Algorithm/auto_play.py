@@ -21,9 +21,11 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
         self.next_state = None
         self.last_state = None
 
+    # todo check usage, doesn't seem to be used
     def get_selected_strategy(self):
         return self.selected_strategy
 
+    # todo check usage, doesn't seem to be used
     @property
     def info(self):
         return {

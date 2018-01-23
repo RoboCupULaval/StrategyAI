@@ -1,3 +1,5 @@
+# Under MIT License, see LICENSE.txt
+__author__ = "Maxime Gagnon-Legault, Simon Bouchard"
 
 import logging
 import sys
@@ -30,13 +32,15 @@ class Engine(Process):
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
     REFEREE_QUEUE_MAXSIZE = 100
 
-    def __init__(self, game_state_queue: Queue, ai_queue: Queue, ui_send_queue: Queue, ui_recv_queue: Queue, stop_event: Event):
+    def __init__(self, game_state_queue: Queue,
+                 ai_queue: Queue,
+                 ui_send_queue: Queue,
+                 ui_recv_queue: Queue):
         super(Engine, self).__init__(name=__name__)
 
         self.logger = logging.getLogger('Engine')
         self.cfg = ConfigService()
         self.team_color = self.cfg.config_dict['GAME']['our_color']
-        self.stop_event = stop_event
 
         self.vision_queue = Queue(self.VISION_QUEUE_MAXSIZE)
         self.ui_send_queue = ui_send_queue
@@ -48,18 +52,18 @@ class Engine(Process):
         vision_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'],
                                   int(self.cfg.config_dict['COMMUNICATION']['vision_port']))
 
-        self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_queue, self.stop_event)
+        self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_queue)
 
         ui_debug_host = self.cfg.config_dict['COMMUNICATION']['ui_debug_address']
         ui_sender_connection_info = (ui_debug_host, int(self.cfg.config_dict['COMMUNICATION']['ui_cmd_sender_port']))
         ui_recver_connection_info = (ui_debug_host, int(self.cfg.config_dict['COMMUNICATION']['ui_cmd_receiver_port']))
 
-        self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue, self.stop_event)
-        self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue, self.stop_event)
+        self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue)
+        self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue)
 
         robot_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'], 20011)
 
-        self.robot_cmd_sender = RobotCommandSender(robot_connection_info, self.robot_cmd_queue, self.stop_event)
+        self.robot_cmd_sender = RobotCommandSender(robot_connection_info, self.robot_cmd_queue)
 
         self.tracker = Tracker(self.vision_queue)
         self.controller = Controller(self.ai_queue)
@@ -80,7 +84,7 @@ class Engine(Process):
                            AICommand(robot_id=5, target={'x': 0, 'y': 2000, 'orientation': 0})])
 
         try:
-            while not self.stop_event.is_set():
+            while True:
 
                 track_frame = self.tracker.execute()
 

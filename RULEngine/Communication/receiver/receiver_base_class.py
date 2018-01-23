@@ -7,11 +7,10 @@ import logging
 
 class ReceiverBaseClass(Process, metaclass=ABCMeta):
 
-    def __init__(self, connection_info: Tuple, queue: Queue, stop_event: Event):
+    def __init__(self, connection_info: Tuple, queue: Queue):
         super().__init__()
 
         self.queue = queue
-        self.stop_event = stop_event
         self.daemon = True
         self.logger = logging.getLogger(self.__class__.__name__)
         self.connection = self.connect(connection_info)
@@ -27,13 +26,9 @@ class ReceiverBaseClass(Process, metaclass=ABCMeta):
     def run(self):
         self.logger.info('Running')
         try:
-
-            while not self.stop_event.is_set():
+            while True:
                 self.receive_packet()
-
+        except KeyboardInterrupt:
+            pass
         finally:
             self.logger.info('Killed')
-
-        exit(0)
-
-

@@ -21,9 +21,9 @@ def set_arg_parser():
 
 if __name__ == '__main__':
     # parser for command line arguments
-    parser = set_arg_parser()
-    args = parser.parse_args()
-    ConfigService().load_file(args.config_file)
+    PARSER = set_arg_parser()
+    ARGS = PARSER.parse_args()
+    ConfigService().load_file(ARGS.config_file)
 
     # RULEngine init
-    framework = Framework()
+    FRAMEWORK = Framework()

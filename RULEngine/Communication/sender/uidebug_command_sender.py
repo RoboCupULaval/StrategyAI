@@ -35,4 +35,3 @@ class UIDebugCommandSender(SenderBaseClass):
         for ball in balls:
             cmd = UIDebugCommandFactory.ball(ball['pose'])
             self.connection.send(pickle.dumps(cmd))
-

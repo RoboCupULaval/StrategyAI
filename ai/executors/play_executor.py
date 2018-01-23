@@ -2,6 +2,8 @@
 
 __author__ = "Maxime Gagnon-Legault"
 
+import logging
+
 from Util.singleton import Singleton
 from Util.role import Role
 from config.config_service import ConfigService
@@ -14,12 +16,8 @@ from ai.states.play_state import PlayState
 class PlayExecutor(metaclass=Singleton):
 
     def __init__(self):
-        """
-        initialise le PlayExecutor
-
-        :param p_world_state: (WorldState) instance du worldstate
-        """
         super().__init__()
+        self.logger = logging.getLogger(self.__class__.__name__)
         cfg = ConfigService()
         self.auto_play = SimpleAutoPlay()
         PlayState().autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"

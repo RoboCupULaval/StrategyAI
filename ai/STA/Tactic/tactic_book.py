@@ -26,11 +26,12 @@ from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.face_target import FaceTarget
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
 
-try:
-    from ai.STA.Tactic.joystick import Joystick
-except ImportError:
-    import warnings
-    warnings.warn('Pygame is not installed, disabling Joystick tactic.', stacklevel=1)
+# try:
+#     from ai.STA.Tactic.joystick import Joystick
+# except ImportError as e:
+#     import warnings
+#     warnings.warn(str(e), stacklevel=1)
+#     warnings.warn('Pygame is not installed, disabling Joystick tactic.', stacklevel=1)
 
 
 class TacticBook(object):
@@ -62,8 +63,8 @@ class TacticBook(object):
             'StayAwayFromBall': StayAwayFromBall,
             'Stop': Stop,
         }
-        if 'Joystick' in sys.modules:
-            self.tactic_book['Joystick'] = Joystick
+        # if 'Joystick' in sys.modules:
+        #     self.tactic_book['Joystick'] = Joystick
 
     def get_tactics_name_list(self) -> List[str]:
         """
