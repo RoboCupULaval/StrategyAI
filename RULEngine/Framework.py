@@ -32,7 +32,7 @@ class Framework:
         self.cfg = ConfigService()
 
         # Queues
-        self.game_state_queue = Queue()
+        self.game_state_queue = Queue(maxsize=1)
         self.ai_queue = Queue()
         self.ui_send_queue = Queue()
         self.ui_recv_queue = Queue()

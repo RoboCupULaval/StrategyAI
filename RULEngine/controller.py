@@ -9,7 +9,7 @@ from collections import namedtuple
 
 from Util.PID import PID
 
-from math import sin, cos, sqrt
+from math import sin, cos, sqrt, atan2
 
 from config.config_service import ConfigService
 
@@ -17,13 +17,14 @@ MAX_ROBOT = 12
 MAX_LINEAR_SPEED = 2000  # mm/s
 
 
-RobotState = namedtuple('RobotState', 'robot_id command kick_type kick_force dribbler_active')
-RobotPacket = namedtuple('RobotPacket', 'timestamp is_team_yellow robots_states')
+RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active')
+RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow packet')
 
 
 class Robot:
 
-    __slots__ = ('_robot_id', 'controller', 'target', 'pose', 'velocity', 'kick_type', 'kick_force', 'dribbler_active')
+    __slots__ = ('_robot_id', 'controller', 'target', 'pose', 'velocity',
+                 'kick_type', 'kick_force', 'dribbler_active', 'input_command')
 
     def __init__(self, robot_id, controller):
         self._robot_id = robot_id
@@ -34,6 +35,7 @@ class Robot:
         self.kick_type = None
         self.kick_force = 0
         self.dribbler_active = False
+        self.input_command = None
 
     @property
     def robot_id(self):
@@ -43,8 +45,8 @@ class Robot:
 def get_control_setting(game_type: str):
 
     if game_type == 'sim':
-        translation = {'kp': .7, 'ki': 0.000001, 'kd': 0.001}
-        rotation = {'kp': 0.5, 'ki': 0, 'kd': 0.00001}
+        translation = {'kp': 0.75, 'ki': .10, 'kd': 0}
+        rotation = {'kp': .75, 'ki': 0.15, 'kd': 0}
     elif game_type == 'real':
         translation = {'kp': .01, 'ki': 0.0005, 'kd': 0}
         rotation = {'kp': .01, 'ki': 0.0035, 'kd': 0.0001}
@@ -71,11 +73,31 @@ class Controller(list):
 
         super().__init__(Robot(robot_id, PositionControl(control_setting)) for robot_id in range(MAX_ROBOT))
 
-    def update(self, track_frame: Dict):
-        self.timestamp = track_frame['timestamp']
-        our_robots = track_frame[self.team_color]
+    def execute(self, track_frame: Dict) -> RobotPacketFrame:
 
-        for robot in our_robots:
+        self.timestamp = track_frame['timestamp']
+        self.update_robots_states(track_frame[self.team_color])
+        self.update_ai_commands()
+
+        packet = RobotPacketFrame(timestamp=self.timestamp,
+                                  is_team_yellow=True if self.team_color == 'yellow' else False,
+                                  packet=[])
+
+        active_robots = iter(robot for robot in self
+                             if robot.pose is not None and robot.target is not None)
+
+        for robot in active_robots:
+            command = robot.controller.execute(robot.target, robot.pose)
+            packet.packet.append(RobotPacket(robot_id=robot.robot_id,
+                                             command=command,
+                                             kick_type=robot.kick_type,
+                                             kick_force=robot.kick_force,
+                                             dribbler_active=robot.dribbler_active))
+
+        return packet
+
+    def update_robots_states(self, robots_states):
+        for robot in robots_states:
             robot_id = robot['id']
             self[robot_id].pose = {'x': robot['pose']['x'],
                                    'y': robot['pose']['y'],
@@ -84,6 +106,7 @@ class Controller(list):
                                        'y': robot['velocity']['y'],
                                        'orientation': robot['velocity']['orientation']}
 
+    def update_ai_commands(self):
         try:
             ai_commands = self.ai_queue.get(block=False)
             for cmd in ai_commands:
@@ -96,28 +119,9 @@ class Controller(list):
         except Empty:
             pass
 
-    def execute(self) -> RobotPacket:
-
-        packet = RobotPacket(timestamp=self.timestamp,
-                             is_team_yellow=True if self.team_color == 'yellow' else False,
-                             robots_states=[])
-
-        active_robots = iter(robot for robot in self
-                             if robot.pose is not None and robot.target is not None)
-
-        for robot in active_robots:
-
-            command = robot.controller.execute(robot.target, robot.pose)
-            packet.robots_states.append(RobotState(robot_id=robot.robot_id,
-                                                   command=command,
-                                                   kick_type=robot.kick_type,
-                                                   kick_force=robot.kick_force,
-                                                   dribbler_active=robot.dribbler_active))
-
-        return packet
-
 
 class PositionControl:
+
     def __init__(self, control_setting: Dict):
         self.control_setting = control_setting
         self.controllers = {'x': PID(**self.control_setting['translation']),
@@ -142,7 +146,24 @@ class PositionControl:
 
 
 class VelocityControl:
-    pass
+
+    def __init__(self, control_setting: Dict):
+        self.orientation_controller = PID(**control_setting['rotation'], wrap_error=True)
+
+    def execute(self, target, pose):
+
+        error = {state: target[state] - pose[state] for state in pose}
+
+        x_cmd, y_cmd = rotate(error['x'], error['y'], -pose['orientation'])
+
+        command = {'x': x_cmd, 'y': y_cmd, 'orientation': self.orientation_controller.execute(error['orientation'])}
+
+        overspeed_factor = sqrt(command['x'] ** 2 + command['y'] ** 2) / MAX_LINEAR_SPEED
+        if overspeed_factor > 1:
+            command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / overspeed_factor
+
+        return command
+
 
 def rotate(x: float, y: float, angle: float):
       return [cos(angle) * x - sin(angle) * y, sin(angle) * x + cos(angle) * y]

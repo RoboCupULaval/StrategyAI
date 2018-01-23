@@ -5,6 +5,7 @@ import logging
 import sys
 from collections import namedtuple
 from multiprocessing import Process, Queue, Event
+from queue import Full
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
@@ -26,8 +27,8 @@ class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dr
 
 
 class Engine(Process):
-    VISION_QUEUE_MAXSIZE = 4*60
-    ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 24
+    VISION_QUEUE_MAXSIZE = 4
+    ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
     REFEREE_QUEUE_MAXSIZE = 100
@@ -77,27 +78,23 @@ class Engine(Process):
 
         self.logger.debug('Running')
 
-        self.ai_queue.put([AICommand(robot_id=1, target={'x': 0, 'y': -2000, 'orientation': 0}),
-                           AICommand(robot_id=2, target={'x': 0, 'y': -1000, 'orientation': 0}),
-                           AICommand(robot_id=3, target={'x': 0, 'y': 0, 'orientation': 0}),
-                           AICommand(robot_id=4, target={'x': 0, 'y': 1000, 'orientation': 0}),
-                           AICommand(robot_id=5, target={'x': 0, 'y': 2000, 'orientation': 0})])
+        self.ai_queue.put([AICommand(robot_id=0, target={'x': -4200, 'y': 0, 'orientation': 0}),
+                           AICommand(robot_id=1, target={'x': -90, 'y': -2000, 'orientation': 0}),
+                           AICommand(robot_id=2, target={'x': -90, 'y': -1000, 'orientation': 0}),
+                           AICommand(robot_id=3, target={'x': -590, 'y': 0, 'orientation': 0}),
+                           AICommand(robot_id=4, target={'x': -90, 'y': 1000, 'orientation': 0}),
+                           AICommand(robot_id=5, target={'x': -90, 'y': 2000, 'orientation': 0})])
 
         try:
             while True:
 
-                track_frame = self.tracker.execute()
+                track_frame = self.tracker.update()
+                robot_packets_frame = self.controller.execute(track_frame)
+                self.robot_cmd_queue.put(robot_packets_frame)
+                self.tracker.predict(robot_packets_frame.packet)
 
-                self.game_state_queue.put(track_frame)
+                self.follow_ball(track_frame, robot_id=0)
                 self.ui_send_queue.put(track_frame)
-
-                self.controller.update(track_frame)
-                robot_packets = self.controller.execute()
-                if robot_packets.robots_states:
-                    self.robot_cmd_queue.put(robot_packets)
-
-                if self.vision_queue.qsize() == self.VISION_QUEUE_MAXSIZE:
-                    self.logger.info('Vision queue full. Frames will be lost.')
 
         except KeyboardInterrupt:
             pass
@@ -106,5 +103,15 @@ class Engine(Process):
 
         sys.stdout.flush()
         exit(0)
+
+    def follow_ball(self, track_frame, robot_id):
+        if track_frame['balls']:
+            ball_pose = track_frame['balls'][0]['pose']
+            ball_pose['orientation'] = 0
+            self.ai_queue.put([AICommand(robot_id=robot_id, target=ball_pose)])
+        try:
+            self.game_state_queue.put(track_frame, block=False)
+        except Full:
+            pass
 
 

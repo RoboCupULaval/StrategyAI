@@ -35,35 +35,34 @@ class RobotFilter(KalmanFilter):
                          [0, 0, 0, 0, 1, 0]])  # Orientation
 
     def control_input_model(self):
-        return np.array([[0, 0, 0],   # Position x
-                         [1, 0, 0],   # Speed x
-                         [0, 0, 0],   # Position y
-                         [0, 1, 0],   # Speed y
-                         [0, 0, 0],   # Position Theta
-                         [0, 0, 1]])  # Speed Theta
+        return np.array([[0,       0,       0],   # Position x
+                         [self.dt, 0,       0],   # Speed x
+                         [0,       0,       0],   # Position y
+                         [0,       self.dt, 0],   # Speed y
+                         [0,       0,       0],   # Position Theta
+                         [0,       0, self.dt]])  # Speed Theta
 
     def initial_state_covariance(self):
         return 10 ** 6 * np.eye(self.state_number)
 
     def process_covariance(self):
-        return np.diag([.000005, .05, 0.000005, .05, 0.0001, 1.0])
+        return np.diag([.5, 5, 0.5, 5, 0.1, .1])
 
     def observation_covariance(self):
         if fabs(self.x[0]) < 30 or fabs(self.x[2]) < 30:
-            R = np.diag([50, 50, 0.00005])
+            R = np.diag([50, 50, 0.01])
         else:
-            R = np.diag([10, 10, 0.00005])
+            R = np.diag([10, 10, 0.01])
         return R
 
     def update(self, observation, t_capture):
-
         error = observation - self.observation_model() @ self.x
         error[2] = RobotFilter.wrap_to_pi(error[2])
 
         self._update(error, t_capture)
 
-    def predict(self):
-        self._predict()
+    def predict(self, input_command=None):
+        self._predict(input_command)
         self.x[4] = self.wrap_to_pi(self.x[4])
 
     @staticmethod

@@ -23,7 +23,7 @@ class SenderBaseClass(Process, metaclass=ABCMeta):
         pass
 
     def run(self):
-        self.logger.info('Running')
+        self.logger.debug('Running')
         try:
             while True:
                 self.send_packet()
@@ -31,3 +31,5 @@ class SenderBaseClass(Process, metaclass=ABCMeta):
             pass
         finally:
             self.logger.info('Killed')
+
+        exit(0)

@@ -20,21 +20,21 @@ class GrSimCommandSender(SenderBaseClass):
         self.connection.send(packet.SerializeToString())
 
     @staticmethod
-    def _create_protobuf_packet(packet) -> grSim_Packet.grSim_Packet:
+    def _create_protobuf_packet(packets_frame) -> grSim_Packet.grSim_Packet:
         grsim_packet = grSim_Packet.grSim_Packet()
 
-        grsim_packet.commands.isteamyellow = packet.is_team_yellow
-        grsim_packet.commands.timestamp = packet.timestamp if packet.timestamp is not None else 0
+        grsim_packet.commands.isteamyellow = packets_frame.is_team_yellow
+        grsim_packet.commands.timestamp = packets_frame.timestamp if packets_frame.timestamp is not None else 0
 
-        for robot_state in packet.robots_states:
+        for packet in packets_frame.packet:
             grsim_command = grsim_packet.commands.robot_commands.add()
-            grsim_command.id = robot_state.robot_id
+            grsim_command.id = packet.robot_id
             grsim_command.wheelsspeed = False
-            grsim_command.veltangent = robot_state.command['x']/1000
-            grsim_command.velnormal = robot_state.command['y']/1000
-            grsim_command.velangular = robot_state.command['orientation']
-            grsim_command.spinner = robot_state.dribbler_active
-            grsim_command.kickspeedx = robot_state.kick_force
+            grsim_command.veltangent = packet.command['x']/1000
+            grsim_command.velnormal = packet.command['y']/1000
+            grsim_command.velangular = packet.command['orientation']
+            grsim_command.spinner = packet.dribbler_active
+            grsim_command.kickspeedx = packet.kick_force
             grsim_command.kickspeedz = 0
 
         return grsim_packet

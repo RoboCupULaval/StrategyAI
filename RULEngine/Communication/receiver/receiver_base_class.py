@@ -24,11 +24,14 @@ class ReceiverBaseClass(Process, metaclass=ABCMeta):
         pass
 
     def run(self):
-        self.logger.info('Running')
+        self.logger.debug('Running')
         try:
             while True:
                 self.receive_packet()
         except KeyboardInterrupt:
             pass
         finally:
-            self.logger.info('Killed')
+            self.connection.close()
+            self.logger.debug('Killed')
+
+        exit(0)
