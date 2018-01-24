@@ -3,7 +3,7 @@ import time
 
 from multiprocessing import Queue
 
-from Debug.uidebug_command_factory import UIDebugCommandFactory
+from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from Util.role import Role
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.executors.executor import Executor
@@ -14,7 +14,7 @@ from config.config_service import ConfigService
 
 class PlayExecutor(Executor):
 
-    def __init__(self, ui_recv_queue: Queue):
+    def __init__(self, ui_send_queue: Queue):
         """
         initialise le PlayExecutor
 
@@ -27,7 +27,7 @@ class PlayExecutor(Executor):
         self.last_time = 0
         self.last_available_players = {}
         self.goalie_id = -1
-        self.ui_recv_queue = ui_recv_queue
+        self.ui_send_queue = ui_send_queue
 
     def exec(self) -> None:
         """
@@ -74,8 +74,8 @@ class PlayExecutor(Executor):
                        'tactic': PlayState().tactic_book.get_tactics_name_list(),
                        'action': ['None']}
 
-        msg = UIDebugCommandFactory().send_books(cmd_tactics)
-        self.ui_recv_queue.put(msg)
+        msg = UIDebugCommandFactory().books(cmd_tactics)
+        self.ui_send_queue.put(msg)
 
 
     def _has_available_players_changed(self) -> bool:

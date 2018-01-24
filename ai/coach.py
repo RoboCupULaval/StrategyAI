@@ -18,7 +18,7 @@ class Coach(Process):
         Initialise l'IA.
         Celui-ci s'occupe d'appeler tout les morceaux de l'ia dans le bon ordre pour prendre une décision de jeu
         """
-        super(Coach, self).__init__(name=__name__)
+        super(Coach, self).__init__(name="Coach")
 
         self.logger = logging.getLogger("Coach")
         self.cfg = ConfigService()
@@ -49,11 +49,12 @@ class Coach(Process):
         self.play_state = PlayState()
 
         # self.debug_executor = DebugExecutor()
-        self.play_executor = PlayExecutor(self.ui_recv_queue)
+        self.play_executor = PlayExecutor(self.ui_send_queue)
 
     def main_loop(self) -> None:
         while not self.stop_event.is_set():
             last_game_state = self._get_last_game_state()
+            self.game_state.update(last_game_state)
             # self.debug_executor.exec()
             self.play_executor.exec()
             sleep(0.05)
@@ -67,8 +68,8 @@ class Coach(Process):
 
     def _get_last_game_state(self):
         # This is a way to get the last available gamestate, it's probably should not be a queue
-        size = self.game_state_queue.size()
+        size = self.game_state_queue.qsize()
 
         for _ in range(0, size -1):
-            self.game_state_queue.pop()
-        return self.game_state_queue.pop()
+            self.game_state_queue.get()
+        return self.game_state_queue.get()

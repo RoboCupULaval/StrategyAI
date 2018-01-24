@@ -1,8 +1,12 @@
 # Under MIT License, see LICENSE.txt
+from RULEngine.GameDomainObjects.ball import Ball
 from RULEngine.GameDomainObjects.game import Game
+from RULEngine.GameDomainObjects.team import Team
+from Util.constant import TeamColor
 from Util.role import Role
 from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
+from config.config_service import ConfigService
 
 
 class GameState(object, metaclass=Singleton):
@@ -14,12 +18,25 @@ class GameState(object, metaclass=Singleton):
         self._game = Game()
         self.our_team_color = None
         self.field = None
-        self.my_team = None
-        self.other_team = None
         self.timestamp = 0
         self.const = None
         self._role_mapper = RoleMapper()
         self.delta_t = None
+
+        cfg = ConfigService()
+        if cfg.config_dict["GAME"]["our_color"] == "blue":
+            self.my_team = self._game.blue_team
+            self.their_team = self._game.yellow_team
+        else:
+            self.my_team = self._game.blue_team
+            self.their_team = self._game.yellow_team
+
+
+    def update(self, new_game_state):
+        self._game.blue_team.update(new_game_state['blue'])
+        self._game.yellow_team.update(new_game_state['blue'])
+
+        self.game._balls = [Ball.from_dict(msg_ball) for msg_ball in new_game_state['balls']]
 
     def get_player_by_role(self, role: Role):
         return self._role_mapper.roles_translation[role]

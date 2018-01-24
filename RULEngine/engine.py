@@ -9,6 +9,7 @@ from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCom
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.robot_command_sender import RobotCommandSender
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
+from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 
 from RULEngine.controller import Controller
 from RULEngine.tracker import Tracker
@@ -90,7 +91,7 @@ class Engine(Process):
                 self.tracker.predict(robot_packets_frame.packet)
 
                 self.follow_ball(track_frame, robot_id=0)
-                self.ui_send_queue.put(track_frame)
+                self.ui_send_queue.put(UIDebugCommandFactory().track_frame(track_frame))
 
         except KeyboardInterrupt:
             pass

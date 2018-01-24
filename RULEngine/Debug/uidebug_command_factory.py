@@ -81,7 +81,7 @@ class UIDebugCommandFactory(metaclass=Singleton):
 
     # TODO make this better maybe?
     @staticmethod
-    def send_books(cmd_tactics_dict: Dict):
+    def books(cmd_tactics_dict: Dict):
         """
         of the form:
         cmd_tactics = {'strategy': strategybook.get_strategies_name_list(),
@@ -98,6 +98,25 @@ class UIDebugCommandFactory(metaclass=Singleton):
                                             'action': action,
                                             'target': target}}}
         return DebugCommand(1002, data)
+
+    @staticmethod
+    def track_frame(track_frame):
+        cmd = []
+        cmd += UIDebugCommandFactory().robots(track_frame['blue'])
+        cmd += UIDebugCommandFactory().robots(track_frame['yellow'])
+        cmd += UIDebugCommandFactory().balls(track_frame['balls'])
+        return cmd
+
+
+    def robots(self, robots):
+        cmd = []
+        for robot in robots:
+            circle, line = UIDebugCommandFactory.robot(robot['pose'])
+            cmd += [circle, line]
+        return cmd
+
+    def balls(self, balls):
+        return [UIDebugCommandFactory.ball(ball['pose']) for ball in balls]
 
     @staticmethod
     def team_color_cmd(team_color: TeamColor = None):

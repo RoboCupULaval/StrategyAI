@@ -1,17 +1,24 @@
+from typing import List
+
 from RULEngine.GameDomainObjects.ball import Ball
 from Util.Position import Position
 
 
 class Field:
-    def __init__(self, ball: Ball):
-        assert isinstance(ball, Ball)
+    def __init__(self, balls: List[Ball]):
 
-        self._ball = Ball
+        self._balls = balls
         self._constant = constant
 
     @property
     def ball(self):
-        return self._ball
+        if len(self._balls) == 0:
+            raise RuntimeError("There is no ball to detect")
+        return self._balls[0]
+
+    @property
+    def balls(self):
+        return self._balls
 
     @property
     def constant(self):

@@ -16,10 +16,12 @@ class UIDebugCommandSender(SenderBaseClass):
     def send_packet(self):
 
         try:
-            track_frame = self.queue.get()
-            self.send_robots_position(track_frame['blue'])
-            self.send_robots_position(track_frame['yellow'])
-            self.send_balls_position(track_frame['balls'])
+            cmds = self.queue.get()
+            if not isinstance(cmds, list):
+                cmds = [cmds]
+
+            for cmd in cmds:
+                self.connection.send(pickle.dumps(cmd))
         except ConnectionRefusedError:
             pass
 

@@ -1,11 +1,25 @@
 # Under MIT License, see LICENSE.txt
+from typing import Dict
+
+from Util.Pose import Pose
 from Util.Position import Position
 
 
 class Ball:
-    def __init__(self):
+    def __init__(self, id):
+        self._id = id
         self._position = Position()
         self._velocity = Position()
+
+    @property
+    def id(self) -> int:
+        return self._id
+
+    @id.setter
+    def id(self, value) -> None:
+        assert isinstance(value, int)
+        assert 0 <= value
+        self._id = value
 
     @property
     def position(self) -> Position:
@@ -24,3 +38,11 @@ class Ball:
     def velocity(self, value) -> None:
         assert isinstance(value, Position)
         self._velocity = value
+
+    @classmethod
+    def from_dict(cls, dict: Dict):
+        b = Ball(dict["id"])
+        b.position = Pose.from_dict(dict["pose"]).position
+        b.velocity.x = dict["velocity"]["x"]
+        b.velocity.y = dict["velocity"]["y"]
+        return b
