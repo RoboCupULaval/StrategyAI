@@ -40,3 +40,9 @@ class STAChangeCommand:
             return STAType.AUTONOMOUS_PLAY
         else:
             return STAType.NONE
+
+    def is_tactic_change_command(self):
+        return self.type == TACTIC_COMMAND_TYPE
+
+    def is_strategy_change_command(self):
+        return self.type == STRATEGY_COMMAND_TYPE

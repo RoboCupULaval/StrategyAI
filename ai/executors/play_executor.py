@@ -24,7 +24,8 @@ class PlayExecutor(metaclass=Singleton):
 
         cfg = ConfigService()
         self.auto_play = SimpleAutoPlay()
-        PlayState().autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
+        self.play_state = PlayState()
+        self.play_state.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
         self.last_available_players = {}
         self.goalie_id = -1
 
@@ -46,6 +47,16 @@ class PlayExecutor(metaclass=Singleton):
         # self._send_auto_state()
 
     def order_change_of_sta(self, cmd: STAChangeCommand):
+        if cmd.is_strategy_change_command():
+            self._change_strategy(cmd)
+        elif cmd.is_tactic_change_command():
+            self._change_tactic(cmd)
+
+    def _change_strategy(self, cmd: STAChangeCommand):
+        new_strategy = self.play_state.get_new_strategy(cmd.data)
+        self.play_state.set_strategy(new_strategy)
+
+    def _change_tactic(self, cmd: STAChangeCommand):
         pass
 
     def _execute_strategy(self) -> None:

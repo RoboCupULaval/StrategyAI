@@ -15,6 +15,8 @@ from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from ai.states.play_state import PlayState
 
 
+
+
 class DebugExecutor(metaclass=Singleton):
     def __init__(self, debug_queue: Queue):
         self.logger = logging.getLogger("DebugExecutor")
@@ -118,3 +120,4 @@ class DebugExecutor(metaclass=Singleton):
     #         hc = HumanControl(self.ws.game_state)
     #         hc.assign_tactic(tactic, player_id)
     #         self.ws.play_state.set_strategy(hc)
+
