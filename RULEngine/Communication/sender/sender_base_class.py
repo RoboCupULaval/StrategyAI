@@ -30,6 +30,6 @@ class SenderBaseClass(Process, metaclass=ABCMeta):
         except KeyboardInterrupt:
             pass
         finally:
-            self.logger.info('Killed')
+            self.logger.debug('Killed')
 
         exit(0)

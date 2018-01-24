@@ -166,4 +166,4 @@ class VelocityControl:
 
 
 def rotate(x: float, y: float, angle: float):
-      return [cos(angle) * x - sin(angle) * y, sin(angle) * x + cos(angle) * y]
+    return [cos(angle) * x - sin(angle) * y, sin(angle) * x + cos(angle) * y]

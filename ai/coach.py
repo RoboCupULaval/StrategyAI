@@ -1,8 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
 import logging
-from multiprocessing import Process, Queue, Event
+from multiprocessing import Process, Queue
 
+from RULEngine.services.team_color_service import TeamColorService
 from ai.executors.debug_executor import DebugExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.states.game_state import GameState
@@ -33,6 +34,7 @@ class Coach(Process):
         self.ui_recv_queue = ui_recv_queue
 
         # the states
+        self.team_color_service = TeamColorService()
         self.game_state = None
         self.play_state = None
 
@@ -41,7 +43,7 @@ class Coach(Process):
         self.play_executor = None
 
     def initialize(self) -> None:
-        self.game_state = GameState()
+        self.game_state = GameState(self.game_state_queue)
         self.play_state = PlayState()
 
         self.debug_executor = DebugExecutor(self.ui_recv_queue)
@@ -50,7 +52,7 @@ class Coach(Process):
     def main_loop(self) -> None:
         while True:
             self.debug_executor.exec()
-        # self.play_executor.exec()
+            # self.play_executor.exec()
 
     def run(self) -> None:
         self.initialize()

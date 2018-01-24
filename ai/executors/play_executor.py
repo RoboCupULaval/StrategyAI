@@ -16,8 +16,8 @@ from ai.states.play_state import PlayState
 class PlayExecutor(metaclass=Singleton):
 
     def __init__(self):
-        super().__init__()
         self.logger = logging.getLogger(self.__class__.__name__)
+
         cfg = ConfigService()
         self.auto_play = SimpleAutoPlay()
         PlayState().autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
@@ -73,7 +73,7 @@ class PlayExecutor(metaclass=Singleton):
     #     self.ws.debug_interface.send_books(cmd_tactics)
 
     def _has_available_players_changed(self) -> bool:
-        available_players = GameState().my_team.available_players
+        available_players = GameState().our_team.available_players
         player_change = False
         for i in available_players:
             if i not in self.last_available_players:

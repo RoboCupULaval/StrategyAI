@@ -66,6 +66,4 @@ class Framework:
     # noinspection PyUnusedLocal
     # pylint: disable=unused-argument
     def _sigint_handler(self, *args):
-        self.logger.info("*************************")
-        self.logger.info("Received interrupt signal from the os. Starting shutdown sequence")
         self.stop_game()

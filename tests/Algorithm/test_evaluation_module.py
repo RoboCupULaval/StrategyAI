@@ -114,7 +114,7 @@ class TestEvaluationModule(unittest.TestCase):
     def _create_mock_teams(self, allies, opponents):
         team1 = create_autospec(Team)
         team1.available_players = allies
-        GameState().my_team = team1
+        GameState().our_team = team1
 
         team2 = create_autospec(Team)
         team2.available_players = opponents

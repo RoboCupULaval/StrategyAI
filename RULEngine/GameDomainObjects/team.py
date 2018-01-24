@@ -1,5 +1,8 @@
 # Under MIT License, see LICENSE.txt
-from typing import Dict
+
+__author__ = "Maxime Gagnon-Legault"
+
+from typing import Dict, List
 
 from RULEngine.services.team_color_service import TeamColor
 
@@ -11,6 +14,10 @@ class Team:
         self._team_color = team_color
         self._players = {}
         self._onplay_players = {}
+
+    def update(self, players_data: List):
+        for i, player_data in enumerate(players_data):
+            self.players[i].update(players_data)
 
     @property
     def team_color(self) -> TeamColor:

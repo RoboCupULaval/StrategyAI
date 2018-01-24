@@ -25,7 +25,7 @@ def closest_players_to_point(point: Position, our_team=None):
     # our_team pour obtenir une liste contenant une équipe en particulier
     list_player = []
     if our_team or our_team is None:
-        for i in GameState().my_team.available_players.values():
+        for i in GameState().our_team.available_players.values():
             # les players friends
             player_distance = (i.pose.position - point).norm()
             list_player.append(PlayerPosition(i, player_distance))
@@ -89,7 +89,7 @@ def best_passing_option(passing_player, consider_goal=True):
     goal = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
 
     receiver_id = None
-    for i in GameState().my_team.available_players.values():
+    for i in GameState().our_team.available_players.values():
 
         if i.id != passing_player.id:
             # Calcul du score pour passeur vers receveur
@@ -120,7 +120,7 @@ def best_goal_score_option(passing_player):
 def line_of_sight_clearance(player, targets):
     # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est petit)
     score = np.linalg.norm(player.pose.position - targets)
-    for j in GameState().my_team.available_players.values():
+    for j in GameState().our_team.available_players.values():
         # Obstacle : les players friends
         condition = []
         if not (j.id == player.id):

@@ -14,6 +14,10 @@ class Player:
         self._pose = Pose()
         self._velocity = Pose()
 
+    def update(self, new_pose: Pose, new_velocity: Pose):
+        self.pose = new_pose
+        self.velocity = new_velocity
+
     def has_id(self, pid):
         return self.id == pid
 
