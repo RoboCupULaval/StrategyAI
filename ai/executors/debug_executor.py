@@ -18,17 +18,18 @@ from ai.states.play_state import PlayState
 
 
 class DebugExecutor(metaclass=Singleton):
-    def __init__(self, debug_queue: Queue):
+    def __init__(self, ui_send_queue: Queue, ui_recv_queue: Queue):
         self.logger = logging.getLogger("DebugExecutor")
-        self.debug_queue = debug_queue
+        self.ui_send_queue = ui_send_queue
+        self.ui_recv_queue = ui_recv_queue
         self.play_executor_ref = PlayExecutor()
+        self.last_time = 0
 
     def exec(self) -> None:
-        while not self.debug_queue.empty():
+        while not self.ui_recv_queue.empty():
             try:
-                cmd = self.debug_queue.get(block=False)
-                cmd = STAChangeCommand(loads(cmd))
-                self.play_executor_ref.order_change_of_sta(cmd)
+                cmd = self.ui_recv_queue.get(block=False)
+                self.play_executor_ref.order_change_of_sta(STAChangeCommand(cmd))
             except Empty:
                 break
 
@@ -43,7 +44,7 @@ class DebugExecutor(metaclass=Singleton):
                        'action': ['None']}
 
         msg = UIDebugCommandFactory().books(cmd_tactics)
-        self.debug_queue.put(msg)
+        self.ui_send_queue.put(msg)
 
 
 
