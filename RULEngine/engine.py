@@ -79,7 +79,7 @@ class Engine(Process):
 
         self.logger.debug('Running')
 
-        self.ai_queue.put([AICommand(robot_id=1, target=Pose(0, 0, 0))])
+        #self.ai_queue.put([AICommand(robot_id=1, target=Pose(0, 0, 0))])
 
         try:
             while not self.stop_event.is_set():

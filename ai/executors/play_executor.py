@@ -1,5 +1,9 @@
 # Under MIT License, see LICENSE.txt
+import time
 
+from multiprocessing import Queue
+
+from Debug.uidebug_command_factory import UIDebugCommandFactory
 from Util.role import Role
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.executors.executor import Executor
@@ -10,7 +14,7 @@ from config.config_service import ConfigService
 
 class PlayExecutor(Executor):
 
-    def __init__(self):
+    def __init__(self, ui_recv_queue: Queue):
         """
         initialise le PlayExecutor
 
@@ -23,6 +27,7 @@ class PlayExecutor(Executor):
         self.last_time = 0
         self.last_available_players = {}
         self.goalie_id = -1
+        self.ui_recv_queue = ui_recv_queue
 
     def exec(self) -> None:
         """
@@ -52,26 +57,26 @@ class PlayExecutor(Executor):
             PlayState().set_strategy(PlayState().get_new_strategy("HumanControl")(GameState()))
         # L'éxécution en tant que telle
         PlayState().current_strategy.exec()
-        # self.ws.play_state.current_ai_commands = self.ws.play_state.current_strategy.exec()
 
-    # def _send_auto_state(self) -> None:
-    #     self.ws.debug_interface.send_play_info(self.ws.game_state.game.referee.info,
-    #                                             self.ws.game_state.game.referee.team_info,
-    #                                             self.auto_play.info,
-    #                                             self.ws.play_state.autonomous_flag)
+        if time.time() - self.last_time > 0.25:
+            # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
+            self._send_books()
+            self.last_time = time.time()
 
-    # def _send_books(self) -> None:
-    #     """
-    #     Envoie les livres de stratégies et de tactiques
-    #
-    #     :return: None
-    #     """
-    #     cmd_tactics = {'strategy': self.ws.play_state.
-    #                    strategy_book.get_strategies_name_list(),
-    #                    'tactic': self.ws.play_state.tactic_book.
-    #                    get_tactics_name_list(),
-    #                    'action': ['None']}
-    #     self.ws.debug_interface.send_books(cmd_tactics)
+
+    def _send_books(self) -> None:
+        """
+        Envoie les livres de stratégies et de tactiques
+
+        :return: None
+        """
+        cmd_tactics = {'strategy': PlayState().strategy_book.get_strategies_name_list(),
+                       'tactic': PlayState().tactic_book.get_tactics_name_list(),
+                       'action': ['None']}
+
+        msg = UIDebugCommandFactory().send_books(cmd_tactics)
+        self.ui_recv_queue.put(msg)
+
 
     def _has_available_players_changed(self) -> bool:
         available_players = GameState().my_team.available_players
