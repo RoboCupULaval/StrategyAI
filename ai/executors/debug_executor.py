@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+import time
 
 __author__ = "Maxime Gagnon-Legault"
 
@@ -10,6 +11,8 @@ from pickle import loads
 from Util.singleton import Singleton
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.executors.play_executor import PlayExecutor
+from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
+from ai.states.play_state import PlayState
 
 
 class DebugExecutor(metaclass=Singleton):
@@ -27,7 +30,22 @@ class DebugExecutor(metaclass=Singleton):
             except Empty:
                 break
 
-    # def _parse_command(self, cmd: UIDebugCommand)->None:
+        if time.time() - self.last_time > 0.25:
+            # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
+            self._send_books()
+            self.last_time = time.time()
+
+    def _send_books(self) -> None:
+        cmd_tactics = {'strategy': PlayState().strategy_book.get_strategies_name_list(),
+                       'tactic': PlayState().tactic_book.get_tactics_name_list(),
+                       'action': ['None']}
+
+        msg = UIDebugCommandFactory().books(cmd_tactics)
+        self.debug_queue.put(msg)
+
+
+
+                # def _parse_command(self, cmd: UIDebugCommand)->None:
     #     if cmd.is_strategy_cmd():
     #         self._parse_strategy(cmd)
     #

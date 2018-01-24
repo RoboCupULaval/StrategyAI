@@ -1,10 +1,14 @@
 # Under MIT License, see LICENSE.txt
+import time
 
-__author__ = "Maxime Gagnon-Legault"
+__author__ = "Maxime Gagnon-Legault, Philippe Babin"
 
 import logging
 
 from Util.singleton import Singleton
+from multiprocessing import Queue
+
+from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from Util.role import Role
 from config.config_service import ConfigService
 from ai.Util.sta_change_command import STAChangeCommand
@@ -72,17 +76,17 @@ class PlayExecutor(metaclass=Singleton):
     #                    'action': ['None']}
     #     self.ws.debug_interface.send_books(cmd_tactics)
 
-    def _has_available_players_changed(self) -> bool:
-        available_players = GameState().our_team.available_players
-        player_change = False
-        for i in available_players:
-            if i not in self.last_available_players:
-                player_change = True
-                break
-        if not player_change:
-            for i in self.last_available_players:
-                if i not in available_players:
-                    player_change = True
-                    break
-        self.last_available_players = available_players.copy()
-        return player_change
+    # def _has_available_players_changed(self) -> bool:
+    #     available_players = GameState().our_team.available_players
+    #     player_change = False
+    #     for i in available_players:
+    #         if i not in self.last_available_players:
+    #             player_change = True
+    #             break
+    #     if not player_change:
+    #         for i in self.last_available_players:
+    #             if i not in available_players:
+    #                 player_change = True
+    #                 break
+    #     self.last_available_players = available_players.copy()
+    #     return player_change

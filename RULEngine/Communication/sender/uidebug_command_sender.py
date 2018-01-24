@@ -3,7 +3,6 @@
 __author__ = "Maxime Gagnon-Legault"
 
 import pickle
-from math import cos, sin
 
 from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
 from RULEngine.Communication.sender.udp_socket import udp_socket
@@ -18,10 +17,12 @@ class UIDebugCommandSender(SenderBaseClass):
     def send_packet(self):
 
         try:
-            track_frame = self.queue.get()
-            self.send_robots_position(track_frame['blue'])
-            self.send_robots_position(track_frame['yellow'])
-            self.send_balls_position(track_frame['balls'])
+            cmds = self.queue.get()
+            if not isinstance(cmds, list):
+                cmds = [cmds]
+
+            for cmd in cmds:
+                self.connection.send(pickle.dumps(cmd))
         except ConnectionRefusedError:
             pass
 

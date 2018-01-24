@@ -1,13 +1,14 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.GameDomainObjects.team import Team
+from typing import Dict
+
 from Util.Pose import Pose
 
 
 class Player:
 
-    def __init__(self, number_id: int, team: Team):
+    def __init__(self, number_id: int, team):
         assert isinstance(number_id, int)
-        assert number_id in [x for x in range(1, 13)]
+        assert number_id in [x for x in range(0, 13)]
 
         self._id = number_id
         self._team = team
@@ -53,3 +54,12 @@ class Player:
     @property
     def team_color(self):
         return self.team.team_color
+
+    @classmethod
+    def from_dict(cls, dict: Dict, team):
+        p = Player(dict["id"], team)
+        p.pose = Pose.from_dict(dict["pose"])
+        # TODO: Use another type of object specific to speed
+        p.velocity = Pose.from_dict(dict["pose"])
+
+        return p

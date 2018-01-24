@@ -48,12 +48,15 @@ class ConfigService(metaclass=Singleton):
             raise RuntimeError('play_zone is either full, positive or negative')
 
         # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
-        if self.config_dict['GAME']['our_color'] == 'blue':
+        our_color = self.config_dict['GAME']['our_color']
+        if our_color == 'blue':
             self.config_dict['COMMUNICATION']['ui_cmd_sender_port'] = 14444    # DO NOT TOUCH
             self.config_dict['COMMUNICATION']['ui_cmd_receiver_port'] = 15555  # DO NOT TOUCH
-        else:
+        elif our_color == "yellow":
             self.config_dict['COMMUNICATION']['ui_cmd_sender_port'] = 16666    # DO NOT TOUCH
             self.config_dict['COMMUNICATION']['ui_cmd_receiver_port'] = 17777  # DO NOT TOUCH
+        else:
+            ValueError("Config file contains wrong colors! Should be either blue or yellow, not {}".format())
 
         # [print(key,':' ,value) for key, value in self.config_dict['COMMUNICATION'].items()]
 

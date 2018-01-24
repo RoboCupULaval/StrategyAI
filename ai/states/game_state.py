@@ -1,17 +1,19 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.GameDomainObjects.ball import Ball
-from RULEngine.GameDomainObjects.team import Team
-
 __author__ = "Maxime Gagnon-Legault"
+
 
 import logging
 from multiprocessing import Queue
 from queue import Empty
 
+from RULEngine.GameDomainObjects.ball import Ball
 from RULEngine.GameDomainObjects.game import Game
+from RULEngine.GameDomainObjects.team import Team
+from Util.constant import TeamColor
 from Util.role import Role
 from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
+from config.config_service import ConfigService
 
 
 class GameState(object, metaclass=Singleton):
@@ -29,16 +31,12 @@ class GameState(object, metaclass=Singleton):
 
         self.our_team_color = None
         self.field = None
-        self.update_timestamp = 0
-        self.delta_t = None
 
-    def update(self) -> None:
-        try:
-            self.frame = self._game_state_queue.get(block=True, timeout=self.UPDATE_TIMEOUT)
-        except Empty:
-            return  # for the moment
+    def update(self, new_game_state):
+        self._game.blue_team.update(new_game_state['blue'])
+        self._game.yellow_team.update(new_game_state['blue'])
 
-        self.game.our_team.update()
+        self.game._balls = [Ball.from_dict(msg_ball) for msg_ball in new_game_state['balls']]
 
     def get_player_by_role(self, role: Role):
         return self._role_mapper.roles_translation[role]

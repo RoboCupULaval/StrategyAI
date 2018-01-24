@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 import logging
 
+from RULEngine.GameDomainObjects.player import Player
 from Util.Pose import Pose
 
 from RULEngine.GameDomainObjects.ball import Ball
@@ -16,8 +17,8 @@ class Game(metaclass=Singleton):
     def __init__(self):
         self.logger = logging.getLogger("Game - DomainObject")
 
-        self._ball = Ball()
-        self._field = Field(self._ball)
+        self._balls = []
+        self._field = Field(self._balls)
         self._referee = Referee()
         self._blue_team = Team(team_color=TeamColor.BLUE)
         self._yellow_team = Team(team_color=TeamColor.YELLOW)
@@ -26,13 +27,6 @@ class Game(metaclass=Singleton):
 
     def is_team_yellow(self):
         return self.our_team_color == TeamColor.YELLOW
-
-    @staticmethod
-    def _update_players_of_team(players, team, delta):
-        for player in players:
-            player_position = Position(player.x, player.y, player.height)
-            player_pose = Pose(player_position, player.orientation)
-            team.update_player(player.robot_id, player_pose, delta)
 
     @property
     def ball(self):

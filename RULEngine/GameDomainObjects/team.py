@@ -4,6 +4,7 @@ __author__ = "Maxime Gagnon-Legault"
 
 from typing import Dict, List
 
+from RULEngine.GameDomainObjects.player import Player
 from RULEngine.services.team_color_service import TeamColor
 
 
@@ -15,9 +16,13 @@ class Team:
         self._players = {}
         self._onplay_players = {}
 
-    def update(self, players_data: List):
-        for i, player_data in enumerate(players_data):
-            self.players[i].update(players_data)
+    def update(self, players):
+        self._players = {}
+        self._onplay_players = {}
+        for dict_player in players:
+            p = Player.from_dict(dict_player, team=self)
+            self._players[p.id] = p
+            self._onplay_players[p.id] = p
 
     @property
     def team_color(self) -> TeamColor:
@@ -26,6 +31,11 @@ class Team:
     @property
     def players(self) -> Dict:
         return self._players
+
+    # TODO: PB: Keep that until we know how the player will be access in the new architecture
+    @property
+    def available_players(self):
+        return self._onplay_players
 
     @property
     def onplay_player(self):
@@ -36,10 +46,7 @@ class Team:
         return self._team_color
 
     def has_player(self, player):
-        for this_team_player in self.players.values():
-            if this_team_player is player:
-                return True
-        return False
+        return player in self.players.values()
 
     def is_team_yellow(self):
         return self.team_color == TeamColor.YELLOW

@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+
 __author__ = "Maxime Gagnon-Legault, Simon Bouchard"
 
 import logging
@@ -11,6 +12,7 @@ from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCom
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.robot_command_sender import RobotCommandSender
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
+from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 
 from RULEngine.controller import Controller
 from RULEngine.tracker import Tracker
@@ -50,11 +52,13 @@ class Engine(Process):
         self.game_state_queue = game_state_queue
         self.robot_cmd_queue = Queue()
 
+        # vision subprocess
         vision_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'],
                                   int(self.cfg.config_dict['COMMUNICATION']['vision_port']))
 
         self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_queue)
 
+        # UIDebug communication subprocesses
         ui_debug_host = self.cfg.config_dict['COMMUNICATION']['ui_debug_address']
         ui_sender_connection_info = (ui_debug_host, int(self.cfg.config_dict['COMMUNICATION']['ui_cmd_sender_port']))
         ui_recver_connection_info = (ui_debug_host, int(self.cfg.config_dict['COMMUNICATION']['ui_cmd_receiver_port']))
@@ -62,6 +66,7 @@ class Engine(Process):
         self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue)
         self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue)
 
+        # Subprocess to send robot commands
         robot_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'], 20011)
 
         self.robot_cmd_sender = RobotCommandSender(robot_connection_info, self.robot_cmd_queue)
@@ -94,7 +99,7 @@ class Engine(Process):
                 self.tracker.predict(robot_packets_frame.packet)
 
                 self.follow_ball(track_frame, robot_id=0)
-                self.ui_send_queue.put(track_frame)
+                self.ui_send_queue.put(UIDebugCommandFactory().track_frame(track_frame))
 
         except KeyboardInterrupt:
             pass
@@ -113,5 +118,3 @@ class Engine(Process):
             self.game_state_queue.put(track_frame, block=False)
         except Full:
             pass
-
-
