@@ -49,7 +49,7 @@ class Coach(Process):
         self.game_state = GameState(self.game_state_queue)
         self.play_state = PlayState()
 
-        self.debug_executor = DebugExecutor(self.ui_recv_queue)
+        self.debug_executor = DebugExecutor(self.ui_send_queue, self.ui_recv_queue)
         self.play_executor = PlayExecutor()
 
     def main_loop(self) -> None:
