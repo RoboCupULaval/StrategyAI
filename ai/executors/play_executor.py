@@ -14,7 +14,7 @@ from config.config_service import ConfigService
 
 class PlayExecutor(Executor):
 
-    def __init__(self, ui_send_queue: Queue):
+    def __init__(self):
         """
         initialise le PlayExecutor
 
@@ -24,10 +24,8 @@ class PlayExecutor(Executor):
         cfg = ConfigService()
         self.auto_play = SimpleAutoPlay()
         PlayState().autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
-        self.last_time = 0
         self.last_available_players = {}
         self.goalie_id = -1
-        self.ui_send_queue = ui_send_queue
 
     def exec(self) -> None:
         """
@@ -57,38 +55,3 @@ class PlayExecutor(Executor):
             PlayState().set_strategy(PlayState().get_new_strategy("HumanControl")(GameState()))
         # L'éxécution en tant que telle
         PlayState().current_strategy.exec()
-
-        if time.time() - self.last_time > 0.25:
-            # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
-            self._send_books()
-            self.last_time = time.time()
-
-
-    def _send_books(self) -> None:
-        """
-        Envoie les livres de stratégies et de tactiques
-
-        :return: None
-        """
-        cmd_tactics = {'strategy': PlayState().strategy_book.get_strategies_name_list(),
-                       'tactic': PlayState().tactic_book.get_tactics_name_list(),
-                       'action': ['None']}
-
-        msg = UIDebugCommandFactory().books(cmd_tactics)
-        self.ui_send_queue.put(msg)
-
-
-    def _has_available_players_changed(self) -> bool:
-        available_players = GameState().my_team.available_players
-        player_change = False
-        for i in available_players:
-            if i not in self.last_available_players:
-                player_change = True
-                break
-        if not player_change:
-            for i in self.last_available_players:
-                if i not in available_players:
-                    player_change = True
-                    break
-        self.last_available_players = available_players.copy()
-        return player_change

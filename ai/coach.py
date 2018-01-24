@@ -48,15 +48,17 @@ class Coach(Process):
         self.game_state = GameState()
         self.play_state = PlayState()
 
-        # self.debug_executor = DebugExecutor()
-        self.play_executor = PlayExecutor(self.ui_send_queue)
+        self.debug_executor = DebugExecutor(self.ui_send_queue)
+        self.play_executor = PlayExecutor()
 
     def main_loop(self) -> None:
         while not self.stop_event.is_set():
             last_game_state = self._get_last_game_state()
             self.game_state.update(last_game_state)
-            # self.debug_executor.exec()
+            self.debug_executor.exec()
             self.play_executor.exec()
+
+            # TODO: Put it in config file
             sleep(0.05)
 
     def run(self) -> None:

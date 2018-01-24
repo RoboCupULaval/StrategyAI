@@ -1,8 +1,13 @@
 # Under MIT License, see LICENSE.txt
+import time
 
+from multiprocessing import Queue
+
+from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from Util import Pose, Position
 from ai.STA.Strategy.human_control import HumanControl
 from ai.executors.executor import Executor
+from ai.states.play_state import PlayState
 
 STRATEGY_COMMAND_TYPE = 5002
 TACTIC_COMMAND_TYPE = 5003
@@ -27,14 +32,30 @@ class UIDebugCommand(object):
 
 class DebugExecutor(Executor):
 
-    def __init__(self):
+    def __init__(self, ui_send_queue: Queue):
         """initialise"""
         super().__init__()
         self.debug_in = []
+        self.last_time = 0
+        self.ui_send_queue = ui_send_queue
 
     def exec(self):
-        """ouvre les packets, parse et applique les packets detinés à l'IA"""
+        """Open packet, parse them and execute them"""
         self._execute_incoming_debug_commands()
+
+        if time.time() - self.last_time > 0.25:
+            # TODO use handshake with the UI-DEBUG to stop sending it every frame! MGL 2017/03/16
+            self._send_books()
+            self.last_time = time.time()
+
+    def _send_books(self) -> None:
+
+        cmd_tactics = {'strategy': PlayState().strategy_book.get_strategies_name_list(),
+                       'tactic': PlayState().tactic_book.get_tactics_name_list(),
+                       'action': ['None']}
+
+        msg = UIDebugCommandFactory().books(cmd_tactics)
+        self.ui_send_queue.put(msg)
 
     def set_reference(self, debug_ref) -> None:
         """ rentre la référence donné par le RULEngine"""
@@ -69,6 +90,7 @@ class DebugExecutor(Executor):
 
         else:
             pass
+
 
     def _parse_strategy(self, cmd: UIDebugCommand)->None:
         """
