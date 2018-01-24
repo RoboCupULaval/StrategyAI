@@ -5,25 +5,25 @@ import numpy as np
 from RULEngine.filters.ball_kalman_filter import BallFilter
 
 
+# TODO doesnt really work. Broken since merge
+
 class MultiBallService(list):
 
-    BALL_SEPARATION_THRESHOLD = 1000
-    MAX_UNDETECTED_DELAY = 1
+    BALL_SEPARATION_THRESHOLD = 20000
+    MAX_UNDETECTED_DELAY = 2
 
     def __init__(self, max_ball: int=1):
         self.logger = logging.getLogger('MultiBallService')
         self.max_ball = max_ball
         self._current_timestamp = None
 
-        self.logger.info(' initiated with {} balls'.format(max_ball))
+        self.logger.debug(' initiated with {} balls'.format(max_ball))
         super().__init__(BallFilter() for _ in range(max_ball))
         
     def update(self, obs: np.array, timestamp: float) -> None:
         self._current_timestamp = timestamp
         if self.filter_ball_observation(obs) or not self[0].is_active:
             self[0].update(obs, self._current_timestamp)
-
-        self.remove_undetected()
 
     def predict(self) -> None:
         for ball in self:
@@ -32,7 +32,7 @@ class MultiBallService(list):
     def remove_undetected(self) -> None:
         undetected_balls = [ball for ball in self
                             if ball.is_active and
-                            self._current_timestamp - ball.last_t_capture > MultiBallService.MAX_UNDETECTED_DELAY]
+                            self._current_timestamp - ball.last_update_time > MultiBallService.MAX_UNDETECTED_DELAY]
 
         for ball in undetected_balls:
             ball.reset()

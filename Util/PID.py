@@ -1,6 +1,9 @@
 
 from Util.geometry import wrap_to_pi
 
+from time import time
+from collections import deque
+
 
 class PID(object):
     def __init__(self, kp: float, ki: float, kd: float, *, wrap_error=False):
@@ -14,18 +17,23 @@ class PID(object):
             wrap_err: wrap the error. Use with angle control
         """
 
-        # pre-multiply ki with desired dt and divided kd
-
         self.kp = kp
         self.ki = ki
         self.kd = kd
 
         self.err_sum = 0
         self.last_err = 0
+        self.last_time = 0
 
         self.wrap_error = wrap_error
 
+        self.anti_windup = True
+        self.error_deque = deque()
+        self.anti_windup_time = 0.0
+        self.anti_windup_max_time = 0.50
+
     def execute(self, err) -> float:
+        dt, self.last_time = time() - self.last_time, time()
 
         if self.wrap_error:
             err = wrap_to_pi(err)
@@ -37,8 +45,17 @@ class PID(object):
 
         self.err_sum += err
 
-        return (err * self.kp) + (self.err_sum * self.ki) + (d_err * self.kd)
+        if self.anti_windup:
+            self.error_deque.append((err, dt))
+            self.anti_windup_time += dt
+            while self.anti_windup_time > self.anti_windup_max_time:
+                old_err, old_dt = self.error_deque.popleft()
+                self.anti_windup_time -= old_dt
+                self.err_sum -= old_err
+
+        return (err * self.kp) + (self.err_sum * self.ki * dt) + (d_err * self.kd / dt)
 
     def reset(self):
-        self.err_sum = 0
-        self.last_err = 0
+        self.err_sum = 0.0
+        self.last_err = 0.0
+        self.anti_windup_time = 0.0
