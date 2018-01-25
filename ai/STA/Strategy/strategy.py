@@ -3,7 +3,7 @@
 from abc import ABCMeta
 from typing import List, Tuple, Callable, Dict
 
-from Util.ai_command import AICommand
+from Util.ai_command_shit import AICommand
 from Util.role import Role
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
@@ -77,13 +77,13 @@ class Strategy(metaclass=ABCMeta):
                           current_tactic.current_state.__name__, tactic_name, current_tactic.target))
         return state
 
-    def exec(self) -> Dict[int, AICommand]:
+    def exec(self) -> List[AICommand]:
         """
         Appelle la méthode exec de chacune des Tactics assignées aux robots.
         :return: Un dict des 6 AICommand à envoyer aux robots. La commande située à l'indice i de la liste doit être
         envoyée au robot i.
         """
-        commands = {}
+        commands = []
         # for i, g in enumerate(self.roles_graph):
         #     print(i,"->",g)
         # TODO We should probably iterate over game_state.RoleMapping instead of Role
@@ -97,10 +97,9 @@ class Strategy(metaclass=ABCMeta):
                 continue
 
             try:
-                commands[player.id] = self.roles_graph[r].exec()
+                commands.append(self.roles_graph[r].exec())
             except EmptyGraphException as e:
                 continue
-            player.ai_command = commands[player.id]
 
         return commands
 

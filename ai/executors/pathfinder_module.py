@@ -2,7 +2,7 @@ import time
 from functools import partial
 from typing import List
 
-from Util.ai_command import AICommand
+from Util.ai_command_shit import AICommand
 from Util import Position
 from ai.Algorithm.path_partitionner import PathPartitionner, Path
 from ai.states.game_state import GameState

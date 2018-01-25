@@ -5,7 +5,7 @@ from typing import List
 
 from RULEngine.GameDomainObjects.player import Player
 
-from Util.ai_command import AICommandType, AICommand, AIControlLoopType
+from Util.ai_command_shit import AICommandType, AICommand, AIControlLoopType
 from Util.Pose import Pose
 from Util.Velocity import Velocity
 

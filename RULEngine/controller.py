@@ -4,7 +4,6 @@ import logging
 from multiprocessing import Queue
 from queue import Empty
 from typing import Dict
-
 from collections import namedtuple
 
 from Util.PID import PID
@@ -19,6 +18,10 @@ MAX_LINEAR_SPEED = 2000  # mm/s
 
 RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active')
 RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow packet')
+
+
+class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dribbler_active')):
+    pass
 
 
 class Robot:

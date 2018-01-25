@@ -2,7 +2,7 @@
 from typing import Dict
 
 from RULEngine.GameDomainObjects.player import Player
-from Util.ai_command import AICommand, AICommandType, AIControlLoopType
+from Util.ai_command import AICommand
 from Util.Pose import Pose
 from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
@@ -25,14 +25,12 @@ class AllStar(Action):
         """
         Action.__init__(self, game_state, player)
         self.other_args = {"dribbler_on": other_args.get("dribbler_on", False),
-                           "control_loop_type": other_args.get("control_loop_type", AIControlLoopType.POSITION),
                            "pathfinder_on": other_args.get("pathfinder_on", False),
                            "kick_strength": other_args.get("kick_strength", 0),
                            "charge_kick": other_args.get("charge_kick", False),
                            "kick": other_args.get("kick", False),
                            "pose_goal": other_args.get("pose_goal", Pose())
                            }
-        self.ai_command_type = other_args.get("ai_command_type", AICommandType.STOP)
 
         # this is for the pathfinder only no direct assignation
         # TODO put that correctly
@@ -44,4 +42,4 @@ class AllStar(Action):
         :return: Un tuple (None, kick) où None pour activer une commande de stop et kick est nul (on ne botte pas)
         """
         # un None pour que le coachcommandsender envoi une command vide.
-        return AICommand(self.player, self.ai_command_type, **self.other_args)
+        return AICommand(self.player.id, self.other_args["pose_goal"])

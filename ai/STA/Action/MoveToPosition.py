@@ -1,6 +1,6 @@
 # Under MIT license, see LICENSE.txt
 from RULEngine.GameDomainObjects.player import Player
-from Util.ai_command import AICommand, AICommandType
+from Util.ai_command import AICommand
 from Util.Pose import Pose
 from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
@@ -31,12 +31,4 @@ class MoveToPosition(Action):
         self.dribbler_on = dribbler_on
 
     def exec(self):
-        return AICommand(self.player,
-                         AICommandType.MOVE,
-                         pose_goal=self.destination,
-                         pathfinder_on=self.pathfinder_on,
-                         cruise_speed=self.cruise_speed,
-                         collision_ball=self.collision_ball,
-                         charge_kick=self.charge_kick,
-                         end_speed=self.end_speed,
-                         dribbler_on=self.dribbler_on)
+        return AICommand(self.player.id, self.destination.to_dict())

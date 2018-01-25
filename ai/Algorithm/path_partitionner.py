@@ -187,10 +187,10 @@ class PathPartitionner:
             self.collision_body = []
             if self.ball_collision:
                 lenght_pose_obstacle = len(self.game_state.my_team.available_players) + \
-                                       len(self.game_state.other_team.available_players)
+                                       len(self.game_state.enemy_team.available_players)
             else:
                 lenght_pose_obstacle = len(self.game_state.my_team.available_players) + \
-                                       len(self.game_state.other_team.available_players) - 1
+                                       len(self.game_state.enemy_team.available_players) - 1
             self.pose_obstacle = np.zeros((lenght_pose_obstacle, 2))
 
             # FIXME: Find better name that is less confusing between self.player and player
@@ -203,7 +203,7 @@ class PathPartitionner:
                         self.collision_body.append(
                             CollisionBody(player.pose.position, player.velocity.position, self.gap_proxy))
                         i += 1
-            for player in self.game_state.other_team.available_players.values():
+            for player in self.game_state.enemy_team.available_players.values():
                 if (self.player.pose.position - player.pose.position).norm() + \
                             (self.player.ai_command.pose_goal.position - player.pose.position).norm() < \
                             (self.player.ai_command.pose_goal.position - self.player.pose.position).norm() * factor:
@@ -239,13 +239,13 @@ class PathPartitionner:
         i = 0
 
         self.pose_obstacle = np.zeros((len(self.game_state.my_team.available_players) +
-                                       len(self.game_state.other_team.available_players) - 1, 2))
+                                       len(self.game_state.enemy_team.available_players) - 1, 2))
         for player in self.game_state.my_team.available_players.values():
             if player.id != self.player.id:
                 self.pose_obstacle[i, :] = player.pose.position
                 self.collision_body.append(player)
                 i += 1
-        for player in self.game_state.other_team.available_players.values():
+        for player in self.game_state.enemy_team.available_players.values():
             self.pose_obstacle[i, :] = player.pose.position
             self.collision_body.append(player)
             i += 1

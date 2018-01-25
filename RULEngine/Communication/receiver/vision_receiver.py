@@ -33,16 +33,17 @@ class VisionReceiver(ReceiverBaseClass):
         try:
             data = self.connection.recv(1024)
         except timeout:
-            self.logger.error('Vision queue timeout. No frame received.')
+            # self.logger.error('Vision queue timeout. No frame received.')
             return
 
         try:
             packet.ParseFromString(data)
         except DecodeError:
-            self.logger.error('VisionReceiver had trouble decoding a packet!')
+            # self.logger.error('VisionReceiver had trouble decoding a packet!')
             return
 
         try:
             self.queue.put(protobuf_to_dict(packet), block=False)
         except Full as e:
-            self.logger.debug("Vision queue full. Frames will be lost.")
+            pass
+            # self.logger.error("Vision queue full. Frames will be lost.")

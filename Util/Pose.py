@@ -178,3 +178,6 @@ class Pose(object):
     @classmethod
     def from_dict(cls, dict):
         return Pose(dict["x"], dict["y"], dict["orientation"])
+
+    def to_dict(self):
+        return {'x': self.x, 'y': self.y, 'orientation': self.orientation}

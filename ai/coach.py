@@ -1,9 +1,13 @@
 # Under MIT License, see LICENSE.txt
+from typing import Dict, List
+
+from Util.ai_command import AICommand
 
 __author__ = "Maxime Gagnon-Legault, Philippe Babin"
 
 import logging
 from multiprocessing import Process, Queue
+from queue import Empty
 from time import sleep
 
 from RULEngine.services.team_color_service import TeamColorService
@@ -46,33 +50,47 @@ class Coach(Process):
         self.play_executor = None
 
     def initialize(self) -> None:
-        self.game_state = GameState(self.game_state_queue)
+        self.game_state = GameState()
         self.play_state = PlayState()
 
         self.debug_executor = DebugExecutor(self.ui_send_queue, self.ui_recv_queue)
         self.play_executor = PlayExecutor()
 
     def main_loop(self) -> None:
+        sleep(1)
         while True:
             last_game_state = self._get_last_game_state()
-            self.game_state.update(last_game_state)
+
+            # TODO repair
+            if last_game_state is not None:
+                self.game_state.update(last_game_state)
             self.debug_executor.exec()
-            # self.play_executor.exec()
+            ai_commands = self.play_executor.exec()
+
+            self._send_cmd(ai_commands)
 
             # TODO: Put it in config file
             sleep(0.05)
 
     def run(self) -> None:
+        self.logger.debug('Running')
+
         self.initialize()
         try:
             self.main_loop()
         except KeyboardInterrupt:
             pass
 
+    def _send_cmd(self, ai_commands: List[AICommand]):
+        self.ai_queue.put(ai_commands, block=True)
+
     def _get_last_game_state(self):
         # This is a way to get the last available gamestate, it's probably should not be a queue
-        size = self.game_state_queue.qsize()
 
-        for _ in range(0, size - 1):
-            self.game_state_queue.get()
-        return self.game_state_queue.get()
+        try:
+            new_game_state = self.game_state_queue.get()
+        except Empty:
+            # todo repair
+            return None
+
+        return new_game_state

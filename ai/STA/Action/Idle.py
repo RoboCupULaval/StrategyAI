@@ -1,6 +1,9 @@
 # Under MIT license, see LICENSE.txt
+
+__author__ = "Maxime Gagnon-Legault"
+
 from RULEngine.GameDomainObjects.player import Player
-from Util.ai_command import AICommand, AICommandType
+from Util.ai_command import AICommand
 from ai.states.game_state import GameState
 from .Action import Action
 
@@ -22,5 +25,4 @@ class Idle(Action):
         """
         Exécute l'arrêt
         """
-        return AICommand(self.player,
-                         AICommandType.STOP)
+        return AICommand(self.player.id, None)

@@ -5,7 +5,7 @@ __author__ = "Maxime Gagnon-Legault, Simon Bouchard"
 import logging
 import sys
 from collections import namedtuple
-from multiprocessing import Process, Queue, Event
+from multiprocessing import Process, Queue
 from queue import Full
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
@@ -80,15 +80,14 @@ class Engine(Process):
         self.robot_cmd_sender.start()
 
     def run(self):
-
         self.logger.debug('Running')
-
-        self.ai_queue.put([AICommand(robot_id=0, target={'x': -4200, 'y': 0, 'orientation': 0}),
-                           AICommand(robot_id=1, target={'x': -90, 'y': -2000, 'orientation': 0}),
-                           AICommand(robot_id=2, target={'x': -90, 'y': -1000, 'orientation': 0}),
-                           AICommand(robot_id=3, target={'x': -590, 'y': 0, 'orientation': 0}),
-                           AICommand(robot_id=4, target={'x': -90, 'y': 1000, 'orientation': 0}),
-                           AICommand(robot_id=5, target={'x': -90, 'y': 2000, 'orientation': 0})])
+        #
+        # self.ai_queue.put([AICommand(robot_id=0, target={'x': -4200, 'y': 0, 'orientation': 0}),
+        #                    AICommand(robot_id=1, target={'x': -90, 'y': -2000, 'orientation': 0}),
+        #                    AICommand(robot_id=2, target={'x': -90, 'y': -1000, 'orientation': 0}),
+        #                    AICommand(robot_id=3, target={'x': -590, 'y': 0, 'orientation': 0}),
+        #                    AICommand(robot_id=4, target={'x': -90, 'y': 1000, 'orientation': 0}),
+        #                    AICommand(robot_id=5, target={'x': -90, 'y': 2000, 'orientation': 0})])
 
         try:
             while True:
@@ -98,7 +97,11 @@ class Engine(Process):
                 self.robot_cmd_queue.put(robot_packets_frame)
                 self.tracker.predict(robot_packets_frame.packet)
 
-                self.follow_ball(track_frame, robot_id=0)
+                try:
+                    self.game_state_queue.put(track_frame, block=False)
+                except Full:
+                    pass
+
                 self.ui_send_queue.put(UIDebugCommandFactory().track_frame(track_frame))
 
         except KeyboardInterrupt:
@@ -114,7 +117,3 @@ class Engine(Process):
             ball_pose = track_frame['balls'][0]['pose']
             ball_pose['orientation'] = 0
             self.ai_queue.put([AICommand(robot_id=robot_id, target=ball_pose)])
-        try:
-            self.game_state_queue.put(track_frame, block=False)
-        except Full:
-            pass

@@ -15,8 +15,6 @@ from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from ai.states.play_state import PlayState
 
 
-
-
 class DebugExecutor(metaclass=Singleton):
     def __init__(self, ui_send_queue: Queue, ui_recv_queue: Queue):
         self.logger = logging.getLogger("DebugExecutor")
@@ -46,9 +44,11 @@ class DebugExecutor(metaclass=Singleton):
         msg = UIDebugCommandFactory().books(cmd_tactics)
         self.ui_send_queue.put(msg)
 
+    def _send_state(self) -> None:
+        # TODO
+        pass
 
-
-                # def _parse_command(self, cmd: UIDebugCommand)->None:
+    # def _parse_command(self, cmd: UIDebugCommand)->None:
     #     if cmd.is_strategy_cmd():
     #         self._parse_strategy(cmd)
     #

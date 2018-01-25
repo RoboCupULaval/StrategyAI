@@ -30,7 +30,7 @@ def closest_players_to_point(point: Position, our_team=None):
             player_distance = (i.pose.position - point).norm()
             list_player.append(PlayerPosition(i, player_distance))
     if not our_team:
-        for i in GameState().other_team.available_players.values():
+        for i in GameState().enemy_team.available_players.values():
             # les players ennemis
             player_distance = (i.pose.position - point).norm()
             list_player.append(PlayerPosition(i, player_distance))
@@ -127,7 +127,7 @@ def line_of_sight_clearance(player, targets):
             condition += [target is not j.pose.position for target in targets]
             if any(condition):
                 score *= trajectory_score(player.pose.position, targets[condition], j.pose.position)
-    for j in GameState().other_team.available_players.values():
+    for j in GameState().enemy_team.available_players.values():
         # Obstacle : les players ennemis
         score *= trajectory_score(player.pose.position, targets, j.pose.position)
     return score
@@ -147,7 +147,7 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
     #     # Obstacle : les players friends
     #     if not (j.id == player.id or j.pose.position == target):
     #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
-    for j in GameState().other_team.available_players.values():
+    for j in GameState().enemy_team.available_players.values():
         # Obstacle : les players ennemis
         scores *= trajectory_score(np.array(GameState().get_ball_position()), targets, np.array(j.pose.position))
         #print(scores)
@@ -164,7 +164,7 @@ def line_of_sight_clearance_ball_legacy(player, target: Position):
     #     # Obstacle : les players friends
     #     if not (j.id == player.id or j.pose.position == target):
     #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
-    for j in GameState().other_team.available_players.values():
+    for j in GameState().enemy_team.available_players.values():
         # Obstacle : les players ennemis
         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
     return score
@@ -260,7 +260,7 @@ def score_strategy_other_team():
     # Retourne le score de l'équipe ennemie (négatif = ils sont en offensive, positif = ils sont en défensive)
     i = 0
     x_sum = 0
-    for player in GameState().other_team.available_players.values():
+    for player in GameState().enemy_team.available_players.values():
         x_sum += player.pose.position.x
         i += 1
     if GameState().field.our_side == FieldSide.POSITIVE:

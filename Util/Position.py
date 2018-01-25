@@ -106,3 +106,7 @@ class Position(np.ndarray):
 
     def __hash__(self):
         return hash(str(self))
+
+    @classmethod
+    def from_dict(cls, dict):
+        return Position(dict["x"], dict["y"])

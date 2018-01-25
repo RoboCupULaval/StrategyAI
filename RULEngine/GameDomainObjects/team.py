@@ -1,4 +1,6 @@
 # Under MIT License, see LICENSE.txt
+from Util.Pose import Pose
+from Util.constant import PLAYER_PER_TEAM
 
 __author__ = "Maxime Gagnon-Legault"
 
@@ -13,16 +15,16 @@ class Team:
         assert isinstance(team_color, TeamColor)
 
         self._team_color = team_color
-        self._players = {}
+        self._players = {i: Player(i, self) for i in range(PLAYER_PER_TEAM)}
         self._onplay_players = {}
 
     def update(self, players):
-        self._players = {}
-        self._onplay_players = {}
-        for dict_player in players:
-            p = Player.from_dict(dict_player, team=self)
-            self._players[p.id] = p
-            self._onplay_players[p.id] = p
+        # self._players = {}
+        # self._onplay_players = {}
+        for p in players:
+            # p = Player.from_dict(dict_player, team=self)
+            self._players[p["id"]].update(Pose.from_dict(p["pose"]), Pose.from_dict(p["velocity"]))
+            # self._onplay_players[p.id] = p
 
     @property
     def team_color(self) -> TeamColor:
@@ -35,7 +37,7 @@ class Team:
     # TODO: PB: Keep that until we know how the player will be access in the new architecture
     @property
     def available_players(self):
-        return self._onplay_players
+        return self._players
 
     @property
     def onplay_player(self):

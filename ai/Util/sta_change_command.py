@@ -42,7 +42,7 @@ class STAChangeCommand:
             return STAType.NONE
 
     def is_tactic_change_command(self):
-        return self.type == TACTIC_COMMAND_TYPE
+        return self.type == STAType.TACTIC
 
     def is_strategy_change_command(self):
-        return self.type == STRATEGY_COMMAND_TYPE
+        return self.type == STAType.STRATEGY
