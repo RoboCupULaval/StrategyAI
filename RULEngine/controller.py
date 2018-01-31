@@ -14,7 +14,7 @@ from config.config_service import ConfigService
 
 MAX_ROBOT = 12
 MAX_LINEAR_SPEED = 2000  # mm/s
-
+MAX_LINEAR_ACCELERATION = 2000 # mm/s
 
 RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active')
 RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow packet')
@@ -90,6 +90,7 @@ class Controller(list):
                              if robot.pose is not None and robot.target is not None)
 
         for robot in active_robots:
+            self.update_robot_path(robot)
             command = robot.controller.execute(robot.target, robot.pose)
             packet.packet.append(RobotPacket(robot_id=robot.robot_id,
                                              command=command,
@@ -121,6 +122,9 @@ class Controller(list):
 
         except Empty:
             pass
+
+    def update_robot_path(self, robot):
+
 
 
 class PositionControl:
