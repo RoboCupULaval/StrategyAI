@@ -1,18 +1,12 @@
 import numpy as np
-import path
-import
+from Util.path import Path
+from RULEngine.controller import Robot
 
 
-
-
-
-
-def path_smoother(path, player: Player, vel_cruise: [int, float]=1000):
-    path = path
+def path_smoother(player: Robot):
+    path = player.raw_path
     player = player
-    cmd = player.ai_command
-    if cmd.cruise_speed:
-        vel_cruise = cmd.cruise_speed * 1000
+    vel_cruise = player.cruise_speed
     positions_list = [path.points[0]]
     for idx, point in enumerate(path.points[1:-1]):
         i = idx + 1
@@ -30,7 +24,7 @@ def path_smoother(path, player: Player, vel_cruise: [int, float]=1000):
         i = idx + 1
         p2 = point
         p3 = path.points[i+1]
-        radius_at_const_speed = vel_cruise ** 2 / (Player.max_acc * 1000)
+        radius_at_const_speed = vel_cruise ** 2 / player.max_angular_acceleration
         theta = abs(np.math.atan2(p3[1]-p2[1], p3[0]-p2[0]) - np.math.atan2(p1[1]-p2[1], p1[0]-p2[0]))
         try:
             dist_deviation = (radius_at_const_speed/(np.math.sin(theta/2)))-radius_at_const_speed
@@ -40,7 +34,7 @@ def path_smoother(path, player: Player, vel_cruise: [int, float]=1000):
         radius = radius_at_const_speed
         while dist_deviation > dist_from_path:
             speed *= 0.4
-            radius = speed ** 2 / (Player.max_acc * 1000)
+            radius = speed ** 2 / player.max_angular_acceleration
             dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
         if (p1-p2).norm() < 0.001 or (p2-p3).norm() < 0.001 or (p1-p3).norm() < 0.001:
             # on traite tout le cas ou le problème dégènere
@@ -84,7 +78,7 @@ def path_smoother(path, player: Player, vel_cruise: [int, float]=1000):
         if (point_list[i] - point_list[i+1]).norm() < 10:
             continue
         if False:
-            min_dist = abs(0.5 * (np.square(speed_list[i]) - np.square(speed_list[i + 1])) / (Player.max_acc * 1000))
+            min_dist = abs(0.5 * (np.square(speed_list[i]) - np.square(speed_list[i + 1])) / player.max_angular_acceleration)
             if min_dist > (point_list[i] - point_list[i+1]).norm():
                 if speed_list[i] > speed_list[i + 1]:
                     speed_list[i] *= (point_list[i] - point_list[i+1]).norm() / min_dist

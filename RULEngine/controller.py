@@ -11,10 +11,14 @@ from Util.PID import PID
 from math import sin, cos, sqrt, atan2
 
 from config.config_service import ConfigService
+from Util.path import Path
+from Util.path_smoother import path_smoother
 
 MAX_ROBOT = 12
 MAX_LINEAR_SPEED = 2000  # mm/s
 MAX_LINEAR_ACCELERATION = 2000 # mm/s
+MAX_ANGULAR_SPEED = 1 # rad/s
+MAX_ANGULAR_ACCELERATION = 1 #rad/s^2
 
 RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active')
 RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow packet')
@@ -27,7 +31,9 @@ class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dr
 class Robot:
 
     __slots__ = ('_robot_id', 'controller', 'target', 'pose', 'velocity',
-                 'kick_type', 'kick_force', 'dribbler_active', 'input_command')
+                 'kick_type', 'kick_force', 'dribbler_active', 'input_command',
+                 'cruise_speed', 'max_linear_speed', 'max_linear_acceleration',
+                 'max_angular_speed', 'max_angular_acceleration', 'path', 'raw_path')
 
     def __init__(self, robot_id, controller):
         self._robot_id = robot_id
@@ -39,6 +45,13 @@ class Robot:
         self.kick_force = 0
         self.dribbler_active = False
         self.input_command = None
+        self.max_linear_speed = MAX_LINEAR_SPEED
+        self.max_angular_acceleration = MAX_LINEAR_ACCELERATION
+        self.max_angular_speed = MAX_ANGULAR_SPEED
+        self.max_angular_acceleration = MAX_ANGULAR_ACCELERATION
+        self.cruise_speed = 1000
+        self.path = Path()
+        self.raw_path = Path()
 
     @property
     def robot_id(self):
@@ -124,6 +137,8 @@ class Controller(list):
             pass
 
     def update_robot_path(self, robot):
+        robot.path.quick_update_path(robot.pose.position)
+        robot.path = path_smoother(robot.raw_path)
 
 
 

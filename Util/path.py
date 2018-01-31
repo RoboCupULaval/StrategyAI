@@ -1,3 +1,8 @@
+import numpy as np
+
+from Util.Position import Position
+
+
 class Path:
     # FIXME remove speed from pathfinder, it shouldn't be its concern
     def __init__(self, start=Position(),  end=Position(), start_speed=0, end_speed=0):
@@ -58,6 +63,6 @@ class Path:
             length += np.linalg.norm(point - self.points[idx+1])
         return length
 
-    def quick_update_path(self, player):
-        self.points[0] = player.pose.position
+    def quick_update_path(self, position):
+        self.points[0] = position
         return self.generate_path_from_points(self.points, self.speeds, 50)
