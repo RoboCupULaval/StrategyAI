@@ -1,12 +1,10 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
 
-from RULEngine.GameDomainObjects.player import Player
-
 from Util.Pose import Pose
 from Util.area import stayOutsideCircle
-
 from ai.Algorithm.path_partitionner import CollisionBody
+from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState

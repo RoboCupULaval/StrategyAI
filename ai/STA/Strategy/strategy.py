@@ -1,9 +1,9 @@
 # Under MIT license, see LICENSE.txt
 
 from abc import ABCMeta
-from typing import List, Tuple, Callable, Dict
+from typing import List, Tuple, Callable
 
-from Util.ai_command_shit import AICommand
+from Util import AICommand
 from Util.role import Role
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node

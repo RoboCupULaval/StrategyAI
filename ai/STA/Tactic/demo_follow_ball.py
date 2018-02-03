@@ -1,14 +1,12 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
 
-from RULEngine.GameDomainObjects.player import Player
-
-from Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
 from Util.Pose import Pose
+from Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
 from Util.geometry import get_distance
-
+from ai.GameDomainObjects import Player
 from ai.STA.Action.Idle import Idle
-from ai.STA.Action.PathfindToPosition import PathfindToPosition
+from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -32,7 +30,7 @@ class DemoFollowBall(Tactic):
             self.next_state = self.halt
         else:
             self.next_state = self.move_to_ball
-        return PathfindToPosition(self.game_state, self.player, self.target)
+        return MoveToPosition(self.game_state, self.player, self.target)
 
     def halt(self):
         self.status_flag = Flags.SUCCESS

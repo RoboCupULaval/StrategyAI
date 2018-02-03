@@ -41,6 +41,7 @@ class PlayExecutor(metaclass=Singleton):
 
         :return: None
         """
+
         # if PlayState().autonomous_flag:
         #     if GameState().game.referee.team_info['ours']['goalie'] != self.goalie_id:
         #         self.goalie_id = GameState().game.referee.team_info['ours']['goalie']
@@ -48,8 +49,6 @@ class PlayExecutor(metaclass=Singleton):
         #     self.auto_play.update(self._has_available_players_changed())
 
         return self._execute_strategy()
-
-        # self._send_auto_state()
 
     def order_change_of_sta(self, cmd: STAChangeCommand):
         if cmd.is_strategy_change_command():
@@ -97,11 +96,8 @@ class PlayExecutor(metaclass=Singleton):
             self.play_state.set_strategy(PlayState().get_new_strategy("HumanControl")(GameState()))
         return self.play_state.current_strategy.exec()
 
-    # def _send_auto_state(self) -> None:
-    #     self.ws.debug_interface.send_play_info(self.ws.game_state.game.referee.info,
-    #                                             self.ws.game_state.game.referee.team_info,
-    #                                             self.auto_play.info,
-    #                                             self.ws.play_state.autonomous_flag)
+
+
 
     # def _has_available_players_changed(self) -> bool:
     #     available_players = GameState().our_team.available_players

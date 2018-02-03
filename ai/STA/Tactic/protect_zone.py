@@ -1,12 +1,10 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
 
-from RULEngine.GameDomainObjects.player import Player
-
-from Util.constant import ROBOT_RADIUS
-from Util.area import isInsideSquare, stayInsideSquare
 from Util.Pose import Pose, Position
-
+from Util.area import isInsideSquare, stayInsideSquare
+from Util.constant import ROBOT_RADIUS
+from ai.GameDomainObjects import Player
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.MoveToPosition import MoveToPosition

@@ -1,8 +1,10 @@
 # Under MIT license, see LICENSE.txt
 
-from RULEngine.GameDomainObjects.player import Player
-from Util.ai_command_shit import AICommand, AICommandType
-from Util.Pose import Pose
+__author__ = "Maxime Gagnon-Legault"
+
+from Util import Pose
+from Util import AICommand
+from ai.GameDomainObjects import Player
 from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
 

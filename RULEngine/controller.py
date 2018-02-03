@@ -1,15 +1,15 @@
+# Under MIT licence, see LICENCE.txt
+
+__author__ = "Simon Bouchard, Maxime Gagnon-Legault"
 
 import logging
-
 from multiprocessing import Queue
 from queue import Empty
 from typing import Dict
 from collections import namedtuple
+from math import sin, cos, sqrt
 
 from Util.PID import PID
-
-from math import sin, cos, sqrt, atan2
-
 from config.config_service import ConfigService
 
 MAX_ROBOT = 12
@@ -20,6 +20,7 @@ RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force d
 RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow packet')
 
 
+# TODO see if necessary, also same as RobotPacket
 class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dribbler_active')):
     pass
 

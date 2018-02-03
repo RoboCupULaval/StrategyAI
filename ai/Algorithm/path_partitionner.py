@@ -2,11 +2,11 @@ from enum import Enum
 
 import numpy as np
 import numpy.matlib
-from Util.Pose import Pose
 
-from RULEngine.GameDomainObjects.player import Player
+from Util.Pose import Pose
 from Util.Position import Position
 from Util.geometry import conv_position_2_list, remove_duplicates
+from ai.GameDomainObjects import Player
 
 
 class Path:

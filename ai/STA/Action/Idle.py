@@ -2,8 +2,8 @@
 
 __author__ = "Maxime Gagnon-Legault"
 
-from RULEngine.GameDomainObjects.player import Player
-from Util.ai_command import AICommand
+from Util import AICommand
+from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
 from .Action import Action
 
@@ -21,7 +21,7 @@ class Idle(Action):
         """
         Action.__init__(self, game_state, player)
 
-    def exec(self):
+    def exec(self) -> AICommand:
         """
         Exécute l'arrêt
         """

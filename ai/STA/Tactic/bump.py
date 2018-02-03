@@ -1,26 +1,23 @@
 # Under MIT licence, see LICENCE.txt
+
+__author__ = "Maxime Gagnon-Legault"
+
 import math
 import time
 from typing import List
-
 import numpy as np
-from Util.Pose import Pose, Position
 
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
-from RULEngine.GameDomainObjects.player import Player
-
-from Util.ai_command_shit import AICommandType
+from Util.Pose import Pose, Position
+from Util.ai_command import AICommand
 from Util.constant import ROBOT_RADIUS
 from Util.geometry import get_distance
-
-from ai.STA.Action.AllStar import AllStar
+from ai.GameDomainObjects.player import Player
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
-
-__author__ = 'RoboCupULaval'
 
 
 class Bump(Tactic):
@@ -115,8 +112,7 @@ class Bump(Tactic):
         dest_position = self.get_behind_ball_position(ball_position)
         destination_pose = Pose(dest_position, player_pose.orientation)
 
-        return AllStar(self.game_state, self.player, **{"pose_goal": destination_pose,
-                                                        "ai_command_type": AICommandType.MOVE})
+        return AICommand(self.player.id, destination_pose.to_dict())
 
     def get_behind_ball_position(self, ball_position):
         vec_dir = self.target.position - ball_position

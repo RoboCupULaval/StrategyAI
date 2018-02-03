@@ -1,12 +1,12 @@
 # Under MIT licence, see LICENCE.txt
 
+__author__ = 'Maxime Gagnon-Legault'
+
 from abc import abstractmethod
 
-from RULEngine.GameDomainObjects.player import Player
-from Util.ai_command_shit import AICommand
+from Util import AICommand
+from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
-
-__author__ = 'Robocup ULaval'
 
 
 class Action:
@@ -32,8 +32,5 @@ class Action:
         """
         pass
 
-    def get_name(self):
-        return self.__class__.__name__
-
     def __str__(self):
-        return self.__class__.__name__
+        return str(self.player) + " -> " + self.__class__.__name__

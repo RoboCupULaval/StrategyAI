@@ -1,11 +1,9 @@
 # Under MIT licence, see LICENCE.txt
 
-from RULEngine.GameDomainObjects.player import Player
-
-from Util.Pose import Pose, Position
+from Util import Pose, Position
+from Util import AICommand
 from Util.geometry import get_closest_point_on_segment
-from Util.ai_command_shit import AICommand, AICommandType
-
+from ai.GameDomainObjects.player import Player
 from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
 
@@ -43,7 +41,6 @@ class GoBetween(Action):
         self.position2 = position2
         self.target = target
         self.minimum_distance = p_minimum_distance
-        self.pathfind = True
 
     def get_destination(self) -> Pose:
         """
@@ -63,6 +60,5 @@ class GoBetween(Action):
 
         return Pose(destination, destination_orientation)
 
-    def exec(self):
-        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.get_destination(),
-                                                             "pathfinder_on": self.pathfind})
+    def exec(self) -> AICommand:
+        return AICommand(self.player.id, target=self.get_destination().to_dict())

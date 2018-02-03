@@ -4,9 +4,9 @@ from Util.constant import PLAYER_PER_TEAM
 
 __author__ = "Maxime Gagnon-Legault"
 
-from typing import Dict, List
+from typing import Dict
 
-from RULEngine.GameDomainObjects.player import Player
+from ai.GameDomainObjects.player import Player
 from RULEngine.services.team_color_service import TeamColor
 
 

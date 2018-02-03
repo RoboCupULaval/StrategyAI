@@ -1,15 +1,13 @@
 # Under MIT License, see LICENSE.txt
 
-from typing import List, Tuple, Callable, Any
+__author__ = "Maxime Gagnon-Legault"
 
-from RULEngine.GameDomainObjects.player import Player
-from Util import Pose
-from Util.singleton import Singleton
+from typing import List, Tuple
+
+from Util import Singleton
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.strategy_book import StrategyBook
-from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_book import TacticBook
-from ai.states.game_state import GameState
 
 
 class PlayState(object, metaclass=Singleton):
@@ -20,7 +18,6 @@ class PlayState(object, metaclass=Singleton):
         """
         initialise le PlayState
         """
-        # Livres
         self.strategy_book = StrategyBook()
         self.tactic_book = TacticBook()
         self.autonomous_flag = False
@@ -28,7 +25,7 @@ class PlayState(object, metaclass=Singleton):
 
     def set_strategy(self, strategy: Strategy) -> None:
         """
-        applique un stratégie du STA à executer
+        Applique un stratégie du STA à executer
 
         :param strategy: Strategy object déjà instancier, la stratégie à executer
         :return: None

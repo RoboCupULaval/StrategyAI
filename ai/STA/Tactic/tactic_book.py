@@ -1,6 +1,5 @@
 # Under MIT License, see LICENSE.txt
 from typing import List
-import sys
 
 from ai.STA.Tactic.pass_to_player import PassToPlayer
 from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot

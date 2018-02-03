@@ -1,14 +1,17 @@
 # Under MIT licence, see LICENCE.txt
+
+__author__ = 'RoboCupULaval'
+
 import time
 
 import numpy as np
-from Util.Pose import Pose
 
-from RULEngine.GameDomainObjects.player import Player
-from Util.constant import BALL_RADIUS, ROBOT_RADIUS
+from Util.Pose import Pose
 from Util.Position import Position
+from Util.ai_command import AICommand
+from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from Util.geometry import get_distance
-from ai.STA.Action.AllStar import AllStar
+from ai.GameDomainObjects import Player
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
@@ -16,8 +19,6 @@ from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
-
-__author__ = 'RoboCupULaval'
 
 ORIENTATION_DEADZONE = 0.2
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
@@ -38,7 +39,8 @@ class PassToPlayer(Tactic):
             self.next_state = self.get_behind_ball
             self.last_time = time.time()
 
-        return AllStar(self.game_state, self.player, **{"charge_kick": True, "dribbler_on": 1})
+        # todo charge kick here please/ask Simon what kicktype is supposed to be
+        return AICommand(self.player.id, kick_type=1, dribbler_active=True)
 
     def get_behind_ball(self):
         self.status_flag = Flags.WIP

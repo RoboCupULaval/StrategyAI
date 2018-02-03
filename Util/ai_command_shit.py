@@ -1,9 +1,9 @@
 from collections import ChainMap
 from enum import Enum
 
-from RULEngine.GameDomainObjects.player import Player
 from Util.Pose import Pose
 from Util.Velocity import Velocity
+from ai.GameDomainObjects import Player
 
 
 class AICommandType(Enum):

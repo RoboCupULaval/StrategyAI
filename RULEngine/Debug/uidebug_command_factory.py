@@ -3,10 +3,10 @@
 from math import sin, cos
 from typing import Dict
 
-from RULEngine.GameDomainObjects.player import Player
 from RULEngine.services.team_color_service import TeamColorService
 from Util.constant import TeamColor
 from Util.singleton import Singleton
+from ai.GameDomainObjects.player import Player
 
 __author__ = "Maxime Gagnon-Legault, Philippe Babin, and others"
 
@@ -90,7 +90,6 @@ class UIDebugCommandFactory(metaclass=Singleton):
         """
         return DebugCommand(1001, cmd_tactics_dict)
 
-    # todo finish
     @staticmethod
     def send_robot_strategic_state(player: Player, tactic: str, action: str, target: str="not implemented"):
         teamcolor_str = player.team.team_color.__str__()
@@ -100,13 +99,19 @@ class UIDebugCommandFactory(metaclass=Singleton):
         return DebugCommand(1002, data)
 
     @staticmethod
+    def autoplay_info(referee_info, referee_team_info, auto_play_info, auto_flag):
+        return DebugCommand(1005, {'referee': referee_info,
+                                   'referee_team': referee_team_info,
+                                   'auto_play': auto_play_info,
+                                   'auto_flag': auto_flag})
+
+    @staticmethod
     def track_frame(track_frame):
         cmd = []
         cmd += UIDebugCommandFactory().robots(track_frame['blue'])
         cmd += UIDebugCommandFactory().robots(track_frame['yellow'])
         cmd += UIDebugCommandFactory().balls(track_frame['balls'])
         return cmd
-
 
     def robots(self, robots):
         cmd = []
@@ -124,15 +129,7 @@ class UIDebugCommandFactory(metaclass=Singleton):
 
         if team_color is None:
             return DebugCommand(1004, {'team_color': TeamColorService().our_team_color.name.lower()})
-
         return DebugCommand(1004, {'team_color': team_color.name.lower()})
-
-    @staticmethod
-    def play_info_cmd(referee_info, referee_team_info, auto_play_info, auto_flag):
-        return DebugCommand(1005, {'referee': referee_info,
-                                   'referee_team': referee_team_info,
-                                   'auto_play': auto_play_info,
-                                   'auto_flag': auto_flag})
 
     @staticmethod
     def robot(pose: Dict, color=(0, 255, 0), color_angle=(255, 0, 0), radius=120, timeout=0.05):

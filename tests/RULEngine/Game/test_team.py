@@ -2,11 +2,11 @@ import unittest
 
 from RULEngine.Util.Pose import Pose
 
-from RULEngine.GameDomainObjects.player import Player
-from RULEngine.GameDomainObjects.team import Team
 from RULEngine.services.team_color_service import TeamColor
 from Util import PLAYER_PER_TEAM, MAX_PLAYER_ON_FIELD_PER_TEAM
 from Util import Position
+from ai.GameDomainObjects import Player
+from ai.GameDomainObjects import Team
 
 
 class TestTeam(unittest.TestCase):

@@ -6,13 +6,12 @@ from math import pi, sqrt
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 
-from RULEngine.GameDomainObjects.game import Game
-from RULEngine.GameDomainObjects.player import Player
-from RULEngine.GameDomainObjects.referee import Referee
 from RULEngine.services.team_color_service import TeamColorService
 from Util import AICommand, AICommandType, AIControlLoopType
 from Util import Position
-from ai.STA.Action.GetBall import GetBall
+from ai.GameDomainObjects import Game
+from ai.GameDomainObjects import Player
+from ai.GameDomainObjects import Referee
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.Idle import Idle

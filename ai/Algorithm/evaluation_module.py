@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.GameDomainObjects.Shitty_Field import FieldSide
 from Util import Position
 from Util.constant import ROBOT_RADIUS
+from ai.GameDomainObjects.Shitty_Field import FieldSide
 from ai.states.game_state import GameState
 
 

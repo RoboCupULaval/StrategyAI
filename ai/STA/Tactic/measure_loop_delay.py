@@ -3,9 +3,7 @@ import time
 from typing import List, Optional
 
 from Util.Pose import Pose, Position
-
-from RULEngine.GameDomainObjects.player import Player
-
+from ai.GameDomainObjects import Player
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic

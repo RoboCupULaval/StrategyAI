@@ -3,12 +3,12 @@ import time
 from typing import List
 
 import numpy as np
-from Util.Pose import Pose
 
-from RULEngine.GameDomainObjects.player import Player
-from Util.constant import BALL_RADIUS, ROBOT_RADIUS
+from Util.Pose import Pose
 from Util.Position import Position
+from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.Algorithm.evaluation_module import closest_players_to_point
+from ai.GameDomainObjects import Player
 from ai.STA.Action.Idle import Idle
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic

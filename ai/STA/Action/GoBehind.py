@@ -1,17 +1,17 @@
 # Under MIT licence, see LICENCE.txt
+
+__author__ = "Maxime Gagnon-Legault"
+
 import math
-
 import numpy as np
-from Util.Pose import Pose
 
-from RULEngine.GameDomainObjects.player import Player
-from Util.ai_command_shit import AICommand, AICommandType
-from Util.Position import Position
+from Util import Pose
+from Util import Position
+from Util import AICommand
 from Util.geometry import wrap_to_pi
+from ai.GameDomainObjects import Player
 from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
-
-__author__ = 'Robocup ULaval'
 
 
 class GoBehind(Action):
@@ -49,7 +49,7 @@ class GoBehind(Action):
         self.cruise_speed = cruise_speed
         self.orientation = orientation
 
-        # TODO find something better MGL 2017/05/22
+        # TODO find something better MGL 2017/05/22 TODO repair MGL 2018/01/25
         if self.position2 is None:
             self.position2 = game_state.const["FIELD_THEIR_GOAL_MID_GOAL"]
 
@@ -114,7 +114,5 @@ class GoBehind(Action):
         destination_pose = Pose(destination_position, destination_orientation)
         return destination_pose
 
-    def exec(self):
-        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.get_destination(),
-                                                             "cruise_speed": self.cruise_speed,
-                                                             "pathfinder_on": self.pathfinder_on})
+    def exec(self) -> AICommand:
+        return AICommand(self.player.id, target=self.get_destination().to_dict())

@@ -3,11 +3,10 @@ import random
 from typing import List
 
 import numpy as np
+
 from Util.Pose import Pose, Position
-
-from RULEngine.GameDomainObjects.player import Player
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
-
+from ai.GameDomainObjects.player import Player
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState

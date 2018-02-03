@@ -1,23 +1,25 @@
+# Under MIT licence, see LICENCE.txt
+
+__author__ = 'Maxime Gagnon-Legault, and others'
+
 import math as m
 import time
 from typing import List, Union
 
 import numpy as np
-from Util.Pose import Pose
 
-from RULEngine.GameDomainObjects.player import Player
+from Util.Pose import Pose
 from Util.Position import Position
+from Util.ai_command import AICommand
 from Util.geometry import compare_angle
 from ai.Algorithm.evaluation_module import best_passing_option
-from ai.STA.Action.AllStar import AllStar
+from ai.GameDomainObjects import Player
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
-
-__author__ = 'RoboCupULaval'
 
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
@@ -56,8 +58,9 @@ class GoKick(Tactic):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
             self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
-        tentative_command = {'charge_kick':True}
-        return AllStar(self.game_state, self.player, other_args=tentative_command)
+
+        # todo charge kick here please/ask Simon what kicktype is supposed to be
+        return AICommand(self.player.id, kick_type=1)
 
     def go_behind_ball(self):
         self.ball_spacing = GRAB_BALL_SPACING

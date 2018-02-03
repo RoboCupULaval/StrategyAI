@@ -1,17 +1,14 @@
 # Under MIT licence, see LICENCE.txt
 
+__author__ = 'Maxime Gagnon-Legault'
 
-from Util.Pose import Pose
-
-from RULEngine.GameDomainObjects.player import Player
-from Util.ai_command_shit import AICommand, AICommandType
-from Util.Position import Position
-from Util.geometry import get_closest_point_on_segment
+from Util import Pose, Position
+from Util import AICommand
 from Util.area import stayInsideCircle
-from ai.STA.Action.Action import Action
-from ai.states.game_state import GameState
-
-__author__ = 'Robocup ULaval'
+from Util.geometry import get_closest_point_on_segment
+from ai.GameDomainObjects import Player
+from ai.STA.Action import Action
+from ai.states import GameState
 
 
 class ProtectGoal(Action):
@@ -61,7 +58,9 @@ class ProtectGoal(Action):
         inner_circle_position = stayInsideCircle(ball_position, goal_position, self.minimum_distance)
         outer_circle_position = stayInsideCircle(ball_position, goal_position, self.maximum_distance)
 
-        destination_position = get_closest_point_on_segment(goalkeeper_position, inner_circle_position, outer_circle_position)
+        destination_position = get_closest_point_on_segment(goalkeeper_position,
+                                                            inner_circle_position,
+                                                            outer_circle_position)
 
         # Vérification que destination_position respecte la distance maximale
         if self.maximum_distance is None:
@@ -74,8 +73,4 @@ class ProtectGoal(Action):
         destination_orientation = (ball_position - destination_position).angle()
 
         destination_pose = Pose(destination_position, destination_orientation)
-        return AICommand(self.player,
-                         AICommandType.MOVE,
-                         pose_goal=destination_pose,
-                         pathfinder_on=False)
-
+        return AICommand(self.player.id, target=destination_pose.to_dict())

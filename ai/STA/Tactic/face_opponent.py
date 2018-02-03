@@ -4,10 +4,10 @@ from typing import List
 
 import numpy as np
 
-from RULEngine.GameDomainObjects.player import Player
-from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 from Util.Pose import Pose
+from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 from ai.Algorithm.evaluation_module import closest_player_to_point
+from ai.GameDomainObjects import Player
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags

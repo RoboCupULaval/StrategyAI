@@ -19,6 +19,3 @@ class BambaFollow(Strategy):
         self.add_tactic(Role.FIRST_ATTACK, DemoFollowBall(self.game_state, p1))
         self.add_tactic(Role.SECOND_ATTACK, DemoFollowRobot(self.game_state, p2, args=[p1.id]))
         self.add_tactic(Role.MIDDLE, DemoFollowRobot(self.game_state, p3, args=[p2.id]))
-
-
-

@@ -1,12 +1,13 @@
 # Under MIT license, see LICENSE.txt
 
-from RULEngine.GameDomainObjects.player import Player
-from Util.ai_command_shit import AICommand, AICommandType
+__author__ = 'Maxime Gagnon-Legault'
+
+
 from Util.Pose import Pose
+from Util import AICommand
+from ai.GameDomainObjects import Player
 from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
-
-__author__ = 'Robocup ULaval'
 
 
 class Grab(Action):
@@ -17,6 +18,6 @@ class Grab(Action):
         """
         Action.__init__(self, game_state, player)
 
-    def exec(self):
-        ball = self.game_state.get_ball_position()
-        return AICommand(self.player, AICommandType.MOVE, pose_goal=Pose(ball, self.player.pose.orientation), pathfinder_on=True)
+    def exec(self) -> AICommand:
+        ball = self.game_state.ball.position
+        return AICommand(self.player.id, target=Pose(ball, self.player.pose.orientation).to_dict())

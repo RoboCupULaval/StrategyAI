@@ -46,3 +46,8 @@ class STAChangeCommand:
 
     def is_strategy_change_command(self):
         return self.type == STAType.STRATEGY
+
+    def is_autoplay_change_command(self):
+        return self.type == STAType.AUTONOMOUS_PLAY
+
+    # TODO add for action command

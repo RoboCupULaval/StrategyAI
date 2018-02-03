@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.GameDomainObjects.field import Field
-from RULEngine.GameDomainObjects.referee import Referee
+from ai.GameDomainObjects import Field
+from ai.GameDomainObjects import Referee
+
 from RULEngine.services.team_color_service import TeamColorService
 
 __author__ = "Maxime Gagnon-Legault"
@@ -8,8 +9,8 @@ __author__ = "Maxime Gagnon-Legault"
 
 import logging
 
-from RULEngine.GameDomainObjects.ball import Ball
-from RULEngine.GameDomainObjects.team import Team
+from ai.GameDomainObjects.ball import Ball
+from ai.GameDomainObjects import Team
 from Util.constant import TeamColor
 from Util.role import Role
 from Util.role_mapper import RoleMapper
@@ -101,3 +102,7 @@ class GameState(object, metaclass=Singleton):
     @property
     def ball(self) -> Ball:
         return self._field.ball
+
+    @property
+    def referee(self) -> Referee:
+        return self._referee

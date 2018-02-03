@@ -1,7 +1,7 @@
 from typing import List
 
-from RULEngine.GameDomainObjects.ball import Ball
 from Util.Position import Position
+from ai.GameDomainObjects.ball import Ball
 
 
 class Field:

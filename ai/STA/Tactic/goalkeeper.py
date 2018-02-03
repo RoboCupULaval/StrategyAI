@@ -1,19 +1,20 @@
 # Under MIT licence, see LICENCE.txt
 
+__author__ = "Maxime Gagnon-Legault, and others"
+
 import time
 from math import tan, pi
 from typing import List
 
 from Util.Pose import Pose
-
-from RULEngine.GameDomainObjects.Shitty_Field import FieldSide
-from RULEngine.GameDomainObjects.player import Player
 from Util.Position import Position
+from Util.ai_command import AICommand
 from Util.constant import ROBOT_RADIUS
 from Util.constant import TeamColor
 from Util.geometry import clamp, compare_angle, wrap_to_pi
 from ai.Algorithm.evaluation_module import closest_player_to_point, best_passing_option, player_with_ball
-from ai.STA.Action.AllStar import AllStar
+from ai.GameDomainObjects.Shitty_Field import FieldSide
+from ai.GameDomainObjects import Player
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.MoveToPosition import MoveToPosition
@@ -22,8 +23,6 @@ from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
-
-__author__ = 'RoboCupULaval'
 
 TARGET_ASSIGNATION_DELAY = 1
 
@@ -51,7 +50,9 @@ class GoalKeeper(Tactic):
 
     def kick_charge(self):
         self.next_state = self.protect_goal
-        return AllStar(self.game_state, self.player,  **{"charge_kick": True})
+
+        # todo charge kick here please/ask Simon what kicktype is supposed to be
+        return AICommand(self.player.id,  kick_type=1)
 
     def protect_goal(self):
         if not self.penalty_kick:
