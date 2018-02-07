@@ -4,8 +4,8 @@ from typing import List
 
 import numpy as np
 
-from Util.Pose import Pose
-from Util.Position import Position
+from Util import Pose, Position
+from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player

@@ -1,5 +1,5 @@
 # Under MIT license, see LICENSE.txt
-from Util.Pose import Pose
+from Util import Pose
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags

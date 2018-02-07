@@ -1,11 +1,9 @@
 # Under MIT license, see LICENSE.txt
 
-__author__ = "Maxime Gagnon-Legault"
 
-from Util import Pose
-from Util import AICommand
+from Util import Pose, AICommand
 from ai.GameDomainObjects import Player
-from ai.STA.Action.Action import Action
+from ai.STA.Action import Action
 from ai.states.game_state import GameState
 
 

@@ -2,7 +2,6 @@
 from enum import Enum
 from typing import Dict
 
-__author__ = "Maxime Gagnon-Legault"
 
 STRATEGY_COMMAND_TYPE = 5002
 TACTIC_COMMAND_TYPE = 5003

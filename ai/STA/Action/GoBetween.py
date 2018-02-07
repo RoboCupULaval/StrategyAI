@@ -2,12 +2,11 @@
 
 from Util import Pose, Position
 from Util import AICommand
-from Util.geometry import get_closest_point_on_segment
 from ai.GameDomainObjects.player import Player
-from ai.STA.Action.Action import Action
-from ai.states.game_state import GameState
 
-__author__ = 'Robocup ULaval'
+from Util.geometry import get_closest_point_on_segment
+from ai.STA.Action import Action
+from ai.states import GameState
 
 
 class GoBetween(Action):

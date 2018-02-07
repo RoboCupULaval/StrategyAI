@@ -1,18 +1,11 @@
 # Under MIT License, see LICENSE.txt
 import time
 from typing import List, Dict
-
-from Util.Pose import Pose
-from Util.Position import Position
-from Util.ai_command import AICommand
-from ai.STA.Strategy.human_control import HumanControl
-
-__author__ = "Maxime Gagnon-Legault, Philippe Babin"
-
 import logging
 
-from Util.singleton import Singleton
-from multiprocessing import Queue
+from Util import Pose, Position, AICommand, Singleton
+from ai.STA.Strategy.human_control import HumanControl
+
 
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from Util.role import Role

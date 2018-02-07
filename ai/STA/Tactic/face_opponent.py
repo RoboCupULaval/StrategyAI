@@ -4,7 +4,7 @@ from typing import List
 
 import numpy as np
 
-from Util.Pose import Pose
+from Util import Pose
 from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 from ai.Algorithm.evaluation_module import closest_player_to_point
 from ai.GameDomainObjects import Player

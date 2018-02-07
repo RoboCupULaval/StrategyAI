@@ -1,7 +1,5 @@
 # Under MIT License, see LICENSE.txt
 
-__author__ = "Maxime Gagnon-Legault, Simon Bouchard"
-
 from collections import namedtuple
 
 

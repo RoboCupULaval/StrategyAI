@@ -1,8 +1,8 @@
 from typing import Union
 
-from Util.Pose import Pose
+from Util.pose import Pose
 
-from Util.Position import Position
+from Util.position import Position
 
 
 class Velocity(Pose):

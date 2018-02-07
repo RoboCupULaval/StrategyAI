@@ -6,8 +6,10 @@ from unittest.mock import Mock
 from RULEngine.Game.Player import Player
 
 from Util import AICommand, AICommandType, AIControlLoopType, _default_keys, _keys_type
-from Util import Pose
-from Util import Velocity
+from Util import pose
+from Util import velocity
+from Util.pose import Pose
+from Util.velocity import Velocity
 
 
 class AICommandTestCase(unittest.TestCase):

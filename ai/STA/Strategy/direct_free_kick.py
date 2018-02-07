@@ -2,7 +2,7 @@
 
 from functools import partial
 
-from Util.Pose import Position, Pose
+from Util.pose import Position, Pose
 from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_player_to_point
 from ai.STA.Strategy.strategy import Strategy

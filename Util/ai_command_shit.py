@@ -1,8 +1,8 @@
 from collections import ChainMap
 from enum import Enum
 
-from Util.Pose import Pose
-from Util.Velocity import Velocity
+from Util import Pose
+from Util.velocity import Velocity
 from ai.GameDomainObjects import Player
 
 

@@ -1,9 +1,5 @@
 # Under MIT licence, see LICENCE.txt
-
-__author__ = 'Maxime Gagnon-Legault'
-
-from Util import Pose, Position
-from Util import AICommand
+from Util import Pose, Position, AICommand
 from Util.area import stayInsideCircle
 from Util.geometry import get_closest_point_on_segment
 from ai.GameDomainObjects import Player

@@ -2,14 +2,12 @@
 
 import unittest
 
-from RULEngine.GameDomainObjects.game import Game
-from RULEngine.GameDomainObjects.player import Player
-from RULEngine.GameDomainObjects.referee import Referee
-from RULEngine.Util.Pose import Pose
+from ai.GameDomainObjects import Player
+from ai.GameDomainObjects import Referee
+from Util import Pose
 
 from RULEngine.services.team_color_service import TeamColorService, TeamColor
-from Util import AICommand, AICommandType
-from Util import Position
+from Util.position import Position
 from ai.Algorithm.Graph.Node import Node
 from ai.Algorithm.Graph.Vertex import Vertex
 from ai.GameDomainObjects.ball import Ball

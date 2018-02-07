@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 from typing import Dict
 
-from Util.Pose import Pose
+from Util.pose import Pose
 
 
 class Player:

@@ -1,7 +1,5 @@
 # Under MIT licence, see LICENCE.txt
 
-__author__ = 'Maxime Gagnon-Legault'
-
 from abc import abstractmethod
 
 from Util import AICommand

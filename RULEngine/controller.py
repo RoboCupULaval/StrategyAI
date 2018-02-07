@@ -1,6 +1,5 @@
 # Under MIT licence, see LICENCE.txt
 
-__author__ = "Simon Bouchard, Maxime Gagnon-Legault"
 
 import logging
 from multiprocessing import Queue
@@ -8,12 +7,16 @@ from queue import Empty
 from typing import Dict
 from collections import namedtuple
 from math import sin, cos, sqrt
-
+from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
+from RULEngine.robot import Robot, MAX_LINEAR_SPEED
 from Util.PID import PID
-from config.config_service import ConfigService
 
-MAX_ROBOT = 12
-MAX_LINEAR_SPEED = 2000  # mm/s
+from Util.pose import Pose
+from Util.position import Position
+from Util.constant import PLAYER_PER_TEAM
+from Util.path import Path
+from Util.path_smoother import path_smoother
+from config.config_service import ConfigService
 
 
 RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active')
@@ -23,27 +26,6 @@ RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow pack
 # TODO see if necessary, also same as RobotPacket
 class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dribbler_active')):
     pass
-
-
-class Robot:
-
-    __slots__ = ('_robot_id', 'controller', 'target', 'pose', 'velocity',
-                 'kick_type', 'kick_force', 'dribbler_active', 'input_command')
-
-    def __init__(self, robot_id, controller):
-        self._robot_id = robot_id
-        self.controller = controller
-        self.target = None
-        self.pose = None
-        self.velocity = None
-        self.kick_type = None
-        self.kick_force = 0
-        self.dribbler_active = False
-        self.input_command = None
-
-    @property
-    def robot_id(self):
-        return self._robot_id
 
 
 def get_control_setting(game_type: str):
@@ -75,7 +57,7 @@ class Controller(list):
 
         control_setting = get_control_setting(self.cfg.config_dict['GAME']['type'])
 
-        super().__init__(Robot(robot_id, PositionControl(control_setting)) for robot_id in range(MAX_ROBOT))
+        super().__init__(Robot(robot_id, PositionControl(control_setting)) for robot_id in range(PLAYER_PER_TEAM))
 
     def execute(self, track_frame: Dict) -> RobotPacketFrame:
 
@@ -91,6 +73,7 @@ class Controller(list):
                              if robot.pose is not None and robot.target is not None)
 
         for robot in active_robots:
+            self.update_robot_path(robot)
             command = robot.controller.execute(robot.target, robot.pose)
             packet.packet.append(RobotPacket(robot_id=robot.robot_id,
                                              command=command,
@@ -122,6 +105,14 @@ class Controller(list):
 
         except Empty:
             pass
+
+    def update_robot_path(self, robot):
+        # The pathfinder was coded with Pose/Position in mind. So the dict pose of Robot must be converted
+        pose = Pose.from_dict(robot.pose)
+        # TODO: This is temporary, since ia doesn't send a path yet
+        robot.path =  Path(pose.position, Position.from_dict(robot.target))
+        robot.path.quick_update_path(pose.position)
+        robot.path = path_smoother(robot)
 
 
 class PositionControl:

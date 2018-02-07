@@ -4,7 +4,7 @@ from functools import partial
 from random import shuffle
 
 from Util.constant import PLAYER_PER_TEAM
-from Util.Pose import Pose, Position
+from Util.pose import Pose, Position
 
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
@@ -62,7 +62,6 @@ class RobocupChoreography(Strategy):
             if not (i == robot1 or i == robot2 or i == robot3):
                 self.add_tactic(i, Stop(self.game_state, i))
 
-
     def condition(self, i):
         self.tactic_conditions[i] = self.graphs[i].get_current_tactic().status_flag == Flags.SUCCESS
 
@@ -78,4 +77,3 @@ class RobocupChoreography(Strategy):
                 return False
         '''
         return True
-

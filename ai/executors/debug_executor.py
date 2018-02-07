@@ -3,8 +3,6 @@ import time
 
 from ai.states.game_state import GameState
 
-__author__ = "Maxime Gagnon-Legault"
-
 import logging
 from multiprocessing import Queue
 from queue import Empty

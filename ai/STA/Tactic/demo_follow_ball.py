@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
 
-from Util.Pose import Pose
+from Util import Pose
 from Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
 from Util.geometry import get_distance
 from ai.GameDomainObjects import Player
@@ -11,7 +11,6 @@ from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
-__author__ = 'RoboCupULaval'
 
 FOLLOW_SPEED = 1.5
 

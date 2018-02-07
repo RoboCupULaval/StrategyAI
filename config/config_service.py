@@ -1,6 +1,6 @@
 from configparser import ConfigParser, ParsingError
 
-from Util.singleton import Singleton
+from Util import Singleton
 
 
 class ConfigService(metaclass=Singleton):

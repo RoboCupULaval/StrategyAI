@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
 
-from Util.Pose import Pose
+from Util import Pose
 from Util.ai_command_shit import AICommand, AICommandType
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic

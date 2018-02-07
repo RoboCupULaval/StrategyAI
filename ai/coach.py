@@ -3,7 +3,6 @@ from typing import Dict, List
 
 from Util.ai_command import AICommand
 
-__author__ = "Maxime Gagnon-Legault, Philippe Babin"
 
 import logging
 from multiprocessing import Process, Queue

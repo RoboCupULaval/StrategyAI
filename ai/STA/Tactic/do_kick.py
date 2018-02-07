@@ -1,8 +1,9 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
 
-from Util.Pose import Pose
+from Util import Pose
 from ai.GameDomainObjects import Player
+
 from ai.STA.Action.Kick import Kick
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState

@@ -1,15 +1,12 @@
 # Under MIT licence, see LICENCE.txt
 
-__author__ = 'RoboCupULaval'
-
 import time
 
 import numpy as np
 
-from Util.Pose import Pose
-from Util.Position import Position
-from Util.ai_command import AICommand
+from Util import Pose, Position, AICommand
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS
+from Util.position import Position
 from Util.geometry import get_distance
 from ai.GameDomainObjects import Player
 from ai.STA.Action.GoBehind import GoBehind

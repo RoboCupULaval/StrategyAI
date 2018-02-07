@@ -1,8 +1,6 @@
 # Under MIT License, see LICENSE.txt
 import math as m
 
-__author__ = 'RoboCupULaval'
-
 
 # Question
 def isInsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):

@@ -1,5 +1,5 @@
 # Under MIT license, see LICENSE.txt
-from Util.Position import Position
+from Util.position import Position
 from Util.role import Role
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition

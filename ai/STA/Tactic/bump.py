@@ -8,8 +8,7 @@ from typing import List
 import numpy as np
 
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
-from Util.Pose import Pose, Position
-from Util.ai_command import AICommand
+from Util import Pose, Position, AICommand
 from Util.constant import ROBOT_RADIUS
 from Util.geometry import get_distance
 from ai.GameDomainObjects.player import Player

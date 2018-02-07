@@ -3,15 +3,20 @@
 import unittest
 from math import pi, sqrt
 
-from RULEngine.Util.Pose import Pose
+from RULEngine.Util.pose import Pose
 from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
 
 from RULEngine.services.team_color_service import TeamColorService
 from Util import AICommand, AICommandType, AIControlLoopType
+<<<<<<< HEAD
 from Util import Position
 from ai.GameDomainObjects import Game
 from ai.GameDomainObjects import Player
 from ai.GameDomainObjects import Referee
+=======
+from Util.position import Position
+from ai.STA.Action.GetBall import GetBall
+>>>>>>> 658ccbf98f0e28b85cf7ad0e97fabff8066870e6
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.Idle import Idle
@@ -72,7 +77,7 @@ class TestActions(unittest.TestCase):
                                     **{"pose_goal": destination_pose})
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
-        grab_pose = Pose(Position(-5, 5), 3*pi/4)
+        grab_pose = Pose(Position(-5, 5), 3 * pi / 4)
         self.game_state.set_ball_position(Position(-5, 5), A_DELTA_T)
         ai_cmd = self.grab_ball.exec()
         ai_cmd_expected = AICommand(self.a_player, AICommandType.MOVE,
@@ -94,42 +99,42 @@ class TestActions(unittest.TestCase):
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
         # test avec une droite horizontale
-        self.go_between = GoBetween(self.game_state,self.a_player, Position(100, 100), Position(-100, 100),
+        self.go_between = GoBetween(self.game_state, self.a_player, Position(100, 100), Position(-100, 100),
                                     Position(0, 200))
         ai_cmd = self.go_between.exec().pose_goal
-        ai_cmd_expected = Pose(Position(0, 100), pi/2)
+        ai_cmd_expected = Pose(Position(0, 100), pi / 2)
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
         # test avec une droite quelconque
-        self.go_between = GoBetween(self.game_state,self.a_player, Position(0, 500), Position(500, 0),
+        self.go_between = GoBetween(self.game_state, self.a_player, Position(0, 500), Position(500, 0),
                                     Position(-300, -300))
         ai_cmd = self.go_between.exec().pose_goal
-        ai_cmd_expected = Pose(Position(250, 250), -3*pi/4)
+        ai_cmd_expected = Pose(Position(250, 250), -3 * pi / 4)
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
         # test destination calculée derrière position1
-        self.go_between = GoBetween(self.game_state,self.a_player, Position(1000, 75), Position(1500, -250),
+        self.go_between = GoBetween(self.game_state, self.a_player, Position(1000, 75), Position(1500, -250),
                                     Position(0, 0), 0)
         ai_cmd = self.go_between.exec().pose_goal
         ai_cmd_expected = Pose(Position(1000, 75), -3.067)
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
         # test destination calculée derrière position2
-        self.go_between = GoBetween(self.game_state,self.a_player, Position(-100, 50), Position(-50, 50),
+        self.go_between = GoBetween(self.game_state, self.a_player, Position(-100, 50), Position(-50, 50),
                                     Position(-60.0 + sqrt(3), 51.0), 10)
         ai_cmd = self.go_between.exec().pose_goal
         ai_cmd_expected = Pose(Position(-60, 50), 0.5235)
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
         # test correction pour respecter la distance minimale
-        self.go_between = GoBetween(self.game_state,self.a_player, Position(-500, 25), Position(1, 25),
+        self.go_between = GoBetween(self.game_state, self.a_player, Position(-500, 25), Position(1, 25),
                                     Position(-179, 0), 180)
         ai_cmd = self.go_between.exec().pose_goal
-        ai_cmd_expected = Pose(Position(-179, 25), -pi/2)
+        ai_cmd_expected = Pose(Position(-179, 25), -pi / 2)
         self.assertEqual(ai_cmd, ai_cmd_expected)
 
         # test distance entre les positions insuffisantes
-        self.assertRaises(AssertionError, GoBetween, self.game_state,self.a_player, Position(1, 1),
+        self.assertRaises(AssertionError, GoBetween, self.game_state, self.a_player, Position(1, 1),
                           Position(-1, -1), 50)
 
     def test_GoBehind(self):
@@ -137,16 +142,16 @@ class TestActions(unittest.TestCase):
         distance_behind = 500
 
         # test avec une droite verticale
-        self.go_behind = GoBehind(self.game_state,self.a_player, Position(1000, 250.3), Position(1000, 725.8),
+        self.go_behind = GoBehind(self.game_state, self.a_player, Position(1000, 250.3), Position(1000, 725.8),
                                   distance_behind)
         aicmd_obtenu = self.go_behind.exec()
         aicmd_expected = AICommand(self.a_player, AICommandType.MOVE,
-                                **{"pose_goal": Pose(Position(1000, -249.700), 1.5707)})
+                                   **{"pose_goal": Pose(Position(1000, -249.700), 1.5707)})
         self.assertEqual(aicmd_obtenu, aicmd_expected)
 
 
         # test avec une droite quelconque
-        self.go_behind = GoBehind(self.game_state,self.a_player, Position(1.5, 2.3), Position(18.3, 27.8),
+        self.go_behind = GoBehind(self.game_state, self.a_player, Position(1.5, 2.3), Position(18.3, 27.8),
                                   distance_behind)
         aicmd_obtenu = self.go_behind.exec()
         aicmd_expected = AICommand(self.a_player, AICommandType.MOVE,
@@ -155,7 +160,7 @@ class TestActions(unittest.TestCase):
         self.assertEqual(aicmd_obtenu, aicmd_expected)
 
         # test avec une droite horizontale
-        self.go_behind = GoBehind(self.game_state,self.a_player, Position(175.8, -200.34), Position(-276.8, -200.34),
+        self.go_behind = GoBehind(self.game_state, self.a_player, Position(175.8, -200.34), Position(-276.8, -200.34),
                                   distance_behind)
         aicmd_obtenu = GoBehind.exec(self.go_behind)
         aicmd_cible = AICommand(self.a_player, AICommandType.MOVE,
@@ -164,7 +169,7 @@ class TestActions(unittest.TestCase):
 
     def test_kick(self):
         # test avec la valeur 0 (nulle)
-        target = Pose(Position(1,1))
+        target = Pose(Position(1, 1))
         ball_position = Position(5, 0)
         self.game_state.set_ball_position(ball_position, A_DELTA_T)
         expected_cmd = AICommand(self.a_player, AICommandType.MOVE,

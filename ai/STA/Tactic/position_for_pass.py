@@ -2,8 +2,7 @@
 import time
 from typing import List
 
-from Util.Pose import Pose
-from Util.Position import Position
+from Util import Pose, Position
 from Util.role import Role
 from ai.Algorithm.evaluation_module import best_position_in_region
 from ai.GameDomainObjects import Player

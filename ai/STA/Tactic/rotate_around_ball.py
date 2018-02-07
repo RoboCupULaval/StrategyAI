@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
 
-from Util.Pose import Pose
+from Util import Pose
 from ai.GameDomainObjects import Player
 from ai.STA.Action.rotate_around import RotateAround
 from ai.STA.Tactic.tactic import Tactic

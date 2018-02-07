@@ -1,6 +1,5 @@
 # Under MIT licence, see LICENCE.txt
 
-__author__ = "Maxime Gagnon-Legault"
 
 from .ball import Ball
 from .field import Field

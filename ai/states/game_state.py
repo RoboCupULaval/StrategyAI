@@ -1,16 +1,9 @@
 # Under MIT License, see LICENSE.txt
-from ai.GameDomainObjects import Field
-from ai.GameDomainObjects import Referee
-
-from RULEngine.services.team_color_service import TeamColorService
-
-__author__ = "Maxime Gagnon-Legault"
-
 
 import logging
 
-from ai.GameDomainObjects.ball import Ball
-from ai.GameDomainObjects import Team
+from RULEngine.services.team_color_service import TeamColorService
+from ai.GameDomainObjects import Ball, Team, Field, Referee
 from Util.constant import TeamColor
 from Util.role import Role
 from Util.role_mapper import RoleMapper

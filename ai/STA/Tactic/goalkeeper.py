@@ -1,14 +1,12 @@
 # Under MIT licence, see LICENCE.txt
 
-__author__ = "Maxime Gagnon-Legault, and others"
+__author__ = 'RoboCupULaval'
 
 import time
 from math import tan, pi
 from typing import List
 
-from Util.Pose import Pose
-from Util.Position import Position
-from Util.ai_command import AICommand
+from Util import Pose, Position, AICommand
 from Util.constant import ROBOT_RADIUS
 from Util.constant import TeamColor
 from Util.geometry import clamp, compare_angle, wrap_to_pi

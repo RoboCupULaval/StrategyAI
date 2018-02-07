@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from typing import List
 
-from Util.Pose import Pose
+from Util import Pose
 from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 from ai.GameDomainObjects.player import Player
 from ai.STA.Action.MoveToPosition import MoveToPosition

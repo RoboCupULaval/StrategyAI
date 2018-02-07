@@ -1,8 +1,8 @@
 # Under MIT license, see LICENSE.txt
 
 from Util.role import Role
-from Util.Position import Position
-from Util.Pose import Pose
+from Util.position import Position
+from Util.pose import Pose
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
 from ai.STA.Tactic.goalkeeper import GoalKeeper
@@ -29,5 +29,3 @@ class DefenseWallNoKick(Strategy):
         for role, player in role_by_robots:
             if player:
                 self.add_tactic(role, AlignToDefenseWall(self.game_state, player, self.robots))
-
-

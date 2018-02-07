@@ -5,9 +5,10 @@ __author__ = "Maxime Gagnon-Legault"
 import math
 import numpy as np
 
-from Util import Pose
-from Util import Position
-from Util import AICommand
+from Util import Pose, Position, AICommand
+
+from ai.GameDomainObjects import Player
+from Util.position import Position
 from Util.geometry import wrap_to_pi
 from ai.GameDomainObjects import Player
 from ai.STA.Action.Action import Action

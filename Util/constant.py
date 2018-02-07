@@ -3,7 +3,6 @@
 
 from enum import Enum
 
-__author__ = 'RoboCupULaval'
 
 ROBOT_RADIUS = 90
 BALL_RADIUS = 21

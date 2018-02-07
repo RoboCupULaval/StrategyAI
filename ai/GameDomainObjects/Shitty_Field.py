@@ -1,9 +1,9 @@
 # Under MIT License, see LICENSE.txt
 from enum import Enum
 
-from Util.Position import Position
+from Util import Position
 from ai.Algorithm.path_partitionner import CollisionBody, CollisionType
-from ai.GameDomainObjects.ball import Ball
+from ai.GameDomainObjects import Ball
 # from RULEngine.Debug.debug_interface import DebugInterface
 from config.config_service import ConfigService
 

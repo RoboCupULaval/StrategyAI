@@ -2,7 +2,7 @@
 import time
 from typing import List, Optional
 
-from Util.Pose import Pose, Position
+from Util import Pose, Position
 from ai.GameDomainObjects import Player
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.MoveToPosition import MoveToPosition

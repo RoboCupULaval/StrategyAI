@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
 
-from Util.Pose import Pose, Position
+from Util import Pose, Position
 from Util.area import isInsideSquare, stayInsideSquare
 from Util.constant import ROBOT_RADIUS
 from ai.GameDomainObjects import Player

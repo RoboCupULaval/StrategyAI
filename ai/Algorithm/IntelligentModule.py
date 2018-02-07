@@ -4,8 +4,6 @@
 """
 from abc import abstractmethod, ABCMeta
 
-__author__ = 'RoboCupULaval'
-
 
 class IntelligentModule(object, metaclass=ABCMeta):
     """

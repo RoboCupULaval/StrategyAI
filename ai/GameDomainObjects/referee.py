@@ -4,7 +4,7 @@ from enum import IntEnum
 from typing import Dict
 
 from RULEngine.services.team_color_service import TeamColorService
-from Util.Position import Position
+from Util.position import Position
 from Util.constant import TeamColor
 
 
@@ -76,7 +76,6 @@ new_team_info = {"name": "",
 
 
 class Referee:
-
 
     def __init__(self):
         self.command = RefereeCommand.STOP

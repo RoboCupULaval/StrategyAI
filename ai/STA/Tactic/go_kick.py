@@ -1,16 +1,12 @@
 # Under MIT licence, see LICENCE.txt
 
-__author__ = 'Maxime Gagnon-Legault, and others'
-
 import math as m
 import time
 from typing import List, Union
 
 import numpy as np
 
-from Util.Pose import Pose
-from Util.Position import Position
-from Util.ai_command import AICommand
+from Util import Pose, Position, AICommand
 from Util.geometry import compare_angle
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.GameDomainObjects import Player

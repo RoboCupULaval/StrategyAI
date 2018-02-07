@@ -1,7 +1,5 @@
 # Under MIT license, see LICENSE.txt
 
-__author__ = "Maxime Gagnon-Legault"
-
 from Util import AICommand
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
