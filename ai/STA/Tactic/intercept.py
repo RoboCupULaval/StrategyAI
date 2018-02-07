@@ -2,7 +2,7 @@
 from typing import List
 
 import numpy as np
-from Util.Pose import Pose, Position
+from Util.pose import Pose, Position
 
 from RULEngine.GameDomainObjects.player import Player
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS

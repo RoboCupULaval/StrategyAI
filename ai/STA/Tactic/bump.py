@@ -4,7 +4,7 @@ import time
 from typing import List
 
 import numpy as np
-from Util.Pose import Pose, Position
+from Util.pose import Pose, Position
 
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from RULEngine.GameDomainObjects.player import Player

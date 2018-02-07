@@ -3,7 +3,7 @@ from typing import List
 
 from RULEngine.GameDomainObjects.player import Player
 
-from Util.Pose import Pose
+from Util.pose import Pose
 from Util.area import stayOutsideCircle
 
 from ai.Algorithm.path_partitionner import CollisionBody

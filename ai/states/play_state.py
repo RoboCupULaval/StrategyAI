@@ -3,7 +3,7 @@
 from typing import List, Tuple, Callable, Any
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import Pose
+from Util import pose
 from Util.singleton import Singleton
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.strategy_book import StrategyBook

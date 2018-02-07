@@ -102,7 +102,8 @@ class Engine(Process):
                 except Full:
                     pass
 
-                self.ui_send_queue.put(UIDebugCommandFactory().track_frame(track_frame))
+                self.ui_send_queue.put(UIDebugCommandFactory.track_frame(track_frame))
+                self.ui_send_queue.put(UIDebugCommandFactory.robots_path(self.controller))
 
         except KeyboardInterrupt:
             pass

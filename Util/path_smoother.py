@@ -4,7 +4,7 @@ from RULEngine.robot import Robot
 
 
 def path_smoother(player: Robot):
-    path = player.raw_path
+    path = player.path
     player = player
     vel_cruise = player.cruise_speed
     positions_list = [path.points[0]]

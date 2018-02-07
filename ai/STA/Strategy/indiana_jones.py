@@ -2,7 +2,7 @@
 
 from functools import partial
 
-from Util.Pose import Position, Pose
+from Util.pose import Position, Pose
 from Util.role import Role
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder

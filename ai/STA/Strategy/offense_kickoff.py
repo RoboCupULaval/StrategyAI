@@ -1,8 +1,8 @@
 # Under MIT license, see LICENSE.txt
 
-from Util.Pose import Pose
+from Util.pose import Pose
 
-from Util.Position import Position
+from Util.position import Position
 from Util.role import Role
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick

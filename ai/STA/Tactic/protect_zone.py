@@ -5,7 +5,7 @@ from RULEngine.GameDomainObjects.player import Player
 
 from Util.constant import ROBOT_RADIUS
 from Util.area import isInsideSquare, stayInsideSquare
-from Util.Pose import Pose, Position
+from Util.pose import Pose, Position
 
 from ai.STA.Action.GoBetween import GoBetween
 from ai.STA.Action.Idle import Idle

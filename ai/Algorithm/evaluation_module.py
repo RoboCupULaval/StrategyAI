@@ -1,8 +1,11 @@
 # Under MIT License, see LICENSE.txt
 from RULEngine.GameDomainObjects.Shitty_Field import FieldSide
-from Util import Position
+from Util.geometry import get_distance
+from Util.position import Position
 from Util.constant import ROBOT_RADIUS
 from ai.states.game_state import GameState
+
+import numpy as np
 
 
 class PlayerPosition(object):
@@ -73,8 +76,8 @@ def best_position_option(player, pointA: Position, pointB: Position):
     positions = []
 
     for i in range(ncounts):
-        positions += [Position(pointA.x + i * (pointB.x - pointA.x)/(ncounts-1),
-                               pointA.y + i * (pointB.y - pointA.y)/(ncounts-1))]
+        positions += [Position(pointA.x + i * (pointB.x - pointA.x) / (ncounts - 1),
+                               pointA.y + i * (pointB.y - pointA.y) / (ncounts-1))]
     positions = np.stack(positions)
     scores = line_of_sight_clearance(player, positions)
     best_score_index = np.argmin(scores)
@@ -111,7 +114,7 @@ def best_passing_option(passing_player, consider_goal=True):
 def best_goal_score_option(passing_player):
     # Retourne la meilleure position dans le but pour kick
     goalA = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"],
-                     GameState().field.constant["FIELD_GOAL_WIDTH"]/2)
+                     GameState().field.constant["FIELD_GOAL_WIDTH"] / 2)
     goalB = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"],
                      -GameState().field.constant["FIELD_GOAL_WIDTH"] / 2)
     best_position = best_position_option(passing_player, goalA, goalB)

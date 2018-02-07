@@ -4,7 +4,7 @@ from typing import List
 
 from RULEngine.GameDomainObjects.player import Player
 from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
-from Util.Pose import Pose
+from Util.pose import Pose
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags

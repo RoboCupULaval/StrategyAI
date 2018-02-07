@@ -1,11 +1,11 @@
 # Under MIT licence, see LICENCE.txt
 
 
-from Util.Pose import Pose
+from Util.pose import Pose
 
 from RULEngine.GameDomainObjects.player import Player
 from Util.ai_command_shit import AICommand, AICommandType
-from Util.Position import Position
+from Util.position import Position
 from Util.geometry import get_closest_point_on_segment
 from Util.area import stayInsideCircle
 from ai.STA.Action.Action import Action

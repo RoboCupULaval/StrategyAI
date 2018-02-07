@@ -2,14 +2,14 @@
 import logging
 
 from RULEngine.GameDomainObjects.player import Player
-from Util.Pose import Pose
+from Util.pose import Pose
 
 from RULEngine.GameDomainObjects.ball import Ball
 from RULEngine.GameDomainObjects.field import Field
 from RULEngine.GameDomainObjects.referee import Referee
 from RULEngine.GameDomainObjects.team import Team
 from RULEngine.services.team_color_service import TeamColor
-from Util import Position
+from Util import position
 from Util.singleton import Singleton
 
 

@@ -2,10 +2,10 @@ from enum import Enum
 
 import numpy as np
 import numpy.matlib
-from Util.Pose import Pose
+from Util.pose import Pose
 
 from RULEngine.GameDomainObjects.player import Player
-from Util.Position import Position
+from Util.position import Position
 from Util.geometry import conv_position_2_list, remove_duplicates
 from Util.path import Path
 
@@ -122,7 +122,7 @@ class PathPartitionner():
                 """
                 hack shady pour eviter une erreur shady (trop fatiguer pour dealer ak ste shit la)
                 
-                File "/home/phil/robocup/StrategyIA/RULEngine/Util/Position.py", line 68, in __eq__
+                File "/home/phil/robocup/StrategyIA/RULEngine/Util/position.py", line 68, in __eq__
                     min_abs_tol = min(self.abs_tol, other.position.abs_tol)
                     AttributeError: 'numpy.ndarray' object has no attribute 'position'
                 """

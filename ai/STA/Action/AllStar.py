@@ -3,7 +3,7 @@ from typing import Dict
 
 from RULEngine.GameDomainObjects.player import Player
 from Util.ai_command import AICommand
-from Util.Pose import Pose
+from Util.pose import Pose
 from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
 

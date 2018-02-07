@@ -2,7 +2,7 @@
 import time
 from typing import List, Optional
 
-from Util.Pose import Pose, Position
+from Util.pose import Pose, Position
 
 from RULEngine.GameDomainObjects.player import Player
 

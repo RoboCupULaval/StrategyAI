@@ -5,7 +5,7 @@ from RULEngine.GameDomainObjects.ball import Ball
 from ai.Algorithm.path_partitionner import CollisionBody, CollisionType
 # from RULEngine.Debug.debug_interface import DebugInterface
 from config.config_service import ConfigService
-from Util.Position import Position
+from Util.position import Position
 
 
 class FieldSide(Enum):

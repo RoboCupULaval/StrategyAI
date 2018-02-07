@@ -1,6 +1,6 @@
 import numpy as np
 
-from Util.Position import Position
+from Util.position import Position
 
 
 class Path:

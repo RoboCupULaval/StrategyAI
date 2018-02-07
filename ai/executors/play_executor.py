@@ -2,8 +2,8 @@
 import time
 from typing import List, Dict
 
-from Util.Pose import Pose
-from Util.Position import Position
+from Util.pose import Pose
+from Util.position import Position
 from Util.ai_command import AICommand
 from ai.STA.Strategy.human_control import HumanControl
 

@@ -28,8 +28,8 @@ class Robot:
         self.max_angular_speed = MAX_ANGULAR_SPEED
         self.max_angular_acceleration = MAX_ANGULAR_ACCELERATION
         self.cruise_speed = 1000
-        self.path = Path()
-        self.raw_path = Path()
+        self.path = None
+        self.raw_path = None
 
     @property
     def robot_id(self):

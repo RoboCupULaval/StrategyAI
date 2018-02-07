@@ -102,20 +102,55 @@ class UIDebugCommandFactory(metaclass=Singleton):
     @staticmethod
     def track_frame(track_frame):
         cmd = []
-        cmd += UIDebugCommandFactory().robots(track_frame['blue'])
-        cmd += UIDebugCommandFactory().robots(track_frame['yellow'])
-        cmd += UIDebugCommandFactory().balls(track_frame['balls'])
+        cmd += UIDebugCommandFactory.robots(track_frame['blue'])
+        cmd += UIDebugCommandFactory.robots(track_frame['yellow'])
+        cmd += UIDebugCommandFactory.balls(track_frame['balls'])
         return cmd
 
+    @staticmethod
+    def robots_path(robots):
+        cmds = []
+        for robot in robots:
+            if not robot.path or len(robot.path.points) < 2:
+                continue
+            points = robot.path.points
 
-    def robots(self, robots):
+            for start_point, end_point in zip(points, points[1:]):
+                cmds.append(UIDebugCommandFactory.line(start_point, end_point, timeout=0.1))
+
+            # MultiplePoints is weird, it has a special behavior were an unique ID link must be provided
+            cmds.append(UIDebugCommandFactory.multiple_points(points[1:],
+                                                              ORANGE,
+                                                              width=5,
+                                                              link="path - " + str(robot.robot_id),
+                                                              timeout=0.0))
+        return cmds
+
+    @staticmethod
+    def line(start_point, end_point, color=MAGENTA.repr(), timeout=DEFAULT_DEBUG_TIMEOUT):
+        return DebugCommand(3001, {'start': (float(start_point[0]), float(start_point[1])),
+                                   'end':  (float(end_point[0]), float(end_point[1])),
+                                   'color': color,
+                                   'timeout': timeout})
+    @staticmethod
+    def multiple_points(points, color=VIOLET, width=5, link=None, timeout=DEFAULT_DEBUG_TIMEOUT):
+        points_as_tuple = [(int(point[0]), int(point[1])) for point in points]
+
+        return DebugCommand(3005, {'points': points_as_tuple,
+                                   'color': color.repr(),
+                                   'width': width,
+                                   'timeout': timeout}, p_link=link)
+
+    @staticmethod
+    def robots(robots):
         cmd = []
         for robot in robots:
             circle, line = UIDebugCommandFactory.robot(robot['pose'])
             cmd += [circle, line]
         return cmd
 
-    def balls(self, balls):
+    @staticmethod
+    def balls(balls):
         return [UIDebugCommandFactory.ball(ball['pose']) for ball in balls]
 
     @staticmethod
@@ -145,12 +180,8 @@ class UIDebugCommandFactory(metaclass=Singleton):
 
         end_point = (pose['x'] + radius * cos(pose['orientation']),
                      pose['y'] + radius * sin(pose['orientation']))
-        data_line = {'start': player_center,
-                     'end': end_point,
-                     'color': color_angle,
-                     'timeout': timeout}
 
-        return DebugCommand(3003, data_circle), DebugCommand(3001, data_line)
+        return DebugCommand(3003, data_circle), UIDebugCommandFactory.line(player_center, end_point, color_angle, timeout)
 
     @staticmethod
     def ball(pose: dict, color=(255, 127, 80), timeout=0.05):

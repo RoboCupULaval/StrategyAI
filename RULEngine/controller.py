@@ -6,10 +6,13 @@ from multiprocessing import Queue
 from queue import Empty
 from typing import Dict
 
+from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from RULEngine.robot import Robot, MAX_LINEAR_SPEED
 from Util.PID import PID
-from Util.Pose import Pose
+from Util.pose import Pose
+from Util.position import Position
 from Util.constant import PLAYER_PER_TEAM
+from Util.path import Path
 from Util.path_smoother import path_smoother
 from config.config_service import ConfigService
 
@@ -103,8 +106,11 @@ class Controller(list):
     def update_robot_path(self, robot):
         # The pathfinder was coded with Pose/Position in mind. So the dict pose of Robot must be converted
         pose = Pose.from_dict(robot.pose)
+        # TODO: This is temporary, since ia doesn't send a path yet
+        robot.path =  Path(pose.position, Position.from_dict(robot.target))
         robot.path.quick_update_path(pose.position)
         robot.path = path_smoother(robot)
+
 
 
 

@@ -3,7 +3,7 @@ from functools import partial
 from typing import List
 
 from Util.ai_command_shit import AICommand
-from Util import Position
+from Util import position
 from ai.Algorithm.path_partitionner import PathPartitionner, CollisionBody
 from Util.path import Path
 from ai.states.game_state import GameState

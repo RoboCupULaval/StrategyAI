@@ -2,7 +2,8 @@
 from typing import List
 
 from RULEngine.GameDomainObjects.player import Player
-from Util import Pose
+from Util import pose
+from Util.pose import Pose
 from ai.STA.Action.rotate_around import RotateAround
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState

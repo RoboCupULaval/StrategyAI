@@ -2,7 +2,7 @@
 
 from RULEngine.GameDomainObjects.player import Player
 
-from Util.Pose import Pose, Position
+from Util.pose import Pose, Position
 from Util.geometry import get_closest_point_on_segment
 from Util.ai_command_shit import AICommand, AICommandType
 

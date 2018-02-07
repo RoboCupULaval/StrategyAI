@@ -1,12 +1,12 @@
 import unittest
 
 from RULEngine.Util.Pose import Pose
+from RULEngine.Util.position import Position
 
 from RULEngine.GameDomainObjects.player import Player
 from RULEngine.GameDomainObjects.team import Team
 from RULEngine.services.team_color_service import TeamColor
 from Util import PLAYER_PER_TEAM, MAX_PLAYER_ON_FIELD_PER_TEAM
-from Util import Position
 
 
 class TestTeam(unittest.TestCase):
@@ -42,7 +42,7 @@ class TestTeam(unittest.TestCase):
         for i in range(MAX_PLAYER_ON_FIELD_PER_TEAM):
             self.team.update_player(i, [Pose(Position(500, 500))])
             self.assertTrue(self.team.players[i] in self.team.available_players.values())
-        self.team.update_player(MAX_PLAYER_ON_FIELD_PER_TEAM+1, [Pose(Position(500, 500))])
+        self.team.update_player(MAX_PLAYER_ON_FIELD_PER_TEAM + 1, [Pose(Position(500, 500))])
         self.assertTrue(self.team.players[MAX_PLAYER_ON_FIELD_PER_TEAM+1] in self.team.available_players.values())
         self.assertTrue(len(self.team.available_players) == MAX_PLAYER_ON_FIELD_PER_TEAM+1)
         # simulating 21 frames where we don't see the robot

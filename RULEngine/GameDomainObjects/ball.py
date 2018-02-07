@@ -4,8 +4,8 @@ __author__ = "Maxime Gagnon-Legault, Philippe Babin"
 
 from typing import Dict
 
-from Util.Pose import Pose
-from Util.Position import Position
+from Util.pose import Pose
+from Util.position import Position
 
 
 class Ball:

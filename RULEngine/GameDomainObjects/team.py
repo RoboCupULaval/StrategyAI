@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-from Util.Pose import Pose
+from Util.pose import Pose
 from Util.constant import PLAYER_PER_TEAM
 
 __author__ = "Maxime Gagnon-Legault"

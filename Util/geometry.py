@@ -4,9 +4,9 @@ import warnings
 from typing import Union
 
 import numpy as np
-from Util.Pose import Pose
+from Util.pose import Pose
 
-from Util import Position
+from Util.position import Position
 
 __author__ = 'RoboCupULaval'
 
@@ -168,8 +168,8 @@ def get_closest_point_on_line(reference: Position,
 
 
 def get_closest_point_on_segment(reference: Position,
-                                position1: Position,
-                                position2: Position) -> Position:
+                                 position1: Position,
+                                 position2: Position) -> Position:
     """
         Calcul la position du point sur un segment le plus près d'une position de
         référence. Le segment est donné par deux positions. La ligne reliant la
@@ -218,7 +218,7 @@ def get_position_behind_point(point: Position, aiming: Position, spacing: Union[
     return point - spacing * (aiming - point).normalized()
 
 
-def are_collinear(pos1: Position, pos2: Position, pos3: Position, abs_tol=m.pi/30) -> bool:
+def are_collinear(pos1: Position, pos2: Position, pos3: Position, abs_tol=m.pi / 30) -> bool:
     return compare_angle((pos2 - pos3).angle(), (pos1 - pos2).angle(), abs_tol=abs_tol)
 
 

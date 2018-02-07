@@ -4,7 +4,7 @@ from functools import partial
 from random import shuffle
 
 from Util.constant import PLAYER_PER_TEAM
-from Util.Pose import Pose, Position
+from Util.pose import Pose, Position
 
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder

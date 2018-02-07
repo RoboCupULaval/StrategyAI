@@ -4,7 +4,7 @@ from typing import List
 from RULEngine.GameDomainObjects.player import Player
 
 from Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
-from Util.Pose import Pose
+from Util.pose import Pose
 from Util.geometry import get_distance
 
 from ai.STA.Action.Idle import Idle

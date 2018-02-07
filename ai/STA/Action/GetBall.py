@@ -1,7 +1,9 @@
 # Under MIT licence, see LICENCE.txt
 from RULEngine.GameDomainObjects.player import Player
-from Util import AICommand, AICommandType
-from Util import Pose
+from Util.ai_command import AICommand
+from Util.ai_command_shit import AICommandType
+from Util.pose import Pose
+from Util import pose
 from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
 

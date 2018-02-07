@@ -5,7 +5,7 @@ from typing import Union
 import numpy as np
 
 from Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE
-from Util.Position import Position
+from Util.position import Position
 
 
 class Pose(object):

@@ -9,8 +9,8 @@ from RULEngine.GameDomainObjects.game import Game
 from RULEngine.GameDomainObjects.player import Player
 from RULEngine.GameDomainObjects.referee import Referee
 from RULEngine.services.team_color_service import TeamColorService, TeamColor
-from Util import AICommand, AICommandType
-from Util import Position
+from Util.position import Position
+from Util import position
 from ai.Algorithm.Graph.Node import Node
 from ai.Algorithm.Graph.Vertex import Vertex
 from ai.STA.Tactic.goalkeeper import GoalKeeper

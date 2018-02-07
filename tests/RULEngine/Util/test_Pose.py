@@ -2,9 +2,8 @@ import math as m
 import unittest
 
 import numpy as np
-from RULEngine.Util.Pose import Pose
-
-from Util import Position
+from RULEngine.Util.pose import Pose
+from RULEngine.Util.position import Position
 
 
 class TestPose(unittest.TestCase):
@@ -26,7 +25,7 @@ class TestPose(unittest.TestCase):
         self.assertTrue(pose1.position is not pose2.position)
         self.assertTrue(pose1.orientation is not pose2.orientation)
 
-        pose1 = Pose(Position(1, 1), 1 + 2*m.pi)
+        pose1 = Pose(Position(1, 1), 1 + 2 * m.pi)
         self.assertAlmostEqual(pose1.orientation, 1)
         pose2 = Pose(pose1)
         self.assertAlmostEqual(pose2.orientation, 1)
@@ -172,33 +171,33 @@ class TestPose(unittest.TestCase):
 
         self.assertEqual(Pose(Position(), 1), Pose(Position(), 1 + tol))
         self.assertEqual(Pose(Position(), 1), Pose(Position(), 1 - tol))
-        self.assertNotEqual(Pose(Position(), 1), Pose(Position(), 1 + 1.1*tol))
-        self.assertNotEqual(Pose(Position(), 1), Pose(Position(), 1 - 1.1*tol))
+        self.assertNotEqual(Pose(Position(), 1), Pose(Position(), 1 + 1.1 * tol))
+        self.assertNotEqual(Pose(Position(), 1), Pose(Position(), 1 - 1.1 * tol))
 
         self.assertEqual(Pose(Position(), 0), Pose(Position(), +tol))
         self.assertEqual(Pose(Position(), 0), Pose(Position(), -tol))
         self.assertEqual(Pose(Position(), +tol), Pose(Position(), 0))
         self.assertEqual(Pose(Position(), -tol), Pose(Position(), 0))
-        self.assertNotEqual(Pose(Position(), 0), Pose(Position(), +1.1*tol))
-        self.assertNotEqual(Pose(Position(), 0), Pose(Position(), -1.1*tol))
-        self.assertNotEqual(Pose(Position(), +1.1*tol), Pose(Position(), 0))
-        self.assertNotEqual(Pose(Position(), -1.1*tol), Pose(Position(), 0))
+        self.assertNotEqual(Pose(Position(), 0), Pose(Position(), +1.1 * tol))
+        self.assertNotEqual(Pose(Position(), 0), Pose(Position(), -1.1 * tol))
+        self.assertNotEqual(Pose(Position(), +1.1 * tol), Pose(Position(), 0))
+        self.assertNotEqual(Pose(Position(), -1.1 * tol), Pose(Position(), 0))
 
-        self.assertEqual(Pose(Position(), 0), Pose(Position(), 2*m.pi + tol))
-        self.assertEqual(Pose(Position(), 0), Pose(Position(), 2*m.pi - tol))
-        self.assertNotEqual(Pose(Position(), 0), Pose(Position(), 2*m.pi + 1.1*tol))
-        self.assertNotEqual(Pose(Position(), 0), Pose(Position(), 2*m.pi - 1.1*tol))
+        self.assertEqual(Pose(Position(), 0), Pose(Position(), 2 * m.pi + tol))
+        self.assertEqual(Pose(Position(), 0), Pose(Position(), 2 * m.pi - tol))
+        self.assertNotEqual(Pose(Position(), 0), Pose(Position(), 2 * m.pi + 1.1 * tol))
+        self.assertNotEqual(Pose(Position(), 0), Pose(Position(), 2 * m.pi - 1.1 * tol))
 
         self.assertEqual(Pose(Position(), m.pi), Pose(Position(), -m.pi))
-        self.assertEqual(Pose(Position(), m.pi+tol), Pose(Position(), -m.pi))
-        self.assertEqual(Pose(Position(), m.pi), Pose(Position(), -m.pi+tol))
-        self.assertEqual(Pose(Position(), m.pi-tol), Pose(Position(), -m.pi))
+        self.assertEqual(Pose(Position(), m.pi + tol), Pose(Position(), -m.pi))
+        self.assertEqual(Pose(Position(), m.pi), Pose(Position(), -m.pi + tol))
+        self.assertEqual(Pose(Position(), m.pi - tol), Pose(Position(), -m.pi))
         self.assertEqual(Pose(Position(), m.pi), Pose(Position(), -m.pi - tol))
 
-        self.assertNotEqual(Pose(Position(), m.pi+1.1*tol), Pose(Position(), -m.pi))
-        self.assertNotEqual(Pose(Position(), m.pi), Pose(Position(), -m.pi+1.1*tol))
-        self.assertNotEqual(Pose(Position(), m.pi-1.1*tol), Pose(Position(), -m.pi))
-        self.assertNotEqual(Pose(Position(), m.pi), Pose(Position(), -m.pi-1.1*tol))
+        self.assertNotEqual(Pose(Position(), m.pi + 1.1 * tol), Pose(Position(), -m.pi))
+        self.assertNotEqual(Pose(Position(), m.pi), Pose(Position(), -m.pi + 1.1 * tol))
+        self.assertNotEqual(Pose(Position(), m.pi - 1.1 * tol), Pose(Position(), -m.pi))
+        self.assertNotEqual(Pose(Position(), m.pi), Pose(Position(), -m.pi - 1.1 * tol))
 
     def test_wrap_to_pi(self):
         self.assertEqual(Pose.wrap_to_pi(0), 0)

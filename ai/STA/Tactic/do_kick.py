@@ -3,7 +3,7 @@ from typing import List
 
 from RULEngine.GameDomainObjects.player import Player
 
-from Util.Pose import Pose
+from Util.pose import Pose
 
 from ai.STA.Action.Kick import Kick
 from ai.STA.Tactic.tactic import Tactic
