@@ -40,6 +40,8 @@ class ProtectGoal(Action):
         assert isinstance(minimum_distance, (int, float))
         assert (isinstance(maximum_distance, (int, float)) or maximum_distance is None)
         if maximum_distance is not None:
+            if maximum_distance <= minimum_distance:
+                maximum_distance = minimum_distance * 1.5
             assert maximum_distance >= minimum_distance
         if maximum_distance is None:
             maximum_distance = minimum_distance

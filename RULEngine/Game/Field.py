@@ -43,7 +43,7 @@ class Field:
     def set_collision_body(self):
         x_their_goal = self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
         x_our_goal = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
-        radius = self.constant["FIELD_GOAL_RADIUS"]
+        radius = 1
 
         self.field_collision_body = [CollisionBody(Position(x_their_goal, 0), Position(0, 0), radius, CollisionType.ZONE),
                                      CollisionBody(Position(x_our_goal, 0), Position(0, 0), radius, CollisionType.ZONE)]
@@ -148,7 +148,7 @@ class Field:
                                 X_RIGHT=self.constant["FIELD_X_RIGHT"] + self.constant["FIELD_BOUNDARY_WIDTH"])
 
     def respect_field_rules(self, position):
-        new_position = self.stay_outside_goal_area(position, our_goal=False)
+        new_position = position
         return self.stay_inside_play_field(new_position)
 
 

@@ -100,7 +100,7 @@ class GoKick(Tactic):
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - ball_position).angle()
         if self.game_state.get_ball_velocity().norm() > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
-            self.next_state = self.halt
+            self.next_state = self.go_behind_ball
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
             self.next_state = self.kick
         else:
