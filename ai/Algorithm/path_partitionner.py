@@ -7,71 +7,7 @@ from Util.Pose import Pose
 from RULEngine.GameDomainObjects.player import Player
 from Util.Position import Position
 from Util.geometry import conv_position_2_list, remove_duplicates
-
-
-class Path:
-    # FIXME remove speed from pathfinder, it shouldn't be its concern
-    def __init__(self, start=Position(),  end=Position(), start_speed=0, end_speed=0):
-
-        self.start = start
-        self.goal = end
-        self.points = [start, end]
-        self.speeds = [start_speed, end_speed]
-
-    def join_segments(self, other):
-        new_path = Path()
-        new_path.points = self.points+other.points[1:]
-        new_path.start = self.start
-        new_path.goal = other.points[-1]
-        return new_path
-
-    def split_path(self, idx):
-        if idx < 1:
-            path_1 = Path()
-            path_2 = self
-        else:
-            path_1 = Path()
-            path_1.start = self.start
-            path_1.goal = self.points[idx]
-            path_1.points = self.points[:idx+1]
-            path_2 = Path()
-            path_2.start = self.points[idx]
-            path_2.goal = self.goal
-            path_2.points = self.points[idx:]
-        return path_1, path_2
-
-    @staticmethod
-    def generate_path_from_points(points_list, speed_list=None, threshold=None):
-
-        if speed_list is None:
-            speed_list = [0, 0]
-        if len(points_list) < 3:
-            pass
-        else:
-            if threshold is not None:
-                if np.linalg.norm(points_list[0] - points_list[1]) < threshold:
-                    del points_list[1]
-                # print(position_list)
-                # print(new_speed_list)
-
-        # points étant une liste de positions
-        new_path = Path()
-        new_path.start = points_list[0]
-        new_path.goal = points_list[-1]
-        new_path.points = points_list
-        new_path.speeds = speed_list
-
-        return new_path
-
-    def get_path_length(self):
-        length = 0
-        for idx, point in enumerate(self.points[:-1]):
-            length += np.linalg.norm(point - self.points[idx+1])
-        return length
-
-    def quick_update_path(self, player):
-        self.points[0] = player.pose.position
-        return self.generate_path_from_points(self.points, self.speeds, 50)
+from Util.path import Path
 
 
 class CollisionType(Enum):
@@ -84,17 +20,22 @@ class CollisionBody:
     UNCOLLIDABLE = 0
     COLLIDABLE = 1
 
-    def __init__(self, body_position, body_velocity, body_avoid_radius=150,
-                 collision_type: CollisionType = CollisionType.PLAYER):
+    def __init__(self, body_position=Position, body_velocity=Position, body_avoid_radius=150,
+                 collision_type: CollisionType = CollisionType.PLAYER, body_pose=Pose, max_acc=2, ident_num=-1):
         self.position = body_position
         self.velocity = body_velocity
         self.avoid_radius = body_avoid_radius
         self.type = collision_type
+        # object's maxmimum acceleration, needed for path_reshaper
+        self.max_acc = max_acc
+        # only for retro compatibility and to allow future usage
+        self.pose = body_pose
+        # only for retro compatibility
+        self.id = ident_num
 
 
-class PathPartitionner:
-    def __init__(self, gamestate):
-        self.game_state = gamestate
+class PathPartitionner():
+    def __init__(self):
         self.path = Path(Position(0, 0), Position(0, 0))
         self.raw_path = Path(Position(0, 0), Position(0, 0))
         self.res = 100
@@ -106,14 +47,12 @@ class PathPartitionner:
         self.player = None
         self.closest_obs_speed = np.array([0, 0])
         self.path_appendice = None
-        self.vecs_robot_2_obs = None
-        self.path_colide_directions = None
-        self.dist_robot_2_obs = None
-        self.path_colide_points = None
         self.end_speed = 0
         self.ball_collision = False
         self.avoid_radius = np.array([])
         self.optional_collision = None
+        self.collidable_objects = None
+        self.pose_target = CollisionBody(body_avoid_radius=1)
 
     def fastpathplanner(self, path, depth=0, avoid_dir=None):
         self.get_pertinent_collision_objects(False)
@@ -131,37 +70,54 @@ class PathPartitionner:
             path = path_1.join_segments(path_2)
         return path
 
-    def get_path(self, player: Player, pose_target: Pose=Pose(), cruise_speed: [int, float]=1,
-                 old_path=None, old_raw_path=Path(Position(99999, 99999), Position(99999, -99999)),
-                 end_speed=0, ball_collision=False, optional_collision=None):
+    def get_path(self, player: CollisionBody, pose_target: CollisionBody, cruise_speed=1,
+                 old_path=None, old_raw_path=Path(), end_speed=0, collidable_objects=None):
         self.cruise_speed = cruise_speed
+        self.pose_target = pose_target
+        self.collidable_objects = collidable_objects
         self.end_speed = end_speed
         self.player = player
-        self.ball_collision = ball_collision
-        self.optional_collision = optional_collision
-
+        # compatibilite avec ancienne version de get_pertinent_collision_objects()
+        self.ball_collision = False
+        self.optional_collision = None
+        # Debug code pls no remove
+        # if old_path is not None:
         self.get_pertinent_collision_objects()
+        self.path = Path(self.player.position, self.pose_target.position, self.player.velocity.norm(), self.end_speed * 1000)
+        if len(self.collision_body) <= 0:
+            return self.path, self.path
+        #if old_raw_path is not None:
+            # print(old_raw_path.points)
+            # start_1 = time.time()
+            # self.is_path_collide(old_raw_path, tolerance=self.gap_proxy-50)
+            # end_1 = time.time()
+            # start_2 = time.time()
+            # self.is_path_collide_legacy(old_raw_path, tolerance=self.gap_proxy - 50)
+            # end_2 = time.time()
+            #print(end_1 - start_1, end_2 - start_2)
+            #print("is_path_colide", self.is_path_collide(old_raw_path, tolerance=8))
+            # print("meme goal?", (np.linalg.norm(pose_target.position - old_raw_path.goal) < 200))
+            # print("quel goal?", pose_target.position, old_raw_path.goal)
+
+
         if self.end_speed == 0:
             hysteresis = 50 * cruise_speed
         else:
             hysteresis = 50 * cruise_speed
         if (old_path is not None) and (not self.is_path_collide(old_raw_path,
-                                                                tolerance=1.5)) and \
-                ((pose_target.position - old_raw_path.goal).norm() < hysteresis):
+                                                                tolerance=8)) and \
+                ((self.pose_target.position - old_raw_path.goal).norm() < hysteresis):
             if False:
                 old_raw_path.quick_update_path(self.player)
                 self.path_appendice = Path(old_raw_path.goal, self.path.goal)
                 self.path_appendice = self.fastpathplanner(self.path_appendice)
                 self.raw_path = old_raw_path.join_segments(self.path_appendice)
-                self.path = reshape_path(self.raw_path, self.player, self.cruise_speed)
             else:
                 old_raw_path.quick_update_path(self.player)
                 self.raw_path = old_raw_path
-                self.raw_path.speeds[0] = self.player.velocity.position.norm()
-                self.path = reshape_path(self.raw_path, self.player, self.cruise_speed)
+                self.raw_path.speeds[0] = self.player.velocity.norm()
 
         else:
-            self.path = Path(self.player.pose.position, pose_target.position, 0, self.end_speed * 1000)
             if self.path.get_path_length() < 0.1:
                 """
                 hack shady pour eviter une erreur shady (trop fatiguer pour dealer ak ste shit la)
@@ -171,60 +127,22 @@ class PathPartitionner:
                     AttributeError: 'numpy.ndarray' object has no attribute 'position'
                 """
                 return self.path, self.path
-            self.closest_obs_speed = self.find_closest_obstacle(self.player.pose.position, self.path)
+            self.closest_obs_speed = self.find_closest_obstacle(self.player.position, self.path)
             self.path = self.fastpathplanner(self.path)
 
             self.raw_path = self.path
-            self.path = reshape_path(self.path, self.player, self.cruise_speed)
 
         return self.path, self.raw_path
 
     def get_pertinent_collision_objects(self, first_call=True):
         factor = 1.1
         if first_call:
-            i = 0
-
-            self.collision_body = []
-            if self.ball_collision:
-                lenght_pose_obstacle = len(self.game_state.my_team.available_players) + \
-                                       len(self.game_state.enemy_team.available_players)
-            else:
-                lenght_pose_obstacle = len(self.game_state.my_team.available_players) + \
-                                       len(self.game_state.enemy_team.available_players) - 1
-            self.pose_obstacle = np.zeros((lenght_pose_obstacle, 2))
-
-            # FIXME: Find better name that is less confusing between self.player and player
-            for player in self.game_state.my_team.available_players.values():
-                if player.id != self.player.id:
-                    if (self.player.pose.position - player.pose.position).norm() + \
-                            (self.player.ai_command.pose_goal.position - player.pose.position).norm() < \
-                            (self.player.ai_command.pose_goal.position - self.player.pose.position).norm() * factor:
-                        self.pose_obstacle[i, :] = player.pose.position
-                        self.collision_body.append(
-                            CollisionBody(player.pose.position, player.velocity.position, self.gap_proxy))
-                        i += 1
-            for player in self.game_state.enemy_team.available_players.values():
-                if (self.player.pose.position - player.pose.position).norm() + \
-                            (self.player.ai_command.pose_goal.position - player.pose.position).norm() < \
-                            (self.player.ai_command.pose_goal.position - self.player.pose.position).norm() * factor:
-                    self.pose_obstacle[i, :] = player.pose.position
-                    self.collision_body.append(
-                        CollisionBody(player.pose.position, player.velocity.position, self.gap_proxy))
-                    i += 1
-
-            self.pose_obstacle = self.pose_obstacle[0:i, :]
-            if not(self.optional_collision is None):
-                # for idx, collision_body in enumerate(self.optional_collision):
-                for idx, mask in enumerate(self.player.collision_body_mask):
-                    if mask == CollisionBody.COLLIDABLE:
-                        self.pose_obstacle = np.concatenate((self.pose_obstacle,
-                                                             self.optional_collision[idx].position.reshape(1, 2)))
-                        self.collision_body.append(self.optional_collision[idx])
-            if self.ball_collision:
-                ball_position = self.game_state.get_ball_position()
-                self.pose_obstacle = np.concatenate((self.pose_obstacle, ball_position.reshape(1, 2)))
-                self.collision_body.append(CollisionBody(ball_position, Position(0, 0), 300, collision_type=CollisionType.BALL))
-
+            for collidable_object in self.collidable_objects:
+                if (self.player.position - collidable_object.position).norm() + \
+                        (self.pose_target.position - collidable_object.position).norm() < \
+                        (self.pose_target.position - self.player.position).norm() * factor:
+                    self.collision_body.append(collidable_object)
+            self.pose_obstacle = np.array([obj.position for obj in self.collision_body])
             self.avoid_radius = np.array([obj.avoid_radius for obj in self.collision_body])
         else:
             temp = (self.path.start - self.pose_obstacle) + (self.path.goal - self.pose_obstacle)
@@ -233,26 +151,6 @@ class PathPartitionner:
             self.pose_obstacle = self.pose_obstacle[conditon, :]
             self.collision_body = np.array(self.collision_body)[conditon]
             self.avoid_radius = self.avoid_radius[conditon]
-
-    def get_raw_path(self, pose_target=Position()):
-        # sans path_reshaper
-        i = 0
-
-        self.pose_obstacle = np.zeros((len(self.game_state.my_team.available_players) +
-                                       len(self.game_state.enemy_team.available_players) - 1, 2))
-        for player in self.game_state.my_team.available_players.values():
-            if player.id != self.player.id:
-                self.pose_obstacle[i, :] = player.pose.position
-                self.collision_body.append(player)
-                i += 1
-        for player in self.game_state.enemy_team.available_players.values():
-            self.pose_obstacle[i, :] = player.pose.position
-            self.collision_body.append(player)
-            i += 1
-
-        self.path = Path(self.player.pose.position, pose_target.position)
-
-        return self.fastpathplanner(self.path)
 
     def is_path_collide_legacy(self, path, obstacles=None, tolerance=None):
         if obstacles is None:
@@ -286,13 +184,15 @@ class PathPartitionner:
                         return True
         return False
 
-    def is_path_collide(self, path, obstacles=None, tolerance=None, flag_closest_obs=False):
+    def is_path_collide(self, path=None, obstacles=None, tolerance=None, flag_closest_obs=False):
+        if path is None:
+            return False
         if obstacles is None:
             obstacles = self.pose_obstacle
         if tolerance is None:
             tolerances = self.avoid_radius
         else:
-            tolerances = self.avoid_radius - self.avoid_radius / tolerance
+            tolerances = self.avoid_radius / tolerance
         if path.start == path.goal or len(obstacles) == 0:
             return False
         points = np.array(path.points)
@@ -373,6 +273,8 @@ class PathPartitionner:
         assert(isinstance(point, Position))
         dist_point_obs = np.inf
         closest_obs = None
+        if len(self.collision_body) <= 0:
+            return False
         closest_collision_body = self.collision_body[0].position
         if (path.start - path.goal).norm() < 0.001:
             return [closest_obs, dist_point_obs, closest_collision_body]
@@ -414,7 +316,7 @@ class PathPartitionner:
         if 0 < len_along_path < (pose_target - pose_robot).norm():
             vec_perp = direction.perpendicular()
             vec_perp = vec_perp[0:2] / vec_perp.norm()
-            cruise_speed = self.player.velocity.position.conv_2_np()
+            cruise_speed = self.player.velocity.conv_2_np()
             self.closest_obs_speed = closest_collision_body.velocity
             avoid_dir = -vec_perp
             if closest_collision_body.type == CollisionType.BALL or closest_collision_body.type == CollisionType.ZONE:
@@ -470,102 +372,19 @@ class PathPartitionner:
         sub_target = Position(sub_target[0], sub_target[1])
         return [sub_target, avoid_dir]
 
+    def get_next_point(self, robot_id=None):
+        pass
+
+    def update(self):
+        pass
+
     def remove_redundant_points(self):
         if len(self.path.points) > 2:
-            if self.player.velocity.position.norm() > 1000:
+            if self.player.velocity.norm() > 1000:
                 points, speeds = remove_duplicates(self.path.points, self.path.speeds,
-                                                   5 * self.player.velocity.position.norm() / 500)
+                                                   5 * self.player.velocity.norm() / 500)
             else:
                 points, speeds = remove_duplicates(self.path.points, self.path.speeds, 5)
             return Path().generate_path_from_points(points, speeds)
         else:
             return Path().generate_path_from_points(self.path.points, self.path.speeds)
-
-
-def reshape_path(path, player: Player, vel_cruise: [int, float]=1000):
-    path = path
-    player = player
-    cmd = player.ai_command
-    if cmd.cruise_speed:
-        vel_cruise = cmd.cruise_speed * 1000
-    positions_list = [path.points[0]]
-    for idx, point in enumerate(path.points[1:-1]):
-        i = idx + 1
-        if (path.points[i] - path.points[i+1]).norm() < 10:
-            continue
-        positions_list += [path.points[i]]
-    positions_list += [path.points[-1]]
-    path.points = positions_list
-    p1 = path.points[0]
-    point_list = [p1]
-    speed_list = [path.speeds[0]]
-
-    for idx, point in enumerate(path.points[1:-1]):
-        dist_from_path = 50  # mm
-        i = idx + 1
-        p2 = point
-        p3 = path.points[i+1]
-        radius_at_const_speed = vel_cruise ** 2 / (Player.max_acc * 1000)
-        theta = abs(np.math.atan2(p3[1]-p2[1], p3[0]-p2[0]) - np.math.atan2(p1[1]-p2[1], p1[0]-p2[0]))
-        try:
-            dist_deviation = (radius_at_const_speed/(np.math.sin(theta/2)))-radius_at_const_speed
-        except ZeroDivisionError:
-            dist_deviation = 0
-        speed = vel_cruise
-        radius = radius_at_const_speed
-        while dist_deviation > dist_from_path:
-            speed *= 0.4
-            radius = speed ** 2 / (Player.max_acc * 1000)
-            dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
-        if (p1-p2).norm() < 0.001 or (p2-p3).norm() < 0.001 or (p1-p3).norm() < 0.001:
-            # on traite tout le cas ou le problème dégènere
-            point_list += [p2]
-            speed_list += [vel_cruise]
-        else:
-            p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) *\
-                      (p1 - p2) / (p1 - p2).norm()
-            p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) *\
-                (p3 - p2) / (p3 - p2).norm()
-            if (p4-p5).norm() > (p3-p1).norm():
-                point_list += [p2]
-                speed_list += [vel_cruise]
-            elif (p1 - p2).norm() < (p4 - p2).norm():
-                radius *= (p1 - p2).norm() / (p4 - p2).norm()
-                dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
-                p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p1 - p2) / (p1 - p2).norm()
-                p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p3 - p2) / (p3 - p2).norm()
-                point_list += [p4, p5]
-                speed_list += [speed, speed]
-            elif (p3 - p2).norm() < (p5 - p2).norm():
-                radius *= (p3 - p2).norm() / (p5 - p2).norm()
-                dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
-                p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p1 - p2) / (p1 - p2).norm()
-                p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p3 - p2) / (p3 - p2).norm()
-                point_list += [p4, p5]
-                speed_list += [speed, speed]
-            else:
-                point_list += [p4, p5]
-                speed_list += [speed, speed]
-        p1 = point_list[-1]
-
-    speed_list += [path.speeds[-1]]
-    point_list += [path.goal]
-    # on s'assure que le path est bel et bien réalisable par un robot et on
-    # merge les points qui sont trop proches les un des autres.
-    position_list = [point_list[0]]
-    new_speed_list = [speed_list[0]]
-    for idx, point in enumerate(point_list[1:-1]):
-        i = idx + 1
-        if (point_list[i] - point_list[i+1]).norm() < 10:
-            continue
-        if False:
-            min_dist = abs(0.5 * (np.square(speed_list[i]) - np.square(speed_list[i + 1])) / (Player.max_acc * 1000))
-            if min_dist > (point_list[i] - point_list[i+1]).norm():
-                if speed_list[i] > speed_list[i + 1]:
-                    speed_list[i] *= (point_list[i] - point_list[i+1]).norm() / min_dist
-
-        position_list += [point_list[i]]
-        new_speed_list += [speed_list[i]]
-    position_list += [point_list[-1]]
-    new_speed_list += [speed_list[-1]]
-    return Path().generate_path_from_points(position_list, new_speed_list)
