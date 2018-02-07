@@ -8,7 +8,7 @@ from ai.Algorithm.path_partitionner import PathPartitionner, CollisionBody
 from Util.path import Path
 from ai.states.game_state import GameState
 from config.config_service import ConfigService
-from RULEngine.controller import Robot
+from RULEngine.robot import Robot
 
 INTERMEDIATE_DISTANCE_THRESHOLD = 540
 AIcommands = List[AICommand]

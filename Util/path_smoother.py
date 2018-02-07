@@ -1,6 +1,6 @@
 import numpy as np
 from Util.path import Path
-from RULEngine.controller import Robot
+from RULEngine.robot import Robot
 
 
 def path_smoother(player: Robot):

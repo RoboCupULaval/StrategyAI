@@ -1,24 +1,18 @@
 
 import logging
-
+from collections import namedtuple
+from math import sin, cos, sqrt
 from multiprocessing import Queue
 from queue import Empty
 from typing import Dict
-from collections import namedtuple
 
+from RULEngine.robot import Robot, MAX_LINEAR_SPEED
 from Util.PID import PID
-
-from math import sin, cos, sqrt, atan2
-
-from config.config_service import ConfigService
-from Util.path import Path
+from Util.Pose import Pose
+from Util.constant import PLAYER_PER_TEAM
 from Util.path_smoother import path_smoother
+from config.config_service import ConfigService
 
-MAX_ROBOT = 12
-MAX_LINEAR_SPEED = 2000  # mm/s
-MAX_LINEAR_ACCELERATION = 2000 # mm/s
-MAX_ANGULAR_SPEED = 1 # rad/s
-MAX_ANGULAR_ACCELERATION = 1 #rad/s^2
 
 RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active')
 RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow packet')
@@ -26,36 +20,6 @@ RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow pack
 
 class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dribbler_active')):
     pass
-
-
-class Robot:
-
-    __slots__ = ('_robot_id', 'controller', 'target', 'pose', 'velocity',
-                 'kick_type', 'kick_force', 'dribbler_active', 'input_command',
-                 'cruise_speed', 'max_linear_speed', 'max_linear_acceleration',
-                 'max_angular_speed', 'max_angular_acceleration', 'path', 'raw_path')
-
-    def __init__(self, robot_id, controller):
-        self._robot_id = robot_id
-        self.controller = controller
-        self.target = None
-        self.pose = None
-        self.velocity = None
-        self.kick_type = None
-        self.kick_force = 0
-        self.dribbler_active = False
-        self.input_command = None
-        self.max_linear_speed = MAX_LINEAR_SPEED
-        self.max_angular_acceleration = MAX_LINEAR_ACCELERATION
-        self.max_angular_speed = MAX_ANGULAR_SPEED
-        self.max_angular_acceleration = MAX_ANGULAR_ACCELERATION
-        self.cruise_speed = 1000
-        self.path = Path()
-        self.raw_path = Path()
-
-    @property
-    def robot_id(self):
-        return self._robot_id
 
 
 def get_control_setting(game_type: str):
@@ -87,7 +51,7 @@ class Controller(list):
 
         control_setting = get_control_setting(self.cfg.config_dict['GAME']['type'])
 
-        super().__init__(Robot(robot_id, PositionControl(control_setting)) for robot_id in range(MAX_ROBOT))
+        super().__init__(Robot(robot_id, PositionControl(control_setting)) for robot_id in range(PLAYER_PER_TEAM))
 
     def execute(self, track_frame: Dict) -> RobotPacketFrame:
 
@@ -137,8 +101,10 @@ class Controller(list):
             pass
 
     def update_robot_path(self, robot):
-        robot.path.quick_update_path(robot.pose.position)
-        robot.path = path_smoother(robot.raw_path)
+        # The pathfinder was coded with Pose/Position in mind. So the dict pose of Robot must be converted
+        pose = Pose.from_dict(robot.pose)
+        robot.path.quick_update_path(pose.position)
+        robot.path = path_smoother(robot)
 
 
 
