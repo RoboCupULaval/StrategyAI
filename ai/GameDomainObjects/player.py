@@ -15,7 +15,7 @@ class Player:
         self._team = team
         self._pose = Pose()
         self._velocity = Pose()
-        self.path_finder_history = PathfinderHistory()
+        self.pathfinder_history = PathfinderHistory()
         self.pathfinder_on = True
 
     def update(self, new_pose: Pose, new_velocity: Pose):

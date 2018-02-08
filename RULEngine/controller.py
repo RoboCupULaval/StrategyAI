@@ -24,7 +24,8 @@ RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow pack
 
 
 # TODO see if necessary, also same as RobotPacket
-class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dribbler_active')):
+class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dribbler_active command path '
+                                        'cruise_speed end_speed')):
     pass
 
 
@@ -102,15 +103,15 @@ class Controller(list):
                 self[robot_id].kick_type = cmd.kick_type
                 self[robot_id].kick_force = cmd.kick_force
                 self[robot_id].dribbler_active = cmd.dribbler_active
-
+                self[robot_id].path = cmd.path
+                self[robot_id].cruise_speed = cmd.cruise_speed
+                self[robot_id].end_speed = cmd.end_speed
         except Empty:
             pass
 
     def update_robot_path(self, robot):
         # The pathfinder was coded with Pose/Position in mind. So the dict pose of Robot must be converted
         pose = Pose.from_dict(robot.pose)
-        # TODO: This is temporary, since ia doesn't send a path yet
-        robot.path =  Path(pose.position, Position.from_dict(robot.target))
         robot.path.quick_update_path(pose.position)
         robot.path = path_smoother(robot)
 
