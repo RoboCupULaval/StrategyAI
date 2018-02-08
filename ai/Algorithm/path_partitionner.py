@@ -37,7 +37,6 @@ class CollisionBody:
 class PathPartitionner():
     def __init__(self):
         self.path = Path(Position(0, 0), Position(0, 0))
-        self.raw_path = Path(Position(0, 0), Position(0, 0))
         self.res = 100
         self.gap_proxy = 200
         self.max_recurs = 3
@@ -71,7 +70,7 @@ class PathPartitionner():
         return path
 
     def get_path(self, player: CollisionBody, pose_target: CollisionBody, cruise_speed=1,
-                 old_path=None, old_raw_path=Path(), end_speed=0, collidable_objects=None):
+                 old_path=None, end_speed=0, collidable_objects=None):
         self.cruise_speed = cruise_speed
         self.pose_target = pose_target
         self.collidable_objects = collidable_objects
@@ -85,7 +84,7 @@ class PathPartitionner():
         self.get_pertinent_collision_objects()
         self.path = Path(self.player.position, self.pose_target.position, self.player.velocity.norm(), self.end_speed * 1000)
         if len(self.collision_body) <= 0:
-            return self.path, self.path
+            return self.path
         #if old_raw_path is not None:
             # print(old_raw_path.points)
             # start_1 = time.time()
@@ -104,18 +103,15 @@ class PathPartitionner():
             hysteresis = 50 * cruise_speed
         else:
             hysteresis = 50 * cruise_speed
-        if (old_path is not None) and (not self.is_path_collide(old_raw_path,
+        if (old_path is not None) and (not self.is_path_collide(old_path,
                                                                 tolerance=8)) and \
-                ((self.pose_target.position - old_raw_path.goal).norm() < hysteresis):
+                ((self.pose_target.position - old_path.goal).norm() < hysteresis):
             if False:
-                old_raw_path.quick_update_path(self.player)
-                self.path_appendice = Path(old_raw_path.goal, self.path.goal)
+                old_path.quick_update_path(self.player)
+                self.path_appendice = Path(old_path.goal, self.path.goal)
                 self.path_appendice = self.fastpathplanner(self.path_appendice)
-                self.raw_path = old_raw_path.join_segments(self.path_appendice)
             else:
-                old_raw_path.quick_update_path(self.player)
-                self.raw_path = old_raw_path
-                self.raw_path.speeds[0] = self.player.velocity.norm()
+                old_path.quick_update_path(self.player)
 
         else:
             if self.path.get_path_length() < 0.1:
@@ -126,13 +122,13 @@ class PathPartitionner():
                     min_abs_tol = min(self.abs_tol, other.position.abs_tol)
                     AttributeError: 'numpy.ndarray' object has no attribute 'position'
                 """
-                return self.path, self.path
+                return self.path
             self.closest_obs_speed = self.find_closest_obstacle(self.player.position, self.path)
             self.path = self.fastpathplanner(self.path)
 
             self.raw_path = self.path
 
-        return self.path, self.raw_path
+        return self.path
 
     def get_pertinent_collision_objects(self, first_call=True):
         factor = 1.1

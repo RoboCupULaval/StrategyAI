@@ -9,6 +9,7 @@ from ai.STA.Strategy.human_control import HumanControl
 
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from Util.role import Role
+from ai.executors.pathfinder_module import pathfind_ai_commands
 from config.config_service import ConfigService
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
@@ -24,9 +25,11 @@ class PlayExecutor(metaclass=Singleton):
         cfg = ConfigService()
         self.auto_play = SimpleAutoPlay()
         self.play_state = PlayState()
+        self.game_state = GameState()
         self.play_state.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
         self.last_available_players = {}
         self.goalie_id = -1
+        self.pathfind_ai_commands = pathfind_ai_commands
 
     def exec(self) -> List[AICommand]:
         """
@@ -40,8 +43,8 @@ class PlayExecutor(metaclass=Singleton):
         #         self.goalie_id = GameState().game.referee.team_info['ours']['goalie']
         #         GameState().update_player_for_locked_role(self.goalie_id, Role.GOALKEEPER)
         #     self.auto_play.update(self._has_available_players_changed())
-
-        return self._execute_strategy()
+        ai_commands = self._execute_strategy()
+        return self.pathfind_ai_commands(self.game_state, ai_commands)
 
     def order_change_of_sta(self, cmd: STAChangeCommand):
         if cmd.is_strategy_change_command():

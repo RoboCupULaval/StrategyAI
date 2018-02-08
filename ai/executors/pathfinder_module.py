@@ -13,30 +13,26 @@ INTERMEDIATE_DISTANCE_THRESHOLD = 540
 AIcommands = List[AICommand]
 
 
-def create_pathfinder(game_state, type_of_pathfinder):
-    assert isinstance(type_of_pathfinder, str)
-    assert type_of_pathfinder.lower() in ["path_part"]
+def create_pathfinder():
 
-    if type_of_pathfinder.lower() == "path_part":
-        return PathPartitionner()
-    else:
-        raise TypeError("Couldn't init a pathfinder with the type of ",
-                        type_of_pathfinder, "!")
+    return PathPartitionner()
 
 
-def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
+def pathfind_ai_commands(game_state, ai_commands):
     last_path = None
     last_raw_path = None
     field = game_state.game.field
-    if player.ai_command is None or not player.ai_command.pathfinder_on:
-        return None
-    if player.pathfinder_history.last_pose_goal is not None:
-        MIN_CHANGE_IN_GOAL = 200
-        if (player.pathfinder_history.last_pose_goal - player.ai_command.pose_goal.position).norm() < MIN_CHANGE_IN_GOAL:
-            last_path = player.pathfinder_history.last_path
-            last_raw_path = player.pathfinder_history.last_raw_path
-    pathfinder = create_pathfinder(game_state, type_pathfinder)
-    if type_pathfinder == "path_part":
+    for ai_command in ai_commands:
+        player = game_state.get_player(ai_command.robot_id)
+        if ai_command is None or not player.pathfinder_on:
+            return None
+        if player.pathfinder_history.last_pose_goal is not None:
+            MIN_CHANGE_IN_GOAL = 200
+            if (player.pathfinder_history.last_pose_goal - player.ai_command.pose_goal.position).norm() < MIN_CHANGE_IN_GOAL:
+                last_path = player.pathfinder_history.last_path
+                last_raw_path = player.pathfinder_history.last_raw_path
+        pathfinder = create_pathfinder()
+
         # player.ai_command.pose_goal.position = \
         #     field.respect_field_rules(Position(player.ai_command.pose_goal.position[0],
         #                                        player.ai_command.pose_goal.position[1]))
@@ -44,16 +40,15 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
         collision_bodies = get_pertinent_collision_objects(player, game_state, optionnal_collision_bodies)
         player_collision_object = CollisionBody(player.pose.position, player.velocity.position, 150, body_pose=player.pose,
                                                 max_acc=Robot.max_linear_acceleration/1000, ident_num=player.id)
-        target = CollisionBody(body_position=player.ai_command.pose_goal.position,
-                               body_pose=player.ai_command.pose_goal,
+        target = CollisionBody(body_position=ai_command.target.position,
+                               body_pose=ai_command.target,
                                body_avoid_radius=1)
-        path, raw_path = pathfinder.get_path(player_collision_object,
-                                             target,
-                                             player.ai_command.cruise_speed,
-                                             last_path,
-                                             last_raw_path,
-                                             end_speed=player.ai_command.end_speed,
-                                             collidable_objects=collision_bodies)
+        path = pathfinder.get_path(player_collision_object,
+                                   target,
+                                   ai_command.cruise_speed,
+                                   last_path,
+                                   end_speed=ai_command.end_speed,
+                                   collidable_objects=collision_bodies)
         MIN_CHANGE_FOR_RECALCULATE = 100
         if path.get_path_length() < MIN_CHANGE_FOR_RECALCULATE:
             player.pathfinder_history.last_path = None
@@ -61,20 +56,9 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
         else:
             player.pathfinder_history.last_path = path
             player.pathfinder_history.last_pose_goal = path.goal
-        player.pathfinder_history.last_raw_path = raw_path
 
-        player.ai_command.path = path.points[1:]
-        player.ai_command.path_speeds = path.speeds
-        player.ai_command.path_turn = path.turns
-        return path
-
-    else:
-        path = pathfinder.get_path(player,
-                                   player.ai_command.pose_goal,
-                                   player.ai_command.cruise_speed)
-        player.ai_command.path = path
-        # print(time.time() - start)
-        return path
+        ai_command.path = path
+    return ai_commands
 
 
 def get_pertinent_collision_objects(commanded_player, game_state, optionnal_collision_bodies=None):

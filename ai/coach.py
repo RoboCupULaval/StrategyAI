@@ -65,7 +65,6 @@ class Coach(Process):
                 self.game_state.update(last_game_state)
             self.debug_executor.exec()
             ai_commands = self.play_executor.exec()
-
             self._send_cmd(ai_commands)
 
             # TODO: Put it in config file
