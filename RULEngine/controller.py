@@ -4,6 +4,7 @@
 import logging
 from multiprocessing import Queue
 from queue import Empty
+from time import time
 from typing import Dict
 from collections import namedtuple
 from math import sin, cos, sqrt
@@ -47,7 +48,8 @@ class Controller(list):
     def __init__(self, ai_queue: Queue):
 
         self.ai_queue = ai_queue
-
+        self.dt = 0
+        self.last_time = 0
         self.timestamp = None
 
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
@@ -61,7 +63,7 @@ class Controller(list):
         super().__init__(Robot(robot_id, VelocityControl(control_setting)) for robot_id in range(PLAYER_PER_TEAM))
 
     def execute(self, track_frame: Dict) -> RobotPacketFrame:
-
+        self.dt, self.last_time = time() - self.last_time, time()
         self.timestamp = track_frame['timestamp']
         self.update_robots_states(track_frame[self.team_color])
         self.update_ai_commands()
@@ -78,7 +80,7 @@ class Controller(list):
             # The next destination will always be second point since the first one is the robot's position
             next_speed = robot.path.speeds[1]
             next_target = Pose(robot.path.turns[1], 0).to_dict()
-            command = robot.controller.execute(next_target, robot.pose, robot)
+            command = robot.controller.execute(next_target, robot.pose, robot, self.dt)
             packet.packet.append(RobotPacket(robot_id=robot.robot_id,
                                              command=command,
                                              kick_type=robot.kick_type,
@@ -129,7 +131,7 @@ class PositionControl:
                             'y': PID(**self.control_setting['translation']),
                             'orientation': PID(**self.control_setting['rotation'], wrap_error=True)}
 
-    def execute(self, target, pose, robot):
+    def execute(self, target, pose, robot, dt):
 
         error = {state: target[state] - pose[state] for state in pose}
         command = {state: self.controllers[state].execute(error[state]) for state in self.controllers}
@@ -138,7 +140,6 @@ class PositionControl:
         overspeed_factor = sqrt(command['x'] ** 2 + command['y'] ** 2) / MAX_LINEAR_SPEED
         if overspeed_factor > 1:
             command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / overspeed_factor
-        print(command)
         return command
 
     def reset(self):
@@ -151,19 +152,14 @@ class VelocityControl:
     def __init__(self, control_setting: Dict):
         self.orientation_controller = PID(**control_setting['rotation'], wrap_error=True)
 
-    def execute(self, target, pose, robot):
+    def execute(self, target, pose, robot, dt):
 
-        dt = self.orientation_controller.dt
         error = {state: target[state] - pose[state] for state in pose}
         next_velocity = get_next_velocity(robot, dt)
         x_cmd, y_cmd = rotate(next_velocity.x, next_velocity.y, -pose['orientation'])
 
         command = {'x': x_cmd, 'y': y_cmd, 'orientation': self.orientation_controller.execute(error['orientation'])}
 
-        overspeed_factor = sqrt(command['x'] ** 2 + command['y'] ** 2) / MAX_LINEAR_SPEED
-        if overspeed_factor > 1:
-            command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / overspeed_factor
-        print(command)
         return command
 
 

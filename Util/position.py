@@ -63,7 +63,7 @@ class Position(np.ndarray):
 
     def normalized(self):
         if not self.norm():
-            raise ZeroDivisionError
+            return self * 0.0
         return self / self.norm()
 
     def perpendicular(self):
