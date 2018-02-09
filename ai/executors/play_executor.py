@@ -3,6 +3,7 @@ import time
 from typing import List, Dict
 import logging
 
+from RULEngine.controller import EngineCommand
 from Util import Pose, Position, AICommand, Singleton
 from ai.STA.Strategy.human_control import HumanControl
 
@@ -15,7 +16,6 @@ from ai.Util.sta_change_command import STAChangeCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
-from controller import EngineCommand
 
 
 class PlayExecutor(metaclass=Singleton):

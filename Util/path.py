@@ -60,8 +60,7 @@ class Path:
     @classmethod
     def from_dict(cls, dict):
         points = [Position.from_dict(p) for p in dict]
-        path = Path()
-        path.points = points
+        path = Path.generate_path_from_points(points)
         return path
 
     def to_dict(self):

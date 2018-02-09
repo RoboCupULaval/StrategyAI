@@ -112,6 +112,7 @@ class PathPartitionner():
                 self.path_appendice = self.fastpathplanner(self.path_appendice)
             else:
                 old_path.quick_update_path(self.player.position)
+                self.path = old_path
 
         else:
             if self.path.get_path_length() < 0.1:
@@ -125,8 +126,6 @@ class PathPartitionner():
                 return self.path
             self.closest_obs_speed = self.find_closest_obstacle(self.player.position, self.path)
             self.path = self.fastpathplanner(self.path)
-
-            self.raw_path = self.path
 
         return self.path
 
