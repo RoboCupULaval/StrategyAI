@@ -11,6 +11,7 @@ class Velocity(Pose):
         position, orientation = self._pose_builder(args)
         self._orientation = orientation
         self._position = position
+        self.speed = self._position.norm()
 
     @property
     def orientation(self):

@@ -23,11 +23,12 @@ class Robot:
         self.dribbler_active = False
         self.input_command = None
         self.max_linear_speed = MAX_LINEAR_SPEED
-        self.max_angular_acceleration = MAX_LINEAR_ACCELERATION
+        self.max_linear_acceleration = MAX_LINEAR_ACCELERATION
         self.max_angular_speed = MAX_ANGULAR_SPEED
         self.max_angular_acceleration = MAX_ANGULAR_ACCELERATION
         self.cruise_speed = 1000
         self.path = None
+        self.raw_path = None
 
     @property
     def robot_id(self):

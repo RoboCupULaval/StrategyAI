@@ -11,6 +11,7 @@ class Path:
         self.goal = end
         self.points = [start, end]
         self.speeds = [start_speed, end_speed]
+        self.turns = self.points
 
     def join_segments(self, other):
         new_path = Path()
@@ -35,7 +36,7 @@ class Path:
         return path_1, path_2
 
     @staticmethod
-    def generate_path_from_points(points_list, speed_list=None, threshold=None):
+    def generate_path_from_points(points_list, speed_list=None, threshold=None, turns_list=None):
 
         if speed_list is None:
             speed_list = [0, 0]
@@ -52,8 +53,11 @@ class Path:
         new_path = Path()
         new_path.start = points_list[0]
         new_path.goal = points_list[-1]
+        if turns_list is None:
+            turns_list = [new_path.start, new_path.goal]
         new_path.points = points_list
         new_path.speeds = speed_list
+        new_path.turns = turns_list
 
         return new_path
 
@@ -75,3 +79,5 @@ class Path:
     def quick_update_path(self, position):
         self.points[0] = position
         return self.generate_path_from_points(self.points, self.speeds, 50)
+
+

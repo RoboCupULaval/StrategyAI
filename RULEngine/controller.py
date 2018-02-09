@@ -16,6 +16,7 @@ from Util.position import Position
 from Util.constant import PLAYER_PER_TEAM
 from Util.path import Path
 from Util.path_smoother import path_smoother
+from Util.trapezoidal_speed import get_next_velocity
 from config.config_service import ConfigService
 
 
@@ -57,7 +58,7 @@ class Controller(list):
 
         control_setting = get_control_setting(self.cfg.config_dict['GAME']['type'])
 
-        super().__init__(Robot(robot_id, PositionControl(control_setting)) for robot_id in range(PLAYER_PER_TEAM))
+        super().__init__(Robot(robot_id, VelocityControl(control_setting)) for robot_id in range(PLAYER_PER_TEAM))
 
     def execute(self, track_frame: Dict) -> RobotPacketFrame:
 
@@ -75,10 +76,9 @@ class Controller(list):
         for robot in active_robots:
             self.update_robot_path(robot)
             # The next destination will always be second point since the first one is the robot's position
-            next_target = robot.path[1]
-            # TODO: The path is a series of position but the controller expected a target pose
-            next_target['orientation'] = 0
-            command = robot.controller.execute(next_target, robot.pose)
+            next_speed = robot.path.speeds[1]
+            next_target = Pose(robot.path.turns[1], 0).to_dict()
+            command = robot.controller.execute(next_target, robot.pose, robot)
             packet.packet.append(RobotPacket(robot_id=robot.robot_id,
                                              command=command,
                                              kick_type=robot.kick_type,
@@ -105,9 +105,10 @@ class Controller(list):
                 self[robot_id].kick_type = cmd.kick_type
                 self[robot_id].kick_force = cmd.kick_force
                 self[robot_id].dribbler_active = cmd.dribbler_active
+                self[robot_id].raw_path = cmd.path
                 self[robot_id].path = cmd.path
-                #self[robot_id].cruise_speed = cmd.cruise_speed
-                #self[robot_id].end_speed = cmd.end_speed
+                # TODO: tests, hardcoder c'est méchant
+                self[robot_id].cruise_speed = 2000
         except Empty:
             pass
 
@@ -115,10 +116,9 @@ class Controller(list):
         # The pathfinder was coded with Pose/Position in mind. So the dict pose of Robot must be converted
         pose = Pose.from_dict(robot.pose)
         # TODO: This is really ugly... We need to juggle between Path and it's  dict representation.
-        robot.path = Path.from_dict(robot.path)
+        robot.path = Path.from_dict(robot.raw_path)
         robot.path.quick_update_path(pose.position)
         robot.path = path_smoother(robot)
-        robot.path = robot.path.to_dict()
 
 
 class PositionControl:
@@ -129,7 +129,7 @@ class PositionControl:
                             'y': PID(**self.control_setting['translation']),
                             'orientation': PID(**self.control_setting['rotation'], wrap_error=True)}
 
-    def execute(self, target, pose):
+    def execute(self, target, pose, robot):
 
         error = {state: target[state] - pose[state] for state in pose}
         command = {state: self.controllers[state].execute(error[state]) for state in self.controllers}
@@ -138,7 +138,7 @@ class PositionControl:
         overspeed_factor = sqrt(command['x'] ** 2 + command['y'] ** 2) / MAX_LINEAR_SPEED
         if overspeed_factor > 1:
             command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / overspeed_factor
-
+        print(command)
         return command
 
     def reset(self):
@@ -151,18 +151,19 @@ class VelocityControl:
     def __init__(self, control_setting: Dict):
         self.orientation_controller = PID(**control_setting['rotation'], wrap_error=True)
 
-    def execute(self, target, pose):
+    def execute(self, target, pose, robot):
 
+        dt = self.orientation_controller.dt
         error = {state: target[state] - pose[state] for state in pose}
-
-        x_cmd, y_cmd = rotate(error['x'], error['y'], -pose['orientation'])
+        next_velocity = get_next_velocity(robot, dt)
+        x_cmd, y_cmd = rotate(next_velocity.x, next_velocity.y, -pose['orientation'])
 
         command = {'x': x_cmd, 'y': y_cmd, 'orientation': self.orientation_controller.execute(error['orientation'])}
 
         overspeed_factor = sqrt(command['x'] ** 2 + command['y'] ** 2) / MAX_LINEAR_SPEED
         if overspeed_factor > 1:
             command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / overspeed_factor
-
+        print(command)
         return command
 
 

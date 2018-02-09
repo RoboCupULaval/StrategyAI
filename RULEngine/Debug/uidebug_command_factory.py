@@ -118,9 +118,9 @@ class UIDebugCommandFactory(metaclass=Singleton):
     def robots_path(robots):
         cmds = []
         for robot in robots:
-            if not robot.path or len(robot.path) < 2:
+            if not robot.raw_path or len(robot.raw_path) < 2:
                 continue
-            path = [position_to_tuple(p) for p in robot.path]
+            path = [position_to_tuple(p) for p in robot.raw_path]
 
             for start_point, end_point in zip(path, path[1:]):
                 cmds.append(UIDebugCommandFactory.line(start_point,

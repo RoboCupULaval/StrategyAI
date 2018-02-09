@@ -383,3 +383,6 @@ class PathPartitionner():
             return Path().generate_path_from_points(points, speeds)
         else:
             return Path().generate_path_from_points(self.path.points, self.path.speeds)
+
+
+
