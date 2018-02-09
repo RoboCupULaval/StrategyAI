@@ -9,12 +9,13 @@ from ai.STA.Strategy.human_control import HumanControl
 
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from Util.role import Role
-from ai.executors.pathfinder_module import pathfind_ai_commands
+from ai.executors.pathfinder_module import generate_path
 from config.config_service import ConfigService
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
+from controller import EngineCommand
 
 
 class PlayExecutor(metaclass=Singleton):
@@ -29,9 +30,8 @@ class PlayExecutor(metaclass=Singleton):
         self.play_state.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
         self.last_available_players = {}
         self.goalie_id = -1
-        self.pathfind_ai_commands = pathfind_ai_commands
 
-    def exec(self) -> List[AICommand]:
+    def exec(self) -> List[EngineCommand]:
         """
         Execute la stratégie courante et envoie le status des robots et les livres de tactiques et stratégies
 
@@ -43,8 +43,20 @@ class PlayExecutor(metaclass=Singleton):
         #         self.goalie_id = GameState().game.referee.team_info['ours']['goalie']
         #         GameState().update_player_for_locked_role(self.goalie_id, Role.GOALKEEPER)
         #     self.auto_play.update(self._has_available_players_changed())
-        ai_commands = self._execute_strategy()
-        return self.pathfind_ai_commands(self.game_state, ai_commands)
+        ai_cmds = self._execute_strategy()
+        engine_cmds = []
+        for ai_cmd in ai_cmds:
+            path = generate_path(self.game_state, ai_cmd)
+            engine_cmds.append(self.generate_engine_cmd(ai_cmd, path))
+        return engine_cmds
+
+    def generate_engine_cmd(self, ai_cmd, path):
+        return EngineCommand(robot_id=ai_cmd.robot_id,
+                             path=path.to_dict() if path else None,
+                             kick_type=ai_cmd.kick_type,
+                             kick_force=ai_cmd.kick_force,
+                             dribbler_active=ai_cmd.dribbler_active)
+
 
     def order_change_of_sta(self, cmd: STAChangeCommand):
         if cmd.is_strategy_change_command():
@@ -109,3 +121,4 @@ class PlayExecutor(metaclass=Singleton):
     #                 break
     #     self.last_available_players = available_players.copy()
     #     return player_change
+

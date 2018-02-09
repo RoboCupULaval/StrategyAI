@@ -15,4 +15,4 @@ class MoveToPosition(Action):
         self.destination = destination
 
     def exec(self):
-        return AICommand(self.player.id, self.destination.to_dict())
+        return AICommand(self.player.id, self.destination)

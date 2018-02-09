@@ -57,6 +57,16 @@ class Path:
 
         return new_path
 
+    @classmethod
+    def from_dict(cls, dict):
+        points = [Position.from_dict(p) for p in dict]
+        path = Path()
+        path.points = points
+        return path
+
+    def to_dict(self):
+        return [p.to_dict() for p in self.points]
+
     def get_path_length(self):
         length = 0
         for idx, point in enumerate(self.points[:-1]):

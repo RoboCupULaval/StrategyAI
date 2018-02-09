@@ -110,3 +110,9 @@ class Position(np.ndarray):
     @classmethod
     def from_dict(cls, dict):
         return Position(dict["x"], dict["y"])
+
+    def to_dict(self):
+        return {'x': self.x, 'y': self.y}
+
+def position_to_tuple(position):
+    return (position['x'], position['y'])

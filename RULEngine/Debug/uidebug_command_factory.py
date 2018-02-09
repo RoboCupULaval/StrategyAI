@@ -5,6 +5,7 @@ from typing import Dict
 
 from RULEngine.services.team_color_service import TeamColorService
 from Util.constant import TeamColor
+from Util.position import position_to_tuple
 from Util.singleton import Singleton
 from ai.GameDomainObjects.player import Player
 
@@ -117,15 +118,17 @@ class UIDebugCommandFactory(metaclass=Singleton):
     def robots_path(robots):
         cmds = []
         for robot in robots:
-            if not robot.path or len(robot.path.points) < 2:
+            if not robot.path or len(robot.path) < 2:
                 continue
-            points = robot.path.points
+            path = [position_to_tuple(p) for p in robot.path]
 
-            for start_point, end_point in zip(points, points[1:]):
-                cmds.append(UIDebugCommandFactory.line(start_point, end_point, timeout=0.1))
+            for start_point, end_point in zip(path, path[1:]):
+                cmds.append(UIDebugCommandFactory.line(start_point,
+                                                       end_point,
+                                                       timeout=0.1))
 
             # MultiplePoints is weird, it has a special behavior were an unique ID link must be provided
-            cmds.append(UIDebugCommandFactory.multiple_points(points[1:],
+            cmds.append(UIDebugCommandFactory.multiple_points(path[1:],
                                                               ORANGE,
                                                               width=5,
                                                               link="path - " + str(robot.robot_id),

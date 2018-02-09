@@ -107,11 +107,11 @@ class PathPartitionner():
                                                                 tolerance=8)) and \
                 ((self.pose_target.position - old_path.goal).norm() < hysteresis):
             if False:
-                old_path.quick_update_path(self.player)
+                old_path.quick_update_path(self.player.position)
                 self.path_appendice = Path(old_path.goal, self.path.goal)
                 self.path_appendice = self.fastpathplanner(self.path_appendice)
             else:
-                old_path.quick_update_path(self.player)
+                old_path.quick_update_path(self.player.position)
 
         else:
             if self.path.get_path_length() < 0.1:

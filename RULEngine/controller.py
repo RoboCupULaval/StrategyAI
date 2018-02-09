@@ -24,8 +24,7 @@ RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow pack
 
 
 # TODO see if necessary, also same as RobotPacket
-class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dribbler_active command path '
-                                        'cruise_speed end_speed')):
+class EngineCommand(namedtuple('EngineCommand', 'robot_id path kick_type kick_force dribbler_active')):
     pass
 
 
@@ -71,11 +70,15 @@ class Controller(list):
                                   packet=[])
 
         active_robots = iter(robot for robot in self
-                             if robot.pose is not None and robot.target is not None)
+                             if robot.pose is not None and robot.path is not None)
 
         for robot in active_robots:
             self.update_robot_path(robot)
-            command = robot.controller.execute(robot.target, robot.pose)
+            # The next destination will always be second point since the first one is the robot's position
+            next_target = robot.path[1]
+            # TODO: The path is a series of position but the controller expected a target pose
+            next_target['orientation'] = 0
+            command = robot.controller.execute(next_target, robot.pose)
             packet.packet.append(RobotPacket(robot_id=robot.robot_id,
                                              command=command,
                                              kick_type=robot.kick_type,
@@ -99,21 +102,23 @@ class Controller(list):
             ai_commands = self.ai_queue.get(block=False)
             for cmd in ai_commands:
                 robot_id = cmd.robot_id
-                self[robot_id].target = cmd.target
                 self[robot_id].kick_type = cmd.kick_type
                 self[robot_id].kick_force = cmd.kick_force
                 self[robot_id].dribbler_active = cmd.dribbler_active
                 self[robot_id].path = cmd.path
-                self[robot_id].cruise_speed = cmd.cruise_speed
-                self[robot_id].end_speed = cmd.end_speed
+                #self[robot_id].cruise_speed = cmd.cruise_speed
+                #self[robot_id].end_speed = cmd.end_speed
         except Empty:
             pass
 
     def update_robot_path(self, robot):
         # The pathfinder was coded with Pose/Position in mind. So the dict pose of Robot must be converted
         pose = Pose.from_dict(robot.pose)
+        # TODO: This is really ugly... We need to juggle between Path and it's  dict representation.
+        robot.path = Path.from_dict(robot.path)
         robot.path.quick_update_path(pose.position)
         robot.path = path_smoother(robot)
+        robot.path = robot.path.to_dict()
 
 
 class PositionControl:

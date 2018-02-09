@@ -16,7 +16,6 @@ class Robot:
     def __init__(self, robot_id, controller):
         self._robot_id = robot_id
         self.controller = controller
-        self.target = None
         self.pose = None
         self.velocity = None
         self.kick_type = None
@@ -29,7 +28,6 @@ class Robot:
         self.max_angular_acceleration = MAX_ANGULAR_ACCELERATION
         self.cruise_speed = 1000
         self.path = None
-        self.raw_path = None
 
     @property
     def robot_id(self):

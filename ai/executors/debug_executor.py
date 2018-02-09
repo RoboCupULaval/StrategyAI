@@ -44,8 +44,9 @@ class DebugExecutor(metaclass=Singleton):
         self.ui_send_queue.put(msg)
 
     def _send_state(self) -> None:
-        for _ in GameState().our_team.players:
-            UIDebugCommandFactory.send_robot_strategic_state()
+        pass
+        # for player in GameState().our_team.players:
+        #     self.ui_send_queue.put(UIDebugCommandFactory.robot_strategic_state())
 
     def _send_auto_state(self) -> None:
         msg = UIDebugCommandFactory.autoplay_info(GameState().referee.info,
