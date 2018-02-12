@@ -37,7 +37,7 @@ class Tracker:
     def update(self) -> Dict:
 
         try:
-            vision_frame = self.vision_queue.get(block=False)
+            vision_frame = self.vision_queue.get(block=True)
             detection_frame = vision_frame['detection']
             self._current_timestamp = detection_frame['t_capture']
             self._update(detection_frame)

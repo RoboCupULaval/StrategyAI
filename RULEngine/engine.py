@@ -94,7 +94,9 @@ class Engine(Process):
 
                 track_frame = self.tracker.update()
                 robot_packets_frame = self.controller.execute(track_frame)
+
                 self.robot_cmd_queue.put(robot_packets_frame)
+
                 self.tracker.predict(robot_packets_frame.packet)
 
                 try:

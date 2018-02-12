@@ -26,7 +26,7 @@ class Robot:
         self.max_linear_acceleration = MAX_LINEAR_ACCELERATION
         self.max_angular_speed = MAX_ANGULAR_SPEED
         self.max_angular_acceleration = MAX_ANGULAR_ACCELERATION
-        self.cruise_speed = 1000
+        self.cruise_speed = 2000
         self.path = None
         self.raw_path = None
 
