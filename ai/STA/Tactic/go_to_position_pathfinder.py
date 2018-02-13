@@ -21,12 +21,15 @@ class GoToPositionPathfinder(Tactic):
         self.charge_kick = charge_kick
         self.end_speed = end_speed
         self.cruise_speed = float(args[0]) if len(self.args) > 0 else cruise_speed
+        print("Assign move to position to robot id {}".format(self.player.id))
 
     def exec(self):
         if self.check_success():
             self.status_flag = Flags.SUCCESS
         else:
             self.status_flag = Flags.WIP
+
+
 
         return MoveToPosition(self.game_state,
                               self.player,
