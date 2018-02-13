@@ -81,23 +81,26 @@ def path_smoother(player: Robot):
     turns_list += [path.goal]
     # on s'assure que le path est bel et bien réalisable par un robot et on
     # merge les points qui sont trop proches les un des autres.
-    position_list = [point_list[0]]
-    new_speed_list = [speed_list[0]]
-    new_turns_list = [turns_list[0]]
-    for idx, point in enumerate(point_list[1:-1]):
-        i = idx + 1
+    position_list = []
+    new_speed_list = []
+    new_turns_list = []
+    for idx, point in enumerate(point_list[0:-1]):
+        i = idx
         if (point_list[i] - point_list[i+1]).norm() < 10:
             continue
+        else:
+            position_list += [point_list[i]]
+            new_speed_list += [speed_list[i]]
+            new_turns_list += [turns_list[i]]
         if False:
             min_dist = abs(0.5 * (np.square(speed_list[i]) - np.square(speed_list[i + 1])) / player.max_linear_acceleration)
             if min_dist > (point_list[i] - point_list[i+1]).norm():
                 if speed_list[i] > speed_list[i + 1]:
                     speed_list[i] *= (point_list[i] - point_list[i+1]).norm() / min_dist
 
-        position_list += [point_list[i]]
-        new_speed_list += [speed_list[i]]
-        new_turns_list += [turns_list[i]]
+
     position_list += [point_list[-1]]
     new_speed_list += [speed_list[-1]]
     new_turns_list += [turns_list[-1]]
+    print(position_list)
     return Path().generate_path_from_points(position_list, new_speed_list, threshold=None, turns_list=new_turns_list)

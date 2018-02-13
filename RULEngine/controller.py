@@ -26,14 +26,14 @@ RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow pack
 
 
 # TODO see if necessary, also same as RobotPacket
-class EngineCommand(namedtuple('EngineCommand', 'robot_id path kick_type kick_force dribbler_active')):
+class EngineCommand(namedtuple('EngineCommand', 'robot_id path kick_type kick_force dribbler_active target')):
     pass
 
 
 def get_control_setting(game_type: str):
 
     if game_type == 'sim':
-        translation = {'kp': 0.75, 'ki': .10, 'kd': 0}
+        translation = {'kp': 1, 'ki': .10, 'kd': 0}
         rotation = {'kp': .75, 'ki': 0.15, 'kd': 0}
     elif game_type == 'real':
         translation = {'kp': .01, 'ki': 0.0005, 'kd': 0}
@@ -79,7 +79,7 @@ class Controller(list):
             self.update_robot_path(robot)
             # The next destination will always be second point since the first one is the robot's position
             next_speed = robot.path.speeds[1]
-            next_target = Pose(robot.path.turns[1], 0).to_dict()
+            next_target = Pose(robot.path.turns[1], robot.target.orientation).to_dict()
             command = robot.controller.execute(next_target, robot.pose, robot, self.dt)
             packet.packet.append(RobotPacket(robot_id=robot.robot_id,
                                              command=command,
@@ -111,6 +111,7 @@ class Controller(list):
                 self[robot_id].path = cmd.path
                 # TODO: tests, hardcoder c'est méchant
                 self[robot_id].cruise_speed = 2000
+                self[robot_id].target = cmd.target
         except Empty:
             pass
 
@@ -121,6 +122,7 @@ class Controller(list):
         robot.path = Path.from_dict(robot.raw_path)
         robot.path.quick_update_path(pose.position)
         robot.path = path_smoother(robot)
+        print(robot.path.points)
 
 
 class PositionControl:
@@ -151,6 +153,10 @@ class VelocityControl:
 
     def __init__(self, control_setting: Dict):
         self.orientation_controller = PID(**control_setting['rotation'], wrap_error=True)
+        self.control_setting = control_setting
+        self.controllers = {'x': PID(**self.control_setting['translation']),
+                            'y': PID(**self.control_setting['translation']),
+                            'orientation': PID(**self.control_setting['rotation'], wrap_error=True)}
 
     def execute(self, target, pose, robot, dt):
 
@@ -159,7 +165,13 @@ class VelocityControl:
         x_cmd, y_cmd = rotate(next_velocity.x, next_velocity.y, -pose['orientation'])
 
         command = {'x': x_cmd, 'y': y_cmd, 'orientation': self.orientation_controller.execute(error['orientation'])}
+        if Pose.from_dict(error).position.norm() < 50:
+            command = {state: self.controllers[state].execute(error[state]) for state in self.controllers}
+            command['x'], command['y'] = rotate(command['x'], command['y'], -pose['orientation'])
 
+            overspeed_factor = sqrt(command['x'] ** 2 + command['y'] ** 2) / MAX_LINEAR_SPEED
+            if overspeed_factor > 1:
+                command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / overspeed_factor
         return command
 
 

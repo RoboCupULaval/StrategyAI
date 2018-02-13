@@ -12,6 +12,7 @@ from ai.Algorithm.evaluation_module import best_passing_option
 from ai.GameDomainObjects import Player
 from ai.STA.Action.Idle import Idle
 from ai.STA.Action.Kick import Kick
+from ai.STA.Action.kick_charge import KickCharge
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -56,7 +57,7 @@ class GoKick(Tactic):
             self.cmd_last_time = time.time()
 
         # todo charge kick here please/ask Simon what kicktype is supposed to be
-        return AICommand(self.player.id, kick_type=1)
+        return KickCharge(self.game_state, self.player, kick_type=1)
 
     def go_behind_ball(self):
         self.ball_spacing = GRAB_BALL_SPACING

@@ -1,4 +1,4 @@
-
+from Util import Pose
 from Util.path import Path
 
 MAX_LINEAR_SPEED = 2000  # mm/s
@@ -29,6 +29,7 @@ class Robot:
         self.cruise_speed = 2000
         self.path = None
         self.raw_path = None
+        self.target = Pose()
 
     @property
     def robot_id(self):

@@ -37,23 +37,24 @@ class Path:
 
     @staticmethod
     def generate_path_from_points(points_list, speed_list=None, threshold=None, turns_list=None):
-
-        if speed_list is None:
+        if speed_list is None or len(speed_list) < 2:
             speed_list = [0, 0]
+            if len(points_list) < 2:
+                points_list = [points_list[0], points_list[0]]
         if len(points_list) < 3:
             pass
         else:
-            if threshold is not None:
-                if np.linalg.norm(points_list[0] - points_list[1]) < threshold:
-                    del points_list[1]
-                # print(position_list)
-                # print(new_speed_list)
-
+            for i in range(0, len(points_list)-1):
+                if threshold is not None:
+                    if np.linalg.norm(points_list[i] - points_list[i+1]) < threshold:
+                        del points_list[i+1]
+                    # print(position_list)
+                    # print(new_speed_list)
         # points étant une liste de positions
         new_path = Path()
         new_path.start = points_list[0]
         new_path.goal = points_list[-1]
-        if turns_list is None:
+        if turns_list is None or len(turns_list) < 2:
             turns_list = [new_path.start, new_path.goal]
         new_path.points = points_list
         new_path.speeds = speed_list
@@ -78,6 +79,6 @@ class Path:
 
     def quick_update_path(self, position):
         self.points[0] = position
-        return self.generate_path_from_points(self.points, self.speeds, 50)
+        return Path().generate_path_from_points(self.points, self.speeds, None)
 
 
