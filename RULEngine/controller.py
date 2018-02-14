@@ -26,7 +26,7 @@ RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow pack
 
 
 # TODO see if necessary, also same as RobotPacket
-class EngineCommand(namedtuple('EngineCommand', 'robot_id path kick_type kick_force dribbler_active target')):
+class EngineCommand(namedtuple('EngineCommand', 'robot_id path kick_type kick_force dribbler_active target_orientation')):
     pass
 
 
@@ -78,8 +78,7 @@ class Controller(list):
         for robot in active_robots:
             self.update_robot_path(robot)
             # The next destination will always be second point since the first one is the robot's position
-            next_speed = robot.path.speeds[1]
-            next_target = Pose(robot.path.turns[1], robot.target.orientation).to_dict()
+            next_target = Pose(robot.path.turns[1], robot.target_orientation).to_dict()
             command = robot.controller.execute(next_target, robot.pose, robot, self.dt)
             packet.packet.append(RobotPacket(robot_id=robot.robot_id,
                                              command=command,
@@ -111,7 +110,8 @@ class Controller(list):
                 self[robot_id].path = cmd.path
                 # TODO: tests, hardcoder c'est méchant
                 self[robot_id].cruise_speed = 2000
-                self[robot_id].target = cmd.target
+
+                self[robot_id].target_orientation = cmd.target_orientation
         except Empty:
             pass
 
@@ -119,11 +119,11 @@ class Controller(list):
         # The pathfinder was coded with Pose/Position in mind. So the dict pose of Robot must be converted
         pose = Pose.from_dict(robot.pose)
         # TODO: This is really ugly... We need to juggle between Path and it's  dict representation.
-        robot.raw_path = Path.from_dict(robot.raw_path)
-        robot.raw_path = robot.raw_path.quick_update_path(pose.position)
-        robot.path = robot.raw_path
+        raw_path = Path.from_dict(robot.raw_path)
+        raw_path = raw_path.quick_update_path(pose.position)
+        robot.path = raw_path
         robot.path = path_smoother(robot)
-        robot.raw_path = robot.raw_path.to_dict()
+        robot.raw_path = raw_path.to_dict()
 
 
 class PositionControl:
