@@ -119,10 +119,11 @@ class Controller(list):
         # The pathfinder was coded with Pose/Position in mind. So the dict pose of Robot must be converted
         pose = Pose.from_dict(robot.pose)
         # TODO: This is really ugly... We need to juggle between Path and it's  dict representation.
-        robot.path = Path.from_dict(robot.raw_path)
-        robot.path.quick_update_path(pose.position)
+        robot.raw_path = Path.from_dict(robot.raw_path)
+        robot.raw_path = robot.raw_path.quick_update_path(pose.position)
+        robot.path = robot.raw_path
         robot.path = path_smoother(robot)
-        print(robot.path.points)
+        robot.raw_path = robot.raw_path.to_dict()
 
 
 class PositionControl:

@@ -39,8 +39,8 @@ class Path:
     def generate_path_from_points(points_list, speed_list=None, threshold=None, turns_list=None):
         if speed_list is None or len(speed_list) < 2:
             speed_list = [0, 0]
-            if len(points_list) < 2:
-                points_list = [points_list[0], points_list[0]]
+        if len(points_list) < 2:
+            points_list = [points_list[0], points_list[0]]
         if len(points_list) < 3:
             pass
         else:

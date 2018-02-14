@@ -86,7 +86,7 @@ def path_smoother(player: Robot):
     new_turns_list = []
     for idx, point in enumerate(point_list[0:-1]):
         i = idx
-        if (point_list[i] - point_list[i+1]).norm() < 10:
+        if (point_list[i] - point_list[i+1]).norm() < 100:
             continue
         else:
             position_list += [point_list[i]]
@@ -98,9 +98,7 @@ def path_smoother(player: Robot):
                 if speed_list[i] > speed_list[i + 1]:
                     speed_list[i] *= (point_list[i] - point_list[i+1]).norm() / min_dist
 
-
     position_list += [point_list[-1]]
     new_speed_list += [speed_list[-1]]
     new_turns_list += [turns_list[-1]]
-    print(position_list)
     return Path().generate_path_from_points(position_list, new_speed_list, threshold=None, turns_list=new_turns_list)
