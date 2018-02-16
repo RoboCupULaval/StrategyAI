@@ -1,6 +1,9 @@
+# TODO Fix for new architecture
 # Under MIT licence, see LICENCE.txt
-__author__ = "Maxime Gagnon-Legault, and others"
-
+# from ai.STA.Tactic.tactic import Tactic
+#
+# __author__ = "Maxime Gagnon-Legault, and others"
+#
 # import unittest
 #
 # from RULEngine.GameDomainObjects.ball import Ball
@@ -25,6 +28,12 @@ __author__ = "Maxime Gagnon-Legault, and others"
 #
 # def foo2():
 #     return False
+#
+# class ATactic(Tactic):
+#     pass
+#
+# class AnotherTactic(Tactic):
+#     pass
 #
 #
 # A_PLAYER_ID = 1
@@ -132,6 +141,3 @@ __author__ = "Maxime Gagnon-Legault, and others"
 #         self.assertEqual(self.graph1.current_node, 1)
 #         self.assertEqual(self.graph1.nodes[0].tactic.status_flag, Flags.INIT)
 
-# TODO
-# if __name__ == "__main__":
-#     unittest.main()
