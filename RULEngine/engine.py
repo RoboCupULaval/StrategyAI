@@ -1,10 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
-__author__ = "Maxime Gagnon-Legault, Simon Bouchard"
-
 import logging
 import sys
-from collections import namedtuple
 from multiprocessing import Process, Queue
 from queue import Full
 
@@ -12,6 +9,7 @@ from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCom
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.robot_command_sender import RobotCommandSender
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
+
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 
 from RULEngine.controller import Controller
@@ -19,13 +17,9 @@ from RULEngine.tracker import Tracker
 
 from config.config_service import ConfigService
 
+from Util import AICommand
 
-class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dribbler_active')):
-
-    __slots__ = ()
-
-    def __new__(cls, robot_id, target=None, kick_type=None, kick_force=0, dribbler_active=False, command=None):
-        return super().__new__(cls, robot_id, target, kick_type, kick_force, dribbler_active)
+__author__ = "Maxime Gagnon-Legault, Simon Bouchard"
 
 
 class Engine(Process):
@@ -81,13 +75,6 @@ class Engine(Process):
 
     def run(self):
         self.logger.debug('Running')
-        #
-        # self.ai_queue.put([AICommand(robot_id=0, target={'x': -4200, 'y': 0, 'orientation': 0}),
-        #                    AICommand(robot_id=1, target={'x': -90, 'y': -2000, 'orientation': 0}),
-        #                    AICommand(robot_id=2, target={'x': -90, 'y': -1000, 'orientation': 0}),
-        #                    AICommand(robot_id=3, target={'x': -590, 'y': 0, 'orientation': 0}),
-        #                    AICommand(robot_id=4, target={'x': -90, 'y': 1000, 'orientation': 0}),
-        #                    AICommand(robot_id=5, target={'x': -90, 'y': 2000, 'orientation': 0})])
 
         try:
             while True:
