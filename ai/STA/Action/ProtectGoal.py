@@ -4,7 +4,7 @@ from Util.area import stayInsideCircle
 from Util.geometry import get_closest_point_on_segment
 from ai.GameDomainObjects import Player
 from ai.STA.Action import Action
-from ai.states import GameState
+from ai.states.game_state import GameState
 
 
 class ProtectGoal(Action):

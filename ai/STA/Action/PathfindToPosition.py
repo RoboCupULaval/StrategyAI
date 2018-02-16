@@ -4,7 +4,7 @@ from Util.ai_command_shit import AICommand, AICommandType
 from Util import Pose
 
 from ai.STA.Action import Action
-from ai.states import GameState
+from ai.states.game_state import GameState
 
 
 # TODO remove this and use MoveToPosition (Simon B)

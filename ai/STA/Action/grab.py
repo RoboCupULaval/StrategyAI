@@ -4,7 +4,7 @@
 from Util import Pose, AICommand
 from ai.GameDomainObjects import Player
 from ai.STA.Action import Action
-from ai.states import GameState
+from ai.states.game_state import GameState
 
 
 class Grab(Action):

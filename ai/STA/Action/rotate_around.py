@@ -10,7 +10,7 @@ from Util.ai_command_shit import AICommand, AICommandType
 from Util.geometry import compare_angle, wrap_to_pi
 from ai.GameDomainObjects import Player
 from ai.STA.Action import Action
-from ai.states import GameState
+from ai.states.game_state import GameState
 
 DEFAULT_ROTATION_SPEED = 6*m.pi  # rad/s
 DEFAULT_RADIUS = 150  # mm
