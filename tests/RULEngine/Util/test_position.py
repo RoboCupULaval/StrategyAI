@@ -2,10 +2,9 @@ import math as m
 import unittest
 
 import numpy as np
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.position import Position
 
-from Util import compare_angle
+from Util import Position, Pose
+from Util.geometry import compare_angle
 
 
 class TestPosition(unittest.TestCase):
@@ -131,7 +130,7 @@ class TestPosition(unittest.TestCase):
         self.assertEqual(Position(-1, 0).rotate(m.pi / 2), Position(0, -1))
         self.assertEqual(Position(0, -1).rotate(m.pi / 2), Position(1, 0))
         self.assertEqual(Position(526, 878).rotate(2.14675), Position(-1022.833, -37.052))
-        self.assertTrue(type(Position(526, 878).rotate(2.14675)) is position)
+        self.assertTrue(type(Position(526, 878).rotate(2.14675)) is Position)
 
     def test_normalized(self):
         self.assertEqual(Position(1, 0).normalized(), Position(1, 0))
@@ -139,10 +138,9 @@ class TestPosition(unittest.TestCase):
         self.assertEqual(Position(10, 10).normalized(), Position(m.sqrt(2) / 2, m.sqrt(2) / 2))
         normalized_vector = Position(np.array([12.45, -23.23]) / np.sqrt(np.square([12.45, -23.23]).sum()))
         self.assertEqual(Position(12.45, -23.23).normalized(), normalized_vector)
-        self.assertTrue(type(Position(12.45, -23.23).normalized()) is position)
+        self.assertTrue(type(Position(12.45, -23.23).normalized()) is Position)
 
-        with self.assertRaises(ZeroDivisionError):
-            Position(0, 0).normalized()
+        self.assertEqual(Position(0, 0).normalized(), Position(0, 0))
 
     def test_eq(self):
 

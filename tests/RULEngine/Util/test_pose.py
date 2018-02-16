@@ -2,8 +2,9 @@ import math as m
 import unittest
 
 import numpy as np
-from RULEngine.Util.pose import Pose
-from RULEngine.Util.position import Position
+
+from Util import Position, Pose
+from Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE
 
 
 class TestPose(unittest.TestCase):
@@ -166,7 +167,6 @@ class TestPose(unittest.TestCase):
     def test_eq(self):
         self.assertEqual(Pose(), Pose())
 
-        from Util import ORIENTATION_ABSOLUTE_TOLERANCE
         tol = 0.9999 * ORIENTATION_ABSOLUTE_TOLERANCE
 
         self.assertEqual(Pose(Position(), 1), Pose(Position(), 1 + tol))

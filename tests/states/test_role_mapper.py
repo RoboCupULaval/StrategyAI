@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from Util import Role
+from Util.role import Role
 from ai.states.game_state import GameState
 
 
