@@ -21,7 +21,7 @@ class TestGeometry(unittest.TestCase):
         self.positionSO = Position(-10000, -10000)
 
     def test_get_distance(self):
-        dist = get_distance(self.position, self.positionN)
+        dist = (self.position - self.positionN).norm()
         self.assertEqual(dist, 10000)
 
         approx_dist = (self.positionNE - self.positionSO).norm()
