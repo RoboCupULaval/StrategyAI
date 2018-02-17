@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 import logging
+import os
 import sys
 from multiprocessing import Process, Queue
 from queue import Full
@@ -74,7 +75,8 @@ class Engine(Process):
         self.robot_cmd_sender.start()
 
     def run(self):
-        self.logger.debug('Running')
+        own_pid = os.getpid()
+        self.logger.debug('Running with process ID {}'.format(own_pid))
 
         try:
             while True:
@@ -101,6 +103,19 @@ class Engine(Process):
 
         sys.stdout.flush()
         exit(0)
+
+    def is_any_subprocess_borked(self):
+        borked_process_found = not self.vision_receiver.is_alive() or \
+                               not self.ui_sender.is_alive() or \
+                               not self.ui_recver.is_alive() or \
+                               not self.robot_cmd_sender.is_alive()
+        return borked_process_found
+
+    def terminate_subprocesses(self):
+        self.vision_receiver.terminate()
+        self.ui_sender.terminate()
+        self.ui_recver.terminate()
+        self.robot_cmd_sender.terminate()
 
     def follow_ball(self, track_frame, robot_id):
         if track_frame['balls']:
