@@ -35,12 +35,11 @@ class Kick(Action):
             ball_position = self.player.pose.position
             orientation = self.player.pose.orientation
 
-        cmd_params = {"pose_goal": Pose(ball_position, orientation),
-                      "kick": True,
-                      "pathfinder_on": True,
-                      "kick_strength": self.force,
+        cmd_params = {"target": Pose(ball_position, orientation),
+                      "kick_type": 1,
+                      "kick_force": self.force,
                       "cruise_speed": 0.1,
                       "charge_kick": True,
                       "end_speed":self.end_speed}
 
-        return AICommand(self.player, AICommandType.MOVE, **cmd_params)
+        return AICommand(self.player.id, **cmd_params)

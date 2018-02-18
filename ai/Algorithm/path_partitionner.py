@@ -103,9 +103,10 @@ class PathPartitionner():
             hysteresis = 50 * cruise_speed
         else:
             hysteresis = 50 * cruise_speed
-        if (old_path is not None) and (not self.is_path_collide(old_path,
-                                                                tolerance=8)) and \
-                ((self.pose_target.position - old_path.goal).norm() < hysteresis):
+        if False:
+        # if (old_path is not None) and (not self.is_path_collide(old_path,
+        #                                                         tolerance=8)) and \
+        #         ((self.pose_target.position - old_path.goal).norm() < hysteresis):
             if False:
                 old_path.quick_update_path(self.player.position)
                 self.path_appendice = Path(old_path.goal, self.path.goal)

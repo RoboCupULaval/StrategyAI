@@ -1,4 +1,4 @@
-
+from Util import Pose
 from Util.path import Path
 
 MAX_LINEAR_SPEED = 2000  # mm/s
@@ -8,7 +8,7 @@ MAX_ANGULAR_ACCELERATION = 1  # rad/s^2
 
 class Robot:
 
-    __slots__ = ('_robot_id', 'controller', 'target', 'pose', 'velocity',
+    __slots__ = ('_robot_id', 'controller', 'target_orientation', 'pose', 'velocity',
                  'kick_type', 'kick_force', 'dribbler_active', 'input_command',
                  'cruise_speed', 'max_linear_speed', 'max_linear_acceleration',
                  'max_angular_speed', 'max_angular_acceleration', 'path', 'raw_path')
@@ -29,6 +29,7 @@ class Robot:
         self.cruise_speed = 2000
         self.path = None
         self.raw_path = None
+        self.target_orientation = 0
 
     @property
     def robot_id(self):

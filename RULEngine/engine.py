@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+import time
 
 import logging
 import sys
@@ -39,6 +40,7 @@ class Engine(Process):
         self.cfg = ConfigService()
         self.team_color = self.cfg.config_dict['GAME']['our_color']
 
+
         self.vision_queue = Queue(self.VISION_QUEUE_MAXSIZE)
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
@@ -68,6 +70,10 @@ class Engine(Process):
         self.tracker = Tracker(self.vision_queue)
         self.controller = Controller(self.ai_queue)
 
+        # print framerate
+        self.framecount = 0
+        self.time_last_print = time.time()
+
         self.vision_receiver.start()
         self.ui_sender.start()
         self.ui_recver.start()
@@ -94,6 +100,8 @@ class Engine(Process):
                 self.ui_send_queue.put(UIDebugCommandFactory.track_frame(track_frame))
                 self.ui_send_queue.put(UIDebugCommandFactory.robots_path(self.controller))
 
+                self.print_framerate()
+
         except KeyboardInterrupt:
             pass
         finally:
@@ -107,3 +115,12 @@ class Engine(Process):
             ball_pose = track_frame['balls'][0]['pose']
             ball_pose['orientation'] = 0
             self.ai_queue.put([AICommand(robot_id=robot_id, target=ball_pose)])
+
+    def print_framerate(self):
+        self.framecount += 1
+        dt = time.time() - self.time_last_print
+        if dt > 2:
+            print("Engine update at {:.2f} fps".format(self.framecount / dt))
+            self.time_last_print = time.time()
+            self.framecount = 0
+

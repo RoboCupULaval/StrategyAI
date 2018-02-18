@@ -46,7 +46,7 @@ class RobotFilter(KalmanFilter):
         return 10 ** 6 * np.eye(self.state_number)
 
     def process_covariance(self):
-        return np.diag([.5, 5, 0.5, 5, 0.1, .1])
+        return np.diag([.5, 0.5, 0.5, 0.5, 0.1, .1])
 
     def observation_covariance(self):
         if fabs(self.x[0]) < 30 or fabs(self.x[2]) < 30:

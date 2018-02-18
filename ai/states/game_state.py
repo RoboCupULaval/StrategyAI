@@ -3,6 +3,7 @@
 import logging
 
 from RULEngine.services.team_color_service import TeamColorService
+from Util import Position
 from ai.GameDomainObjects import Ball, Team, Field, Referee
 from Util.constant import TeamColor
 from Util.role import Role
@@ -47,6 +48,7 @@ class GameState(object, metaclass=Singleton):
         self._yellow_team.update(new_game_state['yellow'])
 
         self._balls = [Ball.from_dict(msg_ball) for msg_ball in new_game_state['balls']]
+        self._field = Field(self._balls)
 
     def get_player_by_role(self, role: Role):
         return self._role_mapper.roles_translation[role]
@@ -77,14 +79,25 @@ class GameState(object, metaclass=Singleton):
     def get_player(self, id: int):
         return self.our_team.players[id]  # tODO
 
+    def get_ball_position(self) -> Position:
+        """
+            Retourne la position de la balle
+            :return: L'instance de Position, la position de la balle
+        """
+        return self._field.ball.position
+
     @property
     def delta_t(self) -> float:
         return self._delta_t
 
-    @delta_t.setter
-    def delta_t(self, value) -> None:
+    def get_ball_velocity(self) -> Position:
+        """
+        Retourne le vecteur vélocité de la balle.
+        Use with care, probably not implemented correctly
 
-        self._delta_t = value
+        :return: la vélocité de la balle.
+        """
+        return self._field.ball.velocity
 
     @property
     def our_team(self) -> Team:
