@@ -1,11 +1,11 @@
 # Under MIT License, see LICENSE.txt
 
-__author__ = "Maxime Gagnon-Legault"
-
 from ipaddress import ip_address
 from queue import Full
 from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY, timeout, SOL_SOCKET, SO_REUSEADDR
 from struct import pack
+
+from time import time
 
 from google.protobuf.message import DecodeError
 from protobuf_to_dict import protobuf_to_dict
@@ -13,9 +13,12 @@ from protobuf_to_dict import protobuf_to_dict
 from RULEngine.Communication.protobuf.messages_robocup_ssl_wrapper_pb2 import SSL_WrapperPacket
 from RULEngine.Communication.receiver.receiver_base_class import ReceiverBaseClass
 
+__author__ = "Maxime Gagnon-Legault"
+
 
 class VisionReceiver(ReceiverBaseClass):
     TIME_OUT = 1
+    packet_buffer = []
 
     def connect(self, connection_info):
         connection = socket(AF_INET, SOCK_DGRAM)
@@ -30,20 +33,26 @@ class VisionReceiver(ReceiverBaseClass):
     def receive_packet(self):
 
         packet = SSL_WrapperPacket()
+
         try:
             data = self.connection.recv(1024)
-        except timeout:
-            # self.logger.error('Vision queue timeout. No frame received.')
-            return
 
-        try:
             packet.ParseFromString(data)
-        except DecodeError:
-            # self.logger.error('VisionReceiver had trouble decoding a packet!')
-            return
+            packet = protobuf_to_dict(packet)
 
-        try:
-            self.queue.put(protobuf_to_dict(packet), block=False)
+            VisionReceiver.packet_buffer.append(packet)
+
+            # If the queue is full, it means the engine haven't process the frame yet.
+            self.queue.put(VisionReceiver.packet_buffer.copy(), block=False)
+            # If the queue doesnt block, we can clear the buffer
+            VisionReceiver.packet_buffer.clear()
+
+        except timeout:
+            self.logger.error('Vision queue timeout. No frame received.')
+
+        except DecodeError:
+            if not packet.HasField('geometry'):
+                self.logger.error('VisionReceiver had trouble decoding a packet!')
+
         except Full as e:
             pass
-            # self.logger.error("Vision queue full. Frames will be lost.")
