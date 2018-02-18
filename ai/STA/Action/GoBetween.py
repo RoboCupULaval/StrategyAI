@@ -6,7 +6,7 @@ from ai.GameDomainObjects.player import Player
 
 from Util.geometry import get_closest_point_on_segment
 from ai.STA.Action import Action
-from ai.states import GameState
+from ai.states.game_state import GameState
 
 
 class GoBetween(Action):

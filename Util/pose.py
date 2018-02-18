@@ -4,8 +4,8 @@ from typing import Union
 
 import numpy as np
 
-from Util.constant import ORIENTATION_ABSOLUTE_TOLERANCE
-from Util.position import Position
+from .constant import ORIENTATION_ABSOLUTE_TOLERANCE
+from .position import Position
 
 
 class Pose(object):

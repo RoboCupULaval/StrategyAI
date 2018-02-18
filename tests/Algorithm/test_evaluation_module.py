@@ -1,17 +1,10 @@
+
 import unittest
 from unittest.mock import create_autospec
 
 import numpy as np
-from RULEngine.Util.pose import Pose
-from RULEngine.Util.position import Position
+from Util import Pose, Position
 
-<<<<<<< HEAD
-from Util import Position
-=======
-from RULEngine.GameDomainObjects.player import Player
-from RULEngine.GameDomainObjects.team import Team
-from Util import position
->>>>>>> 658ccbf98f0e28b85cf7ad0e97fabff8066870e6
 from ai.Algorithm.evaluation_module import line_of_sight_clearance, trajectory_score
 from ai.GameDomainObjects import Player
 from ai.GameDomainObjects import Team
@@ -121,11 +114,11 @@ class TestEvaluationModule(unittest.TestCase):
     def _create_mock_teams(self, allies, opponents):
         team1 = create_autospec(Team)
         team1.available_players = allies
-        GameState().our_team = team1
+        GameState()._our_team = team1
 
         team2 = create_autospec(Team)
         team2.available_players = opponents
-        GameState().other_team = team2
+        GameState()._enemy_team = team2
 
     def _define_points_obstacle(self, start_point, goal, obstacle):
         self.start_point.x, self.start_point.y = start_point

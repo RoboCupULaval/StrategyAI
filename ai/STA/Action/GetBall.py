@@ -3,7 +3,7 @@ from ai.GameDomainObjects import Player
 from Util import AICommand, Pose
 from Util.ai_command_shit import AICommandType
 from ai.STA.Action import Action
-from ai.states import GameState
+from ai.states.game_state import GameState
 
 
 class GetBall(Action):

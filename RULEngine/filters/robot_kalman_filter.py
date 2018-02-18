@@ -61,13 +61,9 @@ class RobotFilter(KalmanFilter):
         error[2] = RobotFilter.wrap_to_pi(error[2])
         self._update(error, t_capture)
 
-
     def predict(self, input_command=None):
-        last_pose = self.x[0::1]
         self._predict(input_command)
         self.x[4] = self.wrap_to_pi(self.x[4])
-        # if np.linalg.norm(np.array((last_pose - self.x[0::1]) / self.dt)) > 1:
-        #     print(np.linalg.norm(np.array((last_pose - self.x[0::1]) / self.dt)))
 
     @staticmethod
     def wrap_to_pi(angle):

@@ -1,18 +1,16 @@
 # Under MIT License, see LICENSE.txt
-import time
-
-__author__ = "Maxime Gagnon-Legault, Simon Bouchard"
 
 import logging
 import sys
-from collections import namedtuple
 from multiprocessing import Process, Queue
 from queue import Full
+from time import time, sleep
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.robot_command_sender import RobotCommandSender
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
+
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 
 from RULEngine.controller import Controller
@@ -20,21 +18,16 @@ from RULEngine.tracker import Tracker
 
 from config.config_service import ConfigService
 
-
-class AICommand(namedtuple('AICommand', 'robot_id target kick_type kick_force dribbler_active')):
-
-    __slots__ = ()
-
-    def __new__(cls, robot_id, target=None, kick_type=None, kick_force=0, dribbler_active=False, command=None):
-        return super().__new__(cls, robot_id, target, kick_type, kick_force, dribbler_active)
+__author__ = "Maxime Gagnon-Legault and Simon Bouchard"
 
 
 class Engine(Process):
-    VISION_QUEUE_MAXSIZE = 4
+    VISION_QUEUE_MAXSIZE = 1
     ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
     REFEREE_QUEUE_MAXSIZE = 100
+    FPS = 30
 
     def __init__(self, game_state_queue: Queue,
                  ai_queue: Queue,
@@ -46,8 +39,7 @@ class Engine(Process):
         self.cfg = ConfigService()
         self.team_color = self.cfg.config_dict['GAME']['our_color']
 
-
-        self.vision_queue = Queue(self.VISION_QUEUE_MAXSIZE)
+        self.vision_queue = Queue(maxsize=Engine.VISION_QUEUE_MAXSIZE)
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
         self.ai_queue = ai_queue
@@ -78,7 +70,7 @@ class Engine(Process):
 
         # print framerate
         self.framecount = 0
-        self.time_last_print = time.time()
+        self.time_last_print = time()
 
         self.vision_receiver.start()
         self.ui_sender.start()
@@ -87,16 +79,11 @@ class Engine(Process):
 
     def run(self):
         self.logger.debug('Running')
-        #
-        # self.ai_queue.put([AICommand(robot_id=0, target={'x': -4200, 'y': 0, 'orientation': 0}),
-        #                    AICommand(robot_id=1, target={'x': -90, 'y': -2000, 'orientation': 0}),
-        #                    AICommand(robot_id=2, target={'x': -90, 'y': -1000, 'orientation': 0}),
-        #                    AICommand(robot_id=3, target={'x': -590, 'y': 0, 'orientation': 0}),
-        #                    AICommand(robot_id=4, target={'x': -90, 'y': 1000, 'orientation': 0}),
-        #                    AICommand(robot_id=5, target={'x': -90, 'y': 2000, 'orientation': 0})])
 
         try:
             while True:
+
+                start = time()
 
                 track_frame = self.tracker.update()
                 robot_packets_frame = self.controller.execute(track_frame)
@@ -113,6 +100,14 @@ class Engine(Process):
                 self.ui_send_queue.put(UIDebugCommandFactory.track_frame(track_frame))
                 self.ui_send_queue.put(UIDebugCommandFactory.robots_path(self.controller))
 
+                sleep_time = max(1/Engine.FPS - (time() - start), 0)
+                if sleep_time > 0:
+                    pass
+                    #sleep(sleep_time)
+                else:
+                    #self.logger.debug('main loop take too much time.')
+                    pass
+
                 self.print_framerate()
 
         except KeyboardInterrupt:
@@ -123,17 +118,12 @@ class Engine(Process):
         sys.stdout.flush()
         exit(0)
 
-    def follow_ball(self, track_frame, robot_id):
-        if track_frame['balls']:
-            ball_pose = track_frame['balls'][0]['pose']
-            ball_pose['orientation'] = 0
-            self.ai_queue.put([AICommand(robot_id=robot_id, target=ball_pose)])
 
     def print_framerate(self):
         self.framecount += 1
-        dt = time.time() - self.time_last_print
+        dt = time() - self.time_last_print
         if dt > 2:
             print("Engine update at {:.2f} fps".format(self.framecount / dt))
-            self.time_last_print = time.time()
+            self.time_last_print = time()
             self.framecount = 0
 

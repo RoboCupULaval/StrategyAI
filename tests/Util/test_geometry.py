@@ -3,7 +3,8 @@
 import math as m
 import unittest
 
-import Util.geometry
+from Util import Position
+from Util.geometry import get_line_equation, get_nearest, get_closest_point_on_line, get_distance
 
 __author__ = 'RoboCupULaval'
 
@@ -11,16 +12,16 @@ __author__ = 'RoboCupULaval'
 class TestGeometry(unittest.TestCase):
 
     def setUp(self):
-        self.position = RULEngine.Util.Position.Position()
-        self.positionN = RULEngine.Util.Position.Position(0, 10000)
-        self.positionNE = RULEngine.Util.Position.Position(10000, 10000)
-        self.positionNO = RULEngine.Util.Position.Position(-10000, 10000)
-        self.positionS = RULEngine.Util.Position.Position(0, -10000)
-        self.positionSE = RULEngine.Util.Position.Position(10000, -10000)
-        self.positionSO = RULEngine.Util.Position.Position(-10000, -10000)
+        self.position = Position()
+        self.positionN = Position(0, 10000)
+        self.positionNE = Position(10000, 10000)
+        self.positionNO = Position(-10000, 10000)
+        self.positionS = Position(0, -10000)
+        self.positionSE = Position(10000, -10000)
+        self.positionSO = Position(-10000, -10000)
 
     def test_get_distance(self):
-        dist = Util.geometry.get_distance(self.position, self.positionN)
+        dist = (self.position - self.positionN).norm()
         self.assertEqual(dist, 10000)
 
         approx_dist = (self.positionNE - self.positionSO).norm()
@@ -36,28 +37,28 @@ class TestGeometry(unittest.TestCase):
 
     def test_get_nearest(self):
         list_of_positions = [self.positionNE, self.positionSE, self.positionSO, self.positionN]
-        nearest = Util.geometry.get_nearest(self.position, list_of_positions)
+        nearest = get_nearest(self.position, list_of_positions)
         self.assertEqual(nearest[0], self.positionN)
 
         list_of_positions.remove(self.positionN)
         list_of_positions.append(self.positionS)
-        nearest = Util.geometry.get_nearest(self.position, list_of_positions)
+        nearest = get_nearest(self.position, list_of_positions)
         self.assertEqual(nearest[0], self.positionS)
 
 
     def test_get_line_equation(self):
-        self.assertEqual(Util.geometry.get_line_equation(self.positionNE, self.positionSO), (1, 0))
-        self.assertEqual(Util.geometry.get_line_equation(self.positionNE, self.positionNO), (0, 10000))
+        self.assertEqual(get_line_equation(self.positionNE, self.positionSO), (1, 0))
+        self.assertEqual(get_line_equation(self.positionNE, self.positionNO), (0, 10000))
 
     def test_get_closest_point_on_line(self):
         # Quand le point est nul (0, 0)
-        close_null_point = Util.geometry.get_closest_point_on_line(self.positionNE, self.positionSE, self.positionNO)
+        close_null_point = get_closest_point_on_line(self.positionNE, self.positionSE, self.positionNO)
         self.assertEqual(close_null_point, self.position)
         # Quand le point est sur une position à l'extérieure des deux points
-        close_nonexistent_point = Util.geometry.get_closest_point_on_line(self.positionSE, self.position, self.positionN)
+        close_nonexistent_point = get_closest_point_on_line(self.positionSE, self.position, self.positionN)
         self.assertEqual(close_nonexistent_point, self.positionS)
         # Point normal
-        close_point = Util.geometry.get_closest_point_on_line(self.positionNE, self.position, self.positionN)
+        close_point = get_closest_point_on_line(self.positionNE, self.position, self.positionN)
         self.assertEqual(close_point, self.positionN)
 
     # def test_get_required_kick_force(self): # simple calculation
