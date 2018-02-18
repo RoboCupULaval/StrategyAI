@@ -98,7 +98,8 @@ class Engine(Process):
 
                 sleep_time = max(1/Engine.FPS - (time() - start), 0)
                 if sleep_time > 0:
-                    sleep(sleep_time)
+                    pass
+                    #sleep(sleep_time)
                 else:
                     #self.logger.debug('main loop take too much time.')
                     pass
