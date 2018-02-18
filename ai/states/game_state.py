@@ -111,6 +111,10 @@ class GameState(object, metaclass=Singleton):
     def ball(self) -> Ball:
         return self._field.ball
 
+    @ball.setter
+    def ball(self, ball: Ball) -> Ball:
+        self._field = Field([ball])
+
     @property
     def referee(self) -> Referee:
         return self._referee

@@ -6,9 +6,9 @@ from Util import Position
 
 
 class Ball:
-    def __init__(self, id):
+    def __init__(self, id, position=Position()):
         self._id = id
-        self._position = Position()
+        self._position = position
         self._velocity = Position()
 
     def update(self, new_position: Position, new_velocity: Position):
