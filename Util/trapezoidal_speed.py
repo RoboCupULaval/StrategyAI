@@ -19,18 +19,18 @@ def get_next_velocity(robot: Robot, dt):
     target_direction = (robot.path.points[1] - Pose.from_dict(robot.pose).position).normalized()
     offset = 1
     if target_speed > next_speed:
-        print('go')
+        #print('go')
         next_speed += robot.max_linear_acceleration * dt * offset
     else:
         if dist_accelerate(robot, target_speed, next_speed):  # We need to accelerate
-            print('go')
+            #print('go')
             next_speed += robot.max_linear_acceleration * dt * offset
         elif dist_break(robot, target_speed, next_speed):  # We need to go to break
-            print('break')
+            #print('break')
             next_speed -= robot.max_linear_acceleration * dt * offset
         else: #accelerate until dist_break:
-            print('go2')
-            next_speed -= robot.max_linear_acceleration * dt * offset
+            #print('go2')
+            next_speed += robot.max_linear_acceleration * dt * offset
 
 
     next_speed = np.clip(next_speed, 0, robot.cruise_speed)
@@ -52,6 +52,6 @@ def dist_break(robot: Robot, target_speed, current_speed) -> bool:  # distance_t
     distance = abs(0.5 * (current_speed ** 2 - target_speed ** 2)) / robot.max_linear_acceleration * offset
     # distance = max(distance, MIN_DISTANCE_TO_REACH_TARGET_SPEED)
     position_error = robot.path.points[1] - Pose.from_dict(robot.pose).position
-    return position_error.norm() >= distance
+    return position_error.norm() <= distance
 
 
