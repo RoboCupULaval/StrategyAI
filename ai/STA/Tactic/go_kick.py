@@ -78,7 +78,7 @@ class GoKick(Tactic):
             if self._get_distance_from_ball() < KICK_DISTANCE:
                 self.next_state = self.kick
         else:
-            if (self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10)):
+            if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10):
                 self.next_state = self.kick
 
         orientation = (self.target.position - self.player.pose.position).angle()

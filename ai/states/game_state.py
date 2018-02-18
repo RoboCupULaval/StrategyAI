@@ -18,7 +18,9 @@ class GameState(object, metaclass=Singleton):
         initialise le GameState, initialise les variables avec des valeurs nulles
         """
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.reset()
 
+    def reset(self):
         self._role_mapper = RoleMapper()
         self._delta_t = 0
         self.our_team_color = None
