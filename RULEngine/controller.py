@@ -1,6 +1,8 @@
 # Under MIT licence, see LICENCE.txt
 
 
+
+import sys
 import logging
 from multiprocessing import Queue
 from queue import Empty
@@ -11,15 +13,18 @@ from math import sin, cos, sqrt
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from RULEngine.robot import Robot, MAX_LINEAR_SPEED
 from Util.PID import PID
+from Util.csv_plotter import Csv_plotter
 
 from Util.pose import Pose
 from Util.position import Position
 from Util.constant import PLAYER_PER_TEAM
 from Util.path import Path
 from Util.path_smoother import path_smoother
+from Util.scroll_plot import DynamicUpdate
 from Util.trapezoidal_speed import get_next_velocity
 from config.config_service import ConfigService
-
+import numpy as np
+import csv
 
 RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active')
 RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow packet')
@@ -46,11 +51,11 @@ def get_control_setting(game_type: str):
 
 class Controller(list):
     def __init__(self, ai_queue: Queue):
-
         self.ai_queue = ai_queue
         self.dt = 0
         self.last_time = 0
         self.timestamp = None
+        self.csv_plotter = Csv_plotter()
 
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger("Controller")
@@ -85,7 +90,7 @@ class Controller(list):
                                              kick_type=robot.kick_type,
                                              kick_force=robot.kick_force,
                                              dribbler_active=robot.dribbler_active))
-
+            self.csv_plotter.write([Pose.from_dict(robot.velocity).position.norm(), np.linalg.norm([command['x'], command['y']])])
         return packet
 
     def update_robots_states(self, robots_states):

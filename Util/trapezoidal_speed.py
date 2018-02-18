@@ -6,6 +6,7 @@ from Util import Position, Pose
 MIN_DISTANCE_TO_REACH_TARGET_SPEED = 0
 
 
+
 def get_next_velocity(robot: Robot, dt):
     """Return the next velocity according to a constant acceleration model of a point mass.
        It try to produce a trapezoidal velocity path with the required cruising and target speed.
@@ -16,7 +17,7 @@ def get_next_velocity(robot: Robot, dt):
     #print(target_speed)
     #print(next_speed)
     target_direction = (robot.path.points[1] - Pose.from_dict(robot.pose).position).normalized()
-    offset = 20
+    offset = 1
     if target_speed > next_speed:
         #print('go')
         next_speed += robot.max_linear_acceleration * dt * offset
@@ -40,15 +41,17 @@ def get_next_velocity(robot: Robot, dt):
 
 
 def dist_accelerate(robot: Robot, target_speed, current_speed) -> bool:  # distance_to_reach_target_speed
-    offset = 20
+    offset = 1
     distance = abs(0.5 * (current_speed ** 2 - target_speed ** 2)) / robot.max_linear_acceleration * offset
     # distance = max(distance, MIN_DISTANCE_TO_REACH_TARGET_SPEED)
     position_error = robot.path.points[1] - Pose.from_dict(robot.pose).position
     return position_error.norm() >= 2 * distance
 
 def dist_break(robot: Robot, target_speed, current_speed) -> bool:  # distance_to_reach_target_speed
-    offset = 3
+    offset = 1
     distance = abs(0.5 * (current_speed ** 2 - target_speed ** 2)) / robot.max_linear_acceleration * offset
     # distance = max(distance, MIN_DISTANCE_TO_REACH_TARGET_SPEED)
     position_error = robot.path.points[1] - Pose.from_dict(robot.pose).position
     return position_error.norm() <= distance
+
+
