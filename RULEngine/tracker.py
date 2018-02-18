@@ -8,6 +8,8 @@ import numpy as np
 from RULEngine.filters.multiballservice import MultiBallService
 from RULEngine.filters.robot_kalman_filter import RobotFilter
 
+from Util.geometry import wrap_to_pi
+
 from config.config_service import ConfigService
 
 
@@ -24,6 +26,7 @@ class Tracker:
 
         self.cfg = ConfigService()
         self.team_color = self.cfg.config_dict['GAME']['our_color']
+        self.our_side = self.cfg.config_dict['GAME']['our_side']
 
         self.vision_queue = vision_queue
 
@@ -39,6 +42,10 @@ class Tracker:
 
         for frame in vision_frames:
             detection_frame = frame['detection']
+
+            if self.our_side == 'negative':
+                detection_frame = Tracker.change_reference(detection_frame)
+
             self._current_timestamp = max(self._current_timestamp, detection_frame['t_capture'])
             self._update(detection_frame)
 
@@ -88,6 +95,22 @@ class Tracker:
                 robot.reset()
 
         self._balls.remove_undetected()
+
+    @staticmethod
+    def change_reference(detection_frame):
+
+        for robot_obs in detection_frame.get('robots_blue', ()):
+            robot_obs['x'], robot_obs['y'] = -robot_obs['x'], -robot_obs['y']
+            robot_obs['orientation'] = wrap_to_pi(robot_obs['orientation'] + np.pi)
+
+        for robot_obs in detection_frame.get('robots_yellow', ()):
+            robot_obs['x'], robot_obs['y'] = -robot_obs['x'], -robot_obs['y']
+            robot_obs['orientation'] = wrap_to_pi(robot_obs['orientation'] + np.pi)
+
+        for ball_obs in detection_frame.get('balls', ()):
+            ball_obs['x'], ball_obs['y'] = -ball_obs['x'], -ball_obs['y']
+
+        return detection_frame
 
     @property
     def track_frame(self) -> Dict:

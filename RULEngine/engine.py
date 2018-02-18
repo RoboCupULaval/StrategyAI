@@ -27,7 +27,7 @@ class Engine(Process):
     UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
     REFEREE_QUEUE_MAXSIZE = 100
-    FPS = 30
+    # FPS = 30
 
     def __init__(self, game_state_queue: Queue,
                  ai_queue: Queue,
@@ -79,7 +79,7 @@ class Engine(Process):
         try:
             while True:
 
-                start = time()
+                # start = time()
 
                 track_frame = self.tracker.update()
                 robot_packets_frame = self.controller.execute(track_frame)
@@ -96,13 +96,11 @@ class Engine(Process):
                 self.ui_send_queue.put(UIDebugCommandFactory.track_frame(track_frame))
                 self.ui_send_queue.put(UIDebugCommandFactory.robots_path(self.controller))
 
-                sleep_time = max(1/Engine.FPS - (time() - start), 0)
-                if sleep_time > 0:
-                    pass
-                    #sleep(sleep_time)
-                else:
-                    #self.logger.debug('main loop take too much time.')
-                    pass
+                # sleep_time = max(1/Engine.FPS - (time() - start), 0)
+                # if sleep_time > 0:
+                #     sleep(sleep_time)
+                # else:
+                #     self.logger.debug('main loop take too much time.')
 
         except KeyboardInterrupt:
             pass
