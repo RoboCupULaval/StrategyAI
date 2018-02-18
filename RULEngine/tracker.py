@@ -43,8 +43,8 @@ class Tracker:
         for frame in vision_frames:
             detection_frame = frame['detection']
 
-            if self.our_side == 'negative':
-                detection_frame = Tracker.change_reference(detection_frame)
+            # if self.our_side == 'negative':
+            #     detection_frame = Tracker.change_reference(detection_frame)
 
             self._current_timestamp = max(self._current_timestamp, detection_frame['t_capture'])
             self._update(detection_frame)
