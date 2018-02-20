@@ -35,5 +35,3 @@ class TestVertex(unittest.TestCase):
         expected_string = "Next node: " + str(self.vertex1.next_node) + " Condition: " + self.vertex1.condition.__name__
         self.assertEqual(str(self.vertex1), expected_string)
 
-if __name__ == "__main__":
-    unittest.main()
