@@ -19,7 +19,8 @@ from config.config_service import ConfigService
 
 class Coach(Process):
 
-    def __init__(self, game_state_queue: Queue, ai_queue: Queue, ui_send_queue: Queue, ui_recv_queue: Queue):
+    def __init__(self, game_state_queue: Queue, ai_queue: Queue, referee_queue: Queue,
+                 ui_send_queue: Queue, ui_recv_queue: Queue):
         """
         Initialise l'IA.
         Celui-ci s'occupe d'appeler tout les morceaux de l'ia dans le bon ordre pour prendre une décision de jeu
@@ -36,6 +37,7 @@ class Coach(Process):
         # Queues for interprocess communication with the engine
         self.game_state_queue = game_state_queue
         self.ai_queue = ai_queue
+        self.referee_queue = referee_queue
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
 

@@ -1,143 +1,66 @@
-# TODO Fix for new architecture
 # Under MIT licence, see LICENCE.txt
-# from ai.STA.Tactic.tactic import Tactic
-#
-# __author__ = "Maxime Gagnon-Legault, and others"
-#
-# import unittest
-#
-# from RULEngine.GameDomainObjects.ball import Ball
-# from RULEngine.GameDomainObjects.game import Game
-# from RULEngine.GameDomainObjects.player import Player
-# from RULEngine.GameDomainObjects.referee import Referee
-# from RULEngine.Util.Pose import Pose
-# from RULEngine.Util.Position import Position
-# from RULEngine.services.team_color_service import TeamColorService, TeamColor
-# from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
-# from ai.Algorithm.Graph.Node import Node
-# from ai.Algorithm.Graph.Vertex import Vertex
-# from ai.STA.Action.Idle import Idle
-# from ai.STA.Tactic.go_to_position_no_pathfinder import GoToPositionNoPathfinder
-# from ai.STA.Tactic.stop import Stop
-# from ai.STA.Tactic.tactic_constants import Flags
-#
-#
-# def foo():
-#     return True
-#
-#
-# def foo2():
-#     return False
-#
-# class ATactic(Tactic):
-#     pass
-#
-# class AnotherTactic(Tactic):
-#     pass
-#
-#
-# A_PLAYER_ID = 1
-# class TestGraph(unittest.TestCase):
-#     def setUp(self):
-#         self.game_state = Game()
-#         self.game = Game()
-#         self.game_state = self.game
-#         self.empty_graph = Graph()
-#         self.graph1 = Graph()
-#         self.a_player = Player(TeamColor.YELLOW, A_PLAYER_ID)
-#         self.tactic1 = Stop(self.game_state, self.a_player)
-#         self.tactic2 = GoToPositionNoPathfinder(self.game_state, self.a_player, Pose(Position(500, 0), 0))
-#         self.node1 = Node(self.tactic1)
-#         self.node2 = Node(self.tactic2)
-#         self.vertex1 = Vertex(1, foo)
-#         self.graph1.add_node(self.node1)
-#         self.graph1.add_node(self.node2)
-#         self.graph1.add_vertex(0, 1, foo)
-#
-#     def test_init(self):
-#         self.assertEqual(self.empty_graph.current_node, 0)
-#         self.assertEqual(len(self.empty_graph.nodes), 0)
-#
-#     def test_get_current_tactic_name(self):
-#         self.assertEqual(self.graph1.get_current_tactic_name(), "Stop")
-#         self.assertEqual(self.empty_graph.get_current_tactic_name(), None)
-#         self.empty_graph.add_node(self.node2)
-#         self.assertEqual(self.empty_graph.get_current_tactic_name(), "GoToPositionNoPathfinder")
-#
-#     def test_get_current_tactic(self):
-#         self.assertIsInstance(self.graph1.get_current_tactic(), Stop)
-#         self.assertEqual(self.empty_graph.get_current_tactic(), None)
-#         self.empty_graph.add_node(self.node2)
-#         self.assertIsInstance(self.empty_graph.get_current_tactic(), GoToPositionNoPathfinder)
-#
-#     def test_add_node(self):
-#         self.assertEqual(len(self.graph1.nodes), 2)
-#         self.assertRaises(AssertionError, self.graph1.add_node, "not a node")
-#
-#     def test_remove_node(self):
-#         self.assertRaises(AssertionError, self.graph1.remove_node, "not an int")
-#         self.assertRaises(AssertionError, self.graph1.remove_node, -1)
-#         self.assertRaises(AssertionError, self.graph1.remove_node, 420)
-#         self.graph1.remove_node(1)
-#         self.assertEqual(len(self.graph1.nodes), 1)
-#         self.assertEqual(len(self.graph1.nodes[0].vertices), 0)
-#
-#     def test_add_vertex(self):
-#         self.assertEqual(len(self.graph1.nodes[0].vertices), 1)
-#         self.assertRaises(AssertionError, self.graph1.add_vertex, "not an int", 1, foo)
-#         self.assertRaises(AssertionError, self.graph1.add_vertex, -1, 1, foo)
-#         self.assertRaises(AssertionError, self.graph1.add_vertex, 420, 1, foo)
-#         self.assertRaises(AssertionError, self.graph1.add_vertex, 0, "not an int", foo)
-#         self.assertRaises(AssertionError, self.graph1.add_vertex, 0, -1, foo)
-#         self.assertRaises(AssertionError, self.graph1.add_vertex, 0, 420, foo)
-#         self.assertRaises(AssertionError, self.graph1.add_vertex, 0, 1, "not a callable")
-#         self.graph1.add_vertex(0, 1, foo)
-#         self.assertEqual(len(self.graph1.nodes[0].vertices), 1)
-#
-#     def test_remove_vertex(self):
-#         self.assertRaises(AssertionError, self.graph1.remove_vertex, "not an int", 1)
-#         self.assertRaises(AssertionError, self.graph1.remove_vertex, -1, 1)
-#         self.assertRaises(AssertionError, self.graph1.remove_vertex, 420, 1)
-#         self.assertRaises(AssertionError, self.graph1.remove_vertex, 0, "not an int")
-#         self.assertRaises(AssertionError, self.graph1.remove_vertex, 0, -1)
-#         self.assertRaises(AssertionError, self.graph1.remove_vertex, 0, 420)
-#         self.graph1.add_node(self.node2)
-#         self.graph1.remove_vertex(0, 2)
-#         self.assertEqual(len(self.graph1.nodes[0].vertices), 1)
-#         self.graph1.remove_vertex(0, 1)
-#         self.assertEqual(len(self.graph1.nodes[0].vertices), 0)
-#
-#     def test_exec(self):
-#         next_ai_command = self.graph1.exec()
-#         expected_ai_command = Idle(self.game_state, self.a_player).exec()
-#
-#         self.assertEqual(self.graph1.current_node, 1)
-#         self.assertEqual(next_ai_command, expected_ai_command)
-#
-#         self.assertRaises(EmptyGraphException, self.empty_graph.exec)
-#
-#         self.empty_graph.add_node(self.node2)
-#         self.empty_graph.add_node(self.node1)
-#         self.empty_graph.add_vertex(0, 1, foo2)
-#
-#         next_ai_command = self.empty_graph.exec()
-#         expected_ai_command = GoToPositionNoPathfinder(self.game_state, self.a_player,
-#                                                        Pose(Position(500, 0), 0)).exec()
-#         self.assertEqual(self.empty_graph.current_node, 0)
-#         self.assertEqual(next_ai_command, expected_ai_command)
-#
-#         next_ai_command = self.empty_graph.exec()
-#         expected_ai_command = GoToPositionNoPathfinder(self.game_state, self.a_player,
-#                                                        Pose(Position(500, 0), 0)).exec()
-#         self.assertEqual(self.empty_graph.current_node, 0)
-#         self.assertEqual(next_ai_command, expected_ai_command)
-#
-#     def test_set_current_node(self):
-#         self.assertRaises(AssertionError, self.graph1.set_current_node, "not an int")
-#         self.assertRaises(AssertionError, self.graph1.set_current_node, -1)
-#         self.assertRaises(AssertionError, self.graph1.set_current_node, 420)
-#         self.graph1.nodes[0].set_flag(Flags.WIP)
-#         self.graph1.set_current_node(1)
-#         self.assertEqual(self.graph1.current_node, 1)
-#         self.assertEqual(self.graph1.nodes[0].tactic.status_flag, Flags.INIT)
+from unittest.mock import create_autospec, MagicMock
 
+from ai.STA.Tactic.tactic import Tactic
+
+__author__ = "Maxime Gagnon-Legault, and others"
+
+import unittest
+
+from ai.Algorithm.Graph.Graph import Graph
+from ai.Algorithm.Graph.Node import Node
+
+
+
+class TestGraph(unittest.TestCase):
+    def setUp(self):
+        self.graph = Graph()
+
+    def test_givenAGraphWithANode_whenGetCurrentTactic_thenReturnTacticOfANode(self):
+        aNode = self._create_mock_node()
+        self.graph.add_node(aNode)
+
+        assert self.graph.get_current_tactic() == aNode.tactic
+
+    def test_givenAGraphWithANode_whenExecGraph_thenNodeIsCall(self):
+        aNode = self._create_mock_node()
+        self.graph.add_node(aNode)
+
+        self.graph.exec()
+
+        aNode.exec.assert_any_call()
+
+    def test_givenAGraphWithTwoNodeLinked_whenExecTwice_thenBothNodeAreCalled(self):
+        aNode = self._create_mock_node(id_next_node=1)
+        anotherNode = self._create_mock_node()
+        self.graph.add_node(aNode)
+        self.graph.add_node(anotherNode)
+
+        self.graph.exec()
+        self.graph.exec()
+
+        aNode.exec.assert_any_call()
+        anotherNode.exec.assert_any_call()
+
+    def test_givenAGraphWithTwoNodeUnLinked_whenExecTwice_thenOnlyTheFirstNodeIsCalled(self):
+        aNode = self._create_mock_node()
+        anotherNode = self._create_mock_node()
+        self.graph.add_node(aNode)
+        self.graph.add_node(anotherNode)
+
+        self.graph.exec()
+        self.graph.exec()
+
+        aNode.exec.assert_any_call()
+        anotherNode.exec.assert_not_called()
+
+    def _create_mock_node(self, id_next_node=-1):
+        node = create_autospec(Node)
+        node.tactic = self._create_mock_tactic("my command")
+        node.exec = MagicMock(return_value=("my command", id_next_node))
+        return node
+
+    def _create_mock_tactic(self, command):
+        tactic = create_autospec(Tactic)
+        tactic.exec = lambda : command
+        return tactic

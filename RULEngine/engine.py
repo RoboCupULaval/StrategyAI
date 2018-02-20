@@ -4,10 +4,11 @@ import logging
 import sys
 from multiprocessing import Process, Queue
 from queue import Full
-from time import time, sleep
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
+from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
+
 from RULEngine.Communication.sender.robot_command_sender import RobotCommandSender
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 
@@ -27,10 +28,11 @@ class Engine(Process):
     UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
     REFEREE_QUEUE_MAXSIZE = 100
-    FPS = 30
+    # FPS = 30
 
     def __init__(self, game_state_queue: Queue,
                  ai_queue: Queue,
+                 referee_queue: Queue,
                  ui_send_queue: Queue,
                  ui_recv_queue: Queue):
         super(Engine, self).__init__(name=__name__)
@@ -43,6 +45,7 @@ class Engine(Process):
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
         self.ai_queue = ai_queue
+        self.referee_queue = referee_queue
         self.game_state_queue = game_state_queue
         self.robot_cmd_queue = Queue()
 
@@ -60,6 +63,11 @@ class Engine(Process):
         self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue)
         self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue)
 
+        # Referee communication
+        referee_recver_connection_info = ( self.cfg.config_dict['COMMUNICATION']['referee_udp_address'],
+                                           int(self.cfg.config_dict['COMMUNICATION']['referee_port']))
+        self.referee_recver = RefereeReceiver(referee_recver_connection_info, self.referee_queue)
+
         # Subprocess to send robot commands
         robot_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'], 20011)
 
@@ -75,6 +83,7 @@ class Engine(Process):
         self.vision_receiver.start()
         self.ui_sender.start()
         self.ui_recver.start()
+        self.referee_recver.start()
         self.robot_cmd_sender.start()
 
     def run(self):
@@ -83,7 +92,7 @@ class Engine(Process):
         try:
             while True:
 
-                start = time()
+                # start = time()
 
                 track_frame = self.tracker.update()
                 robot_packets_frame = self.controller.execute(track_frame)
@@ -100,13 +109,11 @@ class Engine(Process):
                 self.ui_send_queue.put(UIDebugCommandFactory.track_frame(track_frame))
                 self.ui_send_queue.put(UIDebugCommandFactory.robots_path(self.controller))
 
-                sleep_time = max(1/Engine.FPS - (time() - start), 0)
-                if sleep_time > 0:
-                    pass
-                    #sleep(sleep_time)
-                else:
-                    #self.logger.debug('main loop take too much time.')
-                    pass
+                # sleep_time = max(1/Engine.FPS - (time() - start), 0)
+                # if sleep_time > 0:
+                #     sleep(sleep_time)
+                # else:
+                #     self.logger.debug('main loop take too much time.')
 
                 self.print_framerate()
 
