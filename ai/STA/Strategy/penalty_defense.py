@@ -22,12 +22,15 @@ class PenaltyDefense(Strategy):
                          Pose(Position(self.theirgoal.position.x / 8, 0)),
                          Pose(Position(self.theirgoal.position.x / 8, GameState().const["FIELD_Y_BOTTOM"] / 3)),
                          Pose(Position(self.theirgoal.position.x / 8, GameState().const["FIELD_Y_BOTTOM"] * 2 / 3))]
+        postions_for_roles = dict(zip(roles_to_consider, position_list))
         role_by_robots = [(i, position_list[i-1], self.game_state.get_player_by_role(i)) for i in roles_to_consider]
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
 
         self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal, penalty_kick=True))
 
-        for index, position, player in role_by_robots:
+        for role in roles_to_consider:
+            position = postions_for_roles[role]
+            player = self.game_state.get_player_by_role(role)
             if player:
-                self.add_tactic(index, GoToPositionPathfinder(self.game_state, player, position))
+                self.add_tactic(role, GoToPositionPathfinder(self.game_state, player, position))
