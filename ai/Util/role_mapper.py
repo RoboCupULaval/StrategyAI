@@ -1,7 +1,9 @@
 from collections import Counter
 from .role import Role
 
+
 class RoleMapper(object):
+
     LOCKED_ROLES = []
 
     def __init__(self):
