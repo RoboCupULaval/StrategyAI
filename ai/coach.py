@@ -19,23 +19,25 @@ from config.config_service import ConfigService
 
 class Coach(Process):
 
-    def __init__(self, game_state_queue: Queue, ai_queue: Queue, ui_send_queue: Queue, ui_recv_queue: Queue):
+    def __init__(self, game_state_queue: Queue, ai_queue: Queue, referee_queue: Queue,
+                 ui_send_queue: Queue, ui_recv_queue: Queue):
         """
         Initialise l'IA.
         Celui-ci s'occupe d'appeler tout les morceaux de l'ia dans le bon ordre pour prendre une décision de jeu
         """
-        super(Coach, self).__init__(name="Coach")
+        super(Coach, self).__init__(name='Coach')
 
         self.logger = logging.getLogger(self.__class__.__name__)
         self.cfg = ConfigService()
 
         cfg = ConfigService()
-        self.mode_debug_active = cfg.config_dict["DEBUG"]["using_debug"] == "true"
-        self.is_simulation = cfg.config_dict["GAME"]["type"] == "sim"
+        self.mode_debug_active = cfg.config_dict['DEBUG']['using_debug'] == 'true'
+        self.is_simulation = cfg.config_dict['GAME']['type'] == 'sim'
 
         # Queues for interprocess communication with the engine
         self.game_state_queue = game_state_queue
         self.ai_queue = ai_queue
+        self.referee_queue = referee_queue
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
 
