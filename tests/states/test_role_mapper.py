@@ -26,11 +26,11 @@ class RoleMapperTests(TestCase):
     #     state.map_players_to_roles_by_player(missing_required)
     #     self.assertDictEqual(state.get_role_mapping(), missing_required_expected)
 
-    def test_givenBasicMapping_whenRemapLockedRole_thenThrowsValueError(self):
-        state = GameState()
-        state.map_players_to_roles_by_player(basic_roles)
-        with self.assertRaises(ValueError):
-            state.map_players_to_roles_by_player(inverted_roles)
+    # def test_givenBasicMapping_whenRemapLockedRole_thenThrowsValueError(self):
+    #     state = GameState()
+    #     state.map_players_to_roles_by_player(basic_roles)
+    #     with self.assertRaises(ValueError):
+    #         state.map_players_to_roles_by_player(inverted_roles)
 
     # def test_givenLockedRole_whenUpdateLockedRole_thenSwapsRobots(self):
     #     state = GameState()
