@@ -85,7 +85,7 @@ class GoKick(Tactic):
             self.next_state = self.kick
 
         return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                     cruise_speed=2, charge_kick=True, end_speed=0.4, collision_ball=False)
+                                     cruise_speed=2, charge_kick=True, end_speed=0.2, collision_ball=False)
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
