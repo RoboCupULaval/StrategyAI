@@ -10,6 +10,7 @@ from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.PID import PID
 from ai.Algorithm.path_partitionner import CollisionBody
 from ai.Util.ai_command import AICommandType, AIControlLoopType, AICommand
+from ai.Util.csv_plotter import Csv_plotter
 from ai.Util.role import Role
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
@@ -29,6 +30,7 @@ class MotionExecutor(Executor):
         super().__init__(p_world_state)
         is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
         self.robot_motion = [RobotMotion(p_world_state, player_id, is_sim=is_simulation) for player_id in range(12)]
+
 
     def exec(self):
         for player in self.ws.game_state.my_team.available_players.values():
@@ -65,7 +67,9 @@ class RobotMotion(object):
     def __init__(self, world_state: WorldState, robot_id, is_sim=True):
         self.ws = world_state
         self.id = robot_id
-
+        self.plotter = None
+        if self.id == 2:
+            self.plotter = Csv_plotter()
         self.dt = None
         self.is_sim = is_sim
         self.setting = get_control_setting(is_sim)
@@ -165,7 +169,8 @@ class RobotMotion(object):
         #if not translation_cmd.norm() < 0.01:
         #    print(translation_cmd, "self.target_reached()", self.target_reached(), "self.next_speed", self.next_speed,"self.target_speed", self.target_speed )
         # self.debug(translation_cmd, rotation_cmd)
-
+        if self.plotter is not None:
+            self.plotter.write([self.current_speed, translation_cmd.norm()])
         return SpeedPose(translation_cmd, rotation_cmd)
 
     def get_next_velocity(self) -> Position:
@@ -173,21 +178,30 @@ class RobotMotion(object):
            It try to produce a trapezoidal velocity path with the required cruising and target speed.
            The target speed is the speed that the robot need to reach at the target point."""
 
-        if self.target_reached():  # We need to go to target speed
-            if self.next_speed < self.target_speed:  # Target speed is faster than current speed
+        if self.current_speed < self.target_speed: # accelerate
+            self.next_speed += self.setting.translation.max_acc * self.dt
+        else:
+            if self.distance_accelerate():
                 self.next_speed += self.setting.translation.max_acc * self.dt
-                if self.next_speed > self.target_speed:  # Next_speed is too fast
-                    self.next_speed = self.target_speed
-            else:  # Target speed is slower than current speed
-                self.next_speed -= self.setting.translation.max_acc * self.dt *2
-        else:  # We need to go to the cruising speed
-            if self.next_speed < self.cruise_speed:  # Going faster
-                self.next_speed += self.setting.translation.max_acc * self.dt
-                # self.next_speed = min(self.cruise_speed, self.next_speed)
+            elif self.distance_break():
+                self.next_speed -= self.setting.translation.max_acc * self.dt
             else:
-                self.next_speed -= self.setting.translation.max_acc * self.dt * 2
+                self.next_speed = self.current_speed
+        # if self.target_reached():  # We need to go to target speed
+        #     if self.next_speed < self.target_speed:  # Target speed is faster than current speed
+        #         self.next_speed += self.setting.translation.max_acc * self.dt
+        #         if self.next_speed > self.target_speed:  # Next_speed is too fast
+        #             self.next_speed = self.target_speed
+        #     else:  # Target speed is slower than current speed
+        #         self.next_speed -= self.setting.translation.max_acc * self.dt *2
+        # else:  # We need to go to the cruising speed
+        #     if self.next_speed < self.cruise_speed:  # Going faster
+        #         self.next_speed += self.setting.translation.max_acc * self.dt
+        #         # self.next_speed = min(self.cruise_speed, self.next_speed)
+        #     else:
+        #         self.next_speed -= self.setting.translation.max_acc * self.dt * 2
 
-
+        self.next_speed = np.clip(self.next_speed, 0.0, self.cruise_speed)
         self.next_speed = np.clip(self.next_speed, 0.0, self.setting.translation.max_speed)
         next_velocity = Position(self.target_direction * self.next_speed)
 
@@ -245,6 +259,19 @@ class RobotMotion(object):
         return new_speed
 
     def target_reached(self, boost_factor=1) -> bool:  # distance_to_reach_target_speed
+        distance = 0.5 * (self.target_speed ** 2 - self.current_speed ** 2) / self.setting.translation.max_acc
+        distance = boost_factor * m.fabs(distance)
+        distance = max(distance, MIN_DISTANCE_TO_REACH_TARGET_SPEED)
+        return self.position_error.norm() <= distance
+
+    def distance_accelerate(self, boost_factor=1) -> bool:  # distance_to_reach_target_speed
+        distance = 0.5 * (self.target_speed ** 2 - self.current_speed ** 2) / self.setting.translation.max_acc
+        distance = boost_factor * m.fabs(distance)
+        distance = max(distance, MIN_DISTANCE_TO_REACH_TARGET_SPEED)
+        return self.position_error.norm() >= distance * 2
+
+
+    def distance_break(self, boost_factor=1) -> bool:  # distance_to_reach_target_speed
         distance = 0.5 * (self.target_speed ** 2 - self.current_speed ** 2) / self.setting.translation.max_acc
         distance = boost_factor * m.fabs(distance)
         distance = max(distance, MIN_DISTANCE_TO_REACH_TARGET_SPEED)
