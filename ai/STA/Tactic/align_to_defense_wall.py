@@ -37,7 +37,7 @@ class AlignToDefenseWall(Tactic):
         self.player = player
         self.field_goal_radius = self.game_state.const["FIELD_GOAL_RADIUS"]
         self.field_goal_segment = self.game_state.const["FIELD_GOAL_SEGMENT"]
-        self.keep_out_distance = self.field_goal_radius + np.divide(self.field_goal_segment, 2.)
+        self.keep_out_distance = self.field_goal_radius * 1.5
         self.goal_width = self.game_state.const["FIELD_GOAL_WIDTH"]
         self.goal_middle = Position(self.game_state.field.constant["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
         self.position_middle_formation = Position(0, 0)
@@ -51,9 +51,9 @@ class AlignToDefenseWall(Tactic):
     def get_players_in_formation(self):
         self.player_number_in_formation = None
         self.robots_in_formation = self.robots
-        for idx, player in enumerate(self.robots):
-            if not self.is_not_one_of_the_closests(player):
-                del self.robots_in_formation[idx]
+        # for idx, player in enumerate(self.robots):
+        #     if not self.is_not_one_of_the_closests(player):
+        #         del self.robots_in_formation[idx]
         for idx, player in enumerate(self.robots_in_formation):
             if self.player == player:
                 self.player_number_in_formation = idx
@@ -164,6 +164,7 @@ class AlignToDefenseWall(Tactic):
                 break
         # print(self.robots_in_formation)
         # print(self.player_number_in_formation)
+        # print(self.player.id)
         if self.check_success():
             return self.halt
         else:
