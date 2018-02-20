@@ -62,8 +62,6 @@ class FriendKalmanFilter:
         if command is None:
             self.x = np.dot(self.F, self.x)
         else:
-            if np.isinf(np.array(self.x, dtype=np.float64)).any():
-                raise "FUCK"
             conversion_m_to_mm = 1000
             command = Pose(command[0], command[1], command[2]).scale(conversion_m_to_mm)
             command.position = command.position.rotate(self.x[4])
@@ -151,8 +149,6 @@ class FriendKalmanFilter:
     def filter(self, observation=None, command=None, dt=0.05):
         if not dt:
             dt = self.default_dt
-        if np.isinf(np.array(self.x, dtype=np.float64)).any():
-            raise "FUCK"
         if command is not None:
             self.transition_model_with_command(dt)
         else:
