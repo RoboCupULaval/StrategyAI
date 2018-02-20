@@ -44,6 +44,7 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
             last_raw_path = player.pathfinder_history.last_raw_path
     pathfinder = create_pathfinder(game_state, type_pathfinder)
     if type_pathfinder == "path_part":
+        print(player.ai_command.pose_goal.position)
         player.ai_command.pose_goal.position = \
             field.respect_field_rules(Position(player.ai_command.pose_goal.position[0],
                                                player.ai_command.pose_goal.position[1]))
