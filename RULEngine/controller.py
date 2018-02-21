@@ -12,7 +12,7 @@ from collections import namedtuple
 from math import sin, cos, sqrt
 from RULEngine.robot import Robot, MAX_LINEAR_SPEED
 from Util.PID import PID
-from Util.csv_plotter import Csv_plotter
+from Util.csv_plotter import CsvPlotter
 
 from Util import Pose
 from Util.constant import PLAYER_PER_TEAM
@@ -22,7 +22,6 @@ from Util.scroll_plot import DynamicUpdate
 from Util.trapezoidal_speed import get_next_velocity
 from config.config_service import ConfigService
 import numpy as np
-import csv
 
 RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active')
 RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow packet')
@@ -46,14 +45,17 @@ def get_control_setting(game_type: str):
 
     return {'translation': translation, 'rotation': rotation}
 
+class Observer:
+    def write(self, poses):
+        pass
 
 class Controller(list):
-    def __init__(self, ai_queue: Queue):
+    def __init__(self, ai_queue: Queue, observer=Observer):
         self.ai_queue = ai_queue
         self.dt = 0
         self.last_time = 0
         self.timestamp = None
-        self.csv_plotter = Csv_plotter()
+        self.observer = observer
 
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger("Controller")
@@ -88,7 +90,7 @@ class Controller(list):
                                              kick_type=robot.kick_type,
                                              kick_force=robot.kick_force,
                                              dribbler_active=robot.dribbler_active))
-            self.csv_plotter.write([Pose.from_dict(robot.velocity).position.norm(), np.linalg.norm([command['x'], command['y']])])
+            self.observer.write([Pose.from_dict(robot.velocity).position.norm(), np.linalg.norm([command['x'], command['y']])])
         return packet
 
     def update_robots_states(self, robots_states):
