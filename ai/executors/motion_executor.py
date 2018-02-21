@@ -10,7 +10,6 @@ from RULEngine.Util.SpeedPose import SpeedPose
 from RULEngine.Util.PID import PID
 from ai.Algorithm.path_partitionner import CollisionBody
 from ai.Util.ai_command import AICommandType, AIControlLoopType, AICommand
-from ai.Util.csv_plotter import Csv_plotter
 from ai.Util.role import Role
 from ai.executors.executor import Executor
 from ai.states.world_state import WorldState
@@ -67,10 +66,6 @@ class RobotMotion(object):
     def __init__(self, world_state: WorldState, robot_id, is_sim=True):
         self.ws = world_state
         self.id = robot_id
-        self.plotter = None
-        if self.id == 2:
-            self.plotter = Csv_plotter()
-        self.dt = None
         self.is_sim = is_sim
         self.setting = get_control_setting(is_sim)
         self.setting.translation.max_acc = None
@@ -169,8 +164,6 @@ class RobotMotion(object):
         #if not translation_cmd.norm() < 0.01:
         #    print(translation_cmd, "self.target_reached()", self.target_reached(), "self.next_speed", self.next_speed,"self.target_speed", self.target_speed )
         # self.debug(translation_cmd, rotation_cmd)
-        if self.plotter is not None:
-            self.plotter.write([self.current_speed, translation_cmd.norm()])
         return SpeedPose(translation_cmd, rotation_cmd)
 
     def get_next_velocity(self) -> Position:
