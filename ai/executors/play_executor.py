@@ -55,7 +55,8 @@ class PlayExecutor(metaclass=Singleton):
                              path=path.to_dict() if path else None,
                              kick_type=ai_cmd.kick_type,
                              kick_force=ai_cmd.kick_force,
-                             dribbler_active=ai_cmd.dribbler_active)
+                             dribbler_active=ai_cmd.dribbler_active,
+                             target_orientation=ai_cmd.target.orientation if ai_cmd.target else 0)
 
 
     def order_change_of_sta(self, cmd: STAChangeCommand):

@@ -4,6 +4,7 @@ import logging
 import sys
 from multiprocessing import Process, Queue
 from queue import Full
+from time import time
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
@@ -16,6 +17,12 @@ from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 
 from RULEngine.controller import Controller
 from RULEngine.tracker import Tracker
+
+try:
+    from Util.csv_plotter import CsvPlotter
+except:
+    print("Fail to import csv_plotter. It will be disable.")
+    from RULEngine.controller import Observer as CsvPlotter
 
 from config.config_service import ConfigService
 
@@ -74,7 +81,11 @@ class Engine(Process):
         self.robot_cmd_sender = RobotCommandSender(robot_connection_info, self.robot_cmd_queue)
 
         self.tracker = Tracker(self.vision_queue)
-        self.controller = Controller(self.ai_queue)
+        self.controller = Controller(self.ai_queue, CsvPlotter)
+
+        # print framerate
+        self.framecount = 0
+        self.time_last_print = time()
 
         self.vision_receiver.start()
         self.ui_sender.start()
@@ -111,6 +122,8 @@ class Engine(Process):
                 # else:
                 #     self.logger.debug('main loop take too much time.')
 
+                self.print_framerate()
+
         except KeyboardInterrupt:
             pass
         finally:
@@ -118,4 +131,13 @@ class Engine(Process):
 
         sys.stdout.flush()
         exit(0)
+
+
+    def print_framerate(self):
+        self.framecount += 1
+        dt = time() - self.time_last_print
+        if dt > 2:
+            print("Engine update at {:.2f} fps".format(self.framecount / dt))
+            self.time_last_print = time()
+            self.framecount = 0
 
