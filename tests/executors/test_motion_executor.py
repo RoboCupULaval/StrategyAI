@@ -13,11 +13,11 @@ class TestRobotMotion(unittest.TestCase):
         self.rm = RobotMotion(self.ws, 0)
         self.rm.setting.rotation.deadzone = 0.1
         self.rm.setting.rotation.sensibility = 0.01
-        self.rm.setting.rotation.max_speed = OurPlayer.max_angular_speed
+        self.rm.setting.rotation.max_speed = 1
         self.rm.setting.translation.deadzone = 0.1
         self.rm.setting.translation.sensibility = 0.01
-        self.rm.setting.translation.max_speed = OurPlayer.max_speed
-        self.rm.setting.translation.max_acc = OurPlayer.max_acc
+        self.rm.setting.translation.max_speed = 2
+        self.rm.setting.translation.max_acc = 2
         self.rm.dt = 0.05
 
     def test_limit_speed(self):

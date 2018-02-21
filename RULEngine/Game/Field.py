@@ -163,14 +163,21 @@ class Field:
             self.field_lines = self._convert_field_line_segments(field.field_lines)
             self.field_arcs = self._convert_field_circular_arc(field.field_arcs)
 
+            if "RightFieldLeftPenaltyArc" not in self.field_arcs:
+                # This is a new type of field for Robocup 2018, it does not have a circular goal zone
+                self._defense_radius = self.field_lines["LeftFieldLeftPenaltyStretch"].length
+            else:
+                self._defense_radius = self.field_arcs['RightFieldLeftPenaltyArc'].radius
+
+
             self._field_length = field.field_length
             self._field_width = field.field_width
             self._boundary_width = field.boundary_width
             self._goal_width = field.goal_width
             self._goal_depth = field.goal_depth
             self._center_circle_radius = self.field_arcs['CenterCircle'].radius
-            self._defense_radius = self.field_arcs['RightFieldLeftPenaltyArc'].radius
-            self._defense_stretch = self.field_lines['LeftPenaltyStretch'].length
+            self._defense_stretch = 100 # hard coded parce que cette valeur d'est plus valide et que plusieurs modules en ont de besoin
+            #la valeur qu'on avait apres le fix a Babin était de 9295 mm, ce qui est 90 fois la grandeur d'avant.
 
             self.constant["FIELD_Y_TOP"] = self._field_width / 2
             self.constant["FIELD_Y_BOTTOM"] = -self._field_width / 2

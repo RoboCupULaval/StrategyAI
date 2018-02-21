@@ -17,8 +17,7 @@ class Pathfinder_Benchmark(Strategy):
 
         roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE,
                              Role.FIRST_DEFENCE, Role.SECOND_DEFENCE, Role.GOALKEEPER]
-        roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE,
-                             Role.FIRST_DEFENCE, Role.SECOND_DEFENCE, Role.GOALKEEPER]
+
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider if self.game_state.get_player_by_role(i) is not None]
 
         for index, player in role_by_robots:
