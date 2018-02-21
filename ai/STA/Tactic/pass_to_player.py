@@ -37,7 +37,7 @@ class PassToPlayer(Tactic):
             self.next_state = self.get_behind_ball
             self.last_time = time.time()
 
-        return AllStar(self.game_state, self.player, **{"charge_kick": True, "dribbler_on": 1})
+        return AllStar(self.game_state, self.player, **{"charge_kick": True, "dribbler_on": True})
 
     def get_behind_ball(self):
         self.status_flag = Flags.WIP
@@ -73,7 +73,7 @@ class PassToPlayer(Tactic):
             self.next_state = self.kick
         else:
             self.next_state = self.kick_charge
-        return Kick(self.game_state, self.player, 1, self.target)
+        return Kick(self.game_state, self.player, 5, self.target)
 
     def halt(self):
         if self.status_flag == Flags.INIT:

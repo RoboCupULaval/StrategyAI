@@ -3,6 +3,7 @@
 import numpy as np
 import math as m
 
+from RULEngine.Debug import debug_interface
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
 from RULEngine.Util.SpeedPose import SpeedPose
@@ -28,6 +29,7 @@ class MotionExecutor(Executor):
         super().__init__(p_world_state)
         is_simulation = ConfigService().config_dict["GAME"]["type"] == "sim"
         self.robot_motion = [RobotMotion(p_world_state, player_id, is_sim=is_simulation) for player_id in range(12)]
+
 
     def exec(self):
         for player in self.ws.game_state.my_team.available_players.values():
@@ -64,8 +66,6 @@ class RobotMotion(object):
     def __init__(self, world_state: WorldState, robot_id, is_sim=True):
         self.ws = world_state
         self.id = robot_id
-
-        self.dt = None
         self.is_sim = is_sim
         self.setting = get_control_setting(is_sim)
         self.setting.translation.max_acc = None
@@ -113,17 +113,19 @@ class RobotMotion(object):
                                     self.setting.rotation.antiwindup,
                                     wrap_err=True)
         self.position_flag = False
+        self.rotation_flag = False
         self.last_position = Position()
         self.target_turn = self.target_pose.position
 
     def update(self, cmd: AICommand) -> Pose():
-
+        #print(cmd.path_speeds)
         self.update_states(cmd)
 
         # Rotation control
         rotation_cmd = self.angle_controller.update(self.pose_error.orientation, dt=self.dt)
         rotation_cmd = self.apply_rotation_constraints(rotation_cmd)
-
+        if abs(self.pose_error.orientation) < 0.2:
+            self.rotation_flag = True
         # Translation control
         self.position_flag = False
         if self.position_error.norm() < MIN_DISTANCE_TO_REACH_TARGET_SPEED * max(1.0, self.cruise_speed):
@@ -135,13 +137,33 @@ class RobotMotion(object):
                                        self.y_controller.update(self.pose_error.position.y, dt=self.dt))
         else:
             translation_cmd = self.get_next_velocity()
-
         # Adjust command to robot's orientation
-        translation_cmd = translation_cmd.rotate(-self.current_pose.orientation)
+        # self.ws.debug_interface.add_line(start_point=(self.current_pose.position[0] * 1000, self.current_pose.position[1] * 1000),
+        #                                  end_point=(self.current_pose.position[0] * 1000 + translation_cmd[0] * 600, self.current_pose.position[1] * 1000 + translation_cmd[1] * 600),
+        #                                  timeout=0.01, color=debug_interface.CYAN.repr())
+
+        compasation_ref_world = translation_cmd.rotate(self.dt * rotation_cmd)
+        translation_cmd = translation_cmd.rotate(-(self.current_pose.orientation))
+        if not self.rotation_flag and cmd.path[-1] is not cmd.path[0]:
+            translation_cmd *= translation_cmd * 0.0
+            self.next_speed = 0.0
+            self.x_controller.reset()
+            self.y_controller.reset()
+        if self.position_error.norm() > 0.1 and self.rotation_flag:
+            self.angle_controller.reset()
+            rotation_cmd = 0
+
+
+
+        # self.ws.debug_interface.add_line(
+        #     start_point=(self.current_pose.position[0] * 1000, self.current_pose.position[1] * 1000),
+        #     end_point=(self.current_pose.position[0] * 1000 + compasation_ref_world[0] * 600,
+        #                self.current_pose.position[1] * 1000 + compasation_ref_world[1] * 600),
+        #     timeout=0.01, color=debug_interface.ORANGE.repr())
         translation_cmd = self.apply_translation_constraints(translation_cmd)
-
+        #if not translation_cmd.norm() < 0.01:
+        #    print(translation_cmd, "self.target_reached()", self.target_reached(), "self.next_speed", self.next_speed,"self.target_speed", self.target_speed )
         # self.debug(translation_cmd, rotation_cmd)
-
         return SpeedPose(translation_cmd, rotation_cmd)
 
     def get_next_velocity(self) -> Position:
@@ -149,17 +171,30 @@ class RobotMotion(object):
            It try to produce a trapezoidal velocity path with the required cruising and target speed.
            The target speed is the speed that the robot need to reach at the target point."""
 
-        if self.target_reached():  # We need to go to target speed
-            if self.next_speed < self.target_speed:  # Target speed is faster than current speed
+        if self.current_speed < self.target_speed: # accelerate
+            self.next_speed += self.setting.translation.max_acc * self.dt
+        else:
+            if self.distance_accelerate():
                 self.next_speed += self.setting.translation.max_acc * self.dt
-                if self.next_speed > self.target_speed:  # Next_speed is too fast
-                    self.next_speed = self.target_speed
-            else:  # Target speed is slower than current speed
+            elif self.distance_break():
                 self.next_speed -= self.setting.translation.max_acc * self.dt
-        else:  # We need to go to the cruising speed
-            if self.next_speed < self.cruise_speed:  # Going faster
-                self.next_speed += self.setting.translation.max_acc * self.dt
+            else:
+                self.next_speed = self.current_speed
+        # if self.target_reached():  # We need to go to target speed
+        #     if self.next_speed < self.target_speed:  # Target speed is faster than current speed
+        #         self.next_speed += self.setting.translation.max_acc * self.dt
+        #         if self.next_speed > self.target_speed:  # Next_speed is too fast
+        #             self.next_speed = self.target_speed
+        #     else:  # Target speed is slower than current speed
+        #         self.next_speed -= self.setting.translation.max_acc * self.dt *2
+        # else:  # We need to go to the cruising speed
+        #     if self.next_speed < self.cruise_speed:  # Going faster
+        #         self.next_speed += self.setting.translation.max_acc * self.dt
+        #         # self.next_speed = min(self.cruise_speed, self.next_speed)
+        #     else:
+        #         self.next_speed -= self.setting.translation.max_acc * self.dt * 2
 
+        self.next_speed = np.clip(self.next_speed, 0.0, self.cruise_speed)
         self.next_speed = np.clip(self.next_speed, 0.0, self.setting.translation.max_speed)
         next_velocity = Position(self.target_direction * self.next_speed)
 
@@ -200,7 +235,7 @@ class RobotMotion(object):
 
     def limit_speed(self, translation_cmd: Position) -> Position:
         if translation_cmd.norm() != 0.0:
-            translation_speed = float(np.sqrt(np.sum(np.square(translation_cmd))))
+            translation_speed = translation_cmd.norm()
             translation_speed = clamp(translation_speed, 0, self.setting.translation.max_speed)
             new_speed = translation_cmd.normalized() * translation_speed
         else:
@@ -217,6 +252,19 @@ class RobotMotion(object):
         return new_speed
 
     def target_reached(self, boost_factor=1) -> bool:  # distance_to_reach_target_speed
+        distance = 0.5 * (self.target_speed ** 2 - self.current_speed ** 2) / self.setting.translation.max_acc
+        distance = boost_factor * m.fabs(distance)
+        distance = max(distance, MIN_DISTANCE_TO_REACH_TARGET_SPEED)
+        return self.position_error.norm() <= distance
+
+    def distance_accelerate(self, boost_factor=1) -> bool:  # distance_to_reach_target_speed
+        distance = 0.5 * (self.target_speed ** 2 - self.current_speed ** 2) / self.setting.translation.max_acc
+        distance = boost_factor * m.fabs(distance)
+        distance = max(distance, MIN_DISTANCE_TO_REACH_TARGET_SPEED)
+        return self.position_error.norm() >= distance * 2
+
+
+    def distance_break(self, boost_factor=1) -> bool:  # distance_to_reach_target_speed
         distance = 0.5 * (self.target_speed ** 2 - self.current_speed ** 2) / self.setting.translation.max_acc
         distance = boost_factor * m.fabs(distance)
         distance = max(distance, MIN_DISTANCE_TO_REACH_TARGET_SPEED)
@@ -268,6 +316,7 @@ class RobotMotion(object):
         self.x_controller.reset()
         self.y_controller.reset()
         self.position_flag = False
+        self.rotation_flag = False
         self.last_translation_cmd = Position()
         self.next_speed = 0.0
         self.next_angular_speed = 0.0
@@ -288,11 +337,11 @@ class RobotMotion(object):
 def get_control_setting(is_sim: bool):
 
     if is_sim:
-        translation = {"kp": 1, "ki": 0.5, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
-        rotation = {"kp": 2, "ki": 1, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        translation = {"kp": 1, "ki": 0.1, "kd": 0.5, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        rotation = {"kp": 3, "ki": 3, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
     else:
-        translation = {"kp": 1, "ki": 0.5, "kd": 0, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
-        rotation = {"kp": 1, "ki": 0.35, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        translation = {"kp": 1, "ki": 0.1, "kd": 0.5, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
+        rotation = {"kp": 3, "ki": 3, "kd": 0.01, "antiwindup": 0, "deadzone": 0, "sensibility": 0}
 
     control_setting = DotDict()
     control_setting.translation = DotDict(translation)

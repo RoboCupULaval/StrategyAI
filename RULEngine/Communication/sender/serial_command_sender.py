@@ -11,7 +11,7 @@ except ImportError:
 from RULEngine.Command.command import *
 
 COMMUNICATION_SLEEP = 0.001
-MOVE_COMMAND_SLEEP = 0.05
+MOVE_COMMAND_SLEEP = 0.01
 
 
 class SerialCommandSender(object):

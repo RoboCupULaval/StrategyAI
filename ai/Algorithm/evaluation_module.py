@@ -20,28 +20,29 @@ def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
         return None
 
 
-def closest_players_to_point(point: Position, our_team=None):
+def closest_players_to_point(point: Position, our_team=None, robots=None):
     # Retourne une liste de tuples (player, distance) en ordre croissant de distance,
     # our_team pour obtenir une liste contenant une équipe en particulier
-    list_player = []
-    if our_team or our_team is None:
-        for i in GameState().my_team.available_players.values():
+    if robots is None:
+        if our_team or our_team is None:
             # les players friends
-            player_distance = (i.pose.position - point).norm()
-            list_player.append(PlayerPosition(i, player_distance))
-    if not our_team:
-        for i in GameState().other_team.available_players.values():
+            robots = GameState().my_team.available_players.values()
+        else:
             # les players ennemis
-            player_distance = (i.pose.position - point).norm()
-            list_player.append(PlayerPosition(i, player_distance))
+            robots = GameState().other_team.available_players.values()
+    list_player = []
+
+    for i in robots:
+        player_distance = (i.pose.position - point).norm()
+        list_player.append(PlayerPosition(i, player_distance))
     list_player = sorted(list_player, key=lambda x: x.distance)
     return list_player
 
 
-def closest_player_to_point(point: Position, our_team=None):
+def closest_player_to_point(point: Position, our_team=None, robots=None):
     # Retourne le player le plus proche,
     # our_team pour obtenir une liste contenant une équipe en particulier
-    return closest_players_to_point(point, our_team)[0]
+    return closest_players_to_point(point, our_team, robots)[0]
 
 
 def is_ball_moving(min_speed=0.1):
@@ -251,8 +252,11 @@ def best_position_in_region(player, A, B):
 
     saturation_modifier = np.clip((positions[:, 0] - x_closest_to_our_side) / width, 0.05, 1)
     scores /= saturation_modifier
-    best_score_index = np.argmin(scores)
-    best_position = positions[best_score_index, :]
+    try:
+        best_score_index = np.argmin(scores)
+        best_position = positions[best_score_index, :]
+    except:
+        best_position = Position()
 
     return best_position
 

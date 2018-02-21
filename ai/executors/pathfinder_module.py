@@ -87,7 +87,7 @@ def pathfind_ai_commands(type_pathfinder, game_state, player) -> Path:
 def get_pertinent_collision_objects(commanded_player, game_state, optionnal_collision_bodies=None):
     factor = 1.1
     collision_bodies = []
-    gap_proxy = 150
+    gap_proxy = 250
     # FIXME: Find better name that is less confusing between self.player and player
     for player in game_state.my_team.available_players.values():
         if player.id != commanded_player.id:

@@ -1,4 +1,6 @@
 # Under MIT License, see LICENSE.txt
+from math import cos, sin
+
 from RULEngine.Debug import debug_interface
 from RULEngine.Util.constant import ROBOT_RADIUS
 from ai.executors.executor import Executor
@@ -43,8 +45,8 @@ class ModuleExecutor(Executor):
         for player in self.ws.game_state.my_team.available_players.values():
             if player.check_if_on_field():
                 pose = player.pose
-                self.ws.debug_interface.add_circle(center=(pose[0], pose[1]), radius=ROBOT_RADIUS, timeout=0.06)
-
+                self.ws.debug_interface.add_circle(center=(pose[0], pose[1]), radius=ROBOT_RADIUS, timeout=0.01)
+                self.ws.debug_interface.add_line(start_point=(pose[0], pose[1]), end_point=(pose[0]+cos(pose[2])*300, pose[1]+sin(pose[2])*300), timeout=0.01, color=debug_interface.BLACK.repr())
     def exec_display_ball_kalman(self):
         position = self.ws.game_state.game.ball.position
-        self.ws.debug_interface.add_circle(center=(position[0], position[1]), color=debug_interface.ORANGE.repr(), radius=90, timeout=0.06)
+        self.ws.debug_interface.add_circle(center=(position[0], position[1]), color=debug_interface.ORANGE.repr(), radius=90, timeout=0.01)

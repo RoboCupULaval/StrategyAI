@@ -63,12 +63,20 @@ class FriendKalmanFilter:
             self.x = np.dot(self.F, self.x)
         else:
             conversion_m_to_mm = 1000
-            command = Pose(*command).scale(conversion_m_to_mm)
+            command = Pose(command[0], command[1], command[2]).scale(conversion_m_to_mm)
             command.position = command.position.rotate(self.x[4])
-            self.x = np.dot(self.F, self.x) + np.dot(self.B, command.to_array())
+            oldx = self.x.copy()
+            self.x = np.dot(self.F, oldx) + np.dot(self.B, command.to_array())
+
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
         if self.P[0][0] is np.nan:
             exit(0)
+
+        if np.abs(self.x[5]) > 500:
+            print("A The estimate of orientation speed is reaching inf!!")
+            self.x[5] = 0
+            self.P[5][5] = 0
+
 
     # @profile(immediate=False)
     def update(self, observation):
@@ -105,6 +113,10 @@ class FriendKalmanFilter:
             K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
             self.x = self.x + np.dot(K, np.transpose(y))
             self.P = np.dot((self.eye - np.dot(K, H)), self.P)
+
+        if np.abs(self.x[5]) > 500:
+            print("B The estimate of orientation speed is reaching inf!!")
+            self.x[5] = 0
 
     def transition_model_with_command(self, dt):
         self.F = np.array([[1, 0, dt, 0, 0, 0],  # Position x

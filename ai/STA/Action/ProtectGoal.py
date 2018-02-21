@@ -7,6 +7,7 @@ from RULEngine.Util.Position import Position
 from RULEngine.Util.area import stayInsideCircle
 from RULEngine.Util.geometry import get_closest_point_on_segment
 from ai.STA.Action.Action import Action
+from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.Util.ai_command import AICommand, AICommandType
 from ai.states.game_state import GameState
 
@@ -70,11 +71,12 @@ class ProtectGoal(Action):
             destination_position = stayInsideCircle(destination_position, goal_position, self.maximum_distance)
 
         # Calcul de l'orientation de la pose de destination
-        destination_orientation = (ball_position - destination_position).angle()
+        #destination_orientation = (ball_position - destination_position).angle()
 
-        destination_pose = Pose(destination_position, destination_orientation)
-        return AICommand(self.player,
-                         AICommandType.MOVE,
-                         pose_goal=destination_pose,
-                         pathfinder_on=False)
+        destination_pose = Pose(destination_position, self.player.pose.orientation)
+        # return AICommand(self.player,
+        #                  AICommandType.MOVE,
+        #                  pose_goal=destination_pose,
+        #                  pathfinder_on=False)
+        return GoToPositionPathfinder(self.game_state, self.player, destination_pose, end_speed=0.5).exec()
 

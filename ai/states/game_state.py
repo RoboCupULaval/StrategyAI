@@ -37,7 +37,7 @@ class GameState(object, metaclass=Singleton):
 
     def get_role_by_player_id(self, player_id: int) -> Union[Role, None]:
         for r, p in self._role_mapper.roles_translation.items():
-            if p.id == player_id:
+            if p is not None and p.id == player_id:
                 return r
 
     def bind_random_available_players_to_role(self) -> OurPlayer:
