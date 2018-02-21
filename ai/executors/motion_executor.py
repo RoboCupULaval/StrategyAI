@@ -235,7 +235,7 @@ class RobotMotion(object):
 
     def limit_speed(self, translation_cmd: Position) -> Position:
         if translation_cmd.norm() != 0.0:
-            translation_speed = float(np.sqrt(np.sum(np.square(translation_cmd))))
+            translation_speed = translation_cmd.norm()
             translation_speed = clamp(translation_speed, 0, self.setting.translation.max_speed)
             new_speed = translation_cmd.normalized() * translation_speed
         else:
