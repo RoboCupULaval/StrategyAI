@@ -10,7 +10,7 @@ from Util.position import Position
 from Util.geometry import get_distance
 from ai.GameDomainObjects import Player
 from ai.STA.Action.GoBehind import GoBehind
-from ai.STA.Action.Idle import Idle
+from Util.ai_command import Idle
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.tactic import Tactic

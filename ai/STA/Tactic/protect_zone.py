@@ -6,7 +6,7 @@ from Util.area import isInsideSquare, stayInsideSquare
 from Util.constant import ROBOT_RADIUS
 from ai.GameDomainObjects import Player
 from ai.STA.Action.GoBetween import GoBetween
-from ai.STA.Action.Idle import Idle
+from Util.ai_command import Idle
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags

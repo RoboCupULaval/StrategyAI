@@ -5,7 +5,7 @@ from Util import Pose
 from Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
 from Util.geometry import get_distance
 from ai.GameDomainObjects import Player
-from ai.STA.Action.Idle import Idle
+from Util.ai_command import Idle
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags

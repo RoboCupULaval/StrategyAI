@@ -9,7 +9,7 @@ from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
-from ai.STA.Action.Idle import Idle
+from Util.ai_command import Idle
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
