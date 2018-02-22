@@ -41,6 +41,8 @@ class Tracker:
         vision_frames = self.vision_queue.get(block=True)
 
         for frame in vision_frames:
+            if 'detection' not in frame: # this is a geometry frame
+                continue
             detection_frame = frame['detection']
 
             # if self.our_side == 'negative':
