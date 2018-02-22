@@ -1,7 +1,8 @@
 # Under MIT License, see LICENSE.txt
 
 import logging
-from multiprocessing import Event, Queue
+import time
+from multiprocessing import Queue
 import signal  # so we can stop gracefully
 
 from RULEngine.engine import Engine
@@ -58,7 +59,20 @@ class Framework:
         signal.signal(signal.SIGINT, self._sigint_handler)
 
         # stop until someone manually stop us / we receive interrupt signal from os
-        signal.pause()
+        # also check if one of the subprocess died
+        every_process_is_alright = True
+        while every_process_is_alright:
+            every_process_is_alright = self.engine.is_alive() and \
+                                       self.coach.is_alive() and \
+                                       not self.engine.is_any_subprocess_borked()
+            if not every_process_is_alright:
+                self.logger.critical('One of the engine subprocesses died! Shutting down...')
+                self.engine.terminate_subprocesses()
+                self.engine.terminate()
+                self.coach.terminate()
+
+            # use the time you want here, 0.5 seems sane to me.
+            time.sleep(0.5)
 
     def stop_game(self):
         self.engine.terminate()
