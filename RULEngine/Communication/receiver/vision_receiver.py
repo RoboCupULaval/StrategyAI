@@ -43,7 +43,7 @@ class VisionReceiver(ReceiverBaseClass):
             VisionReceiver.packet_buffer.append(packet)
 
             # If the queue is full, it means the engine haven't process the frame yet.
-            self.queue.put(VisionReceiver.packet_buffer.copy(), block=False)
+            self._queue.put(VisionReceiver.packet_buffer.copy(), block=False)
             # If the queue doesnt block, we can clear the buffer
             VisionReceiver.packet_buffer.clear()
 

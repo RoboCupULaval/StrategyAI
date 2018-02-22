@@ -137,7 +137,7 @@ class Engine(Process):
         self.framecount += 1
         dt = time() - self.time_last_print
         if dt > 2:
-            print("Engine update at {:.2f} fps".format(self.framecount / dt))
+            self.logger.info('Updating at {:.2f} fps'.format(self.framecount / dt))
             self.time_last_print = time()
             self.framecount = 0
 
