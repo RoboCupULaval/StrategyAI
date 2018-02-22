@@ -32,6 +32,7 @@ class ReceiverBaseClass(Process, metaclass=ABCMeta):
     def monitor_queue(self, s):
         s.enter(1, 1, self.monitor_queue, argument=(s,))
 
+        # noinspection PyProtectedMember
         usage = self._queue.qsize() / self._queue._maxsize
 
         if usage > 0.5:
