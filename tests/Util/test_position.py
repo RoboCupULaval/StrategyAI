@@ -7,180 +7,133 @@ from Util import Position
 from Util.position import normalized, perpendicular, rotate, is_close
 
 
+A_POS_ANGLE = 1.234
+A_NEG_ANGLE = -1.234
+A_ZERO_ANGLE = 0
+A_90_ANGLE = np.pi/2
+A_180_ANGLE = np.pi
+
+A_X = 123.4
+A_Y = -56.7
+
+A_LIST = [A_X, A_Y]
+A_ARRAY = np.array(A_LIST)
+A_DICT = {'x': A_X, 'y': A_Y}
+
+A_ZERO_POS = Position(0, 0)
+A_POS = Position(A_X, A_Y)
+A_SAME_POS = Position(A_X, A_Y)
+A_DIFFERENT_POS = Position(A_X+123, A_Y-456)
+
+# TODO: vvvv eventually move to geometry unit_test vvvv
+
+A_POS_ROTATED_BY_A_POS_ANGLE = Position(94.294, 97.730)
+A_POS_ROTATED_BY_A_NEG_ANGLE = Position(-12.735, -135.205)
+
+A_POS_NORM = np.linalg.norm(A_POS)
+A_POS_NORMALIZED = Position(A_X, A_Y) / A_POS_NORM
+
+A_POS_PERPENDICULAR = Position(-A_Y, A_X) / A_POS_NORM
+
+A_POS_OFFSET_BY_1 = A_POS + Position(1, 0)
+A_POS_OFFSET_BY_LESS_THAN_1 = A_POS_OFFSET_BY_1 - Position(0.001, 0)
+
+
 class TestPosition(unittest.TestCase):
 
-    def test_new_without_args(self):
-        self.assertEqual(Position(), Position(0, 0))
+    def test_givenNoArgs_whenNew_thenZeroPosition(self):
+        self.assertEqual(Position(), A_ZERO_POS)
 
-    def test_attributes(self):
-        self.assertTrue(hasattr(Position(), 'x'))
-        self.assertTrue(hasattr(Position(), 'y'))
+    def test_givenArgs_whenNew_thenPositionIsInstantiated(self):
+        pos = Position(A_X, A_Y)
+        self.assertEqual(pos.x, A_X)
+        self.assertEqual(pos.y, A_Y)
 
-    def test_get_x(self):
-        pos = Position(1, 2)
-        self.assertTrue(pos.x == 1)
+    def test_givenNumpyArray_whenFromArray_thenPositionIsInstantiated(self):
+        pos = Position.from_array(A_ARRAY)
+        self.assertEqual(pos.x, A_ARRAY[0])
+        self.assertEqual(pos.y, A_ARRAY[1])
 
-    def test_get_y(self):
-        pos = Position(1, 2)
-        self.assertTrue(pos.y == 2)
+    def test_givenNumpyArray_whenFromArray_thenPositionIsCopy(self):
+        pos = Position.from_array(A_ARRAY)
+        self.assertIsNot(pos, A_ARRAY)
 
-    def test_set_x(self):
-        pos = Position(1, 2)
-        pos.x = 4
-        self.assertTrue(pos.x == 4)
+    def test_givenList_whenFromList_thenPositionIsInstantiated(self):
+        pos = Position.from_list(A_LIST)
+        self.assertEqual(pos.x, A_LIST[0])
+        self.assertEqual(pos.y, A_LIST[1])
 
-    def test_set_y(self):
-        pos = Position(1, 2)
-        pos.y = 4
-        self.assertTrue(pos.y == 4)
+    def test_givenDict_whenFromDict_thenPositionIsInstantiated(self):
+        pos = Position.from_dict(A_DICT)
+        self.assertEqual(pos.x, A_DICT['x'])
+        self.assertEqual(pos.y, A_DICT['y'])
 
-    def test_new_with_null_args(self):
-        pos = Position(0, 0)
-        self.assertEqual(pos.x, 0)
-        self.assertEqual(pos.y, 0)
+    def test_givenSamePosition_whenTestEquality_thenTrue(self):
+        self.assertTrue(A_POS == A_SAME_POS)
 
-    def test_new_with_real_args(self):
-        pos = Position(-100, 0.001)
-        self.assertEqual(pos.x, -100)
-        self.assertEqual(pos.y, 0.001)
+    def test_givenDifferentPosition_whenTestEquality_thenFalse(self):
+        self.assertFalse(A_POS == A_DIFFERENT_POS)
 
-    def test_from_array(self):
-        my_array = np.array([100, -50.23])
-        pos = Position.from_array(my_array)
-        self.assertEqual(pos.x, 100)
-        self.assertEqual(pos.y, -50.23)
+    def test_givenSamePosition_whenTestInequality_thenFalse(self):
+        self.assertFalse(A_POS != A_SAME_POS)
 
-    def test_from_array_is_not_same(self):
-        my_array = np.array([100, -50.23])
-        pos = Position.from_array(my_array)
-        my_array[0] = 10
-        self.assertNotEqual(pos.x, 10)
+    def test_givenDifferentPosition_whenTestInequality_thenTrue(self):
+        self.assertTrue(A_POS != A_DIFFERENT_POS)
 
-    def test_from_list(self):
-        pos = Position.from_list([100, -50.23])
-        self.assertEqual(pos.x, 100)
-        self.assertEqual(pos.y, -50.23)
+    def test_givenPosition_whenGetAngle_thenAngle(self):
+        pos_angle = m.atan2(A_POS.y, A_POS.x)
+        self.assertEqual(A_POS.angle, pos_angle)
 
-    def test_from_dict(self):
-        test_dict = {'x': -1.23, 'y': 4.56}
-        pos = Position.from_dict(test_dict)
-        self.assertEqual(pos.x, -1.23)
-        self.assertEqual(pos.y, 4.56)
+    def test_givenZeroPosition_whenGetAngle_thenZero(self):
+        self.assertEqual(A_ZERO_POS.angle, A_ZERO_ANGLE)
 
-    def test_equal_zero(self):
-        pos1 = Position()
-        pos2 = Position()
-        self.assertTrue(pos1 == pos2)
+    def test_givenPosition_whenGetNorm_thenNorm(self):
+        self.assertEqual(A_POS.norm, A_POS_NORM)
 
-    def test_equal_real_args(self):
-        pos1 = Position(500, 549)
-        pos2 = Position(400, -400)
-        self.assertFalse(pos1 == pos2)
+    # TODO: vvvv eventually move to geometry unit_test vvvv
 
-    def test_not_equal(self):
-        pos1 = Position(500, 549)
-        pos2 = Position(400, -400)
-        self.assertTrue(pos1 != pos2)
+    def test_givenPositionAndPositiveAngle_whenRotate_thenReturnRotatedPosition(self):
+        self.assertEqual(rotate(A_POS, A_POS_ANGLE), A_POS_ROTATED_BY_A_POS_ANGLE)
 
-    def test_angle(self):
-        test_angle = 10 * np.pi/180
-        pos = Position(m.cos(test_angle), m.sin(test_angle))
-        self.assertEqual(pos.angle, test_angle)
+    def test_givenPositionAndNegativeAngle_whenRotate_thenReturnRotatedPosition(self):
+        self.assertEqual(rotate(A_POS, A_NEG_ANGLE), A_POS_ROTATED_BY_A_NEG_ANGLE)
 
-    def test_angle_at_zero(self):
-        test_angle = 0 * np.pi/180
-        pos = Position(m.cos(test_angle), m.sin(test_angle))
-        self.assertEqual(pos.angle, test_angle)
+    def test_givenPositionAndAngle_whenRotate_thenReturnIsPosition(self):
+        self.assertIsInstance(rotate(A_POS, A_POS_ANGLE), Position)
 
-    def test_angle_at_180(self):
-        test_angle = 180 * np.pi/180
-        pos = Position(m.cos(test_angle), m.sin(test_angle))
-        self.assertEqual(pos.angle, test_angle)
+    def test_givenPositionAndAngle_whenRotate_thenReturnIsNotSame(self):
+        self.assertIsNot(rotate(A_POS, A_POS_ANGLE), A_POS)
 
-    def test_norm_with_null_position(self):
-        pos = Position()
-        self.assertEqual(pos.norm, 0)
+    def test_givenPosition_whenNormalized_thenReturnNormalizedPosition(self):
+        self.assertEqual(normalized(A_POS), A_POS_NORMALIZED)
 
-    def test_norm_with_real_args(self):
-        self.assertEqual(Position(1, 1).norm, m.sqrt(2))
+    def test_givenZeroPosition_whenNormalized_thenThrowsZeroDivisionError(self):
+        with self.assertRaises(ZeroDivisionError):
+            print(normalized(A_ZERO_POS))
 
-    def test_norm_with_negative_args(self):
-        self.assertEqual(Position(1, -1).norm, m.sqrt(2))
-        self.assertEqual(Position(-1, 1).norm, m.sqrt(2))
-        self.assertEqual(Position(-1, -1).norm, m.sqrt(2))
+    def test_givenPosition_whenNormalized_thenReturnIsPosition(self):
+        self.assertIsInstance(normalized(A_POS), Position)
 
-    def test_norm_with_others_args(self):
-        self.assertEqual(Position(3, 4).norm, 5)
+    def test_givenPosition_whenNormalized_thenReturnIsNotSame(self):
+        self.assertIsNot(normalized(A_POS), A_POS)
 
-    def test_rotate_with_unity_1(self):
-        pos = Position(1, 0)
-        test_angle = np.pi/2
-        self.assertEqual(rotate(pos, test_angle), Position(0, 1))
+    def test_givenPosition_whenPerpendicular_thenReturnPerpendicularPosition(self):
+        self.assertEqual(perpendicular(A_POS), A_POS_PERPENDICULAR)
 
-    def test_rotate_with_unity_2(self):
-        pos = Position(0, 1)
-        test_angle = np.pi/2
-        self.assertEqual(rotate(pos, test_angle), Position(-1, 0))
+    def test_givenPosition_whenPerpendicular_thenReturnIsNotSame(self):
+        self.assertIsNot(perpendicular(A_POS), A_POS)
 
-    def test_rotate_with_unity_3(self):
-        pos = Position(-1, 0)
-        test_angle = np.pi / 2
-        self.assertEqual(rotate(pos, test_angle), Position(0, -1))
+    def test_givenPosition_whenPerpendicular_thenReturnIsPosition(self):
+        self.assertIsInstance(perpendicular(A_POS), Position)
 
-    def test_rotate_with_unity_4(self):
-        pos = Position(0, -1)
-        test_angle = np.pi / 2
-        self.assertEqual(rotate(pos, test_angle), Position(1, 0))
+    def test_givenSamePositions_whenIsClose_thenReturnTrue(self):
+        self.assertTrue(is_close(A_POS, A_SAME_POS))
 
-    def test_rotate_with_real_args(self):
-        pos = Position(526, 878)
-        test_angle = 2.14675
-        self.assertEqual(rotate(pos, test_angle), Position(-1022.833, -37.052))
+    def test_givenDifferentPositions_whenIsClose_thenReturnFalse(self):
+        self.assertFalse(is_close(A_POS, A_DIFFERENT_POS))
 
-    def test_rotate_return_type(self):
-        pos = Position(526, 878)
-        test_angle = 1.234
-        res = rotate(pos, test_angle)
-        self.assertTrue(type(res) is Position)
+    def test_givenPositionOffsetByTolerance_whenIsClose_thenReturnFalse(self):
+        self.assertFalse(is_close(A_POS, A_POS_OFFSET_BY_1, abs_tol=1))
 
-    def test_rotate_identity(self):
-        pos = Position(526, 878)
-        test_angle = 1.234
-        res = rotate(pos, test_angle)
-        self.assertTrue(pos is not res)
-
-    def test_normalized_with_unity_pos(self):
-        pos = Position(1, 0)
-        self.assertEqual(normalized(pos), Position(1, 0))
-
-    def test_normalized_with_unity_neg(self):
-        pos = Position(0, -1)
-        self.assertEqual(normalized(pos), Position(0, -1))
-
-    def test_normalized_with_args(self):
-        pos = Position(10, 10)
-        self.assertEqual(normalized(pos), Position(m.sqrt(2) / 2, m.sqrt(2) / 2))
-
-    def test_normalized_return_type(self):
-        pos = Position(526, 878)
-        res = normalized(pos)
-        self.assertTrue(type(res) is Position)
-
-    def test_normalized_identity(self):
-        pos = Position(526, 878)
-        res = normalized(pos)
-        self.assertTrue(pos is not res)
-
-    def test_perpendicular_with_unity(self):
-        pos = Position(1, 0)
-        self.assertEqual(perpendicular(pos), Position(0, 1))
-
-    def test_perpendicular_with_args(self):
-        pos = Position(2, 2)
-        self.assertEqual(perpendicular(pos), Position(-np.sqrt(2)/2, np.sqrt(2)/2))
-
-    def test_perpendicular_identity(self):
-        pos = Position(2, 2)
-        res = perpendicular(pos)
-        self.assertTrue(pos is not res)
-
+    def test_givenPositionOffsetByLessThanTolerance_whenIsClose_thenReturnTrue(self):
+        self.assertTrue(is_close(A_POS, A_POS_OFFSET_BY_LESS_THAN_1, abs_tol=1))

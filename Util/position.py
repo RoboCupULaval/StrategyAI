@@ -85,6 +85,8 @@ def rotate(vec: Position, angle):
 
 
 def normalized(vec: Position):
+    if vec.norm == 0:
+        raise ZeroDivisionError
     return vec.copy() / vec.norm
 
 

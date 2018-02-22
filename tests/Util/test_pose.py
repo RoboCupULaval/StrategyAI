@@ -16,30 +16,6 @@ class TestPose(unittest.TestCase):
     def test_init_with_args(self):
         pass
 
-    def test_get_position(self):
-        pass
-
-    def test_set_position(self):
-        pass
-
-    def test_get_orientation(self):
-        pass
-
-    def test_set_orientation(self):
-        pass
-
-    def test_get_x(self):
-        pass
-
-    def test_set_x(self):
-        pass
-
-    def test_get_y(self):
-        pass
-
-    def test_set_y(self):
-        pass
-
     def test_add_with(self):
         pass
 
