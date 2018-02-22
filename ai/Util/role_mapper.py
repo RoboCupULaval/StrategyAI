@@ -40,7 +40,7 @@ class RoleMapper(object):
     def update_player_for_locked_role(self, player, role):
         # This method should NOT be used to swap two robots. We only use it if we
         # explicitely need to update a robot in the LOCKED_ROLES role (ie, referee asks to update goalkeeper)
-        assert role in self.LOCKED_ROLES
+        # assert role in self.LOCKED_ROLES
         old_locked_player = self.roles_translation[role]
         for key, value in self.roles_translation.items():
             if value == player:
