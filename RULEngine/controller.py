@@ -11,6 +11,7 @@ from typing import Dict
 from collections import namedtuple
 from math import sin, cos, sqrt
 
+from RULEngine.robot import Robot, MAX_LINEAR_SPEED, MIN_LINEAR_SPEED, MAX_LINEAR_ACCELERATION
 
 from RULEngine.robot import Robot, MAX_LINEAR_SPEED, MIN_LINEAR_SPEED
 from Util.PID import PID
@@ -47,12 +48,14 @@ def get_control_setting(game_type: str):
 
     return {'translation': translation, 'rotation': rotation}
 
+
 class Observer:
     def __init__(self):
         pass
 
     def write(self, poses):
         pass
+
 
 class Controller(list):
     def __init__(self, ai_queue: Queue, observer=Observer):
@@ -82,12 +85,12 @@ class Controller(list):
                                   is_team_yellow=True if self.team_color == 'yellow' else False,
                                   packet=[])
 
-        active_robots = iter(robot for robot in self
-                             if robot.pose is not None and robot.path is not None)
-
-        for robot in active_robots:
-            self.update_robot_path(robot)
-            command = robot.controller.execute(robot, robot.path, robot.target_orientation)
+        for robot in self:
+            if robot.pose is not None and robot.path is not None: # active robots
+                self.update_robot_path(robot)
+                command = robot.controller.execute(robot, robot.path, robot.target_orientation)
+            else:
+                command = {"x": 0, "y": 0, "orientation": 0}
             packet.packet.append(RobotPacket(robot_id=robot.robot_id,
                                              command=command,
                                              kick_type=robot.kick_type,
@@ -149,7 +152,7 @@ class PositionControl:
 
         overspeed_factor = sqrt(command['x'] ** 2 + command['y'] ** 2) / MAX_LINEAR_SPEED
         if overspeed_factor > 1:
-            command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / overspeed_factor
+            command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / ovegrrspeed_factor
         return command
 
     def reset(self):
@@ -161,8 +164,13 @@ def is_time_to_break(robots_pose, destination, cruise_speed):
     # TODO: we assume that the end speed is zero, which is not always the case
     dist_to_target = sqrt((destination[0] - robots_pose["x"])**2 +
                           (destination[1] - robots_pose["y"]) ** 2)
-    print("Cruse speed", cruise_speed)
-    return dist_to_target < cruise_speed ** 2 / robot.MAX_LINEAR_ACCELERATION
+    return dist_to_target < cruise_speed ** 2 / MAX_LINEAR_ACCELERATION
+
+def optimal_speed(robots_pose, destination, cruise_speed):
+    # TODO: we assume that the end speed is zero, which is not always the case
+    dist_to_target = sqrt((destination[0] - robots_pose["x"])**2 +
+                          (destination[1] - robots_pose["y"]) ** 2)
+    return max(cruise_speed, sqrt(MAX_LINEAR_ACCELERATION * dist_to_target))
 
 
 class VelocityControl:
@@ -183,6 +191,7 @@ class VelocityControl:
         speed_norm = robot.cruise_speed
         if is_time_to_break(robot.pose, path.points[-1], robot.cruise_speed):
             speed_norm = MIN_LINEAR_SPEED  # Near zero, but not quite
+        #speed_norm = optimal_speed(robot.pose, path.points[-1], robot.cruise_speed) # TODO: test this IRL
         norm = sqrt(error["x"]**2 + error["y"]**2)
         vel_x = speed_norm * error["x"] / norm
         vel_y = speed_norm  * error["y"] / norm
@@ -190,9 +199,8 @@ class VelocityControl:
         cmd_x, cmd_y = rotate(vel_x, vel_y, -pose["orientation"])
 
         cmd_theta = self.orientation_controller.execute(error['orientation'])
-        #cmd_theta = 0
+
         command = {'x': cmd_x, 'y': cmd_y, 'orientation': cmd_theta}
-        print(command)
         return command
 
 

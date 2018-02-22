@@ -74,7 +74,7 @@ def get_pertinent_collision_objects(commanded_player, game_state, ai_command, op
                 (ai_command.target.position - commanded_player.pose.position).norm() * factor:
             collision_bodies.append(
                 CollisionBody(player.pose.position, player.velocity.position, gap_proxy))
-    if commanded_player.ball_collision:
+    if ai_command.ball_collision:
         ball_colision_body = [
             CollisionBody(game_state.get_ball_position(), game_state.get_ball_velocity(), gap_proxy)]
         return collision_bodies + ball_colision_body
