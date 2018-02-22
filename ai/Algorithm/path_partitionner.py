@@ -312,7 +312,7 @@ class PathPartitionner():
         if 0 < len_along_path < (pose_target - pose_robot).norm():
             vec_perp = direction.perpendicular()
             vec_perp = vec_perp[0:2] / vec_perp.norm()
-            cruise_speed = self.player.velocity.conv_2_np()
+            cruise_speed = self.player.velocity
             self.closest_obs_speed = closest_collision_body.velocity
             avoid_dir = -vec_perp
             if closest_collision_body.type == CollisionType.BALL or closest_collision_body.type == CollisionType.ZONE:

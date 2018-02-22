@@ -29,9 +29,9 @@ class Intercept(Tactic):
     def go_between_ball_and_target(self):
         self.status_flag = Flags.WIP
         ball = self.game_state.get_ball_position()
-        ball_velocity = self.game_state.get_ball_velocity().conv_2_np()
+        ball_velocity = self.game_state.get_ball_velocity()
         if np.linalg.norm(ball_velocity) > 50:
-            self.target = Pose(Position.from_np(ball.conv_2_np() - ball_velocity), 0)
+            self.target = Pose(Position.from_np(ball - ball_velocity), 0)
             dist_behind = np.linalg.norm(ball_velocity) + 1/np.sqrt(np.linalg.norm(ball_velocity))
         else:
             self.target = None
@@ -76,9 +76,9 @@ class Intercept(Tactic):
         return Grab(self.game_state, self.player)
 
     def _is_player_between_ball_and_target(self, fact=-0.99):
-        player = self.player.pose.position.conv_2_np()
-        target = self.target.position.conv_2_np()
-        ball = self.game_state.get_ball_position().conv_2_np()
+        player = self.player.pose.position
+        target = self.target.position
+        ball = self.game_state.get_ball_position()
 
         ball_to_player = player - ball
         target_to_ball = ball - target
@@ -92,8 +92,8 @@ class Intercept(Tactic):
         return False
 
     def _is_player_towards_ball(self, fact=-0.99):
-        player = self.player.pose.position.conv_2_np()
-        ball = self.game_state.get_ball_position().conv_2_np()
+        player = self.player.pose.position
+        ball = self.game_state.get_ball_position()
 
         ball_to_player = player - ball
         ball_to_player /= np.linalg.norm(ball_to_player)

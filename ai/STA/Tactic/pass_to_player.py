@@ -41,9 +41,9 @@ class PassToPlayer(Tactic):
 
     def get_behind_ball(self):
         self.status_flag = Flags.WIP
-        player = self.player.pose.position.conv_2_np()
-        ball = self.game_state.get_ball_position().conv_2_np()
-        target = self.game_state.get_player_position(self.target_id, True).conv_2_np()
+        player = self.player.pose.position
+        ball = self.game_state.get_ball_position()
+        target = self.game_state.get_player_position(self.target_id, True)
 
         vector_player_2_ball = ball - player
         vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
@@ -86,9 +86,9 @@ class PassToPlayer(Tactic):
         return get_distance(self.player.pose.position, self.game_state.get_ball_position())
 
     def _is_player_towards_ball_and_target(self, fact=-0.99):
-        player = self.player.pose.position.conv_2_np()
-        ball = self.game_state.get_ball_position().conv_2_np()
-        target = self.game_state.get_player_position(self.target_id, True).conv_2_np()
+        player = self.player.pose.position
+        ball = self.game_state.get_ball_position()
+        target = self.game_state.get_player_position(self.target_id, True)
 
         vector_player_2_ball = ball - player
         vector_target_2_ball = ball - target

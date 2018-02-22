@@ -66,8 +66,8 @@ class Bump(Tactic):
         else:
             self.next_state = self.get_behind_ball
         # self.debug.add_log(1, "orientation go get ball {}".format(self.last_angle))
-        target = self.target.position.conv_2_np()
-        player = self.player.pose.position.conv_2_np()
+        target = self.target.position
+        player = self.player.pose.position
         player_to_target = target - player
         player_to_target = 0.5 * player_to_target / np.linalg.norm(player_to_target)
         speed_pose = Pose(Position.from_np(player_to_target))
