@@ -41,15 +41,15 @@ A_POS_OFFSET_BY_LESS_THAN_1 = A_POS_OFFSET_BY_1 - Position(0.001, 0)
 
 class TestPosition(unittest.TestCase):
 
-    def test_givenNoArgs_whenNew_thenZeroPosition(self):
+    def test_givenNoArgs_whenNew_thenReturnZeroPosition(self):
         self.assertEqual(Position(), A_ZERO_POS)
 
-    def test_givenArgs_whenNew_thenPositionIsInstantiated(self):
+    def test_givenArgs_whenNew_thenReturnNewPosition(self):
         pos = Position(A_X, A_Y)
         self.assertEqual(pos.x, A_X)
         self.assertEqual(pos.y, A_Y)
 
-    def test_givenNumpyArray_whenFromArray_thenPositionIsInstantiated(self):
+    def test_givenNumpyArray_whenFromArray_thenReturnNewPosition(self):
         pos = Position.from_array(A_ARRAY)
         self.assertEqual(pos.x, A_ARRAY[0])
         self.assertEqual(pos.y, A_ARRAY[1])
@@ -73,12 +73,6 @@ class TestPosition(unittest.TestCase):
 
     def test_givenDifferentPosition_whenTestEquality_thenFalse(self):
         self.assertFalse(A_POS == A_DIFFERENT_POS)
-
-    def test_givenSamePosition_whenTestInequality_thenFalse(self):
-        self.assertFalse(A_POS != A_SAME_POS)
-
-    def test_givenDifferentPosition_whenTestInequality_thenTrue(self):
-        self.assertTrue(A_POS != A_DIFFERENT_POS)
 
     def test_givenPosition_whenGetAngle_thenAngle(self):
         pos_angle = m.atan2(A_POS.y, A_POS.x)

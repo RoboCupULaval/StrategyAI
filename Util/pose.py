@@ -6,19 +6,27 @@ from Util.position import Position
 ORIENTATION_ABSOLUTE_TOLERANCE = 0.004
 
 
-class Pose(object):
+class Pose:
 
     def __init__(self, position: Position=Position(), orientation: float=0):
 
-        self._orientation = wrap_to_2pi(orientation)
+        self._orientation = orientation
         self._position = position
+
+    @classmethod
+    def from_dict(cls, my_dict):
+        return cls(Position(my_dict['x'], my_dict['y']), my_dict['orientation'])
+
+    @classmethod
+    def from_values(cls, x, y, orientation):
+        return cls(Position(x, y), orientation)
 
     @property
     def x(self) -> float:
         return self._position.x
 
     @x.setter
-    def x(self, new_x):
+    def x(self, new_x: float):
         self.position.x = new_x
 
     @property
@@ -26,7 +34,7 @@ class Pose(object):
         return self._position.y
 
     @y.setter
-    def y(self, new_y):
+    def y(self, new_y: float):
         self.position.y = new_y
 
     @property
@@ -43,18 +51,20 @@ class Pose(object):
 
     @orientation.setter
     def orientation(self, orientation):
-        self._orientation = wrap_to_2pi(orientation)
+        self._orientation = orientation
+
+    def to_dict(self):
+        return {'x': self.x, 'y': self.y, 'orientation': self.orientation}
 
     def __add__(self, other: Position):
-        res = Pose(self.position + other, self.orientation)
-        return res
+        return Pose(self.position + other, self.orientation)
 
     def __sub__(self, other: Position):
-        res = Pose(self.position - other, self.orientation)
-        return res
+        return self + (-other.position)
 
     def __eq__(self, other):
-        orientation_equal = compare_angle(self.orientation, other.orientation, ORIENTATION_ABSOLUTE_TOLERANCE)
+        orientation_equal = m.isclose(self.orientation, other.orientation,
+                                      abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE, rel_tol=0)
         position_equal = self.position == other.position
         return position_equal and orientation_equal
 
@@ -67,25 +77,10 @@ class Pose(object):
     def __repr__(self):
         return 'Pose' + str(self)
 
-    @classmethod
-    def from_dict(cls, my_dict):
-        return Pose(Position(my_dict['x'], my_dict['y']), my_dict['orientation'])
 
-    @classmethod
-    def from_values(cls, x, y, orientation):
-        return cls(Position(x, y), orientation)
-
-    def to_dict(self):
-        return {'x': self.x, 'y': self.y, 'orientation': self.orientation}
-
-
-def wrap_to_pi(angle):
+def wrap_to_pi(angle: float):
     return (angle + m.pi) % (2 * m.pi) - m.pi
 
 
-def wrap_to_2pi(angle):
-    return angle % (2 * m.pi)
-
-
-def compare_angle(angle1, angle2, abs_tol=0.004):
+def compare_angle(angle1: float, angle2: float, *, abs_tol=0.004):
     return m.isclose(wrap_to_pi(angle1 - angle2), 0, abs_tol=abs_tol, rel_tol=0)

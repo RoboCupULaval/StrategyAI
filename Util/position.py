@@ -12,6 +12,18 @@ class Position(np.ndarray):
         obj.x, obj.y = obj
         return obj
 
+    @classmethod
+    def from_array(cls, array):
+        return cls(array[0], array[1])
+
+    @classmethod
+    def from_list(cls, new_list):
+        return cls(new_list[0], new_list[1])
+
+    @classmethod
+    def from_dict(cls, new_dict):
+        return cls(new_dict['x'], new_dict['y'])
+
     @property
     def x(self):
         return float(self[0])
@@ -48,6 +60,9 @@ class Position(np.ndarray):
     def is_close(self, other, abs_tol=POSITION_ABS_TOL):
         return is_close(self, other, abs_tol)
 
+    def to_dict(self):
+        return {'x': self.x, 'y': self.y}
+
     def __eq__(self, other):
         return self.is_close(other)
 
@@ -61,22 +76,7 @@ class Position(np.ndarray):
         return '({:8.3f}, {:8.3f})'.format(self[0], self[1])
 
     def __hash__(self):
-        return hash(id(self))
-
-    @classmethod
-    def from_array(cls, array):
-        return cls(array[0], array[1])
-
-    @classmethod
-    def from_list(cls, new_list):
-        return cls(new_list[0], new_list[1])
-
-    @classmethod
-    def from_dict(cls, new_dict):
-        return cls(new_dict['x'], new_dict['y'])
-
-    def to_dict(self):
-        return {'x': self.x, 'y': self.y}
+        return hash(str(self))
 
 
 def rotate(vec: Position, angle):

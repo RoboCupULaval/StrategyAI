@@ -1,74 +1,76 @@
 
 import unittest
-import numpy as np
+from math import pi
+
 from Util import Position, Pose
-from Util.pose import wrap_to_pi, wrap_to_2pi, compare_angle
+from Util.pose import wrap_to_pi, compare_angle
+
+A_X = 123.4
+A_Y = -456.7
+A_ORIENTATION = 1.234
+
+A_POS = Position(A_X, A_Y)
+A_DIFFERENT_POS = A_POS + Position(314, -15)
+
+A_POSE = Pose(A_POS, A_ORIENTATION)
+A_DIFFERENT_POSE = Pose(A_DIFFERENT_POS, A_ORIENTATION+0.123)
+A_POSE_WITH_DIFFERENT_POS = Pose(A_DIFFERENT_POS, A_ORIENTATION)
+A_POSE_WITH_DIFFERENT_ORIENTATION = Pose(A_POS, A_ORIENTATION-0.987)
+
+A_DICT = {'x': A_X, 'y': A_Y, 'orientation': A_ORIENTATION}
 
 
 class TestPose(unittest.TestCase):
 
-    def test_init_without_arg(self):
+    def test_givenNoArg_whenNew_thenZeroPose(self):
         pass
 
-    def test_init_no_orientation(self):
+    def test_givenPositionAndOrientation_whenNew_thenReturnNewPose(self):
         pass
 
-    def test_init_with_args(self):
+    def test_givenPosition_whenNew_thenReturnNewPose(self):
         pass
 
-    def test_add_with(self):
+    def test_givenPosition_whenNew_thenReturnPoseWithPositionCopy(self):
         pass
 
-    def test_sub_with(self):
+    def test_givenXYOrientation_whenFromValues_thenReturnNewPose(self):
         pass
 
-    def test_equal_with(self):
+    def test_givenDict_whenFromDict_thenReturnNewPose(self):
         pass
 
-    def test_not_equal(self):
+    def test_givenWrongDict_whenFromDict_thenThrowsKeyError(self):
         pass
 
-    def test_from_values(self):
+    def test_givenPose_whenToDict_thenReturnDict(self):
         pass
 
-    def test_from_dict(self):
+    def test_givenPose_whenSettingPosition_thenSetPositionCopy(self):
         pass
 
-    def test_to_dict(self):
+    def test_givenPoseAndPosition_whenAddingPosition_thenReturnAddition(self):
         pass
 
-    def test_wrap_to_pi_with_zero(self):
-        self.assertEqual(wrap_to_pi(0), 0)
+    def test_givenPoseAndPosition_whenAddingPosition_thenReturnDifferentPose(self):
+        pass
 
-    def test_wrap_to_pi_with_edge_case_pos(self):
-        self.assertEqual(wrap_to_pi(np.pi), -np.pi)
+    def test_givenPoseAndSamePose_whenTestEquality_thenTrue(self):
+        pass
 
-    def test_wrap_to_pi_with_edge_case_neg(self):
-        self.assertEqual(wrap_to_pi(-np.pi), -np.pi)
+    def test_givenPoseAndDifferentPose_whenTestEquality_thenFalse(self):
+        pass
 
-    def test_wrap_to_pi_with_edge_case_zero(self):
-        self.assertEqual(wrap_to_pi(2 * np.pi), 0)
+    # TODO: vvvv eventually move to geometry unit_test vvvv
 
-    def test_wrap_to_pi_with_real_args_pos(self):
-        self.assertEqual(wrap_to_pi(1.234), 1.234)
+    def test_givenOrientation_whenWrapToPi_thenReturnWrappedOrientation(self):
+        pass
 
-    def test_wrap_to_pi_with_real_args_neg(self):
-        self.assertEqual(wrap_to_pi(-1.234), -1.234)
+    def test_givenAngleAndSameAngle_whenCompareAngle_thenTrue(self):
+        pass
 
-    def test_wrap_to_2pi_with_zero(self):
-        self.assertEqual(wrap_to_2pi(0), 0)
+    def test_givenAngleAndSameAnglePlus2Pi_whenCompareAngle_thenTrue(self):
+        pass
 
-    def test_wrap_to_2pi_with_edge_case_pos(self):
-        self.assertEqual(wrap_to_2pi(2*np.pi), 0)
-
-    def test_wrap_to_2pi_with_edge_case_neg(self):
-        self.assertEqual(wrap_to_2pi(-2*np.pi), 0)
-
-    def test_wrap_to_2pi_with_real_args_pos(self):
-        self.assertEqual(wrap_to_2pi(4.567), 4.567)
-
-    def test_wrap_to_2pi_with_real_args_neg(self):
-        self.assertEqual(wrap_to_2pi(-4.567), 2*np.pi - 4.567)
-
-    def test_compare_angle(self):
+    def test_givenAngleAndDifferentAngle_whenCompareAngle_thenFalse(self):
         pass
