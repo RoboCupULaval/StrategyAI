@@ -11,7 +11,7 @@ class Pose:
     def __init__(self, position: Position=Position(), orientation: float=0):
 
         self._orientation = orientation
-        self._position = position
+        self._position = position.copy()
 
     @classmethod
     def from_dict(cls, my_dict):
