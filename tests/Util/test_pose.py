@@ -73,8 +73,26 @@ class TestPose(unittest.TestCase):
     def test_wrap_to_pi_with_edge_case_zero(self):
         self.assertEqual(wrap_to_pi(2 * np.pi), 0)
 
-    def test_wrap_to_2pi(self):
-        pass
+    def test_wrap_to_pi_with_real_args_pos(self):
+        self.assertEqual(wrap_to_pi(1.234), 1.234)
+
+    def test_wrap_to_pi_with_real_args_neg(self):
+        self.assertEqual(wrap_to_pi(-1.234), -1.234)
+
+    def test_wrap_to_2pi_with_zero(self):
+        self.assertEqual(wrap_to_2pi(0), 0)
+
+    def test_wrap_to_2pi_with_edge_case_pos(self):
+        self.assertEqual(wrap_to_2pi(2*np.pi), 0)
+
+    def test_wrap_to_2pi_with_edge_case_neg(self):
+        self.assertEqual(wrap_to_2pi(-2*np.pi), 0)
+
+    def test_wrap_to_2pi_with_real_args_pos(self):
+        self.assertEqual(wrap_to_2pi(4.567), 4.567)
+
+    def test_wrap_to_2pi_with_real_args_neg(self):
+        self.assertEqual(wrap_to_2pi(-4.567), 2*np.pi - 4.567)
 
     def test_compare_angle(self):
         pass
