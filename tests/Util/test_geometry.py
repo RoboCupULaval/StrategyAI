@@ -1,14 +1,14 @@
 # Under MIT License, see LICENSE.txt
 
-
 import unittest
 
 import numpy as np
 import math as m
 
 from Util import Position
-from Util.geometry import get_closest_point_on_line, compare_angle, wrap_to_pi,\
-    perpendicular, normalize, are_close, rotate
+from Util.geometry import compare_angle, wrap_to_pi, perpendicular, normalize, are_close, rotate
+# from Util.geometry import get_closest_point_on_segment, get_closest_point_on_line
+
 
 __author__ = 'RoboCupULaval'
 
