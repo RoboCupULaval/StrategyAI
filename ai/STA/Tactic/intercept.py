@@ -31,7 +31,7 @@ class Intercept(Tactic):
         ball = self.game_state.get_ball_position()
         ball_velocity = self.game_state.get_ball_velocity()
         if np.linalg.norm(ball_velocity) > 50:
-            self.target = Pose(Position.from_np(ball - ball_velocity), 0)
+            self.target = Pose(Position.from_array(ball - ball_velocity), 0)
             dist_behind = np.linalg.norm(ball_velocity) + 1/np.sqrt(np.linalg.norm(ball_velocity))
         else:
             self.target = None

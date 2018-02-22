@@ -11,7 +11,7 @@ from typing import Dict
 from collections import namedtuple
 from math import sin, cos, sqrt
 
-import robot
+
 from RULEngine.robot import Robot, MAX_LINEAR_SPEED, MIN_LINEAR_SPEED
 from Util.PID import PID
 from Util.csv_plotter import CsvPlotter
@@ -163,6 +163,7 @@ def is_time_to_break(robots_pose, destination, cruise_speed):
                           (destination[1] - robots_pose["y"]) ** 2)
     print("Cruse speed", cruise_speed)
     return dist_to_target < cruise_speed ** 2 / robot.MAX_LINEAR_ACCELERATION
+
 
 class VelocityControl:
 

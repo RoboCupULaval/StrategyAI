@@ -29,30 +29,24 @@ class Position(np.ndarray):
         self[1] = y
 
     @property
-    def abs_tol(self):
-        return POSITION_ABS_TOL
-
     def norm(self):
-        """Return the distance of the point from the origin"""
-        return np.sqrt(self[0] ** 2 + self[1] ** 2)  # Faster than np.linalg.norm()
+        return np.sqrt(self.x ** 2 + self.y ** 2)
 
+    @property
     def angle(self):
-        """Return the angle of the point from the x-axis between -pi and pi"""
-        return float(np.arctan2(self[1], self[0]))
+        return float(np.arctan2(self.y, self.x))
 
     def rotate(self, angle):
-        rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]).view(Position)
-        return np.dot(rotation, self)
+        return rotate(self, angle)
 
     def normalized(self):
-        return self / self.norm()
+        return normalized(self)
 
     def perpendicular(self):
-        """Return the orthonormal vector to the np.array([0,0,1]) with right hand rule."""
-        return Position(self[1], -self[0]).normalized()
+        return perpendicular(self)
 
     def is_close(self, other, abs_tol=POSITION_ABS_TOL):
-        return (self - other).view(Position).norm() < abs_tol
+        return is_close(self, other, abs_tol)
 
     def __eq__(self, other):
         return self.is_close(other)
@@ -70,8 +64,12 @@ class Position(np.ndarray):
         return hash(id(self))
 
     @classmethod
-    def from_np(cls, array):
-        return cls(array)
+    def from_array(cls, array):
+        return cls(array[0], array[1])
+
+    @classmethod
+    def from_list(cls, new_list):
+        return cls(new_list[0], new_list[1])
 
     @classmethod
     def from_dict(cls, new_dict):
@@ -79,3 +77,21 @@ class Position(np.ndarray):
 
     def to_dict(self):
         return {'x': self.x, 'y': self.y}
+
+
+def rotate(vec: Position, angle):
+    rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]).view(Position)
+    return rotation @ vec
+
+
+def normalized(vec: Position):
+    return vec.copy() / vec.norm
+
+
+def perpendicular(vec: Position):
+    """Return the orthonormal vector to the np.array([0,0,1]) with right hand rule."""
+    return normalized(Position(-vec.y, vec.x))
+
+
+def is_close(vec1: Position, vec2: Position, abs_tol=0.001):
+    return (vec1 - vec2).view(Position).norm < abs_tol

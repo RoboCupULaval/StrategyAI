@@ -70,7 +70,7 @@ class Bump(Tactic):
         player = self.player.pose.position
         player_to_target = target - player
         player_to_target = 0.5 * player_to_target / np.linalg.norm(player_to_target)
-        speed_pose = Pose(Position.from_np(player_to_target))
+        speed_pose = Pose(Position.from_array(player_to_target))
         return Move(self.game_state, self.player, speed_pose)
 
     def halt(self):

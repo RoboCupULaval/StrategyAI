@@ -1,13 +1,10 @@
 # Under MIT License, see LICENSE.txt
 import math as m
 import warnings
-from typing import Union
 
 import numpy as np
-from Util.pose import Pose
 
-from Util.position import Position
-
+from Util import Position, Pose
 
 
 def remove_duplicates(seq, concurent_list=None, round_up_threshold=1):
@@ -211,10 +208,6 @@ def conv_position_2_list(position: Position):
     """
 
     return [position.x, position.y]
-
-
-def get_position_behind_point(point: Position, aiming: Position, spacing: Union[int, float]) -> Position:
-    return point - spacing * (aiming - point).normalized()
 
 
 def are_collinear(pos1: Position, pos2: Position, pos3: Position, abs_tol=m.pi / 30) -> bool:

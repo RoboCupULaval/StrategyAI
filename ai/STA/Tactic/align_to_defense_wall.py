@@ -89,7 +89,7 @@ class AlignToDefenseWall(Tactic):
         respecte la règle de la main droite et pointe toujours vers le coin suppérieur du but si on est à gauche du 
         terrain et l'inverse si on est à droite du terrain
         """
-        self.vec_perp_of_ball_2_goal = self.vec_ball_2_goal.perpendicular()
+        self.vec_perp_of_ball_2_goal = -self.vec_ball_2_goal.perpendicular()
         # vec_ball_2_goal_top = self.goal_middle + np.divide(Position(self.goal_width, 0), 2.0) - ball_position
         # vec_ball_2_goal_bottom = self.goal_middle - np.divide(Position(self.goal_width, 0), 2.0) - ball_position
         vec_bottom_goal_2_to_top_goal = Position(self.goal_width, 0)
