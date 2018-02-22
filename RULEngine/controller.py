@@ -86,7 +86,8 @@ class Controller(list):
                 self.update_robot_path(robot)
                 target = Pose(robot.path.points[1], robot.target_orientation).to_dict()
 
-                if sqrt((target["x"]-robot.pose['x'])**2 + (target["y"]-robot.pose['y'])**2) > 50:
+                if sqrt((target["x"]-robot.pose['x'])**2 + (target["y"]-robot.pose['y'])**2) > 50\
+                        and robot.path.speeds[1] > 0:
                     command = robot.speed_controller.execute(robot, robot.path, robot.target_orientation)
                 else:
                     command = robot.position_controller.execute(robot, target)
