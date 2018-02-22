@@ -34,7 +34,6 @@ def get_next_velocity(robot: Robot, dt):
 
 
     next_speed = np.clip(next_speed, 0, robot.cruise_speed)
-    print(next_speed)
     next_velocity = Position(target_direction * next_speed)
 
     return next_velocity
