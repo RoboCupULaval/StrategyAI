@@ -31,8 +31,10 @@ class ReceiverBaseClass(Process, metaclass=ABCMeta):
 
     def monitor_queue(self, s):
         s.enter(1, 1, self.monitor_queue, argument=(s,))
-        if self._queue.qsize() >= 0.5 * self._queue._maxsize:
-            usage = self._queue.qsize() / self._queue._maxsize
+
+        usage = self._queue.qsize() / self._queue._maxsize
+
+        if usage > 0.5:
             self.logger.debug('Queue is at {}% of it\'s max capacity.'.format(100 * usage))
 
     def start(self):
