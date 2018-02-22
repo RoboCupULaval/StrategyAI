@@ -4,7 +4,7 @@ import numpy as np
 import numpy.matlib
 
 from Util import Pose, Position
-from Util.geometry import conv_position_2_list, remove_duplicates, perpendicular, normalize
+from Util.geometry import remove_duplicates, perpendicular, normalize
 from Util.path import Path
 
 
@@ -167,7 +167,7 @@ class PathPartitionner():
                         continue
                     dist_from_path = abs(np.cross(direction, vec_robot_2_obs))
                     projection_obs_on_direction = \
-                        np.dot(direction, vec_robot_2_obs / (vec_robot_2_obs).norm())
+                        np.dot(direction, vec_robot_2_obs / (vec_robot_2_obs).norm)
                     if projection_obs_on_direction < 0.00001 or projection_obs_on_direction > 1:
                         dist_from_path_temp = (pose_start - pose_obs).norm
                         if dist_from_path_temp > (pose_target - pose_obs).norm:
@@ -302,10 +302,10 @@ class PathPartitionner():
             return sub_target, avoid_dir
 
         direction = (pose_target - pose_robot) / (pose_target - pose_robot).norm
-        vec_robot_2_obs = np.array(conv_position_2_list(pose_obstacle_closest - pose_robot))
+        vec_robot_2_obs = (pose_obstacle_closest - pose_robot).position
         len_along_path = np.dot(vec_robot_2_obs, direction)
         # dist_from_path = (np.cross(direction, vec_robot_2_obs)).norm
-        # projection_obs_on_direction = np.dot(direction, vec_robot_2_obs / vec_robot_2_obs.norm())
+        # projection_obs_on_direction = np.dot(direction, vec_robot_2_obs / vec_robot_2_obs.norm)
         self.res = closest_collision_body.avoid_radius / 10.
         if 0 < len_along_path < (pose_target - pose_robot).norm:
             vec_perp = -perpendicular(direction)
@@ -315,28 +315,28 @@ class PathPartitionner():
             avoid_dir = -vec_perp
             if closest_collision_body.type == CollisionType.BALL or closest_collision_body.type == CollisionType.ZONE:
                 avoid_dir = -vec_perp
-                sub_target_1 = np.array(conv_position_2_list(pose_robot)) + \
+                sub_target_1 = pose_robot.position + \
                     direction * len_along_path + vec_perp * self.res
-                sub_target_2 = np.array(conv_position_2_list(pose_robot)) + \
+                sub_target_2 = pose_robot.position + \
                     direction * len_along_path - vec_perp * self.res
-                bool_sub_target_1 = self.verify_sub_target(Position(sub_target_1[0], sub_target_1[1]))
-                bool_sub_target_2 = self.verify_sub_target(Position(sub_target_2[0], sub_target_2[1]))
+                bool_sub_target_1 = self.verify_sub_target(sub_target_1)
+                bool_sub_target_2 = self.verify_sub_target(sub_target_2)
 
                 while bool_sub_target_1:
                     sub_target_1 += vec_perp * self.res
-                    bool_sub_target_1 = self.verify_sub_target(Position(sub_target_1[0], sub_target_1[1]))
+                    bool_sub_target_1 = self.verify_sub_target(sub_target_1)
 
                 sub_target_1 += vec_perp * 0.01 * self.res
                 while bool_sub_target_2:
 
                     sub_target_2 -= vec_perp * self.res
-                    bool_sub_target_2 = self.verify_sub_target(Position(sub_target_2[0], sub_target_2[1]))
+                    bool_sub_target_2 = self.verify_sub_target(sub_target_2)
 
                 sub_target_2 -= vec_perp * 0.01 * self.res
                 if cruise_speed.norm < 0.1:
                     sub_target = sub_target_1
-                elif np.abs(np.dot(direction, (sub_target_1 - path.start) / (sub_target_1 - path.start).norm())) > \
-                        np.abs(np.dot(direction, (sub_target_2 - path.start) / (sub_target_2 - path.start).norm())):
+                elif np.abs(np.dot(direction, (sub_target_1 - path.start) / (sub_target_1 - path.start).norm)) > \
+                        np.abs(np.dot(direction, (sub_target_2 - path.start) / (sub_target_2 - path.start).norm)):
                     sub_target = sub_target_1
                 else:
                     sub_target = sub_target_2
@@ -350,20 +350,19 @@ class PathPartitionner():
                     avoid_dir = -vec_perp
                 else:
                     avoid_dir = vec_perp
-                sub_target = np.array(conv_position_2_list(pose_robot)) +\
+                sub_target = pose_robot.position +\
                     direction * len_along_path + vec_perp * self.res
 
-                bool_sub_target = self.verify_sub_target(Position(sub_target[0], sub_target[1]))
+                bool_sub_target = self.verify_sub_target(sub_target)
                 while bool_sub_target:
                     sub_target -= avoid_dir * self.res
-                    bool_sub_target = self.verify_sub_target(Position(sub_target[0], sub_target[1]))
+                    bool_sub_target = self.verify_sub_target(sub_target)
 
                 sub_target -= avoid_dir * 0.01 * self.res
                 avoid_dir = vec_perp
-            sub_target = Position(sub_target[0], sub_target[1])
         else:
-            sub_target = Position(pose_target[0], pose_target[1])
-        sub_target = Position(sub_target[0], sub_target[1])
+            sub_target = pose_target
+
         return [sub_target, avoid_dir]
 
     def get_next_point(self, robot_id=None):

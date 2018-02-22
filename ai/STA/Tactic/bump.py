@@ -10,7 +10,7 @@ import numpy as np
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from Util import Pose, Position, AICommand
 from Util.constant import ROBOT_RADIUS
-from Util.geometry import get_distance
+
 from ai.GameDomainObjects.player import Player
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
@@ -58,7 +58,7 @@ class Bump(Tactic):
     def push_ball(self):
         # self.debug.add_log(1, "Grab ball called")
         # self.debug.add_log(1, "vector player 2 ball : {} mm".format(self.vector_norm))
-        if get_distance(self.last_ball_position, self.player.pose.position) < 40:
+        if (self.last_ball_position - self.player.pose.position).norm < 40:
             self.next_state = self.halt
             self.last_time = time.time()
         elif self._is_player_opposing_ball_and_target(-0.9):
@@ -79,8 +79,7 @@ class Bump(Tactic):
         return Idle(self.game_state, self.player)
 
     def _get_distance_from_ball(self):
-        return get_distance(self.player.pose.position,
-                            self.game_state.get_ball_position())
+        return (self.player.pose.position - self.game_state.get_ball_position()).norm
 
     def _is_player_opposing_ball_and_target(self, fact=-0.99):
 

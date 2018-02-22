@@ -7,7 +7,7 @@ import numpy as np
 from Util import Pose, Position, AICommand
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from Util.position import Position
-from Util.geometry import get_distance
+
 from ai.GameDomainObjects import Player
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Idle import Idle
@@ -83,7 +83,7 @@ class PassToPlayer(Tactic):
         return Idle(self.game_state, self.player)
 
     def _get_distance_from_ball(self):
-        return get_distance(self.player.pose.position, self.game_state.get_ball_position())
+        return (self.player.pose.position - self.game_state.get_ball_position()).norm
 
     def _is_player_towards_ball_and_target(self, fact=-0.99):
         player = self.player.pose.position

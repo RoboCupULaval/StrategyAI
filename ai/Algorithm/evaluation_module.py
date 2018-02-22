@@ -1,6 +1,5 @@
 # Under MIT License, see LICENSE.txt
 from Util import Position
-from Util.geometry import get_distance
 from Util.position import Position
 from Util.constant import ROBOT_RADIUS
 from ai.GameDomainObjects.Shitty_Field import FieldSide
@@ -64,11 +63,6 @@ def is_ball_our_side():
         return GameState().get_ball_position().x > 0
     else:
         return GameState().get_ball_position().x < 0
-
-
-def is_target_reached(player, target: Position, min_dist=0.01):
-    # Retourne TRUE si dans un rayon de l'objectif
-    return get_distance(target, player.pose.position) < min_dist
 
 
 def best_position_option(player, pointA: Position, pointB: Position):
