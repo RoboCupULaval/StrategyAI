@@ -29,7 +29,8 @@ class GoToPositionPathfinder(Tactic):
 
         return MoveToPosition(self.game_state,
                               self.player,
-                              self.target).exec()
+                              self.target,
+                              cruise_speed=self.cruise_speed).exec()
 
     def check_success(self):
         distance = (self.player.pose - self.target).position.norm()
