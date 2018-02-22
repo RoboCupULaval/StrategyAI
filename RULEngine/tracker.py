@@ -1,13 +1,14 @@
 
 import logging
 from multiprocessing import Queue
-from queue import Empty
 from typing import Dict, List
 
 import numpy as np
 
 from RULEngine.filters.multiballservice import MultiBallService
 from RULEngine.filters.robot_kalman_filter import RobotFilter
+
+from Util.geometry import wrap_to_pi
 
 from config.config_service import ConfigService
 
@@ -25,6 +26,7 @@ class Tracker:
 
         self.cfg = ConfigService()
         self.team_color = self.cfg.config_dict['GAME']['our_color']
+        self.our_side = self.cfg.config_dict['GAME']['our_side']
 
         self.vision_queue = vision_queue
 
@@ -32,19 +34,22 @@ class Tracker:
         self._yellow_team = [RobotFilter() for _ in range(Tracker.MAX_ROBOT_PER_TEAM)]
         self._balls = MultiBallService(Tracker.MAX_BALL_ON_FIELD)
 
-        self._current_timestamp = None
+        self._current_timestamp = 0
 
     def update(self) -> Dict:
 
-        try:
-            vision_frame = self.vision_queue.get(block=True)
-            detection_frame = vision_frame['detection']
-            self._current_timestamp = detection_frame['t_capture']
+        vision_frames = self.vision_queue.get(block=True)
+
+        for frame in vision_frames:
+            if 'detection' not in frame: # this is a geometry frame
+                continue
+            detection_frame = frame['detection']
+
+            # if self.our_side == 'negative':
+            #     detection_frame = Tracker.change_reference(detection_frame)
+
+            self._current_timestamp = max(self._current_timestamp, detection_frame['t_capture'])
             self._update(detection_frame)
-        except Empty:
-            pass
-        except KeyError:
-            pass
 
         self.remove_undetected()
 
@@ -92,6 +97,22 @@ class Tracker:
                 robot.reset()
 
         self._balls.remove_undetected()
+
+    @staticmethod
+    def change_reference(detection_frame):
+
+        for robot_obs in detection_frame.get('robots_blue', ()):
+            robot_obs['x'], robot_obs['y'] = -robot_obs['x'], -robot_obs['y']
+            robot_obs['orientation'] = wrap_to_pi(robot_obs['orientation'] + np.pi)
+
+        for robot_obs in detection_frame.get('robots_yellow', ()):
+            robot_obs['x'], robot_obs['y'] = -robot_obs['x'], -robot_obs['y']
+            robot_obs['orientation'] = wrap_to_pi(robot_obs['orientation'] + np.pi)
+
+        for ball_obs in detection_frame.get('balls', ()):
+            ball_obs['x'], ball_obs['y'] = -ball_obs['x'], -ball_obs['y']
+
+        return detection_frame
 
     @property
     def track_frame(self) -> Dict:

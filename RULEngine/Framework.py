@@ -35,12 +35,14 @@ class Framework:
         # Queues
         self.game_state_queue = Queue(maxsize=1)
         self.ai_queue = Queue()
+        self.referee_queue = Queue()
         self.ui_send_queue = Queue()
         self.ui_recv_queue = Queue()
 
         # Engine
         self.engine = Engine(self.game_state_queue,
                              self.ai_queue,
+                             self.referee_queue,
                              self.ui_send_queue,
                              self.ui_recv_queue)
         self.engine.start()
@@ -48,6 +50,7 @@ class Framework:
         # AI
         self.coach = Coach(self.game_state_queue,
                            self.ai_queue,
+                           self.referee_queue,
                            self.ui_send_queue,
                            self.ui_recv_queue)
         self.coach.start()

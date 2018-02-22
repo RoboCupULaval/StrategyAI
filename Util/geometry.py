@@ -1,16 +1,54 @@
 # Under MIT License, see LICENSE.txt
+
 import math as m
-import warnings
-from typing import Union
-
 import numpy as np
-from Util.pose import Pose
 
-from Util.position import Position
+from Util import Position
 
+
+def get_angle_between_three_points(start: Position, mid: Position, end: Position):
+    return abs(wrap_to_pi((mid - start).angle - (end - mid).angle()))
+
+
+def are_collinear(pos1: Position, pos2: Position, pos3: Position, abs_tol=np.pi / 30) -> bool:
+    return compare_angle((pos2 - pos3).angle, (pos1 - pos2).angle, abs_tol=abs_tol)
+
+
+def wrap_to_pi(angle):
+    return (angle + np.pi) % (2 * np.pi) - np.pi
+
+
+def compare_angle(angle1, angle2, abs_tol=0.004) -> bool:
+    return m.fabs(wrap_to_pi(angle1 - angle2)) < abs_tol
+
+
+def rotate(vec: Position, angle) -> Position:
+    rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]).view(Position)
+    return rotation @ vec
+
+
+def normalize(vec: Position) -> Position:
+    if vec.norm == 0:
+        raise ZeroDivisionError
+    return vec.copy() / vec.norm
+
+
+def perpendicular(vec: Position) -> Position:
+    """Return the orthonormal vector to the np.array([0,0,1]) with right hand rule."""
+    return normalize(Position(-vec.y, vec.x))
+
+
+def are_close(vec1: Position, vec2: Position, abs_tol=0.001) -> bool:
+    return (vec1 - vec2).view(Position).norm < abs_tol
+
+
+def clamp(val, min_val, max_val):
+    return max(min(val, max_val), min_val)
 
 
 def remove_duplicates(seq, concurent_list=None, round_up_threshold=1):
+    # TODO: Clean that. Seems to complicate for nothing. + Varible return argument
+
     seen = set()
     seen2 = set()
     seen_add = seen.add
@@ -29,96 +67,6 @@ def round_position_to_number(positions, base=2):
         position.x = int(base * round(float(position.x)/base))
         position.y = int(base * round(float(position.y)/base))
     return positions
-
-
-def get_distance(position_1: Position, position_2: Position) -> float:
-    """
-        Calcul la distance entre deux positions (la norme du vecteur reliant les deux points).
-        Args:
-            position_1: Position 1.
-            position_2: Position 2.
-        Returns:
-            La distance en millimètres entre les deux positions
-    """
-    # assert isinstance(position_1, Position)
-    # assert isinstance(position_2, Position)
-    warnings.warn('(position_1 - position_2).norm() should be use instead.', stacklevel=2)
-    return m.sqrt((position_2.x - position_1.x) ** 2 +
-                  (position_2.y - position_1.y) ** 2)
-
-
-def get_angle(main_position: Position, other: Position) -> float:
-    """
-        Calcul l'angle entre deux positions et l'axe abscisses. Le résultat est
-        en radians entre -pi et pi.
-        Args:
-            main_position: La position de référence.
-            other: Position de l'objet.
-        Returns:
-            L'angle entre les deux positions et l'axe des abscisses.
-    """
-    assert isinstance(main_position, Position), "TypeError main_position"
-    assert isinstance(other, Position), "TypeError other"
-    warnings.warn('(position_1 - position_2).angle() should be use instead.', stacklevel=2)
-    position_x = float(other.x - main_position.x)
-    position_y = float(other.y - main_position.y)
-    return m.atan2(position_y, position_x)
-
-
-def get_nearest(ref_position: Position, list_of_position: list, number=1):
-    """
-        Classe une liste de positions en ordre croissant de distance par
-        rapport à une position de référence et retourne le nombre de positions
-        voulu. Mettre le nombre de positions voulu à 1 permet de trouver la
-        position la plus proche.
-        Args:
-            ref_position: La position de référence.
-            list_of_position: Une liste de positions.
-            number: Le nombre de positions à retourner.
-        Returns:
-            list<Position>: Positions classées en ordre croissant de distance.
-    """
-    assert isinstance(ref_position, Position)
-    assert isinstance(list_of_position, list)
-    assert isinstance(number, int)
-
-    dict_position_distance = {}
-    for bot_position in list_of_position:
-        dst = (ref_position - bot_position).norm()
-
-        while dst in dict_position_distance.keys():
-            dst += 0.1
-        dict_position_distance[dst] = bot_position
-
-    list_sorted = []
-    for i, bot_dst in enumerate(sorted(dict_position_distance.keys())):
-        if i < number:
-            list_sorted.append(dict_position_distance[bot_dst])
-        else:
-            return list_sorted
-
-
-def get_line_equation(position1: Position, position2: Position) -> tuple:
-    """
-        Calcul l'équation de la droite formée par deux positions.
-        Args:
-            position1: La première position de la droite.
-            position2: La seconde position de la droite.
-        Exceptions:
-            ZeroDivisionError: Une exception est soulevée si la droite est
-                               verticale.
-        Returns:
-            Un tuple contenant la pente et l'ordonnée à l'origine.
-    """
-    assert isinstance(position1, Position)
-    assert isinstance(position2, Position)
-
-    delta = position2 - position1
-
-    slope = delta.y / delta.x
-    origin = position1.y - slope * position1.x
-
-    return slope, origin
 
 
 def get_closest_point_on_line(reference: Position,
@@ -192,42 +140,8 @@ def get_closest_point_on_segment(reference: Position,
     outside_y = (reference.y > position1.y and reference.y > position2.y) or \
                 (reference.y < position1.y and reference.y < position2.y)
     if outside_x or outside_y:
-        if (position1 - reference).norm() < (position2 - reference).norm():
+        if (position1 - reference).norm < (position2 - reference).norm:
             position_on_segment = position1
         else:
             position_on_segment = position2
     return position_on_segment
-
-
-def get_angle_between_three_points(start: Position, mid: Position, end: Position):
-    return abs(wrap_to_pi((mid - start).angle() - (end - mid).angle()))
-
-
-def conv_position_2_list(position: Position):
-    """
-    convertit les datas d'un objet position en liste
-    :param position:
-    :return: liste des datas de l'objet
-    """
-
-    return [position.x, position.y]
-
-
-def get_position_behind_point(point: Position, aiming: Position, spacing: Union[int, float]) -> Position:
-    return point - spacing * (aiming - point).normalized()
-
-
-def are_collinear(pos1: Position, pos2: Position, pos3: Position, abs_tol=m.pi / 30) -> bool:
-    return compare_angle((pos2 - pos3).angle(), (pos1 - pos2).angle(), abs_tol=abs_tol)
-
-
-def wrap_to_pi(angle):
-    return (angle + np.pi) % (2 * np.pi) - np.pi
-
-
-def compare_angle(angle1, angle2, abs_tol=0.004):
-    return m.isclose(Pose.wrap_to_pi(angle1 - angle2), 0, abs_tol=abs_tol, rel_tol=0)
-
-
-def clamp(val: float, min_val: float, max_val: float) -> float:
-    return max(min(val, max_val), min_val)
