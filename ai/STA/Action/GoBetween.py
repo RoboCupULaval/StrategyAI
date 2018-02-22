@@ -4,7 +4,7 @@ from Util import Pose, Position
 from Util import AICommand
 from ai.GameDomainObjects.player import Player
 
-from Util.geometry import get_closest_point_on_segment
+from Util.geometry import get_closest_point_on_segment, normalize
 from ai.STA.Action import Action
 from ai.states.game_state import GameState
 
@@ -49,13 +49,13 @@ class GoBetween(Action):
         pt1 = self.position1
         pt2 = self.position2
         target = self.target
-        delta = self.minimum_distance * (pt2 - pt1).normalized()
+        delta = self.minimum_distance * normalize(pt2 - pt1)
         pt1 = pt1 + delta
         pt2 = pt2 - delta
 
         destination = get_closest_point_on_segment(target, pt1, pt2)
         dest_to_target = target - destination
-        destination_orientation = dest_to_target.angle()
+        destination_orientation = dest_to_target.angle
 
         return Pose(destination, destination_orientation)
 
