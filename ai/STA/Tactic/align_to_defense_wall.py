@@ -5,7 +5,8 @@ from typing import List
 import numpy as np
 
 from Util import Pose, Position
-from Util.constant import BALL_RADIUS, ROBOT_RADIUS
+from Util.geometry import perpendicular, normalize
+
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
@@ -89,28 +90,28 @@ class AlignToDefenseWall(Tactic):
         respecte la règle de la main droite et pointe toujours vers le coin suppérieur du but si on est à gauche du 
         terrain et l'inverse si on est à droite du terrain
         """
-        self.vec_perp_of_ball_2_goal = self.vec_ball_2_goal.perpendicular()
+        self.vec_perp_of_ball_2_goal = -perpendicular(self.vec_ball_2_goal)
         # vec_ball_2_goal_top = self.goal_middle + np.divide(Position(self.goal_width, 0), 2.0) - ball_position
         # vec_ball_2_goal_bottom = self.goal_middle - np.divide(Position(self.goal_width, 0), 2.0) - ball_position
         vec_bottom_goal_2_to_top_goal = Position(self.goal_width, 0)
 
         vec_triangle_base = np.multiply(np.dot(self.vec_perp_of_ball_2_goal, vec_bottom_goal_2_to_top_goal),
                                         self.vec_perp_of_ball_2_goal)
-        # if vec_ball_2_goal_top.norm() < vec_ball_2_goal_bottom.norm():
+        # if vec_ball_2_goal_top.norm < vec_ball_2_goal_bottom.norm:
         #     lower_triangle_corner = self.goal_middle + np.divide(Position(self.goal_width, 0), 2.0) - vec_triangle_base
         #     upper_tirangle_corner = self.goal_middle + np.divide(Position(self.goal_width, 0), 2.0)
         # else:
         #     upper_tirangle_corner = self.goal_middle - np.divide(Position(self.goal_width, 0), 2.0) + vec_triangle_base
         #     lower_triangle_corner = self.goal_middle - np.divide(Position(self.goal_width, 0), 2.0)
-        vec_ball_2_limit_circle = (self.vec_ball_2_goal.norm() - self.keep_out_distance) * \
-                                  (self.goal_middle - self.ball_position).normalized()
-        #if self.number_of_robots * 1.8 * ROBOT_RADIUS > vec_triangle_base.norm():
+        vec_ball_2_limit_circle = (self.vec_ball_2_goal.norm - self.keep_out_distance) * \
+                                  normalize(self.goal_middle - self.ball_position)
+        #if self.number_of_robots * 1.8 * ROBOT_RADIUS > vec_triangle_base.norm:
         if True:
             self.position_middle_formation = self.ball_position + vec_ball_2_limit_circle * 0.8
         else:
             self.position_middle_formation = self.ball_position + \
-                                            vec_ball_2_limit_circle.normalized() * \
-                                            (self.number_of_robots * 1.8 * ROBOT_RADIUS / vec_triangle_base.norm())
+                                             normalize(vec_ball_2_limit_circle) * \
+                                             (self.number_of_robots * 1.8 * ROBOT_RADIUS / vec_triangle_base.norm)
 
     def compute_positions_in_formation(self):
         if self.number_of_robots == 1:
@@ -123,10 +124,10 @@ class AlignToDefenseWall(Tactic):
 
         elif self.number_of_robots == 3:
             position_0 = self.position_middle_formation + self.vec_perp_of_ball_2_goal * 2. * ROBOT_RADIUS * 1.1 + \
-                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
-            position_1 = self.position_middle_formation - self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 1.1
+                         normalize(self.vec_ball_2_goal) * ROBOT_RADIUS * 0.9
+            position_1 = self.position_middle_formation - normalize(self.vec_ball_2_goal) * ROBOT_RADIUS * 1.1
             position_2 = self.position_middle_formation - self.vec_perp_of_ball_2_goal * 2. * ROBOT_RADIUS * 1.1 + \
-                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
+                         normalize(self.vec_ball_2_goal) * ROBOT_RADIUS * 0.9
 
             self.positions_in_formations = [position_0, position_1, position_2]
 
@@ -141,14 +142,14 @@ class AlignToDefenseWall(Tactic):
 
         elif self.number_of_robots == 5:
             position_0 = self.position_middle_formation + self.vec_perp_of_ball_2_goal * 3. * ROBOT_RADIUS * 1.1 + \
-                         self.vec_ball_2_goal.normalized() * 3. * ROBOT_RADIUS * 0.9
+                         normalize(self.vec_ball_2_goal) * 3. * ROBOT_RADIUS * 0.9
             position_1 = self.position_middle_formation + self.vec_perp_of_ball_2_goal * ROBOT_RADIUS * 1.1 + \
-                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
-            position_2 = self.position_middle_formation - self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 1.1
+                         normalize(self.vec_ball_2_goal) * ROBOT_RADIUS * 0.9
+            position_2 = self.position_middle_formation - normalize(self.vec_ball_2_goal) * ROBOT_RADIUS * 1.1
             position_3 = self.position_middle_formation - self.vec_perp_of_ball_2_goal * ROBOT_RADIUS * 1.1 + \
-                         self.vec_ball_2_goal.normalized() * ROBOT_RADIUS * 0.9
+                         normalize(self.vec_ball_2_goal) * ROBOT_RADIUS * 0.9
             position_4 = self.position_middle_formation - self.vec_perp_of_ball_2_goal * 3 * ROBOT_RADIUS * 1.1 + \
-                         self.vec_ball_2_goal.normalized() * 3. * ROBOT_RADIUS * 0.9
+                         normalize(self.vec_ball_2_goal) * 3. * ROBOT_RADIUS * 0.9
 
             self.positions_in_formations = [position_0, position_1, position_2, position_3, position_4]
         # print(self.positions_in_formations)
@@ -169,7 +170,7 @@ class AlignToDefenseWall(Tactic):
             return self.halt
         else:
             destination_orientation = (self.ball_position -
-                                       self.positions_in_formations[self.player_number_in_formation]).angle()
+                                       self.positions_in_formations[self.player_number_in_formation]).angle
             return GoToPositionPathfinder(self.game_state, self.player,
                                           Pose(self.positions_in_formations[self.player_number_in_formation],
                                                destination_orientation)).exec()
@@ -180,7 +181,7 @@ class AlignToDefenseWall(Tactic):
 
     def check_success(self):
         player_position = self.player.pose.position
-        distance = (player_position - self.target.position).norm()
+        distance = (player_position - self.target.position).norm
         if distance < self.game_state.const["POSITION_DEADZONE"]:
             return True
         return False

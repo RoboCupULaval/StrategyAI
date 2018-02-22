@@ -12,6 +12,8 @@ from collections import namedtuple
 from math import sin, cos, sqrt
 
 from RULEngine.robot import Robot, MAX_LINEAR_SPEED, MIN_LINEAR_SPEED, MAX_LINEAR_ACCELERATION
+
+from RULEngine.robot import Robot, MAX_LINEAR_SPEED, MIN_LINEAR_SPEED
 from Util.PID import PID
 from Util.csv_plotter import CsvPlotter
 
@@ -46,12 +48,14 @@ def get_control_setting(game_type: str):
 
     return {'translation': translation, 'rotation': rotation}
 
+
 class Observer:
     def __init__(self):
         pass
 
     def write(self, poses):
         pass
+
 
 class Controller(list):
     def __init__(self, ai_queue: Queue, observer=Observer):
@@ -173,6 +177,7 @@ def optimal_speed(robots_pose, destination, cruise_speed):
     dist_to_target = sqrt((destination[0] - robots_pose["x"])**2 +
                           (destination[1] - robots_pose["y"]) ** 2)
     return max(cruise_speed, sqrt(MAX_LINEAR_ACCELERATION * dist_to_target))
+
 
 class VelocityControl:
 
