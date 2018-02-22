@@ -48,23 +48,11 @@ class Position(np.ndarray):
     def angle(self):
         return float(np.arctan2(self.y, self.x))
 
-    def rotate(self, angle):
-        return rotate(self, angle)
-
-    def normalized(self):
-        return normalized(self)
-
-    def perpendicular(self):
-        return perpendicular(self)
-
-    def is_close(self, other, abs_tol=POSITION_ABS_TOL):
-        return is_close(self, other, abs_tol)
-
     def to_dict(self):
         return {'x': self.x, 'y': self.y}
 
     def __eq__(self, other):
-        return self.is_close(other)
+        return (self - other).view(Position).norm < POSITION_ABS_TOL
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -78,22 +66,3 @@ class Position(np.ndarray):
     def __hash__(self):
         return hash(str(self))
 
-
-def rotate(vec: Position, angle):
-    rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]).view(Position)
-    return rotation @ vec
-
-
-def normalized(vec: Position):
-    if vec.norm == 0:
-        raise ZeroDivisionError
-    return vec.copy() / vec.norm
-
-
-def perpendicular(vec: Position):
-    """Return the orthonormal vector to the np.array([0,0,1]) with right hand rule."""
-    return normalized(Position(-vec.y, vec.x))
-
-
-def is_close(vec1: Position, vec2: Position, abs_tol=0.001):
-    return (vec1 - vec2).view(Position).norm < abs_tol

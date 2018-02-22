@@ -7,7 +7,7 @@ from Util import Pose
 from Util.ai_command_shit import AICommand, AICommandType
 
 from Util.ai_command_shit import AICommand, AICommandType
-from Util.geometry import compare_angle, wrap_to_pi, rotate, normalized
+from Util.geometry import compare_angle, wrap_to_pi, rotate, normalize
 from ai.GameDomainObjects import Player
 from ai.STA.Action import Action
 from ai.states.game_state import GameState
@@ -73,7 +73,7 @@ class RotateAround(Action):
             aiming_to_target = target - self.aiming
             heading_error = wrap_to_pi(aiming_to_target.angle - target_to_player.angle())
             if compare_angle(heading_error, 0, abs_tol=self.rotation_speed*dt/2):  # True if heading is right
-                next_position = self.radius * aiming_to_target.normalized()
+                next_position = self.radius * normalize(aiming_to_target)
                 next_orientation = aiming_to_target.angle - m.pi
                 self.tangential_speed = 0
             else:
@@ -81,12 +81,12 @@ class RotateAround(Action):
                     delta_angle = m.copysign(self.rotation_speed * dt, heading_error)
                 else:
                     delta_angle = m.copysign(self.rotation_speed * dt, -1 if self.is_clockwise else 1)
-                next_position = self.radius * rotate(normalized(target_to_player), delta_angle)
+                next_position = self.radius * rotate(normalize(target_to_player), delta_angle)
                 next_orientation = aiming_to_target.angle - m.pi
 
         else:  # If no aiming, we just rotate around the target with the target orientation
             delta_angle = m.copysign(self.rotation_speed * dt, -1 if self.is_clockwise else 1)
-            next_position = self.radius * rotate(normalized(target_to_player), delta_angle)
+            next_position = self.radius * rotate(normalize(target_to_player), delta_angle)
             next_orientation = self.target.orientation + delta_angle / 2
 
         next_position += target

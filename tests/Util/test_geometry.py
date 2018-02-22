@@ -8,7 +8,7 @@ import math as m
 
 from Util import Position
 from Util.geometry import get_line_equation, get_nearest, get_closest_point_on_line, compare_angle, wrap_to_pi,\
-    perpendicular, normalized, is_close, rotate
+    perpendicular, normalize, is_close, rotate
 
 __author__ = 'RoboCupULaval'
 
@@ -119,17 +119,17 @@ class TestGeometry(unittest.TestCase):
         self.assertIsNot(rotate(A_POS, A_POS_ANGLE), A_POS)
 
     def test_givenPosition_whenNormalized_thenReturnNormalizedPosition(self):
-        self.assertEqual(normalized(A_POS), A_POS_NORMALIZED)
+        self.assertEqual(normalize(A_POS), A_POS_NORMALIZED)
 
     def test_givenZeroPosition_whenNormalized_thenThrowsZeroDivisionError(self):
         with self.assertRaises(ZeroDivisionError):
-            print(normalized(A_ZERO_POS))
+            print(normalize(A_ZERO_POS))
 
     def test_givenPosition_whenNormalized_thenReturnIsPosition(self):
-        self.assertIsInstance(normalized(A_POS), Position)
+        self.assertIsInstance(normalize(A_POS), Position)
 
     def test_givenPosition_whenNormalized_thenReturnIsNotSame(self):
-        self.assertIsNot(normalized(A_POS), A_POS)
+        self.assertIsNot(normalize(A_POS), A_POS)
 
     def test_givenPosition_whenPerpendicular_thenReturnPerpendicularPosition(self):
         self.assertEqual(perpendicular(A_POS), A_POS_PERPENDICULAR)

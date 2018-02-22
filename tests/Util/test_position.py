@@ -4,7 +4,6 @@ import unittest
 import numpy as np
 
 from Util import Position
-from Util.position import normalized, perpendicular, rotate, is_close
 
 
 __author__ = 'Simon Bouchard'

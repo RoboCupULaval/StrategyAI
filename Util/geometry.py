@@ -227,7 +227,7 @@ def rotate(vec: Position, angle):
     return rotation @ vec
 
 
-def normalized(vec: Position):
+def normalize(vec: Position):
     if vec.norm == 0:
         raise ZeroDivisionError
     return vec.copy() / vec.norm
@@ -235,7 +235,7 @@ def normalized(vec: Position):
 
 def perpendicular(vec: Position):
     """Return the orthonormal vector to the np.array([0,0,1]) with right hand rule."""
-    return normalized(Position(-vec.y, vec.x))
+    return normalize(Position(-vec.y, vec.x))
 
 
 def is_close(vec1: Position, vec2: Position, abs_tol=0.001):
