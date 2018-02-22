@@ -32,14 +32,12 @@ def get_next_velocity(robot: Robot, dt):
             #print('go2')
             next_speed += robot.max_linear_acceleration * dt * offset
 
-
     next_speed = np.clip(next_speed, 0, robot.cruise_speed)
-    print(next_speed)
     next_velocity = target_direction * next_speed
-
+    
     return next_velocity
 
-
+  
 def dist_accelerate(robot: Robot, target_speed, current_speed) -> bool:  # distance_to_reach_target_speed
     offset = 1
     distance = abs(0.5 * (current_speed ** 2 - target_speed ** 2)) / robot.max_linear_acceleration * offset

@@ -73,7 +73,7 @@ class Controller(list):
 
         control_setting = get_control_setting(self.cfg.config_dict['GAME']['type'])
 
-        super().__init__(Robot(robot_id, VelocityControl(control_setting)) for robot_id in range(PLAYER_PER_TEAM))
+        super().__init__(Robot(robot_id, PositionControl(control_setting), VelocityControl(control_setting)) for robot_id in range(PLAYER_PER_TEAM))
 
     def execute(self, track_frame: Dict) -> RobotPacketFrame:
         self.dt, self.last_time = time() - self.last_time, time()
@@ -88,7 +88,13 @@ class Controller(list):
         for robot in self:
             if robot.pose is not None and robot.path is not None: # active robots
                 self.update_robot_path(robot)
-                command = robot.controller.execute(robot, robot.path, robot.target_orientation)
+                target = Pose(robot.path.points[1], robot.target_orientation).to_dict()
+
+                if sqrt((target["x"]-robot.pose['x'])**2 + (target["y"]-robot.pose['y'])**2) > 50\
+                        and robot.path.speeds[1] > 0:
+                    command = robot.speed_controller.execute(robot, robot.path, robot.target_orientation)
+                else:
+                    command = robot.position_controller.execute(robot, target)
             else:
                 command = {"x": 0, "y": 0, "orientation": 0}
             packet.packet.append(RobotPacket(robot_id=robot.robot_id,
@@ -144,15 +150,15 @@ class PositionControl:
                             'y': PID(**self.control_setting['translation']),
                             'orientation': PID(**self.control_setting['rotation'], wrap_error=True)}
 
-    def execute(self, target, pose, robot, dt):
-
+    def execute(self, robot, target):
+        pose = robot.pose
         error = {state: target[state] - pose[state] for state in pose}
         command = {state: self.controllers[state].execute(error[state]) for state in self.controllers}
         command['x'], command['y'] = rotate(command['x'], command['y'], -pose['orientation'])
 
         overspeed_factor = sqrt(command['x'] ** 2 + command['y'] ** 2) / MAX_LINEAR_SPEED
         if overspeed_factor > 1:
-            command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / ovegrrspeed_factor
+            command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / overspeed_factor
         return command
 
     def reset(self):
