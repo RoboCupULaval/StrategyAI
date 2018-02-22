@@ -2,7 +2,6 @@ from collections import ChainMap
 from enum import Enum
 
 from Util import Pose
-from Util.velocity import Velocity
 from ai.GameDomainObjects import Player
 
 
@@ -30,7 +29,7 @@ _default_keys = {
     'charge_kick': False,
     'kick': False,
     'pose_goal': None,
-    'speed': Velocity(),
+    'speed': Pose(),
     'cruise_speed': 1.0,
     'end_speed': 0.0,
     'collision_ball': False,
@@ -49,7 +48,7 @@ _keys_type = {
     'charge_kick': bool,
     'kick': bool,
     'pose_goal': Pose,
-    'speed': Velocity,
+    'speed': Pose,
     'cruise_speed': (int, float),
     'end_speed': (int, float),
     'collision_ball': bool,

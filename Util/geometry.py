@@ -39,7 +39,7 @@ def get_distance(position_1: Position, position_2: Position) -> float:
     """
     # assert isinstance(position_1, Position)
     # assert isinstance(position_2, Position)
-    warnings.warn('(position_1 - position_2).norm() should be use instead.', stacklevel=2)
+    warnings.warn('(position_1 - position_2).norm should be use instead.', stacklevel=2)
     return m.sqrt((position_2.x - position_1.x) ** 2 +
                   (position_2.y - position_1.y) ** 2)
 
@@ -56,7 +56,7 @@ def get_angle(main_position: Position, other: Position) -> float:
     """
     assert isinstance(main_position, Position), "TypeError main_position"
     assert isinstance(other, Position), "TypeError other"
-    warnings.warn('(position_1 - position_2).angle() should be use instead.', stacklevel=2)
+    warnings.warn('(position_1 - position_2).angle should be use instead.', stacklevel=2)
     position_x = float(other.x - main_position.x)
     position_y = float(other.y - main_position.y)
     return m.atan2(position_y, position_x)
@@ -81,7 +81,7 @@ def get_nearest(ref_position: Position, list_of_position: list, number=1):
 
     dict_position_distance = {}
     for bot_position in list_of_position:
-        dst = (ref_position - bot_position).norm()
+        dst = (ref_position - bot_position).norm
 
         while dst in dict_position_distance.keys():
             dst += 0.1
@@ -189,7 +189,7 @@ def get_closest_point_on_segment(reference: Position,
     outside_y = (reference.y > position1.y and reference.y > position2.y) or \
                 (reference.y < position1.y and reference.y < position2.y)
     if outside_x or outside_y:
-        if (position1 - reference).norm() < (position2 - reference).norm():
+        if (position1 - reference).norm < (position2 - reference).norm:
             position_on_segment = position1
         else:
             position_on_segment = position2
@@ -197,7 +197,7 @@ def get_closest_point_on_segment(reference: Position,
 
 
 def get_angle_between_three_points(start: Position, mid: Position, end: Position):
-    return abs(wrap_to_pi((mid - start).angle() - (end - mid).angle()))
+    return abs(wrap_to_pi((mid - start).angle - (end - mid).angle()))
 
 
 def conv_position_2_list(position: Position):
@@ -211,7 +211,7 @@ def conv_position_2_list(position: Position):
 
 
 def are_collinear(pos1: Position, pos2: Position, pos3: Position, abs_tol=m.pi / 30) -> bool:
-    return compare_angle((pos2 - pos3).angle(), (pos1 - pos2).angle(), abs_tol=abs_tol)
+    return compare_angle((pos2 - pos3).angle, (pos1 - pos2).angle, abs_tol=abs_tol)
 
 
 def wrap_to_pi(angle):
@@ -219,7 +219,27 @@ def wrap_to_pi(angle):
 
 
 def compare_angle(angle1, angle2, abs_tol=0.004):
-    return m.isclose(Pose.wrap_to_pi(angle1 - angle2), 0, abs_tol=abs_tol, rel_tol=0)
+    return m.isclose(wrap_to_pi(angle1 - angle2), 0, abs_tol=abs_tol, rel_tol=0)
+
+
+def rotate(vec: Position, angle):
+    rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]).view(Position)
+    return rotation @ vec
+
+
+def normalized(vec: Position):
+    if vec.norm == 0:
+        raise ZeroDivisionError
+    return vec.copy() / vec.norm
+
+
+def perpendicular(vec: Position):
+    """Return the orthonormal vector to the np.array([0,0,1]) with right hand rule."""
+    return normalized(Position(-vec.y, vec.x))
+
+
+def is_close(vec1: Position, vec2: Position, abs_tol=0.001):
+    return (vec1 - vec2).view(Position).norm < abs_tol
 
 
 def clamp(val: float, min_val: float, max_val: float) -> float:

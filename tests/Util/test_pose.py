@@ -3,7 +3,8 @@ import unittest
 from math import pi
 
 from Util import Position, Pose
-from Util.pose import wrap_to_pi, compare_angle
+
+__author__ = 'Simon Bouchard'
 
 A_X = 123.4
 A_Y = -456.7
@@ -90,22 +91,3 @@ class TestPose(unittest.TestCase):
     def test_givenPoseAndDifferentPose_whenTestEquality_thenFalse(self):
         self.assertNotEqual(A_POSE, A_DIFFERENT_POSE)
 
-    # TODO: vvvv eventually move to geometry unit_test vvvv
-
-    def test_givenOrientationLessThanPi_whenWrapToPi_thenReturnWrappedOrientation(self):
-        self.assertEqual(wrap_to_pi(AN_ANGLE_LESS_THAN_PI), AN_ANGLE_LESS_THAN_PI)
-
-    def test_givenOrientationGreaterThanPi_whenWrapToPi_thenReturnWrappedOrientation(self):
-        self.assertEqual(wrap_to_pi(AN_ANGLE_GREATER_THAN_PI), AN_ANGLE_GREATER_THAN_PI - 2*pi)
-
-    def test_givenAngleAndSameAngle_whenCompareAngle_thenTrue(self):
-        self.assertTrue(compare_angle(AN_ANGLE_LESS_THAN_PI, AN_ANGLE_LESS_THAN_PI))
-
-    def test_givenAngleAndSameAnglePlus2Pi_whenCompareAngle_thenTrue(self):
-        self.assertTrue(compare_angle(AN_ANGLE_LESS_THAN_PI, AN_ANGLE_LESS_THAN_PI + 2*pi))
-
-    def test_givenAngleAndDifferentAngle_whenCompareAngle_thenFalse(self):
-        self.assertFalse(compare_angle(AN_ANGLE_LESS_THAN_PI, AN_ANGLE_GREATER_THAN_PI))
-
-    def test_givenDifferentAngleInTolAndTol_whenCompareAngle_thenTrue(self):
-        self.assertTrue(compare_angle(AN_ANGLE_LESS_THAN_PI, AN_ANGLE_LESS_THAN_PI+0.99, abs_tol=1))
