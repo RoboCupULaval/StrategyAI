@@ -3,11 +3,11 @@
 import math as m
 import numpy as np
 
-from Util import Position
+from Util import Position, Pose
 
 
 def get_angle_between_three_points(start: Position, mid: Position, end: Position):
-    return abs(wrap_to_pi((mid - start).angle - (end - mid).angle()))
+    return abs(wrap_to_pi((mid - start).angle - (end - mid).angle))
 
 
 def are_collinear(pos1: Position, pos2: Position, pos3: Position, abs_tol=np.pi / 30) -> bool:
@@ -20,6 +20,10 @@ def wrap_to_pi(angle):
 
 def compare_angle(angle1, angle2, abs_tol=0.004) -> bool:
     return m.fabs(wrap_to_pi(angle1 - angle2)) < abs_tol
+
+
+def compare_pose_orientation(pose1: Pose, pose2: Pose, abs_tol=0.004) -> bool:
+    return m.fabs(wrap_to_pi(pose1.orientation - pose2.orientation)) < abs_tol
 
 
 def rotate(vec: Position, angle) -> Position:
@@ -39,7 +43,7 @@ def perpendicular(vec: Position) -> Position:
 
 
 def are_close(vec1: Position, vec2: Position, abs_tol=0.001) -> bool:
-    return (vec1 - vec2).view(Position).norm < abs_tol
+    return (vec1 - vec2).norm < abs_tol
 
 
 def clamp(val, min_val, max_val):
