@@ -1,4 +1,5 @@
 # Under MIT license, see LICENSE.txt
+from math import pi
 from typing import List
 
 from Util import Pose
@@ -13,7 +14,7 @@ from ai.states.game_state import GameState
 
 class GoToPositionPathfinder(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
-                 args: List[str]=None, ball_collision=False, cruise_speed=1, charge_kick=False, end_speed=0):
+                 args: List[str]=None, ball_collision=True, cruise_speed=1, charge_kick=False, end_speed=0):
         super().__init__(game_state, player, target, args)
         self.target = target
         self.status_flag = Flags.INIT

@@ -61,7 +61,6 @@ class Coach(Process):
         start = time()
         while not self.field:
             sleep(0.1)
-        print(self.field)
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
     def run(self) -> None:

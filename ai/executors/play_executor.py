@@ -63,7 +63,8 @@ class PlayExecutor(metaclass=Singleton):
                              kick_force=ai_cmd.kick_force,
                              dribbler_active=ai_cmd.dribbler_active,
                              cruise_speed=ai_cmd.cruise_speed * 1000,
-                             target_orientation=ai_cmd.target.orientation if ai_cmd.target else 0)
+                             target_orientation=ai_cmd.target.orientation if ai_cmd.target else 0,
+                             charge_kick=ai_cmd.charge_kick)
 
 
     def order_change_of_sta(self, cmd: STAChangeCommand):
@@ -115,13 +116,14 @@ class PlayExecutor(metaclass=Singleton):
     def _send_robots_status(self) -> None:
         states = self.play_state.get_current_tactical_state()
         cmds = []
-        for player_id, tactic_name, action_name, target in states:
-            target_tuple = (int(target.position.x), int(target.position.y))
-            cmd = UIDebugCommandFactory().robot_strategic_state(player_id,
-                                                                tactic_name,
-                                                                action_name,
-                                                                target_tuple)
-            cmds.append(cmd)
+        for player, tactic_name, action_name, target in states:
+            if action_name != 'Stop':
+                target_tuple = (int(target.position.x), int(target.position.y))
+                cmd = UIDebugCommandFactory().robot_strategic_state(player,
+                                                                    tactic_name,
+                                                                    action_name,
+                                                                    target_tuple)
+                cmds.append(cmd)
         self.ui_send_queue.put(cmds)
 
 

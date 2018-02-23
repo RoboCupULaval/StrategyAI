@@ -12,7 +12,7 @@ class Robot:
     __slots__ = ('_robot_id', 'position_controller', 'speed_controller', 'target_orientation', 'pose', 'velocity',
                  'kick_type', 'kick_force', 'dribbler_active', 'input_command',
                  'cruise_speed', 'max_linear_speed', 'max_linear_acceleration',
-                 'max_angular_speed', 'max_angular_acceleration', 'path', 'raw_path')
+                 'max_angular_speed', 'max_angular_acceleration', 'path', 'raw_path', 'charge_kick')
 
     def __init__(self, robot_id, position_controller, speed_controller):
         self._robot_id = robot_id
@@ -32,6 +32,7 @@ class Robot:
         self.path = None
         self.raw_path = None
         self.target_orientation = 0
+        self.charge_kick = False
 
     @property
     def robot_id(self):
