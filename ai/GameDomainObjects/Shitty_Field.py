@@ -27,7 +27,7 @@ class FieldLineSegment:
     def __init__(self, protobuf_line):
         self.p1 = Position(protobuf_line.p1.x, protobuf_line.p1.y)
         self.p2 = Position(protobuf_line.p2.x, protobuf_line.p2.y)
-        self.length = (self.p2 - self.p1).norm()
+        self.length = (self.p2 - self.p1).norm
         self.thickness = protobuf_line.thickness
 
 

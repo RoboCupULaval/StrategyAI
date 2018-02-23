@@ -34,7 +34,7 @@ class FaceOpponent(Tactic):
                                          math.sin(self.target_player.pose.orientation)])
         destination_position = self.target_player.pose.position + self.distance * orientation_opponent
         ball_to_player = self.game_state.get_ball_position() - self.player.pose.orientation
-        destination_orientation = ball_to_player.angle()
+        destination_orientation = ball_to_player.angle
         destination_pose = Pose(destination_position, destination_orientation)
 
         if self.check_success():
@@ -52,6 +52,6 @@ class FaceOpponent(Tactic):
                               dribbler_on=self.dribbler_on).exec()
 
     def check_success(self):
-        distance = (self.player.pose - self.target).position.norm()
+        distance = (self.player.pose - self.target).position.norm
         return distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.target, abs_tol=ANGLE_TO_HALT)
 

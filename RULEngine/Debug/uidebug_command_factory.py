@@ -91,7 +91,7 @@ class UIDebugCommandFactory(metaclass=Singleton):
         return DebugCommand(1001, cmd_tactics_dict)
 
     @staticmethod
-    def send_robot_strategic_state(player: Player, tactic: str, action: str, target: str="not implemented"):
+    def robot_strategic_state(player: Player, tactic: str, action: str, target: str="not implemented"):
         teamcolor_str = player.team.team_color.__str__()
         data = {teamcolor_str: {player.id: {'tactic': tactic,
                                             'action': action,

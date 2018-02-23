@@ -302,7 +302,7 @@ class PathPartitionner():
             return sub_target, avoid_dir
 
         direction = (pose_target - pose_robot) / (pose_target - pose_robot).norm
-        vec_robot_2_obs = (pose_obstacle_closest - pose_robot).position
+        vec_robot_2_obs = pose_obstacle_closest - pose_robot
         len_along_path = np.dot(vec_robot_2_obs, direction)
         # dist_from_path = (np.cross(direction, vec_robot_2_obs)).norm
         # projection_obs_on_direction = np.dot(direction, vec_robot_2_obs / vec_robot_2_obs.norm)
@@ -310,7 +310,7 @@ class PathPartitionner():
         if 0 < len_along_path < (pose_target - pose_robot).norm:
             vec_perp = -perpendicular(direction)
             vec_perp = vec_perp[0:2] / vec_perp.norm
-            cruise_speed = self.player.velocity.to_array()
+            cruise_speed = self.player.velocity
             self.closest_obs_speed = closest_collision_body.velocity
             avoid_dir = -vec_perp
             if closest_collision_body.type == CollisionType.BALL or closest_collision_body.type == CollisionType.ZONE:
@@ -350,7 +350,7 @@ class PathPartitionner():
                     avoid_dir = -vec_perp
                 else:
                     avoid_dir = vec_perp
-                sub_target = pose_robot.position +\
+                sub_target = pose_robot +\
                     direction * len_along_path + vec_perp * self.res
 
                 bool_sub_target = self.verify_sub_target(sub_target)

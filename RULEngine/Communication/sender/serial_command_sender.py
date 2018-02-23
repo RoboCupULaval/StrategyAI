@@ -26,7 +26,8 @@ class SerialCommandSender(SenderBaseClass):
 
     def send_buffer(self):
         for robot_id, cmd in SerialCommandSender.buffer.items():
-            self.connection.sendSpeed(robot_id, cmd['x'] / 1000, cmd['y'] / 1000, cmd['orientation'])
+            if not (cmd['x'] == cmd['y'] == 0):
+                self.connection.sendSpeed(robot_id, cmd['x'] / 1000, cmd['y'] / 1000, cmd['orientation'])
 
         SerialCommandSender.buffer.clear()
 
