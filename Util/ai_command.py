@@ -3,10 +3,15 @@
 from collections import namedtuple
 
 
-
-class AICommand(namedtuple('AICommand', 'target kick_type kick_force charge_kick dribbler_active '
-                                        'cruise_speed end_speed ball_collision pathfinder_on')):
-    __slots__ = ()
+AICommand = namedtuple('AICommand', 'target,'
+                                    'kick_type,'
+                                    'kick_force,'
+                                    'charge_kick,'
+                                    'dribbler_active,'
+                                    'cruise_speed,'
+                                    'end_speed,'
+                                    'ball_collision,'
+                                    'pathfinder_on')
 
 
 class CmdBuilder:
@@ -34,7 +39,7 @@ class CmdBuilder:
 
     def withKick(self, kick_force=1):
         self.kick_force = kick_force
-        self.kick_type = 1 # For the moment we only have one type
+        self.kick_type = 1  # For the moment we only have one type
         return self
 
     def withForceDribbler(self):
