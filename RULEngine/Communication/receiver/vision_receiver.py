@@ -33,25 +33,24 @@ class VisionReceiver(ReceiverBaseClass):
         return connection
 
     def run(self):
+        self.catch_geometry_packet()
+        super().run()
+
+    def catch_geometry_packet(self):
         self.logger.debug('Waiting for geometry packet...')
         geometry_packet = None
-
         while geometry_packet is None:
             wrapper_packet = SSL_WrapperPacket()
-
             try:
                 data = self.connection.recv(2048)
             except timeout:
                 self.logger.debug('No Vision Frame received.')
                 continue
-
             wrapper_packet.ParseFromString(data)
             wrapper_packet = protobuf_to_dict(wrapper_packet)
             geometry_packet = wrapper_packet.get('geometry', None)
-
         self.logger.debug('Geometry packet received.')
         self.field.update(geometry_packet)
-        super().run()
 
     def receive_packet(self):
 
