@@ -7,15 +7,17 @@ from typing import Dict
 from RULEngine.Communication.protobuf import grSim_Packet_pb2 as grSim_Packet
 from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
 from RULEngine.Communication.sender.udp_socket import udp_socket
+from RULEngine.Communication.monitor import monitor_queue
 
 
+@monitor_queue
 class GrSimCommandSender(SenderBaseClass):
 
     def connect(self, connection_info):
         return udp_socket(connection_info)
 
     def send_packet(self):
-        packet = self.queue.get()
+        packet = self._link.get()
         packet = self._create_protobuf_packet(packet)
         self.connection.send(packet.SerializeToString())
 

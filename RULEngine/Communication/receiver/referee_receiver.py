@@ -8,7 +8,8 @@ from struct import pack
 from protobuf_to_dict import protobuf_to_dict
 
 from RULEngine.Communication.protobuf.referee_pb2 import SSL_Referee
-from RULEngine.Communication.receiver.receiver_base_class import ReceiverBaseClass, monitor_queue
+from RULEngine.Communication.receiver.receiver_base_class import ReceiverBaseClass
+from RULEngine.Communication.monitor import monitor_queue
 
 __author__ = "Simon Bouchard"
 

@@ -7,9 +7,9 @@ import logging
 
 class SenderBaseClass(Process, metaclass=ABCMeta):
 
-    def __init__(self, connection_info: Tuple, queue: Queue):
+    def __init__(self, connection_info: Tuple, link: Queue):
         super().__init__()
-        self.queue = queue
+        self._link = link
         self.connection = self.connect(connection_info)
         self.daemon = True
         self.logger = logging.getLogger(self.__class__.__name__)
