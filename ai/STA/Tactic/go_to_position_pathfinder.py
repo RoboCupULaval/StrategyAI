@@ -29,10 +29,10 @@ class GoToPositionPathfinder(Tactic):
         else:
             self.status_flag = Flags.WIP
 
-        return CmdBuilder().withMoveTo(self.target,
-                                       cruise_speed=self.cruise_speed,
-                                       end_speed=self.end_speed,
-                                       ball_collision=self.ball_collision).build()
+        return CmdBuilder().addMoveTo(self.target,
+                                      cruise_speed=self.cruise_speed,
+                                      end_speed=self.end_speed,
+                                      ball_collision=self.ball_collision).build()
 
     def check_success(self):
         distance = (self.player.pose - self.target).position.norm

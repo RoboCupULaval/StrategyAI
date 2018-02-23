@@ -53,7 +53,7 @@ class GoKick(Tactic):
             self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
 
-        return CmdBuilder().withChargeKicker().build()
+        return CmdBuilder().addChargeKicker().build()
 
     def go_behind_ball(self):
         self.ball_spacing = GRAB_BALL_SPACING
@@ -67,9 +67,9 @@ class GoKick(Tactic):
             if self.auto_update_target:
                 self._find_best_passing_option()
         ball_collision = self.tries_flag == 0
-        return CmdBuilder().withMoveTo(Pose(distance_behind, orientation),
-                                       cruise_speed=1,
-                                       ball_collision=ball_collision).build()
+        return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
+                                      cruise_speed=1,
+                                      ball_collision=ball_collision).build()
 
     def grab_ball(self):
         if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10):
@@ -77,10 +77,10 @@ class GoKick(Tactic):
 
         orientation = (self.target.position - self.player.pose.position).angle
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
-        return CmdBuilder().withMoveTo(Pose(distance_behind, orientation),
-                                       cruise_speed=2,
-                                       end_speed=0,
-                                       ball_collision=False).withChargeKicker().build()
+        return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
+                                      cruise_speed=2,
+                                      end_speed=0,
+                                      ball_collision=False).addChargeKicker().build()
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
@@ -89,7 +89,7 @@ class GoKick(Tactic):
         ball_position = self.game_state.get_ball_position()
         orientation = (self.target.position - self.player.pose.position).angle
 
-        return CmdBuilder().withMoveTo(Pose(ball_position, orientation), cruise_speed=2).withKick(self.kick_force).build()
+        return CmdBuilder().addMoveTo(Pose(ball_position, orientation), cruise_speed=2).addKick(self.kick_force).build()
 
     def validate_kick(self):
         if self.game_state.get_ball_velocity().norm > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:

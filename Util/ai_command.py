@@ -29,7 +29,7 @@ class CmdBuilder:
         self._ball_collision = True
         self._pathfinder_on = True
 
-    def withMoveTo(self, target, cruise_speed=1, end_speed=0, ball_collision=True):
+    def addMoveTo(self, target, cruise_speed=1, end_speed=0, ball_collision=True):
         self._target = target
         self._cruise_speed = cruise_speed
         self._end_speed = end_speed
@@ -37,16 +37,16 @@ class CmdBuilder:
         self._pathfinder_on = True
         return self
 
-    def withKick(self, kick_force=1):
+    def addKick(self, kick_force=1):
         self._kick_force = kick_force
         self._kick_type = 1  # For the moment we only have one type
         return self
 
-    def withForceDribbler(self):
+    def addForceDribbler(self):
         self._dribbler_active = True
         return self
 
-    def withChargeKicker(self):
+    def addChargeKicker(self):
         self._charge_kick = True
         return self
 

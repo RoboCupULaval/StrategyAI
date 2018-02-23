@@ -47,9 +47,8 @@ class GameState(object, metaclass=Singleton):
 
         self._balls = [Ball.from_dict(msg_ball) for msg_ball in new_game_state['balls']]
 
-        # FIXME PB on my computer when a large lag is experienced, the ball is lost. To prevent that we only update when we have a ball
-        if len(self._balls) != 0:
-            self._field = Field(self._balls)
+
+        self._field = Field(self._balls)
 
     def get_player_by_role(self, role: Role):
         return self._role_mapper.roles_translation[role]
