@@ -32,4 +32,4 @@ class RefereeReceiver(ReceiverBaseClass):
 
         packet.ParseFromString(data)
         packet = protobuf_to_dict(packet)
-        self.queue.put(packet)
+        self._queue.put(packet)

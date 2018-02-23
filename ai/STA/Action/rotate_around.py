@@ -66,12 +66,12 @@ class RotateAround(Action):
         target_to_player = player - target
         if not(self.behind_target is None):
             if (self.behind_target - self.player.pose.position).norm < 300:
-                # print((self.behind_target - self.player.pose.position).norm())
+                # print((self.behind_target - self.player.pose.position).norm)
                 self.tangential_speed *= (self.behind_target - self.player.pose.position).norm / 300
 
         if self.aiming is not None:
             aiming_to_target = target - self.aiming
-            heading_error = wrap_to_pi(aiming_to_target.angle - target_to_player.angle())
+            heading_error = wrap_to_pi(aiming_to_target.angle - target_to_player.angle)
             if compare_angle(heading_error, 0, abs_tol=self.rotation_speed*dt/2):  # True if heading is right
                 next_position = self.radius * normalize(aiming_to_target)
                 next_orientation = aiming_to_target.angle - m.pi

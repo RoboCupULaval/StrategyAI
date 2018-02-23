@@ -51,6 +51,12 @@ class Position(np.ndarray):
     def to_dict(self):
         return {'x': self.x, 'y': self.y}
 
+    def __add__(self, other):
+        return super().__add__(other).view(Position)
+
+    def __sub__(self, other):
+        return super().__sub__(other).view(Position)
+
     def __eq__(self, other):
         return (self - other).view(Position).norm < POSITION_ABS_TOL
 

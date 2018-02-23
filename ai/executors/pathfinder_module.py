@@ -22,7 +22,7 @@ def generate_path(game_state, player, ai_command):
         return None
     if player.pathfinder_history.last_pose_goal is not None:
         MIN_CHANGE_IN_GOAL = 200
-        if (player.pathfinder_history.last_pose_goal - ai_command.target.position).norm() < MIN_CHANGE_IN_GOAL:
+        if (player.pathfinder_history.last_pose_goal - ai_command.target.position).norm < MIN_CHANGE_IN_GOAL:
             last_path = player.pathfinder_history.last_path
     pathfinder = create_pathfinder()
 
@@ -60,15 +60,15 @@ def get_pertinent_collision_objects(commanded_player, game_state, ai_command, op
     # FIXME: Find better name that is less confusing between self.player and player
     for player in game_state.our_team.available_players.values():
         if player.id != commanded_player.id:
-            if (commanded_player.pose.position - player.pose.position).norm() + \
-                    (ai_command.target.position - player.pose.position).norm() < \
-                    (ai_command.target.position - commanded_player.pose.position).norm() * factor:
+            if (commanded_player.pose.position - player.pose.position).norm + \
+                    (ai_command.target.position - player.pose.position).norm < \
+                    (ai_command.target.position - commanded_player.pose.position).norm * factor:
                 collision_bodies.append(
                     CollisionBody(player.pose.position, player.velocity.position, gap_proxy))
     for player in game_state.enemy_team.available_players.values():
-        if (commanded_player.pose.position - player.pose.position).norm() + \
-                (ai_command.target.position - player.pose.position).norm() < \
-                (ai_command.target.position - commanded_player.pose.position).norm() * factor:
+        if (commanded_player.pose.position - player.pose.position).norm + \
+                (ai_command.target.position - player.pose.position).norm < \
+                (ai_command.target.position - commanded_player.pose.position).norm * factor:
             collision_bodies.append(
                 CollisionBody(player.pose.position, player.velocity.position, gap_proxy))
     if ai_command.ball_collision:

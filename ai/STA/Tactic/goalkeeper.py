@@ -116,13 +116,13 @@ class GoalKeeper(Tactic):
         return Kick(self.game_state, self.player, self.kick_force, self.target)
 
     def _get_distance_from_ball(self):
-        return (self.player.pose.position - self.game_state.get_ball_position()).norm()
+        return (self.player.pose.position - self.game_state.get_ball_position()).norm
 
     def _is_player_towards_ball_and_target(self, abs_tol=pi/30):
         ball_position = self.game_state.get_ball_position()
         target_to_ball = ball_position - self.target.position
         ball_to_player = self.player.pose.position - ball_position
-        return compare_angle(target_to_ball.angle(), ball_to_player.angle(), abs_tol=abs_tol)
+        return compare_angle(target_to_ball.angle, ball_to_player.angle, abs_tol=abs_tol)
 
     def _find_best_passing_option(self):
         if (self.target_assignation_last_time is None

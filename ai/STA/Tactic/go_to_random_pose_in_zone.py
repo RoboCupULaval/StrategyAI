@@ -51,7 +51,7 @@ class GoToRandomPosition(Tactic):
         return GoToPositionPathfinder(self.game_state, self.player, self.next_pose).exec()
 
     def check_success(self):
-        distance = (self.player.pose - self.next_pose).position.norm()
+        distance = (self.player.pose - self.next_pose).position.norm
         if distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.next_pose, abs_tol=ANGLE_TO_HALT):
             return True
         return False

@@ -4,6 +4,7 @@ from typing import List
 from Util import Pose
 from Util.ai_command import CmdBuilder
 from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
+from Util.geometry import compare_angle
 from ai.GameDomainObjects.player import Player
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
@@ -34,5 +35,5 @@ class GoToPositionPathfinder(Tactic):
                                        ball_collision=self.ball_collision).build()
 
     def check_success(self):
-        distance = (self.player.pose - self.target).position.norm()
-        return distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.target, abs_tol=ANGLE_TO_HALT)
+        distance = (self.player.pose - self.target).position.norm
+        return distance < POSITION_DEADZONE and compare_angle(self.player.pose.orientation, self.target.orientation, abs_tol=ANGLE_TO_HALT)

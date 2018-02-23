@@ -3,6 +3,8 @@ import time
 from typing import List, Dict
 import logging
 
+from multiprocessing import Queue
+
 from RULEngine.controller import EngineCommand
 from Util import Pose, Position, AICommand, Singleton
 from ai.GameDomainObjects import Player
@@ -21,7 +23,7 @@ from ai.states.play_state import PlayState
 
 class PlayExecutor(metaclass=Singleton):
 
-    def __init__(self):
+    def __init__(self, ui_send_queue: Queue):
         self.logger = logging.getLogger(self.__class__.__name__)
 
         cfg = ConfigService()
@@ -31,6 +33,7 @@ class PlayExecutor(metaclass=Singleton):
         self.play_state.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
         self.last_available_players = {}
         self.goalie_id = -1
+        self.ui_send_queue = ui_send_queue
 
     def exec(self) -> List[EngineCommand]:
         """
@@ -46,12 +49,14 @@ class PlayExecutor(metaclass=Singleton):
         #     self.auto_play.update(self._has_available_players_changed())
         ai_cmds = self._execute_strategy()
         engine_cmds = []
+
         for player, ai_cmd in ai_cmds.items():
             if ai_cmd.pathfinder_on:
                 path = generate_path(self.game_state, player, ai_cmd)
             else:
                 path = None
             engine_cmds.append(self.generate_engine_cmd(player, ai_cmd, path))
+
         return engine_cmds
 
     def generate_engine_cmd(self, player: Player, ai_cmd: AICommand, path):
@@ -110,7 +115,17 @@ class PlayExecutor(metaclass=Singleton):
             self.play_state.set_strategy(PlayState().get_new_strategy("HumanControl")(GameState()))
         return self.play_state.current_strategy.exec()
 
-
+    def _send_robots_status(self) -> None:
+        states = self.play_state.get_current_tactical_state()
+        cmds = []
+        for player_id, tactic_name, action_name, target in states:
+            target_tuple = (int(target.position.x), int(target.position.y))
+            cmd = UIDebugCommandFactory().robot_strategic_state(player_id,
+                                                                tactic_name,
+                                                                action_name,
+                                                                target_tuple)
+            cmds.append(cmd)
+        self.ui_send_queue.put(cmds)
 
 
     # def _has_available_players_changed(self) -> bool:

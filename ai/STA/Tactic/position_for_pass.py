@@ -40,7 +40,7 @@ class PositionForPass(Tactic):
         if self.player.receiver_pass_flag is False:
             self.target_position = self._find_best_player_position()
         self.last_time = time.time()
-        destination_orientation = (self.game_state.get_ball_position() - self.player.pose.position).angle()
+        destination_orientation = (self.game_state.get_ball_position() - self.player.pose.position).angle
         return Pose(self.target_position, destination_orientation)
 
     def _find_best_player_position(self):
