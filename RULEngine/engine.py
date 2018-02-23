@@ -32,7 +32,7 @@ __author__ = "Maxime Gagnon-Legault and Simon Bouchard"
 
 class Engine(Process):
     VISION_QUEUE_MAXSIZE = 1
-    ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 100
+    ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 1
     UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
     REFEREE_QUEUE_MAXSIZE = 100
@@ -104,19 +104,23 @@ class Engine(Process):
                 # start = time()
 
                 track_frame = self.tracker.update()
-                robot_packets_frame = self.controller.execute(track_frame)
-
-                self.robot_cmd_queue.put(robot_packets_frame)
-
-                self.tracker.predict(robot_packets_frame.packet)
 
                 try:
-                    self.game_state_queue.put(track_frame, block=False)
+                    self.game_state_queue.put_nowait(track_frame)
                 except Full:
                     pass
 
-                self.ui_send_queue.put(UIDebugCommandFactory.track_frame(track_frame))
-                self.ui_send_queue.put(UIDebugCommandFactory.robots_path(self.controller))
+                robot_packets_frame = self.controller.execute(track_frame)
+
+                try:
+                    self.robot_cmd_queue.put_nowait(robot_packets_frame)
+                except Full:
+                    pass
+
+                self.tracker.predict(robot_packets_frame.packet)
+
+                self.ui_send_queue.put_nowait(UIDebugCommandFactory.track_frame(track_frame))
+                self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
 
                 # sleep_time = max(1/Engine.FPS - (time() - start), 0)
                 # if sleep_time > 0:
