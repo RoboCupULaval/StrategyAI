@@ -44,31 +44,36 @@ class Engine(Process):
 
     def __init__(self,
                  game_state: DictProxy,
+                 field: DictProxy,
                  ai_queue: Queue,
                  referee_queue: Queue,
                  ui_send_queue: Queue,
                  ui_recv_queue: Queue):
-        super(Engine, self).__init__(name=__name__)
+        super().__init__(name=__name__)
 
         self.logger = logging.getLogger('Engine')
         self.cfg = ConfigService()
         self.team_color = self.cfg.config_dict['GAME']['our_color']
 
+        # Managers for shared memory between process
         manager = Manager()
         self.vision_state = manager.list([manager.dict() for _ in range(Engine.NUM_CAMERA)])
+        self.game_state = game_state
+        self.field = field
 
+        # Queues for inter process communication with the AI
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
         self.ai_queue = ai_queue
         self.referee_queue = referee_queue
-        self.game_state = game_state
+
         self.robot_cmd_queue = Queue()
 
         # vision subprocess
         vision_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'],
                                   int(self.cfg.config_dict['COMMUNICATION']['vision_port']))
 
-        self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_state)
+        self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_state, self.field)
 
         # UIDebug communication subprocesses
         ui_debug_host = self.cfg.config_dict['COMMUNICATION']['ui_debug_address']
@@ -112,6 +117,7 @@ class Engine(Process):
 
                 game_state = self.tracker.update()
                 self.game_state.update(game_state)
+
                 robot_packets_frame = self.controller.execute(self.game_state)
 
                 try:

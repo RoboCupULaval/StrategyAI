@@ -8,7 +8,7 @@ import logging
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
 
-from time import sleep
+from time import sleep, time
 
 from RULEngine.services.team_color_service import TeamColorService
 from ai.executors.debug_executor import DebugExecutor
@@ -20,13 +20,15 @@ from config.config_service import ConfigService
 
 class Coach(Process):
 
-    def __init__(self, engine_game_state: DictProxy, ai_queue: Queue, referee_queue: Queue,
-                 ui_send_queue: Queue, ui_recv_queue: Queue):
-        """
-        Initialise l'IA.
-        Celui-ci s'occupe d'appeler tout les morceaux de l'ia dans le bon ordre pour prendre une décision de jeu
-        """
-        super(Coach, self).__init__(name='Coach')
+    def __init__(self,
+                 engine_game_state: DictProxy,
+                 field: DictProxy,
+                 ai_queue: Queue,
+                 referee_queue: Queue,
+                 ui_send_queue: Queue,
+                 ui_recv_queue: Queue):
+
+        super().__init__(name=__name__)
 
         self.logger = logging.getLogger(self.__class__.__name__)
         self.cfg = ConfigService()
@@ -35,8 +37,11 @@ class Coach(Process):
         self.mode_debug_active = cfg.config_dict['DEBUG']['using_debug'] == 'true'
         self.is_simulation = cfg.config_dict['GAME']['type'] == 'sim'
 
-        # Queues for interprocess communication with the engine
+        # Managers for shared memory between process
         self.engine_game_state = engine_game_state
+        self.field = field
+
+        # Queues for interprocess communication with the engine
         self.ai_queue = ai_queue
         self.referee_queue = referee_queue
         self.ui_send_queue = ui_send_queue
@@ -44,41 +49,37 @@ class Coach(Process):
 
         # the states
         self.team_color_service = TeamColorService()
-        self.game_state = None
-        self.play_state = None
-
-        # the executors
-        self.debug_executor = None
-        self.play_executor = None
-
-    def initialize(self) -> None:
         self.game_state = GameState()
         self.play_state = PlayState()
 
+        # the executors
         self.play_executor = PlayExecutor(self.ui_send_queue)
         self.debug_executor = DebugExecutor(self.play_executor, self.ui_send_queue, self.ui_recv_queue)
 
-    def main_loop(self) -> None:
-        sleep(1)
-        while True:
-            if self.engine_game_state:
-                self.game_state.update(self.engine_game_state)
-
-            self.debug_executor.exec()
-            ai_commands = self.play_executor.exec()
-            self._send_cmd(ai_commands)
-
-            # TODO: Put it in config file
-            sleep(0.05)
+    def wait_for_geometry(self):
+        self.logger.debug('Waiting for geometry from the Engine.')
+        start = time()
+        while not self.field:
+            sleep(0.1)
+        print(self.field)
+        self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
     def run(self) -> None:
+        self.wait_for_geometry()
         self.logger.debug('Running')
-
-        self.initialize()
         try:
-            self.main_loop()
+            while True:
+                self.main_loop()
+                sleep(0.05)  # TODO: Put it in config file
+
         except KeyboardInterrupt:
             pass
+
+    def main_loop(self) -> None:
+        self.game_state.update(self.engine_game_state)
+        self.debug_executor.exec()
+        ai_commands = self.play_executor.exec()
+        self._send_cmd(ai_commands)
 
     def _send_cmd(self, ai_commands: List[AICommand]):
         self.ai_queue.put(ai_commands)

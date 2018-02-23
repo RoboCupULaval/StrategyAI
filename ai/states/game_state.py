@@ -42,11 +42,15 @@ class GameState(object, metaclass=Singleton):
             self._enemy_team = self._blue_team
 
     def update(self, new_game_state):
-        self._blue_team.update(new_game_state['blue'])
-        self._yellow_team.update(new_game_state['yellow'])
+        if new_game_state:
+            # Game State is a shared dict with the Engine. Might cause a race condition
+            game_state = new_game_state.copy()
 
-        self._balls = [Ball.from_dict(msg_ball) for msg_ball in new_game_state['balls']]
-        self._field = Field(self._balls)
+            self._blue_team.update(game_state['blue'])
+            self._yellow_team.update(game_state['yellow'])
+
+            self._balls = [Ball.from_dict(msg_ball) for msg_ball in game_state['balls']]
+            self._field = Field(self._balls)
 
     def get_player_by_role(self, role: Role):
         return self._role_mapper.roles_translation[role]

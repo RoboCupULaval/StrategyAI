@@ -32,8 +32,11 @@ class Framework:
         # config
         self.cfg = ConfigService()
 
-        # Queues
+        # Managers
         self.game_state = Manager().dict()
+        self.field = Manager().dict()
+
+        # Queues
         self.ai_queue = Queue()
         self.referee_queue = Queue()
         self.ui_send_queue = Queue()
@@ -41,6 +44,7 @@ class Framework:
 
         # Engine
         self.engine = Engine(self.game_state,
+                             self.field,
                              self.ai_queue,
                              self.referee_queue,
                              self.ui_send_queue,
@@ -49,6 +53,7 @@ class Framework:
 
         # AI
         self.coach = Coach(self.game_state,
+                           self.field,
                            self.ai_queue,
                            self.referee_queue,
                            self.ui_send_queue,

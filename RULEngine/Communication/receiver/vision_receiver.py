@@ -1,10 +1,10 @@
 # Under MIT License, see LICENSE.txt
 
 from ipaddress import ip_address
-
 from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY, timeout, SOL_SOCKET, SO_REUSEADDR
-
 from struct import pack
+
+from multiprocessing.managers import DictProxy
 
 from google.protobuf.message import DecodeError
 from protobuf_to_dict import protobuf_to_dict
@@ -18,6 +18,10 @@ __author__ = "Maxime Gagnon-Legault"
 class VisionReceiver(ReceiverBaseClass):
     TIME_OUT = 1
 
+    def __init__(self, connection_info, link: DictProxy, field: DictProxy):
+        self.field = field
+        super().__init__(connection_info, link)
+
     def connect(self, connection_info):
         connection = socket(AF_INET, SOCK_DGRAM)
         connection.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -28,22 +32,39 @@ class VisionReceiver(ReceiverBaseClass):
 
         return connection
 
+    def run(self):
+        self.logger.debug('Waiting for geometry packet...')
+        geometry_packet = None
+
+        while geometry_packet is None:
+            wrapper_packet = SSL_WrapperPacket()
+            data = self.connection.recv(2048)
+            wrapper_packet.ParseFromString(data)
+            wrapper_packet = protobuf_to_dict(wrapper_packet)
+            geometry_packet = wrapper_packet.get('geometry', None)
+
+        self.logger.debug('Geometry packet received.')
+        self.field.update(geometry_packet)
+        super().run()
+
     def receive_packet(self):
 
-        packet = SSL_WrapperPacket()
+        wrapper_packet = SSL_WrapperPacket()
 
         try:
-            data = self.connection.recv(1024)
+            data = self.connection.recv(2048)
         except timeout:
             self.logger.debug('No Vision Frame received.')
             return
 
         try:
-            packet.ParseFromString(data)
+            wrapper_packet.ParseFromString(data)
         except DecodeError:
-            if not packet.HasField('geometry'):
-                self.logger.error('VisionReceiver had trouble decoding a packet!')
+            self.logger.error('VisionReceiver had trouble decoding a packet!')
 
-        packet = protobuf_to_dict(packet)['detection']
+        wrapper_packet = protobuf_to_dict(wrapper_packet)
 
-        self._link[packet['camera_id']] = packet
+        detection_packet = wrapper_packet.get('detection', None)
+
+        if detection_packet:
+            self._link[detection_packet['camera_id']] = detection_packet
