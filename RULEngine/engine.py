@@ -3,9 +3,11 @@
 import logging
 import os
 import sys
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Manager
 from queue import Full
 from time import time
+
+from typing import Dict
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
@@ -38,7 +40,8 @@ class Engine(Process):
     REFEREE_QUEUE_MAXSIZE = 100
     # FPS = 30
 
-    def __init__(self, game_state_queue: Queue,
+    def __init__(self,
+                 game_state: Dict,
                  ai_queue: Queue,
                  referee_queue: Queue,
                  ui_send_queue: Queue,
@@ -54,7 +57,7 @@ class Engine(Process):
         self.ui_recv_queue = ui_recv_queue
         self.ai_queue = ai_queue
         self.referee_queue = referee_queue
-        self.game_state_queue = game_state_queue
+        self.game_state = game_state
         self.robot_cmd_queue = Queue()
 
         # vision subprocess
@@ -103,14 +106,9 @@ class Engine(Process):
 
                 # start = time()
 
-                track_frame = self.tracker.update()
+                self.game_state = self.tracker.update()
 
-                try:
-                    self.game_state_queue.put_nowait(track_frame)
-                except Full:
-                    pass
-
-                robot_packets_frame = self.controller.execute(track_frame)
+                robot_packets_frame = self.controller.execute(self.game_state)
 
                 try:
                     self.robot_cmd_queue.put_nowait(robot_packets_frame)
@@ -119,7 +117,7 @@ class Engine(Process):
 
                 self.tracker.predict(robot_packets_frame.packet)
 
-                self.ui_send_queue.put_nowait(UIDebugCommandFactory.track_frame(track_frame))
+                self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(self.game_state))
                 self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
 
                 # sleep_time = max(1/Engine.FPS - (time() - start), 0)

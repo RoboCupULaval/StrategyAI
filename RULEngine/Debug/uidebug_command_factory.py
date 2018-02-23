@@ -106,11 +106,11 @@ class UIDebugCommandFactory(metaclass=Singleton):
                                    'auto_flag': auto_flag})
 
     @staticmethod
-    def track_frame(track_frame):
+    def game_state(state):
         cmd = []
-        cmd += UIDebugCommandFactory.robots(track_frame['blue'])
-        cmd += UIDebugCommandFactory.robots(track_frame['yellow'])
-        cmd += UIDebugCommandFactory.balls(track_frame['balls'])
+        cmd += UIDebugCommandFactory.robots(state['blue'])
+        cmd += UIDebugCommandFactory.robots(state['yellow'])
+        cmd += UIDebugCommandFactory.balls(state['balls'])
         return cmd
 
     @staticmethod

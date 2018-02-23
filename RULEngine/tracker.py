@@ -38,7 +38,7 @@ class Tracker:
 
     def update(self) -> Dict:
 
-        vision_frames = self.vision_queue.get(block=True)
+        vision_frames = self.vision_queue.get()
 
         for frame in vision_frames:
             if 'detection' not in frame: # this is a geometry frame
@@ -53,7 +53,7 @@ class Tracker:
 
         self.remove_undetected()
 
-        return self.track_frame
+        return self.game_state
 
     def _update(self, detection_frame: Dict):
 
@@ -115,13 +115,13 @@ class Tracker:
         return detection_frame
 
     @property
-    def track_frame(self) -> Dict:
-        track_fields = dict()
-        track_fields['timestamp'] = self._current_timestamp
-        track_fields['blue'] = self.blue_team
-        track_fields['yellow'] = self.yellow_team
-        track_fields['balls'] = self.balls
-        return track_fields
+    def game_state(self) -> Dict:
+        game_fields = dict()
+        game_fields['timestamp'] = self._current_timestamp
+        game_fields['blue'] = self.blue_team
+        game_fields['yellow'] = self.yellow_team
+        game_fields['balls'] = self.balls
+        return game_fields
 
     @property
     def balls(self) -> List[Dict]:

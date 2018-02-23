@@ -19,7 +19,7 @@ from config.config_service import ConfigService
 
 class Coach(Process):
 
-    def __init__(self, game_state_queue: Queue, ai_queue: Queue, referee_queue: Queue,
+    def __init__(self, engine_game_state: Dict, ai_queue: Queue, referee_queue: Queue,
                  ui_send_queue: Queue, ui_recv_queue: Queue):
         """
         Initialise l'IA.
@@ -35,7 +35,7 @@ class Coach(Process):
         self.is_simulation = cfg.config_dict['GAME']['type'] == 'sim'
 
         # Queues for interprocess communication with the engine
-        self.game_state_queue = game_state_queue
+        self.engine_game_state = engine_game_state
         self.ai_queue = ai_queue
         self.referee_queue = referee_queue
         self.ui_send_queue = ui_send_queue
@@ -60,11 +60,8 @@ class Coach(Process):
     def main_loop(self) -> None:
         sleep(1)
         while True:
-            last_game_state = self._get_last_game_state()
-
-            # TODO repair
-            if last_game_state is not None:
-                self.game_state.update(last_game_state)
+            if self.engine_game_state:
+                self.game_state.update(self.engine_game_state)
             self.debug_executor.exec()
             ai_commands = self.play_executor.exec()
             self._send_cmd(ai_commands)
@@ -82,15 +79,4 @@ class Coach(Process):
             pass
 
     def _send_cmd(self, ai_commands: List[AICommand]):
-        self.ai_queue.put(ai_commands, block=True)
-
-    def _get_last_game_state(self):
-        # This is a way to get the last available gamestate, it's probably should not be a queue
-
-        try:
-            new_game_state = self.game_state_queue.get()
-        except Empty:
-            # todo repair
-            return None
-
-        return new_game_state
+        self.ai_queue.put(ai_commands)
