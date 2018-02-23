@@ -24,7 +24,7 @@ from RULEngine.tracker import Tracker
 
 try:
     from Util.csv_plotter import CsvPlotter
-except:
+except ImportError:
     print("Fail to import csv_plotter. It will be disable.")
     from RULEngine.controller import Observer as CsvPlotter
 
