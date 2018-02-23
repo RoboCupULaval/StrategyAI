@@ -87,7 +87,9 @@ class Engine(Process):
         # print framerate
         self.framecount = 0
         self.time_last_print = time()
-
+    
+    def start(self):
+        super().start()
         self.vision_receiver.start()
         self.ui_sender.start()
         self.ui_recver.start()
