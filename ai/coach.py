@@ -54,8 +54,8 @@ class Coach(Process):
         self.game_state = GameState()
         self.play_state = PlayState()
 
-        self.debug_executor = DebugExecutor(self.ui_send_queue, self.ui_recv_queue)
-        self.play_executor = PlayExecutor()
+        self.play_executor = PlayExecutor(self.ui_send_queue)
+        self.debug_executor = DebugExecutor(self.play_executor, self.ui_send_queue, self.ui_recv_queue)
 
     def main_loop(self) -> None:
         sleep(1)

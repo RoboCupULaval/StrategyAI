@@ -16,11 +16,11 @@ from ai.states.play_state import PlayState
 
 
 class DebugExecutor(metaclass=Singleton):
-    def __init__(self, ui_send_queue: Queue, ui_recv_queue: Queue):
+    def __init__(self, play_executor, ui_send_queue: Queue, ui_recv_queue: Queue):
         self.logger = logging.getLogger("DebugExecutor")
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
-        self.play_executor_ref = PlayExecutor()
+        self.play_executor_ref = play_executor
         self.last_time = 0
 
     def exec(self) -> None:

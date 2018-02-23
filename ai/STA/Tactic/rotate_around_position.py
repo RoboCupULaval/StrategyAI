@@ -14,5 +14,5 @@ class RotateAroundPosition(Tactic):
         self.radius = 90 if not args else float(args[0])
 
     def exec(self):
-        orientation = (self.target.position - self.player.pose.position).angle()
+        orientation = (self.target.position - self.player.pose.position).angle
         return RotateAround(self.game_state, self.player, Pose(self.target.position, orientation), self.radius).exec()

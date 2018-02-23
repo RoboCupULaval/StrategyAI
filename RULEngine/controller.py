@@ -90,11 +90,11 @@ class Controller(list):
                 self.update_robot_path(robot)
                 target = Pose(robot.path.points[1], robot.target_orientation).to_dict()
 
-                if sqrt((target["x"]-robot.pose['x'])**2 + (target["y"]-robot.pose['y'])**2) > 50\
-                        and robot.path.speeds[1] > 0:
-                    command = robot.speed_controller.execute(robot, robot.path, robot.target_orientation)
-                else:
-                    command = robot.position_controller.execute(robot, target)
+                # if sqrt((target["x"]-robot.pose['x'])**2 + (target["y"]-robot.pose['y'])**2) > 50\
+                #         and robot.path.speeds[1] > 0:
+                command = robot.speed_controller.execute(robot, robot.path, robot.target_orientation)
+                # else:
+                #     command = robot.position_controller.execute(robot, target)
             else:
                 command = {"x": 0, "y": 0, "orientation": 0}
             packet.packet.append(RobotPacket(robot_id=robot.robot_id,
@@ -102,7 +102,7 @@ class Controller(list):
                                              kick_type=robot.kick_type,
                                              kick_force=robot.kick_force,
                                              dribbler_active=robot.dribbler_active))
-            #self.observer.write([Pose.from_dict(robot.velocity).position.norm(), np.linalg.norm([command['x'], command['y']])])
+            #self.observer.write([Pose.from_dict(robot.velocity).position.norm, np.linalg.norm([command['x'], command['y']])])
         return packet
 
     def update_robots_states(self, robots_states):

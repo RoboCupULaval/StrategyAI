@@ -30,7 +30,7 @@ class Kick(Action):
         """
         if self.target is not None:
             ball_position = self.game_state.get_ball_position()
-            orientation = (self.target.position - self.player.pose.position).angle()
+            orientation = (self.target.position - self.player.pose.position).angle
         else:
             ball_position = self.player.pose.position
             orientation = self.player.pose.orientation

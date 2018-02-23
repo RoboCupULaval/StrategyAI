@@ -13,8 +13,9 @@ class SerialCommandSender(SenderBaseClass):
     def send_packet(self):
         packets_frame = self.queue.get()
         for packet in packets_frame.packet:
-            self.connection.sendSpeed(packet.robot_id,
-                                      packet.command['x']/1000,
-                                      packet.command['y']/1000,
-                                      packet.command['orientation'])
+            if not (packet.command['x'] == packet.command['y'] == 0):
+                self.connection.sendSpeed(packet.robot_id,
+                                          packet.command['x']/1000,
+                                          packet.command['y']/1000,
+                                          packet.command['orientation'])
 
