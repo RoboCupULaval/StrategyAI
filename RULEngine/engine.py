@@ -100,6 +100,8 @@ class Engine(Process):
         self.framecount = 0
         self.time_last_print = time()
 
+        self.loop_time = time()
+
     def start(self):
         super().start()
         self.vision_receiver.start()
@@ -114,8 +116,6 @@ class Engine(Process):
 
         try:
             while True:
-
-                start = time()
 
                 game_state = self.tracker.update()
                 self.game_state.update(game_state)
@@ -133,10 +133,7 @@ class Engine(Process):
                 self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
 
                 self.print_framerate()
-
-                sleep_time = max(1/Engine.FPS - (time() - start), 0)
-                if sleep_time > 0:
-                    sleep(sleep_time)
+                self.limit_fps()
 
         except KeyboardInterrupt:
             pass
@@ -158,6 +155,13 @@ class Engine(Process):
         self.ui_sender.terminate()
         self.ui_recver.terminate()
         self.robot_cmd_sender.terminate()
+
+    def limit_fps(self):
+        dt, self.loop_time = time() - self.loop_time, time()
+        sleep_time = max(1 / Engine.FPS - dt, 0)
+        if sleep_time > 0:
+            sleep(sleep_time)
+
 
     def print_framerate(self):
         self.framecount += 1
