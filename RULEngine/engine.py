@@ -144,10 +144,10 @@ class Engine(Process):
         exit(0)
 
     def is_any_subprocess_borked(self):
-        borked_process_found = not self.vision_receiver.is_alive() or \
-                               not self.ui_sender.is_alive() or \
-                               not self.ui_recver.is_alive() or \
-                               not self.robot_cmd_sender.is_alive()
+        borked_process_found = any((not self.vision_receiver.is_alive(),
+                                    not self.ui_sender.is_alive(),
+                                    not self.ui_recver.is_alive(),
+                                    not self.robot_cmd_sender.is_alive()))
         return borked_process_found
 
     def terminate_subprocesses(self):
