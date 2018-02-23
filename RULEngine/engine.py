@@ -4,10 +4,11 @@ import logging
 import os
 import sys
 from multiprocessing import Process, Queue, Manager
-from queue import Full
-from time import time
+from multiprocessing.managers import DictProxy
 
-from typing import Dict
+from queue import Full
+from time import time, sleep
+
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
@@ -33,15 +34,16 @@ __author__ = "Maxime Gagnon-Legault and Simon Bouchard"
 
 
 class Engine(Process):
-    VISION_QUEUE_MAXSIZE = 1
+
     ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 1
     UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
     UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
     REFEREE_QUEUE_MAXSIZE = 100
-    # FPS = 30
+    FPS = 60
+    NUM_CAMERA = 4
 
     def __init__(self,
-                 game_state: Dict,
+                 game_state: DictProxy,
                  ai_queue: Queue,
                  referee_queue: Queue,
                  ui_send_queue: Queue,
@@ -52,7 +54,9 @@ class Engine(Process):
         self.cfg = ConfigService()
         self.team_color = self.cfg.config_dict['GAME']['our_color']
 
-        self.vision_queue = Queue(maxsize=Engine.VISION_QUEUE_MAXSIZE)
+        manager = Manager()
+        self.vision_state = manager.list([manager.dict() for _ in range(Engine.NUM_CAMERA)])
+
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
         self.ai_queue = ai_queue
@@ -64,7 +68,7 @@ class Engine(Process):
         vision_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'],
                                   int(self.cfg.config_dict['COMMUNICATION']['vision_port']))
 
-        self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_queue)
+        self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_state)
 
         # UIDebug communication subprocesses
         ui_debug_host = self.cfg.config_dict['COMMUNICATION']['ui_debug_address']
@@ -84,7 +88,7 @@ class Engine(Process):
 
         self.robot_cmd_sender = RobotCommandSender(robot_connection_info, self.robot_cmd_queue)
 
-        self.tracker = Tracker(self.vision_queue)
+        self.tracker = Tracker(self.vision_state)
         self.controller = Controller(self.ai_queue, CsvPlotter)
 
         # print framerate
@@ -104,10 +108,10 @@ class Engine(Process):
         try:
             while True:
 
-                # start = time()
+                start = time()
 
-                self.game_state = self.tracker.update()
-
+                game_state = self.tracker.update()
+                self.game_state.update(game_state)
                 robot_packets_frame = self.controller.execute(self.game_state)
 
                 try:
@@ -120,13 +124,11 @@ class Engine(Process):
                 self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(self.game_state))
                 self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
 
-                # sleep_time = max(1/Engine.FPS - (time() - start), 0)
-                # if sleep_time > 0:
-                #     sleep(sleep_time)
-                # else:
-                #     self.logger.debug('main loop take too much time.')
-
                 self.print_framerate()
+
+                sleep_time = max(1/Engine.FPS - (time() - start), 0)
+                if sleep_time > 0:
+                    sleep(sleep_time)
 
         except KeyboardInterrupt:
             pass

@@ -6,7 +6,8 @@ from Util.ai_command import AICommand
 
 import logging
 from multiprocessing import Process, Queue
-from queue import Empty
+from multiprocessing.managers import DictProxy
+
 from time import sleep
 
 from RULEngine.services.team_color_service import TeamColorService
@@ -19,7 +20,7 @@ from config.config_service import ConfigService
 
 class Coach(Process):
 
-    def __init__(self, engine_game_state: Dict, ai_queue: Queue, referee_queue: Queue,
+    def __init__(self, engine_game_state: DictProxy, ai_queue: Queue, referee_queue: Queue,
                  ui_send_queue: Queue, ui_recv_queue: Queue):
         """
         Initialise l'IA.
@@ -62,6 +63,7 @@ class Coach(Process):
         while True:
             if self.engine_game_state:
                 self.game_state.update(self.engine_game_state)
+
             self.debug_executor.exec()
             ai_commands = self.play_executor.exec()
             self._send_cmd(ai_commands)

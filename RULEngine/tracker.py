@@ -1,6 +1,7 @@
 
 import logging
-from multiprocessing import Queue
+from multiprocessing.managers import DictProxy
+
 from typing import Dict, List
 
 import numpy as np
@@ -19,7 +20,7 @@ class Tracker:
     MAX_BALL_ON_FIELD = 1
     MAX_UNDETECTED_DELAY = 1
 
-    def __init__(self, vision_queue: Queue):
+    def __init__(self, vision_state: DictProxy):
 
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger('Tracker')
@@ -28,46 +29,48 @@ class Tracker:
         self.team_color = self.cfg.config_dict['GAME']['our_color']
         self.our_side = self.cfg.config_dict['GAME']['our_side']
 
-        self.vision_queue = vision_queue
+        self.vision_state = vision_state
 
         self._blue_team = [RobotFilter() for _ in range(Tracker.MAX_ROBOT_PER_TEAM)]
         self._yellow_team = [RobotFilter() for _ in range(Tracker.MAX_ROBOT_PER_TEAM)]
         self._balls = MultiBallService(Tracker.MAX_BALL_ON_FIELD)
 
+        self._camera_frame_number = [-1 for _ in range(4)]  # TODO: make me a constant somewhere
         self._current_timestamp = 0
 
     def update(self) -> Dict:
 
-        vision_frames = self.vision_queue.get()
+        camera_frames = [frame for frame in self.vision_state
+                         if frame and frame['frame_number'] > self._camera_frame_number[frame['camera_id']]]
 
-        for frame in vision_frames:
-            if 'detection' not in frame: # this is a geometry frame
-                continue
-            detection_frame = frame['detection']
+        if any(camera_frames):
 
-            # if self.our_side == 'negative':
-            #     detection_frame = Tracker.change_reference(detection_frame)
+            for frame in camera_frames:
 
-            self._current_timestamp = max(self._current_timestamp, detection_frame['t_capture'])
-            self._update(detection_frame)
+                # if self.our_side == 'negative':
+                #     vision_frame = Tracker.change_reference(frame)
 
-        self.remove_undetected()
+                self._camera_frame_number[frame['camera_id']] = frame['frame_number']
+                self._update(frame, frame['t_capture'])
+
+            self._current_timestamp = max(frame['t_capture'] for frame in camera_frames)
+            self.remove_undetected()
 
         return self.game_state
 
-    def _update(self, detection_frame: Dict):
+    def _update(self, detection_frame: Dict, timestamp):
 
         for robot_obs in detection_frame.get('robots_blue', ()):
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
-            self._blue_team[robot_obs['robot_id']].update(obs, self._current_timestamp)
+            self._blue_team[robot_obs['robot_id']].update(obs, timestamp)
 
         for robot_obs in detection_frame.get('robots_yellow', ()):
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
-            self._yellow_team[robot_obs['robot_id']].update(obs, self._current_timestamp)
+            self._yellow_team[robot_obs['robot_id']].update(obs, timestamp)
 
         for ball_obs in detection_frame.get('balls', ()):
             obs = np.array([ball_obs['x'], ball_obs['y']])
-            self._balls.update(obs, self._current_timestamp)
+            self._balls.update(obs, timestamp)
 
     def predict(self, robot_packet):
 

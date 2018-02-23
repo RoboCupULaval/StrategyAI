@@ -6,9 +6,10 @@ from queue import Full
 from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY
 from struct import pack
 
-from RULEngine.Communication.receiver.receiver_base_class import ReceiverBaseClass
+from RULEngine.Communication.receiver.receiver_base_class import ReceiverBaseClass, monitor_queue
 
 
+@monitor_queue
 class UIDebugCommandReceiver(ReceiverBaseClass):
 
     def connect(self, connection_info):
@@ -24,7 +25,7 @@ class UIDebugCommandReceiver(ReceiverBaseClass):
         data, _ = self.connection.recvfrom(2048)
 
         try:
-            self._queue.put(loads(data))
+            self._link.put(loads(data))
         except Full as e:
             self.logger.debug("{}".format(e))
 
