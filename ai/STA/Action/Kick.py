@@ -40,6 +40,7 @@ class Kick(Action):
                       "kick_force": self.force,
                       "cruise_speed": 0.1,
                       "charge_kick": True,
-                      "end_speed":self.end_speed}
+                      "end_speed": self.end_speed,
+                      "ball_collision": False}
 
         return AICommand(self.player.id, **cmd_params)

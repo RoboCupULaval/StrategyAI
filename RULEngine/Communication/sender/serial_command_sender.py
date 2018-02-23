@@ -4,7 +4,6 @@ from pyhermes import McuCommunicator
 
 from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
 
-
 class SerialCommandSender(SenderBaseClass):
 
     def connect(self, connection_info):
@@ -18,11 +17,11 @@ class SerialCommandSender(SenderBaseClass):
             # It would be preferable if the speed commands were send at a fix rate
             # The following hack make it impossible to immediately break,
             # instead the robot will stop receiving commands and thus break 0.5s later...
-            if not (packet.command['x'] == packet.command['y'] == 0):
-                self.connection.sendSpeed(packet.robot_id,
-                                          packet.command['x']/1000,
-                                          packet.command['y']/1000,
-                                          packet.command['orientation'])
+
+            self.connection.sendSpeed(packet.robot_id,
+                                      packet.command['x']/1000,
+                                      packet.command['y']/1000,
+                                      packet.command['orientation'])
             # FIXME PB: Because of the issue #18 of the Communication Tower, every 3 packets mights be lost
             # We should it fix this in the ComTower or check it here
             if packet.kick_force > 0:

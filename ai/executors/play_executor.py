@@ -116,13 +116,14 @@ class PlayExecutor(metaclass=Singleton):
     def _send_robots_status(self) -> None:
         states = self.play_state.get_current_tactical_state()
         cmds = []
-        for player_id, tactic_name, action_name, target in states:
-            target_tuple = (int(target.position.x), int(target.position.y))
-            cmd = UIDebugCommandFactory().robot_strategic_state(player_id,
-                                                                tactic_name,
-                                                                action_name,
-                                                                target_tuple)
-            cmds.append(cmd)
+        for player, tactic_name, action_name, target in states:
+            if action_name != 'Stop':
+                target_tuple = (int(target.position.x), int(target.position.y))
+                cmd = UIDebugCommandFactory().robot_strategic_state(player,
+                                                                    tactic_name,
+                                                                    action_name,
+                                                                    target_tuple)
+                cmds.append(cmd)
         self.ui_send_queue.put(cmds)
 
 

@@ -42,7 +42,7 @@ def get_control_setting(game_type: str):
         rotation = {'kp': .75, 'ki': 0.15, 'kd': 0}
     elif game_type == 'real':
         translation = {'kp': .01, 'ki': 0.0, 'kd': 0}
-        rotation = {'kp': .01, 'ki': 0.0035, 'kd': 0.0001}
+        rotation = {'kp': 0.5, 'ki': 0.02, 'kd': 0.0}
     else:
         raise TypeError('No matching game type found in control setting')
 
@@ -170,13 +170,13 @@ class PositionControl:
 
 def is_time_to_break(robots_pose, destination, cruise_speed):
     # TODO: we assume that the end speed is zero, which is not always the case
-    dist_to_target = sqrt((destination[0] - robots_pose["x"])**2 +
+    dist_to_target = sqrt((destination[0] - robots_pose["x"]) ** 2 +
                           (destination[1] - robots_pose["y"]) ** 2)
     return dist_to_target < cruise_speed ** 2 / MAX_LINEAR_ACCELERATION
 
 def optimal_speed(robots_pose, destination, cruise_speed):
     # TODO: we assume that the end speed is zero, which is not always the case
-    dist_to_target = sqrt((destination[0] - robots_pose["x"])**2 +
+    dist_to_target = sqrt((destination[0] - robots_pose["x"]) ** 2 +
                           (destination[1] - robots_pose["y"]) ** 2)
     return max(cruise_speed, sqrt(MAX_LINEAR_ACCELERATION * dist_to_target))
 
@@ -193,12 +193,13 @@ class VelocityControl:
     # TODO: Adapte those argument to the other controler
     def execute(self, robot: Robot, path, target_orientation):
         pose = robot.pose
-        target = Pose(path.points[1], target_orientation).to_dict()
+        target = Pose(path.turns[1], target_orientation).to_dict()
         error = {state: target[state] - pose[state] for state in pose}
 
         speed_norm = robot.cruise_speed
         if is_time_to_break(robot.pose, path.points[-1], robot.cruise_speed):
             speed_norm = MIN_LINEAR_SPEED  # Near zero, but not quite
+            print("breaking")
         #speed_norm = optimal_speed(robot.pose, path.points[-1], robot.cruise_speed) # TODO: test this IRL
         norm = sqrt(error["x"]**2 + error["y"]**2)
         vel_x = speed_norm * error["x"] / norm
