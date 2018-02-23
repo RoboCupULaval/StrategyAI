@@ -38,7 +38,13 @@ class VisionReceiver(ReceiverBaseClass):
 
         while geometry_packet is None:
             wrapper_packet = SSL_WrapperPacket()
-            data = self.connection.recv(2048)
+
+            try:
+                data = self.connection.recv(2048)
+            except timeout:
+                self.logger.debug('No Vision Frame received.')
+                continue
+
             wrapper_packet.ParseFromString(data)
             wrapper_packet = protobuf_to_dict(wrapper_packet)
             geometry_packet = wrapper_packet.get('geometry', None)

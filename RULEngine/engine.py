@@ -97,7 +97,7 @@ class Engine(Process):
         self.controller = Controller(self.ai_queue, CsvPlotter)
 
         # print framerate
-        self.framecount = 0
+        self.frame_count = 0
         self.time_last_print = time()
 
         self.loop_time = time()
@@ -132,8 +132,8 @@ class Engine(Process):
                 self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(self.game_state))
                 self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
 
-                self.print_framerate()
-                self.limit_fps()
+                self.print_frame_rate()
+                self.limit_frame_rate()
 
         except KeyboardInterrupt:
             pass
@@ -156,17 +156,16 @@ class Engine(Process):
         self.ui_recver.terminate()
         self.robot_cmd_sender.terminate()
 
-    def limit_fps(self):
+    def limit_frame_rate(self):
         dt, self.loop_time = time() - self.loop_time, time()
-        sleep_time = max(1 / Engine.FPS - dt, 0)
+        sleep_time = 1/Engine.FPS - dt
         if sleep_time > 0:
             sleep(sleep_time)
 
-
-    def print_framerate(self):
-        self.framecount += 1
+    def print_frame_rate(self):
+        self.frame_count += 1
         dt = time() - self.time_last_print
-        if dt > 2:
-            self.logger.info('Updating at {:.2f} fps'.format(self.framecount / dt))
+        if dt > 10:
+            self.logger.info('Updating at {:.2f} fps'.format(self.frame_count / dt))
             self.time_last_print = time()
-            self.framecount = 0
+            self.frame_count = 0
