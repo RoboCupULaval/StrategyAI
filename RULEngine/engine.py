@@ -72,7 +72,7 @@ class Engine(Process):
         self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue)
 
         # Referee communication
-        referee_recver_connection_info = ( self.cfg.config_dict['COMMUNICATION']['referee_udp_address'],
+        referee_recver_connection_info = (self.cfg.config_dict['COMMUNICATION']['referee_udp_address'],
                                            int(self.cfg.config_dict['COMMUNICATION']['referee_port']))
         self.referee_recver = RefereeReceiver(referee_recver_connection_info, self.referee_queue)
 
@@ -87,7 +87,7 @@ class Engine(Process):
         # print framerate
         self.framecount = 0
         self.time_last_print = time()
-    
+
     def start(self):
         super().start()
         self.vision_receiver.start()
