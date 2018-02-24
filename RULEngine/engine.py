@@ -8,7 +8,7 @@ from multiprocessing.managers import DictProxy
 
 from queue import Full
 from time import time, sleep
-
+import sched
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
@@ -108,6 +108,7 @@ class Engine(Process):
 
     def run(self):
         own_pid = os.getpid()
+        self.wait_for_vision()
         self.logger.debug('Running with process ID {}'.format(own_pid))
 
         try:
@@ -122,6 +123,11 @@ class Engine(Process):
 
         sys.stdout.flush()
         exit(0)
+
+    def wait_for_vision(self):
+        self.logger.debug('Waiting for vision frame from the VisionReceiver...')
+        while not any(self.vision_state):
+            sleep(0.1)
 
     def main_loop(self):
         game_state = self.tracker.update()
