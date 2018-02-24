@@ -16,12 +16,9 @@ def create_pathfinder():
     return PathPartitionner()
 
 
-def generate_path(game_state, ai_command):
+def generate_path(game_state, player, ai_command):
     last_path = None
     if ai_command.target is None:
-        return None
-    player = game_state.get_player(ai_command.robot_id)
-    if ai_command is None or not player.pathfinder_on:
         return None
     if player.pathfinder_history.last_pose_goal is not None:
         MIN_CHANGE_IN_GOAL = 200

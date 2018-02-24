@@ -6,7 +6,7 @@ from typing import List
 from Util import Pose
 from Util.ai_command_shit import AICommandType, AICommand, AIControlLoopType
 from ai.GameDomainObjects import Player
-from ai.STA.Action.Idle import Idle
+from Util.ai_command import Idle
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -56,7 +56,7 @@ class RobotIdent(Tactic):
             next_action = AICommand(self.player, AICommandType.MOVE, **{"pose_goal": speed_pose,
                                                                         "control_loop_type": AIControlLoopType.OPEN})
         else:
-            next_action = Idle(self.game_state, self.player)
+            next_action = Idle
 
         return next_action
 

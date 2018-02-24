@@ -7,6 +7,7 @@ from multiprocessing import Queue
 
 from RULEngine.controller import EngineCommand
 from Util import Pose, Position, AICommand, Singleton
+from ai.GameDomainObjects import Player
 from ai.STA.Strategy.human_control import HumanControl
 
 
@@ -48,16 +49,18 @@ class PlayExecutor(metaclass=Singleton):
         #     self.auto_play.update(self._has_available_players_changed())
         ai_cmds = self._execute_strategy()
         engine_cmds = []
-        for ai_cmd in ai_cmds:
-            path = generate_path(self.game_state, ai_cmd)
-            engine_cmds.append(self.generate_engine_cmd(ai_cmd, path))
 
+        for player, ai_cmd in ai_cmds.items():
+            if ai_cmd.pathfinder_on:
+                path = generate_path(self.game_state, player, ai_cmd)
+            else:
+                path = None
+            engine_cmds.append(self.generate_engine_cmd(player, ai_cmd, path))
 
-        self._send_robots_status()
         return engine_cmds
 
-    def generate_engine_cmd(self, ai_cmd, path):
-        return EngineCommand(robot_id=ai_cmd.robot_id,
+    def generate_engine_cmd(self, player: Player, ai_cmd: AICommand, path):
+        return EngineCommand(robot_id=player.id,
                              path=path.to_dict() if path else None,
                              kick_type=ai_cmd.kick_type,
                              kick_force=ai_cmd.kick_force,
@@ -106,7 +109,7 @@ class PlayExecutor(metaclass=Singleton):
             hc.assign_tactic(tactic, player_id)
             self.play_state.set_strategy(hc)
 
-    def _execute_strategy(self) -> List[AICommand]:
+    def _execute_strategy(self) -> Dict[Player, AICommand]:
         # Applique un stratégie par défault s'il n'en a pas (lors du démarage par exemple)
         # TODO change this so we don't send humancontrol when nothing is set/ Donothing would be better
         if self.play_state.current_strategy is None:

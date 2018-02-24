@@ -46,6 +46,8 @@ class GameState(object, metaclass=Singleton):
         self._yellow_team.update(new_game_state['yellow'])
 
         self._balls = [Ball.from_dict(msg_ball) for msg_ball in new_game_state['balls']]
+
+
         self._field = Field(self._balls)
 
     def get_player_by_role(self, role: Role):
