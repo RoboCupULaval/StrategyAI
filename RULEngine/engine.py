@@ -35,11 +35,6 @@ __author__ = "Maxime Gagnon-Legault and Simon Bouchard"
 
 class Engine(Process):
 
-    ROBOT_COMMAND_SENDER_QUEUE_MAXSIZE = 100
-    UI_DEBUG_COMMAND_SENDER_QUEUE_MAXSIZE = 100
-    UI_DEBUG_COMMAND_RECEIVER_QUEUE_MAXSIZE = 100
-    REFEREE_QUEUE_MAXSIZE = 100
-    
     FPS = 60
     NUM_CAMERA = 4
 
@@ -68,7 +63,7 @@ class Engine(Process):
         self.ai_queue = ai_queue
         self.referee_queue = referee_queue
 
-        self.robot_cmd_queue = Queue()
+        self.robot_cmd_queue = Queue(maxsize=100)
 
         # vision subprocess
         vision_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'],
