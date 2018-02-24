@@ -112,25 +112,9 @@ class Engine(Process):
 
         try:
             while True:
-
-                game_state = self.tracker.update()
-                self.game_state.update(game_state)
-
-                robot_packets_frame = self.controller.execute(self.game_state)
-
-                try:
-                    self.robot_cmd_queue.put_nowait(robot_packets_frame)
-                except Full:
-                    pass
-
-                self.tracker.predict(robot_packets_frame.packet)
-
-                self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(self.game_state))
-                self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
-
+                self.main_loop()
                 self.print_frame_rate()
                 self.limit_frame_rate()
-
         except KeyboardInterrupt:
             pass
         finally:
@@ -139,11 +123,22 @@ class Engine(Process):
         sys.stdout.flush()
         exit(0)
 
+    def main_loop(self):
+        game_state = self.tracker.update()
+
+        self.game_state.update(game_state)
+        robot_packets_frame = self.controller.execute(self.game_state)
+        self.tracker.predict(robot_packets_frame.packet)
+
+        self.robot_cmd_queue.put_nowait(robot_packets_frame)
+        self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(self.game_state))
+        self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
+
     def is_any_subprocess_borked(self):
-        borked_process_found = any((not self.vision_receiver.is_alive(),
-                                    not self.ui_sender.is_alive(),
-                                    not self.ui_recver.is_alive(),
-                                    not self.robot_cmd_sender.is_alive()))
+        borked_process_found = not all((self.vision_receiver.is_alive(),
+                                        self.ui_sender.is_alive(),
+                                        self.ui_recver.is_alive(),
+                                        self.robot_cmd_sender.is_alive()))
         return borked_process_found
 
     def terminate_subprocesses(self):
