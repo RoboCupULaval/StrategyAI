@@ -18,6 +18,8 @@ class Action:
         """
         assert isinstance(game_state, GameState), "action classe mère doit avoir un p_game_state objet GameState"
         assert isinstance(player, Player), "action classe mère doit avoir pour player une instance de Player"
+
+        raise RuntimeError("Action are deprecated, use CmdBuilder instead.")
         self.game_state = game_state
         self.player = player
 

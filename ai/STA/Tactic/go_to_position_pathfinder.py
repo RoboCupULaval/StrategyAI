@@ -3,6 +3,7 @@ from math import pi
 from typing import List
 
 from Util import Pose
+from Util.ai_command import CmdBuilder
 from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 from Util.geometry import compare_angle
 from ai.GameDomainObjects.player import Player
@@ -29,11 +30,10 @@ class GoToPositionPathfinder(Tactic):
         else:
             self.status_flag = Flags.WIP
 
-        return MoveToPosition(self.game_state,
-                              self.player,
-                              self.target,
-                              cruise_speed=self.cruise_speed,
-                              ball_collision=self.ball_collision).exec()
+        return CmdBuilder().addMoveTo(self.target,
+                                      cruise_speed=self.cruise_speed,
+                                      end_speed=self.end_speed,
+                                      ball_collision=self.ball_collision).build()
 
     def check_success(self):
         distance = (self.player.pose - self.target).position.norm
