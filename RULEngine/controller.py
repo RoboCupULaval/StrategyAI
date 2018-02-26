@@ -199,7 +199,6 @@ class VelocityControl:
         speed_norm = robot.cruise_speed
         if is_time_to_break(robot.pose, path.points[-1], robot.cruise_speed):
             speed_norm = MIN_LINEAR_SPEED  # Near zero, but not quite
-            print("breaking")
         #speed_norm = optimal_speed(robot.pose, path.points[-1], robot.cruise_speed) # TODO: test this IRL
         norm = sqrt(error["x"]**2 + error["y"]**2)
         vel_x = speed_norm * error["x"] / norm

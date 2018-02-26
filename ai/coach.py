@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 from typing import Dict, List
 
+from RULEngine.controller import EngineCommand
 from Util.ai_command import AICommand
 
 
@@ -77,8 +78,8 @@ class Coach(Process):
     def main_loop(self) -> None:
         self.game_state.update(self.engine_game_state)
         self.debug_executor.exec()
-        ai_commands = self.play_executor.exec()
-        self._send_cmd(ai_commands)
+        engine_commands = self.play_executor.exec()
+        self._send_cmd(engine_commands)
 
-    def _send_cmd(self, ai_commands: List[AICommand]):
-        self.ai_queue.put(ai_commands)
+    def _send_cmd(self, engine_commands: List[EngineCommand]):
+        self.ai_queue.put(engine_commands)

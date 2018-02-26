@@ -10,7 +10,7 @@ from RULEngine.filters.ball_kalman_filter import BallFilter
 class MultiBallService(list):
 
     BALL_SEPARATION_THRESHOLD = 20000
-    MAX_UNDETECTED_DELAY = 20
+    MAX_UNDETECTED_DELAY = 60
 
     def __init__(self, max_ball: int=1):
         self.logger = logging.getLogger('MultiBallService')
