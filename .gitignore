@@ -73,3 +73,6 @@ unfiltered.txt
 
 # Config custom
 *.custom.cfg
+
+# own files
+venv/

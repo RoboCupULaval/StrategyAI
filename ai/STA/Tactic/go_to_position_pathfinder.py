@@ -23,7 +23,7 @@ class GoToPositionPathfinder(Tactic):
         self.cruise_speed = float(args[0]) if len(self.args) > 0 else cruise_speed
         #print("Assign move to position to robot id {}".format(self.player.id))
 
-    def exec(self):
+    def exec(self) -> object:
         if self.check_success():
             self.status_flag = Flags.SUCCESS
         else:
