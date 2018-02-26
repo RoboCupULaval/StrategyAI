@@ -2,12 +2,15 @@
 import logging
 
 from Util import Pose, Position
+from Util.constant import ROBOT_RADIUS
+from Util.geometry import compare_angle
 from ai.GameDomainObjects import Ball
 from ai.STA.Tactic.tactic import Tactic
 from ai.states import GameState
 
 
 class PerfectSim:
+
     def __init__(self, tactic_obj):
         assert not isinstance(tactic_obj, Tactic), "You must pass the class, not an instance of the class. (ex: 'GoToPosition', not 'GoToPosition()')"
 
@@ -20,6 +23,11 @@ class PerfectSim:
 
         # Singleton are a pain in the ass, there state must be reset
         self.game_state.reset()
+
+        # Variable for assertion
+        self.last_ia_cmd = None
+        self.has_charge_kick = False
+        self.has_hit_ball = False
 
     def add_robot(self, robot_id, pose: Pose):
         self.game_state.our_team.players[robot_id].pose = pose
@@ -37,14 +45,44 @@ class PerfectSim:
     def tick(self):
         if not self.tactic:
             raise RuntimeError("You must call start() to initialize the simulation")
+
+        print("====== Executing {} ======".format(str(self.tactic.current_state.__func__)))
         ia_cmd = self.tactic.exec()
 
         self._apply_cmd(ia_cmd)
 
+    def has_kick(self):
+        return self.last_ia_cmd.kick_type == 1
+
     def _apply_cmd(self, ia_cmd):
-        if ia_cmd.kick_type:
-            print("kick")
+        self.last_ia_cmd = ia_cmd
+
         if ia_cmd.target:
+            print("Hero robot moved to {}".format(ia_cmd.target))
             self.hero_robot.pose = ia_cmd.target
+
+        if ia_cmd.kick_type == 1:
+            if self._robot_can_hit_ball(self.hero_robot):
+                print("Hero Robot has kick and hit the ball")
+                self.has_hit_ball = True
+            else:
+                print("Hero Robot has kick, but didn't hit the ball")
+
+        if ia_cmd.charge_kick:
+            self.has_charge_kick = True
+
+    def _robot_can_hit_ball(self, robot):
+        KICK_DISTANCE_MIN = ROBOT_RADIUS - 30
+        KICK_DISTANCE_MAX = ROBOT_RADIUS + 100
+        MAX_ANGLE_FOR_KICK = 15
+
+        ball_position = self.game_state.ball.position
+        robot_to_ball = robot.pose.position - ball_position
+
+        return KICK_DISTANCE_MIN < robot_to_ball.norm <  KICK_DISTANCE_MAX \
+               and compare_angle(robot.pose.orientation, robot_to_ball.angle, abs_tol=MAX_ANGLE_FOR_KICK)
+
+
+
 
 
