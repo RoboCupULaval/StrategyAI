@@ -2,9 +2,10 @@
 from typing import List
 
 from Util import Pose
-from Util.ai_command_shit import AICommand
+from Util.ai_command import CmdBuilder, AICommand
 from ai.GameDomainObjects import Player
-from ai.STA.Action.Idle import Idle
+from ai.STA.Action import Action
+from Util.ai_command import Idle
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
@@ -49,7 +50,7 @@ class Tactic(object):
             :return: un nouvelle instance de l'action Idle pour le robot
         """
         self.next_state = self.halt
-        return Idle(self.game_state, self.player)
+        return CmdBuilder().build()
 
     def exec(self) -> AICommand:
         """
@@ -57,11 +58,12 @@ class Tactic(object):
 
             :return: un AICommand
         """
-        next_action = self.current_state()
+        next_ai_command = self.current_state()
+        if isinstance(next_ai_command, Action):
+            raise RuntimeError("Action are deprecaded use CmdBuilder")
+        if not isinstance(next_ai_command, AICommand):
+            raise RuntimeError("A tactic MUST return an AICommand, not a {}".format(type(next_ai_command)))
         self.current_state = self.next_state
-        next_ai_command = next_action.exec()
-        self.player.ai_command = next_ai_command
-        # return deprecated TODO remove with all others as well MGL 2017/05/22
         return next_ai_command
 
     def get_name(self):

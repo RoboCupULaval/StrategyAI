@@ -10,7 +10,7 @@ def path_smoother(player: Robot):
     positions_list = [path.points[0]]
     for idx, point in enumerate(path.points[1:-1]):
         i = idx + 1
-        if (path.points[i] - path.points[i+1]).norm() < 10:
+        if (path.points[i] - path.points[i+1]).norm < 10:
             continue
         positions_list += [path.points[i]]
     positions_list += [path.points[-1]]
@@ -37,34 +37,34 @@ def path_smoother(player: Robot):
             speed *= 0.4
             radius = speed ** 2 / player.max_angular_acceleration
             dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
-        if (p1-p2).norm() < 0.001 or (p2-p3).norm() < 0.001 or (p1-p3).norm() < 0.001:
+        if (p1-p2).norm < 0.001 or (p2-p3).norm < 0.001 or (p1-p3).norm < 0.001:
             # on traite tout le cas ou le problème dégènere
             point_list += [p2]
             speed_list += [vel_cruise]
             turns_list += [p2]
         else:
             p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) *\
-                      (p1 - p2) / (p1 - p2).norm()
+                      (p1 - p2) / (p1 - p2).norm
             p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) *\
-                (p3 - p2) / (p3 - p2).norm()
-            if (p4-p5).norm() > (p3-p1).norm():
+                (p3 - p2) / (p3 - p2).norm
+            if (p4-p5).norm > (p3-p1).norm:
                 point_list += [p2]
                 speed_list += [vel_cruise]
                 turns_list += [p2]
-            elif (p1 - p2).norm() < (p4 - p2).norm():
-                radius *= (p1 - p2).norm() / (p4 - p2).norm()
+            elif (p1 - p2).norm < (p4 - p2).norm:
+                radius *= (p1 - p2).norm / (p4 - p2).norm
                 dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
-                p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p1 - p2) / (p1 - p2).norm()
-                p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p3 - p2) / (p3 - p2).norm()
+                p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p1 - p2) / (p1 - p2).norm
+                p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p3 - p2) / (p3 - p2).norm
                 point_list += [p4, p5]
                 speed_list += [speed, speed]
                 centre_rotation = ((p4 + p5 - 2 * p2) / 2) * (1 + (radius / dist_deviation))
                 turns_list += [p4, centre_rotation]
-            elif (p3 - p2).norm() < (p5 - p2).norm():
-                radius *= (p3 - p2).norm() / (p5 - p2).norm()
+            elif (p3 - p2).norm < (p5 - p2).norm:
+                radius *= (p3 - p2).norm / (p5 - p2).norm
                 dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
-                p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p1 - p2) / (p1 - p2).norm()
-                p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p3 - p2) / (p3 - p2).norm()
+                p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p1 - p2) / (p1 - p2).norm
+                p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p3 - p2) / (p3 - p2).norm
                 point_list += [p4, p5]
                 speed_list += [speed, speed]
                 centre_rotation = ((p4 + p5 - 2 * p2) / 2) * (1 + (radius / dist_deviation))
@@ -86,7 +86,7 @@ def path_smoother(player: Robot):
     new_turns_list = []
     for idx, point in enumerate(point_list[0:-1]):
         i = idx
-        if (point_list[i] - point_list[i+1]).norm() < 100:
+        if (point_list[i] - point_list[i+1]).norm < 100:
             continue
         else:
             position_list += [point_list[i]]
@@ -94,9 +94,9 @@ def path_smoother(player: Robot):
             new_turns_list += [turns_list[i]]
         if False:
             min_dist = abs(0.5 * (np.square(speed_list[i]) - np.square(speed_list[i + 1])) / player.max_linear_acceleration)
-            if min_dist > (point_list[i] - point_list[i+1]).norm():
+            if min_dist > (point_list[i] - point_list[i+1]).norm:
                 if speed_list[i] > speed_list[i + 1]:
-                    speed_list[i] *= (point_list[i] - point_list[i+1]).norm() / min_dist
+                    speed_list[i] *= (point_list[i] - point_list[i+1]).norm / min_dist
 
     position_list += [point_list[-1]]
     new_speed_list += [speed_list[-1]]

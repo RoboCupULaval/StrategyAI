@@ -16,8 +16,6 @@ class Player:
         self._pose = Pose()
         self._velocity = Pose()
         self.pathfinder_history = PathfinderHistory()
-        self.pathfinder_on = True # FIXME this does not belong in Player, it belong in AICommand
-        self.ball_collision = False
 
     def update(self, new_pose: Pose, new_velocity: Pose):
         self.pose = new_pose

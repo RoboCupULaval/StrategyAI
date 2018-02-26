@@ -3,9 +3,9 @@ from typing import List
 
 from Util import Pose
 from Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
-from Util.geometry import get_distance
+
 from ai.GameDomainObjects import Player
-from ai.STA.Action.Idle import Idle
+from Util.ai_command import Idle
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -25,7 +25,7 @@ class DemoFollowRobot(Tactic):
         self.status_flag = Flags.WIP
         self.target = self.game_state.get_player_pose(self.robot_to_follow_id)
 
-        if get_distance(self.player.pose.position, self.target.position) < POSITION_DEADZONE + ROBOT_RADIUS:
+        if (self.player.pose.position - self.target.position).norm < POSITION_DEADZONE + ROBOT_RADIUS:
             self.next_state = self.halt
         else:
             self.next_state = self.move_to_ball
@@ -35,8 +35,7 @@ class DemoFollowRobot(Tactic):
     def halt(self):
         self.status_flag = Flags.SUCCESS
 
-        if get_distance(self.player.pose.position, self.game_state.get_ball_position()) \
-                < POSITION_DEADZONE + ROBOT_RADIUS:
+        if (self.player.pose.position - self.game_state.get_ball_position()) < POSITION_DEADZONE + ROBOT_RADIUS:
             self.next_state = self.halt
         else:
             self.next_state = self.move_to_ball

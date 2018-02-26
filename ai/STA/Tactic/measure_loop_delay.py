@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from Util import Pose, Position
 from ai.GameDomainObjects import Player
-from ai.STA.Action.Idle import Idle
+from Util.ai_command import Idle
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -33,7 +33,7 @@ class MeasureLoopDelay(Tactic):
         return MoveToPosition(self.game_state, self.player, self.target)
 
     def is_moving(self):
-        if (self.player.pose.position - self.init_position).norm() > MOVING_THRESHOLD:
+        if (self.player.pose.position - self.init_position).norm > MOVING_THRESHOLD:
             self.start_moving_time = time.time()
             self.loop_delay = self.start_moving_time - self.send_command_time
             print('Delay of the AI loop is {:5.3f} second'.format(self.loop_delay))

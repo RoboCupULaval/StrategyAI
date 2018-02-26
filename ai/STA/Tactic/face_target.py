@@ -17,6 +17,6 @@ class FaceTarget(Tactic):
 
     def exec(self):
         self.status_flag = Flags.WIP
-        target_orientation = (self.target.position - self.player.pose.position).angle()
+        target_orientation = (self.target.position - self.player.pose.position).angle
         return AICommand(self.player, AICommandType.MOVE, pose_goal=Pose(self.player_position, target_orientation))
 

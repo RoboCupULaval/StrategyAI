@@ -9,7 +9,7 @@
 # from Util import Position
 # # from Util import RobotJoystick
 # from ai.STA.Action.AllStar import AllStar
-# from ai.STA.Action.Idle import Idle
+# from Util.ai_command import Idle
 # from ai.STA.Tactic.tactic import Tactic
 # from ai.STA.Tactic.tactic_constants import Flags
 # from ai.states.game_state import GameState

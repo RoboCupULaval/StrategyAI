@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 class DynamicUpdate():
     #Suppose we know the x range

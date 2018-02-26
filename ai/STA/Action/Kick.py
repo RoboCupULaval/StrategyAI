@@ -30,7 +30,7 @@ class Kick(Action):
         """
         if self.target is not None:
             ball_position = self.game_state.get_ball_position()
-            orientation = (self.target.position - self.player.pose.position).angle()
+            orientation = (self.target.position - self.player.pose.position).angle
         else:
             ball_position = self.player.pose.position
             orientation = self.player.pose.orientation
@@ -40,6 +40,7 @@ class Kick(Action):
                       "kick_force": self.force,
                       "cruise_speed": 0.1,
                       "charge_kick": True,
-                      "end_speed":self.end_speed}
+                      "end_speed": self.end_speed,
+                      "ball_collision": False}
 
         return AICommand(self.player.id, **cmd_params)

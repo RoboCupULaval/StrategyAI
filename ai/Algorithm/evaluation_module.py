@@ -1,6 +1,5 @@
 # Under MIT License, see LICENSE.txt
 from Util import Position
-from Util.geometry import get_distance
 from Util.position import Position
 from Util.constant import ROBOT_RADIUS
 from ai.GameDomainObjects.Shitty_Field import FieldSide
@@ -31,12 +30,12 @@ def closest_players_to_point(point: Position, our_team=None):
     if our_team or our_team is None:
         for i in GameState().our_team.available_players.values():
             # les players friends
-            player_distance = (i.pose.position - point).norm()
+            player_distance = (i.pose.position - point).norm
             list_player.append(PlayerPosition(i, player_distance))
     if not our_team:
         for i in GameState().enemy_team.available_players.values():
             # les players ennemis
-            player_distance = (i.pose.position - point).norm()
+            player_distance = (i.pose.position - point).norm
             list_player.append(PlayerPosition(i, player_distance))
     list_player = sorted(list_player, key=lambda x: x.distance)
     return list_player
@@ -49,11 +48,11 @@ def closest_player_to_point(point: Position, our_team=None):
 
 
 def is_ball_moving(min_speed=0.1):
-    return GameState().get_ball_velocity().norm() > min_speed
+    return GameState().get_ball_velocity().norm > min_speed
 
 def is_ball_kicked(player, min_distance=150, min_speed=1000):
-    if (player.pose.position - GameState.get_ball_position()).norm() > min_distance and \
-                    GameState.get_ball_velocity().norm() > min_speed:
+    if (player.pose.position - GameState.get_ball_position()).norm > min_distance and \
+                    GameState.get_ball_velocity().norm > min_speed:
         return True
     else:
         return False
@@ -64,11 +63,6 @@ def is_ball_our_side():
         return GameState().get_ball_position().x > 0
     else:
         return GameState().get_ball_position().x < 0
-
-
-def is_target_reached(player, target: Position, min_dist=0.01):
-    # Retourne TRUE si dans un rayon de l'objectif
-    return get_distance(target, player.pose.position) < min_dist
 
 
 def best_position_option(player, pointA: Position, pointB: Position):
@@ -278,7 +272,7 @@ def score_strategy_other_team():
     if player_their_team is not None and player_our_team is not None:
         their_player_to_ball = GameState().get_ball_position() - player_their_team.pose.position
         our_player_to_ball = GameState().get_ball_position() - player_our_team.pose.position
-        score += their_player_to_ball.norm() - our_player_to_ball.norm()
+        score += their_player_to_ball.norm - our_player_to_ball.norm
 
     return score
 

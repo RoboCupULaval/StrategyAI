@@ -6,7 +6,7 @@ from Util.area import isInsideSquare, stayInsideSquare
 from Util.constant import ROBOT_RADIUS
 from ai.GameDomainObjects import Player
 from ai.STA.Action.GoBetween import GoBetween
-from ai.STA.Action.Idle import Idle
+from Util.ai_command import Idle
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -80,7 +80,7 @@ class ProtectZone(Tactic):
         destination = stayInsideSquare(self.game_state.get_ball_position(), self.y_top, self.y_bottom, self.x_left,
                                        self.x_right)
         destination = self.game_state.game.field.stay_outside_goal_area(destination, our_goal=True)
-        orientation = (self.game_state.get_ball_position()- destination).angle()
+        orientation = (self.game_state.get_ball_position()- destination).angle
         return MoveToPosition(self.game_state, self.player, Pose(destination, orientation))
 
     def get_enemy_in_zone(self):

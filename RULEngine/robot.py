@@ -5,17 +5,19 @@ MAX_LINEAR_SPEED = 2000  # mm/s
 MAX_LINEAR_ACCELERATION = 2000  # mm/s^2
 MAX_ANGULAR_SPEED = 1  # rad/s
 MAX_ANGULAR_ACCELERATION = 1  # rad/s^2
+MIN_LINEAR_SPEED = 200 # mm/s Speed near zero, but still move the robot
 
 class Robot:
 
-    __slots__ = ('_robot_id', 'controller', 'target_orientation', 'pose', 'velocity',
+    __slots__ = ('_robot_id', 'position_controller', 'speed_controller', 'target_orientation', 'pose', 'velocity',
                  'kick_type', 'kick_force', 'dribbler_active', 'input_command',
                  'cruise_speed', 'max_linear_speed', 'max_linear_acceleration',
-                 'max_angular_speed', 'max_angular_acceleration', 'path', 'raw_path')
+                 'max_angular_speed', 'max_angular_acceleration', 'path', 'raw_path', 'charge_kick')
 
-    def __init__(self, robot_id, controller):
+    def __init__(self, robot_id, position_controller, speed_controller):
         self._robot_id = robot_id
-        self.controller = controller
+        self.position_controller = position_controller
+        self.speed_controller = speed_controller
         self.pose = None
         self.velocity = None
         self.kick_type = None
@@ -30,6 +32,7 @@ class Robot:
         self.path = None
         self.raw_path = None
         self.target_orientation = 0
+        self.charge_kick = False
 
     @property
     def robot_id(self):

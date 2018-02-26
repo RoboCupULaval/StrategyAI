@@ -5,7 +5,6 @@ from typing import Dict
 
 from RULEngine.services.team_color_service import TeamColorService
 from Util.constant import TeamColor
-from Util.position import position_to_tuple
 from Util.singleton import Singleton
 from ai.GameDomainObjects.player import Player
 
@@ -92,7 +91,7 @@ class UIDebugCommandFactory(metaclass=Singleton):
         return DebugCommand(1001, cmd_tactics_dict)
 
     @staticmethod
-    def send_robot_strategic_state(player: Player, tactic: str, action: str, target: str="not implemented"):
+    def robot_strategic_state(player: Player, tactic: str, action: str, target: str="not implemented"):
         teamcolor_str = player.team.team_color.__str__()
         data = {teamcolor_str: {player.id: {'tactic': tactic,
                                             'action': action,
@@ -120,7 +119,7 @@ class UIDebugCommandFactory(metaclass=Singleton):
         for robot in robots:
             if not robot.raw_path or len(robot.raw_path) < 2:
                 continue
-            path = [position_to_tuple(p) for p in robot.raw_path]
+            path = [(p['x'], p['y']) for p in robot.raw_path]
 
             for start_point, end_point in zip(path, path[1:]):
                 cmds.append(UIDebugCommandFactory.line(start_point,

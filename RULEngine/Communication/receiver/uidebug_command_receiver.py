@@ -24,7 +24,7 @@ class UIDebugCommandReceiver(ReceiverBaseClass):
         data, _ = self.connection.recvfrom(2048)
 
         try:
-            self.queue.put(loads(data))
+            self._queue.put(loads(data))
         except Full as e:
             self.logger.debug("{}".format(e))
 
