@@ -193,7 +193,7 @@ class VelocityControl:
     # TODO: Adapte those argument to the other controler
     def execute(self, robot: Robot, path, target_orientation):
         pose = robot.pose
-        target = Pose(path.turns[1], target_orientation).to_dict()
+        target = Pose(path.points[1], target_orientation).to_dict()
         error = {state: target[state] - pose[state] for state in pose}
 
         speed_norm = robot.cruise_speed

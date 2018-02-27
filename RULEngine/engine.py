@@ -35,7 +35,7 @@ __author__ = "Maxime Gagnon-Legault and Simon Bouchard"
 
 class Engine(Process):
 
-    FPS = 30
+    FPS = 60
     NUM_CAMERA = 4
     FIX_FRAME_RATE = True
 
@@ -167,12 +167,12 @@ class Engine(Process):
         if time_ahead < -2:
             self.logger.info(
                 "The required frame rate is too fast for the engine. "
-                "To find out what is the best frame rate for your computer, launch the engine with FIX_FRAME_RATE at false.")
+                "To find out what is the best frame rate for your computer, launch the engine with FIX_FRAME_RATE at false and use the minimum FPS that you get.")
 
     def print_frame_rate(self):
         self.frame_count += 1
         dt = time() - self.time_last_print
-        if dt > 2:
+        if dt > 10:
             self.logger.info('Updating at {:.2f} fps'.format(self.frame_count / dt))
             self.time_last_print = time()
             self.frame_count = 0
