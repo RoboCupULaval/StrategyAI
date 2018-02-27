@@ -44,12 +44,12 @@ class GameState(object, metaclass=Singleton):
     def update(self, new_game_state):
         if new_game_state:
             # Game State is a shared dict with the Engine. Might cause a race condition
-            game_state = new_game_state.copy()
+            game_state = new_game_state.copy()  # FIX: this is a shallow copy. is it okay?
 
             self._blue_team.update(game_state['blue'])
             self._yellow_team.update(game_state['yellow'])
 
-            self._balls = game_state['balls']
+            self._balls = [Ball.from_dict(ball_dict) for ball_dict in game_state['balls']]
             self._field = Field(self._balls)
 
     def get_player_by_role(self, role: Role):

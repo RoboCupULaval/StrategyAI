@@ -101,8 +101,7 @@ class Controller(list):
                 self[robot_id].kick_type = cmd.kick_type
                 self[robot_id].kick_force = cmd.kick_force
                 self[robot_id].dribbler_active = cmd.dribbler_active
-                self[robot_id].raw_path = Path.from_dict(cmd.path) if cmd.path else None
-                self[robot_id].path = Path.from_dict(cmd.path) if cmd.path else None
+                self[robot_id].raw_path = cmd.path
                 self[robot_id].cruise_speed = cmd.cruise_speed
                 self[robot_id].charge_kick = cmd.charge_kick
                 self[robot_id].target_orientation = cmd.target_orientation
@@ -111,7 +110,7 @@ class Controller(list):
 
     def update_robot_path(self):
         for robot in self:
-            if robot.path is not None and robot.pose is not None:
+            if robot.raw_path is not None and robot.pose is not None:
                 robot.raw_path = robot.raw_path.quick_update_path(robot.pose.position)
                 robot.path = path_smoother(robot, robot.raw_path)
 
@@ -142,7 +141,7 @@ class Controller(list):
                                 charge_kick=robot.charge_kick))
         return packet
 
-    
+
 class PositionControl:
 
     def __init__(self, control_setting: Dict):
@@ -210,11 +209,11 @@ class VelocityControl:
 
 def is_time_to_break(robots_pose, destination, cruise_speed):
     # TODO: we assume that the end speed is zero, which is not always the case
-    dist_to_target = (destination - robots_pose).norm
+    dist_to_target = (destination - robots_pose.position).norm
     return dist_to_target < cruise_speed ** 2 / MAX_LINEAR_ACCELERATION
 
 
 def optimal_speed(robots_pose, destination, cruise_speed):
     # TODO: we assume that the end speed is zero, which is not always the case
-    dist_to_target = (destination - robots_pose).norm
+    dist_to_target = (destination - robots_pose.position).norm
     return max(cruise_speed, sqrt(MAX_LINEAR_ACCELERATION * dist_to_target))
