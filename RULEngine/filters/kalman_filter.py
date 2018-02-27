@@ -67,7 +67,6 @@ class KalmanFilter:
     def _predict(self, input_command):
         if self._dt == 0:
             self._dt = time() - self.last_predict_time
-        self.last_predict_time = time()
 
         # Predict the next state from states vector and input commands
         if np.all(input_command):
@@ -77,7 +76,9 @@ class KalmanFilter:
 
         # Update the state covariance matrix from the transition model
         self.P = self.transition_model() @ self.P @ self.transition_model().T + self.Q
+
         self._dt = 0
+        self.last_predict_time = time()
 
     def update(self, observation, t_capture) -> None:
         error = observation - self.observation_model() @ self.x
