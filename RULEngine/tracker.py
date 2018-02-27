@@ -139,12 +139,12 @@ class Tracker:
 
     @property
     def blue_team(self) -> List[Pose]:
-        active_players = [p for p in self._balls if p.is_active]
+        active_players = [p for p in self._blue_team if p.is_active]
         return Tracker.format_team(active_players)
 
     @property
     def yellow_team(self) -> List[Pose]:
-        active_players = [p for p in self._balls if p.is_active]
+        active_players = [p for p in self._yellow_team if p.is_active]
         return Tracker.format_team(active_players)
 
     @staticmethod
