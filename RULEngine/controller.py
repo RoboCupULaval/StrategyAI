@@ -27,7 +27,7 @@ from config.config_service import ConfigService
 import numpy as np
 
 RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active charge_kick')
-RobotPacketFrame = namedtuple('RobotPacketFrame', 'timestamp is_team_yellow packet')
+RobotState = namedtuple('RobotState', 'timestamp is_team_yellow packet')
 
 
 # TODO see if necessary, also same as RobotPacket
@@ -75,15 +75,15 @@ class Controller(list):
 
         super().__init__(Robot(robot_id, PositionControl(control_setting), VelocityControl(control_setting)) for robot_id in range(PLAYER_PER_TEAM))
 
-    def execute(self, track_frame: Dict) -> RobotPacketFrame:
+    def execute(self, track_frame: Dict) -> RobotState:
         self.dt, self.last_time = time() - self.last_time, time()
         self.timestamp = track_frame['timestamp']
         self.update_robots_states(track_frame[self.team_color])
         self.update_engine_commands()
 
-        packet = RobotPacketFrame(timestamp=self.timestamp,
-                                  is_team_yellow=True if self.team_color == 'yellow' else False,
-                                  packet=[])
+        packet = RobotState(timestamp=self.timestamp,
+                            is_team_yellow=True if self.team_color == 'yellow' else False,
+                            packet=[])
 
         for robot in self:
             command = {"x": 0, "y": 0, "orientation": 0}

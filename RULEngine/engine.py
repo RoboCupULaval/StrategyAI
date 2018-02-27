@@ -135,10 +135,10 @@ class Engine(Process):
         game_state = self.tracker.update()
 
         self.game_state.update(game_state)
-        robot_packets_frame = self.controller.execute(self.game_state)
-        self.tracker.predict(robot_packets_frame.packet)
-
-        self.robot_cmd_sender.send_packet(robot_packets_frame)
+        robot_state = self.controller.execute(self.game_state)
+        self.robot_cmd_sender.send_packet(robot_state)
+        self.tracker.predict(robot_state.packet)
+        
         self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(self.game_state))
         self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
 
