@@ -46,7 +46,7 @@ class Ball:
     @classmethod
     def from_dict(cls, dict: Dict):
         b = Ball(dict["id"])
-        b.position = Position.from_dict(dict["pose"])
+        b.position = dict["pose"]
         b.velocity.x = dict["velocity"]["x"]
         b.velocity.y = dict["velocity"]["y"]
         return b

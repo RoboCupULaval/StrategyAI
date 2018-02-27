@@ -1,5 +1,6 @@
 # Under MIT License, see LICENSE.txt
 import math as m
+import numpy as np
 
 from Util.position import Position
 
@@ -18,7 +19,7 @@ class Pose:
         return cls(Position(my_dict['x'], my_dict['y']), my_dict['orientation'])
 
     @classmethod
-    def from_values(cls, x, y, orientation):
+    def from_values(cls, x, y, orientation=0):
         return cls(Position(x, y), orientation)
 
     @property
@@ -43,7 +44,11 @@ class Pose:
 
     @position.setter
     def position(self, position: Position):
-            self._position = position.copy()
+        self._position = position.copy()
+
+    @property
+    def norm(self):
+        return self.position.norm
 
     @property
     def orientation(self):
@@ -52,6 +57,9 @@ class Pose:
     @orientation.setter
     def orientation(self, orientation):
         self._orientation = orientation
+
+    def to_array(self):
+        return np.array([self.x, self.y, self.orientation])
 
     def to_dict(self):
         return {'x': self.x, 'y': self.y, 'orientation': self.orientation}

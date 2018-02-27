@@ -3,8 +3,8 @@ from Util.path import Path
 from RULEngine.robot import Robot
 
 
-def path_smoother(player: Robot):
-    path = player.path
+def path_smoother(player: Robot, path):
+    path = path.copy()
     player = player
     vel_cruise = player.cruise_speed
     positions_list = [path.points[0]]

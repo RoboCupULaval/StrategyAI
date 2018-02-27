@@ -17,7 +17,8 @@ from RULEngine.robot import Robot, MAX_LINEAR_SPEED, MIN_LINEAR_SPEED
 from Util.PID import PID
 from Util.csv_plotter import CsvPlotter
 
-from Util import Pose
+from Util import Pose, Position
+from Util.geometry import rotate, wrap_to_pi
 from Util.constant import PLAYER_PER_TEAM
 from Util.path import Path
 from Util.path_smoother import path_smoother
@@ -60,8 +61,6 @@ class Observer:
 class Controller(list):
     def __init__(self, ai_queue: Queue, observer=Observer):
         self.ai_queue = ai_queue
-        self.dt = 0
-        self.last_time = 0
         self.timestamp = None
         self.observer = observer
 
@@ -73,48 +72,25 @@ class Controller(list):
 
         control_setting = get_control_setting(self.cfg.config_dict['GAME']['type'])
 
-        super().__init__(Robot(robot_id, PositionControl(control_setting), VelocityControl(control_setting)) for robot_id in range(PLAYER_PER_TEAM))
+        super().__init__(Robot(robot_id, PositionControl(control_setting), VelocityControl(control_setting))
+                         for robot_id in range(PLAYER_PER_TEAM))
 
     def execute(self, track_frame: Dict) -> RobotPacketFrame:
-        self.dt, self.last_time = time() - self.last_time, time()
+
         self.timestamp = track_frame['timestamp']
         self.update_robots_states(track_frame[self.team_color])
         self.update_engine_commands()
+        self.update_robot_path()
 
-        packet = RobotPacketFrame(timestamp=self.timestamp,
-                                  is_team_yellow=True if self.team_color == 'yellow' else False,
-                                  packet=[])
+        commands = self.execute_controller()
+        packet = self.generate_packet(commands)
 
-        for robot in self:
-            command = {"x": 0, "y": 0, "orientation": 0}
-            if robot.pose is not None and robot.path is not None: # active robots
-                self.update_robot_path(robot)
-
-                # The following commented code currently breaks IRL, will be fix later
-                # target = Pose(robot.path.points[1], robot.target_orientation).to_dict()
-                # if sqrt((target["x"]-robot.pose['x'])**2 + (target["y"]-robot.pose['y'])**2) > 50\
-                #         and robot.path.speeds[1] > 0:
-                command = robot.speed_controller.execute(robot, robot.path, robot.target_orientation)
-                # else:
-                #     command = robot.position_controller.execute(robot, target)
-            packet.packet.append(RobotPacket(robot_id=robot.robot_id,
-                                             command=command,
-                                             kick_type=robot.kick_type,
-                                             kick_force=robot.kick_force,
-                                             dribbler_active=robot.dribbler_active,
-                                             charge_kick=robot.charge_kick))
-            #self.observer.write([Pose.from_dict(robot.velocity).position.norm, np.linalg.norm([command['x'], command['y']])])
         return packet
 
     def update_robots_states(self, robots_states):
         for robot in robots_states:
-            robot_id = robot['id']
-            self[robot_id].pose = {'x': robot['pose']['x'],
-                                   'y': robot['pose']['y'],
-                                   'orientation': robot['pose']['orientation']}
-            self[robot_id].velocity = {'x': robot['velocity']['x'],
-                                       'y': robot['velocity']['y'],
-                                       'orientation': robot['velocity']['orientation']}
+            self[robot['id']].pose = robot['pose']
+            self[robot['id']].velocity = robot['velocity']
 
     def update_engine_commands(self):
         try:
@@ -125,25 +101,48 @@ class Controller(list):
                 self[robot_id].kick_type = cmd.kick_type
                 self[robot_id].kick_force = cmd.kick_force
                 self[robot_id].dribbler_active = cmd.dribbler_active
-                self[robot_id].raw_path = cmd.path
-                self[robot_id].path = cmd.path
+                self[robot_id].raw_path = Path.from_dict(cmd.path) if cmd.path else None
+                self[robot_id].path = Path.from_dict(cmd.path) if cmd.path else None
                 self[robot_id].cruise_speed = cmd.cruise_speed
                 self[robot_id].charge_kick = cmd.charge_kick
                 self[robot_id].target_orientation = cmd.target_orientation
         except Empty:
             pass
 
-    def update_robot_path(self, robot):
-        # The pathfinder was coded with Pose/Position in mind. So the dict pose of Robot must be converted
-        pose = Pose.from_dict(robot.pose)
-        # TODO: This is really ugly... We need to juggle between Path and it's dict representation.
-        raw_path = Path.from_dict(robot.raw_path)
-        raw_path = raw_path.quick_update_path(pose.position)
-        robot.path = raw_path
-        robot.path = path_smoother(robot)
-        robot.raw_path = raw_path.to_dict()
+    def update_robot_path(self):
+        for robot in self:
+            if robot.path is not None and robot.pose is not None:
+                robot.raw_path = robot.raw_path.quick_update_path(robot.pose.position)
+                robot.path = path_smoother(robot, robot.raw_path)
 
+    def execute_controller(self):
+        commands = []
+        for robot in self:
+            if robot.pose is not None and robot.path is not None:  # active robots
+                cmd = robot.speed_controller.execute(robot)
+                commands.append(cmd)
+            else:
+                commands.append(None)
+        return commands
 
+    def generate_packet(self, commands):
+        packet = RobotPacketFrame(timestamp=self.timestamp,
+                                  is_team_yellow=True if self.team_color == 'yellow' else False,
+                                  packet=[])
+
+        for robot in self:
+            command = commands[robot.robot_id]
+            if command is not None:
+                packet.packet.append(
+                    RobotPacket(robot_id=robot.robot_id,
+                                command=command,
+                                kick_type=robot.kick_type,
+                                kick_force=robot.kick_force,
+                                dribbler_active=robot.dribbler_active,
+                                charge_kick=robot.charge_kick))
+        return packet
+
+    
 class PositionControl:
 
     def __init__(self, control_setting: Dict):
@@ -152,33 +151,27 @@ class PositionControl:
                             'y': PID(**self.control_setting['translation']),
                             'orientation': PID(**self.control_setting['rotation'], wrap_error=True)}
 
-    def execute(self, robot, target):
-        pose = robot.pose
-        error = {state: target[state] - pose[state] for state in pose}
-        command = {state: self.controllers[state].execute(error[state]) for state in self.controllers}
-        command['x'], command['y'] = rotate(command['x'], command['y'], -pose['orientation'])
+    def execute(self, robot: Robot, target: Pose):
+        robot = robot.pose
 
-        overspeed_factor = sqrt(command['x'] ** 2 + command['y'] ** 2) / MAX_LINEAR_SPEED
+        pos_error = target.position - robot.position
+        orientation_error = wrap_to_pi(target.orientation - robot.position)
+
+        command = Pose()
+        command.position = Position(self.controllers['x'].execute(pos_error.x),
+                                    self.controllers['y'].execute(pos_error.y))
+        command.orientation = self.controllers['orientation'].execute(orientation_error)
+
+        command.position = rotate(command.position, -robot.orientation)
+
+        overspeed_factor = command.norm / MAX_LINEAR_SPEED
         if overspeed_factor > 1:
-            command['x'], command['y'] = command['x'] / overspeed_factor, command['y'] / overspeed_factor
+            command.position /= overspeed_factor
         return command
 
     def reset(self):
         for controller in self.controllers.values():
             controller.reset()
-
-
-def is_time_to_break(robots_pose, destination, cruise_speed):
-    # TODO: we assume that the end speed is zero, which is not always the case
-    dist_to_target = sqrt((destination[0] - robots_pose["x"]) ** 2 +
-                          (destination[1] - robots_pose["y"]) ** 2)
-    return dist_to_target < cruise_speed ** 2 / MAX_LINEAR_ACCELERATION
-
-def optimal_speed(robots_pose, destination, cruise_speed):
-    # TODO: we assume that the end speed is zero, which is not always the case
-    dist_to_target = sqrt((destination[0] - robots_pose["x"]) ** 2 +
-                          (destination[1] - robots_pose["y"]) ** 2)
-    return max(cruise_speed, sqrt(MAX_LINEAR_ACCELERATION * dist_to_target))
 
 
 class VelocityControl:
@@ -191,26 +184,37 @@ class VelocityControl:
                             'orientation': PID(**self.control_setting['rotation'], wrap_error=True)}
 
     # TODO: Adapte those argument to the other controler
-    def execute(self, robot: Robot, path, target_orientation):
+    def execute(self, robot: Robot):
         pose = robot.pose
-        target = Pose(path.points[1], target_orientation).to_dict()
-        error = {state: target[state] - pose[state] for state in pose}
+
+        target = Pose(robot.path.points[1], robot.target_orientation)
+
+        error = Pose()
+        error.position = target.position - robot.pose.position
+        error.orientation = wrap_to_pi(target.orientation - robot.pose.orientation)
 
         speed_norm = robot.cruise_speed
-        if is_time_to_break(robot.pose, path.points[-1], robot.cruise_speed):
+        if is_time_to_break(robot.pose, robot.path.points[-1], robot.cruise_speed):
             speed_norm = MIN_LINEAR_SPEED  # Near zero, but not quite
+
         #speed_norm = optimal_speed(robot.pose, path.points[-1], robot.cruise_speed) # TODO: test this IRL
-        norm = sqrt(error["x"]**2 + error["y"]**2)
-        vel_x = speed_norm * error["x"] / norm
-        vel_y = speed_norm  * error["y"] / norm
 
-        cmd_x, cmd_y = rotate(vel_x, vel_y, -pose["orientation"])
+        vel = speed_norm * error.position / error.norm
 
-        cmd_theta = self.orientation_controller.execute(error['orientation'])
+        command = Pose()
+        command.position = rotate(vel, -pose.orientation)
+        command.orientation = self.orientation_controller.execute(error.orientation)
 
-        command = {'x': cmd_x, 'y': cmd_y, 'orientation': cmd_theta}
         return command
 
 
-def rotate(x: float, y: float, angle: float):
-    return [cos(angle) * x - sin(angle) * y, sin(angle) * x + cos(angle) * y]
+def is_time_to_break(robots_pose, destination, cruise_speed):
+    # TODO: we assume that the end speed is zero, which is not always the case
+    dist_to_target = (destination - robots_pose).norm
+    return dist_to_target < cruise_speed ** 2 / MAX_LINEAR_ACCELERATION
+
+
+def optimal_speed(robots_pose, destination, cruise_speed):
+    # TODO: we assume that the end speed is zero, which is not always the case
+    dist_to_target = (destination - robots_pose).norm
+    return max(cruise_speed, sqrt(MAX_LINEAR_ACCELERATION * dist_to_target))

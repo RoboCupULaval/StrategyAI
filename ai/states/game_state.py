@@ -49,7 +49,7 @@ class GameState(object, metaclass=Singleton):
             self._blue_team.update(game_state['blue'])
             self._yellow_team.update(game_state['yellow'])
 
-            self._balls = [Ball.from_dict(msg_ball) for msg_ball in game_state['balls']]
+            self._balls = game_state['balls']
             self._field = Field(self._balls)
 
     def get_player_by_role(self, role: Role):

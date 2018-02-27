@@ -42,7 +42,7 @@ class Position(np.ndarray):
 
     @property
     def norm(self):
-        return np.sqrt(self.x ** 2 + self.y ** 2)
+        return float(np.sqrt(self.x ** 2 + self.y ** 2))
 
     @property
     def angle(self):

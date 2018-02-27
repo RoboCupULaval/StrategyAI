@@ -1,15 +1,14 @@
 
 import logging
 from multiprocessing.managers import DictProxy
-
 from typing import Dict, List
-
 import numpy as np
 
 from RULEngine.filters.multiballservice import MultiBallService
 from RULEngine.filters.robot_kalman_filter import RobotFilter
 
 from Util.geometry import wrap_to_pi
+from Util import Pose, Position
 
 from config.config_service import ConfigService
 
@@ -76,20 +75,12 @@ class Tracker:
 
         input_commands = [None for _ in range(12)]
         for packet in robot_packet:
-            input_commands[packet.robot_id] = packet.command
+            input_commands[packet.robot_id] = packet.command.to_array()
 
-        if self.team_color == 'yellow':
-            for robot, input_cmd in zip(self._yellow_team, input_commands):
-                input_cmd = [input_cmd[state] for state in ['x', 'y', 'orientation']] if input_cmd else None
-                robot.predict(np.array(input_cmd))
-            for robot in self._blue_team:
-                robot.predict()
-        else:
-            for robot in self._yellow_team:
-                robot.predict()
-            for robot, input_cmd in zip(self._blue_team, input_commands):
-                input_cmd = [input_cmd[state] for state in ['x', 'y', 'orientation']] if input_cmd else None
-                robot.predict(np.array(input_cmd))
+        for robot, input_cmd in zip(self._our_team, input_commands):
+            robot.predict(input_cmd)
+        for robot in self._their_team:
+            robot.predict()
 
         self._balls.predict()
 
@@ -104,18 +95,33 @@ class Tracker:
     @staticmethod
     def change_reference(detection_frame):
 
-        for robot_obs in detection_frame.get('robots_blue', ()):
-            robot_obs['x'], robot_obs['y'] = -robot_obs['x'], -robot_obs['y']
-            robot_obs['orientation'] = wrap_to_pi(robot_obs['orientation'] + np.pi)
+        teams = detection_frame.get('robots_blue', ())\
+                + detection_frame.get('robots_yellow', ())
 
-        for robot_obs in detection_frame.get('robots_yellow', ()):
-            robot_obs['x'], robot_obs['y'] = -robot_obs['x'], -robot_obs['y']
-            robot_obs['orientation'] = wrap_to_pi(robot_obs['orientation'] + np.pi)
+        for robot_obs in teams:
+            robot_obs.position *= -1
+            robot_obs.orientation = wrap_to_pi(robot_obs.orientation + np.pi)
 
         for ball_obs in detection_frame.get('balls', ()):
-            ball_obs['x'], ball_obs['y'] = -ball_obs['x'], -ball_obs['y']
+            ball_obs.position *= -1
 
         return detection_frame
+
+    @property
+    def _our_team(self):
+        if self.team_color == 'yellow':
+            our_team = self._yellow_team
+        else:
+            our_team = self._blue_team
+        return our_team
+
+    @property
+    def _their_team(self):
+        if self.team_color == 'yellow':
+            their_team = self._blue_team
+        else:
+            their_team = self._yellow_team
+        return their_team
 
     @property
     def game_state(self) -> Dict:
@@ -127,25 +133,38 @@ class Tracker:
         return game_fields
 
     @property
-    def balls(self) -> List[Dict]:
-        return Tracker.format_list(self._balls, 'x y')
+    def balls(self) -> List[Position]:
+        active_balls = [b for b in self._balls if b.is_active]
+        return Tracker.format_ball(active_balls)
 
     @property
-    def blue_team(self) -> List[Dict]:
-        return Tracker.format_list(self._blue_team, 'x y orientation')
+    def blue_team(self) -> List[Pose]:
+        active_players = [p for p in self._balls if p.is_active]
+        return Tracker.format_team(active_players)
 
     @property
-    def yellow_team(self) -> List[Dict]:
-        return Tracker.format_list(self._yellow_team, 'x y orientation')
+    def yellow_team(self) -> List[Pose]:
+        active_players = [p for p in self._balls if p.is_active]
+        return Tracker.format_team(active_players)
 
     @staticmethod
-    def format_list(entities: List, states) -> List[Dict]:
+    def format_team(entities: List) -> List[Pose]:
         formatted_list = []
         for entity_id, entity in enumerate(entities):
-            if entity.is_active:
-                fields = dict()
-                fields['pose'] = {state: value for state, value in zip(states.split(), entity.pose)}
-                fields['velocity'] = {state: value for state, value in zip(states.split(), entity.velocity)}
-                fields['id'] = entity_id
-                formatted_list.append(fields)
+            fields = dict()
+            fields['pose'] = Pose.from_values(*entity.pose)
+            fields['velocity'] = Pose.from_values(*entity.velocity)
+            fields['id'] = entity_id
+            formatted_list.append(fields)
+        return formatted_list
+
+    @staticmethod
+    def format_ball(entities: List) -> List[Position]:
+        formatted_list = []
+        for entity_id, entity in enumerate(entities):
+            fields = dict()
+            fields['pose'] = Position(*entity.pose)
+            fields['velocity'] = Position(*entity.velocity)
+            fields['id'] = entity_id
+            formatted_list.append(fields)
         return formatted_list
