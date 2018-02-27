@@ -116,13 +116,11 @@ class Controller(list):
                 robot.path = path_smoother(robot, robot.raw_path)
 
     def execute_controller(self):
-        commands = []
+        commands = dict()
         for robot in self:
             if robot.pose is not None and robot.path is not None:  # active robots
-                cmd = robot.speed_controller.execute(robot)
-                commands.append(cmd)
-            else:
-                commands.append(None)
+                commands[robot.robot_id] = robot.speed_controller.execute(robot)
+
         return commands
 
     def generate_packet(self, commands):
@@ -130,16 +128,15 @@ class Controller(list):
                                   is_team_yellow=True if self.team_color == 'yellow' else False,
                                   packet=[])
 
-        for robot in self:
-            command = commands[robot.robot_id]
-            if command is not None:
-                packet.packet.append(
-                    RobotPacket(robot_id=robot.robot_id,
-                                command=command,
-                                kick_type=robot.kick_type,
-                                kick_force=robot.kick_force,
-                                dribbler_active=robot.dribbler_active,
-                                charge_kick=robot.charge_kick))
+        for robot_id, cmd in commands.items():
+            robot = self[robot_id]
+            packet.packet.append(
+                RobotPacket(robot_id=robot_id,
+                            command=cmd,
+                            kick_type=robot.kick_type,
+                            kick_force=robot.kick_force,
+                            dribbler_active=robot.dribbler_active,
+                            charge_kick=robot.charge_kick))
         return packet
 
 
