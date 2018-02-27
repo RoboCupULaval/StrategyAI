@@ -2,7 +2,7 @@
 
 import logging
 import time
-from multiprocessing import Queue
+from multiprocessing import Queue, Manager
 import signal  # so we can stop gracefully
 
 from RULEngine.engine import Engine
@@ -32,15 +32,19 @@ class Framework:
         # config
         self.cfg = ConfigService()
 
+        # Managers
+        self.game_state = Manager().dict()
+        self.field = Manager().dict()
+
         # Queues
-        self.game_state_queue = Queue(maxsize=1)
-        self.ai_queue = Queue()
-        self.referee_queue = Queue()
-        self.ui_send_queue = Queue()
-        self.ui_recv_queue = Queue()
+        self.ai_queue = Queue(maxsize=100)
+        self.referee_queue = Queue(maxsize=100)
+        self.ui_send_queue = Queue(maxsize=100)
+        self.ui_recv_queue = Queue(maxsize=100)
 
         # Engine
-        self.engine = Engine(self.game_state_queue,
+        self.engine = Engine(self.game_state,
+                             self.field,
                              self.ai_queue,
                              self.referee_queue,
                              self.ui_send_queue,
@@ -48,7 +52,8 @@ class Framework:
         self.engine.start()
 
         # AI
-        self.coach = Coach(self.game_state_queue,
+        self.coach = Coach(self.game_state,
+                           self.field,
                            self.ai_queue,
                            self.referee_queue,
                            self.ui_send_queue,

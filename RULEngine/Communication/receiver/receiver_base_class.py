@@ -1,25 +1,20 @@
+
 from abc import ABCMeta, abstractmethod
 from multiprocessing import Process, Queue
-from typing import Tuple
+from multiprocessing.managers import DictProxy
+from typing import Tuple, Union
 import logging
-import sched
-import time
-from threading import Thread
 
 
 class ReceiverBaseClass(Process, metaclass=ABCMeta):
 
-    def __init__(self, connection_info: Tuple, queue: Queue):
+    def __init__(self, connection_info: Tuple, link: Union[Queue, DictProxy]):
         super().__init__()
 
-        self._queue = queue
+        self._link = link
         self.daemon = True
         self.logger = logging.getLogger(self.__class__.__name__)
         self.connection = self.connect(connection_info)
-
-        s = sched.scheduler(time.time, time.sleep)
-        s.enter(1, 1, self.monitor_queue, argument=(s,))
-        self._monitoring_thread = Thread(target=s.run, args=(s,), daemon=True)
 
     @abstractmethod
     def connect(self, connection_info):
@@ -29,21 +24,9 @@ class ReceiverBaseClass(Process, metaclass=ABCMeta):
     def receive_packet(self):
         pass
 
-    def monitor_queue(self, s):
-        s.enter(1, 1, self.monitor_queue, argument=(s,))
-
-        # noinspection PyProtectedMember
-        usage = self._queue.qsize() / self._queue._maxsize
-
-        if usage > 0.5:
-            self.logger.debug('Queue is at {}% of it\'s max capacity.'.format(100 * usage))
-
-    def start(self):
-        super().start()
-        self._monitoring_thread.start()
-        self.logger.debug('Running')
-
     def run(self):
+
+        self.logger.debug('Running')
 
         try:
             while True:

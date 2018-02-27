@@ -193,13 +193,12 @@ class VelocityControl:
     # TODO: Adapte those argument to the other controler
     def execute(self, robot: Robot, path, target_orientation):
         pose = robot.pose
-        target = Pose(path.turns[1], target_orientation).to_dict()
+        target = Pose(path.points[1], target_orientation).to_dict()
         error = {state: target[state] - pose[state] for state in pose}
 
         speed_norm = robot.cruise_speed
         if is_time_to_break(robot.pose, path.points[-1], robot.cruise_speed):
             speed_norm = MIN_LINEAR_SPEED  # Near zero, but not quite
-            print("breaking")
         #speed_norm = optimal_speed(robot.pose, path.points[-1], robot.cruise_speed) # TODO: test this IRL
         norm = sqrt(error["x"]**2 + error["y"]**2)
         vel_x = speed_norm * error["x"] / norm

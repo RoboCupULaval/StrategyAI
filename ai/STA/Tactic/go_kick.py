@@ -66,10 +66,10 @@ class GoKick(Tactic):
             self.next_state = self.go_behind_ball
             if self.auto_update_target:
                 self._find_best_passing_option()
-        ball_collision = self.tries_flag == 0
+        # ball_collision = self.tries_flag == 0
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=1,
-                                      ball_collision=ball_collision).build()
+                                      ball_collision=True).build()
 
     def grab_ball(self):
         if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10):

@@ -1,14 +1,17 @@
 # Under MIT License, see LICENSE.txt
 
-__author__ = "Maxime Gagnon-Legault"
 
 import pickle
 
 from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
 from RULEngine.Communication.sender.udp_socket import udp_socket
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
+from RULEngine.Communication.monitor import monitor_queue
+
+__author__ = "Maxime Gagnon-Legault"
 
 
+@monitor_queue
 class UIDebugCommandSender(SenderBaseClass):
 
     def connect(self, connection_info):
@@ -17,7 +20,7 @@ class UIDebugCommandSender(SenderBaseClass):
     def send_packet(self):
 
         try:
-            cmds = self.queue.get()
+            cmds = self._link.get()
             if not isinstance(cmds, list):
                 cmds = [cmds]
 

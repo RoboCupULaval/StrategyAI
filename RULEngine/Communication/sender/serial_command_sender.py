@@ -3,14 +3,16 @@
 from pyhermes import McuCommunicator
 
 from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
+from RULEngine.Communication.monitor import monitor_queue
 
+@monitor_queue
 class SerialCommandSender(SenderBaseClass):
 
     def connect(self, connection_info):
         return McuCommunicator(timeout=0.1)
 
     def send_packet(self):
-        packets_frame = self.queue.get()
+        packets_frame = self._link.get()
         for packet in packets_frame.packet:
 
             # FIXME PB:  Currently we are sending as much packet as the ctrl loop is generating.
