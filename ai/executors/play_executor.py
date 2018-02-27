@@ -61,7 +61,7 @@ class PlayExecutor(metaclass=Singleton):
 
     def generate_engine_cmd(self, player: Player, ai_cmd: AICommand, path):
         return EngineCommand(robot_id=player.id,
-                             path=path if path else None,
+                             path=path,
                              kick_type=ai_cmd.kick_type,
                              kick_force=ai_cmd.kick_force,
                              dribbler_active=ai_cmd.dribbler_active,
