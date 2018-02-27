@@ -80,7 +80,7 @@ class Engine(Process):
 
         # Referee communication
         referee_recver_connection_info = (self.cfg.config_dict['COMMUNICATION']['referee_udp_address'],
-                                           int(self.cfg.config_dict['COMMUNICATION']['referee_port']))
+                                          int(self.cfg.config_dict['COMMUNICATION']['referee_port']))
         self.referee_recver = RefereeReceiver(referee_recver_connection_info, self.referee_queue)
 
         # Subprocess to send robot commands
@@ -138,7 +138,8 @@ class Engine(Process):
         robot_state = self.controller.execute(self.game_state)
         self.robot_cmd_sender.send_packet(robot_state)
         self.tracker.predict(robot_state.packet)
-        
+
+        # self.ui_send_queue.put_nowait(UIDebugCommandFactory.robot_state(robot_state)) TODO send robot speed command
         self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(self.game_state))
         self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
 

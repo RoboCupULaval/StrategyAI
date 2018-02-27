@@ -114,6 +114,12 @@ class UIDebugCommandFactory(metaclass=Singleton):
         return cmd
 
     @staticmethod
+    def robot_state(state):
+        cmd = []
+        cmd += UIDebugCommandFactory.robot_commands(state.packet)
+        return cmd
+
+    @staticmethod
     def robots_path(robots):
         cmds = []
         for robot in robots:
