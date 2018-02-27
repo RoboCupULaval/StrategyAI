@@ -6,15 +6,7 @@ from typing import Tuple, Union
 import logging
 
 
-class ReceiverBaseClass(Process, metaclass=ABCMeta):
-
-    def __init__(self, connection_info: Tuple, link: Union[Queue, DictProxy]):
-        super().__init__()
-
-        self._link = link
-        self.daemon = True
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.connection = self.connect(connection_info)
+class ReceiverBaseClass(metaclass=ABCMeta):
 
     @abstractmethod
     def connect(self, connection_info):
@@ -23,6 +15,24 @@ class ReceiverBaseClass(Process, metaclass=ABCMeta):
     @abstractmethod
     def receive_packet(self):
         pass
+
+
+class Receiver(ReceiverBaseClass, metaclass=ABCMeta):
+
+    def __init__(self, connection_info):
+        self.connection = self.connect(connection_info)
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+
+class ReceiverProcess(Process, ReceiverBaseClass, metaclass=ABCMeta):
+
+    def __init__(self, connection_info: Tuple, link: Union[Queue, DictProxy]):
+        super().__init__()
+
+        self._link = link
+        self.daemon = True
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.connection = self.connect(connection_info)
 
     def run(self):
 
@@ -36,5 +46,4 @@ class ReceiverBaseClass(Process, metaclass=ABCMeta):
         finally:
             self.connection.close()
             self.logger.debug('Killed')
-
-        exit(0)
+            exit(0)

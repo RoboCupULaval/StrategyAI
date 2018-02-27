@@ -8,14 +8,14 @@ from struct import pack
 from protobuf_to_dict import protobuf_to_dict
 
 from RULEngine.Communication.protobuf.referee_pb2 import SSL_Referee
-from RULEngine.Communication.receiver.receiver_base_class import ReceiverBaseClass
+from RULEngine.Communication.receiver.receiver_base_class import ReceiverProcess
 from RULEngine.Communication.monitor import monitor_queue
 
 __author__ = "Simon Bouchard"
 
 
 @monitor_queue
-class RefereeReceiver(ReceiverBaseClass):
+class RefereeReceiver(ReceiverProcess):
 
     def connect(self, connection_info):
         connection = socket(AF_INET, SOCK_DGRAM)

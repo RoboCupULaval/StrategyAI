@@ -5,11 +5,15 @@ import pickle
 
 from RULEngine.Communication.sender.sender_base_class import SenderProcess
 from RULEngine.Communication.sender.udp_socket import udp_socket
+from RULEngine.Communication.monitor import monitor_queue
+
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
+
 
 __author__ = "Maxime Gagnon-Legault"
 
 
+@monitor_queue
 class UIDebugCommandSender(SenderProcess):
 
     def connect(self, connection_info):
@@ -27,13 +31,3 @@ class UIDebugCommandSender(SenderProcess):
         except ConnectionRefusedError:
             pass
 
-    def send_robots_position(self, robots):
-        for robot in robots:
-            cmd1, cmd2 = UIDebugCommandFactory.robot(robot['pose'])
-            self.connection.send(pickle.dumps(cmd1))
-            self.connection.send(pickle.dumps(cmd2))
-
-    def send_balls_position(self, balls):
-        for ball in balls:
-            cmd = UIDebugCommandFactory.ball(ball['pose'])
-            self.connection.send(pickle.dumps(cmd))

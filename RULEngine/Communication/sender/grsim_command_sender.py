@@ -1,13 +1,13 @@
 # Under MIT License, see LICENSE.txt
 
 from RULEngine.Communication.protobuf import grSim_Packet_pb2 as grSim_Packet
-from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
+from RULEngine.Communication.sender.sender_base_class import Sender
 from RULEngine.Communication.sender.udp_socket import udp_socket
 
 __author__ = "Maxime Gagnon-Legault"
 
 
-class GrSimCommandSender(SenderBaseClass):
+class GrSimCommandSender(Sender):
 
     def connect(self, connection_info):
         return udp_socket(connection_info)

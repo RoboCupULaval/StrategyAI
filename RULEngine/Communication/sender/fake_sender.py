@@ -1,7 +1,7 @@
-from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
+from RULEngine.Communication.sender.sender_base_class import Sender
 
 
-class FakeSender(SenderBaseClass):
+class FakeSender(Sender):
 
     def connect(self, connection_info):
         return None

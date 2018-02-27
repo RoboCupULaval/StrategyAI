@@ -2,10 +2,10 @@
 
 from pyhermes import McuCommunicator
 
-from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
+from RULEngine.Communication.sender.sender_base_class import Sender
 
 
-class SerialCommandSender(SenderBaseClass):
+class SerialCommandSender(Sender):
 
     def connect(self, connection_info):
         return McuCommunicator(timeout=0.1)
