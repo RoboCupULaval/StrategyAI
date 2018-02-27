@@ -22,12 +22,12 @@ class RobotFilter(KalmanFilter):
             return self.x[4]
 
     def transition_model(self):
-        return np.array([[1, self.dt, 0, 0,       0,       0],   # Position x
-                         [0, 1,       0, 0,       0,       0],   # Speed x
-                         [0, 0,       1, self.dt, 0,       0],   # Position y
-                         [0, 0,       0, 1,       0,       0],   # Speed y
-                         [0, 0,       0, 0,       1, self.dt],   # Position Theta
-                         [0, 0,       0, 0,       0,       1]])  # Speed Theta
+        return np.array([[1, self._dt, 0, 0, 0, 0],  # Position x
+                         [0, 1, 0, 0, 0, 0],         # Speed x
+                         [0, 0, 1, self._dt, 0, 0],  # Position y
+                         [0, 0, 0, 1, 0, 0],         # Speed y
+                         [0, 0, 0, 0, 1, self._dt],  # Position Theta
+                         [0, 0, 0, 0, 0, 1]])        # Speed Theta
 
     def observation_model(self):
         return np.array([[1, 0, 0, 0, 0, 0],   # Position x
@@ -35,12 +35,12 @@ class RobotFilter(KalmanFilter):
                          [0, 0, 0, 0, 1, 0]])  # Orientation
 
     def control_input_model(self):
-        return np.array([[0,       0,       0],   # Position x
-                         [self.dt, 0,       0],   # Speed x
-                         [0,       0,       0],   # Position y
-                         [0,       self.dt, 0],   # Speed y
-                         [0,       0,       0],   # Position Theta
-                         [0,       0, self.dt]])  # Speed Theta
+        return np.array([[0,       0,       0],  # Position x
+                         [self._dt, 0, 0],  # Speed x
+                         [0,       0,       0],  # Position y
+                         [0, self._dt, 0],  # Speed y
+                         [0,       0,       0],  # Position Theta
+                         [0, 0, 0]])  # Speed Theta
 
     def initial_state_covariance(self):
         return 10 ** 6 * np.eye(self.state_number)
