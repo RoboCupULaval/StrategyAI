@@ -9,6 +9,7 @@ def monitor_queue(cls):
 
         def __init__(self, *args, **kwargs):
             self.oInstance = cls(*args, **kwargs)
+            self.queue = args[1]
             s = sched.scheduler(time.time, time.sleep)
             s.enter(1, 1, self.monitor_queue, argument=(s,))
             Thread(target=s.run, args=(s,), daemon=True).start()
@@ -17,7 +18,7 @@ def monitor_queue(cls):
             s.enter(1, 1, self.monitor_queue, argument=(s,))
 
             # noinspection PyProtectedMember
-            usage = self.oInstance._link.qsize() / self.oInstance._link._maxsize
+            usage = self.queue.qsize() / self.queue._maxsize
 
             if usage > 0.5:
                 self.oInstance.logger.debug('Queue is at {}% of it\'s max capacity.'.format(100 * usage))

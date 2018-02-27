@@ -25,17 +25,17 @@ from RULEngine.tracker import Tracker
 try:
     from Util.csv_plotter import CsvPlotter
 except ImportError:
-    print("Fail to import csv_plotter. It will be disable.")
+    print('Fail to import csv_plotter. It will be disable.')
     from RULEngine.controller import Observer as CsvPlotter
 
 from config.config_service import ConfigService
 
-__author__ = "Maxime Gagnon-Legault and Simon Bouchard"
+__author__ = 'Maxime Gagnon-Legault and Simon Bouchard'
 
 
 class Engine(Process):
 
-    FPS = 60
+    FPS = 30
     NUM_CAMERA = 4
     FIX_FRAME_RATE = True
 
@@ -64,15 +64,13 @@ class Engine(Process):
         self.ai_queue = ai_queue
         self.referee_queue = referee_queue
 
-        self.robot_cmd_queue = Queue(maxsize=100)
-
         # vision subprocess
         vision_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'],
                                   int(self.cfg.config_dict['COMMUNICATION']['vision_port']))
 
         self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_state, self.field)
 
-        # UIDebug communication subprocesses
+        # UIDebug communication sub processes
         ui_debug_host = self.cfg.config_dict['COMMUNICATION']['ui_debug_address']
         ui_sender_connection_info = (ui_debug_host, int(self.cfg.config_dict['COMMUNICATION']['ui_cmd_sender_port']))
         ui_recver_connection_info = (ui_debug_host, int(self.cfg.config_dict['COMMUNICATION']['ui_cmd_receiver_port']))
@@ -88,12 +86,12 @@ class Engine(Process):
         # Subprocess to send robot commands
         robot_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'], 20011)
 
-        self.robot_cmd_sender = RobotCommandSender(robot_connection_info, self.robot_cmd_queue)
+        self.robot_cmd_sender = RobotCommandSender(robot_connection_info)
 
         self.tracker = Tracker(self.vision_state)
         self.controller = Controller(self.ai_queue, CsvPlotter)
 
-        # print framerate
+        # print frame rate
         self.frame_count = 0
         self.time_last_print = time()
 
@@ -105,7 +103,6 @@ class Engine(Process):
         self.ui_sender.start()
         self.ui_recver.start()
         self.referee_recver.start()
-        self.robot_cmd_sender.start()
 
     def run(self):
         own_pid = os.getpid()
@@ -118,10 +115,9 @@ class Engine(Process):
                 self.time_bank += 1.0/Engine.FPS
 
                 self.main_loop()
+                
                 self.print_frame_rate()
-
-                time_ahead = self.time_bank - time()
-                self.limit_frame_rate(time_ahead)
+                self.limit_frame_rate()
         except KeyboardInterrupt:
             pass
         finally:
@@ -142,32 +138,32 @@ class Engine(Process):
         robot_packets_frame = self.controller.execute(self.game_state)
         self.tracker.predict(robot_packets_frame.packet)
 
-        self.robot_cmd_queue.put_nowait(robot_packets_frame)
+        self.robot_cmd_sender.send_packet(robot_packets_frame)
         self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(self.game_state))
         self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
 
     def is_any_subprocess_borked(self):
         borked_process_found = not all((self.vision_receiver.is_alive(),
                                         self.ui_sender.is_alive(),
-                                        self.ui_recver.is_alive(),
-                                        self.robot_cmd_sender.is_alive()))
+                                        self.ui_recver.is_alive()))
         return borked_process_found
 
     def terminate_subprocesses(self):
         self.vision_receiver.terminate()
         self.ui_sender.terminate()
         self.ui_recver.terminate()
-        self.robot_cmd_sender.terminate()
 
-    def limit_frame_rate(self, time_ahead):
+    def limit_frame_rate(self):
+        time_ahead = self.time_bank - time()
         if not Engine.FIX_FRAME_RATE:
             return
         if time_ahead > 0:
             sleep(time_ahead)
         if time_ahead < -2:
             self.logger.info(
-                "The required frame rate is too fast for the engine. "
-                "To find out what is the best frame rate for your computer, launch the engine with FIX_FRAME_RATE at false and use the minimum FPS that you get.")
+                'The required frame rate is too fast for the engine. '
+                'To find out what is the best frame rate for your computer,'
+                'launch the engine with FIX_FRAME_RATE at false and use the minimum FPS that you get.')
 
     def print_frame_rate(self):
         self.frame_count += 1

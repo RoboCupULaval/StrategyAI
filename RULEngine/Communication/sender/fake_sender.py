@@ -6,7 +6,7 @@ class FakeSender(SenderBaseClass):
     def connect(self, connection_info):
         return None
 
-    def send_packet(self):
+    def send_packet(self, packet):
         pass
 
     def run(self):
