@@ -83,6 +83,7 @@ class Controller(list):
         self.update_robot_path()
 
         commands = self.execute_controller()
+
         packet = self.generate_packet(commands)
 
         return packet
