@@ -20,6 +20,7 @@ class HumanControl(Strategy):
         assert isinstance(tactic, Tactic)
         assert isinstance(robot_id, int)
 
+
         r = self.game_state.get_role_by_player_id(robot_id)
         if r is None:
             self.game_state.map_players_to_roles_by_player_id({robot_id: Role.FIRST_ATTACK})  # TODO

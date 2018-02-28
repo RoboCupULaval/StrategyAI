@@ -36,6 +36,7 @@ _default_keys = {
     'control_loop_type': AIControlLoopType.POSITION,
     'path': [],
     'path_speeds': [0.0, 0.0],
+    'path_turns': []
 }
 
 _keys_type = {
@@ -55,6 +56,7 @@ _keys_type = {
     'control_loop_type': AIControlLoopType,
     'path': list,
     'path_speeds': list,
+    'path_turns': list,
 }
 
 
