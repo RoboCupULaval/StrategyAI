@@ -10,12 +10,12 @@ class BallFilter(KalmanFilter):
     @property
     def pose(self):
         if self.is_active:
-            return np.array([self.x[0], self.x[2]]).flatten()
+            return self.x[0::2]
 
     @property
     def velocity(self):
         if self.is_active:
-            return np.array([self.x[1], self.x[3]]).flatten()
+            return self.x[1::2]
 
     def transition_model(self):
         return np.array([[1, self.dt, 0,       0],   # Position x

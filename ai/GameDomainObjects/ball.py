@@ -44,9 +44,8 @@ class Ball:
         self._velocity = value
 
     @classmethod
-    def from_dict(cls, dict: Dict):
-        b = Ball(dict["id"])
-        b.position = Position.from_dict(dict["pose"])
-        b.velocity.x = dict["velocity"]["x"]
-        b.velocity.y = dict["velocity"]["y"]
+    def from_dict(cls, ball_dict: Dict):
+        b = Ball(ball_dict['id'])
+        b.position = ball_dict['pose']
+        b.velocity = ball_dict['velocity']
         return b

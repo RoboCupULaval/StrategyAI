@@ -18,11 +18,10 @@ class SerialCommandSender(Sender):
             # It would be preferable if the speed commands were send at a fix rate
             # The following hack make it impossible to immediately break,
             # instead the robot will stop receiving commands and thus break 0.5s later...
-
             self.connection.sendSpeed(packet.robot_id,
-                                      packet.command['x']/1000,
-                                      packet.command['y']/1000,
-                                      packet.command['orientation'])
+                                      packet.command.x/1000,
+                                      packet.command.y/1000,
+                                      packet.command.orientation)
             # FIXME PB: Because of the issue #18 of the Communication Tower, every 3 packets mights be lost
             # We should it fix this in the ComTower or check it here
             if packet.kick_force > 0:

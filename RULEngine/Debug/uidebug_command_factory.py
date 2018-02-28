@@ -6,6 +6,8 @@ from typing import Dict
 from RULEngine.services.team_color_service import TeamColorService
 from Util.constant import TeamColor
 from Util.singleton import Singleton
+from Util import Pose
+
 from ai.GameDomainObjects.player import Player
 
 __author__ = "Maxime Gagnon-Legault, Philippe Babin, and others"
@@ -125,7 +127,7 @@ class UIDebugCommandFactory(metaclass=Singleton):
         for robot in robots:
             if not robot.raw_path or len(robot.raw_path) < 2:
                 continue
-            path = [(p['x'], p['y']) for p in robot.raw_path]
+            path = [(p.x, p.y) for p in robot.raw_path]
 
             for start_point, end_point in zip(path, path[1:]):
                 cmds.append(UIDebugCommandFactory.line(start_point,
@@ -176,22 +178,22 @@ class UIDebugCommandFactory(metaclass=Singleton):
         return DebugCommand(1004, {'team_color': team_color.name.lower()})
 
     @staticmethod
-    def robot(pose: Dict, color=(0, 255, 0), color_angle=(255, 0, 0), radius=120, timeout=0.05):
-        player_center = (pose['x'], pose['y'])
+    def robot(pose: Pose, color=(0, 255, 0), color_angle=(255, 0, 0), radius=120, timeout=0.05):
+        player_center = (pose.x, pose.y)
         data_circle = {'center': player_center,
                        'radius': radius,
                        'color': color,
                        'is_fill': True,
                        'timeout': timeout}
 
-        end_point = (pose['x'] + radius * cos(pose['orientation']),
-                     pose['y'] + radius * sin(pose['orientation']))
+        end_point = (pose.x + radius * cos(pose.orientation),
+                     pose.y + radius * sin(pose.orientation))
 
         return DebugCommand(3003, data_circle), UIDebugCommandFactory.line(player_center, end_point, color_angle, timeout)
 
     @staticmethod
-    def ball(pose: dict, color=(255, 127, 80), timeout=0.05):
-        data_circle = {'center': (pose['x'], pose['y']),
+    def ball(pose: Pose, color=(255, 127, 80), timeout=0.05):
+        data_circle = {'center': (pose.x, pose.y),
                        'radius': 150,
                        'color': color,
                        'is_fill': True,

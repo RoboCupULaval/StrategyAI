@@ -42,7 +42,7 @@ class Position(np.ndarray):
 
     @property
     def norm(self):
-        return np.sqrt(self.x ** 2 + self.y ** 2)
+        return float(np.sqrt(self.x ** 2 + self.y ** 2))
 
     @property
     def angle(self):
@@ -56,6 +56,12 @@ class Position(np.ndarray):
 
     def __sub__(self, other):
         return super().__sub__(other).view(Position)
+
+    def __mul__(self, other):
+        return super().__mul__(other).view(Position)
+
+    def __divmod__(self, other):
+        return super().__divmod__(other).view(Position)
 
     def __eq__(self, other):
         return (self - other).view(Position).norm < POSITION_ABS_TOL
