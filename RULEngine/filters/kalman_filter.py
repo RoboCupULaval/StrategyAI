@@ -68,7 +68,7 @@ class KalmanFilter:
         if self._dt == 0:
             self._dt = time() - self.last_predict_time
         self.last_predict_time = time()
-        
+
         # Predict the next state from states vector and input commands
         if np.all(input_command):
             self.x = self.transition_model() @ self.x + self.control_input_model() @ input_command
