@@ -20,6 +20,7 @@ class Team:
     def update(self, players):
         # self._players = {}
         # self._onplay_players = {}
+        self._onplay_players = {player["id"]: self._players[player["id"]] for player in players}
         for p in players:
             # p = Player.from_dict(dict_player, team=self)
             self._players[p["id"]].update(Pose.from_dict(p["pose"]), Pose.from_dict(p["velocity"]))
@@ -39,7 +40,7 @@ class Team:
         return self._players
 
     @property
-    def onplay_player(self):
+    def onplay_players(self):
         return self._onplay_players
 
     @property
