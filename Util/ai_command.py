@@ -2,6 +2,8 @@
 
 from collections import namedtuple
 
+from Util.position import Position
+from Util.pose import Pose
 
 AICommand = namedtuple('AICommand', 'target,'
                                     'kick_type,'
@@ -29,8 +31,9 @@ class CmdBuilder:
         self._ball_collision = True
         self._pathfinder_on = True
 
-    def addMoveTo(self, target, cruise_speed=1, end_speed=0, ball_collision=True):
-        self._target = target
+    def addMoveTo(self, target: [Pose, Position], cruise_speed=1, end_speed=0, ball_collision=True):
+        assert isinstance(target, (Pose, Position))
+        self._target = Pose(target) if isinstance(target, Position) else target
         self._cruise_speed = cruise_speed
         self._end_speed = end_speed
         self._ball_collision = ball_collision

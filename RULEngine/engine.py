@@ -161,7 +161,7 @@ class Engine(Process):
         if time_ahead > 0:
             sleep(time_ahead)
         if time_ahead < -2:
-            self.logger.info(
+           raise RuntimeError(
                 'The required frame rate is too fast for the engine. '
                 'To find out what is the best frame rate for your computer,'
                 'launch the engine with FIX_FRAME_RATE at false and use the minimum FPS that you get.')
