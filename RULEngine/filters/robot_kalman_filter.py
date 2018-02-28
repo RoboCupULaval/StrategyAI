@@ -49,21 +49,24 @@ class RobotFilter(KalmanFilter):
         return np.diag([.5, 0.5, 0.5, 0.5, 0.1, .1])
 
     def observation_covariance(self):
-        if fabs(self.x[0]) < 30 or fabs(self.x[2]) < 30:
-            R = np.diag([50, 50, 0.01])
-        else:
-            R = np.diag([10, 10, 0.01])
+        # SB: This need to be tweak to the new fps
+        #if fabs(self.x[0]) < 30 or fabs(self.x[2]) < 30:
+        #    R = np.diag([50, 50, 0.01])
+        #else:
+        R = np.diag([10, 10, 0.01])
         return R
 
-    def update(self, observation, t_capture):
-
-        error = observation - self.observation_model() @ self.x
-        error[2] = RobotFilter.wrap_to_pi(error[2])
-        self._update(error, t_capture)
-
     def predict(self, input_command=None):
+        orientation = self.get_orientation()
+        if input_command is not None and orientation is not None:
+            input_command = RobotFilter.rotate(input_command, orientation)
         self._predict(input_command)
         self.x[4] = self.wrap_to_pi(self.x[4])
+
+    @staticmethod
+    def rotate(vec, angle):
+        rotation = np.array([[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0], [0, 0, 1]])
+        return rotation @ vec
 
     @staticmethod
     def wrap_to_pi(angle):
