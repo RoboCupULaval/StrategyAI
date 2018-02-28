@@ -85,4 +85,16 @@ class Path:
         self.points[0] = position
         return Path().generate_path_from_points(self.points, self.speeds, None)
 
+    def copy(self):
+        new_path = Path()
+        new_path.points = self.points.copy()
+        new_path.speeds = self.speeds.copy()
+        new_path.turns = self.turns.copy()
+        return new_path
 
+    def __iter__(self):
+        for p in self.points:
+            yield p
+
+    def __len__(self):
+        return len(self.points)

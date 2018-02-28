@@ -2,17 +2,16 @@
 
 from pyhermes import McuCommunicator
 
-from RULEngine.Communication.sender.sender_base_class import SenderBaseClass
-from RULEngine.Communication.monitor import monitor_queue
+from RULEngine.Communication.sender.sender_base_class import Sender
 
-@monitor_queue
-class SerialCommandSender(SenderBaseClass):
+
+class SerialCommandSender(Sender):
 
     def connect(self, connection_info):
         return McuCommunicator(timeout=0.1)
 
-    def send_packet(self):
-        packets_frame = self._link.get()
+    def send_packet(self, packets_frame):
+
         for packet in packets_frame.packet:
 
             # FIXME PB:  Currently we are sending as much packet as the ctrl loop is generating.
@@ -21,9 +20,9 @@ class SerialCommandSender(SenderBaseClass):
             # instead the robot will stop receiving commands and thus break 0.5s later...
 
             self.connection.sendSpeed(packet.robot_id,
-                                      packet.command['x']/1000,
-                                      packet.command['y']/1000,
-                                      packet.command['orientation'])
+                                      packet.command.x/1000,
+                                      packet.command.y/1000,
+                                      packet.command.orientation)
             # FIXME PB: Because of the issue #18 of the Communication Tower, every 3 packets mights be lost
             # We should it fix this in the ComTower or check it here
             if packet.kick_force > 0:

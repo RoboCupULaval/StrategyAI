@@ -10,9 +10,9 @@ class KalmanFilter:
     def __init__(self):
 
         self.is_active = False
-        self.last_update_time = 0
+        self.last_capture_time = 0
         self.last_predict_time = time()
-        self.dt = 0
+        self._dt = 0
 
         self.state_number = int(np.size(self.transition_model(), 0))
         self.observable_state = int(np.size(self.observation_model(), 0))
@@ -47,9 +47,12 @@ class KalmanFilter:
         return np.zeros(0)
 
     def _update(self, error, t_capture):
-
         self.is_active = True
-        self.last_update_time = t_capture
+
+        dt = t_capture - self.last_capture_time
+        if dt > 0:  # dt = 0 means it's a frame taken at the same time as the last one. Robot is in multiple camera FOV
+            self._dt = dt
+        self.last_capture_time = t_capture
 
         # Compute Kalman gain from states covariance and observation model
         gain = self.P @ self.observation_model().T \
@@ -62,7 +65,8 @@ class KalmanFilter:
         self.P = self.P - gain @ self.observation_model() @ self.P
 
     def _predict(self, input_command):
-        self.dt = time() - self.last_predict_time
+        if self._dt == 0:
+            self._dt = time() - self.last_predict_time
         self.last_predict_time = time()
 
         # Predict the next state from states vector and input commands
@@ -73,6 +77,8 @@ class KalmanFilter:
 
         # Update the state covariance matrix from the transition model
         self.P = self.transition_model() @ self.P @ self.transition_model().T + self.Q
+
+        self._dt = 0
 
     def update(self, observation, t_capture) -> None:
         error = observation - self.observation_model() @ self.x

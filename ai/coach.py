@@ -1,16 +1,13 @@
 # Under MIT License, see LICENSE.txt
-from typing import Dict, List
-
-from RULEngine.controller import EngineCommand
-from Util.ai_command import AICommand
-
-
+from typing import List
+import os
 import logging
+from time import sleep, time
+
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
 
-from time import sleep, time
-
+from RULEngine.controller import EngineCommand
 from RULEngine.services.team_color_service import TeamColorService
 from ai.executors.debug_executor import DebugExecutor
 from ai.executors.play_executor import PlayExecutor
@@ -65,6 +62,8 @@ class Coach(Process):
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
     def run(self) -> None:
+        own_pid = os.getpid()
+        self.logger.debug('Running with process ID {}'.format(own_pid))
         self.wait_for_geometry()
         self.logger.debug('Running')
         try:
