@@ -22,7 +22,7 @@ class Team:
         # self._onplay_players = {}
         for p in players:
             # p = Player.from_dict(dict_player, team=self)
-            self._players[p["id"]].update(Pose.from_dict(p["pose"]), Pose.from_dict(p["velocity"]))
+            self._players[p['id']].update(p['pose'], p['velocity'])
             # self._onplay_players[p.id] = p
 
     @property
