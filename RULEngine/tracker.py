@@ -96,7 +96,7 @@ class Tracker:
     def remove_undetected(self):
         active_robots = iter(robot for robot in self._yellow_team + self._blue_team if robot.is_active)
         for robot in active_robots:
-            if self._current_timestamp - robot.last_update_time > Tracker.MAX_UNDETECTED_DELAY:
+            if self._current_timestamp - robot.last_capture_time > Tracker.MAX_UNDETECTED_DELAY:
                 robot.reset()
 
         self._balls.remove_undetected()

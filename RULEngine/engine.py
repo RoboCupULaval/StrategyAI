@@ -37,7 +37,7 @@ class Engine(Process):
 
     FPS = 30
     NUM_CAMERA = 4
-    FIX_FRAME_RATE = True
+    FIX_FRAME_RATE = False
 
     def __init__(self,
                  game_state: DictProxy,
