@@ -19,8 +19,8 @@ class KalmanFilter:
 
         self.x = np.zeros(self.state_number)
 
-        self.R = self.observation_covariance()
-        self.Q = self.process_covariance()
+        self.R = self.observation_covariance
+        self.Q = self.process_covariance
         self.P = self.initial_state_covariance()
 
     @abstractmethod
@@ -56,7 +56,7 @@ class KalmanFilter:
 
         # Compute Kalman gain from states covariance and observation model
         gain = self.P @ self.observation_model().T \
-            @ np.linalg.inv(self.observation_model() @ self.P @ self.observation_model().T + self.R)
+            @ np.linalg.inv(self.observation_model() @ self.P @ self.observation_model().T + self.R())
 
         # Update the states vector
         self.x = self.x + gain @ error
@@ -76,7 +76,7 @@ class KalmanFilter:
             self.x = self.transition_model() @ self.x
 
         # Update the state covariance matrix from the transition model
-        self.P = self.transition_model() @ self.P @ self.transition_model().T + self.Q
+        self.P = self.transition_model() @ self.P @ self.transition_model().T + self.Q()
 
         self._dt = 0
 

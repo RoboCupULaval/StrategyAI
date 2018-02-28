@@ -22,12 +22,13 @@ class RobotFilter(KalmanFilter):
             return self.x[4]
 
     def transition_model(self):
-        return np.array([[1, self._dt, 0, 0, 0, 0],  # Position x
-                         [0, 1, 0, 0, 0, 0],         # Speed x
-                         [0, 0, 1, self._dt, 0, 0],  # Position y
-                         [0, 0, 0, 1, 0, 0],         # Speed y
-                         [0, 0, 0, 0, 1, self._dt],  # Position Theta
-                         [0, 0, 0, 0, 0, 1]])        # Speed Theta
+        dt = self._dt
+        return np.array([[1, dt, 0, 0,  0, 0],   # Position x
+                         [0, 1,  0, 0,  0, 0],   # Speed x
+                         [0, 0,  1, dt, 0, 0],   # Position y
+                         [0, 0,  0, 1,  0, 0],   # Speed y
+                         [0, 0,  0, 0,  1, dt],  # Position Theta
+                         [0, 0,  0, 0,  0, 1]])  # Speed Theta
 
     def observation_model(self):
         return np.array([[1, 0, 0, 0, 0, 0],   # Position x
@@ -35,25 +36,40 @@ class RobotFilter(KalmanFilter):
                          [0, 0, 0, 0, 1, 0]])  # Orientation
 
     def control_input_model(self):
-        return np.array([[0,       0,       0],  # Position x
-                         [self._dt, 0, 0],  # Speed x
-                         [0,       0,       0],  # Position y
-                         [0, self._dt, 0],  # Speed y
-                         [0,       0,       0],  # Position Theta
-                         [0, 0, 0]])  # Speed Theta
+        dt = self._dt
+        return np.array([[0,  0,  0],  # Position x
+                         [dt, 0,  0],  # Speed x
+                         [0,  0,  0],  # Position y
+                         [0, dt,  0],  # Speed y
+                         [0,  0,  0],  # Position Theta
+                         [0,  0, dt]])  # Speed Theta
 
     def initial_state_covariance(self):
         return 10 ** 6 * np.eye(self.state_number)
 
     def process_covariance(self):
-        return np.diag([.5, 0.5, 0.5, 0.5, 0.1, .1])
+        dt = self._dt
+        sigma_acc_x = 2000
+        sigma_acc_y = 2000
+        sigma_acc_o = 0.01
+        G = np.array([
+                np.array([0.25 * dt ** 4, 0.50 * dt ** 3,              0,              0,              0,              0]) * sigma_acc_x,
+                np.array([0.50 * dt ** 3, 1.00 * dt ** 2,              0,              0,              0,              0]) * sigma_acc_x,
+                np.array([             0,              0, 0.25 * dt ** 4, 0.50 * dt ** 3,              0,              0]) * sigma_acc_y,
+                np.array([             0,              0, 0.50 * dt ** 3, 1.00 * dt ** 2,              0,              0]) * sigma_acc_y,
+                np.array([             0,              0,              0,              0, 0.25 * dt ** 4, 0.50 * dt ** 3]) * sigma_acc_o,
+                np.array([             0,              0,              0,              0, 0.50 * dt ** 3, 1.00 * dt ** 2]) * sigma_acc_o])
+
+        return G
 
     def observation_covariance(self):
         # SB: This need to be tweak to the new fps
         #if fabs(self.x[0]) < 30 or fabs(self.x[2]) < 30:
         #    R = np.diag([50, 50, 0.01])
         #else:
-        R = np.diag([10, 10, 0.01])
+
+        R = np.square(np.diag([10, 10, 0.01]))
+
         return R
 
     def predict(self, input_command=None):
