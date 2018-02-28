@@ -3,7 +3,8 @@ from .role import Role
 
 
 class RoleMapper(object):
-    LOCKED_ROLES = [Role.GOALKEEPER]
+
+    LOCKED_ROLES = []
 
     def __init__(self):
         self.roles_translation = {r: None for r in Role}

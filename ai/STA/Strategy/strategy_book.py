@@ -5,11 +5,13 @@ __author__ = "Maxime Gagnon-Legault, and others"
 import logging
 from typing import List
 
+from ai.STA.Strategy.defense_wall_3v3 import DefenseWall_3v3
 from ai.STA.Strategy.defense_wall_no_kick import DefenseWallNoKick
 from ai.STA.Strategy.defense_wall import DefenseWall
 from ai.STA.Strategy.direct_free_kick import DirectFreeKick
 from ai.STA.Strategy.indirect_free_kick import IndirectFreeKick
 from ai.STA.Strategy.offense import Offense
+from ai.STA.Strategy.offense_3v3 import Offense_3v3
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.indiana_jones import IndianaJones
 from ai.STA.Strategy.human_control import HumanControl
