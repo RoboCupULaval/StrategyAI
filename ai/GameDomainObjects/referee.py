@@ -3,9 +3,9 @@
 from enum import IntEnum
 from typing import Dict
 
-from RULEngine.services.team_color_service import TeamColorService
-from Util.position import Position
 from Util.constant import TeamColor
+from Util.position import Position
+from Util.team_color_service import TeamColorService
 
 
 class RefereeCommand(IntEnum):

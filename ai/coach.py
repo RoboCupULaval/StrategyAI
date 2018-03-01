@@ -1,14 +1,13 @@
 # Under MIT License, see LICENSE.txt
-from typing import List
-import os
 import logging
-from time import sleep, time
-
+import os
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
+from time import sleep, time
+from typing import List
 
 from RULEngine.controller import EngineCommand
-from RULEngine.services.team_color_service import TeamColorService
+from Util.team_color_service import TeamColorService
 from ai.executors.debug_executor import DebugExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.states.game_state import GameState
