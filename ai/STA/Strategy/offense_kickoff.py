@@ -3,14 +3,10 @@ from functools import partial
 
 from RULEngine.Util.Pose import Pose
 from RULEngine.Util.Position import Position
-from ai.Algorithm.evaluation_module import closest_player_to_point
-from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.Stop import Stop
-from ai.STA.Tactic.tactic_constants import Flags
+from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.states.game_state import GameState
-from ai.STA.Strategy.Strategy import Strategy
+from ai.STA.Strategy.strategy import Strategy
 from ai.Util.role import Role
 
 class OffenseKickOff(Strategy):
@@ -24,7 +20,7 @@ class OffenseKickOff(Strategy):
 
         middle_player = self.game_state.get_player_by_role(Role.MIDDLE)
 
-        self.add_tactic(Role.MIDDLE, GoKick(self.game_state, middle_player, self.theirgoal, auto_update_target=True))
+        self.add_tactic(Role.MIDDLE, GoKick(self.game_state, middle_player, self.theirgoal))
 
         for index, player in role_by_robots:
             if player:

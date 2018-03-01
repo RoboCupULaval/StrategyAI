@@ -3,10 +3,8 @@
 from functools import partial
 from RULEngine.Util.Pose import Position, Pose
 from ai.Algorithm.evaluation_module import closest_player_to_point
-from ai.STA.Strategy.Strategy import Strategy
-from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
-from ai.STA.Tactic.Stop import Stop
+from ai.STA.Strategy.strategy import Strategy
+from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.tactic_constants import Flags
@@ -32,8 +30,7 @@ class IndirectFreeKick(Strategy):
         for index, player in role_by_robots:
             if player:
                 self.add_tactic(index, PositionForPass(self.game_state, player, auto_position=True))
-                self.add_tactic(index, GoKick(self.game_state, player, auto_update_target=True,
-                                              consider_goal_as_target=False))
+                self.add_tactic(index, GoKick(self.game_state, player, auto_update_target=True))
 
                 self.add_condition(index, 0, 1, partial(self.is_closest, player))
                 self.add_condition(index, 1, 0, partial(self.is_not_closest, player))

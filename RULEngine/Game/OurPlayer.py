@@ -7,9 +7,9 @@ from ai.Util.pathfinder_history import PathfinderHistory
 
 
 class OurPlayer(Player):
-    max_speed = 2
-    max_angular_speed = 3.14
-    max_acc = 1.5
+    max_speed = 3
+    max_angular_speed = 2
+    max_acc = 2
     max_angular_acc = 1
 
     def __init__(self, team, id: int):
@@ -18,7 +18,6 @@ class OurPlayer(Player):
         self.kf = FriendKalmanFilter()
         self.ai_command = None
         self.pid = None  # for the moment
-        self.in_play = False
         self.update = self._friend_kalman_update
         self.pathfinder_history = PathfinderHistory()
         self.collision_body_mask = [0, 0]

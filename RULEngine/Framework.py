@@ -22,7 +22,6 @@ from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
 from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
-from RULEngine.Communication.sender.uidebug_vision_sender import UIDebugVisionSender
 from RULEngine.Communication.util.robot_command_sender_factory import RobotCommandSenderFactory
 from RULEngine.Debug.debug_interface import DebugInterface
 from RULEngine.Game.Game import Game
@@ -121,10 +120,6 @@ class Framework(object):
                 # Monitor robot if we are communicating with an actual robot
                 self.uidebug_robot_monitor = UIDebugRobotMonitor(self.robot_command_sender,
                                                                  self.debug)
-                # are we redirecting the vision to the uidebug!
-                if self.cfg.config_dict["COMMUNICATION"]["redirect"] == "true":
-                    self.uidebug_vision_sender = UIDebugVisionSender()
-                    self.vision_redirection_routine = self.uidebug_vision_sender.send_packet
 
         else:
             self.stop_game()
@@ -137,7 +132,7 @@ class Framework(object):
         while not self.thread_terminate.is_set():
             self.time_stamp = time.time()
             self.vision_routine()
-            time.sleep(0)
+            time.sleep(0.01)
 
     def start_game(self, p_ia_coach_mainloop, p_ia_coach_initializer):
         """ Démarrage du moteur de l'IA initial, ajustement de l'équipe de l'ia
@@ -226,7 +221,7 @@ class Framework(object):
             # Communication
             self._send_robot_commands(robot_commands)
             self._send_debug_commands()
-            self._send_new_vision_packet()
+            #self._send_new_vision_packet()
 
             if time_delta > self.ai_timestamp * 1.3:
                 warnings.warn("Update loop took {:5.3f}s instead of {}s!".format(time_delta, self.ai_timestamp),
@@ -343,8 +338,10 @@ class Framework(object):
         self.frame_number += 1
         pb_sslwrapper.detection.t_capture = 0
         pb_sslwrapper.detection.frame_number = self.frame_number
-
-        self.vision_redirection_routine(pb_sslwrapper.SerializeToString())
+        try:
+            self.vision_redirection_routine(pb_sslwrapper.SerializeToString())
+        except:
+            print("Fail to send in vision redirection")
 
     def _sigint_handler(self, *args):
         self.stop_game()

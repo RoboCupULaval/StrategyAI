@@ -4,14 +4,17 @@ import warnings
 from RULEngine.Util.Position import Position
 from RULEngine.Util.Pose import Pose
 from config.config_service import ConfigService
-from profilehooks import profile
+# from profilehooks import profile
 
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
 
 class FriendKalmanFilter:
     def __init__(self):
+        self.matrix_flag = False
         cfg = ConfigService()
+        if cfg.config_dict["GAME"]["kalman_matrix_flag"] == "true":
+            self.matrix_flag = True
         self.default_dt = float(cfg.config_dict["GAME"]["ai_timestamp"])
         self.tau_x = 0.3
         self.tau_y = 0.3
@@ -38,16 +41,16 @@ class FriendKalmanFilter:
         self.H += [[0, 0, 0, 0, 1, 0] for _ in range(ncameras)]  # Orientation
         self.H = np.array(self.H)
         # Process covariance
-        values = np.array([10 ** 3,
-                           10 ** 3,
-                           10 ** 3,
-                           10 ** 3,
+        values = np.array([10 ** 1,
+                           10 ** 1,
+                           10 ** 2,
+                           10 ** 2,
                            10 ** (-1),
                            10 ** (-1)]) # Orientation Covariance was 0.01, SB
         self.Q = np.diag(values)
         # Observation covariance
-        values = [10 ** (-3) for _ in range(ncameras)]
-        values += [10 ** (-3) for _ in range(ncameras)]
+        values = [10 ** (2) for _ in range(ncameras)]
+        values += [10 ** (2) for _ in range(ncameras)]
         values += [10 ** (-1) for _ in range(ncameras)]
         self.R = np.diag(values)  # Pose * ncameras
         # Initial state covariance
@@ -60,25 +63,36 @@ class FriendKalmanFilter:
             self.x = np.dot(self.F, self.x)
         else:
             conversion_m_to_mm = 1000
-            command = Pose(*command).scale(conversion_m_to_mm)
+            command = Pose(command[0], command[1], command[2]).scale(conversion_m_to_mm)
             command.position = command.position.rotate(self.x[4])
-            self.x = np.dot(self.F, self.x) + np.dot(self.B, command.to_array())
+            oldx = self.x.copy()
+            self.x = np.dot(self.F, oldx) + np.dot(self.B, command.to_array())
+
         self.P = np.dot(np.dot(self.F, self.P), np.transpose(self.F)) + self.Q
+        if self.P[0][0] is np.nan:
+            exit(0)
+
+        if np.abs(self.x[5]) > 500:
+            print("A The estimate of orientation speed is reaching inf!!")
+            self.x[5] = 0
+            self.P[5][5] = 0
+
 
     # @profile(immediate=False)
     def update(self, observation):
+
         obsx = []
         obsy = []
         obsth = []
         for obs in observation:
-            if obs is not None:
-                obsx.append(obs.position.x)
-                obsy.append(obs.position.y)
-                obsth.append(obs.orientation)
-            if obs is None:
+            if self.matrix_flag or obs is None:
                 obsx.append(None)
                 obsy.append(None)
                 obsth.append(None)
+            else:
+                obsx.append(obs.position.x)
+                obsy.append(obs.position.y)
+                obsth.append(obs.orientation)
         observation = np.array(obsx + obsy + obsth)
 
         observation = np.array(observation)
@@ -96,13 +110,13 @@ class FriendKalmanFilter:
 
             S = np.dot(np.dot(H, self.P), np.transpose(H)) + R
 
-            S_inv = S
-            S_inv[0, 0] = 1 / S_inv[0, 0]
-            S_inv[1, 1] = 1 / S_inv[1, 1]
-            S_inv[2, 2] = 1 / S_inv[2, 2]
-            K = np.dot(np.dot(self.P, np.transpose(H)), S_inv)
+            K = np.dot(np.dot(self.P, np.transpose(H)), np.linalg.inv(S))
             self.x = self.x + np.dot(K, np.transpose(y))
             self.P = np.dot((self.eye - np.dot(K, H)), self.P)
+
+        if np.abs(self.x[5]) > 500:
+            print("B The estimate of orientation speed is reaching inf!!")
+            self.x[5] = 0
 
     def transition_model_with_command(self, dt):
         self.F = np.array([[1, 0, dt, 0, 0, 0],  # Position x

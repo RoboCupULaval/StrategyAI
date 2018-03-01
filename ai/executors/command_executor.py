@@ -47,11 +47,12 @@ class CommandExecutor(Executor):
             if player.ai_command.charge_kick:
                 temp.append(StartChargingKick(player))
 
-            if player.ai_command.dribbler_on > 0:
+            if player.ai_command.dribbler_on:
                 temp.append(Dribbler(player))
 
             if player.ai_command.kick:
                 temp.append(Kick(player))
+
 
             if player.ai_command.command == AICommandType.MOVE:
                 assert (isinstance(player.ai_command.speed, SpeedPose))

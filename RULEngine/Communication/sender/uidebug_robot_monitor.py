@@ -28,9 +28,9 @@ class UIDebugRobotMonitor(object):
         self.robots_status = {}
         for robot_id in range(PLAYER_PER_TEAM):
             self.robots_status[robot_id] = RobotStatus()
-        self.terminate = threading.Event()
-        self.monitor_thread = threading.Thread(target=self._monitor_loop)
-        self.pause_cond = threading.Condition(threading.Lock())
+        # self.terminate = threading.Event()
+        # self.monitor_thread = threading.Thread(target=self._monitor_loop)
+        # self.pause_cond = threading.Condition(threading.Lock())
 
         # self.monitor_thread.start()
 
@@ -56,6 +56,7 @@ class UIDebugRobotMonitor(object):
         return
 
     def stop(self):
-        self.terminate.set()
-        self.monitor_thread.join()
-        self.terminate.clear()
+        pass
+        # self.terminate.set()
+        # self.monitor_thread.join()
+        # self.terminate.clear()

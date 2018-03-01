@@ -1,11 +1,11 @@
 # Under MIT License, see LICENSE.txt
 
 from functools import partial
-from RULEngine.Util.Pose import Position, Pose
-from ai.STA.Strategy.Strategy import Strategy
-from ai.STA.Tactic.GoalKeeper import GoalKeeper
-from ai.STA.Tactic.goToPositionPathfinder import GoToPositionPathfinder
-from ai.STA.Tactic.Stop import Stop
+from RULEngine.Util.Pose import Pose
+from ai.STA.Strategy.strategy import Strategy
+from ai.STA.Tactic.goalkeeper import GoalKeeper
+from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.Util.role import Role
 from ai.states.game_state import GameState
@@ -28,17 +28,18 @@ class PrepareKickOffDefense(Strategy):
             else -GameState().const["CENTER_CENTER_RADIUS"]
 
         # Positions objectifs des joueurs
-        attack_top_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
-                                            GameState().const["FIELD_Y_BOTTOM"] * 3 / 5))
-        attack_bottom_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
-                                               GameState().const["FIELD_Y_TOP"] * 3 / 5))
-        middle_position = Pose(Position(center_offset + GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10, 0))
-        defense_top_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                             GameState().const["FIELD_Y_TOP"] / 3))
-        defense_bottom_position = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                                GameState().const["FIELD_Y_BOTTOM"] / 3))
+        attack_top_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
+                                   GameState().const["FIELD_Y_BOTTOM"] * 3 / 5, 0)
+        attack_bottom_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
+                                      GameState().const["FIELD_Y_TOP"] * 3 / 5, 0)
+        middle_position = Pose(center_offset + GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10, 0, 0)
 
-        our_goal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
+        defense_top_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
+                                    GameState().const["FIELD_Y_TOP"] / 10, 0)
+        defense_bottom_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
+                                       GameState().const["FIELD_Y_BOTTOM"] / 10, 0)
+
+        our_goal = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0, 0)
 
         self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, our_goal))
 

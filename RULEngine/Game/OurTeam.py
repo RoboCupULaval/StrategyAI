@@ -13,7 +13,6 @@ class OurTeam(Team):
             self.players[player_id] = OurPlayer(self, player_id)
             if (ConfigService().config_dict["GAME"]["type"] == "sim" and 0 <= player_id <= 5)\
                     or (ConfigService().config_dict["GAME"]["type"] == "real" and 1 <= player_id <= 6):
-                self.players[player_id].in_play = True  # TODO : check if useless
                 self.available_players[player_id] = self.players[player_id]
 
     # todo change this MGL 2017/05/29
