@@ -148,4 +148,4 @@ configs = {
 configs['Logitech Logitech Dual Action'] = configs['Logitech Dual Action']
 configs['Logitech Logitech Cordless RumblePad 2'] = configs['Logitech Cordless RumblePad 2']
 configs['Logitech Gamepad F710'] = configs['Logitech Cordless RumblePad 2']
-configs['MAD CATZ ,Ltd. Mad Catz GameDomainObjects Controller'] = configs['Mad Catz GameDomainObjects Controller']
+configs['MAD CATZ ,Ltd. Mad Catz Game Controller'] = configs['Mad Catz Game Controller']

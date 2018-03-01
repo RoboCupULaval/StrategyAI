@@ -36,7 +36,7 @@ pygame.init()
 size = [500, 700]
 screen = pygame.display.set_mode(size)
 
-pygame.display.set_caption("My GameDomainObjects")
+pygame.display.set_caption("My Game")
 
 # Loop until the user clicks the close button.
 done = False

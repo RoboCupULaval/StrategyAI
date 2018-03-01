@@ -64,5 +64,8 @@ class CmdBuilder:
                          self._ball_collision,
                          self._pathfinder_on)
 
+def MoveTo(target: [Pose, Position], cruise_speed=1, end_speed=0, ball_collision=True):
+    return CmdBuilder().addMoveTo(target, cruise_speed, end_speed, ball_collision).build()
+
 
 Idle = CmdBuilder().build()

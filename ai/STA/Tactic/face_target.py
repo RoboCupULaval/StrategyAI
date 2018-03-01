@@ -2,7 +2,7 @@
 from typing import List
 
 from Util import Pose
-from Util.ai_command_shit import AICommand, AICommandType
+from Util.ai_command import CmdBuilder
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -18,5 +18,5 @@ class FaceTarget(Tactic):
     def exec(self):
         self.status_flag = Flags.WIP
         target_orientation = (self.target.position - self.player.pose.position).angle
-        return AICommand(self.player, AICommandType.MOVE, pose_goal=Pose(self.player_position, target_orientation))
+        return CmdBuilder().addMoveTo(Pose(self.player_position, target_orientation)).build()
 
