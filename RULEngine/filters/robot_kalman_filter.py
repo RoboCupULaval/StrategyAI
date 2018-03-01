@@ -65,19 +65,25 @@ class RobotFilter(KalmanFilter):
         #    R = np.diag([50, 50, 0.01])
         #else:
 
-        R = np.diag([1, 1, .00001])
+        R = np.diag([1, 1, .001])
 
         return R
 
     def initial_state_covariance(self):
         return np.diag([10000, 1, 10000, 1, 90 * np.pi/180, 1 * np.pi/180])
 
+    def update(self, observation, t_capture) -> None:
+        error = observation - self.observation_model() @ self.x
+        error[2] = RobotFilter.wrap_to_pi(error[2])
+        self._update(error, t_capture)
+        self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
+
     def predict(self, input_command=None):
         orientation = self.get_orientation()
         if input_command is not None and orientation is not None:
             input_command = RobotFilter.rotate(input_command, orientation)
         self._predict(input_command)
-        self.x[4] = self.wrap_to_pi(self.x[4])
+        self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
 
     @staticmethod
     def rotate(vec, angle):
