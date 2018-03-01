@@ -1,11 +1,10 @@
 
 from math import sqrt
 
+from RULEngine.controllers.PID import PID
 from RULEngine.controllers.controller_base_class import ControllerBaseClass
 from RULEngine.robot import Robot
-
 from Util import Pose
-from Util.PID import PID
 from Util.geometry import wrap_to_pi, rotate
 
 
