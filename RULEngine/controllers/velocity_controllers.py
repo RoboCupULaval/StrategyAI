@@ -23,7 +23,7 @@ class RealVelocityController(ControllerBaseClass):
 
         speed_norm = robot.cruise_speed
         if is_time_to_break(robot.pose, robot.path.points[-1], robot.cruise_speed, robot.max_linear_acceleration):
-            speed_norm = robot.min_linear_speed  # Near zero, but not quite
+            speed_norm = 0
 
         # TODO: test this IRL
         # speed_norm = optimal_speed(robot.pose, path.points[-1], robot.cruise_speed, robot.max_linear_acceleration)
