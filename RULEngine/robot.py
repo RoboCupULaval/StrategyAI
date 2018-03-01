@@ -12,9 +12,7 @@ MIN_LINEAR_SPEED = 200  # mm/s Speed near zero, but still move the robot
 class Robot:
 
     __slots__ = ('_robot_id', 'position_controller', 'velocity_controller',
-                 'pose', 'velocity', 'path', 'engine_command',
-                 'max_linear_speed', 'min_linear_speed', 'max_linear_acceleration',
-                 'max_angular_speed', 'max_angular_acceleration')
+                 'pose', 'velocity', 'path', 'engine_command')
 
     def __init__(self, robot_id):
         self._robot_id = robot_id
