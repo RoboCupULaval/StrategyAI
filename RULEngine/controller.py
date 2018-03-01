@@ -36,7 +36,6 @@ class Controller(list):
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger("Controller")
 
-        self.team_color = TeamColorService().our_team_color
         self.timestamp = None
         self.observer = observer
 
@@ -48,8 +47,9 @@ class Controller(list):
 
     def update(self, track_frame: Dict, engine_cmds: List[EngineCommand]):
         self.timestamp = track_frame['timestamp']
+        our_team_color = str(TeamColorService().our_team_color)
 
-        for robot in track_frame[self.team_color]:
+        for robot in track_frame[our_team_color]:
             self[robot['id']].pose = robot['pose']
             self[robot['id']].velocity = robot['velocity']
 
@@ -70,7 +70,7 @@ class Controller(list):
 
     def generate_packet(self, commands: Dict):
         packet = RobotState(timestamp=self.timestamp,
-                            is_team_yellow=self.team_color == TeamColorService().YELLOW,
+                            is_team_yellow=TeamColorService().is_our_team_yellow,
                             packet=[])
 
         for robot_id, cmd in commands.items():
