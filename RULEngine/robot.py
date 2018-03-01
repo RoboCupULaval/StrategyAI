@@ -1,3 +1,4 @@
+
 from Util import Pose
 from Util.path import Path
 
@@ -10,15 +11,15 @@ MIN_LINEAR_SPEED = 200  # mm/s Speed near zero, but still move the robot
 
 class Robot:
 
-    __slots__ = ('_robot_id', 'position_controller', 'speed_controller', 'target_orientation', 'pose', 'velocity',
+    __slots__ = ('_robot_id', 'position_controller', 'velocity_controller', 'target_orientation', 'pose', 'velocity',
                  'kick_type', 'kick_force', 'dribbler_active', 'input_command',
-                 'cruise_speed', 'max_linear_speed', 'max_linear_acceleration',
+                 'cruise_speed', 'max_linear_speed', 'min_linear_speed', 'max_linear_acceleration',
                  'max_angular_speed', 'max_angular_acceleration', 'path', 'raw_path', 'charge_kick')
 
-    def __init__(self, robot_id, position_controller, speed_controller):
+    def __init__(self, robot_id):
         self._robot_id = robot_id
-        self.position_controller = position_controller
-        self.speed_controller = speed_controller
+        self.position_controller = None
+        self.velocity_controller = None
         self.pose = None
         self.velocity = None
         self.kick_type = None
@@ -27,6 +28,7 @@ class Robot:
         self.input_command = None
         # FIXME: We don't need that if they are contants
         self.max_linear_speed = MAX_LINEAR_SPEED
+        self.min_linear_speed = MIN_LINEAR_SPEED
         self.max_linear_acceleration = MAX_LINEAR_ACCELERATION
         self.max_angular_speed = MAX_ANGULAR_SPEED
         self.max_angular_acceleration = MAX_ANGULAR_ACCELERATION
