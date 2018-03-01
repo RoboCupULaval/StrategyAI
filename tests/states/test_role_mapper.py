@@ -1,6 +1,8 @@
 from unittest import TestCase
-from ai.Util.role import Role
+
+from Util.role import Role
 from ai.states.game_state import GameState
+
 
 class RoleMapperTests(TestCase):
     def test_givenNoMapping_whenMapById_thenMapsAllPlayers(self):

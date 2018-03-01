@@ -1,16 +1,15 @@
 # Under MIT license, see LICENSE.txt
 
 import math as m
-
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.geometry import compare_angle, wrap_to_pi
-
-from ai.states.game_state import GameState
-from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType
-
 from typing import Union
+
+from Util import Pose
+from Util.ai_command import CmdBuilder
+
+from Util.geometry import compare_angle, wrap_to_pi, rotate, normalize
+from ai.GameDomainObjects import Player
+from ai.STA.Action import Action
+from ai.states.game_state import GameState
 
 DEFAULT_ROTATION_SPEED = 6*m.pi  # rad/s
 DEFAULT_RADIUS = 150  # mm
@@ -18,7 +17,7 @@ DEFAULT_RADIUS = 150  # mm
 
 class RotateAround(Action):
     def __init__(self, game_state: GameState,
-                 player: OurPlayer,
+                 player: Player,
                  target: Pose,
                  radius: Union[int, float]=DEFAULT_RADIUS,
                  is_clockwise: Union[bool, None]=None,
@@ -37,7 +36,7 @@ class RotateAround(Action):
             go backward since the robot cannot be at the right radius (Ball is moving with the robot)
 
             :param game_state: current game state
-            :param player: Instance of the player (OurPlayer)
+            :param player: Instance of the player (Player)
             :param target: Position of the center of rotation
             :param radius: Radius of the rotation around target position
             :param is_clockwise: Sense of rotation flag
@@ -65,28 +64,28 @@ class RotateAround(Action):
         target = self.target.position
         target_to_player = player - target
         if not(self.behind_target is None):
-            if (self.behind_target - self.player.pose.position).norm() < 300:
-                # print((self.behind_target - self.player.pose.position).norm())
-                self.tangential_speed *= (self.behind_target - self.player.pose.position).norm() / 300
+            if (self.behind_target - self.player.pose.position).norm < 300:
+                # print((self.behind_target - self.player.pose.position).norm)
+                self.tangential_speed *= (self.behind_target - self.player.pose.position).norm / 300
 
         if self.aiming is not None:
             aiming_to_target = target - self.aiming
-            heading_error = wrap_to_pi(aiming_to_target.angle() - target_to_player.angle())
+            heading_error = wrap_to_pi(aiming_to_target.angle - target_to_player.angle)
             if compare_angle(heading_error, 0, abs_tol=self.rotation_speed*dt/2):  # True if heading is right
-                next_position = self.radius * aiming_to_target.normalized()
-                next_orientation = aiming_to_target.angle() - m.pi
+                next_position = self.radius * normalize(aiming_to_target)
+                next_orientation = aiming_to_target.angle - m.pi
                 self.tangential_speed = 0
             else:
                 if self.is_clockwise is None:  # Force the rotation in a specific orientation
                     delta_angle = m.copysign(self.rotation_speed * dt, heading_error)
                 else:
                     delta_angle = m.copysign(self.rotation_speed * dt, -1 if self.is_clockwise else 1)
-                next_position = self.radius * target_to_player.normalized().rotate(delta_angle)
-                next_orientation = aiming_to_target.angle() - m.pi
+                next_position = self.radius * rotate(normalize(target_to_player), delta_angle)
+                next_orientation = aiming_to_target.angle - m.pi
 
         else:  # If no aiming, we just rotate around the target with the target orientation
             delta_angle = m.copysign(self.rotation_speed * dt, -1 if self.is_clockwise else 1)
-            next_position = self.radius * target_to_player.normalized().rotate(delta_angle)
+            next_position = self.radius * rotate(normalize(target_to_player), delta_angle)
             next_orientation = self.target.orientation + delta_angle / 2
 
         next_position += target
@@ -94,16 +93,11 @@ class RotateAround(Action):
         return Pose(next_position, next_orientation)
 
     def exec(self):
+        # TODO The old code used "use_pathfinder"
         if self.approach:
-            return AICommand(self.player,
-                             AICommandType.MOVE,
-                             pose_goal=self.generate_destination(),
-                             pathfinder_on=self.pathfinder_on,
-                             cruise_speed=self.approach_speed,
-                             end_speed=self.tangential_speed)
+            return CmdBuilder().addMoveTo(self.generate_destination(),
+                                          cruise_speed=self.approach_speed,
+                                          end_speed=self.tangential_speed).build()
         else:
-            return AICommand(self.player,
-                             AICommandType.MOVE,
-                             pose_goal=self.generate_destination(),
-                             pathfinder_on=self.pathfinder_on,
-                             end_speed=self.tangential_speed)
+            return CmdBuilder().addMoveTo(self.generate_destination(),
+                                          end_speed=self.tangential_speed).build()

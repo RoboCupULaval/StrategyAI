@@ -1,50 +1,68 @@
 # Under MIT License, see LICENSE.txt
 
+import logging
 
-"""
-    Ce module garde en mémoire l'état du jeu
-"""
-from typing import Union
-
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Game.Player import Player
-from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
-from RULEngine.Util.constant import TeamColor
-from RULEngine.Util.singleton import Singleton
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from ai.Util.role import Role
-from ai.Util.role_mapper import RoleMapper
+from RULEngine.services.team_color_service import TeamColorService
+from Util import Position
+from ai.GameDomainObjects import Ball, Team, Field, Referee
+from Util.constant import TeamColor
+from Util.role import Role
+from Util.role_mapper import RoleMapper
+from Util.singleton import Singleton
 
 
 class GameState(object, metaclass=Singleton):
+    UPDATE_TIMEOUT = 0.5
 
     def __init__(self):
         """
         initialise le GameState, initialise les variables avec des valeurs nulles
         """
-        self.game = None
-        self.our_team_color = None
-        self.field = None
-        self.my_team = None
-        self.other_team = None
-        self.timestamp = 0
-        self.const = None
-        self._role_mapper = RoleMapper()
+        self.logger = logging.getLogger(self.__class__.__name__)
 
-    def get_player_by_role(self, role: Role) -> OurPlayer:
+        self._role_mapper = RoleMapper()
+        self._delta_t = 0
+        self.our_team_color = None
+
+        self._balls = []
+        self._field = Field(self._balls)
+        self._referee = Referee()
+        self._blue_team = Team(team_color=TeamColor.BLUE)
+        self._yellow_team = Team(team_color=TeamColor.YELLOW)
+        self._our_team = None
+        self._enemy_team = None
+        self._assign_teams()
+
+    def _assign_teams(self):
+        if TeamColorService().our_team_color == TeamColor.BLUE:
+            self._our_team = self._blue_team
+            self._enemy_team = self._yellow_team
+        elif TeamColorService().our_team_color == TeamColor.YELLOW:
+            self._our_team = self._yellow_team
+            self._enemy_team = self._blue_team
+
+    def update(self, new_game_state):
+        if new_game_state:
+            # Game State is a shared dict with the Engine. Might cause a race condition
+            game_state = new_game_state.copy()  # FIX: this is a shallow copy. is it okay?
+
+            self._blue_team.update(game_state['blue'])
+            self._yellow_team.update(game_state['yellow'])
+
+            self._balls = [Ball.from_dict(ball_dict) for ball_dict in game_state['balls']]
+            self._field = Field(self._balls)
+
+    def get_player_by_role(self, role: object) -> object:
         return self._role_mapper.roles_translation[role]
 
-    def get_role_by_player_id(self, player_id: int) -> Union[Role, None]:
+    def get_role_by_player_id(self, player_id: int):
         for r, p in self._role_mapper.roles_translation.items():
             if p is not None and p.id == player_id:
                 return r
 
-    def bind_random_available_players_to_role(self) -> OurPlayer:
-        pass
-
     def map_players_to_roles_by_player_id(self, mapping_by_player_id):
-        mapping_by_player = {role: self.my_team.available_players[player_id] for role, player_id in mapping_by_player_id.items()}
+        mapping_by_player = {role: self.our_team.available_players[player_id]
+                             for role, player_id in mapping_by_player_id.items()}
         self._role_mapper.map_by_player(mapping_by_player)
 
     def map_players_to_roles_by_player(self, mapping):
@@ -58,60 +76,21 @@ class GameState(object, metaclass=Singleton):
         return self._role_mapper.update_player_for_locked_role(player, role)
 
     def _get_player_from_all_possible_player(self, player_id):
-        return self.my_team.players[player_id]
+        return self.our_team.players[player_id]
 
-    def get_player(self, player_id: int, is_my_team=True) -> Player:
-        """
-        Retourne l'instance du joueur avec id player_id dans l'équipe choisit
-
-        :param player_id: id of the desired player
-        :param is_my_team: True for ally team, False for opponent team
-        :return: the player instance
-        """
-        try:
-            if is_my_team:
-                return self.my_team.available_players[player_id]
-            else:
-                return self.other_team.available_players[player_id]
-        except Exception as e:
-            print(e)
-            raise e
-
-    def get_player_pose(self, player_id: int, is_my_team=True) -> Pose:
-        """
-            Retourne la pose d'un joueur d'une équipe
-
-            :param is_my_team: Booléen avec valeur vrai par défaut, l'équipe du joueur est mon équipe
-            :param player_id: identifiant du joueur, en int
-            :return: L'instance Pose de la pose du joueur
-        """
-        if is_my_team:
-            return self.my_team.available_players[player_id].pose
-        else:
-            return self.other_team.available_players[player_id].pose
-
-    def get_player_position(self, player_id: int, is_my_team=True) -> Position:
-        """
-            Retourne la position d'un joueur d'une équipe
-
-            :param is_my_team: Booléen avec valeur vrai par défaut, l'équipe du joueur est mon équipe
-            :param player_id: identifiant du joueur, en int
-            :return: L'instance Position de la position du joueur
-        """
-        if is_my_team:
-            return self.my_team.available_players[player_id].pose.position
-        else:
-            return self.other_team.available_players[player_id].pose.position
+    def get_player(self, id: int):
+        return self.our_team.players[id]  # tODO
 
     def get_ball_position(self) -> Position:
         """
             Retourne la position de la balle
             :return: L'instance de Position, la position de la balle
         """
-        return self.field.ball.position
+        return self._field.ball.position
 
-    def set_ball_position(self, newPosition: Position, delta_t) -> None:
-        self.field.ball.set_position(newPosition, delta_t)
+    @property
+    def delta_t(self) -> float:
+        return self._delta_t
 
     def get_ball_velocity(self) -> Position:
         """
@@ -120,33 +99,20 @@ class GameState(object, metaclass=Singleton):
 
         :return: la vélocité de la balle.
         """
-        return self.field.ball.velocity
+        return self._field.ball.velocity
 
-    def get_delta_t(self) -> float:
-        """
-            Retourne le delta_t de la state
+    @property
+    def our_team(self) -> Team:
+        return self._our_team
 
-            :return: float: le timestamp
-        """
-        return self.game.delta_t
+    @property
+    def enemy_team(self) -> Team:
+        return self._enemy_team
 
-    def set_reference(self, reference_transfer_object: ReferenceTransferObject) -> None:
-        """
-        Ajoute les références des objets du monde.
+    @property
+    def ball(self) -> Ball:
+        return self._field.ball
 
-        :param reference_transfer_object: reference_transfer_object instance avec les références mise dedans
-        :return: None.
-        """
-        assert isinstance(reference_transfer_object, ReferenceTransferObject), \
-            "setting reference to the gamestate require an instance of RULEngine.Util.GameWorld"
-        assert reference_transfer_object.game.referee is not None, \
-            "setting the game_state reference with an invalid (None) referee!"
-        assert reference_transfer_object.team_color_svc is not None, \
-            "setting the game_state reference with an invalid (None) team_color_service!"
-
-        self.game = reference_transfer_object.game
-        self.field = self.game.field
-        self.my_team = self.game.friends
-        self.other_team = self.game.enemies
-        self.our_team_color = reference_transfer_object.team_color_svc.OUR_TEAM_COLOR
-        self.const = self.game.field.constant
+    @property
+    def referee(self) -> Referee:
+        return self._referee

@@ -2,24 +2,24 @@
 
 from abc import abstractmethod
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from ai.Util.ai_command import AICommand
+from Util import AICommand
+from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
-
-__author__ = 'Robocup ULaval'
 
 
 class Action:
     """
     Classe mère de toutes les actions
     """
-    def __init__(self, game_state: GameState, player: OurPlayer):
+    def __init__(self, game_state: GameState, player: Player):
         """
             :param game_state: L'état courant du jeu.
-            :param player: (OurPlayer) instance du joueur qui execute l'action
+            :param player: (Player) instance du joueur qui execute l'action
         """
         assert isinstance(game_state, GameState), "action classe mère doit avoir un p_game_state objet GameState"
-        assert isinstance(player, OurPlayer), "action classe mère doit avoir pour player une instance de OurPlayer"
+        assert isinstance(player, Player), "action classe mère doit avoir pour player une instance de Player"
+
+        raise RuntimeError("Action are deprecated, use CmdBuilder instead.")
         self.game_state = game_state
         self.player = player
 
@@ -32,8 +32,5 @@ class Action:
         """
         pass
 
-    def get_name(self):
-        return self.__class__.__name__
-
     def __str__(self):
-        return self.__class__.__name__
+        return str(self.player) + " -> " + self.__class__.__name__

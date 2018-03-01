@@ -1,6 +1,8 @@
 # Under MIT license, see LICENSE.txt
-
 """ Livre des stratégies. """
+__author__ = "Maxime Gagnon-Legault, and others"
+
+import logging
 from typing import List
 
 from ai.STA.Strategy.defense_wall_3v3 import DefenseWall_3v3
@@ -39,6 +41,7 @@ class StrategyBook(object):
         """
         Initialise le dictionnaire des stratégies présentées au reste de l'IA.
         """
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.strategy_book = {'Offense': Offense,
                               'HumanControl': HumanControl,
                               'DoNothing': DoNothing,
@@ -59,8 +62,7 @@ class StrategyBook(object):
                               'PreparePenaltyOffense': PreparePenaltyOffense,
                               'OffenseKickOff': OffenseKickOff,
                               'DefenseWallNoKick': DefenseWallNoKick,
-                              'Offense_3v3': Offense_3v3,
-                              'DefenseWall_3v3': DefenseWall_3v3
+                              'pStop': DoNothing
                               }
 
     def get_strategies_name_list(self) -> List[str]:
@@ -81,6 +83,7 @@ class StrategyBook(object):
 
         if self.check_existance_strategy(strategy_name):
             return self.strategy_book[strategy_name]
+        self.logger.error("Something asked for this non existant strategy: {}".format(strategy_name))
         return self.strategy_book['DoNothing']
 
     def check_existance_strategy(self, strategy_name: str) -> bool:

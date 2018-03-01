@@ -1,7 +1,5 @@
 # Under MIT license, see LICENSE.txt
 
-__author__ = 'RoboCupULaval'
-
 
 class Vertex:
     """

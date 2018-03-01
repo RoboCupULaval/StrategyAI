@@ -3,13 +3,14 @@
 from functools import partial
 from random import shuffle
 
-from RULEngine.Util.Pose import Position, Pose
+from Util.constant import PLAYER_PER_TEAM
+from Util.pose import Pose, Position
+
 from ai.STA.Strategy.strategy import Strategy
-from RULEngine.Util.constant import PLAYER_PER_TEAM
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.role import Role
+from Util.role import Role
 
 
 class RobocupChoreography(Strategy):
@@ -58,6 +59,9 @@ class RobocupChoreography(Strategy):
         self.add_condition(robot3, 0, 1, partial(self.condition, robot3))
         self.add_condition(robot3, 1, 0, partial(self.condition, robot3))
 
+        for i in range(PLAYER_PER_TEAM):
+            if not (i == robot1 or i == robot2 or i == robot3):
+                self.add_tactic(i, Stop(self.game_state, i))
 
     def condition(self, i):
         try:
@@ -65,6 +69,9 @@ class RobocupChoreography(Strategy):
             return self.roles_graph[role].get_current_tactic().status_flag == Flags.SUCCESS
         except:
             return False
-
-
-
+        '''
+        for k in range(PLAYER_PER_TEAM):
+            if not self.tactic_conditions[k]:
+                return False
+        '''
+        return True

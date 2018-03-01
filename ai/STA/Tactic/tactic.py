@@ -1,11 +1,12 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
-from ai.STA.Action.Idle import Idle
+from Util import Pose
+from Util.ai_command import CmdBuilder, AICommand
+from ai.GameDomainObjects import Player
+from ai.STA.Action import Action
+from Util.ai_command import Idle
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.ai_command import AICommand
 from ai.states.game_state import GameState
 
 __author__ = 'RobocupULaval'
@@ -18,7 +19,7 @@ class Tactic(object):
     # IM SORRY MGL 2017/06/16
     initialized = False
 
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List=None):
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List=None):
         """
         Initialise la tactic avec des valeurs
 
@@ -27,7 +28,7 @@ class Tactic(object):
         :param target: Pose général pouvant être utilisé par les classes enfants comme elles veulent
         """
         assert isinstance(game_state, GameState), "Le game_state doit être un GameState"
-        assert isinstance(player, OurPlayer), "Le player doit être un OurPlayer {}".format(player)
+        assert isinstance(player, Player), "Le player doit être un Player {}".format(player)
         assert isinstance(target, Pose), "La target devrait être une Pose"
 
         self.game_state = game_state
@@ -52,7 +53,7 @@ class Tactic(object):
             :return: un nouvelle instance de l'action Idle pour le robot
         """
         self.next_state = self.halt
-        return Idle(self.game_state, self.player)
+        return Idle
 
     def exec(self) -> AICommand:
         """
@@ -60,11 +61,12 @@ class Tactic(object):
 
             :return: un AICommand
         """
-        next_action = self.current_state()
+        next_ai_command = self.current_state()
+        if isinstance(next_ai_command, Action):
+            raise RuntimeError("Action are deprecaded use CmdBuilder")
+        if not isinstance(next_ai_command, AICommand):
+            raise RuntimeError("A tactic MUST return an AICommand, not a {}".format(type(next_ai_command)))
         self.current_state = self.next_state
-        next_ai_command = next_action.exec()
-        self.player.ai_command = next_ai_command
-        # return deprecated TODO remove with all others as well MGL 2017/05/22
         return next_ai_command
 
     def get_name(self):

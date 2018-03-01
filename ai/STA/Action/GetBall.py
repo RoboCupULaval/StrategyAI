@@ -1,11 +1,9 @@
 # Under MIT licence, see LICENCE.txt
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
+from Util.ai_command import CmdBuilder
+from ai.GameDomainObjects import Player
+from Util import AICommand, Pose
+from ai.STA.Action import Action
 from ai.states.game_state import GameState
-from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType
-
-__author__ = 'Robocup ULaval'
 
 
 class GetBall(Action):
@@ -16,7 +14,7 @@ class GetBall(Action):
     Attributs (en plus de ceux de Action):
         player_id : L'identifiant du joueur
     """
-    def __init__(self, game_state: GameState, player: OurPlayer):
+    def __init__(self, game_state: GameState, player: Player):
         """
             :param game_state: L'état courant du jeu.
             :param player: Joueur qui prend le contrôle de la balle
@@ -29,8 +27,6 @@ class GetBall(Action):
         :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
         """
         ball_position = self.game_state.get_ball_position()
-        destination_orientation = (ball_position - self.player.pose.position).angle()
+        destination_orientation = (ball_position - self.player.pose.position).angle
 
-        return AICommand(self.player,
-                         AICommandType.MOVE,
-                         pose_goal=Pose(ball_position, destination_orientation))
+        return CmdBuilder().addMoveTo(Pose(ball_position, destination_orientation)).build()

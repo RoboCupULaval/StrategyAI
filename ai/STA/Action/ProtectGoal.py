@@ -1,17 +1,10 @@
 # Under MIT licence, see LICENCE.txt
-
-
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.area import stayInsideCircle
-from RULEngine.Util.geometry import get_closest_point_on_segment
-from ai.STA.Action.Action import Action
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
-from ai.Util.ai_command import AICommand, AICommandType
+from Util import Pose, Position, AICommand
+from Util.area import stayInsideCircle
+from Util.geometry import get_closest_point_on_segment
+from ai.GameDomainObjects import Player
+from ai.STA.Action import Action
 from ai.states.game_state import GameState
-
-__author__ = 'Robocup ULaval'
 
 
 class ProtectGoal(Action):
@@ -26,7 +19,7 @@ class ProtectGoal(Action):
         minimum_distance : La distance minimale qu'il doit y avoir entre le gardien et le centre du but.
         maximum_distance : La distance maximale qu'il doit y avoir entre le gardien et le centre du but.
     """
-    def __init__(self, game_state: GameState, player: OurPlayer, is_right_goal: bool=True,
+    def __init__(self, game_state: GameState, player: Player, is_right_goal: bool=True,
                  minimum_distance: [int, float]=150 / 2, maximum_distance: [int, float, None]=None):
         """
         :param game_state: L'état courant du jeu.
@@ -61,7 +54,9 @@ class ProtectGoal(Action):
         inner_circle_position = stayInsideCircle(ball_position, goal_position, self.minimum_distance)
         outer_circle_position = stayInsideCircle(ball_position, goal_position, self.maximum_distance)
 
-        destination_position = get_closest_point_on_segment(goalkeeper_position, inner_circle_position, outer_circle_position)
+        destination_position = get_closest_point_on_segment(goalkeeper_position,
+                                                            inner_circle_position,
+                                                            outer_circle_position)
 
         # Vérification que destination_position respecte la distance maximale
         if self.maximum_distance is None:
@@ -71,12 +66,7 @@ class ProtectGoal(Action):
             destination_position = stayInsideCircle(destination_position, goal_position, self.maximum_distance)
 
         # Calcul de l'orientation de la pose de destination
-        #destination_orientation = (ball_position - destination_position).angle()
+        destination_orientation = (ball_position - destination_position).angle
 
-        destination_pose = Pose(destination_position, self.player.pose.orientation)
-        # return AICommand(self.player,
-        #                  AICommandType.MOVE,
-        #                  pose_goal=destination_pose,
-        #                  pathfinder_on=False)
-        return GoToPositionPathfinder(self.game_state, self.player, destination_pose, end_speed=0.5).exec()
-
+        destination_pose = Pose(destination_position, destination_orientation)
+        return AICommand(self.player.id, target=destination_pose.to_dict())

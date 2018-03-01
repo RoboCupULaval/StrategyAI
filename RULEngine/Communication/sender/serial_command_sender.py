@@ -1,81 +1,35 @@
 # Under MIT License, see LICENSE.txt
-import sched
-import time
-from collections import deque
-try:
-    from pyhermes import McuCommunicator
-except ImportError:
-    print("Couldn't find the pyhermes package. Cannot send command to physical robots.",
-          "\nTo remedy please run the command pip install -r requirements.txt")
 
-from RULEngine.Command.command import *
+from pyhermes import McuCommunicator
 
-COMMUNICATION_SLEEP = 0.001
-MOVE_COMMAND_SLEEP = 0.01
+from RULEngine.Communication.sender.sender_base_class import Sender
 
 
-class SerialCommandSender(object):
-    def __init__(self):
-        self.mcu_com = McuCommunicator(timeout=0.1)
+class SerialCommandSender(Sender):
 
-        self.last_time = 0
-        self.command_queue = deque()
+    def connect(self, connection_info):
+        return McuCommunicator(timeout=0.1)
 
-        self.command_dict = {}
+    def send_packet(self, packets_frame):
 
-        self.terminate = threading.Event()
-        self.comm_thread = threading.Thread(target=self.send_loop, name="SerialCommandSender")
-        self.comm_thread.start()
+        for packet in packets_frame.packet:
 
-    def send_loop(self):
-        def loop_send_packets(sc):
-            if not self.terminate.is_set():
-                sc.enter(MOVE_COMMAND_SLEEP, 1, loop_send_packets, (sc,))
-            # Handle move commands
-            for _, next_command in self.command_dict.items():
-                if isinstance(next_command, Move):
-                    self._package_commands(next_command)
+            # FIXME PB:  Currently we are sending as much packet as the ctrl loop is generating.
+            # It would be preferable if the speed commands were send at a fix rate
+            # The following hack make it impossible to immediately break,
+            # instead the robot will stop receiving commands and thus break 0.5s later...
+            self.connection.sendSpeed(packet.robot_id,
+                                      packet.command.x/1000,
+                                      packet.command.y/1000,
+                                      packet.command.orientation)
+            # FIXME PB: Because of the issue #18 of the Communication Tower, every 3 packets mights be lost
+            # We should it fix this in the ComTower or check it here
+            if packet.kick_force > 0:
+                self.connection.kick(packet.robot_id, packet.kick_force)
 
-            # Handle non-move commands
-            while True:
-                try:
-                    next_command = self.command_queue.popleft()
-                except IndexError:
-                    break
-                self._package_commands(next_command)
+            if packet.dribbler_active:
+                self.connection.turnOnDribbler(packet.robot_id)
 
-        sc = sched.scheduler(time.time, time.sleep)
-        sc.enter(MOVE_COMMAND_SLEEP, 1, loop_send_packets, (sc,))
-        sc.run()
+            if packet.charge_kick:
+                self.connection.charge(packet.robot_id)
 
-
-    def send_command(self, command: Command):
-        # self.command_queue.append(command)
-        # print("({}) Command deque length: {}".format(time.time(), len(self.command_queue)))
-
-        if isinstance(command, Move) or isinstance(command, Stop):
-            self.command_dict[command.player.id] = command
-        elif isinstance(command, Command):
-            self.command_queue.append(command)
-
-    def send_responding_command(self, command: ResponseCommand):
-        """
-        Pause le thread appelant jusqu'à qu'une réponse est reçu
-        """
-        self.command_queue.append(command)
-        command.pause_thread()
-
-        return command.response
-
-    def stop(self):
-        self.terminate.set()
-        self.comm_thread.join()
-
-    def _package_commands(self, command: Command):
-        available_ids = [1, 2, 3, 4, 5, 6]
-        if command.player.id in available_ids:
-            response = command.package_command(self.mcu_com)
-
-            if isinstance(command, ResponseCommand):
-                command.response = response
-                command.wakeup_thread()

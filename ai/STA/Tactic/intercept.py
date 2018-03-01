@@ -1,19 +1,18 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
+
 import numpy as np
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS
-from ai.STA.Action.Idle import Idle
+from Util import Pose, Position
+from Util.constant import BALL_RADIUS, ROBOT_RADIUS
+from ai.GameDomainObjects.player import Player
+from ai.STA.Action.GoBehind import GoBehind
+from Util.ai_command import Idle
 from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.STA.Action.GoBehind import GoBehind
 from ai.states.game_state import GameState
 
-__author__ = 'RoboCupULaval'
 
 ORIENTATION_DEADZONE = 0.2
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
@@ -22,7 +21,7 @@ COMMAND_DELAY = 1.5
 
 
 class Intercept(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None):
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None):
         super().__init__(game_state, player, target, args)
         self.current_state = self.go_between_ball_and_target
         self.next_state = self.go_between_ball_and_target
@@ -30,9 +29,9 @@ class Intercept(Tactic):
     def go_between_ball_and_target(self):
         self.status_flag = Flags.WIP
         ball = self.game_state.get_ball_position()
-        ball_velocity = self.game_state.get_ball_velocity().conv_2_np()
+        ball_velocity = self.game_state.get_ball_velocity()
         if np.linalg.norm(ball_velocity) > 50:
-            self.target = Pose(Position.from_np(ball.conv_2_np() - ball_velocity), 0)
+            self.target = Pose(Position.from_array(ball - ball_velocity), 0)
             dist_behind = np.linalg.norm(ball_velocity) + 1/np.sqrt(np.linalg.norm(ball_velocity))
         else:
             self.target = None
@@ -77,9 +76,9 @@ class Intercept(Tactic):
         return Grab(self.game_state, self.player)
 
     def _is_player_between_ball_and_target(self, fact=-0.99):
-        player = self.player.pose.position.conv_2_np()
-        target = self.target.position.conv_2_np()
-        ball = self.game_state.get_ball_position().conv_2_np()
+        player = self.player.pose.position
+        target = self.target.position
+        ball = self.game_state.get_ball_position()
 
         ball_to_player = player - ball
         target_to_ball = ball - target
@@ -93,8 +92,8 @@ class Intercept(Tactic):
         return False
 
     def _is_player_towards_ball(self, fact=-0.99):
-        player = self.player.pose.position.conv_2_np()
-        ball = self.game_state.get_ball_position().conv_2_np()
+        player = self.player.pose.position
+        ball = self.game_state.get_ball_position()
 
         ball_to_player = player - ball
         ball_to_player /= np.linalg.norm(ball_to_player)

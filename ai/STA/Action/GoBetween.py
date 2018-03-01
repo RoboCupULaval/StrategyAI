@@ -1,15 +1,12 @@
 # Under MIT licence, see LICENCE.txt
-import numpy as np
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.geometry import get_closest_point_on_segment
+from Util import Pose, Position
+from Util import AICommand
+from ai.GameDomainObjects.player import Player
+
+from Util.geometry import get_closest_point_on_segment, normalize
+from ai.STA.Action import Action
 from ai.states.game_state import GameState
-from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType
-
-__author__ = 'Robocup ULaval'
 
 
 class GoBetween(Action):
@@ -24,7 +21,7 @@ class GoBetween(Action):
         target : La position vers laquelle le robot devrait s'orienter
         minimum_distance : La distance minimale qu'il doit y avoir entre le robot et chacun des points
     """
-    def __init__(self, game_state: GameState, player: OurPlayer, position1: Position, position2: Position,
+    def __init__(self, game_state: GameState, player: Player, position1: Position, position2: Position,
                  target: Position, p_minimum_distance: [int, float]=0):
         """
             :param game_state: L'état courant du jeu.
@@ -43,7 +40,6 @@ class GoBetween(Action):
         self.position2 = position2
         self.target = target
         self.minimum_distance = p_minimum_distance
-        self.pathfind = True
 
     def get_destination(self) -> Pose:
         """
@@ -53,16 +49,15 @@ class GoBetween(Action):
         pt1 = self.position1
         pt2 = self.position2
         target = self.target
-        delta = self.minimum_distance * (pt2 - pt1).normalized()
+        delta = self.minimum_distance * normalize(pt2 - pt1)
         pt1 = pt1 + delta
         pt2 = pt2 - delta
 
         destination = get_closest_point_on_segment(target, pt1, pt2)
         dest_to_target = target - destination
-        destination_orientation = dest_to_target.angle()
+        destination_orientation = dest_to_target.angle
 
         return Pose(destination, destination_orientation)
 
-    def exec(self):
-        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.get_destination(),
-                                                             "pathfinder_on": self.pathfind})
+    def exec(self) -> AICommand:
+        return AICommand(self.player.id, target=self.get_destination().to_dict())

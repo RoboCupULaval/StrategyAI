@@ -1,45 +1,32 @@
 # Under MIT License, see LICENSE.txt
 
-import pickle
-from collections import deque
-from socketserver import BaseRequestHandler
+from ipaddress import ip_address
+from pickle import loads
+from queue import Full
+from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY
+from struct import pack
 
-from RULEngine.Communication.util.threaded_udp_server import ThreadedUDPServer
-from RULEngine.Util.constant import DEBUG_RECEIVE_BUFFER_SIZE
-from config.config_service import ConfigService
+from RULEngine.Communication.receiver.receiver_base_class import ReceiverProcess
+from RULEngine.Communication.monitor import monitor_queue
 
 
-class UIDebugCommandReceiver(object):
-    """
-        Service capable d'écouter un port multicast UDP, de reçevoir et de
-        traiter les paquets brutes envoyer par le serveur de débogage.
-    """
-    def __init__(self):
-        cfg = ConfigService()
-        host = cfg.config_dict["COMMUNICATION"]["ui_debug_address"]
-        port = int(cfg.config_dict["COMMUNICATION"]["ui_cmd_receiver_port"])
-        self.packet_list = deque(maxlen=DEBUG_RECEIVE_BUFFER_SIZE)
-        handler = self.get_udp_handler(self.packet_list)
-        self.server = ThreadedUDPServer(host, port, handler)
+@monitor_queue
+class UIDebugCommandReceiver(ReceiverProcess):
 
-    def get_udp_handler(self, packet_list):
-        """ Retourne la classe pour reçevoir async les paquets """
+    def connect(self, connection_info):
+        connection = socket(AF_INET, SOCK_DGRAM)
+        connection.bind(connection_info)
+        if ip_address(connection_info[0]).is_multicast:
+            connection.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, pack("=4sl", inet_aton(connection_info[0]), INADDR_ANY))
 
-        class ThreadedUDPRequestHandler(BaseRequestHandler):
-            """ Contient la logique pour traiter en callback une request. """
-            def handle(self):
-                """
-                    Récupère la request et unpickle le paquet brute dans la
-                    deque.
-                """
-                data = self.request[0]
-                if len(data) > 6:
-                    packet_list.append(pickle.loads(data))
-                else:
-                    raise RuntimeError("Received a legacy ref message on the ui debug port, change port of the ui debug")
-        return ThreadedUDPRequestHandler
+        return connection
 
-    def receive_command(self):
-        """ Vide la file et retourne une liste des paquets brutes. """
-        for _ in range(len(self.packet_list)):
-            yield self.packet_list.pop()
+    def receive_packet(self):
+
+        data, _ = self.connection.recvfrom(2048)
+
+        try:
+            self._link.put(loads(data))
+        except Full as e:
+            self.logger.debug("{}".format(e))
+

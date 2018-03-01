@@ -1,51 +1,37 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.Command.command import Command, ResponseCommand, GetBattery
+
 from RULEngine.Communication.protobuf import grSim_Packet_pb2 as grSim_Packet
-from RULEngine.Communication.util.udp_socket import udp_socket
+from RULEngine.Communication.sender.sender_base_class import Sender
+from RULEngine.Communication.sender.udp_socket import udp_socket
+
+__author__ = "Maxime Gagnon-Legault"
 
 
-class GrSimCommandSender(object):
-    """ Service qui envoie les commandes de mouvements aux robots. """
+class GrSimCommandSender(Sender):
 
-    def __init__(self, host, port):
-        """ Constructeur """
-        self.server = udp_socket(host, port)
+    def connect(self, connection_info):
+        return udp_socket(connection_info)
 
-    def _send_packet(self, packet):
-        """
-            Envoie un paquet en sérialisant au préalable.
+    def send_packet(self, packet):
+        packet = self._create_protobuf_packet(packet)
+        self.connection.send(packet.SerializeToString())
 
-            :param packet: Un paquet prêt à l'envoie
-        """
-        self.server.send(packet.SerializeToString())
+    @staticmethod
+    def _create_protobuf_packet(packets_frame) -> grSim_Packet.grSim_Packet:
+        grsim_packet = grSim_Packet.grSim_Packet()
 
-    def send_command(self, command: Command):
-        """
-            Construit le paquet à envoyer à partir de la commande reçut.
+        grsim_packet.commands.isteamyellow = packets_frame.is_team_yellow
+        grsim_packet.commands.timestamp = packets_frame.timestamp if packets_frame.timestamp is not None else 0
 
-            :param command: Command pour un robot
-        """
-        packet = grSim_Packet.grSim_Packet()
-        packet.commands.isteamyellow = command.player.team.is_team_yellow()
-        packet.commands.timestamp = 0
-        grsim_command = packet.commands.robot_commands.add()
-        grsim_command.id = command.player.id
-        grsim_command.wheelsspeed = False
-        grsim_command.veltangent = command.player.ai_command.speed.position.x
-        grsim_command.velnormal = command.player.ai_command.speed.position.y
-        grsim_command.velangular = command.player.ai_command.speed.orientation
-        grsim_command.spinner = True
-        grsim_command.kickspeedx = command.player.ai_command.kick_strength if command.player.ai_command.kick else 0
-        grsim_command.kickspeedz = 0
+        for packet in packets_frame.packet:
+            grsim_command = grsim_packet.commands.robot_commands.add()
+            grsim_command.id = packet.robot_id
+            grsim_command.wheelsspeed = False
+            grsim_command.veltangent = packet.command.x/1000
+            grsim_command.velnormal = packet.command.y/1000
+            grsim_command.velangular = packet.command.orientation
+            grsim_command.spinner = packet.dribbler_active
+            grsim_command.kickspeedx = packet.kick_force
+            grsim_command.kickspeedz = 0
 
-        self._send_packet(packet)
-
-    def send_responding_command(self, command: ResponseCommand):
-        if isinstance(command, GetBattery):
-            FAKE_VOLTAGE = 14.42
-            return FAKE_VOLTAGE
-
-        raise NotImplementedError("Only GetBattery is supported by grsim_command_sender.")
-
-    def stop(self):
-        pass
+        return grsim_packet

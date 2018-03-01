@@ -1,32 +1,33 @@
 # Under MIT License, see LICENSE.txt
 
+
 import pickle
 
-from RULEngine.Communication.util.udp_socket import udp_socket
-from config.config_service import ConfigService
+from RULEngine.Communication.sender.sender_base_class import SenderProcess
+from RULEngine.Communication.sender.udp_socket import udp_socket
+from RULEngine.Communication.monitor import monitor_queue
+
+from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
 
 
-class UIDebugCommandSender(object):
-    """
-        Définition du service capable d'envoyer des paquets de débogages au
-        serveur et à l'interface de débogage. S'occupe de la sérialisation.
-    """
-    def __init__(self):
-        """ Constructeur """
-        cfg = ConfigService()
-        host = cfg.config_dict["COMMUNICATION"]["ui_debug_address"]
-        port = int(cfg.config_dict["COMMUNICATION"]["ui_cmd_sender_port"])
-        self.server = udp_socket(host, port)
+__author__ = "Maxime Gagnon-Legault"
 
-    def _send_packet(self, p_packet):
-        """ Envoi un seul paquet. """
+
+@monitor_queue
+class UIDebugCommandSender(SenderProcess):
+
+    def connect(self, connection_info):
+        return udp_socket(connection_info)
+
+    def send_packet(self):
+
         try:
-            self.server.send(pickle.dumps(p_packet))
+            cmds = self._queue.get()
+            if not isinstance(cmds, list):
+                cmds = [cmds]
+
+            for cmd in cmds:
+                self.connection.send(pickle.dumps(cmd))
         except ConnectionRefusedError:
-            # FIXME: hack
             pass
 
-    def send_command(self, p_packets):
-        """ Reçoit une liste de paquets et les envoies. """
-        for packet in p_packets:
-            self._send_packet(packet)

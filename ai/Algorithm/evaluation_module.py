@@ -1,8 +1,11 @@
 # Under MIT License, see LICENSE.txt
-from RULEngine.Game.Field import FieldSide
-from RULEngine.Util.constant import ROBOT_RADIUS
-from RULEngine.Util.geometry import *
+from Util import Position
+from Util.position import Position
+from Util.constant import ROBOT_RADIUS
+from ai.GameDomainObjects.Shitty_Field import FieldSide
 from ai.states.game_state import GameState
+
+import numpy as np
 
 
 class PlayerPosition(object):
@@ -23,18 +26,17 @@ def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
 def closest_players_to_point(point: Position, our_team=None, robots=None):
     # Retourne une liste de tuples (player, distance) en ordre croissant de distance,
     # our_team pour obtenir une liste contenant une équipe en particulier
-    if robots is None:
-        if our_team or our_team is None:
-            # les players friends
-            robots = GameState().my_team.available_players.values()
-        else:
-            # les players ennemis
-            robots = GameState().other_team.available_players.values()
     list_player = []
-
-    for i in robots:
-        player_distance = (i.pose.position - point).norm()
-        list_player.append(PlayerPosition(i, player_distance))
+    if our_team or our_team is None:
+        for i in GameState().our_team.available_players.values():
+            # les players friends
+            player_distance = (i.pose.position - point).norm
+            list_player.append(PlayerPosition(i, player_distance))
+    if not our_team:
+        for i in GameState().enemy_team.available_players.values():
+            # les players ennemis
+            player_distance = (i.pose.position - point).norm
+            list_player.append(PlayerPosition(i, player_distance))
     list_player = sorted(list_player, key=lambda x: x.distance)
     return list_player
 
@@ -46,11 +48,11 @@ def closest_player_to_point(point: Position, our_team=None, robots=None):
 
 
 def is_ball_moving(min_speed=0.1):
-    return GameState().get_ball_velocity().norm() > min_speed
+    return GameState().get_ball_velocity().norm > min_speed
 
 def is_ball_kicked(player, min_distance=150, min_speed=1000):
-    if (player.pose.position - GameState.get_ball_position()).norm() > min_distance and \
-                    GameState.get_ball_velocity().norm() > min_speed:
+    if (player.pose.position - GameState.get_ball_position()).norm > min_distance and \
+                    GameState.get_ball_velocity().norm > min_speed:
         return True
     else:
         return False
@@ -63,19 +65,14 @@ def is_ball_our_side():
         return GameState().get_ball_position().x < 0
 
 
-def is_target_reached(player, target: Position, min_dist=0.01):
-    # Retourne TRUE si dans un rayon de l'objectif
-    return get_distance(target, player.pose.position) < min_dist
-
-
 def best_position_option(player, pointA: Position, pointB: Position):
     # Retourne la position (entre pointA et pointB) la mieux placée pour une passe
     ncounts = 11
     positions = []
 
     for i in range(ncounts):
-        positions += [Position(pointA.x + i * (pointB.x - pointA.x)/(ncounts-1),
-                               pointA.y + i * (pointB.y - pointA.y)/(ncounts-1))]
+        positions += [Position(pointA.x + i * (pointB.x - pointA.x) / (ncounts - 1),
+                               pointA.y + i * (pointB.y - pointA.y) / (ncounts-1))]
     positions = np.stack(positions)
     scores = line_of_sight_clearance(player, positions)
     best_score_index = np.argmin(scores)
@@ -90,7 +87,7 @@ def best_passing_option(passing_player, consider_goal=True):
     goal = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
 
     receiver_id = None
-    for i in GameState().my_team.available_players.values():
+    for i in GameState().our_team.available_players.values():
 
         if i.id != passing_player.id:
             # Calcul du score pour passeur vers receveur
@@ -112,7 +109,7 @@ def best_passing_option(passing_player, consider_goal=True):
 def best_goal_score_option(passing_player):
     # Retourne la meilleure position dans le but pour kick
     goalA = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"],
-                     GameState().field.constant["FIELD_GOAL_WIDTH"]/2)
+                     GameState().field.constant["FIELD_GOAL_WIDTH"] / 2)
     goalB = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"],
                      -GameState().field.constant["FIELD_GOAL_WIDTH"] / 2)
     best_position = best_position_option(passing_player, goalA, goalB)
@@ -121,14 +118,14 @@ def best_goal_score_option(passing_player):
 def line_of_sight_clearance(player, targets):
     # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est petit)
     score = np.linalg.norm(player.pose.position - targets)
-    for j in GameState().my_team.available_players.values():
+    for j in GameState().our_team.available_players.values():
         # Obstacle : les players friends
         condition = []
         if not (j.id == player.id):
             condition += [target is not j.pose.position for target in targets]
             if any(condition):
                 score *= trajectory_score(player.pose.position, targets[condition], j.pose.position)
-    for j in GameState().other_team.available_players.values():
+    for j in GameState().enemy_team.available_players.values():
         # Obstacle : les players ennemis
         score *= trajectory_score(player.pose.position, targets, j.pose.position)
     return score
@@ -148,7 +145,7 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
     #     # Obstacle : les players friends
     #     if not (j.id == player.id or j.pose.position == target):
     #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
-    for j in GameState().other_team.available_players.values():
+    for j in GameState().enemy_team.available_players.values():
         # Obstacle : les players ennemis
         scores *= trajectory_score(np.array(GameState().get_ball_position()), targets, np.array(j.pose.position))
         #print(scores)
@@ -165,7 +162,7 @@ def line_of_sight_clearance_ball_legacy(player, target: Position):
     #     # Obstacle : les players friends
     #     if not (j.id == player.id or j.pose.position == target):
     #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
-    for j in GameState().other_team.available_players.values():
+    for j in GameState().enemy_team.available_players.values():
         # Obstacle : les players ennemis
         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
     return score
@@ -264,7 +261,7 @@ def score_strategy_other_team():
     # Retourne le score de l'équipe ennemie (négatif = ils sont en offensive, positif = ils sont en défensive)
     i = 0
     x_sum = 0
-    for player in GameState().other_team.available_players.values():
+    for player in GameState().enemy_team.available_players.values():
         x_sum += player.pose.position.x
         i += 1
     if GameState().field.our_side == FieldSide.POSITIVE:
@@ -278,7 +275,7 @@ def score_strategy_other_team():
     if player_their_team is not None and player_our_team is not None:
         their_player_to_ball = GameState().get_ball_position() - player_their_team.pose.position
         our_player_to_ball = GameState().get_ball_position() - player_our_team.pose.position
-        score += their_player_to_ball.norm() - our_player_to_ball.norm()
+        score += their_player_to_ball.norm - our_player_to_ball.norm
 
     return score
 

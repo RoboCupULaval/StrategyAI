@@ -1,14 +1,37 @@
 # Under MIT License, see LICENSE.txt
 
-from RULEngine.Communication.protobuf import referee_pb2 as ssl_referee
-from RULEngine.Communication.util.protobuf_packet_receiver import ProtobufPacketReceiver
-from config.config_service import ConfigService
+from ipaddress import ip_address
+
+from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY, timeout, SOL_SOCKET, SO_REUSEADDR
+from struct import pack
+
+from protobuf_to_dict import protobuf_to_dict
+
+from RULEngine.Communication.protobuf.referee_pb2 import SSL_Referee
+from RULEngine.Communication.receiver.receiver_base_class import ReceiverProcess
+from RULEngine.Communication.monitor import monitor_queue
+
+__author__ = "Simon Bouchard"
 
 
-class RefereeReceiver(ProtobufPacketReceiver):
+@monitor_queue
+class RefereeReceiver(ReceiverProcess):
 
-    def __init__(self):
-        cfg = ConfigService()
-        host = cfg.config_dict["COMMUNICATION"]["referee_udp_address"]
-        port = int(cfg.config_dict["COMMUNICATION"]["referee_port"])
-        super(RefereeReceiver, self).__init__(host, port, ssl_referee.SSL_Referee)
+    def connect(self, connection_info):
+        connection = socket(AF_INET, SOCK_DGRAM)
+        connection.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        connection.bind(connection_info)
+        if ip_address(connection_info[0]).is_multicast:
+            connection.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, pack('=4sl', inet_aton(connection_info[0]), INADDR_ANY))
+
+        return connection
+
+    def receive_packet(self):
+
+        packet = SSL_Referee()
+
+        data = self.connection.recv(1024)
+
+        packet.ParseFromString(data)
+        packet = protobuf_to_dict(packet)
+        self._link.put(packet)

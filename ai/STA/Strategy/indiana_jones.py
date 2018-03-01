@@ -2,11 +2,11 @@
 
 from functools import partial
 
-from RULEngine.Util.Pose import Position, Pose
+from Util.pose import Position, Pose
+from Util.role import Role
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.role import Role
 
 
 class IndianaJones(Strategy):
@@ -61,4 +61,3 @@ class IndianaJones(Strategy):
 
     def condition(self, i):
         return self.roles_graph[i].get_current_tactic().status_flag == Flags.SUCCESS
-

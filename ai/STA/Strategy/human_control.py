@@ -1,9 +1,9 @@
 # Under MIT license, see LICENSE.txt
-from ai.Util.role import Role
-from ai.states.game_state import GameState
+from Util.role import Role
 from ai.STA.Strategy.strategy import Strategy
-from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.stop import Stop
+from ai.STA.Tactic.tactic import Tactic
+from ai.states.game_state import GameState
 
 
 class HumanControl(Strategy):
@@ -22,6 +22,10 @@ class HumanControl(Strategy):
 
 
         r = self.game_state.get_role_by_player_id(robot_id)
-        if r is not None:
+        if r is None:
+            self.game_state.map_players_to_roles_by_player_id({robot_id: Role.FIRST_ATTACK})  # TODO
+            r = Role.FIRST_ATTACK
+        else:
             self.roles_graph[r].remove_node(0)
-            self.add_tactic(r, tactic)
+        self.add_tactic(r, tactic)
+

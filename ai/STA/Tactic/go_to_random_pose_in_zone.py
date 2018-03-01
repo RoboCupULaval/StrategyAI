@@ -1,17 +1,15 @@
 # Under MIT licence, see LICENCE.txt
-from typing import List
-import numpy as np
-
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
-from ai.STA.Tactic.tactic import Tactic
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
-from ai.states.game_state import GameState
 import random
+from typing import List
 
-__author__ = 'RoboCupULaval'
+import numpy as np
+from Util import Pose, Position
+from Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
+from ai.GameDomainObjects.player import Player
+from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.tactic import Tactic
+from ai.states.game_state import GameState
+
 
 ORIENTATION_DEADZONE = 0.2
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
@@ -20,7 +18,7 @@ COMMAND_DELAY = 1.5
 
 
 class GoToRandomPosition(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, center_of_zone: Position, height_of_zone,
+    def __init__(self, game_state: GameState, player: Player, center_of_zone: Position, height_of_zone,
                  width_of_zone, args: List[str]=None):
         super().__init__(game_state, player, args=args)
         self.current_state = self.exec
@@ -53,8 +51,7 @@ class GoToRandomPosition(Tactic):
         return GoToPositionPathfinder(self.game_state, self.player, self.next_pose).exec()
 
     def check_success(self):
-        distance = (self.player.pose - self.next_pose).position.norm()
-        if distance < 0.3 and self.player.pose.compare_orientation(self.next_pose, abs_tol=0.5):
+        distance = (self.player.pose - self.next_pose).position.norm
+        if distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.next_pose, abs_tol=ANGLE_TO_HALT):
             return True
         return False
-

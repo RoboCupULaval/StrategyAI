@@ -1,16 +1,18 @@
 # Under MIT licence, see LICENCE.txt
+
+__author__ = "Maxime Gagnon-Legault"
+
 import math
 import numpy as np
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.geometry import wrap_to_pi
-from ai.states.game_state import GameState
-from ai.STA.Action.Action import Action
-from ai.Util.ai_command import AICommand, AICommandType
+from Util import Pose, Position, AICommand
 
-__author__ = 'Robocup ULaval'
+from ai.GameDomainObjects import Player
+from Util.position import Position
+from Util.geometry import wrap_to_pi
+from ai.GameDomainObjects import Player
+from ai.STA.Action.Action import Action
+from ai.states.game_state import GameState
 
 
 class GoBehind(Action):
@@ -26,7 +28,7 @@ class GoBehind(Action):
         position2 : La position par rapport à laquelle le robot doit être "derrière" l'objet de la position 1
                     (exemple: le but)
     """
-    def __init__(self, game_state: GameState, player: OurPlayer, position1: Position, position2: Position=None,
+    def __init__(self, game_state: GameState, player: Player, position1: Position, position2: Position=None,
                  distance_behind: [int, float]=250, cruise_speed: [int, float]=1,
                  pathfinder_on: bool=False, orientation: str= 'front'):
         """
@@ -48,7 +50,7 @@ class GoBehind(Action):
         self.cruise_speed = cruise_speed
         self.orientation = orientation
 
-        # TODO find something better MGL 2017/05/22
+        # TODO find something better MGL 2017/05/22 TODO repair MGL 2018/01/25
         if self.position2 is None:
             self.position2 = game_state.const["FIELD_THEIR_GOAL_MID_GOAL"]
 
@@ -106,14 +108,12 @@ class GoBehind(Action):
         # TODO why?!? MGL 2017/05/22
         destination_orientation = 0
         if self.orientation == 'front':
-            destination_orientation = (self.position1 - destination_position).angle()
+            destination_orientation = (self.position1 - destination_position).angle
         elif self.orientation == 'back':
-            destination_orientation = wrap_to_pi((self.position1 - destination_position).angle() + np.pi)
+            destination_orientation = wrap_to_pi((self.position1 - destination_position).angle + np.pi)
 
         destination_pose = Pose(destination_position, destination_orientation)
         return destination_pose
 
-    def exec(self):
-        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.get_destination(),
-                                                             "cruise_speed": self.cruise_speed,
-                                                             "pathfinder_on": self.pathfinder_on})
+    def exec(self) -> AICommand:
+        return AICommand(self.player.id, target=self.get_destination().to_dict())
