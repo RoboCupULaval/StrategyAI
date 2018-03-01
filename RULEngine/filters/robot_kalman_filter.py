@@ -44,9 +44,6 @@ class RobotFilter(KalmanFilter):
                          [0,  0,  0],  # Position Theta
                          [0,  0,  0]])  # Speed Theta
 
-    def initial_state_covariance(self):
-        return 10 ** 6 * np.eye(self.state_number)
-
     def process_covariance(self):
         dt = self._dt
         sigma_acc_x = 100
