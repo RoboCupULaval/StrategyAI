@@ -30,8 +30,8 @@ class BallFilter(KalmanFilter):
 
     def process_covariance(self):
         dt = self._dt
-        sigma_acc_x = 1000
-        sigma_acc_y = 1000
+        sigma_acc_x = 100
+        sigma_acc_y = 100
         G = np.array([
             np.array([0.25 * dt ** 4, 0.50 * dt ** 3, 0, 0]) * sigma_acc_x ** 2,
             np.array([0.50 * dt ** 3, 1.00 * dt ** 2, 0, 0]) * sigma_acc_x ** 2,
@@ -47,7 +47,8 @@ class BallFilter(KalmanFilter):
         #    R = np.diag([50, 50])
         #else:
         #    R = np.diag([10, 10])
-        R = np.diag([1, 1])
+        return np.diag([10, 10])
 
-        return R
+    def initial_state_covariance(self):
+        return 10000 * np.eye(self.state_number)
 

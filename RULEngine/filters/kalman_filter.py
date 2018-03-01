@@ -34,6 +34,7 @@ class KalmanFilter:
     def observation_model(self):
         return np.zeros(0)
 
+    @abstractmethod
     def initial_state_covariance(self):
         return 10 ** 6 * np.eye(self.state_number)
 
