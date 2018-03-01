@@ -73,7 +73,7 @@ class PassToPlayer(Tactic):
             self.next_state = self.kick
         else:
             self.next_state = self.kick_charge
-        return Kick(self.game_state, self.player, 1, self.target)
+        return Kick(self.game_state, self.player, 5, self.target)
 
     def halt(self):
         if self.status_flag == Flags.INIT:

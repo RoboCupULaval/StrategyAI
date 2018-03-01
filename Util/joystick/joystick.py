@@ -1,7 +1,10 @@
 import time
 from math import fabs
 
-import pygame
+try:
+    import pygame
+except:
+    print("Can not find pygame, that's ok, as long as you don't use the joystick tactic")
 
 from Util.joystick.joystick_config import configs
 

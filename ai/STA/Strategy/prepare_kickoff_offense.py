@@ -28,16 +28,16 @@ class PrepareKickOffOffense(Strategy):
         # Positions objectifs des joueurs
         # TODO: Why are those constant different in kickoff_offense and kickoff_defense
         attack_top_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15,
-                                   GameState().const["FIELD_Y_BOTTOM"] * 3 / 5)
+                                   GameState().const["FIELD_Y_BOTTOM"] * 3 / 5, 0)
         attack_bottom_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15,
-                                      GameState().const["FIELD_Y_TOP"] * 3 / 5)
-        middle_position = Pose((GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15, 0))
+                                      GameState().const["FIELD_Y_TOP"] * 3 / 5, 0)
+        middle_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15, 0, 0)
         defense_top_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                    GameState().const["FIELD_Y_TOP"] / 3)
+                                    GameState().const["FIELD_Y_TOP"] / 3, 0)
         defense_bottom_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                       GameState().const["FIELD_Y_BOTTOM"] / 3)
+                                       GameState().const["FIELD_Y_BOTTOM"] / 3, 0)
 
-        our_goal = Pose((GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
+        our_goal = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0, 0)
 
         self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, our_goal))
 

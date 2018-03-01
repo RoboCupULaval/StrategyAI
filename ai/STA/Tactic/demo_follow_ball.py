@@ -5,7 +5,7 @@ from Util import Pose
 from Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
 
 from ai.GameDomainObjects import Player
-from Util.ai_command import Idle
+from Util.ai_command import Idle, CmdBuilder
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -18,24 +18,15 @@ FOLLOW_SPEED = 1.5
 class DemoFollowBall(Tactic):
     def __init__(self, game_state: GameState, player: Player, p_target: Pose=Pose(), args: List[str]=None):
         super().__init__(game_state, player, p_target, args)
-        self.current_state = self.halt
-        self.next_state = self.halt
+        self.current_state = self.move_to_ball
+        self.next_state = self.move_to_ball
 
     def move_to_ball(self):
-        self.status_flag = Flags.WIP
-        self.target = Pose(self.game_state.get_ball_position())
+        ball_position = self.game_state.get_ball_position()
 
-        if (self.player.pose.position - self.target.position).norm < POSITION_DEADZONE + ROBOT_RADIUS:
-            self.next_state = self.halt
+        if (self.player.pose.position - ball_position).norm < POSITION_DEADZONE + ROBOT_RADIUS:
+            self.status_flag = Flags.SUCCESS
+            return Idle
         else:
-            self.next_state = self.move_to_ball
-        return MoveToPosition(self.game_state, self.player, self.target)
-
-    def halt(self):
-        self.status_flag = Flags.SUCCESS
-
-        if (self.player.pose.position - self.game_state.get_ball_position()).norm < POSITION_DEADZONE + ROBOT_RADIUS:
-            self.next_state = self.halt
-        else:
-            self.next_state = self.move_to_ball
-        return Idle(self.game_state, self.player)
+            self.status_flag = Flags.WIP
+            return CmdBuilder().addMoveTo(ball_position).build()

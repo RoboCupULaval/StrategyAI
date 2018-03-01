@@ -4,9 +4,8 @@ import time
 from typing import List
 
 from Util import Pose
-from Util.ai_command_shit import AICommandType, AICommand, AIControlLoopType
 from ai.GameDomainObjects import Player
-from Util.ai_command import Idle
+from Util.ai_command import Idle, AICommand
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -53,8 +52,9 @@ class RobotIdent(Tactic):
             with open(self.output_filename, 'a') as f:
                 f.write('{},{},{},{},{},{},{}\n'.format(t, px, vx, py, vy, pt, vt))
 
-            next_action = AICommand(self.player, AICommandType.MOVE, **{"pose_goal": speed_pose,
-                                                                        "control_loop_type": AIControlLoopType.OPEN})
+            raise RuntimeError("You need to implement a open control loop in the rest of system")
+            # next_action = AICommand(self.player, AICommandType.MOVE, **{"pose_goal": speed_pose,
+            #                                                             "control_loop_type": AIControlLoopType.OPEN})
         else:
             next_action = Idle
 

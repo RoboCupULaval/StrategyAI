@@ -52,7 +52,7 @@ class GameState(object, metaclass=Singleton):
             self._balls = [Ball.from_dict(ball_dict) for ball_dict in game_state['balls']]
             self._field = Field(self._balls)
 
-    def get_player_by_role(self, role: Role):
+    def get_player_by_role(self, role: object) -> object:
         return self._role_mapper.roles_translation[role]
 
     def get_role_by_player_id(self, player_id: int):

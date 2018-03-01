@@ -15,17 +15,12 @@ from RULEngine.robot import Robot, MAX_LINEAR_SPEED, MIN_LINEAR_SPEED, MAX_LINEA
 
 from RULEngine.robot import Robot, MAX_LINEAR_SPEED, MIN_LINEAR_SPEED
 from Util.PID import PID
-from Util.csv_plotter import CsvPlotter
 
 from Util import Pose, Position
 from Util.geometry import rotate, wrap_to_pi
 from Util.constant import PLAYER_PER_TEAM
-from Util.path import Path
 from Util.path_smoother import path_smoother
-from Util.scroll_plot import DynamicUpdate
-from Util.trapezoidal_speed import get_next_velocity
 from config.config_service import ConfigService
-import numpy as np
 
 RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active charge_kick')
 RobotState = namedtuple('RobotState', 'timestamp is_team_yellow packet')

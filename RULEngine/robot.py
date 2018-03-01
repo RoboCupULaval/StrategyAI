@@ -25,6 +25,7 @@ class Robot:
         self.kick_force = 0
         self.dribbler_active = False
         self.input_command = None
+        # FIXME: We don't need that if they are contants
         self.max_linear_speed = MAX_LINEAR_SPEED
         self.max_linear_acceleration = MAX_LINEAR_ACCELERATION
         self.max_angular_speed = MAX_ANGULAR_SPEED

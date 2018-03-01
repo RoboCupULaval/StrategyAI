@@ -53,7 +53,7 @@ class Tactic(object):
             :return: un nouvelle instance de l'action Idle pour le robot
         """
         self.next_state = self.halt
-        return CmdBuilder().build()
+        return Idle
 
     def exec(self) -> AICommand:
         """

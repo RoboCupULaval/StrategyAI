@@ -14,7 +14,7 @@ from ai.states.game_state import GameState
 
 class Strategy(metaclass=ABCMeta):
     """ Définie l'interface commune aux stratégies. """
-    def __init__(self, p_game_state: GameState):
+    def __init__(self, p_game_state: GameState, keep_roles=True):
         """
         Initialise la stratégie en créant un graph vide pour chaque robot de l'équipe.
         :param p_game_state: L'état courant du jeu.

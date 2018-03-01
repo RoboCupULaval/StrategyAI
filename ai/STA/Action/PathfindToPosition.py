@@ -1,6 +1,6 @@
 # Under MIT license, see LICENSE.txt
+from Util.ai_command import CmdBuilder
 from ai.GameDomainObjects import Player
-from Util.ai_command_shit import AICommand, AICommandType
 from Util import Pose
 
 from ai.STA.Action import Action
@@ -36,6 +36,4 @@ class PathfindToPosition(Action):
                      où Pose est la destination du joueur
                         kick est faux (on ne botte pas)
         """
-        return AICommand(self.player, AICommandType.MOVE, **{"pose_goal": self.destination,
-                                                             "pathfinder_on": True,
-                                                             "cruise_speed": self.cruise_speed})
+        return CmdBuilder().addMoveTo(self.destination, cruise_speed=self.cruise_speed).build()
