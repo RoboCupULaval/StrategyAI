@@ -35,9 +35,9 @@ __author__ = 'Maxime Gagnon-Legault and Simon Bouchard'
 
 class Engine(Process):
 
-    FPS = 30
+    FPS = 20
     NUM_CAMERA = 4
-    FIX_FRAME_RATE = True
+    FIX_FRAME_RATE = False
 
     def __init__(self,
                  game_state: DictProxy,

@@ -42,16 +42,16 @@ class RobotFilter(KalmanFilter):
                          [0,  0,  0],  # Position y
                          [0, dt,  0],  # Speed y
                          [0,  0,  0],  # Position Theta
-                         [0,  0, dt]])  # Speed Theta
+                         [0,  0,  0]])  # Speed Theta
 
     def initial_state_covariance(self):
         return 10 ** 6 * np.eye(self.state_number)
 
     def process_covariance(self):
         dt = self._dt
-        sigma_acc_x = 2000
-        sigma_acc_y = 2000
-        sigma_acc_o = 0.01
+        sigma_acc_x = 100
+        sigma_acc_y = 100
+        sigma_acc_o = 0.1
         G = np.array([
                 np.array([0.25 * dt ** 4, 0.50 * dt ** 3,              0,              0,              0,              0]) * sigma_acc_x ** 2,
                 np.array([0.50 * dt ** 3, 1.00 * dt ** 2,              0,              0,              0,              0]) * sigma_acc_x ** 2,
@@ -68,7 +68,7 @@ class RobotFilter(KalmanFilter):
         #    R = np.diag([50, 50, 0.01])
         #else:
 
-        R = np.square(np.diag([10, 10, 0.01]))
+        R = np.diag([1, 1, .001])
 
         return R
 
