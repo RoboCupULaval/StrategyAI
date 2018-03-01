@@ -1,12 +1,12 @@
 
-from RULEngine.controllers.PID import PID
-from RULEngine.controllers.controller_base_class import ControllerBaseClass
+from RULEngine.regulators.PID import PID
+from RULEngine.regulators.regulator_base_class import RegulatorBaseClass
 from RULEngine.robot import Robot, MAX_LINEAR_SPEED
 from Util import Pose
 from Util.geometry import wrap_to_pi, rotate
 
 
-class RealPositionController(ControllerBaseClass):
+class RealPositionRegulator(RegulatorBaseClass):
 
     def __init__(self, control_setting):
         self.controllers = {'x': PID(**control_setting['translation']),
@@ -36,5 +36,5 @@ class RealPositionController(ControllerBaseClass):
             controller.reset()
 
 
-class GrSimPositionController(RealPositionController):
+class GrSimPositionRegulator(RealPositionRegulator):
     pass

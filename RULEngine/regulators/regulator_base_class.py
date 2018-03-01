@@ -4,7 +4,7 @@ from RULEngine.robot import Robot
 from Util import Pose
 
 
-class ControllerBaseClass(metaclass=ABCMeta):
+class RegulatorBaseClass(metaclass=ABCMeta):
 
     @abstractmethod
     def execute(self, robot: Robot) -> Pose:

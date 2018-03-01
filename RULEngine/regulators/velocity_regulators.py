@@ -1,14 +1,14 @@
 
 from math import sqrt
 
-from RULEngine.controllers.PID import PID
-from RULEngine.controllers.controller_base_class import ControllerBaseClass
+from RULEngine.regulators.PID import PID
+from RULEngine.regulators.regulator_base_class import RegulatorBaseClass
 from RULEngine.robot import Robot, MIN_LINEAR_SPEED, MAX_LINEAR_ACCELERATION
 from Util import Pose
 from Util.geometry import wrap_to_pi, rotate
 
 
-class RealVelocityController(ControllerBaseClass):
+class RealVelocityController(RegulatorBaseClass):
 
     def __init__(self, control_setting):
         self.orientation_controller = PID(**control_setting['rotation'], wrap_error=True)

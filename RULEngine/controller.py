@@ -4,9 +4,10 @@ import logging
 from collections import namedtuple
 from typing import Dict, List
 
-from RULEngine.controllers import VelocityController, PositionController
+from RULEngine.regulators import VelocityRegulator, PositionRegulator
 from RULEngine.filters.path_smoother import path_smoother
 from RULEngine.robot import Robot
+from Util import Pose
 from Util.constant import PLAYER_PER_TEAM
 from config.config_service import ConfigService
 
@@ -43,8 +44,8 @@ class Controller(list):
         super().__init__(Robot(robot_id) for robot_id in range(PLAYER_PER_TEAM))
 
         for robot in self:
-            robot.position_controller = PositionController()
-            robot.velocity_controller = VelocityController()
+            robot.position_regulator = PositionRegulator()
+            robot.velocity_regulator = VelocityRegulator()
 
     def update(self, track_frame: Dict, engine_cmds: List[EngineCommand]):
         self.timestamp = track_frame['timestamp']
@@ -64,7 +65,7 @@ class Controller(list):
         for robot in active_robots:
             robot.raw_path.quick_update_path(robot.pose.position)
             robot.path = path_smoother(robot, robot.raw_path)
-            commands[robot.robot_id] = robot.velocity_controller.execute(robot)
+            commands[robot.robot_id] = robot.velocity_regulator.execute(robot)
 
         return self.generate_packet(commands)
 
