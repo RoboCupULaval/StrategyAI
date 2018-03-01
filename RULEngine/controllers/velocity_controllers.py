@@ -15,7 +15,9 @@ class RealVelocityController(ControllerBaseClass):
 
     def execute(self, robot: Robot):
 
-        target = Pose(robot.path.points[1], robot.target_orientation)
+        target_orientation = \
+            robot.target_orientation if robot.target_orientation is not None else robot.pose.orientation
+        target = Pose(robot.path.points[1], target_orientation)
 
         error = Pose()
         error.position = target.position - robot.pose.position
@@ -23,7 +25,7 @@ class RealVelocityController(ControllerBaseClass):
 
         speed_norm = robot.cruise_speed
         if is_time_to_break(robot.pose, robot.path.points[-1], robot.cruise_speed, robot.max_linear_acceleration):
-            speed_norm = 0
+            speed_norm = robot.min_linear_speed
 
         # TODO: test this IRL
         # speed_norm = optimal_speed(robot.pose, path.points[-1], robot.cruise_speed, robot.max_linear_acceleration)
@@ -40,27 +42,7 @@ class RealVelocityController(ControllerBaseClass):
 
 
 class GrSimVelocityController(RealVelocityController):
-
-    def execute(self, robot: Robot):
-
-        target = Pose(robot.path.points[1], robot.target_orientation)
-
-        error = Pose()
-        error.position = target.position - robot.pose.position
-        error.orientation = wrap_to_pi(target.orientation - robot.pose.orientation)
-
-        speed_norm = robot.cruise_speed
-        if is_time_to_break(robot.pose, robot.path.points[-1], robot.cruise_speed, robot.max_linear_acceleration):
-            speed_norm = robot.min_linear_speed  # Near zero, but not quite
-
-        # speed_norm = optimal_speed(robot.pose, robot.path.points[-1], robot.cruise_speed, robot.max_linear_acceleration)
-
-        vel = speed_norm * error.position / error.norm
-
-        cmd_pos = rotate(vel, -robot.pose.orientation)
-        cmd_orientation = self.orientation_controller.execute(error.orientation)
-
-        return Pose(cmd_pos, cmd_orientation)
+    pass
 
 
 def is_time_to_break(robots_pose, destination, cruise_speed, acceleration):

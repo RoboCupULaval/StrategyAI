@@ -4,7 +4,7 @@ import logging
 from collections import namedtuple
 from multiprocessing import Queue
 from queue import Empty
-from typing import Dict
+from typing import Dict, List
 
 from RULEngine.controllers import VelocityController, PositionController
 from RULEngine.filters.path_smoother import path_smoother
@@ -32,8 +32,7 @@ class Observer:
 
 
 class Controller(list):
-    def __init__(self, ai_queue: Queue, observer=Observer):
-        self.ai_queue = ai_queue
+    def __init__(self, observer=Observer):
         self.timestamp = None
         self.observer = observer
 
@@ -49,11 +48,10 @@ class Controller(list):
             robot.position_controller = PositionController()
             robot.velocity_controller = VelocityController()
 
-    def execute(self, track_frame: Dict) -> RobotState:
+    def execute(self, track_frame: Dict, engine_cmds: EngineCommand) -> RobotState:
 
         self.timestamp = track_frame['timestamp']
-        self.update_robots_states(track_frame[self.team_color])
-        self.update_engine_commands()
+        self.update_robots_states(track_frame[self.team_color], engine_cmds)
         self.update_robot_path()
 
         commands = self.execute_controller()
@@ -62,26 +60,20 @@ class Controller(list):
 
         return packet
 
-    def update_robots_states(self, robots_states):
+    def update_robots_states(self, robots_states: Dict, engine_cmds: List[EngineCommand]):
         for robot in robots_states:
             self[robot['id']].pose = robot['pose']
             self[robot['id']].velocity = robot['velocity']
 
-    def update_engine_commands(self):
-        try:
-            engine_cmds = self.ai_queue.get(block=False)
-            for cmd in engine_cmds:
-                robot_id = cmd.robot_id
-                # TODO: engine command could be a field of Robot
-                self[robot_id].kick_type = cmd.kick_type
-                self[robot_id].kick_force = cmd.kick_force
-                self[robot_id].dribbler_active = cmd.dribbler_active
-                self[robot_id].raw_path = cmd.path
-                self[robot_id].cruise_speed = cmd.cruise_speed
-                self[robot_id].charge_kick = cmd.charge_kick
-                self[robot_id].target_orientation = cmd.target_orientation
-        except Empty:
-            pass
+        for cmd in engine_cmds:
+            robot_id = cmd.robot_id
+            # TODO: engine command could be a field of Robot
+            self[robot_id].kick_type = cmd.kick_type
+            self[robot_id].kick_force = cmd.kick_force
+            self[robot_id].dribbler_active = cmd.dribbler_active
+            self[robot_id].raw_path = cmd.path
+            self[robot_id].cruise_speed = cmd.cruise_speed
+            self[robot_id].target_orientation = cmd.target_orientation
 
     def update_robot_path(self):
         for robot in self:
