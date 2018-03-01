@@ -6,9 +6,8 @@ import sys
 from multiprocessing import Process, Queue, Manager
 from multiprocessing.managers import DictProxy
 
-from queue import Full, Empty
+from queue import Empty
 from time import time, sleep
-import sched
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
@@ -26,7 +25,7 @@ try:
     from Util.csv_plotter import CsvPlotter
 except ImportError:
     print('Fail to import csv_plotter. It will be disable.')
-    from RULEngine.controller import Observer as CsvPlotter
+    from Util.csv_plotter import Observer as CsvPlotter
 
 from config.config_service import ConfigService
 

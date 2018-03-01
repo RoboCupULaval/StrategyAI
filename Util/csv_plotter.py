@@ -1,8 +1,16 @@
 import numpy as np
 import csv
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import time
 import os
+
+
+class Observer:
+    def __init__(self):
+        pass
+
+    def write(self, poses):
+        pass
 
 
 class CsvPlotter:

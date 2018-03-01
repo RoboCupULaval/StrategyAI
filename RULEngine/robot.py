@@ -1,7 +1,4 @@
 
-from Util import Pose
-from Util.path import Path
-
 MAX_LINEAR_SPEED = 2000  # mm/s
 MAX_LINEAR_ACCELERATION = 2000  # mm/s^2
 MAX_ANGULAR_SPEED = 1  # rad/s
