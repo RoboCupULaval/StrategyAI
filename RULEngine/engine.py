@@ -138,7 +138,9 @@ class Engine(Process):
         game_state = self.tracker.update()
         self.game_state.update(game_state)
 
-        robot_state = self.controller.execute(self.game_state, engine_cmds)
+        self.controller.update(self.game_state, engine_cmds)
+        robot_state = self.controller.execute()
+
         self.robot_cmd_sender.send_packet(robot_state)
         self.tracker.predict(robot_state.packet)
 

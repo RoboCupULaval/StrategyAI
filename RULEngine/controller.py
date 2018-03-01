@@ -46,19 +46,10 @@ class Controller(list):
             robot.position_controller = PositionController()
             robot.velocity_controller = VelocityController()
 
-    def execute(self, track_frame: Dict, engine_cmds: List[EngineCommand]) -> RobotState:
-
+    def update(self, track_frame: Dict, engine_cmds: List[EngineCommand]):
         self.timestamp = track_frame['timestamp']
-        self.update_robots_states(track_frame[self.team_color], engine_cmds)
 
-        commands = self.execute_controller()
-
-        packet = self.generate_packet(commands)
-
-        return packet
-
-    def update_robots_states(self, robots_states: Dict, engine_cmds: List[EngineCommand]):
-        for robot in robots_states:
+        for robot in track_frame[self.team_color]:
             self[robot['id']].pose = robot['pose']
             self[robot['id']].velocity = robot['velocity']
 
@@ -66,15 +57,16 @@ class Controller(list):
             robot_id = cmd.robot_id
             self[robot_id].engine_command = cmd
 
-    def execute_controller(self) -> Dict:
+    def execute(self) -> RobotState:
         commands = dict()
         active_robots = [robot for robot in self if robot.pose is not None and robot.raw_path is not None]
+
         for robot in active_robots:
             robot.raw_path.quick_update_path(robot.pose.position)
             robot.path = path_smoother(robot, robot.raw_path)
             commands[robot.robot_id] = robot.velocity_controller.execute(robot)
 
-        return commands
+        return self.generate_packet(commands)
 
     def generate_packet(self, commands: Dict):
         packet = RobotState(timestamp=self.timestamp,
@@ -82,12 +74,11 @@ class Controller(list):
                             packet=[])
 
         for robot_id, cmd in commands.items():
-            robot = self[robot_id]
             packet.packet.append(
                 RobotPacket(robot_id=robot_id,
                             command=cmd,
-                            kick_type=robot.engine_command.kick_type,
-                            kick_force=robot.engine_command.kick_force,
-                            dribbler_active=robot.engine_command.dribbler_active,
-                            charge_kick=robot.engine_command.charge_kick))
+                            kick_type=self[robot_id].engine_command.kick_type,
+                            kick_force=self[robot_id].engine_command.kick_force,
+                            dribbler_active=self[robot_id].engine_command.dribbler_active,
+                            charge_kick=self[robot_id].engine_command.charge_kick))
         return packet
