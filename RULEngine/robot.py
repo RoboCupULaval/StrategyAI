@@ -23,15 +23,7 @@ class Robot:
         self.pose = None
         self.velocity = None
         self.path = None
-
         self.engine_command = None
-
-        # FIXME: We don't need that if they are contants
-        self.max_linear_speed = MAX_LINEAR_SPEED
-        self.min_linear_speed = MIN_LINEAR_SPEED
-        self.max_linear_acceleration = MAX_LINEAR_ACCELERATION
-        self.max_angular_speed = MAX_ANGULAR_SPEED
-        self.max_angular_acceleration = MAX_ANGULAR_ACCELERATION
 
     @property
     def robot_id(self):

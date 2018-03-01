@@ -1,7 +1,7 @@
 
 from RULEngine.controllers.PID import PID
 from RULEngine.controllers.controller_base_class import ControllerBaseClass
-from RULEngine.robot import Robot
+from RULEngine.robot import Robot, MAX_LINEAR_SPEED
 from Util import Pose
 from Util.geometry import wrap_to_pi, rotate
 
@@ -27,7 +27,7 @@ class RealPositionController(ControllerBaseClass):
         command.position = rotate(command.position, -pose.orientation)
 
         # Limit max linear speed
-        command.position /= max(1, command.norm / robot.max_linear_speed)
+        command.position /= max(1, command.norm / MAX_LINEAR_SPEED)
 
         return command
 
