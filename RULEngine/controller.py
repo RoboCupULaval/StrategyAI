@@ -1,26 +1,17 @@
 # Under MIT licence, see LICENCE.txt
 
 import logging
-from collections import namedtuple
 from typing import Dict, List
 
 from RULEngine.regulators import VelocityRegulator, PositionRegulator
 from RULEngine.filters.path_smoother import path_smoother
 from RULEngine.robot import Robot
+from RULEngine.Communication import RobotPacket, RobotState
 
+from Util.engine_command import EngineCommand
 from Util.constant import PLAYER_PER_TEAM
 from Util.team_color_service import TeamColorService
 from Util.csv_plotter import Observer
-
-RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active charge_kick')
-RobotState = namedtuple('RobotState', 'timestamp is_team_yellow packet')
-
-
-# TODO see if necessary, also same as RobotPacket
-class EngineCommand(namedtuple('EngineCommand',
-                               'robot_id cruise_speed path kick_type'
-                               ' kick_force dribbler_active charge_kick target_orientation')):
-    pass
 
 
 class Controller(list):
