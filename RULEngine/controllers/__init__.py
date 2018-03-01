@@ -4,7 +4,7 @@ from RULEngine.controllers.velocity_controllers import GrSimVelocityController, 
 from config.config_service import ConfigService
 
 
-class Controller:
+class ControllerFactory:
     available_controllers = None
     controllers_settings = None
 
@@ -23,7 +23,7 @@ class Controller:
         return controller_class(controller_setting)
 
 
-class PositionController(Controller):
+class PositionController(ControllerFactory):
     available_controllers = {'sim': GrSimPositionController,
                              'serial': RealPositionController}
 
@@ -36,7 +36,7 @@ class PositionController(Controller):
     }
 
 
-class VelocityController(Controller):
+class VelocityController(ControllerFactory):
     available_controllers = {'sim': GrSimVelocityController,
                              'serial': RealVelocityController}
 
