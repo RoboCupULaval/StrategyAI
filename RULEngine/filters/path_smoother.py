@@ -3,10 +3,10 @@ from Util.path import Path
 from RULEngine.robot import Robot
 
 
-def path_smoother(player: Robot, path):
+def path_smoother(robot: Robot, path):
     path = path.copy()
-    player = player
-    vel_cruise = player.cruise_speed
+    robot = robot
+    vel_cruise = robot.cruise_speed
     positions_list = [path.points[0]]
     for idx, point in enumerate(path.points[1:-1]):
         i = idx + 1
@@ -25,7 +25,7 @@ def path_smoother(player: Robot, path):
         i = idx + 1
         p2 = point
         p3 = path.points[i+1]
-        radius_at_const_speed = vel_cruise ** 2 / player.max_angular_acceleration
+        radius_at_const_speed = vel_cruise ** 2 / robot.max_angular_acceleration
         theta = abs(np.math.atan2(p3[1]-p2[1], p3[0]-p2[0]) - np.math.atan2(p1[1]-p2[1], p1[0]-p2[0]))
         try:
             dist_deviation = (radius_at_const_speed/(np.math.sin(theta/2)))-radius_at_const_speed
@@ -35,7 +35,7 @@ def path_smoother(player: Robot, path):
         radius = radius_at_const_speed
         while dist_deviation > dist_from_path:
             speed *= 0.4
-            radius = speed ** 2 / player.max_angular_acceleration
+            radius = speed ** 2 / robot.max_angular_acceleration
             dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
         if (p1-p2).norm < 0.001 or (p2-p3).norm < 0.001 or (p1-p3).norm < 0.001:
             # on traite tout le cas ou le problème dégènere
@@ -93,7 +93,7 @@ def path_smoother(player: Robot, path):
             new_speed_list += [speed_list[i]]
             new_turns_list += [turns_list[i]]
         if False:
-            min_dist = abs(0.5 * (np.square(speed_list[i]) - np.square(speed_list[i + 1])) / player.max_linear_acceleration)
+            min_dist = abs(0.5 * (np.square(speed_list[i]) - np.square(speed_list[i + 1])) / robot.max_linear_acceleration)
             if min_dist > (point_list[i] - point_list[i+1]).norm:
                 if speed_list[i] > speed_list[i + 1]:
                     speed_list[i] *= (point_list[i] - point_list[i+1]).norm / min_dist

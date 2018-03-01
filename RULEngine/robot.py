@@ -11,10 +11,10 @@ MIN_LINEAR_SPEED = 200  # mm/s Speed near zero, but still move the robot
 
 class Robot:
 
-    __slots__ = ('_robot_id', 'position_controller', 'velocity_controller', 'target_orientation', 'pose', 'velocity',
-                 'kick_type', 'kick_force', 'dribbler_active', 'input_command',
-                 'cruise_speed', 'max_linear_speed', 'min_linear_speed', 'max_linear_acceleration',
-                 'max_angular_speed', 'max_angular_acceleration', 'path', 'raw_path', 'charge_kick')
+    __slots__ = ('_robot_id', 'position_controller', 'velocity_controller',
+                 'pose', 'velocity', 'path', 'engine_command',
+                 'max_linear_speed', 'min_linear_speed', 'max_linear_acceleration',
+                 'max_angular_speed', 'max_angular_acceleration')
 
     def __init__(self, robot_id):
         self._robot_id = robot_id
@@ -22,22 +22,33 @@ class Robot:
         self.velocity_controller = None
         self.pose = None
         self.velocity = None
-        self.kick_type = None
-        self.kick_force = 0
-        self.dribbler_active = False
-        self.input_command = None
+        self.path = None
+
+        self.engine_command = None
+
         # FIXME: We don't need that if they are contants
         self.max_linear_speed = MAX_LINEAR_SPEED
         self.min_linear_speed = MIN_LINEAR_SPEED
         self.max_linear_acceleration = MAX_LINEAR_ACCELERATION
         self.max_angular_speed = MAX_ANGULAR_SPEED
         self.max_angular_acceleration = MAX_ANGULAR_ACCELERATION
-        self.cruise_speed = 2000
-        self.path = None
-        self.raw_path = None
-        self.target_orientation = 0
-        self.charge_kick = False
 
     @property
     def robot_id(self):
         return self._robot_id
+
+    @property
+    def target_orientation(self):
+        if self.engine_command:
+            return self.engine_command.target_orientation
+
+    @property
+    def cruise_speed(self):
+        if self.engine_command:
+            return self.engine_command.cruise_speed
+
+    @property
+    def raw_path(self):
+        if self.engine_command:
+            return self.engine_command.path
+
