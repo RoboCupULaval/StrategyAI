@@ -31,8 +31,8 @@ class PositionRegulator(RegulatorFactory):
         'sim': {'translation': {'kp': 1, 'ki': 0.1, 'kd': 0},
                 'rotation': {'kp': .75, 'ki': 0.15, 'kd': 0}},
 
-        'serial': {'translation': {'kp': .01, 'ki': 0.0, 'kd': 0},
-                   'rotation': {'kp': 0.5, 'ki': 0.02, 'kd': 0.0}}
+        'serial': {'translation': {'kp': 3, 'ki': 0, 'kd': 0},
+                   'rotation': {'kp': 1, 'ki': 0.02, 'kd': 0.0}}
     }
 
 
