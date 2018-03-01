@@ -7,9 +7,9 @@ from typing import Dict, List
 from RULEngine.regulators import VelocityRegulator, PositionRegulator
 from RULEngine.filters.path_smoother import path_smoother
 from RULEngine.robot import Robot
-from Util import Pose
 from Util.constant import PLAYER_PER_TEAM
 from config.config_service import ConfigService
+from Util.team_color_service import TeamColorService
 
 RobotPacket = namedtuple('RobotPacket', 'robot_id command kick_type kick_force dribbler_active charge_kick')
 RobotState = namedtuple('RobotState', 'timestamp is_team_yellow packet')
@@ -36,8 +36,7 @@ class Controller(list):
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger("Controller")
 
-        self.cfg = ConfigService()
-        self.team_color = self.cfg.config_dict['GAME']['our_color']
+        self.team_color = TeamColorService().our_team_color
         self.timestamp = None
         self.observer = observer
 
@@ -71,7 +70,7 @@ class Controller(list):
 
     def generate_packet(self, commands: Dict):
         packet = RobotState(timestamp=self.timestamp,
-                            is_team_yellow=self.team_color == 'yellow',
+                            is_team_yellow=self.team_color == TeamColorService().YELLOW,
                             packet=[])
 
         for robot_id, cmd in commands.items():
