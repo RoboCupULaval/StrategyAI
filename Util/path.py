@@ -95,14 +95,6 @@ class Path:
         new_path.turns = self.turns.copy()
         return new_path
 
-    @property
-    def start(self):
-        return self.points[0]
-
-    @property
-    def end(self):
-        return self.points[-1]
-
     def __iter__(self):
         for p in self.points:
             yield p

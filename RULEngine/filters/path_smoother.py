@@ -13,7 +13,7 @@ def path_smoother(robot: Robot, path):
     for point, next_point in zip(points_in_between, points_in_between[1:]):
         if (point - next_point).norm >= 10:
             points_in_between_kept.append(point)
-    path.points = [path.start] + points_in_between_kept + [path.end]
+    path.points = [path.start] + points_in_between_kept + [path.goal]
 
     p1 = path.points[0]
     point_list = [p1]
