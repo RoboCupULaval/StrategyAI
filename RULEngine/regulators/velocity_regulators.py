@@ -50,14 +50,13 @@ class RealVelocityController(RegulatorBaseClass):
 class GrSimVelocityController(RealVelocityController):
 
     settings = {
-        'translation': {'kp': 1, 'ki': 0.1, 'kd': 0},
-        'rotation': {'kp': .75, 'ki': 0.15, 'kd': 0}
+       'rotation': {'kp': .75, 'ki': 0.05, 'kd': 0}
     }
 
 
 def is_time_to_break(robots_pose, destination, cruise_speed, acceleration, target_speed):
     # formule physique: v_finale ** 2 = v_init ** 2 - 2 * acceleration * distance_deplacement
-    offset = 1.2  # petite marge pour break avant le point vue qu'il y a du délais
+    offset = 1  # petite marge pour break avant le point vue qu'il y a du délais
     dist_to_target = (destination - robots_pose.position).norm
     return dist_to_target < (abs(cruise_speed ** 2 - target_speed**2) / (2 * acceleration)) * offset
 
