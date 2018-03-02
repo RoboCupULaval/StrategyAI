@@ -17,7 +17,8 @@ class RobotFilter(KalmanFilter):
         if self.is_active:
             return self.x[1::2]
 
-    def get_orientation(self):
+    @property
+    def orientation(self):
         if self.is_active:
             return self.x[4]
 
@@ -79,9 +80,8 @@ class RobotFilter(KalmanFilter):
         self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
 
     def predict(self, input_command=None):
-        orientation = self.get_orientation()
-        if input_command is not None and orientation is not None:
-            input_command = RobotFilter.rotate(input_command, orientation)
+        if input_command is not None and self.orientation is not None:
+            input_command = RobotFilter.rotate(input_command, self.orientation)
         self._predict(input_command)
         self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
 
