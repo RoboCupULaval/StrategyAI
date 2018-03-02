@@ -51,7 +51,7 @@ class Controller(list):
             error = robot.path.points[1] - robot.pose.position
 
             # avec l'ajout du controlleur en position en fin de trajectoire le go_kick semble pas mal plus fiable
-            if (error.norm < 100) and (robot.path.speeds[1] < 0.05):
+            if (error.norm < 200) and (robot.path.speeds[1] < 0.05):
                 commands[robot.robot_id] = robot.position_regulator.execute(robot)
             else:
                 commands[robot.robot_id] = robot.velocity_regulator.execute(robot)

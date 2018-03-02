@@ -17,7 +17,8 @@ class RobotFilter(KalmanFilter):
         if self.is_active:
             return self.x[1::2]
 
-    def get_orientation(self):
+    @property
+    def orientation(self):
         if self.is_active:
             return self.x[4]
 
@@ -46,9 +47,9 @@ class RobotFilter(KalmanFilter):
 
     def process_covariance(self):
         dt = self._dt
-        sigma_acc_x = 100
-        sigma_acc_y = 100
-        sigma_acc_o = 50000 * np.pi/180
+        sigma_acc_x = 1000
+        sigma_acc_y = 1000
+        sigma_acc_o = 10 * np.pi/180
         G = np.array([
                 np.array([0.25 * dt ** 4, 0.50 * dt ** 3,              0,              0,              0,              0]) * sigma_acc_x ** 2,
                 np.array([0.50 * dt ** 3, 1.00 * dt ** 2,              0,              0,              0,              0]) * sigma_acc_x ** 2,
@@ -65,12 +66,12 @@ class RobotFilter(KalmanFilter):
         #    R = np.diag([50, 50, 0.01])
         #else:
 
-        R = np.diag([1, 1, .0001])
+        R = np.diag([1, 1, 0.1 * np.pi/180])
 
         return R
 
     def initial_state_covariance(self):
-        return np.diag([10000, 1, 10000, 1, 90 * np.pi/180, 1 * np.pi/180])
+        return np.diag([10000, 1, 10000, 1, 90 * np.pi/180, 10 * np.pi/180])
 
     def update(self, observation, t_capture) -> None:
         error = observation - self.observation_model() @ self.x
@@ -79,9 +80,8 @@ class RobotFilter(KalmanFilter):
         self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
 
     def predict(self, input_command=None):
-        orientation = self.get_orientation()
-        if input_command is not None and orientation is not None:
-            input_command = RobotFilter.rotate(input_command, orientation)
+        if input_command is not None and self.orientation is not None:
+            input_command = RobotFilter.rotate(input_command, self.orientation)
         self._predict(input_command)
         self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
 

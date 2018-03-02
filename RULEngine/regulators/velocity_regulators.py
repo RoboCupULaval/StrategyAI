@@ -13,15 +13,11 @@ from Util.trapezoidal_speed_profile import get_next_velocity
 
 class RealVelocityController(RegulatorBaseClass):
 
-    settings = {
-        'translation': {'kp': .01, 'ki': 0.0, 'kd': 0},
-        'rotation': {'kp': 0.75, 'ki': 0.15, 'kd': 0.0}
-    }
+    settings = {'kp': 0.5, 'ki': 0.02, 'kd': 0.0}
 
     def __init__(self):
-        self.orientation_controller = PID(**self.settings['rotation'], wrap_error=True)
-        self.dt = 0
-        self.last_time = 0
+        self.orientation_controller = PID(**self.settings, wrap_error=True)
+
     def execute(self, robot: Robot):
         self.dt, self.last_time = time() - self.last_time, time()
         target_orientation = \
@@ -37,10 +33,6 @@ class RealVelocityController(RegulatorBaseClass):
         # if is_time_to_break(robot, robot.path.points[-1], robot.cruise_speed, MAX_LINEAR_ACCELERATION, target_speed):
         #     speed_norm = MIN_LINEAR_SPEED
 
-        # TODO: test this IRL
-        # fonctionne pas du tout, le robot break pas pentoute
-        # speed_norm = optimal_speed(robot.pose, robot.path.points[-1], robot.cruise_speed, MAX_LINEAR_ACCELERATION, target_speed)
-
         vel = speed_norm * error.position / error.norm
 
         cmd_pos = rotate(vel, -robot.pose.orientation)
@@ -54,10 +46,7 @@ class RealVelocityController(RegulatorBaseClass):
 
 class GrSimVelocityController(RealVelocityController):
 
-    settings = {
-        'translation': {'kp': 1, 'ki': 0.1, 'kd': 0},
-        'rotation': {'kp': .75, 'ki': 0.15, 'kd': 0}
-    }
+    settings = {'kp': .75, 'ki': 0.05, 'kd': 0}
 
 
 def is_time_to_break(robot, destination, cruise_speed, acceleration, target_speed):
