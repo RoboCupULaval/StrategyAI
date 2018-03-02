@@ -9,7 +9,7 @@ from Util.geometry import wrap_to_pi, rotate
 class RealPositionRegulator(RegulatorBaseClass):
 
     settings = {
-        'translation': {'kp': 1, 'ki': 0.1, 'kd': 0},
+        'translation': {'kp': 5, 'ki': 0.1, 'kd': 0},
         'rotation': {'kp': .75, 'ki': 0.15, 'kd': 0}
     }
 

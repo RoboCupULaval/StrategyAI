@@ -17,7 +17,7 @@ class Tracker:
 
     MAX_ROBOT_PER_TEAM = 12
     MAX_BALL_ON_FIELD = 1
-    MAX_UNDETECTED_DELAY = 1
+    MAX_UNDETECTED_DELAY = 3
 
     def __init__(self, vision_state: DictProxy):
 
