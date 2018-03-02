@@ -141,7 +141,7 @@ class Engine(Process):
         robot_state = self.controller.execute()
 
         self.robot_cmd_sender.send_packet(robot_state)
-        self.tracker.predict(robot_state.packet)
+        self.tracker.predict(robot_state)
 
         # self.ui_send_queue.put_nowait(UIDebugCommandFactory.robot_state(robot_state)) TODO send robot speed command
         self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(self.game_state))
