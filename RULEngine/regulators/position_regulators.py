@@ -1,17 +1,22 @@
 
 from RULEngine.regulators.PID import PID
 from RULEngine.regulators.regulator_base_class import RegulatorBaseClass
-from RULEngine.robot import Robot, MAX_LINEAR_SPEED
+from RULEngine.robot import Robot, MAX_LINEAR_SPEED, MAX_ANGULAR_SPEED
 from Util import Pose
 from Util.geometry import wrap_to_pi, rotate
 
 
 class RealPositionRegulator(RegulatorBaseClass):
 
-    def __init__(self, control_setting):
-        self.controllers = {'x': PID(**control_setting['translation']),
-                            'y': PID(**control_setting['translation']),
-                            'orientation': PID(**control_setting['rotation'], wrap_error=True)}
+    settings = {
+        'translation': {'kp': 1, 'ki': 0.1, 'kd': 0},
+        'rotation': {'kp': .75, 'ki': 0.15, 'kd': 0}
+    }
+
+    def __init__(self):
+        self.controllers = {'x': PID(**self.settings['translation']),
+                            'y': PID(**self.settings['translation']),
+                            'orientation': PID(**self.settings['rotation'], wrap_error=True)}
 
     def execute(self, robot: Robot):
         pose = robot.pose
@@ -28,7 +33,7 @@ class RealPositionRegulator(RegulatorBaseClass):
 
         # Limit max linear speed
         command.position /= max(1, command.norm / MAX_LINEAR_SPEED)
-
+        command.orientation /= max(1, abs(command.orientation) / MAX_ANGULAR_SPEED)
         return command
 
     def reset(self):
@@ -37,4 +42,8 @@ class RealPositionRegulator(RegulatorBaseClass):
 
 
 class GrSimPositionRegulator(RealPositionRegulator):
-    pass
+
+    settings = {
+        'translation': {'kp': 3, 'ki': 0, 'kd': 0},
+        'rotation': {'kp': 1, 'ki': 0.02, 'kd': 0.0}
+    }

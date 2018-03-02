@@ -5,16 +5,16 @@ from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION, MAX_ANGULAR_ACCELERA
 
 def path_smoother(robot: Robot, path):
     path = path.copy()
-    robot = robot
+
     vel_cruise = robot.cruise_speed
-    positions_list = [path.points[0]]
-    for idx, point in enumerate(path.points[1:-1]):
-        i = idx + 1
-        if (path.points[i] - path.points[i+1]).norm < 10:
-            continue
-        positions_list += [path.points[i]]
-    positions_list += [path.points[-1]]
-    path.points = positions_list
+
+    points_in_between = path.points[1:-1]
+    points_in_between_kept = []
+    for point, next_point in zip(points_in_between, points_in_between[1:]):
+        if (point - next_point).norm >= 10:
+            points_in_between_kept.append(point)
+    path.points = [path.start] + points_in_between_kept + [path.end]
+
     p1 = path.points[0]
     point_list = [p1]
     speed_list = [path.speeds[0]]

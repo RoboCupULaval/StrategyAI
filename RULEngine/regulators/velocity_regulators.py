@@ -10,8 +10,13 @@ from Util.geometry import wrap_to_pi, rotate
 
 class RealVelocityController(RegulatorBaseClass):
 
-    def __init__(self, control_setting):
-        self.orientation_controller = PID(**control_setting['rotation'], wrap_error=True)
+    settings = {
+        'translation': {'kp': .01, 'ki': 0.0, 'kd': 0},
+        'rotation': {'kp': 0.5, 'ki': 0.02, 'kd': 0.0}
+    }
+
+    def __init__(self):
+        self.orientation_controller = PID(**self.settings['rotation'], wrap_error=True)
 
     def execute(self, robot: Robot):
 
@@ -43,7 +48,11 @@ class RealVelocityController(RegulatorBaseClass):
 
 
 class GrSimVelocityController(RealVelocityController):
-    pass
+
+    settings = {
+        'translation': {'kp': 1, 'ki': 0.1, 'kd': 0},
+        'rotation': {'kp': .75, 'ki': 0.15, 'kd': 0}
+    }
 
 
 def is_time_to_break(robots_pose, destination, cruise_speed, acceleration, target_speed):

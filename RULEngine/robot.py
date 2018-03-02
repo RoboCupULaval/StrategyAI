@@ -9,7 +9,7 @@ MIN_LINEAR_SPEED = 200  # mm/s Speed near zero, but still move the robot
 class Robot:
 
     __slots__ = ('_robot_id', 'position_regulator', 'velocity_regulator',
-                 'pose', 'velocity', 'path', 'engine_command')
+                 'pose', 'velocity', 'path', 'engine_cmd')
 
     def __init__(self, robot_id):
         self._robot_id = robot_id
@@ -18,7 +18,7 @@ class Robot:
         self.pose = None
         self.velocity = None
         self.path = None
-        self.engine_command = None
+        self.engine_cmd = None
 
     @property
     def robot_id(self):
@@ -26,16 +26,16 @@ class Robot:
 
     @property
     def target_orientation(self):
-        if self.engine_command:
-            return self.engine_command.target_orientation
+        if self.engine_cmd:
+            return self.engine_cmd.target_orientation
 
     @property
     def cruise_speed(self):
-        if self.engine_command:
-            return self.engine_command.cruise_speed
+        if self.engine_cmd:
+            return self.engine_cmd.cruise_speed
 
     @property
     def raw_path(self):
-        if self.engine_command:
-            return self.engine_command.path
+        if self.engine_cmd:
+            return self.engine_cmd.path
 

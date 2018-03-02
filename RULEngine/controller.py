@@ -6,8 +6,7 @@ from typing import Dict, List
 from RULEngine.regulators import VelocityRegulator, PositionRegulator
 from RULEngine.filters.path_smoother import path_smoother
 from RULEngine.robot import Robot
-from RULEngine.Communication import RobotPacket, RobotState
-from Util import Pose
+from RULEngine.Communication.robot_state import RobotPacket, RobotState
 
 from Util.engine_command import EngineCommand
 from Util.constant import PLAYER_PER_TEAM
@@ -40,7 +39,7 @@ class Controller(list):
 
         for cmd in engine_cmds:
             robot_id = cmd.robot_id
-            self[robot_id].engine_command = cmd
+            self[robot_id].engine_cmd = cmd
 
     def execute(self) -> RobotState:
         commands = dict()
@@ -49,16 +48,13 @@ class Controller(list):
         for robot in active_robots:
             robot.raw_path.quick_update_path(robot.pose.position)
             robot.path = path_smoother(robot, robot.raw_path)
-            target = Pose(robot.path.points[1], 0)
-            error = Pose()
-            error.position = target.position - robot.pose.position
+            error = robot.path.points[1] - robot.pose.position
 
             # avec l'ajout du controlleur en position en fin de trajectoire le go_kick semble pas mal plus fiable
-            if (error.position.norm < 100) and (robot.path.speeds[1] < 0.05):
+            if (error.norm < 100) and (robot.path.speeds[1] < 0.05):
                 commands[robot.robot_id] = robot.position_regulator.execute(robot)
             else:
                 commands[robot.robot_id] = robot.velocity_regulator.execute(robot)
-
 
         return self.generate_packet(commands)
 
@@ -71,8 +67,8 @@ class Controller(list):
             packet.packet.append(
                 RobotPacket(robot_id=robot_id,
                             command=cmd,
-                            kick_type=self[robot_id].engine_command.kick_type,
-                            kick_force=self[robot_id].engine_command.kick_force,
-                            dribbler_active=self[robot_id].engine_command.dribbler_active,
-                            charge_kick=self[robot_id].engine_command.charge_kick))
+                            kick_type=self[robot_id].engine_cmd.kick_type,
+                            kick_force=self[robot_id].engine_cmd.kick_force,
+                            dribbler_active=self[robot_id].engine_cmd.dribbler_active,
+                            charge_kick=self[robot_id].engine_cmd.charge_kick))
         return packet
