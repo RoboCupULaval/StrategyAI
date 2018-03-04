@@ -28,7 +28,7 @@ class PlayState(object, metaclass=Singleton):
         :param strategy: Strategy object déjà instancier, la stratégie à executer
         :return: None
         """
-        assert self.strategy_book.check_existance_strategy(str(strategy))
+        assert isinstance(strategy, Strategy), "You need to pass an instanced strategy"
 
         self.current_strategy = strategy
 

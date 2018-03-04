@@ -39,7 +39,7 @@ class DebugExecutor(metaclass=Singleton):
         cmd_tactics = {'strategy': PlayState().strategy_book.strategies_name(),
                        'strategy_default': PlayState().strategy_book.default_strategies,
                        'tactic': PlayState().tactic_book.tactics_name(),
-                       'tactic_default': PlayState().strategy_book.default_tactics,
+                       'tactic_default': PlayState().tactic_book.default_tactics,
                        'action': ['None']}
 
         msg = UIDebugCommandFactory().books(cmd_tactics)

@@ -62,14 +62,18 @@ class StrategyBook(object):
                               'PreparePenaltyOffense': PreparePenaltyOffense,
                               'OffenseKickOff': OffenseKickOff,
                               'DefenseWallNoKick': DefenseWallNoKick,
-                              'pStop': DoNothing
+                              'DoNothing': DoNothing
                               }
-        self.default_strategies = ['HumanControl',
-                                 'DefenseWall']
+        self.default_strategies = ['Offense',
+                                   'DefenseWall']
 
-        for name, strategy_class in self.tactic_book:
-            assert name == strategy_class.__name__(), \
-                "You give the wrong name to a strategy in strategy book: {} != {}".format(name, strategy_class.__name__())
+        for name, strategy_class in self.strategy_book.items():
+            assert name == strategy_class.__name__, \
+                "You give the wrong name to a strategy in strategy book: {} != {}".format(name, strategy_class.__name__)
+
+        for name in self.default_strategies:
+            assert name in self.strategy_book, \
+                "Default strategy ({}) is not in strategy book".format(name)
 
     def strategies_name(self) -> List[str]:
         """
@@ -86,10 +90,11 @@ class StrategyBook(object):
         :param strategy_name: (str) le nom de la stratégie à retourner
         :return: (Tactic) une nouvelle instance de la stratégie demandé.
         """
+        assert isinstance(strategy_name, str)
 
         if self.check_existance_strategy(strategy_name):
             return self.strategy_book[strategy_name]
-        self.logger.error("Something asked for this non existant strategy: {}".format(strategy_name))
+        self.logger.error("Something asked for this not existing strategy: {}".format(strategy_name))
         return self.strategy_book['DoNothing']
 
     def check_existance_strategy(self, strategy_name: str) -> bool:

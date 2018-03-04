@@ -65,9 +65,12 @@ class TacticBook(object):
         self.default_tactics = ['GoToPositionPathfinder',
                                'GoKick']
 
-        for name, tactic_class in self.tactic_book:
-            assert name == tactic_class.__name__(), \
-                "You give the wrong name to a tactic in tactic book: {} != {}".format(name, tactic_class.__name__())
+        for name, tactic_class in self.tactic_book.items():
+            assert name == tactic_class.__name__, \
+                "You give the wrong name to a tactic in tactic book: {} != {}".format(name, tactic_class.__name__)
+        for name in self.default_tactics:
+            assert name in self.tactic_book, \
+                "Default tactic ({}) is not in tactic book".format(name)
         # if 'Joystick' in sys.modules:
         #     self.tactic_book['Joystick'] = Joystick
 
