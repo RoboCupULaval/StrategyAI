@@ -62,10 +62,16 @@ class TacticBook(object):
             'StayAwayFromBall': StayAwayFromBall,
             'Stop': Stop,
         }
+        self.default_tactics = ['GoToPositionPathfinder',
+                               'GoKick']
+
+        for name, tactic_class in self.tactic_book:
+            assert name == tactic_class.__name__(), \
+                "You give the wrong name to a tactic in tactic book: {} != {}".format(name, tactic_class.__name__())
         # if 'Joystick' in sys.modules:
         #     self.tactic_book['Joystick'] = Joystick
 
-    def get_tactics_name_list(self) -> List[str]:
+    def tactics_name(self) -> List[str]:
         """
         Retourne une liste des nomd des tactiques disponibles à l'IA.
 

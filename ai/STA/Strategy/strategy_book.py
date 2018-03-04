@@ -64,8 +64,14 @@ class StrategyBook(object):
                               'DefenseWallNoKick': DefenseWallNoKick,
                               'pStop': DoNothing
                               }
+        self.default_strategies = ['HumanControl',
+                                 'DefenseWall']
 
-    def get_strategies_name_list(self) -> List[str]:
+        for name, strategy_class in self.tactic_book:
+            assert name == strategy_class.__name__(), \
+                "You give the wrong name to a strategy in strategy book: {} != {}".format(name, strategy_class.__name__())
+
+    def strategies_name(self) -> List[str]:
         """
         Retourne une liste des noms des stratégies disponibles à l'IA.
 
