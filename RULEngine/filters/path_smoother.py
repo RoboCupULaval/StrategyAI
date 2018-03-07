@@ -28,7 +28,7 @@ def path_smoother(robot: Robot, path):
 def filter_points_and_speed(point_list, speed_list, threshold):
     position_list = []
     new_speed_list = []
-    
+
     for i, point in enumerate(point_list[0:-1]):
         if (point_list[i] - point_list[i + 1]).norm < threshold:
             continue
