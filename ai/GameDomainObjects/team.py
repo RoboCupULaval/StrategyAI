@@ -1,12 +1,9 @@
 # Under MIT License, see LICENSE.txt
-from Util.pose import Pose
-from Util.constant import PLAYER_PER_TEAM
-
-
 from typing import Dict
 
+from Util.constant import PLAYER_PER_TEAM
+from Util.team_color_service import TeamColor
 from ai.GameDomainObjects.player import Player
-from RULEngine.services.team_color_service import TeamColor
 
 
 class Team:

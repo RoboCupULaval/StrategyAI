@@ -25,6 +25,10 @@ class TeamColorService(object, metaclass=Singleton):
     def enemy_team_color(self):
         return self._enemy_team_color
 
+    @property
+    def is_our_team_yellow(self):
+        return self._our_team_color == TeamColor.YELLOW
+
     @staticmethod
     def convert_color_from_str(color: str):
         if color == TeamColorService.BLUE:

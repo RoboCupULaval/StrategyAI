@@ -8,7 +8,7 @@ import numpy as np
 
 from Util import Pose, Position, AICommand
 from Util.ai_command import CmdBuilder, Idle
-from Util.geometry import compare_angle
+from Util.geometry import compare_angle, wrap_to_pi
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
@@ -60,7 +60,7 @@ class GoKick(Tactic):
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.player.pose.position).angle
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3)
-        if (self.player.pose.position - distance_behind).norm < 50:
+        if (self.player.pose.position - distance_behind).norm < 50 and wrap_to_pi(self.player.pose.orientation - orientation) < 0.2:
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -68,7 +68,7 @@ class GoKick(Tactic):
                 self._find_best_passing_option()
         # ball_collision = self.tries_flag == 0
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=1,
+                                      cruise_speed=2,
                                       ball_collision=True).build()
 
     def grab_ball(self):

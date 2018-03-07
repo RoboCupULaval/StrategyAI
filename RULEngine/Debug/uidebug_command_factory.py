@@ -3,11 +3,10 @@
 from math import sin, cos
 from typing import Dict
 
-from RULEngine.services.team_color_service import TeamColorService
+from Util import Pose
 from Util.constant import TeamColor
 from Util.singleton import Singleton
-from Util import Pose
-
+from Util.team_color_service import TeamColorService
 from ai.GameDomainObjects.player import Player
 
 __author__ = "Maxime Gagnon-Legault, Philippe Babin, and others"

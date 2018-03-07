@@ -17,7 +17,7 @@ class Tracker:
 
     MAX_ROBOT_PER_TEAM = 12
     MAX_BALL_ON_FIELD = 1
-    MAX_UNDETECTED_DELAY = 1
+    MAX_UNDETECTED_DELAY = 3
 
     def __init__(self, vision_state: DictProxy):
 
@@ -71,10 +71,10 @@ class Tracker:
             obs = np.array([ball_obs['x'], ball_obs['y']])
             self._balls.update(obs, timestamp)
 
-    def predict(self, robot_packet):
+    def predict(self, robot_state):
 
         input_commands = [None for _ in range(12)]
-        for packet in robot_packet:
+        for packet in robot_state.packet:
             input_commands[packet.robot_id] = packet.command.to_array()
 
         for robot, input_cmd in zip(self._our_team, input_commands):

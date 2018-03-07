@@ -37,5 +37,5 @@ class GoToPositionPathfinder(Tactic):
                                       ball_collision=self.ball_collision).build()
 
     def check_success(self):
-        distance = (self.player.pose - self.target).position.norm
+        distance = (self.player.pose - self.target.position).norm
         return distance < POSITION_DEADZONE and compare_angle(self.player.pose.orientation, self.target.orientation, abs_tol=ANGLE_TO_HALT)

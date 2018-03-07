@@ -1,20 +1,20 @@
 import numpy as np
 from Util.path import Path
-from RULEngine.robot import Robot
+from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION
 
 
-def path_smoother(player: Robot, path):
+def path_smoother(robot: Robot, path):
     path = path.copy()
-    player = player
-    vel_cruise = player.cruise_speed
-    positions_list = [path.points[0]]
-    for idx, point in enumerate(path.points[1:-1]):
-        i = idx + 1
-        if (path.points[i] - path.points[i+1]).norm < 10:
-            continue
-        positions_list += [path.points[i]]
-    positions_list += [path.points[-1]]
-    path.points = positions_list
+
+    vel_cruise = robot.cruise_speed
+
+    points_in_between = path.points[1:-1]
+    points_in_between_kept = []
+    for point, next_point in zip(points_in_between, points_in_between[1:]):
+        if (point - next_point).norm >= 10:
+            points_in_between_kept.append(point)
+    path.points = [path.start] + points_in_between_kept + [path.goal]
+
     p1 = path.points[0]
     point_list = [p1]
     speed_list = [path.speeds[0]]
@@ -25,7 +25,7 @@ def path_smoother(player: Robot, path):
         i = idx + 1
         p2 = point
         p3 = path.points[i+1]
-        radius_at_const_speed = vel_cruise ** 2 / player.max_angular_acceleration
+        radius_at_const_speed = vel_cruise ** 2 / MAX_LINEAR_ACCELERATION
         theta = abs(np.math.atan2(p3[1]-p2[1], p3[0]-p2[0]) - np.math.atan2(p1[1]-p2[1], p1[0]-p2[0]))
         try:
             dist_deviation = (radius_at_const_speed/(np.math.sin(theta/2)))-radius_at_const_speed
@@ -35,7 +35,7 @@ def path_smoother(player: Robot, path):
         radius = radius_at_const_speed
         while dist_deviation > dist_from_path:
             speed *= 0.4
-            radius = speed ** 2 / player.max_angular_acceleration
+            radius = speed ** 2 / MAX_LINEAR_ACCELERATION
             dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
         if (p1-p2).norm < 0.001 or (p2-p3).norm < 0.001 or (p1-p3).norm < 0.001:
             # on traite tout le cas ou le problème dégènere
@@ -93,7 +93,7 @@ def path_smoother(player: Robot, path):
             new_speed_list += [speed_list[i]]
             new_turns_list += [turns_list[i]]
         if False:
-            min_dist = abs(0.5 * (np.square(speed_list[i]) - np.square(speed_list[i + 1])) / player.max_linear_acceleration)
+            min_dist = abs(0.5 * (np.square(speed_list[i]) - np.square(speed_list[i + 1])) / MAX_LINEAR_ACCELERATION)
             if min_dist > (point_list[i] - point_list[i+1]).norm:
                 if speed_list[i] > speed_list[i + 1]:
                     speed_list[i] *= (point_list[i] - point_list[i+1]).norm / min_dist

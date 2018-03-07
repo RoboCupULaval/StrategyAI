@@ -83,7 +83,10 @@ class Path:
 
     def quick_update_path(self, position):
         self.points[0] = position
-        return Path().generate_path_from_points(self.points, self.speeds, None)
+        new_path = Path().generate_path_from_points(self.points, self.speeds, None)
+        self.points = new_path.points
+        self.speeds = new_path.speeds
+        self.turns = new_path.turns
 
     def copy(self):
         new_path = Path()
