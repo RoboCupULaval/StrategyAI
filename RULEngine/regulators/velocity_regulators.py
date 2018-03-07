@@ -3,7 +3,7 @@ from math import sqrt
 
 from RULEngine.regulators.PID import PID
 from RULEngine.regulators.regulator_base_class import RegulatorBaseClass
-from RULEngine.robot import Robot, MIN_LINEAR_SPEED, MAX_LINEAR_ACCELERATION
+from RULEngine.robot import Robot, MAX_ANGULAR_SPEED, MAX_LINEAR_ACCELERATION
 from Util import Pose
 from Util.geometry import wrap_to_pi, rotate
 from time import time
@@ -13,10 +13,12 @@ from Util.trapezoidal_speed_profile import get_next_velocity
 
 class RealVelocityController(RegulatorBaseClass):
 
-    settings = {'kp': 0.5, 'ki': 0.02, 'kd': 0.0}
+    settings = {'kp': 0.5, 'ki': 0.4, 'kd': 0.0}
 
     def __init__(self):
         self.orientation_controller = PID(**self.settings, wrap_error=True)
+        self.dt = 0
+        self.last_time = 0
 
     def execute(self, robot: Robot):
         self.dt, self.last_time = time() - self.last_time, time()
@@ -37,7 +39,11 @@ class RealVelocityController(RegulatorBaseClass):
 
         cmd_pos = rotate(vel, -robot.pose.orientation)
         cmd_orientation = self.orientation_controller.execute(error.orientation)
-
+        if cmd_orientation < -MAX_ANGULAR_SPEED:
+            cmd_orientation = -MAX_ANGULAR_SPEED
+        elif cmd_orientation > MAX_ANGULAR_SPEED:
+            cmd_orientation = MAX_ANGULAR_SPEED
+        print(cmd_orientation)
         return Pose(cmd_pos, cmd_orientation)
 
     def reset(self):
