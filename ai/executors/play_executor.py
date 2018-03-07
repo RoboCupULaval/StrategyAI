@@ -1,18 +1,17 @@
 # Under MIT License, see LICENSE.txt
-import time
+
 from typing import List, Dict
 import logging
 
 from multiprocessing import Queue
 
-from RULEngine.controller import EngineCommand
+from Util.engine_command import EngineCommand
 from Util import Pose, Position, AICommand, Singleton
 from ai.GameDomainObjects import Player
 from ai.STA.Strategy.human_control import HumanControl
 
-
 from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
-from Util.role import Role
+
 from ai.executors.pathfinder_module import generate_path
 from config.config_service import ConfigService
 from ai.Util.sta_change_command import STAChangeCommand
@@ -66,7 +65,7 @@ class PlayExecutor(metaclass=Singleton):
                              kick_force=ai_cmd.kick_force,
                              dribbler_active=ai_cmd.dribbler_active,
                              cruise_speed=ai_cmd.cruise_speed * 1000,
-                             target_orientation=ai_cmd.target.orientation if ai_cmd.target else 0,
+                             target_orientation=ai_cmd.target.orientation if ai_cmd.target else None,
                              charge_kick=ai_cmd.charge_kick)
 
     def order_change_of_sta(self, cmd: STAChangeCommand):

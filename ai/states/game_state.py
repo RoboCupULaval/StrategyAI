@@ -2,13 +2,12 @@
 
 import logging
 
-from RULEngine.services.team_color_service import TeamColorService
 from Util import Position
-from ai.GameDomainObjects import Ball, Team, Field, Referee
 from Util.constant import TeamColor
-from Util.role import Role
 from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
+from Util.team_color_service import TeamColorService
+from ai.GameDomainObjects import Ball, Team, Field, Referee
 
 
 class GameState(object, metaclass=Singleton):

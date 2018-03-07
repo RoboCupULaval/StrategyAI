@@ -6,9 +6,8 @@ import sys
 from multiprocessing import Process, Queue, Manager
 from multiprocessing.managers import DictProxy
 
-from queue import Full
+from queue import Empty
 from time import time, sleep
-import sched
 
 from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
@@ -26,7 +25,7 @@ try:
     from Util.csv_plotter import CsvPlotter
 except ImportError:
     print('Fail to import csv_plotter. It will be disable.')
-    from RULEngine.controller import Observer as CsvPlotter
+    from Util.csv_plotter import Observer as CsvPlotter
 
 from config.config_service import ConfigService
 
@@ -35,7 +34,7 @@ __author__ = 'Maxime Gagnon-Legault and Simon Bouchard'
 
 class Engine(Process):
 
-    FPS = 30
+    FPS = 30  # same as camera's fps! (or Frame Rate in GrSim)
     NUM_CAMERA = 4
     FIX_FRAME_RATE = True
 
@@ -89,7 +88,7 @@ class Engine(Process):
         self.robot_cmd_sender = RobotCommandSender(robot_connection_info)
 
         self.tracker = Tracker(self.vision_state)
-        self.controller = Controller(self.ai_queue, CsvPlotter)
+        self.controller = Controller(observer=CsvPlotter)
 
         # print frame rate
         self.frame_count = 0
@@ -132,16 +131,28 @@ class Engine(Process):
             sleep(0.1)
 
     def main_loop(self):
-        game_state = self.tracker.update()
 
+        engine_cmds = self.get_engine_commands()
+
+        game_state = self.tracker.update()
         self.game_state.update(game_state)
-        robot_state = self.controller.execute(self.game_state)
+
+        self.controller.update(self.game_state, engine_cmds)
+        robot_state = self.controller.execute()
+
         self.robot_cmd_sender.send_packet(robot_state)
-        self.tracker.predict(robot_state.packet)
+        self.tracker.predict(robot_state)
 
         # self.ui_send_queue.put_nowait(UIDebugCommandFactory.robot_state(robot_state)) TODO send robot speed command
         self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(self.game_state))
         self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
+
+    def get_engine_commands(self):
+        try:
+            engine_cmds = self.ai_queue.get(block=False)
+        except Empty:
+            engine_cmds = []
+        return engine_cmds
 
     def is_any_subprocess_borked(self):
         borked_process_found = not all((self.vision_receiver.is_alive(),

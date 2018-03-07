@@ -34,4 +34,18 @@ class GrSimCommandSender(Sender):
             grsim_command.kickspeedx = packet.kick_force
             grsim_command.kickspeedz = 0
 
+        active_robot_id = {packet.robot_id for packet in packets_frame.packet}
+        inactive_robot_id = set(range(12)) - active_robot_id
+
+        for robot_id in inactive_robot_id:
+            grsim_command = grsim_packet.commands.robot_commands.add()
+            grsim_command.id = robot_id
+            grsim_command.wheelsspeed = False
+            grsim_command.veltangent = 0
+            grsim_command.velnormal = 0
+            grsim_command.velangular = 0
+            grsim_command.spinner = False
+            grsim_command.kickspeedx = 0
+            grsim_command.kickspeedz = 0
+
         return grsim_packet
