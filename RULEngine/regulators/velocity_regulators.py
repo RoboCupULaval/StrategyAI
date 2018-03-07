@@ -39,11 +39,8 @@ class RealVelocityController(RegulatorBaseClass):
 
         cmd_pos = rotate(vel, -robot.pose.orientation)
         cmd_orientation = self.orientation_controller.execute(error.orientation)
-        if cmd_orientation < -MAX_ANGULAR_SPEED:
-            cmd_orientation = -MAX_ANGULAR_SPEED
-        elif cmd_orientation > MAX_ANGULAR_SPEED:
-            cmd_orientation = MAX_ANGULAR_SPEED
-        print(cmd_orientation)
+        cmd_orientation /= max(1, abs(cmd_orientation) / MAX_ANGULAR_SPEED)
+
         return Pose(cmd_pos, cmd_orientation)
 
     def reset(self):
