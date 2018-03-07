@@ -1,14 +1,13 @@
 
 from math import sqrt
+from time import time
 
 from RULEngine.regulators.PID import PID
 from RULEngine.regulators.regulator_base_class import RegulatorBaseClass
-from RULEngine.robot import Robot, MIN_LINEAR_SPEED, MAX_LINEAR_ACCELERATION
+from RULEngine.robot import Robot
+from RULEngine.trapezoidal_speed_profile import get_next_velocity
 from Util import Pose
 from Util.geometry import wrap_to_pi, rotate
-from time import time
-
-from Util.trapezoidal_speed_profile import get_next_velocity
 
 
 class RealVelocityController(RegulatorBaseClass):
