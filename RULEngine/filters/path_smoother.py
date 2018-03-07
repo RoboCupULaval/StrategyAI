@@ -1,6 +1,6 @@
 import numpy as np
 from Util.path import Path
-from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION, MAX_ANGULAR_ACCELERATION
+from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION
 
 
 def path_smoother(robot: Robot, path):
@@ -25,7 +25,7 @@ def path_smoother(robot: Robot, path):
         i = idx + 1
         p2 = point
         p3 = path.points[i+1]
-        radius_at_const_speed = vel_cruise ** 2 / MAX_ANGULAR_ACCELERATION
+        radius_at_const_speed = vel_cruise ** 2 / MAX_LINEAR_ACCELERATION
         theta = abs(np.math.atan2(p3[1]-p2[1], p3[0]-p2[0]) - np.math.atan2(p1[1]-p2[1], p1[0]-p2[0]))
         try:
             dist_deviation = (radius_at_const_speed/(np.math.sin(theta/2)))-radius_at_const_speed
@@ -35,7 +35,7 @@ def path_smoother(robot: Robot, path):
         radius = radius_at_const_speed
         while dist_deviation > dist_from_path:
             speed *= 0.4
-            radius = speed ** 2 / MAX_ANGULAR_ACCELERATION
+            radius = speed ** 2 / MAX_LINEAR_ACCELERATION
             dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
         if (p1-p2).norm < 0.001 or (p2-p3).norm < 0.001 or (p1-p3).norm < 0.001:
             # on traite tout le cas ou le problème dégènere
