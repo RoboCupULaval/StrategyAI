@@ -84,14 +84,12 @@ class SimpleAutoPlay(AutoPlay):
 
         if self.next_state is None:
             self.next_state = SimpleAutoPlayState.HALT
-            self.selected_strategy = self._get_new_strategy(self.next_state)
+            PlayState().current_strategy = self._state_to_strategy_name(self.next_state)
 
         elif self.next_state != self.current_state or available_players_changed:
-            self.selected_strategy = self._get_new_strategy(self.next_state)
+            PlayState().current_strategy = self._state_to_strategy_name(self.next_state)
 
         self.current_state = self.next_state
-
-        PlayState().set_strategy(self.selected_strategy)
     
     def str(self):
         pass
@@ -161,11 +159,7 @@ class SimpleAutoPlay(AutoPlay):
         self.last_ref_command = referee.command
         return next_state
 
-    def _get_new_strategy(self, state):
-        name = self._get_strategy_name(state)
-        return PlayState().get_new_strategy(name)(GameState())
-
-    def _get_strategy_name(self, state):
+    def _state_to_strategy_name(self, state):
         return {
             # Robots must be stopped
             SimpleAutoPlayState.HALT: 'DoNothing',

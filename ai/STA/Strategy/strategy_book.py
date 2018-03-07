@@ -68,13 +68,14 @@ class StrategyBook(object):
                                    'DefenseWall']
 
         for name, strategy_class in self.strategy_book.items():
-            assert name == strategy_class.__name__, \
-                "You give the wrong name to a strategy in strategy book: {} != {}".format(name, strategy_class.__name__)
+            if name != strategy_class.__name__:
+                raise TypeError("You give the wrong name to a strategy in strategy book: {} != {}".format(name, strategy_class.__name__))
 
         for name in self.default_strategies:
-            assert name in self.strategy_book, \
-                "Default strategy ({}) is not in strategy book".format(name)
+            if not name in self.strategy_book:
+                raise TypeError("Default strategy ({}) is not in strategy book".format(name))
 
+    @property
     def strategies_name(self) -> List[str]:
         """
         Retourne une liste des noms des stratégies disponibles à l'IA.
@@ -94,7 +95,7 @@ class StrategyBook(object):
 
         if self.check_existance_strategy(strategy_name):
             return self.strategy_book[strategy_name]
-        self.logger.error("Something asked for this not existing strategy: {}".format(strategy_name))
+        self.logger.error("Something asked for this non-existing strategy: {}".format(strategy_name))
         return self.strategy_book['DoNothing']
 
     def check_existance_strategy(self, strategy_name: str) -> bool:

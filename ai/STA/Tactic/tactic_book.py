@@ -66,14 +66,17 @@ class TacticBook(object):
                                'GoKick']
 
         for name, tactic_class in self.tactic_book.items():
-            assert name == tactic_class.__name__, \
-                "You give the wrong name to a tactic in tactic book: {} != {}".format(name, tactic_class.__name__)
+            if name != tactic_class.__name__:
+                raise TypeError("You give the wrong name to a tactic in tactic book: {} != {}".format(name, tactic_class.__name__))
+
         for name in self.default_tactics:
-            assert name in self.tactic_book, \
-                "Default tactic ({}) is not in tactic book".format(name)
+            if not name in self.tactic_book:
+                raise TypeError("Default tactic ({}) is not in tactic book".format(name))
+
         # if 'Joystick' in sys.modules:
         #     self.tactic_book['Joystick'] = Joystick
 
+    @property
     def tactics_name(self) -> List[str]:
         """
         Retourne une liste des nomd des tactiques disponibles à l'IA.

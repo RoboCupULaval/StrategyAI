@@ -36,9 +36,9 @@ class DebugExecutor(metaclass=Singleton):
             self.last_time = time.time()
 
     def _send_books(self) -> None:
-        cmd_tactics = {'strategy': PlayState().strategy_book.strategies_name(),
+        cmd_tactics = {'strategy': PlayState().strategy_book.strategies_name,
                        'strategy_default': PlayState().strategy_book.default_strategies,
-                       'tactic': PlayState().tactic_book.tactics_name(),
+                       'tactic': PlayState().tactic_book.tactics_name,
                        'tactic_default': PlayState().tactic_book.default_tactics,
                        'action': ['None']}
 
