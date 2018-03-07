@@ -1,104 +1,97 @@
-import numpy as np
+
+from Util import Position
 from Util.path import Path
-from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION, MAX_ANGULAR_ACCELERATION
+from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION
+from math import sqrt, sin
 
 
 def path_smoother(robot: Robot, path):
     path = path.copy()
+    path = remove_close_points(path, threshold=10)
 
-    vel_cruise = robot.cruise_speed
-
-    points_in_between = path.points[1:-1]
-    points_in_between_kept = []
-    for point, next_point in zip(points_in_between, points_in_between[1:]):
-        if (point - next_point).norm >= 10:
-            points_in_between_kept.append(point)
-    path.points = [path.start] + points_in_between_kept + [path.goal]
-
-    p1 = path.points[0]
-    point_list = [p1]
+    point_list = [path.start]
     speed_list = [path.speeds[0]]
-    turns_list = [p1]
 
-    for idx, point in enumerate(path.points[1:-1]):
-        dist_from_path = 50  # mm
-        i = idx + 1
-        p2 = point
-        p3 = path.points[i+1]
-        radius_at_const_speed = vel_cruise ** 2 / MAX_ANGULAR_ACCELERATION
-        theta = abs(np.math.atan2(p3[1]-p2[1], p3[0]-p2[0]) - np.math.atan2(p1[1]-p2[1], p1[0]-p2[0]))
-        try:
-            dist_deviation = (radius_at_const_speed/(np.math.sin(theta/2)))-radius_at_const_speed
-        except ZeroDivisionError:
-            dist_deviation = 0
-        speed = vel_cruise
-        radius = radius_at_const_speed
-        while dist_deviation > dist_from_path:
-            speed *= 0.4
-            radius = speed ** 2 / MAX_ANGULAR_ACCELERATION
-            dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
-        if (p1-p2).norm < 0.001 or (p2-p3).norm < 0.001 or (p1-p3).norm < 0.001:
-            # on traite tout le cas ou le problème dégènere
-            point_list += [p2]
-            speed_list += [vel_cruise]
-            turns_list += [p2]
-        else:
-            p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) *\
-                      (p1 - p2) / (p1 - p2).norm
-            p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) *\
-                (p3 - p2) / (p3 - p2).norm
-            if (p4-p5).norm > (p3-p1).norm:
-                point_list += [p2]
-                speed_list += [vel_cruise]
-                turns_list += [p2]
-            elif (p1 - p2).norm < (p4 - p2).norm:
-                radius *= (p1 - p2).norm / (p4 - p2).norm
-                dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
-                p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p1 - p2) / (p1 - p2).norm
-                p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p3 - p2) / (p3 - p2).norm
-                point_list += [p4, p5]
-                speed_list += [speed, speed]
-                centre_rotation = ((p4 + p5 - 2 * p2) / 2) * (1 + (radius / dist_deviation))
-                turns_list += [p4, centre_rotation]
-            elif (p3 - p2).norm < (p5 - p2).norm:
-                radius *= (p3 - p2).norm / (p5 - p2).norm
-                dist_deviation = (radius / (np.math.sin(theta / 2))) - radius
-                p4 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p1 - p2) / (p1 - p2).norm
-                p5 = p2 + np.sqrt(np.square(dist_deviation + radius) - radius ** 2) * (p3 - p2) / (p3 - p2).norm
-                point_list += [p4, p5]
-                speed_list += [speed, speed]
-                centre_rotation = ((p4 + p5 - 2 * p2) / 2) * (1 + (radius / dist_deviation))
-                turns_list += [p4, centre_rotation]
-            else:
-                point_list += [p4, p5]
-                speed_list += [speed, speed]
-                centre_rotation = ((p4 + p5 - 2 * p2) / 2) * (1 + (radius / dist_deviation))
-                turns_list += [p4, centre_rotation]
-        p1 = point_list[-1]
+    for p1, p2, p3 in zip(path.points[:], path.points[1:], path.points[2:]):
+        p4, p5, turn_radius = compute_circle_points(p1, p2, p3, robot.cruise_speed)
+        point_list += [p4, p5]
+        speed_list += [speed_in_corner(turn_radius), speed_in_corner(turn_radius)]
 
     speed_list += [path.speeds[-1]]
     point_list += [path.goal]
-    turns_list += [path.goal]
-    # on s'assure que le path est bel et bien réalisable par un robot et on
-    # merge les points qui sont trop proches les un des autres.
+
+    point_list, speed_list = filter_points_and_speed(point_list, speed_list, threshold=100)
+
+    return Path().generate_path_from_points(point_list, speed_list, threshold=None)
+
+
+def filter_points_and_speed(point_list, speed_list, threshold):
     position_list = []
     new_speed_list = []
-    new_turns_list = []
-    for idx, point in enumerate(point_list[0:-1]):
-        i = idx
-        if (point_list[i] - point_list[i+1]).norm < 100:
+    
+    for i, point in enumerate(point_list[0:-1]):
+        if (point_list[i] - point_list[i + 1]).norm < threshold:
             continue
         else:
             position_list += [point_list[i]]
             new_speed_list += [speed_list[i]]
-            new_turns_list += [turns_list[i]]
-        if False:
-            min_dist = abs(0.5 * (np.square(speed_list[i]) - np.square(speed_list[i + 1])) / MAX_LINEAR_ACCELERATION)
-            if min_dist > (point_list[i] - point_list[i+1]).norm:
-                if speed_list[i] > speed_list[i + 1]:
-                    speed_list[i] *= (point_list[i] - point_list[i+1]).norm / min_dist
 
     position_list += [point_list[-1]]
     new_speed_list += [speed_list[-1]]
-    new_turns_list += [turns_list[-1]]
-    return Path().generate_path_from_points(position_list, new_speed_list, threshold=None, turns_list=new_turns_list)
+
+    return position_list, new_speed_list
+
+
+def remove_close_points(path, threshold=10):
+    points_in_between = path.points[1:-1]
+    points_in_between_kept = []
+    for point, next_point in zip(points_in_between, points_in_between[1:]):
+        if (point - next_point).norm >= threshold:
+            points_in_between_kept.append(point)
+    path.points = [path.start] + points_in_between_kept + [path.goal]
+    return path
+
+
+def compute_circle_points(p1, p2, p3, speed, acc=MAX_LINEAR_ACCELERATION):
+    turn_radius, deviation_from_path = compute_turn_radius(p1, p2, p3, speed, acc)
+
+    distance_on_segment = sqrt((deviation_from_path + turn_radius) ** 2 - turn_radius ** 2)
+    p4 = point_on_segment(p2, p1, distance_on_segment)
+    p5 = point_on_segment(p2, p3, distance_on_segment)
+
+    return p4, p5, turn_radius
+
+
+def speed_in_corner(radius, acc=MAX_LINEAR_ACCELERATION):
+
+    speed = sqrt(radius * acc)
+
+    return speed
+
+
+def compute_turn_radius(p1, p2, p3, speed, max_deviation=50, acc=MAX_LINEAR_ACCELERATION):
+    """Assume the raw path is p1->p2->p3.
+       Deviation is compute from p2 to the circle with a line passing by the center of the circle."""
+
+    radius_at_const_speed = speed ** 2 / acc
+    path_angle = (p3 - p2).angle - (p1 - p2).angle
+
+    const_speed_deviation = deviation(radius_at_const_speed, path_angle)
+
+    if const_speed_deviation < max_deviation:
+        deviation_from_path = const_speed_deviation
+        turn_radius = radius_at_const_speed
+    else:
+        deviation_from_path = max_deviation
+        turn_radius = deviation_from_path / (1 / sin(path_angle / 2) - 1)
+
+    return turn_radius, deviation_from_path
+
+
+def deviation(radius: float, theta: float):
+    return radius / sin(theta / 2) - radius if sin(theta/2) != 0 else 0
+
+
+def point_on_segment(start: Position, end: Position, distance: float):
+    ratio = distance / (start-end).norm
+    return (1-ratio) * start + ratio * end
