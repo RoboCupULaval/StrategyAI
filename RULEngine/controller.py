@@ -51,7 +51,7 @@ class Controller(list):
 
             error = robot.target_position - robot.pose.position
 
-            if (error.norm < 200) and (robot.target_speed < 0.05):
+            if error.norm < 200 and robot.target_speed < 0.05:
                 commands[robot.robot_id] = robot.position_regulator.execute(robot)
             else:
                 commands[robot.robot_id] = robot.velocity_regulator.execute(robot)
