@@ -8,7 +8,7 @@ from ai.states.game_state import GameState
 from config.config_service import ConfigService
 from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION
 
-INTERMEDIATE_DISTANCE_THRESHOLD = 540
+MIN_DISTANCE_FROM_OBSTACLE = 250
 
 
 def create_pathfinder():
@@ -39,7 +39,7 @@ def generate_path(game_state, player, ai_command):
 def get_pertinent_collision_objects(commanded_player, game_state, ai_command):
     factor = 1.1
     collision_bodies = []
-    gap_proxy = 250
+    gap_proxy = MIN_DISTANCE_FROM_OBSTACLE
 
     our_team = [player for pid, player in game_state.our_team.onplay_players.items() if pid != commanded_player.id]
     enemy_team = [player for player in game_state.enemy_team.onplay_players.values()]
@@ -51,7 +51,7 @@ def get_pertinent_collision_objects(commanded_player, game_state, ai_command):
         if dist_commanded_to_other + dist_target_to_other < dist_commanded_to_target * factor:
             collision_bodies.append(CollisionBody(other.pose.position, other.velocity.position, gap_proxy))
 
-    if ai_command.ball_collision and game_state.ball:
+    if ai_command.ball_collision and game_state.ball_on_field:
         ball_collision_body = CollisionBody(game_state.get_ball_position(), game_state.get_ball_velocity(), gap_proxy)
         collision_bodies.append(ball_collision_body)
 

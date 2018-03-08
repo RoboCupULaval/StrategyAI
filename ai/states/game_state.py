@@ -113,5 +113,9 @@ class GameState(object, metaclass=Singleton):
         return self._field.ball
 
     @property
+    def ball_on_field(self):
+        return len(self._field.balls) > 0
+
+    @property
     def referee(self) -> Referee:
         return self._referee
