@@ -86,13 +86,13 @@ class GoKick(Tactic):
         self.ball_spacing = GRAB_BALL_SPACING
         self.next_state = self.validate_kick
         self.tries_flag += 1
-        ball_position = self.game_state.get_ball_position()
+        ball_position = self.game_state.ball_position
         orientation = (self.target.position - self.player.pose.position).angle
 
         return CmdBuilder().addMoveTo(Pose(ball_position, orientation), cruise_speed=2).addKick(self.kick_force).build()
 
     def validate_kick(self):
-        if self.game_state.get_ball_velocity().norm > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
+        if self.game_state.ball_velocity.norm > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.halt
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
             self.next_state = self.kick
@@ -110,10 +110,10 @@ class GoKick(Tactic):
         return Idle
 
     def _get_distance_from_ball(self):
-        return (self.player.pose.position - self.game_state.get_ball_position()).norm
+        return (self.player.pose.position - self.game_state.ball_position).norm
 
     def _is_player_towards_ball_and_target(self, abs_tol=m.pi/30):
-        ball_position = self.game_state.get_ball_position()
+        ball_position = self.game_state.ball_position
         target_to_ball = ball_position - self.target.position
         ball_to_player = self.player.pose.position - ball_position
         return compare_angle(target_to_ball.angle, ball_to_player.angle, abs_tol=abs_tol)
@@ -136,12 +136,12 @@ class GoKick(Tactic):
             :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
             """
 
-        delta_x = self.target.position.x - self.game_state.get_ball_position().x
-        delta_y = self.target.position.y - self.game_state.get_ball_position().y
+        delta_x = self.target.position.x - self.game_state.ball_position.x
+        delta_y = self.target.position.y - self.game_state.ball_position.y
         theta = np.math.atan2(delta_y, delta_x)
 
-        x = self.game_state.get_ball_position().x - ball_spacing * np.math.cos(theta)
-        y = self.game_state.get_ball_position().y - ball_spacing * np.math.sin(theta)
+        x = self.game_state.ball_position.x - ball_spacing * np.math.cos(theta)
+        y = self.game_state.ball_position.y - ball_spacing * np.math.sin(theta)
 
         player_x = self.player.pose.position.x
         player_y = self.player.pose.position.y
