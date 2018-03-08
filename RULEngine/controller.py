@@ -38,20 +38,20 @@ class Controller(list):
             self[robot['id']].velocity = robot['velocity']
 
         for cmd in engine_cmds:
-            robot_id = cmd.robot_id
-            self[robot_id].engine_cmd = cmd
+            self[cmd.robot_id].engine_cmd = cmd
 
     def execute(self) -> RobotState:
         commands = dict()
         active_robots = [robot for robot in self if robot.pose is not None and robot.raw_path is not None]
 
         for robot in active_robots:
+            
             robot.raw_path.quick_update_path(robot.pose.position)
             robot.path = path_smoother(robot, robot.raw_path)
-            error = robot.path.points[1] - robot.pose.position
 
-            # avec l'ajout du controlleur en position en fin de trajectoire le go_kick semble pas mal plus fiable
-            if (error.norm < 200) and (robot.path.speeds[1] < 0.05):
+            error = robot.target_position - robot.pose.position
+
+            if (error.norm < 200) and (robot.target_speed < 0.05):
                 commands[robot.robot_id] = robot.position_regulator.execute(robot)
             else:
                 commands[robot.robot_id] = robot.velocity_regulator.execute(robot)
