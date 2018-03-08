@@ -11,7 +11,6 @@ from ai.GameDomainObjects import Ball, Team, Field, Referee
 
 
 class GameState(metaclass=Singleton):
-    UPDATE_TIMEOUT = 0.5
 
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -20,9 +19,14 @@ class GameState(metaclass=Singleton):
 
         self._ball = Ball()
         self._field = Field(self._ball)
+
         self._referee = Referee()
+
         self._blue_team = Team(team_color=TeamColor.BLUE)
         self._yellow_team = Team(team_color=TeamColor.YELLOW)
+
+        self._our_team = self._yellow_team if TeamColorService().is_our_team_yellow else self._blue_team
+        self._enemy_team = self._blue_team if TeamColorService().is_our_team_yellow else self._yellow_team
 
     def update(self, new_game_state):
         if new_game_state:
@@ -30,7 +34,9 @@ class GameState(metaclass=Singleton):
             game_state = new_game_state.copy()  # FIX: this is a shallow copy. is it okay?
             self._blue_team.update(game_state['blue'])
             self._yellow_team.update(game_state['yellow'])
-            self._ball.update(game_state['balls'][0])
+
+            if game_state['balls']:
+                self._ball.update(game_state['balls'][0])
 
     def get_player_by_role(self, role):
         return self._role_mapper.roles_translation[role]
@@ -62,21 +68,11 @@ class GameState(metaclass=Singleton):
 
     @property
     def our_team(self) -> Team:
-        if TeamColorService().is_our_team_yellow:
-            our_team = self._yellow_team
-        else:
-            our_team = self._blue_team
-
-        return our_team
+        return self._our_team
 
     @property
     def enemy_team(self) -> Team:
-        if TeamColorService().is_our_team_yellow:
-            enemy_team = self._blue_team
-        else:
-            enemy_team = self._yellow_team
-
-        return enemy_team
+        return self._enemy_team
 
     @property
     def ball(self) -> Ball:
