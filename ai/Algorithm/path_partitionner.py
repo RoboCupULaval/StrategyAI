@@ -18,11 +18,11 @@ class CollisionBody:
     UNCOLLIDABLE = 0
     COLLIDABLE = 1
 
-    def __init__(self, body_position: Position, body_velocity: Position=Position(), body_avoid_radius=150,
+    def __init__(self, position: Position, velocity: Position=Position(), avoid_radius=150,
                  collision_type: CollisionType = CollisionType.PLAYER):
-        self.position = body_position
-        self.velocity = body_velocity
-        self.avoid_radius = body_avoid_radius
+        self.position = position
+        self.velocity = velocity
+        self.avoid_radius = avoid_radius
         self.type = collision_type
 
 
@@ -38,7 +38,7 @@ class PathPartitionner():
         self.end_speed = 0
         self.avoid_radius = np.array([])
         self.collidable_objects = None
-        self.target = CollisionBody(Position(), body_avoid_radius=1)
+        self.target = CollisionBody(Position(), avoid_radius=1)
 
     def fast_path_planner(self, path, depth=0, avoid_dir=None):
         self.fast_update_pertinent_collision_objects()
