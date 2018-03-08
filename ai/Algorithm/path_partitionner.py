@@ -40,53 +40,52 @@ class PathPartitionner():
         self.collidable_objects = None
         self.target = CollisionBody(Position(), body_avoid_radius=1)
 
-    def fastpathplanner(self, path, depth=0, avoid_dir=None):
-        self.get_pertinent_collision_objects(False)
+    def fast_path_planner(self, path, depth=0, avoid_dir=None):
+        self.fast_update_pertinent_collision_objects()
         if depth < self.max_recurs and not(path.start == path.goal):
-            if self.is_path_collide(path):
-                sub_target, avoid_dir = self.search_point(path, avoid_dir)
+            if self.is_path_colliding(path):
+                sub_target, avoid_dir = self.next_sub_target(path, avoid_dir)
                 if sub_target != path.goal and sub_target != path.start:
-                    path_1 = self.fastpathplanner(Path(path.start, sub_target), depth + 1, avoid_dir)
-                    path_2 = self.fastpathplanner(Path(sub_target, path.goal), depth + 1, avoid_dir)
+                    path_1 = self.fast_path_planner(Path(path.start, sub_target), depth + 1, avoid_dir)
+                    path_2 = self.fast_path_planner(Path(sub_target, path.goal), depth + 1, avoid_dir)
                     path = path_1.join_segments(path_2)
 
         return path
 
-    def get_path(self, player: CollisionBody, pose_target: CollisionBody,
-                 end_speed=0, collidable_objects=None):
+    def get_path(self, player: CollisionBody, pose_target: CollisionBody, end_speed=0, collidable_objects=None):
 
         self.target = pose_target
         self.collidable_objects = collidable_objects
         self.end_speed = end_speed
         self.player = player
-        self.get_pertinent_collision_objects()
+        self.update_pertinent_collision_objects()
         self.path = Path(self.player.position, self.target.position, self.player.velocity.norm, self.end_speed * 1000)
 
         if any(self.collision_body):
-            self.path = self.fastpathplanner(self.path)
+            self.path = self.fast_path_planner(self.path)
 
         return self.path
 
-    def get_pertinent_collision_objects(self, first_call=True):
+    def update_pertinent_collision_objects(self):
         factor = 1.1
-        if first_call:
-            for collidable_object in self.collidable_objects:
-                dist_player_to_obstacle = (self.player.position - collidable_object.position).norm
-                dist_target_to_obstacle = (self.target.position - collidable_object.position).norm
-                dist_target_to_player = (self.target.position - self.player.position).norm
-                if dist_player_to_obstacle + dist_target_to_obstacle < dist_target_to_player * factor:
-                    self.collision_body.append(collidable_object)
-            self.pose_obstacle = np.array([obstacle.position for obstacle in self.collision_body])
-            self.avoid_radius = np.array([obstacle.avoid_radius for obstacle in self.collision_body])
-        else:
-            temp = (self.path.start - self.pose_obstacle) + (self.path.goal - self.pose_obstacle)
-            norm = np.sqrt((temp * temp).sum(axis=1))
-            condition = norm < (self.path.goal - self.path.start).norm
-            self.pose_obstacle = self.pose_obstacle[condition, :]
-            self.collision_body = np.array(self.collision_body)[condition]
-            self.avoid_radius = self.avoid_radius[condition]
+        for collidable_object in self.collidable_objects:
+            dist_player_to_obstacle = (self.player.position - collidable_object.position).norm
+            dist_target_to_obstacle = (self.target.position - collidable_object.position).norm
+            dist_target_to_player = (self.target.position - self.player.position).norm
+            if dist_player_to_obstacle + dist_target_to_obstacle < dist_target_to_player * factor:
+                self.collision_body.append(collidable_object)
+        self.pose_obstacle = np.array([obstacle.position for obstacle in self.collision_body])
+        self.avoid_radius = np.array([obstacle.avoid_radius for obstacle in self.collision_body])
 
-    def is_path_collide(self, path: Path, tolerance=1):
+    def fast_update_pertinent_collision_objects(self):
+        temp = (self.path.start - self.pose_obstacle) + (self.path.goal - self.pose_obstacle)
+        norm = np.sqrt((temp * temp).sum(axis=1))
+        condition = norm < (self.path.goal - self.path.start).norm
+        self.pose_obstacle = self.pose_obstacle[condition, :]
+        self.collision_body = np.array(self.collision_body)[condition]
+        self.avoid_radius = self.avoid_radius[condition]
+
+    def is_path_colliding(self, path: Path, tolerance=1):
         if path is None:
             return False
 
@@ -178,7 +177,7 @@ class PathPartitionner():
 
         return collision_body, dist_robot_2_obs
 
-    def search_point(self, path, avoid_dir=None):
+    def next_sub_target(self, path, avoid_dir=None):
 
         closest_collision_body, dist_point_obs = self.find_closest_obstacle(path)
 
