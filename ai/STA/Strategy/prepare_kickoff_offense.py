@@ -39,7 +39,7 @@ class PrepareKickOffOffense(Strategy):
 
         our_goal = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0, 0)
 
-        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, our_goal))
+        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, our_goal))
 
         robots_and_positions = [(attack_top, attack_top_position),
                                 (attack_bottom, attack_bottom_position),
@@ -50,8 +50,8 @@ class PrepareKickOffOffense(Strategy):
         for player, position in robots_and_positions:
             if player:
                 role = GameState().get_role_by_player_id(player.id)
-                self.add_tactic(role, GoToPositionPathfinder(self.game_state, player, position))
-                self.add_tactic(role, Stop(self.game_state, player))
+                self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))
+                self.create_node(role, Stop(self.game_state, player))
                 self.add_condition(role, 0, 1, partial(self.arrived_to_position, player))
 
     def arrived_to_position(self, player):

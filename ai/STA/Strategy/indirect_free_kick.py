@@ -26,12 +26,12 @@ class IndirectFreeKick(Strategy):
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
 
-        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
+        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
 
         for index, player in role_by_robots:
             if player:
-                self.add_tactic(index, PositionForPass(self.game_state, player, auto_position=True))
-                self.add_tactic(index, GoKick(self.game_state, player, auto_update_target=True))
+                self.create_node(index, PositionForPass(self.game_state, player, auto_position=True))
+                self.create_node(index, GoKick(self.game_state, player, auto_update_target=True))
 
                 self.add_condition(index, 0, 1, partial(self.is_closest, player))
                 self.add_condition(index, 1, 0, partial(self.is_not_closest, player))

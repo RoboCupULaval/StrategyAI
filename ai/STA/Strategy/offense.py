@@ -26,16 +26,27 @@ class Offense(Strategy):
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
 
-        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
+        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
 
         for index, player in role_by_robots:
             if player:
-                self.add_tactic(index, PositionForPass(self.game_state, player, auto_position=True))
-                self.add_tactic(index, GoKick(self.game_state, player, auto_update_target=True))
+#                self.create_node(index, PositionForPass(self.game_state, player, auto_position=True))
+#                self.create_node(index, GoKick(self.game_state, player, auto_update_target=True))
 
-                self.add_condition(index, 0, 1, partial(self.is_closest, player))
-                self.add_condition(index, 1, 0, partial(self.is_not_closest, player))
-                self.add_condition(index, 1, 1, partial(self.has_kicked, player))
+#                self.add_condition(index, 0, 1, partial(self.is_closest, player))
+#                self.add_condition(index, 1, 0, partial(self.is_not_closest, player))
+#                self.add_condition(index, 1, 1, partial(self.has_kicked, player))
+
+                node_pass = self.create_node(index, PositionForPass(self.game_state, player, auto_position=True))
+                node_go_kick = self.create_node(index, GoKick(self.game_state, player, auto_update_target=True))
+
+                player_is_closest = partial(self.is_closest, player)
+                player_is_not_closest = partial(self.is_not_closest, player)
+                player_has_kicked = partial(self.has_kicked, player)
+
+                node_pass.connect_to(node_go_kick, when=player_is_closest)
+                node_go_kick.connect_to(node_pass, when=player_is_not_closest)
+                node_go_kick.connect_to(node_go_kick, when=player_has_kicked)
 
     def is_closest(self, player):
         return player == closest_player_to_point(GameState().get_ball_position(), True).player

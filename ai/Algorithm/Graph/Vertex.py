@@ -1,4 +1,5 @@
 # Under MIT license, see LICENSE.txt
+from ai.Algorithm.Graph import Node
 
 
 class Vertex:
@@ -19,8 +20,7 @@ class Vertex:
         :param p_next_node: Un entier positif représentant le numéro du noeud suivant, pointé par l'extrémité du vertex.
         :param p_condition: Une fonction retournant un booléen indiquant si on peut passer au noeud suivant.
         """
-        assert isinstance(p_next_node, int)
-        assert p_next_node >= 0
+        assert isinstance(p_next_node, Node)
         assert callable(p_condition)
 
         self.next_node = p_next_node

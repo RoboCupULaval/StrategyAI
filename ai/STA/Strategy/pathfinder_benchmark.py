@@ -19,4 +19,4 @@ class Pathfinder_Benchmark(Strategy):
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider if self.game_state.get_player_by_role(i) is not None]
 
         for index, player in role_by_robots:
-            self.add_tactic(index, GoToRandomPosition(self.game_state, player, Position(-1400, 900), 1800, 2700))
+            self.create_node(index, GoToRandomPosition(self.game_state, player, Position(-1400, 900), 1800, 2700))

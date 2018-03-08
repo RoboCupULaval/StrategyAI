@@ -35,14 +35,16 @@ class Strategy(metaclass=ABCMeta):
 
         self.game_state.map_players_to_roles_by_player(role_mapping)
 
-    def add_tactic(self, role: Role, tactic: Tactic) -> None:
+    def create_node(self, role: Role, tactic: Tactic) -> Node:
         """
         Ajoute une tactique au graph des tactiques d'un robot.
         :param role: Le role auquel est assignée la tactique.
         :param tactic: La tactique à assigner au robot du role.
         """
         assert(isinstance(role, Role))
-        self.roles_graph[role].add_node(Node(tactic))
+        tactic_node = Node(tactic)
+        self.roles_graph[role].add_node(tactic_node)
+        return tactic_node
 
     def add_condition(self, role: Role, start_node: int, end_node: int, condition: Callable[..., bool]):
         """

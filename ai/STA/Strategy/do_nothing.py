@@ -11,4 +11,4 @@ class DoNothing(Strategy):
             p = self.game_state.get_player_by_role(r)
             if p is None:
                 continue
-            self.add_tactic(r, Stop(self.game_state, p))
+            self.create_node(r, Stop(self.game_state, p))

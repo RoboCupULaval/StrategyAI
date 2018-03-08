@@ -28,6 +28,7 @@ class PlayState(object, metaclass=Singleton):
         :param strategy: Strategy object déjà instancier, la stratégie à executer
         :return: None
         """
+        print(strategy)
         assert self.strategy_book.check_existance_strategy(str(strategy))
 
         self.current_strategy = strategy

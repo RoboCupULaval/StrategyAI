@@ -22,10 +22,10 @@ class DefenseWallNoKick(Strategy):
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
 
-        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
+        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
 
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
         self.robots = [player for _, player in role_by_robots if player is not None]
         for role, player in role_by_robots:
             if player:
-                self.add_tactic(role, AlignToDefenseWall(self.game_state, player, self.robots))
+                self.create_node(role, AlignToDefenseWall(self.game_state, player, self.robots))
