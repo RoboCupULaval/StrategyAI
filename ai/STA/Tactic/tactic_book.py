@@ -104,4 +104,5 @@ class TacticBook(object):
         """
         if self.check_existance_tactic(tactic_name):
             return self.tactic_book[tactic_name]
+        self.logger.error("Something asked for this non-existing tactic: {}".format(tactic_name))
         return self.tactic_book['Stop']
