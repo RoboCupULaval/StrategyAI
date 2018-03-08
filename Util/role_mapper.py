@@ -2,6 +2,10 @@ from collections import Counter
 from .role import Role
 
 
+class NoRoleAvailable(RuntimeError):
+    pass
+
+
 class RoleMapper(object):
 
     LOCKED_ROLES = []
@@ -21,6 +25,18 @@ class RoleMapper(object):
         if abs(len(results.values()) - len(set(results.values()))) > Counter(results.values())[None]:
             raise ValueError("Tried to assign a locked robot to another role, {}".format(Counter(results.values())))
         self.roles_translation = results
+
+    def map_player_to_first_available_role(self, player):
+        try:
+            role = self.available_roles[0]
+            self.roles_translation[role] = player
+            return role
+        except IndexError:
+            raise NoRoleAvailable()
+
+    @property
+    def available_roles(self):
+        return [role for role, player_id in self.roles_translation.items() if player_id is None]
 
     def _remove_undesired_roles(self, base_map, new_map):
         keys = [key for key in base_map.keys()]

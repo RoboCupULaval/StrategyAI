@@ -1,5 +1,6 @@
 # Under MIT license, see LICENSE.txt
 from Util.role import Role
+from Util.role_mapper import NoRoleAvailable
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic import Tactic
@@ -23,8 +24,13 @@ class HumanControl(Strategy):
 
         r = self.game_state.get_role_by_player_id(robot_id)
         if r is None:
-            self.game_state.map_players_to_roles_by_player_id({robot_id: Role.FIRST_ATTACK})  # TODO
-            r = Role.FIRST_ATTACK
+            try:
+                r = self.game_state.map_player_to_first_available_role(robot_id)
+            except NoRoleAvailable:
+                # When all else fail, just
+                self.game_state.map_players_to_roles_by_player_id({Role.FIRST_ATTACK: robot_id})
+                r = Role.FIRST_ATTACK
+
         else:
             self.roles_graph[r].remove_node(0)
         self.add_tactic(r, tactic)

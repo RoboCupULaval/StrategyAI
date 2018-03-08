@@ -4,6 +4,7 @@ import logging
 
 from Util import Position
 from Util.constant import TeamColor
+from Util.role import Role
 from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
 from Util.team_color_service import TeamColorService
@@ -66,6 +67,10 @@ class GameState(object, metaclass=Singleton):
 
     def map_players_to_roles_by_player(self, mapping):
         self._role_mapper.map_by_player(mapping)
+
+    def map_player_to_first_available_role(self, player_id):
+        player = self.our_team.available_players[player_id]
+        return self._role_mapper.map_player_to_first_available_role(player)
 
     def get_role_mapping(self):
         return self._role_mapper.roles_translation
