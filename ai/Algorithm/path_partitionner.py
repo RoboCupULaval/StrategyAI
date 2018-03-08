@@ -18,7 +18,7 @@ class CollisionBody:
     UNCOLLIDABLE = 0
     COLLIDABLE = 1
 
-    def __init__(self, position: Position, velocity: Position=Position(), avoid_radius=150,
+    def __init__(self, position: Position, velocity: Position=Position(), avoid_radius=1,
                  collision_type: CollisionType = CollisionType.PLAYER):
         self.position = position
         self.velocity = velocity
