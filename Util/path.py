@@ -66,20 +66,10 @@ class Path:
     def goal(self, v):
         self.points[-1] = v
 
-    @classmethod
-    def from_dict(cls, dict):
-        points = [Position.from_dict(p) for p in dict]
-        path = Path.generate_path_from_points(points)
-        return path
-
-    def to_dict(self):
-        return [p.to_dict() for p in self.points]
-
-    def get_path_length(self):
-        length = 0
-        for idx, point in enumerate(self.points[:-1]):
-            length += np.linalg.norm(point - self.points[idx+1])
-        return length
+    @property
+    def length(self):
+        segments = [(point - next_point).view(Position).norm for point, next_point in zip(self.points, self.points[1:])]
+        return sum(segments)
 
     def quick_update_path(self, position):
         self.points[0] = position

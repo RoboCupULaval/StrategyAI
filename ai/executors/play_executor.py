@@ -50,7 +50,7 @@ class PlayExecutor(metaclass=Singleton):
         engine_cmds = []
 
         for player, ai_cmd in ai_cmds.items():
-            if ai_cmd.pathfinder_on:
+            if ai_cmd.pathfinder_on and ai_cmd.target:
                 path = generate_path(self.game_state, player, ai_cmd)
             else:
                 path = None

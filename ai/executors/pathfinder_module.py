@@ -17,64 +17,44 @@ def create_pathfinder():
 
 
 def generate_path(game_state, player, ai_command):
-    last_path = None
-    if ai_command.target is None:
-        return None
-    if player.pathfinder_history.last_pose_goal is not None:
-        MIN_CHANGE_IN_GOAL = 200
-        if (player.pathfinder_history.last_pose_goal - ai_command.target.position).norm < MIN_CHANGE_IN_GOAL:
-            last_path = player.pathfinder_history.last_path
+
     pathfinder = create_pathfinder()
 
-    # ai_command.pose_goal.position = \
-    #     field.respect_field_rules(Position(ai_command.pose_goal.position[0],
-    #                                        ai_command.pose_goal.position[1]))
-    #optionnal_collision_bodies = field.field_collision_body
     collision_bodies = get_pertinent_collision_objects(player, game_state, ai_command)
-    player_collision_object = CollisionBody(player.pose.position, player.velocity.position, 150, body_pose=player.pose,
-                                            max_acc=MAX_LINEAR_ACCELERATION/1000, ident_num=player.id)
+
+    player_collision_object = CollisionBody(body_position=player.pose.position,
+                                            body_velocity=player.velocity.position,
+                                            body_avoid_radius=150)
     target = CollisionBody(body_position=ai_command.target.position,
-                           body_pose=ai_command.target,
                            body_avoid_radius=1)
+
     path = pathfinder.get_path(player_collision_object,
                                target,
-                               ai_command.cruise_speed,
-                               last_path,
                                end_speed=ai_command.end_speed,
                                collidable_objects=collision_bodies)
-    MIN_CHANGE_FOR_RECALCULATE = 100
-    if path.get_path_length() < MIN_CHANGE_FOR_RECALCULATE:
-        player.pathfinder_history.last_path = None
-        player.pathfinder_history.last_pose_goal = path.goal
-    else:
-        player.pathfinder_history.last_path = path
-        player.pathfinder_history.last_pose_goal = path.goal
 
     return path
 
 
-def get_pertinent_collision_objects(commanded_player, game_state, ai_command, optionnal_collision_bodies=None):
+def get_pertinent_collision_objects(commanded_player, game_state, ai_command):
     factor = 1.1
     collision_bodies = []
     gap_proxy = 250
-    # FIXME: Find better name that is less confusing between self.player and player
-    for player in game_state.our_team.onplay_players.values():
-        if player.id != commanded_player.id:
-            if (commanded_player.pose.position - player.pose.position).norm + \
-                    (ai_command.target.position - player.pose.position).norm < \
-                    (ai_command.target.position - commanded_player.pose.position).norm * factor:
-                collision_bodies.append(
-                    CollisionBody(player.pose.position, player.velocity.position, gap_proxy))
-    for player in game_state.enemy_team.onplay_players.values():
-        if (commanded_player.pose.position - player.pose.position).norm + \
-                (ai_command.target.position - player.pose.position).norm < \
-                (ai_command.target.position - commanded_player.pose.position).norm * factor:
-            collision_bodies.append(
-                CollisionBody(player.pose.position, player.velocity.position, gap_proxy))
-    if ai_command.ball_collision:
-        ball_colision_body = [
-            CollisionBody(game_state.get_ball_position(), game_state.get_ball_velocity(), gap_proxy)]
-        return collision_bodies + ball_colision_body
+
+    our_team = [player for pid, player in game_state.our_team.onplay_players.items() if pid != commanded_player.id]
+    enemy_team = [player for player in game_state.enemy_team.onplay_players.values()]
+
+    for other in our_team + enemy_team:
+        dist_commanded_to_other = (commanded_player.pose.position - other.pose.position).norm
+        dist_target_to_other = (ai_command.target.position - other.pose.position).norm
+        dist_commanded_to_target = (ai_command.target.position - commanded_player.pose.position).norm
+        if dist_commanded_to_other + dist_target_to_other < dist_commanded_to_target * factor:
+            collision_bodies.append(CollisionBody(other.pose.position, other.velocity.position, gap_proxy))
+
+    if ai_command.ball_collision and game_state.ball:
+        ball_collision_body = CollisionBody(game_state.get_ball_position(), game_state.get_ball_velocity(), gap_proxy)
+        collision_bodies.append(ball_collision_body)
+
     return collision_bodies
 
 

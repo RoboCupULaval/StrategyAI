@@ -13,7 +13,7 @@ class Field:
     @property
     def ball(self):
         if len(self._balls) == 0:
-            raise RuntimeError("There is no ball to detect")
+            return None
         return self._balls[0]
 
     @property
