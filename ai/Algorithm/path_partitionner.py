@@ -96,7 +96,7 @@ class PathPartitionner:
         if start_to_goal.norm < 50 or not obstacles.any():
             return False
 
-        closest_obstacle_pos, distance = self.find_closest_obstacle(path, tolerance=tolerance)
+        closest_obstacle_pos, _ = self.find_closest_obstacle(path, tolerance=tolerance)
 
         return closest_obstacle_pos is not None
 
@@ -111,16 +111,13 @@ class PathPartitionner:
         if path.length < 0.001:
             return [None, np.inf]
 
-        if not self.obstacles_position.any():
-            return [None, np.inf]
+        obstacles, distances = self.find_obstacles(path, tolerance=tolerance)
 
-        collision_bodies, distances = self.find_obstacles(path, tolerance=tolerance)
-
-        if not collision_bodies.any():
+        if not obstacles.any():
             return [None, np.inf]
 
         idx = np.argmin(distances)
-        return collision_bodies[idx], distances[idx]
+        return obstacles[idx], distances[idx]
 
     def find_obstacles(self, path, tolerance=1):
 
@@ -182,51 +179,22 @@ class PathPartitionner:
 
         closest_collision_body, dist_point_obs = self.find_closest_obstacle(path)
 
-        pose_obstacle_closest = closest_collision_body.position
-        if pose_obstacle_closest is None:
+        if closest_collision_body is None:
             return path.goal, avoid_dir
 
         start_to_goal = path.goal - path.start
         start_to_goal_direction = normalize(start_to_goal)
-        start_to_closest_obstacle = pose_obstacle_closest - path.start
+        start_to_closest_obstacle = closest_collision_body.position - path.start
         len_along_path = np.dot(start_to_closest_obstacle, start_to_goal_direction)
 
         resolution = closest_collision_body.avoid_radius / 10.
-        if 0 < len_along_path < start_to_goal.norm:
 
-            vec_perp = perpendicular(start_to_goal_direction)
-            avoid_dir = vec_perp
-
-            if closest_collision_body.type == CollisionType.BALL or closest_collision_body.type == CollisionType.ZONE:
-
-                # This code is never reach.
-
-                sub_target_1 = path.start.position + start_to_goal_direction * len_along_path - avoid_dir * self.res
-                sub_target_2 = path.start.position + start_to_goal_direction * len_along_path + avoid_dir * self.res
-
-                sub_target_1 = self.optimize_sub_target(sub_target_1, -avoid_dir, res=resolution)
-                sub_target_2 = self.optimize_sub_target(sub_target_2, avoid_dir, res=resolution)
-
-                start_to_target_1 = normalize(sub_target_1 - path.start)
-                start_to_target_2 = normalize(sub_target_2 - path.start)
-
-                if self.player.velocity.norm < 0.1:
-                    sub_target = sub_target_1
-                else:
-                    target_1_projection_toward_goal = np.dot(start_to_goal_direction, start_to_target_1)
-                    target_2_projection_toward_goal = np.dot(start_to_goal_direction, start_to_target_2)
-
-                    if target_1_projection_toward_goal > target_2_projection_toward_goal:
-                        sub_target = sub_target_1
-                    else:
-                        sub_target = sub_target_2
-
-            else:
-                sub_target = path.start + start_to_goal_direction * len_along_path - avoid_dir * self.res
-                sub_target = self.optimize_sub_target(sub_target, -avoid_dir, res=resolution)
-
-        else:
+        if not (0 < len_along_path < start_to_goal.norm):
             sub_target = path.goal
+        else:
+            avoid_dir = perpendicular(start_to_goal_direction)
+            sub_target = path.start + start_to_goal_direction * len_along_path - avoid_dir * self.res
+            sub_target = self.optimize_sub_target(sub_target, -avoid_dir, res=resolution)
 
         return [sub_target, avoid_dir]
 

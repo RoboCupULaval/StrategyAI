@@ -66,6 +66,7 @@ class PlayExecutor(metaclass=Singleton):
                              dribbler_active=ai_cmd.dribbler_active,
                              cruise_speed=ai_cmd.cruise_speed * 1000,
                              target_orientation=ai_cmd.target.orientation if ai_cmd.target else None,
+                             target_speed=ai_cmd.target_speed,
                              charge_kick=ai_cmd.charge_kick)
 
     def order_change_of_sta(self, cmd: STAChangeCommand):

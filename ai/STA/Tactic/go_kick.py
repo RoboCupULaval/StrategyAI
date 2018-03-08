@@ -79,7 +79,7 @@ class GoKick(Tactic):
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=2,
-                                      end_speed=0,
+                                      target_speed=0,
                                       ball_collision=False).addChargeKicker().build()
 
     def kick(self):
