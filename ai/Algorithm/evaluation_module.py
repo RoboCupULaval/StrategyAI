@@ -52,7 +52,7 @@ def is_ball_moving(min_speed=0.1):
 
 def is_ball_kicked(player, min_distance=150, min_speed=1000):
     if (player.pose.position - GameState.ball_position).norm > min_distance and \
-                    GameState.ball_velocity().norm > min_speed:
+                    GameState.ball_velocity.norm > min_speed:
         return True
     else:
         return False
