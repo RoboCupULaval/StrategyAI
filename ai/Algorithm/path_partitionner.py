@@ -26,22 +26,23 @@ class CollisionBody:
         self.type = collision_type
 
 
-class PathPartitionner():
+class PathPartitionner:
 
     def __init__(self):
         self.path = Path()
         self.res = 100
         self.max_recurs = 3
-        self.collision_body = []
-        self.pose_obstacle = None
-        self.player = None
+
+        self.obstacles_position = None
         self.avoid_radius = np.array([])
         self.obstacles = None
-        self.target = CollisionBody(Position(), avoid_radius=1)
+
+        self.player = None
+        self.target = None
 
     def fast_path_planner(self, path, depth=0, avoid_dir=None):
         self.fast_update_pertinent_collision_objects()
-        if depth < self.max_recurs and not(path.start == path.goal):
+        if depth < self.max_recurs and not path.start == path.goal:
             if self.is_path_colliding(path):
                 sub_target, avoid_dir = self.next_sub_target(path, avoid_dir)
                 if sub_target != path.goal and sub_target != path.start:
@@ -51,43 +52,45 @@ class PathPartitionner():
 
         return path
 
-    def get_path(self, player: CollisionBody, pose_target: CollisionBody, obstacles=None):
+    def get_path(self, player: CollisionBody, target: CollisionBody, obstacles=None):
 
-        self.target = pose_target
+        self.target = target
         self.obstacles = obstacles
         self.player = player
         self.update_pertinent_collision_objects()
         self.path = Path(self.player.position, self.target.position)
 
-        if any(self.collision_body):
+        if any(self.obstacles):
             self.path = self.fast_path_planner(self.path)
 
         return self.path
 
     def update_pertinent_collision_objects(self):
         factor = 1.1
+        consider_collision_body = []
         for collidable_object in self.obstacles:
             dist_player_to_obstacle = (self.player.position - collidable_object.position).norm
             dist_target_to_obstacle = (self.target.position - collidable_object.position).norm
             dist_target_to_player = (self.target.position - self.player.position).norm
             if dist_player_to_obstacle + dist_target_to_obstacle < dist_target_to_player * factor:
-                self.collision_body.append(collidable_object)
-        self.pose_obstacle = np.array([obstacle.position for obstacle in self.collision_body])
-        self.avoid_radius = np.array([obstacle.avoid_radius for obstacle in self.collision_body])
+                consider_collision_body.append(collidable_object)
+        self.obstacles_position = np.array([obstacle.position for obstacle in consider_collision_body])
+        self.avoid_radius = np.array([obstacle.avoid_radius for obstacle in consider_collision_body])
+        self.obstacles = consider_collision_body
 
     def fast_update_pertinent_collision_objects(self):
-        temp = (self.path.start - self.pose_obstacle) + (self.path.goal - self.pose_obstacle)
+        temp = (self.path.start - self.obstacles_position) + (self.path.goal - self.obstacles_position)
         norm = np.sqrt((temp * temp).sum(axis=1))
         condition = norm < (self.path.goal - self.path.start).norm
-        self.pose_obstacle = self.pose_obstacle[condition, :]
-        self.collision_body = np.array(self.collision_body)[condition]
+        self.obstacles_position = self.obstacles_position[condition, :]
+        self.obstacles = np.array(self.obstacles)[condition]
         self.avoid_radius = self.avoid_radius[condition]
 
     def is_path_colliding(self, path: Path, tolerance=1):
         if path is None:
             return False
 
-        obstacles = self.pose_obstacle
+        obstacles = self.obstacles_position
         start_to_goal = path.goal - path.start
 
         if start_to_goal.norm < 50 or not obstacles.any():
@@ -99,7 +102,7 @@ class PathPartitionner():
 
     def find_closest_obstacle(self, path: Path, tolerance=1):
 
-        if not any(self.collision_body):
+        if not any(self.obstacles):
             return [None, np.inf]
 
         if path is None:
@@ -108,7 +111,7 @@ class PathPartitionner():
         if path.length < 0.001:
             return [None, np.inf]
 
-        if not self.pose_obstacle.any():
+        if not self.obstacles_position.any():
             return [None, np.inf]
 
         collision_bodies, distances = self.find_obstacles(path, tolerance=tolerance)
@@ -121,7 +124,7 @@ class PathPartitionner():
 
     def find_obstacles(self, path, tolerance=1):
 
-        obstacles = self.pose_obstacle
+        obstacles = self.obstacles_position
 
         tolerances = self.avoid_radius / tolerance
 
@@ -167,13 +170,13 @@ class PathPartitionner():
         dists_to_consider = dists_to_consider.reshape(dists_to_consider.shape[0], 1)
         dists_to_consider_condition = np.abs(dists_to_consider) < tolerances
 
-        collision_body = np.array(self.collision_body)
-        collision_body = np.array([collision_body[points_to_consider]]).T
-        collision_body = collision_body[dists_to_consider_condition]
+        obstacles = np.array(self.obstacles)
+        obstacles = np.array([obstacles[points_to_consider]]).T
+        obstacles = obstacles[dists_to_consider_condition]
 
         dist_robot_2_obs = dist_robot_2_obs[dists_to_consider_condition]
 
-        return collision_body, dist_robot_2_obs
+        return obstacles, dist_robot_2_obs
 
     def next_sub_target(self, path, avoid_dir=None):
 
@@ -228,7 +231,7 @@ class PathPartitionner():
         return [sub_target, avoid_dir]
 
     def verify_sub_target(self, sub_target):
-        dist_sub_2_obs = np.sqrt(((self.pose_obstacle - sub_target) * (self.pose_obstacle - sub_target)).sum(axis=1))
+        dist_sub_2_obs = np.sqrt(((self.obstacles_position - sub_target) * (self.obstacles_position - sub_target)).sum(axis=1))
         if dist_sub_2_obs[dist_sub_2_obs < self.avoid_radius].any():
             return True
         return False
