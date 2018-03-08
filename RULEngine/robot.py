@@ -25,6 +25,16 @@ class Robot:
         return self._robot_id
 
     @property
+    def target_speed(self):
+        if self.path:
+            return self.path.speeds[1]
+
+    @property
+    def target_position(self):
+        if self.path:
+            return self.path.points[0]
+
+    @property
     def target_orientation(self):
         if self.engine_cmd:
             return self.engine_cmd.target_orientation
