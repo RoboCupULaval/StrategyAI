@@ -36,7 +36,7 @@ class RoleMapper(object):
 
     @property
     def available_roles(self):
-        return [role for role, player_id in self.roles_translation.items() if player_id is None]
+        return [role for role, player in self.roles_translation.items() if player is None]
 
     def _remove_undesired_roles(self, base_map, new_map):
         keys = [key for key in base_map.keys()]

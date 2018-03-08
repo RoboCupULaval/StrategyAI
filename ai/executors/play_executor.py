@@ -98,12 +98,9 @@ class PlayExecutor(metaclass=Singleton):
                   "cause de mauvais arguments.")
             raise e
 
-        if isinstance(self.play_state.current_strategy, HumanControl):
-            hc = self.play_state.current_strategy
-            hc.assign_tactic(tactic, player_id)
-        else:
+        if not isinstance(self.play_state.current_strategy, HumanControl):
             self.play_state.current_strategy = "HumanControl"
-            self.play_state.current_strategy.assign_tactic(tactic, player_id)
+        self.play_state.current_strategy.assign_tactic(tactic, player_id)
 
     def _execute_strategy(self) -> Dict[Player, AICommand]:
         # Applique un stratégie par défault s'il n'en a pas (lors du démarage par exemple)
