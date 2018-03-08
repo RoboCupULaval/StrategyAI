@@ -30,9 +30,7 @@ def filter_points_and_speed(point_list, speed_list, threshold):
     new_speed_list = []
     
     for idx, (p1, p2) in enumerate(zip(point_list, point_list[1:])):    
-        if (p1 - p2).norm < threshold:
-            continue
-        else:
+        if (p1 - p2).norm >= threshold:
             position_list.append(p1)
             new_speed_list.append(speed_list[idx])
 
