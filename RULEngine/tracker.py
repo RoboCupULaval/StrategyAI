@@ -5,7 +5,6 @@ from typing import Dict, List
 import numpy as np
 
 from RULEngine.filters.ball_kalman_filter import BallFilter
-from RULEngine.filters.multiballservice import MultiBallService
 from RULEngine.filters.robot_kalman_filter import RobotFilter
 
 from Util.geometry import wrap_to_pi
