@@ -3,8 +3,8 @@ from enum import Enum
 import numpy as np
 import numpy.matlib
 
-from Util import Pose, Position
-from Util.geometry import remove_duplicates, perpendicular, normalize
+from Util import Position
+from Util.geometry import perpendicular, normalize
 from Util.path import Path
 
 
@@ -29,7 +29,7 @@ class CollisionBody:
 class PathPartitionner():
 
     def __init__(self):
-        self.path = Path(Position(0, 0), Position(0, 0))
+        self.path = Path()
         self.res = 100
         self.max_recurs = 3
         self.collision_body = []

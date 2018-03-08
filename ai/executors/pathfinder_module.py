@@ -1,12 +1,6 @@
-import time
-from functools import partial
-from typing import List
+
 
 from ai.Algorithm.path_partitionner import PathPartitionner, CollisionBody
-from Util.path import Path
-from ai.states.game_state import GameState
-from config.config_service import ConfigService
-from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION
 
 MIN_DISTANCE_FROM_OBSTACLE = 250
 
@@ -23,11 +17,9 @@ def generate_path(game_state, player, ai_command):
     collision_bodies = get_pertinent_collision_objects(player, game_state, ai_command)
 
     player_collision_object = CollisionBody(position=player.pose.position,
-                                            velocity=player.velocity.position,
-                                            avoid_radius=150)
+                                            velocity=player.velocity.position)
 
-    target = CollisionBody(position=ai_command.target.position,
-                           avoid_radius=1)
+    target = CollisionBody(position=ai_command.target.position)
 
     path = pathfinder.get_path(player_collision_object,
                                target,
