@@ -16,15 +16,12 @@ def generate_path(game_state, player, ai_command):
 
     collision_bodies = get_pertinent_collision_objects(player, game_state, ai_command)
 
-    player_collision_object = CollisionBody(position=player.pose.position,
-                                            velocity=player.velocity.position)
+    player = CollisionBody(position=player.pose.position,
+                           velocity=player.velocity.position)
 
     target = CollisionBody(position=ai_command.target.position)
 
-    path = pathfinder.get_path(player_collision_object,
-                               target,
-                               end_speed=ai_command.end_speed,
-                               collidable_objects=collision_bodies)
+    path = pathfinder.get_path(player, target, obstacles=collision_bodies)
 
     return path
 

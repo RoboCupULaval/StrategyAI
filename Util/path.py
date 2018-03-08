@@ -4,12 +4,11 @@ from Util import Position
 
 
 class Path:
-    # FIXME remove speed from pathfinder, it shouldn't be its concern
     # TODO: Instead of start and end, should it be more logical to have the list of points?
-    def __init__(self, start=Position(),  end=Position(), start_speed=0, end_speed=0):
+    def __init__(self, start=Position(), end=Position()):
 
         self.points = [start, end]
-        self.speeds = [start_speed, end_speed]
+        self.speeds = [0, 0]
         self.turns = self.points
 
     def join_segments(self, other):

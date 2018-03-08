@@ -35,9 +35,8 @@ class PathPartitionner():
         self.collision_body = []
         self.pose_obstacle = None
         self.player = None
-        self.end_speed = 0
         self.avoid_radius = np.array([])
-        self.collidable_objects = None
+        self.obstacles = None
         self.target = CollisionBody(Position(), avoid_radius=1)
 
     def fast_path_planner(self, path, depth=0, avoid_dir=None):
@@ -52,14 +51,13 @@ class PathPartitionner():
 
         return path
 
-    def get_path(self, player: CollisionBody, pose_target: CollisionBody, end_speed=0, collidable_objects=None):
+    def get_path(self, player: CollisionBody, pose_target: CollisionBody, obstacles=None):
 
         self.target = pose_target
-        self.collidable_objects = collidable_objects
-        self.end_speed = end_speed
+        self.obstacles = obstacles
         self.player = player
         self.update_pertinent_collision_objects()
-        self.path = Path(self.player.position, self.target.position, self.player.velocity.norm, self.end_speed * 1000)
+        self.path = Path(self.player.position, self.target.position)
 
         if any(self.collision_body):
             self.path = self.fast_path_planner(self.path)
@@ -68,7 +66,7 @@ class PathPartitionner():
 
     def update_pertinent_collision_objects(self):
         factor = 1.1
-        for collidable_object in self.collidable_objects:
+        for collidable_object in self.obstacles:
             dist_player_to_obstacle = (self.player.position - collidable_object.position).norm
             dist_target_to_obstacle = (self.target.position - collidable_object.position).norm
             dist_target_to_player = (self.target.position - self.player.position).norm
