@@ -30,8 +30,8 @@ class BallFilter(KalmanFilter):
 
     def process_covariance(self):
         dt = self._dt
-        sigma_acc_x = 100
-        sigma_acc_y = 100
+        sigma_acc_x = 10
+        sigma_acc_y = sigma_acc_x
         G = np.array([
             np.array([0.25 * dt ** 4, 0.50 * dt ** 3, 0, 0]) * sigma_acc_x ** 2,
             np.array([0.50 * dt ** 3, 1.00 * dt ** 2, 0, 0]) * sigma_acc_x ** 2,
@@ -42,13 +42,8 @@ class BallFilter(KalmanFilter):
         return G
 
     def observation_covariance(self):
-        # SB: This need to be tweak to the new fps
-        # if fabs(self.x[0]) < 30 or fabs(self.x[2]) < 30:
-        #    R = np.diag([50, 50])
-        #else:
-        #    R = np.diag([10, 10])
-        return np.diag([10, 10])
+        return np.diag([1, 1])
 
     def initial_state_covariance(self):
-        return 10000 * np.eye(self.state_number)
+        return np.diag([10 ** 3, 0, 10 ** 3, 0])
 

@@ -4,7 +4,7 @@ from multiprocessing.managers import DictProxy
 from typing import Dict, List
 import numpy as np
 
-from RULEngine.filters.multiballservice import MultiBallService
+from RULEngine.filters.ball_kalman_filter import BallFilter
 from RULEngine.filters.robot_kalman_filter import RobotFilter
 
 from Util.geometry import wrap_to_pi
@@ -15,9 +15,10 @@ from config.config_service import ConfigService
 
 class Tracker:
 
-    MAX_ROBOT_PER_TEAM = 12
+    MAX_ROBOT_ID = 12
     MAX_BALL_ON_FIELD = 1
     MAX_UNDETECTED_DELAY = 3
+    NUMBER_OF_CAMERA = 4
 
     def __init__(self, vision_state: DictProxy):
 
@@ -30,11 +31,11 @@ class Tracker:
 
         self.vision_state = vision_state
 
-        self._blue_team = [RobotFilter() for _ in range(Tracker.MAX_ROBOT_PER_TEAM)]
-        self._yellow_team = [RobotFilter() for _ in range(Tracker.MAX_ROBOT_PER_TEAM)]
-        self._balls = MultiBallService(Tracker.MAX_BALL_ON_FIELD)
+        self._blue_team = [RobotFilter() for _ in range(Tracker.MAX_ROBOT_ID)]
+        self._yellow_team = [RobotFilter() for _ in range(Tracker.MAX_ROBOT_ID)]
+        self._ball = BallFilter()
 
-        self._camera_frame_number = [-1 for _ in range(4)]  # TODO: make me a constant somewhere
+        self._camera_frame_number = [-1 for _ in range(Tracker.NUMBER_OF_CAMERA)]
         self._current_timestamp = 0
 
     def update(self) -> Dict:
@@ -69,7 +70,7 @@ class Tracker:
 
         for ball_obs in detection_frame.get('balls', ()):
             obs = np.array([ball_obs['x'], ball_obs['y']])
-            self._balls.update(obs, timestamp)
+            self._ball.update(obs, timestamp)
 
     def predict(self, robot_state):
 
@@ -82,7 +83,7 @@ class Tracker:
         for robot in self._their_team:
             robot.predict()
 
-        self._balls.predict()
+        self._ball.predict()
 
     def remove_undetected(self):
         active_robots = iter(robot for robot in self._yellow_team + self._blue_team if robot.is_active)
@@ -90,7 +91,10 @@ class Tracker:
             if self._current_timestamp - robot.last_capture_time > Tracker.MAX_UNDETECTED_DELAY:
                 robot.reset()
 
-        self._balls.remove_undetected()
+        if self._ball.is_active:
+            if self._current_timestamp - self._ball.last_capture_time > Tracker.MAX_UNDETECTED_DELAY:
+                self._ball.reset()
+                self.logger.info('Deactivating ball')
 
     @staticmethod
     def change_reference(detection_frame):
@@ -134,8 +138,7 @@ class Tracker:
 
     @property
     def balls(self) -> List[Position]:
-        active_balls = [b for b in self._balls if b.is_active]
-        return Tracker.format_ball(active_balls)
+        return Tracker.format_ball([self._ball]) if self._ball.is_active else []
 
     @property
     def blue_team(self) -> List[Pose]:
