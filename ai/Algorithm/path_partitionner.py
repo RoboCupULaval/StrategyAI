@@ -97,7 +97,7 @@ class PathPartitionner():
 
         closest_obstacle_pos, distance = self.find_closest_obstacle(path, tolerance=tolerance)
 
-        return True if closest_obstacle_pos is not None else False
+        return closest_obstacle_pos is not None
 
     def find_closest_obstacle(self, path: Path, tolerance=1):
 
