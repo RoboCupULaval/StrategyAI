@@ -41,7 +41,7 @@ class PlayExecutor(metaclass=Singleton):
         :return: None
         """
 
-        # if PlayState().autonomous_flag:
+        # if self.play_state.autonomous_flag:
         #     if GameState().game.referee.team_info['ours']['goalie'] != self.goalie_id:
         #         self.goalie_id = GameState().game.referee.team_info['ours']['goalie']
         #         GameState().update_player_for_locked_role(self.goalie_id, Role.GOALKEEPER)
@@ -75,8 +75,7 @@ class PlayExecutor(metaclass=Singleton):
             self._change_tactic(cmd)
 
     def _change_strategy(self, cmd: STAChangeCommand):
-        new_strategy = self.play_state.get_new_strategy(cmd.data["strategy"])
-        self.play_state.set_strategy(new_strategy)
+        self.play_state.current_strategy = cmd.data["strategy"]
 
     def _change_tactic(self, cmd: STAChangeCommand):
 
@@ -103,19 +102,18 @@ class PlayExecutor(metaclass=Singleton):
             hc = self.play_state.current_strategy
             hc.assign_tactic(tactic, player_id)
         else:
-            hc = HumanControl(GameState())
-            hc.assign_tactic(tactic, player_id)
-            self.play_state.set_strategy(hc)
+            self.play_state.current_strategy = "HumanControl"
+            self.play_state.current_strategy.assign_tactic(tactic, player_id)
 
     def _execute_strategy(self) -> Dict[Player, AICommand]:
         # Applique un stratégie par défault s'il n'en a pas (lors du démarage par exemple)
         # TODO change this so we don't send humancontrol when nothing is set/ Donothing would be better
         if self.play_state.current_strategy is None:
-            self.play_state.set_strategy(PlayState().get_new_strategy("HumanControl")(GameState()))
+            self.play_state.current_strategy = "HumanControl"
         return self.play_state.current_strategy.exec()
 
     def _send_robots_status(self) -> None:
-        states = self.play_state.get_current_tactical_state()
+        states = self.play_state.current_tactical_state
         cmds = []
         for player, tactic_name, action_name, target in states:
             if action_name != 'Stop':
