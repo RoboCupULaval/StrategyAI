@@ -26,7 +26,7 @@ class GetBall(Action):
         Place le robot afin qu'il prenne le contrôle de la balle
         :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
         """
-        ball_position = self.game_state.get_ball_position()
+        ball_position = self.game_state.ball_position
         destination_orientation = (ball_position - self.player.pose.position).angle
 
         return CmdBuilder().addMoveTo(Pose(ball_position, destination_orientation)).build()

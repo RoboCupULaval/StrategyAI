@@ -6,31 +6,25 @@ from Util import Position
 
 
 class Ball:
-    def __init__(self, id):
-        self._id = id
+    def __init__(self, ball_id=0):
+        self._id = ball_id
         self._position = Position()
         self._velocity = Position()
 
-    def update(self, new_position: Position, new_velocity: Position):
-        self.position = new_position
-        self.velocity = new_velocity
+    def update(self, new_dict: Dict):
+        self.position = new_dict['position']
+        self.velocity = new_dict['velocity']
 
     @property
-    def id(self) -> int:
+    def id(self):
         return self._id
-
-    @id.setter
-    def id(self, value) -> None:
-        assert isinstance(value, int)
-        assert 0 <= value
-        self._id = value
 
     @property
     def position(self) -> Position:
         return self._position
 
     @position.setter
-    def position(self, value) -> None:
+    def position(self, value):
         assert isinstance(value, Position)
         self._position = value
 
@@ -39,13 +33,6 @@ class Ball:
         return self._velocity
 
     @velocity.setter
-    def velocity(self, value) -> None:
+    def velocity(self, value):
         assert isinstance(value, Position)
         self._velocity = value
-
-    @classmethod
-    def from_dict(cls, ball_dict: Dict):
-        b = Ball(ball_dict['id'])
-        b.position = ball_dict['pose']
-        b.velocity = ball_dict['velocity']
-        return b

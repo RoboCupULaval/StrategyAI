@@ -80,7 +80,7 @@ class PlayExecutor(metaclass=Singleton):
     def _change_tactic(self, cmd: STAChangeCommand):
 
         try:
-            this_player = GameState().get_player(cmd.data['id'])
+            this_player = GameState().our_team.available_players[cmd.data['id']]
         except KeyError as id:
             print("Invalid player id: {}".format(cmd.data['id']))
             return
