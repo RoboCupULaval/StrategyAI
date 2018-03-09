@@ -60,7 +60,11 @@ class GoKick(Tactic):
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.player.pose.position).angle
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3)
-        if (self.player.pose.position - distance_behind).norm < 50 and wrap_to_pi(self.player.pose.orientation - orientation) < 0.2:
+        # print((self.player.pose.position - distance_behind).norm < 50 and \
+        #         wrap_to_pi(abs(self.player.pose.orientation - orientation)) < 0.1 and \
+        #         self.player.velocity.position.norm < 100)
+        if (self.player.pose.position - distance_behind).norm < 50 and \
+                wrap_to_pi(abs(self.player.pose.orientation - orientation)) < 0.1:
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -69,6 +73,7 @@ class GoKick(Tactic):
         # ball_collision = self.tries_flag == 0
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=2,
+                                      end_speed=0.2,
                                       ball_collision=True).build()
 
     def grab_ball(self):
@@ -78,8 +83,8 @@ class GoKick(Tactic):
         orientation = (self.target.position - self.player.pose.position).angle
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=2,
-                                      end_speed=0,
+                                      cruise_speed=1,
+                                      end_speed=0.2,
                                       ball_collision=False).addChargeKicker().build()
 
     def kick(self):
