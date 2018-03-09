@@ -4,11 +4,9 @@ from math import sqrt
 from RULEngine.regulators.PID import PID
 from RULEngine.regulators.regulator_base_class import RegulatorBaseClass
 from RULEngine.robot import Robot, MAX_ANGULAR_SPEED, MAX_LINEAR_ACCELERATION
+from RULEngine.trapezoidal_speed_profile import get_next_velocity
 from Util import Pose
 from Util.geometry import wrap_to_pi, rotate
-from time import time
-
-from Util.trapezoidal_speed_profile import get_next_velocity
 
 
 class RealVelocityController(RegulatorBaseClass):
@@ -17,25 +15,22 @@ class RealVelocityController(RegulatorBaseClass):
 
     def __init__(self):
         self.orientation_controller = PID(**self.settings, wrap_error=True)
-        self.dt = 0
-        self.last_time = 0
+
+    @property
+    def dt(self):
+        return self.orientation_controller.dt
 
     def execute(self, robot: Robot):
-        self.dt, self.last_time = time() - self.last_time, time()
         target_orientation = \
             robot.target_orientation if robot.target_orientation is not None else robot.pose.orientation
         target = Pose(robot.path.points[1], target_orientation)
-        target_speed = robot.path.speeds[1]
-        error = Pose()
-        error.position = target.position - robot.pose.position
+
+        error = Pose(target.position - robot.pose.position)
         error.orientation = wrap_to_pi(target.orientation - robot.pose.orientation)
 
         speed_norm = get_next_velocity(robot, self.dt)
-        # speed_norm = robot.cruise_speed
-        # if is_time_to_break(robot, robot.path.points[-1], robot.cruise_speed, MAX_LINEAR_ACCELERATION, target_speed):
-        #     speed_norm = MIN_LINEAR_SPEED
 
-        vel = speed_norm * error.position / error.norm
+        vel = error.position * speed_norm / error.norm
 
         cmd_pos = rotate(vel, -robot.pose.orientation)
         cmd_orientation = self.orientation_controller.execute(error.orientation)

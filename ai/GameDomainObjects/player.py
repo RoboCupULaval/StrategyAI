@@ -25,7 +25,7 @@ class Player:
         return self.id == pid
 
     def __str__(self):
-        return str(self.team.team_color.name)+" "+str(self.id)
+        return '{} {}'.format(self.team.team_color.name, self.id)
 
     @property
     def id(self):
@@ -40,7 +40,7 @@ class Player:
         return self._pose
 
     @pose.setter
-    def pose(self, value):
+    def pose(self, value: Pose):
         assert isinstance(value, Pose)
         self._pose = value
 
@@ -49,19 +49,10 @@ class Player:
         return self._velocity
 
     @velocity.setter
-    def velocity(self, value):
+    def velocity(self, value: Pose):
         assert isinstance(value, Pose)
         self._velocity = value
 
     @property
     def team_color(self):
         return self.team.team_color
-
-    @classmethod
-    def from_dict(cls, dict: Dict, team):
-        p = Player(dict["id"], team)
-        p.pose = Pose.from_dict(dict["pose"])
-        # TODO: Use another type of object specific to speed
-        p.velocity = Pose.from_dict(dict["pose"])
-
-        return p
