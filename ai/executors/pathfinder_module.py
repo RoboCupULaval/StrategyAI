@@ -41,7 +41,7 @@ def get_pertinent_collision_objects(commanded_player, game_state, ai_command):
         if dist_commanded_to_other + dist_target_to_other < dist_commanded_to_target * factor:
             collision_bodies.append(CollisionBody(other.pose.position, other.velocity.position, gap_proxy))
 
-    if ai_command.ball_collision and game_state.ball_on_field:
+    if ai_command.ball_collision and game_state.is_ball_on_field:
         ball_collision_body = CollisionBody(game_state.get_ball_position(), game_state.get_ball_velocity(), gap_proxy)
         collision_bodies.append(ball_collision_body)
 
