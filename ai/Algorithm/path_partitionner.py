@@ -1,4 +1,5 @@
 from enum import Enum
+from time import sleep
 
 import numpy as np
 import numpy.matlib
@@ -6,6 +7,9 @@ import numpy.matlib
 from Util import Position
 from Util.geometry import perpendicular, normalize
 from Util.path import Path
+
+
+MIN_PATH_LENGTH = 50  # mm
 
 
 class CollisionType(Enum):
@@ -24,6 +28,8 @@ class CollisionBody:
         self.velocity = velocity
         self.avoid_radius = avoid_radius
         self.type = collision_type
+
+v_inner = np.vectorize(np.inner)
 
 
 class PathPartitionner:
@@ -74,21 +80,21 @@ class PathPartitionner:
             dist_target_to_player = (self.target.position - self.player.position).norm
             if dist_player_to_obstacle + dist_target_to_obstacle < dist_target_to_player * factor:
                 consider_collision_body.append(collidable_object)
-        self.obstacles_position = np.array([obstacle.position for obstacle in consider_collision_body])
+
         self.avoid_radius = np.array([obstacle.avoid_radius for obstacle in consider_collision_body])
         self.obstacles = consider_collision_body
 
     def fast_update_pertinent_collision_objects(self):
-        temp = (self.path.start - self.obstacles_position) + (self.path.goal - self.obstacles_position)
-        norm = np.sqrt((temp * temp).sum(axis=1))
+        obstacles_position = np.array([obstacle.position for obstacle in self.obstacles])
+        temp = (self.path.start - obstacles_position) + (self.path.goal - obstacles_position)
+        norm = np.linalg.norm(temp, axis=1)
         condition = norm < (self.path.goal - self.path.start).norm
-        self.obstacles_position = self.obstacles_position[condition, :]
         self.obstacles = np.array(self.obstacles)[condition]
         self.avoid_radius = self.avoid_radius[condition]
 
     def is_path_colliding(self, path: Path, tolerance=1):
 
-        if path.length < 50 or self.obstacles is None:
+        if path.length < MIN_PATH_LENGTH or self.obstacles is None:
             return False
 
         closest_obstacle_pos = self.find_closest_obstacle(path, tolerance=tolerance)
@@ -112,54 +118,26 @@ class PathPartitionner:
 
     def find_obstacles(self, path, tolerance=1):
 
-        obstacles = self.obstacles_position
+        obstacles = np.array([obstacle.position for obstacle in self.obstacles])
 
-        if path.length < 0.0001 or obstacles is None:
+        if path.length < MIN_PATH_LENGTH or obstacles is None:
             return None, 0
 
-        points_start = np.array(path.points[:-1])
-        points_target = np.array(path.points[1:])
+        directions = normalize(path.goal - path.start)
 
-        directions = points_target - points_start
-        norm_directions = np.sqrt(np.square(directions).sum(axis=1))
-        directions = directions / norm_directions
-        directions = np.matlib.repmat(directions, obstacles.shape[0], 1)
+        robot_to_obstacles = self.obstacles_position - path.start
+        robot_to_obstacle_norm = np.linalg.norm(robot_to_obstacles, axis=1)
+        robot_to_obstacle_norm = robot_to_obstacle_norm.reshape(len(robot_to_obstacles), 1)
 
-        big_enough_paths = norm_directions > 0.000001
-        points_start = points_start[big_enough_paths]
+        dists_from_path = np.abs(np.cross(directions, robot_to_obstacles))
 
-        position_obstacles = np.matlib.repmat(obstacles, 1, points_start.shape[0])
-        position_robots = np.matlib.repmat(points_start, obstacles.shape[0], 1)
-        vecs_robot_2_obs = position_obstacles - position_robots
-
-        dist_robot_2_obs = np.sqrt(np.square(vecs_robot_2_obs).sum(axis=1))
-
-        big_enough_dists = dist_robot_2_obs > 0.0000001
-        dist_robot_2_obs = dist_robot_2_obs[big_enough_dists]
-        dist_robot_2_obs = dist_robot_2_obs.reshape(dist_robot_2_obs.shape[0], 1)
-        vec_robot_2_obs = vecs_robot_2_obs[big_enough_dists]
-
-        directions_valid = directions[big_enough_dists]
-
-        dists_from_path = np.abs(np.cross(directions_valid, vec_robot_2_obs))
-        projection_obs_on_direction = (directions_valid * vec_robot_2_obs / dist_robot_2_obs).sum(axis=1)
-
-        points_to_consider = np.abs(projection_obs_on_direction) < 1
-        dists_to_consider = dists_from_path[points_to_consider]
-        dists_to_consider = dists_to_consider.reshape(dists_to_consider.shape[0], 1)
-
-        tolerances = self.avoid_radius / tolerance
-        tolerances = np.matlib.repmat(tolerances, 1, points_start.shape[0]).T
-        tolerances = tolerances[big_enough_dists]
-
-        dists_to_consider_condition = np.abs(dists_to_consider) < tolerances
-        dist_robot_2_obs = dist_robot_2_obs[dists_to_consider_condition]
+        dists_to_consider_condition = np.abs(dists_from_path) < self.avoid_radius / tolerance
+        robot_to_obstacle_norm = robot_to_obstacle_norm[dists_to_consider_condition]
 
         obstacles = np.array(self.obstacles)
-        obstacles = np.array([obstacles[points_to_consider]]).T
         obstacles = obstacles[dists_to_consider_condition]
 
-        return obstacles, dist_robot_2_obs
+        return obstacles, robot_to_obstacle_norm
 
     def next_sub_target(self, path, avoid_dir=None):
 
@@ -185,10 +163,10 @@ class PathPartitionner:
         return [sub_target, avoid_dir]
 
     def verify_sub_target(self, sub_target):
-        dist_sub_2_obs = np.sqrt(((self.obstacles_position - sub_target) * (self.obstacles_position - sub_target)).sum(axis=1))
-        if dist_sub_2_obs[dist_sub_2_obs < self.avoid_radius].any():
-            return True
-        return False
+        obstacles_position = np.array([obstacle.position for obstacle in self.obstacles])
+        dist_sub_2_obs = np.sqrt((np.square(obstacles_position - sub_target)).sum(axis=1))
+
+        return dist_sub_2_obs[dist_sub_2_obs < self.avoid_radius].any()
 
     def optimize_sub_target(self, initial_sub_target, avoid_dir, res):
         bool_sub_target_1 = self.verify_sub_target(initial_sub_target)
