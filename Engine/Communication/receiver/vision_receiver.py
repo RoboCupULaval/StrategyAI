@@ -9,8 +9,8 @@ from multiprocessing.managers import DictProxy
 from google.protobuf.message import DecodeError
 from protobuf_to_dict import protobuf_to_dict
 
-from RULEngine.Communication.protobuf.messages_robocup_ssl_wrapper_pb2 import SSL_WrapperPacket
-from RULEngine.Communication.receiver.receiver_base_class import ReceiverProcess
+from Engine.Communication.protobuf.messages_robocup_ssl_wrapper_pb2 import SSL_WrapperPacket
+from Engine.Communication.receiver.receiver_base_class import ReceiverProcess
 
 __author__ = "Maxime Gagnon-Legault"
 

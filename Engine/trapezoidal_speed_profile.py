@@ -1,6 +1,6 @@
 
 from Util.geometry import clamp
-from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION
+from Engine.robot import Robot, MAX_LINEAR_ACCELERATION
 
 MIN_DISTANCE_TO_REACH_TARGET_SPEED = 0
 

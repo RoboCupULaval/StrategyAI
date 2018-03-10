@@ -3,10 +3,10 @@
 import logging
 from typing import Dict, List
 
-from RULEngine.regulators import VelocityRegulator, PositionRegulator
-from RULEngine.filters.path_smoother import path_smoother
-from RULEngine.robot import Robot
-from RULEngine.Communication.robot_state import RobotPacket, RobotState
+from Engine.regulators import VelocityRegulator, PositionRegulator
+from Engine.filters.path_smoother import path_smoother
+from Engine.robot import Robot
+from Engine.Communication.robot_state import RobotPacket, RobotState
 
 from Util.engine_command import EngineCommand
 from Util.constant import PLAYER_PER_TEAM

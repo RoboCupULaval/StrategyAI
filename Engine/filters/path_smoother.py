@@ -1,6 +1,6 @@
 import numpy as np
 from Util.path import Path
-from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION
+from Engine.robot import Robot, MAX_LINEAR_ACCELERATION
 
 
 def path_smoother(robot: Robot, path):

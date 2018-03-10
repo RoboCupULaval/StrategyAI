@@ -5,7 +5,7 @@ import time
 from multiprocessing import Queue, Manager
 import signal  # so we can stop gracefully
 
-from RULEngine.engine import Engine
+from Engine.engine import Engine
 from ai.coach import Coach
 from config.config_service import ConfigService
 

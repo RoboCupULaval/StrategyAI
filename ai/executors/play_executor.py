@@ -10,7 +10,7 @@ from Util import Pose, Position, AICommand, Singleton
 from ai.GameDomainObjects import Player
 from ai.STA.Strategy.human_control import HumanControl
 
-from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
+from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
 
 from ai.executors.pathfinder_module import generate_path
 from config.config_service import ConfigService

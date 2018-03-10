@@ -1,8 +1,8 @@
 # Under MIT License, see LICENSE.txt
 
-from RULEngine.Communication.protobuf import grSim_Packet_pb2 as grSim_Packet
-from RULEngine.Communication.sender.sender_base_class import Sender
-from RULEngine.Communication.sender.udp_socket import udp_socket
+from Engine.Communication.protobuf import grSim_Packet_pb2 as grSim_Packet
+from Engine.Communication.sender.sender_base_class import Sender
+from Engine.Communication.sender.udp_socket import udp_socket
 
 __author__ = "Maxime Gagnon-Legault"
 
