@@ -87,8 +87,6 @@ class Strategy(metaclass=ABCMeta):
         commands = {}
         # for i, g in enumerate(self.roles_graph):
         #     print(i,"->",g)
-        # TODO We should probably iterate over game_state.RoleMapping instead of Role
-        # TODO It would allow us to deal with fewer than 6 roles
         for r in Role:
             player = self.game_state.get_player_by_role(r)
             if player is None:
@@ -107,7 +105,6 @@ class Strategy(metaclass=ABCMeta):
     def __str__(self):
         return self.__class__.__name__
 
-    # TODO check if this is correct MGL 2017/06/16
     def __eq__(self, other):
         """
         La comparaison est basée sur le nom des stratégies. Deux stratégies possédant le même nom sont considérée égale.
