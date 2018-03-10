@@ -79,7 +79,6 @@ class UIDebugCommandFactory(metaclass=Singleton):
 
         return DebugCommand(2, {'level': level, 'message': message})
 
-    # TODO make this better maybe?
     @staticmethod
     def books(cmd_tactics_dict: Dict):
         """

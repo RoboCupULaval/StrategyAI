@@ -1,7 +1,5 @@
 # Under MIT license, see LICENSE.txt
 
-# TODO: Create a new UT for the new IA command
-#
 # import unittest
 # from unittest.mock import Mock
 #
