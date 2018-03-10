@@ -13,7 +13,6 @@ __author__ = "Maxime Gagnon-Legault, Philippe Babin, and others"
 
 
 class Color(object):
-    # FIXME: hack
     def __init__(self, r=0, g=0, b=0):
         self.r = r
         self.g = g
@@ -54,7 +53,7 @@ DEFAULT_TEXT_ALIGN = 'Left'
 DEFAULT_TEXT_COLOR = Color(0, 0, 0)
 
 # Debug timeout (seconds)
-DEFAULT_DEBUG_TIMEOUT = 1
+DEFAULT_DEBUG_TIMEOUT = 1.0
 DEFAULT_PATH_TIMEOUT = 0
 
 
@@ -80,7 +79,6 @@ class UIDebugCommandFactory(metaclass=Singleton):
 
         return DebugCommand(2, {'level': level, 'message': message})
 
-    # TODO make this better maybe?
     @staticmethod
     def books(cmd_tactics_dict: Dict):
         """
@@ -123,22 +121,43 @@ class UIDebugCommandFactory(metaclass=Singleton):
     @staticmethod
     def robots_path(robots):
         cmds = []
-        for robot in robots:
-            if not robot.raw_path or len(robot.raw_path) < 2:
-                continue
-            path = [(p.x, p.y) for p in robot.raw_path]
 
-            for start_point, end_point in zip(path, path[1:]):
-                cmds.append(UIDebugCommandFactory.line(start_point,
-                                                       end_point,
+        for robot in robots:
+            if robot.raw_path:
+                path = robot.raw_path
+            else:
+                continue
+
+            for start, end in zip(path, path[1:]):
+                cmds.append(UIDebugCommandFactory.line((start.x, start.y),
+                                                       (end.x, end.y),
+                                                       color=BLUE.repr(),
                                                        timeout=0.1))
 
             # MultiplePoints is weird, it has a special behavior were an unique ID link must be provided
-            cmds.append(UIDebugCommandFactory.multiple_points(path[1:],
+            cmds.append(UIDebugCommandFactory.multiple_points(path.points[1:],
+                                                              BLUE,
+                                                              width=5,
+                                                              link="raw_path - " + str(robot.robot_id),
+                                                              timeout=0.0))
+
+        for robot in robots:
+            if robot.path:
+                path = robot.path
+            else:
+                continue
+            for start, end in zip(path, path[1:]):
+                cmds.append(UIDebugCommandFactory.line((start.x, start.y),
+                                                       (end.x, end.y),
+                                                       timeout=0.1))
+
+            # MultiplePoints is weird, it has a special behavior were an unique ID link must be provided
+            cmds.append(UIDebugCommandFactory.multiple_points(path.points[1:],
                                                               ORANGE,
                                                               width=5,
                                                               link="path - " + str(robot.robot_id),
                                                               timeout=0.0))
+
         return cmds
 
     @staticmethod

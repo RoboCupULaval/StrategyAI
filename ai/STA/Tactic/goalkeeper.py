@@ -33,13 +33,11 @@ class GoalKeeper(Tactic):
     l'intérieur de son demi-cercle. Si la balle entre dans son demi-cercle, le gardien tente d'aller en prendre
     possession.
     """
-    # TODO: À complexifier pour prendre en compte la position des joueurs adverses et la vitesse de la balle.
 
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(),
                  penalty_kick=False, args: List[str]=None,):
         super().__init__(game_state, player, target, args)
 
-        # TODO: Evil hack to force goalkeeper to be goal
         if len(self.args) > 0:
             print("Active secret mode")
             role_mapping = {Role.GOALKEEPER: player.id}
@@ -55,7 +53,6 @@ class GoalKeeper(Tactic):
         self.kick_force = 5
         self.penalty_kick = penalty_kick
 
-        # TODO: go_kick is copy paste in goalkeeper, we need to find a way to schedule a go tactic in another tactic
         self.tries_flag = 0
         self.grab_ball_tries = 0
         self.kick_last_time = time.time()
@@ -63,7 +60,6 @@ class GoalKeeper(Tactic):
     def kick_charge(self):
         self.next_state = self.protect_goal
 
-        # todo charge kick here please/ask Simon what kicktype is supposed to be
         return AICommand(self.player.id,  kick_type=1)
 
     def protect_goal(self):
@@ -117,7 +113,7 @@ class GoalKeeper(Tactic):
             self._find_best_passing_option()
         collision_ball = self.tries_flag == 0
         return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                      collision_ball=collision_ball, cruise_speed=2, target_speed=0.2)
+                                      collision_ball=collision_ball, cruise_speed=2, end_speed=0.2)
 
     def grab_ball(self):
         if self._is_ball_too_far():
@@ -133,7 +129,7 @@ class GoalKeeper(Tactic):
         orientation = (self.target.position - ball_position).angle()
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                     cruise_speed=2, charge_kick=True, target_speed=0.3, collision_ball=False)
+                                     cruise_speed=2, charge_kick=True, end_speed=0.3, collision_ball=False)
 
     def kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
@@ -141,7 +137,7 @@ class GoalKeeper(Tactic):
         self.tries_flag += 1
         ball_position = self.game_state.ball_position
         orientation = (self.target.position - ball_position).angle()
-        return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, target_speed=0)
+        return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, end_speed=0)
 
     def validate_kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
@@ -155,7 +151,7 @@ class GoalKeeper(Tactic):
             self.status_flag = Flags.INIT
             self.next_state = self.go_behind_ball
 
-        return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, target_speed=0.2)
+        return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, end_speed=0.2)
 
     def _get_distance_from_ball(self):
         return (self.player.pose.position - self.game_state.ball_position).norm

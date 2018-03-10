@@ -5,8 +5,6 @@ import numpy as np
 from RULEngine.filters.ball_kalman_filter import BallFilter
 
 
-# TODO doesnt really work. Broken since merge
-
 class MultiBallService(list):
 
     BALL_SEPARATION_THRESHOLD = 20000

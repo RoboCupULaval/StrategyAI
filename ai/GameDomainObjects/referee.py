@@ -134,7 +134,6 @@ class Referee:
             self.team_info[key]['timeout_time'] = info[key].timeout_time
             self.team_info[key]['goalie'] = info[key].goalie
 
-    # TODO
     # def _convert_raw_to_us(self, command):
     #     if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW:
     #         return command + 30

@@ -104,9 +104,8 @@ class Engine(Process):
         self.referee_recver.start()
 
     def run(self):
-        own_pid = os.getpid()
         self.wait_for_vision()
-        self.logger.debug('Running with process ID {}'.format(own_pid))
+        self.logger.debug('Running with process ID {}'.format(os.getpid()))
 
         self.time_bank = time()
         try:
@@ -143,7 +142,7 @@ class Engine(Process):
         self.robot_cmd_sender.send_packet(robot_state)
         self.tracker.predict(robot_state)
 
-        # self.ui_send_queue.put_nowait(UIDebugCommandFactory.robot_state(robot_state)) TODO send robot speed command
+        # self.ui_send_queue.put_nowait(UIDebugCommandFactory.robot_state(robot_state))
         self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(self.game_state))
         self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
 
