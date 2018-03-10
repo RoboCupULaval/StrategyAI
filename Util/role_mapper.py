@@ -1,5 +1,6 @@
 from collections import Counter
-from .role import Role
+
+from Util.role import Role
 
 
 class NoRoleAvailable(RuntimeError):
@@ -32,7 +33,7 @@ class RoleMapper(object):
             self.roles_translation[role] = player
             return role
         except IndexError:
-            raise NoRoleAvailable()
+            raise NoRoleAvailable() from None
 
     @property
     def available_roles(self):
