@@ -1,5 +1,6 @@
 
 import logging
+from collections import defaultdict
 from typing import Dict
 from Util import Singleton
 from ai.Algorithm.path_partitionner import PathPartitionner
@@ -9,23 +10,24 @@ MIN_DISTANCE_FROM_OBSTACLE = 250
 
 class PathfinderModule(metaclass=Singleton):
     def __init__(self):
-        self.paths = {}
-        self.logger = logging.getLogger("PathfinderExecutor")
+        self.paths = defaultdict(lambda: None)
+        self.logger = logging.getLogger("PathfinderModule")
         self.pathfinder = PathPartitionner(avoid_radius=MIN_DISTANCE_FROM_OBSTACLE)
         self.obstacles = []
 
     def exec(self, game_state, ai_cmds) -> Dict:
 
-        self.paths = {}
         self.updates_obstacles(game_state)
 
         for player, ai_cmd in ai_cmds.items():
             if ai_cmd.pathfinder_on and ai_cmd.target:
                 player_obstacles = self.player_obstacles(game_state, player, ai_cmd)
-                path = self.pathfinder.get_path(player.pose.position, ai_cmd.target.position, obstacles=player_obstacles)
+                self.paths[player] = self.pathfinder.get_path(start=player.pose.position,
+                                                              target=ai_cmd.target.position,
+                                                              obstacles=player_obstacles,
+                                                              last_path=self.paths[player])
             else:
-                path = None
-            self.paths[player] = path
+                self.paths[player] = None
 
         return self.paths
 

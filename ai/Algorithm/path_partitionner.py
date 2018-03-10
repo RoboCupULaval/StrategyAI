@@ -17,7 +17,7 @@ class PathPartitionner:
     def __init__(self, avoid_radius):
         self.avoid_radius = avoid_radius
 
-    def get_path(self, start: Position, target: Position, obstacles=np.array([])):
+    def get_path(self, start: Position, target: Position, obstacles=np.array([]), last_path=None):
 
         obstacles = np.array(obstacles)
 
@@ -94,3 +94,18 @@ class PathPartitionner:
     def is_valid_sub_target(self, sub_target: Position, obstacles: np.ndarray) -> bool:
         dist_sub_2_obs = np.linalg.norm(obstacles - sub_target, axis=1)
         return not np.any(dist_sub_2_obs < self.avoid_radius)
+
+    def path_is_valid(self, path: Path, obstacles):
+
+        if not path:
+            return False
+        obstacles = np.array(obstacles)
+        for start, target in zip(path, path[1:]):
+            print('allo')
+            if self.is_path_colliding(start, target, obstacles):
+                path_valid = False
+                break
+        else:
+            path_valid = True
+
+        return path_valid

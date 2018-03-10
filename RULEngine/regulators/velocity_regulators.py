@@ -3,10 +3,9 @@ from math import sqrt
 
 from RULEngine.regulators.PID import PID
 from RULEngine.regulators.regulator_base_class import RegulatorBaseClass
-from RULEngine.robot import Robot
-from RULEngine.trapezoidal_speed_profile import get_next_velocity
+from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION
 from Util import Pose
-from Util.geometry import wrap_to_pi, rotate
+from Util.geometry import rotate, clamp
 
 
 class RealVelocityController(RegulatorBaseClass):
@@ -22,7 +21,7 @@ class RealVelocityController(RegulatorBaseClass):
 
     def execute(self, robot: Robot):
 
-        speed_norm = get_next_velocity(robot, self.dt)
+        speed_norm = self.get_next_speed(robot)
 
         velocity = robot.position_error * speed_norm / robot.position_error.norm
 
@@ -31,8 +30,25 @@ class RealVelocityController(RegulatorBaseClass):
 
         return Pose(cmd_pos, cmd_orientation)
 
+    def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION, offset=10):
+
+        if robot.target_speed > robot.current_speed:
+            next_speed = robot.current_speed + acc * self.dt * offset
+        else:
+            if not self.reach_acceleration_dist(robot, acc):
+                next_speed = robot.current_speed + acc * self.dt * offset
+            else:
+                next_speed = robot.current_speed - acc * self.dt * offset
+
+        return clamp(next_speed, 0, robot.cruise_speed)
+
+    @staticmethod
+    def reach_acceleration_dist(robot, acc, offset=2) -> bool:
+        distance = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc
+        return robot.position_error.norm < distance * offset
+
     def reset(self):
-        pass
+            pass
 
 
 class GrSimVelocityController(RealVelocityController):

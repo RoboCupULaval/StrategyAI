@@ -39,9 +39,11 @@ class Controller(list):
 
         for cmd in engine_cmds:
             self[cmd.robot_id].engine_cmd = cmd
+            if self[cmd.robot_id].raw_path is None:
+                self[cmd.robot_id].path = None
 
     def execute(self) -> RobotState:
-        commands = dict()
+        commands = {}
         active_robots = [robot for robot in self if robot.pose is not None and robot.raw_path is not None]
 
         for robot in active_robots:
