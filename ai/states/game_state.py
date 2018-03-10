@@ -79,5 +79,9 @@ class GameState(metaclass=Singleton):
         return self._field.ball
 
     @property
+    def is_ball_on_field(self):
+        return self._field.ball is not None
+
+    @property
     def referee(self) -> Referee:
         return self._referee

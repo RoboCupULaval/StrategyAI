@@ -1,7 +1,6 @@
 # Under MIT License, see LICENSE.txt
 from typing import Dict
 
-from Util.pathfinder_history import PathfinderHistory
 from Util.pose import Pose
 
 
@@ -15,7 +14,6 @@ class Player:
         self._team = team
         self._pose = Pose()
         self._velocity = Pose()
-        self.pathfinder_history = PathfinderHistory()
 
     def update(self, new_pose: Pose, new_velocity: Pose):
         self.pose = new_pose

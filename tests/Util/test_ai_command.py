@@ -36,7 +36,7 @@
 #             'pose_goal': pose,
 #             'speed': speed_pose,
 #             'cruise_speed': 1,
-#             'end_speed': 0,
+#             'target_speed': 0,
 #             'collision_ball': False,
 #             'control_loop_type': self.OPEN,
 #             'path': [1, 2, 3],
