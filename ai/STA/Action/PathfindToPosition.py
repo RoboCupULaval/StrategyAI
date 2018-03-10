@@ -7,9 +7,6 @@ from ai.STA.Action import Action
 from ai.states.game_state import GameState
 
 
-# TODO remove this and use MoveToPosition (Simon B)
-
-
 class PathfindToPosition(Action):
     """
     Action Move_to: Déplace le robot avec flag pathfinder

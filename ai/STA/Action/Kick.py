@@ -16,7 +16,6 @@ class Kick(Action):
             :param player: Instance of the player
             :param p_force: Kick force [0, 10]
         """
-        # TODO check the force not used by the new interface! MGL 2017/05/23
         Action.__init__(self, game_state, player)
         assert(isinstance(force, (int, float)))
         self.force = force

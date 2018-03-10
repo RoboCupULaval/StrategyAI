@@ -87,7 +87,6 @@ class PlayExecutor(metaclass=Singleton):
             return
         player_id = this_player.id
         tactic_name = cmd.data['tactic']
-        # TODO ui must send better packets back with the args.
         target = cmd.data['target']
         target = Pose(Position(target[0], target[1]), this_player.pose.orientation)
         args = cmd.data.get('args', "")
@@ -108,7 +107,6 @@ class PlayExecutor(metaclass=Singleton):
 
     def _execute_strategy(self) -> Dict[Player, AICommand]:
         # Applique un stratégie par défault s'il n'en a pas (lors du démarage par exemple)
-        # TODO change this so we don't send humancontrol when nothing is set/ Donothing would be better
         if self.play_state.current_strategy is None:
             self.play_state.current_strategy = "HumanControl"
         return self.play_state.current_strategy.exec()
