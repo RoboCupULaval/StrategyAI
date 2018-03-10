@@ -1,42 +1,50 @@
 
-
-from ai.Algorithm.path_partitionner import PathPartitionner, CollisionBody
+import logging
+from typing import Dict
+from Util import Singleton
+from ai.Algorithm.path_partitionner import PathPartitionner
 
 MIN_DISTANCE_FROM_OBSTACLE = 250
 
 
-def create_pathfinder():  # FIXME: we should not create a new pathfinder object each time...
+class PathfinderModule(metaclass=Singleton):
+    def __init__(self):
+        self.paths = {}
+        self.logger = logging.getLogger("PathfinderExecutor")
+        self.pathfinder = PathPartitionner(avoid_radius=MIN_DISTANCE_FROM_OBSTACLE)
+        self.obstacles = []
 
-    return PathPartitionner()
+    def exec(self, game_state, ai_cmds) -> Dict:
 
+        self.paths = {}
+        self.updates_obstacles(game_state)
 
-def generate_path(game_state, player, ai_command):
+        for player, ai_cmd in ai_cmds.items():
+            if ai_cmd.pathfinder_on and ai_cmd.target:
+                player_obstacles = self.player_obstacles(game_state, player, ai_cmd)
+                path = self.pathfinder.get_path(player.pose.position, ai_cmd.target.position, obstacles=player_obstacles)
+            else:
+                path = None
+            self.paths[player] = path
 
-    pathfinder = create_pathfinder()
+        return self.paths
 
-    collision_bodies = get_pertinent_collision_objects(player, game_state, ai_command)
+    def updates_obstacles(self, game_state):
 
-    start = player.pose.position
-    target = ai_command.target.position
+        self.obstacles.clear()
 
-    path = pathfinder.get_path(start, target, obstacles=collision_bodies)
+        our_team = [player for player in game_state.our_team.available_players.values()]
+        enemy_team = [player for player in game_state.enemy_team.available_players.values()]
 
-    return path
+        for other in our_team + enemy_team:
+            self.obstacles.append(other.pose.position)
 
+    def player_obstacles(self, game_state, player, ai_cmd):
+        path_obstacles = self.obstacles.copy()
 
-def get_pertinent_collision_objects(commanded_player, game_state, ai_command):
+        if ai_cmd.ball_collision and game_state.is_ball_on_field:
+            path_obstacles.append(game_state.ball_position)
 
-    collision_bodies = []
+        path_obstacles.remove(player.pose.position)
 
-    our_team = [player for pid, player in game_state.our_team.available_players.items() if pid != commanded_player.id]
-    enemy_team = [player for player in game_state.enemy_team.available_players.values()]
-
-    for other in our_team + enemy_team:
-        collision_bodies.append(CollisionBody(other.pose.position, avoid_radius=MIN_DISTANCE_FROM_OBSTACLE))
-
-    if ai_command.ball_collision and game_state.is_ball_on_field:
-        collision_bodies.append(CollisionBody(game_state.ball_position, avoid_radius=MIN_DISTANCE_FROM_OBSTACLE))
-
-    return collision_bodies
-
-
+        return path_obstacles
