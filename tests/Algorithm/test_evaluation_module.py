@@ -69,6 +69,7 @@ class TestEvaluationModule(unittest.TestCase):
         path_score_to_p3 = trajectory_score(player1.pose.position, self.goal, player3.pose.position)
 
         assert line_of_sight_clearance(player1, self.goal) == distance_to_target * path_score_to_p2 * path_score_to_p3
+
     def test_givenOnePlayerInOtherTeamFarFromGoal_thenLineOfSightClearanceIsDistanceToTarget(self):
         player1 = self._build_mock_player(Position(100, 100), 1)
         player2 = self._build_mock_player(Position(1500, 1500), 2)
@@ -115,6 +116,7 @@ class TestEvaluationModule(unittest.TestCase):
         team1 = create_autospec(Team)
         team1.available_players = allies
         GameState()._our_team = team1
+        print(GameState().our_team.available_players.values())
 
         team2 = create_autospec(Team)
         team2.available_players = opponents
