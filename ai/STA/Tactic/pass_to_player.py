@@ -36,7 +36,6 @@ class PassToPlayer(Tactic):
             self.next_state = self.get_behind_ball
             self.last_time = time.time()
 
-        # todo charge kick here please/ask Simon what kicktype is supposed to be
         return AICommand(self.player.id, kick_type=1, dribbler_active=True)
 
     def get_behind_ball(self):

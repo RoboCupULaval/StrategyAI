@@ -17,7 +17,6 @@ class Offense_3v3(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state, keep_roles=False)
 
-        # TODO: HARDCODED ID FOR QUALIFICATION, REMOVE LATER
         self.roles_graph = {r: Graph() for r in Role}
         role_mapping = {Role.GOALKEEPER: 2, Role.MIDDLE: 4, Role.FIRST_ATTACK: 6}
         self.game_state.map_players_to_roles_by_player_id(role_mapping)
