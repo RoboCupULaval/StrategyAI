@@ -27,7 +27,7 @@ class Bump(Tactic):
         self.debug_interface = UIDebugCommandFactory()
         self.move_action = self._generate_move_to()
         self.move_action.status_flag = Flags.SUCCESS
-        self.last_ball_position = self.game_state.get_ball_position()
+        self.last_ball_position = self.game_state.ball_position
         self.charge_time = 0
         self.last_time = time.time()
 
@@ -40,19 +40,19 @@ class Bump(Tactic):
         player_x = self.player.pose.position.x
         player_y = self.player.pose.position.y
 
-        ball_x = self.game_state.get_ball_position().x
-        ball_y = self.game_state.get_ball_position().y
+        ball_x = self.game_state.ball_position.x
+        ball_y = self.game_state.ball_position.y
 
         vector_player_2_ball = np.array([ball_x - player_x, ball_y - player_y])
         vector_player_2_ball /= np.linalg.norm(vector_player_2_ball)
 
         if self._is_player_opposing_ball_and_target():
             self.next_state = self.push_ball
-            self.last_ball_position = self.game_state.get_ball_position()
+            self.last_ball_position = self.game_state.ball_position
         else:
             # self.debug.add_log(4, "Distance from ball: {}".format(dist))
             self.next_state = self.get_behind_ball
-        return GoBehind(self.game_state, self.player, self.game_state.get_ball_position(), self.target.position,
+        return GoBehind(self.game_state, self.player, self.game_state.ball_position, self.target.position,
                         120, pathfinder_on=True, orientation='back')
 
     def push_ball(self):
@@ -79,15 +79,15 @@ class Bump(Tactic):
         return Idle(self.game_state, self.player)
 
     def _get_distance_from_ball(self):
-        return (self.player.pose.position - self.game_state.get_ball_position()).norm
+        return (self.player.pose.position - self.game_state.ball_position).norm
 
     def _is_player_opposing_ball_and_target(self, fact=-0.99):
 
         player_x = self.player.pose.position.x
         player_y = self.player.pose.position.y
 
-        ball_x = self.game_state.get_ball_position().x
-        ball_y = self.game_state.get_ball_position().y
+        ball_x = self.game_state.ball_position.x
+        ball_y = self.game_state.ball_position.y
 
         target_x = self.target.position.x
         target_y = self.target.position.y
@@ -105,7 +105,7 @@ class Bump(Tactic):
 
     def _generate_move_to(self):
         player_pose = self.player.pose
-        ball_position = self.game_state.get_ball_position()
+        ball_position = self.game_state.ball_position
 
         dest_position = self.get_behind_ball_position(ball_position)
         destination_pose = Pose(dest_position, player_pose.orientation)

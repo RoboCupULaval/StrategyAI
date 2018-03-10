@@ -166,7 +166,7 @@ class Tracker:
         formatted_list = []
         for entity_id, entity in enumerate(entities):
             fields = dict()
-            fields['pose'] = Position(*entity.pose)
+            fields['position'] = Position(*entity.pose)
             fields['velocity'] = Position(*entity.velocity)
             fields['id'] = entity_id
             formatted_list.append(fields)

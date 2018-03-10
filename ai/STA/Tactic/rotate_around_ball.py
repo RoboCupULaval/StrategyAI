@@ -15,7 +15,7 @@ class RotateAroundBall(Tactic):
         self.target = target
 
     def exec(self):
-        ball_position = self.game_state.get_ball_position()
+        ball_position = self.game_state.ball_position
         orientation = (ball_position - self.player.pose.position).angle
         target = Pose(ball_position, orientation)
         return RotateAround(self.game_state, self.player, target, self.radius, aiming=self.target).exec()

@@ -9,14 +9,9 @@ from ai.STA.Tactic.tactic_book import TacticBook
 from ai.states import GameState
 
 
-class PlayState(object, metaclass=Singleton):
-    """
-    Garde les éléments correspondant aux STA
-    """
+class PlayState(metaclass=Singleton):
+
     def __init__(self):
-        """
-        initialise le PlayState
-        """
         self.strategy_book = StrategyBook()
         self.tactic_book = TacticBook()
         self.autonomous_flag = False

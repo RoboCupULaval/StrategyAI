@@ -1,6 +1,8 @@
 # Under MIT License, see LICENSE.txt
 from typing import List
 
+import logging
+
 from ai.STA.Tactic.pass_to_player import PassToPlayer
 from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot
 from ai.STA.Tactic.do_kick import DoKick
@@ -35,9 +37,9 @@ from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
 
 class TacticBook(object):
     def __init__(self):
-        """
-        Initialise le dictionnaire des tactiques présentées au reste de l'IA.
-        """
+
+        self.logger = logging.getLogger('TacticBook')
+
         self.tactic_book = {
             'AlignToDefenseWall': AlignToDefenseWall,
             'Bump': Bump,
