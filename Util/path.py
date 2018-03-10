@@ -11,21 +11,10 @@ class Path:
         self.speeds = [0, 0]
         self.turns = self.points
 
-    def join_segments(self, other):
+    def __add__(self, other):
         new_path = Path()
         new_path.points = self.points+other.points[1:]
         return new_path
-
-    def split_path(self, idx):
-        if idx < 1:
-            path_1 = Path()
-            path_2 = self
-        else:
-            path_1 = Path()
-            path_1.points = self.points[:idx+1]
-            path_2 = Path()
-            path_2.points = self.points[idx:]
-        return path_1, path_2
 
     @staticmethod
     def generate_path_from_points(points_list, speed_list=None, threshold=None, turns_list=None):
