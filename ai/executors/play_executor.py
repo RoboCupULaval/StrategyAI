@@ -5,7 +5,7 @@ import logging
 
 from multiprocessing import Queue
 
-from Util.engine_command import EngineCommand, generate_engine_cmd
+from Util.engine_command import EngineCommand
 from Util import Pose, Position, AICommand, Singleton
 from ai.GameDomainObjects import Player
 from ai.STA.Strategy.human_control import HumanControl
@@ -128,3 +128,14 @@ class PlayExecutor(metaclass=Singleton):
     #     self.last_available_players = available_players.copy()
     #     return player_change
 
+
+def generate_engine_cmd(player: Player, ai_cmd: AICommand, path):
+    return EngineCommand(player.id,
+                         cruise_speed=ai_cmd.cruise_speed * 1000,
+                         path=path,
+                         kick_type=ai_cmd.kick_type,
+                         kick_force=ai_cmd.kick_force,
+                         dribbler_active=ai_cmd.dribbler_active,
+                         target_orientation=ai_cmd.target.orientation if ai_cmd.target else None,
+                         end_speed=ai_cmd.end_speed,
+                         charge_kick=ai_cmd.charge_kick)
