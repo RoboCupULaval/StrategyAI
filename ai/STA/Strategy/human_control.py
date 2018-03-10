@@ -23,7 +23,7 @@ class HumanControl(Strategy):
 
         r = self.game_state.get_role_by_player_id(robot_id)
         if r is None:
-            self.game_state.map_players_to_roles_by_player_id({robot_id: Role.FIRST_ATTACK})  # TODO
+            self.game_state.map_players_to_roles_by_player_id({robot_id: Role.FIRST_ATTACK})
             r = Role.FIRST_ATTACK
         else:
             self.roles_graph[r].remove_node(0)

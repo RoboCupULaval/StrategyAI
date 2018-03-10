@@ -13,7 +13,6 @@ __author__ = "Maxime Gagnon-Legault, Philippe Babin, and others"
 
 
 class Color(object):
-    # FIXME: hack
     def __init__(self, r=0, g=0, b=0):
         self.r = r
         self.g = g
@@ -80,7 +79,6 @@ class UIDebugCommandFactory(metaclass=Singleton):
 
         return DebugCommand(2, {'level': level, 'message': message})
 
-    # TODO make this better maybe?
     @staticmethod
     def books(cmd_tactics_dict: Dict):
         """

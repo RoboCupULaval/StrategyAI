@@ -95,7 +95,6 @@ def stayOutsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
     if isOutsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
         return Position(position.x, position.y)
     else:
-        # TODO Project position on segment instead of corner
         pos_y = Y_TOP if position.y > Y_TOP - (Y_TOP - Y_BOTTOM) / 2 else Y_BOTTOM
         pos_x = X_RIGHT if position.x > X_RIGHT - (X_RIGHT - X_LEFT) / 2 else X_LEFT
 

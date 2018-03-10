@@ -21,11 +21,9 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
         self.next_state = None
         self.last_state = None
 
-    # todo check usage, doesn't seem to be used
     def get_selected_strategy(self):
         return self.selected_strategy
 
-    # todo check usage, doesn't seem to be used
     @property
     def info(self):
         return {
@@ -132,7 +130,7 @@ class SimpleAutoPlay(AutoPlay):
                 RefereeCommand.GOAL_THEM: self.current_state,
                 RefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
 
-                RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.HALT, #TODO send ball new position to strategy...
+                RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.HALT,
 
                 RefereeCommand.FORCE_START: self._analyse_game(),
                 RefereeCommand.NORMAL_START: self._normal_start(),

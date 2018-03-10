@@ -68,7 +68,7 @@ class Coach(Process):
         try:
             while True:
                 self.main_loop()
-                sleep(0.05)  # TODO: Put it in config file
+                sleep(0.05)
 
         except KeyboardInterrupt:
             pass

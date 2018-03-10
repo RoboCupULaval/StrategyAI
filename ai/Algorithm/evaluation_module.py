@@ -216,7 +216,7 @@ def is_player_facing_target(player, target_position: Position, tolerated_angle: 
 
 
 def ball_direction(self):
-    pass # TODO :
+    pass
 
 
 def best_position_in_region(player, A, B):

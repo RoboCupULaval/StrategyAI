@@ -17,6 +17,4 @@ class KickCharge(Action):
 
     def exec(self):
 
-
-        # todo charge kick here please/ask Simon what kicktype is supposed to be
         return AICommand(self.player.id, kick_type=self.kick_type)
