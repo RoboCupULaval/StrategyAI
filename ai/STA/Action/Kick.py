@@ -9,7 +9,7 @@ from ai.states.game_state import GameState
 
 class Kick(Action):
 
-    def __init__(self, game_state: GameState, player: Player, force: [int, float], target: Pose=Pose(), end_speed=0,
+    def __init__(self, game_state: GameState, player: Player, force: [int, float], target: Pose=Pose(), target_speed=0,
                  cruise_speed=0.1):
         """
             :param game_state: Current state of the game
@@ -21,7 +21,7 @@ class Kick(Action):
         assert(isinstance(force, (int, float)))
         self.force = force
         self.target = target
-        self.end_speed = end_speed
+        self.target_speed = target_speed
 
     def exec(self):
         """
@@ -40,7 +40,7 @@ class Kick(Action):
                       "kick_force": self.force,
                       "cruise_speed": 0.1,
                       "charge_kick": True,
-                      "end_speed": self.end_speed,
+                      "target_speed": self.target_speed,
                       "ball_collision": False}
 
         return AICommand(self.player.id, **cmd_params)
