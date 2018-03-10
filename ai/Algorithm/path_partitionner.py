@@ -1,6 +1,4 @@
 
-from enum import Enum
-
 import numpy as np
 
 from Util import Position
@@ -13,57 +11,48 @@ SUB_TARGET_RESOLUTION_FACTOR = 10
 ELLIPSE_HALF_WIDTH = 500
 
 
-class CollisionType(Enum):
-    PLAYER = 0
-    BALL = 1
-    ZONE = 2
-
-
 class CollisionBody:
-    UNCOLLIDABLE = 0
-    COLLIDABLE = 1
 
-    def __init__(self, position: Position, velocity: Position=Position(), avoid_radius=1,
-                 collision_type: CollisionType = CollisionType.PLAYER):
+    def __init__(self, position: Position, avoid_radius=1):
         self.position = position
-        self.velocity = velocity
         self.avoid_radius = avoid_radius
-        self.type = collision_type
 
 
 class PathPartitionner:
 
-    def __init__(self):
-        self.obstacles = np.array([])
-
-    def get_path(self, start: Position, target: Position, obstacles=np.array([])):
+    @staticmethod
+    def get_path(start: Position, target: Position, obstacles=np.array([])):
 
         obstacles = np.array(obstacles)
 
         if np.any(obstacles):
-            path = self.path_planner(start, target, obstacles)
+            path = PathPartitionner.path_planner(start, target, obstacles)
         else:
             path = Path(start, target)
 
         return path
 
-    def path_planner(self, start, target, obstacles, avoid_dir=None, depth=0):
+    @staticmethod
+    def path_planner(start, target, obstacles, avoid_dir=None, depth=0):
 
-        if start == target:
+        if start == target or depth >= RECURSION_LIMIT:
             return Path(start, target)
 
-        if depth >= RECURSION_LIMIT:
+        if (start - target).norm <= MIN_PATH_LENGTH:
+            return Path(start, target)
+
+        if not np.any(obstacles):
             return Path(start, target)
 
         if not PathPartitionner.is_path_colliding(start, target, obstacles):
             return Path(start, target)
 
-        sub_target, avoid_dir = self.next_sub_target(start, target, obstacles, avoid_dir)
+        sub_target, avoid_dir = PathPartitionner.next_sub_target(start, target, obstacles, avoid_dir)
         if sub_target is None or sub_target == target or sub_target == start:
             return Path(start, target)
 
-        path_1 = self.path_planner(start, sub_target, obstacles, avoid_dir, depth=depth+1)
-        path_2 = self.path_planner(sub_target, target, obstacles, avoid_dir, depth=depth+1)
+        path_1 = PathPartitionner.path_planner(start, sub_target, obstacles, avoid_dir, depth=depth+1)
+        path_2 = PathPartitionner.path_planner(sub_target, target, obstacles, avoid_dir, depth=depth+1)
 
         return path_1.join_segments(path_2)
 
@@ -75,10 +64,6 @@ class PathPartitionner:
 
     @staticmethod
     def filter_obstacles(start, target, obstacles):
-
-        if not np.any(obstacles):
-            return np.array([])
-
         obstacles_position = np.array([obstacle.position for obstacle in obstacles])
         temp = np.linalg.norm(start - obstacles_position + target - obstacles_position, axis=1)
         is_inside_ellipse = temp <= np.sqrt((start - target).norm ** 2 + ELLIPSE_HALF_WIDTH ** 2)
@@ -87,7 +72,7 @@ class PathPartitionner:
     @staticmethod
     def find_collisions(start, target, obstacles):
 
-        if (start - target).norm < MIN_PATH_LENGTH or not np.any(obstacles):
+        if not np.any(obstacles):
             return None, 0
 
         obstacles_pos = np.array([obstacle.position for obstacle in obstacles])
@@ -107,10 +92,6 @@ class PathPartitionner:
 
     @staticmethod
     def next_sub_target(start, target, obstacles, avoid_dir=None):
-
-        if (start - target).norm < MIN_PATH_LENGTH or not np.any(obstacles):
-            return None, 0
-
         collisions, distances = PathPartitionner.find_collisions(start, target, obstacles)
 
         if np.any(collisions):
@@ -132,7 +113,7 @@ class PathPartitionner:
             sub_target = start + start_to_goal_direction * len_along_path - avoid_dir * resolution
             sub_target = PathPartitionner.optimize_sub_target(sub_target, obstacles, -avoid_dir, res=resolution)
 
-        return [sub_target, avoid_dir]
+        return sub_target, avoid_dir
 
     @staticmethod
     def optimize_sub_target(initial_sub_target, obstacles, avoid_dir, res):
