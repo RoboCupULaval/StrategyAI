@@ -54,6 +54,10 @@ class GameState(metaclass=Singleton):
     def map_players_to_roles_by_player(self, mapping):
         self._role_mapper.map_by_player(mapping)
 
+    def map_player_to_first_available_role(self, player_id):
+        player = self.our_team.available_players[player_id]
+        return self._role_mapper.map_player_to_first_available_role(player)
+
     @property
     def role_mapping(self):
         return self._role_mapper.roles_translation

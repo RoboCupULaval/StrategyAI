@@ -78,6 +78,9 @@ class Strategy(metaclass=ABCMeta):
                           current_tactic.current_state.__name__, str(current_tactic), current_tactic.target))
         return state
 
+    def clear_graph_of_role(self, r: Role):
+        self.roles_graph[r] = Graph()
+
     def exec(self) -> Dict[Player, AICommand]:
         """
         Appelle la méthode exec de chacune des Tactics assignées aux robots.
