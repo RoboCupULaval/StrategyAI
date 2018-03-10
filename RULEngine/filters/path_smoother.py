@@ -1,17 +1,13 @@
 
 from Util import Position
-from Util.path import Path
 from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION
 from math import sqrt, sin
-
-max_acc = MAX_LINEAR_ACCELERATION
 
 
 def path_smoother(robot: Robot):
 
     path = robot.raw_path.copy()
     path.start = robot.position
-    path.filter(threshold=10)
 
     if len(path) < 3:
         return path, robot.end_speed
@@ -25,13 +21,17 @@ def path_smoother(robot: Robot):
     # new_path = Path().from_points(point_list)
     # new_path.filter(threshold=10)
 
-    turn_radius, _ = compute_turn_radius(*path[0:3], speed=robot.cruise_speed, acc=max_acc)
-    next_speed = speed_in_corner(turn_radius, acc=max_acc)
+    turn_radius, _ = compute_turn_radius(*path[0:3],
+                                         speed=robot.cruise_speed,
+                                         acc=MAX_LINEAR_ACCELERATION)
+
+    next_speed = speed_in_corner(turn_radius,
+                                 acc=MAX_LINEAR_ACCELERATION)
 
     return path, next_speed
 
 
-def compute_circle_points(p1, p2, p3, speed, acc=max_acc):
+def compute_circle_points(p1, p2, p3, speed, acc):
     turn_radius, deviation_from_path = compute_turn_radius(p1, p2, p3, speed, acc)
 
     distance_on_segment = sqrt((deviation_from_path + turn_radius) ** 2 - turn_radius ** 2)
@@ -41,14 +41,14 @@ def compute_circle_points(p1, p2, p3, speed, acc=max_acc):
     return p4, p5
 
 
-def speed_in_corner(radius, acc=max_acc):
+def speed_in_corner(radius, acc):
 
     speed = sqrt(radius * acc)
 
     return speed
 
 
-def compute_turn_radius(p1, p2, p3, speed, max_deviation=50, acc=max_acc):
+def compute_turn_radius(p1, p2, p3, speed, max_deviation=50, acc=MAX_LINEAR_ACCELERATION):
     """Assume the raw path is p1->p2->p3.
        Deviation is compute from p2 to the circle with a line passing by the center of the circle."""
 
@@ -71,6 +71,6 @@ def deviation(radius, theta):
     return radius / sin(theta / 2) - radius if sin(theta/2) != 0 else 0
 
 
-def point_on_segment(start: Position, end: Position, distance):
-    ratio = distance / (start-end).norm
+def point_on_segment(start: Position, end: Position, distance: float):
+    ratio = distance / (start-end).view(Position).norm
     return (1-ratio) * start + ratio * end

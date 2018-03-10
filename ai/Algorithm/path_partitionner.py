@@ -31,6 +31,8 @@ class PathPartitionner:
         else:
             path = Path(start, target)
 
+        path.filter(threshold=10)
+
         return path
 
     @staticmethod
