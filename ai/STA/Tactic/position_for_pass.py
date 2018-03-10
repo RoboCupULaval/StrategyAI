@@ -58,7 +58,7 @@ class PositionForPass(Tactic):
         if self.player.receiver_pass_flag is False:
             self.target_position = self._find_best_player_position()
         self.last_time = time.time()
-        destination_orientation = (self.game_state.get_ball_position() - self.player.pose.position).angle
+        destination_orientation = (self.game_state.ball_position - self.player.pose.position).angle
         return Pose(self.target_position, destination_orientation)
 
     def _find_best_player_position(self):
@@ -113,13 +113,13 @@ class PositionForPass(Tactic):
 
     def compute_offence_offset(self):
         if self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"] < 0:
-            if self.game_state.get_ball_position()[0] < 0:
-                offset = Position(self.game_state.get_ball_position()[0] - 1000, 0)
+            if self.game_state.ball_position[0] < 0:
+                offset = Position(self.game_state.ball_position[0] - 1000, 0)
             else:
                 offset = Position(0, 0)
         else:
-            if self.game_state.get_ball_position()[0] > 0:
-                offset = Position(self.game_state.get_ball_position()[0] + 1000, 0)
+            if self.game_state.ball_position[0] > 0:
+                offset = Position(self.game_state.ball_position[0] + 1000, 0)
             else:
                 offset = Position(0, 0)
         if abs(offset[0]) > 2000:
@@ -128,13 +128,13 @@ class PositionForPass(Tactic):
 
     def compute_defense_offset(self):
         if GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] < 0:
-            if self.game_state.get_ball_position()[0] > 0:
-                offset = Position(self.game_state.get_ball_position()[0] - 1000, 0)
+            if self.game_state.ball_position[0] > 0:
+                offset = Position(self.game_state.ball_position[0] - 1000, 0)
             else:
                 offset = Position(0, 0)
         else:
-            if self.game_state.get_ball_position()[0] < 0:
-                offset = Position(self.game_state.get_ball_position()[0] + 1000, 0)
+            if self.game_state.ball_position[0] < 0:
+                offset = Position(self.game_state.ball_position[0] + 1000, 0)
             else:
                 offset = Position(0, 0)
         if abs(offset[0]) > 2000:

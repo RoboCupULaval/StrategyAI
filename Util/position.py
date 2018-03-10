@@ -51,6 +51,9 @@ class Position(np.ndarray):
     def to_dict(self):
         return {'x': self.x, 'y': self.y}
 
+    def to_array(self):
+        return np.array([self[0], self[1]])
+
     def __add__(self, other):
         return super().__add__(other).view(Position)
 

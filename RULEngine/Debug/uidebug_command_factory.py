@@ -166,7 +166,7 @@ class UIDebugCommandFactory(metaclass=Singleton):
 
     @staticmethod
     def balls(balls):
-        return [UIDebugCommandFactory.ball(ball['pose']) for ball in balls]
+        return [UIDebugCommandFactory.ball(ball['position']) for ball in balls]
 
     @staticmethod
     def team_color_cmd(team_color: TeamColor = None):
