@@ -86,7 +86,6 @@ class Shitty_Field:
         return not self.is_inside_goal_area(position, dist_from_goal_area, our_goal)
 
     def stay_inside_goal_area(self, position, our_goal=True):
-        # TODO Not tested: stayInsideGoalArea
         if self.is_inside_goal_area(position, our_goal):
             return Position(position.x, position.y)
         else:
@@ -115,7 +114,6 @@ class Shitty_Field:
                     return stayInsideCircle(position, circle_bot, self.constant["FIELD_GOAL_RADIUS"])
 
     def stay_outside_goal_area(self, position, dist_from_goal_area=200, our_goal=True):
-        # TODO Not tested: stayOutsideGoalArea
         if self.is_outside_goal_area(position, dist_from_goal_area, our_goal):
             return Position(position.x, position.y)
         else:
@@ -256,7 +254,6 @@ positive_side_constant = {
     "ROBOT_RADIUS": 90,
     "BALL_RADIUS": 22,
     "PLAYER_PER_TEAM": 6,
-    # TODO KICKSPEED
     "KICK_MAX_SPD": 4,
     # Field Parameters
     "FIELD_Y_TOP": 3000,
@@ -338,7 +335,6 @@ negative_side_constant = {
     "ROBOT_RADIUS": 90,
     "BALL_RADIUS": 22,
     "PLAYER_PER_TEAM": 6,
-    # TODO KICKSPEED
     "KICK_MAX_SPD": 4,
 
     # Field Parameters

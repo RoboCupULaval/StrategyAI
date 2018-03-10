@@ -277,7 +277,6 @@ class PathPartitionner():
         path.goal = point
         return self.is_path_collide(path, tolerance=None, flag_closest_obs=True)
 
-    # TODO: Remove when the new one is well tested
     def verify_sub_target_legacy(self, sub_target):
         for collision_body in self.collision_body:
             pose_obs = collision_body.position
