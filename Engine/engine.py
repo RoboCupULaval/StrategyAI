@@ -9,17 +9,17 @@ from multiprocessing.managers import DictProxy
 from queue import Empty
 from time import time, sleep
 
-from RULEngine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
-from RULEngine.Communication.receiver.vision_receiver import VisionReceiver
-from RULEngine.Communication.receiver.referee_receiver import RefereeReceiver
+from Engine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
+from Engine.Communication.receiver.vision_receiver import VisionReceiver
+from Engine.Communication.receiver.referee_receiver import RefereeReceiver
 
-from RULEngine.Communication.sender.robot_command_sender import RobotCommandSender
-from RULEngine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
+from Engine.Communication.sender.robot_command_sender import RobotCommandSender
+from Engine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 
-from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
+from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
 
-from RULEngine.controller import Controller
-from RULEngine.tracker import Tracker
+from Engine.controller import Controller
+from Engine.tracker import Tracker
 
 try:
     from Util.csv_plotter import CsvPlotter

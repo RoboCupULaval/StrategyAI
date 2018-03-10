@@ -11,7 +11,7 @@ from pickle import loads
 from Util.singleton import Singleton
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.executors.play_executor import PlayExecutor
-from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
+from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from ai.states.play_state import PlayState
 
 

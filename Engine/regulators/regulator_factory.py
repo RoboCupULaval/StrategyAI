@@ -1,5 +1,5 @@
-from RULEngine.regulators.position_regulators import GrSimPositionRegulator, RealPositionRegulator
-from RULEngine.regulators.velocity_regulators import GrSimVelocityController, RealVelocityController
+from Engine.regulators.position_regulators import GrSimPositionRegulator, RealPositionRegulator
+from Engine.regulators.velocity_regulators import GrSimVelocityController, RealVelocityController
 from config.config_service import ConfigService
 
 

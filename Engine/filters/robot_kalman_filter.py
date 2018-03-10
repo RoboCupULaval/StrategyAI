@@ -2,7 +2,7 @@ from math import fabs
 
 import numpy as np
 
-from RULEngine.filters.kalman_filter import KalmanFilter
+from Engine.filters.kalman_filter import KalmanFilter
 
 
 class RobotFilter(KalmanFilter):
