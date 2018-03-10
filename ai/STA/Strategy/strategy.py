@@ -22,7 +22,7 @@ class Strategy(metaclass=ABCMeta):
         assert isinstance(p_game_state, GameState)
         self.game_state = p_game_state
         self.roles_graph = {r: Graph() for r in Role}
-        players = [p for p in self.game_state.our_team.players.values()]  # FIXME: SB. was available_players
+        players = [p for p in self.game_state.our_team.players.values()]
         roles = [r for r in Role]
         role_mapping = dict(zip(roles, players))
         # Magnifique hack pour bypasser un mapping de goalkeeper

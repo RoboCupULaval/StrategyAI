@@ -57,7 +57,6 @@ def get_pertinent_collision_objects(commanded_player, game_state, ai_command, op
     factor = 1.1
     collision_bodies = []
     gap_proxy = 250
-    # FIXME: Find better name that is less confusing between self.player and player
     for player in game_state.our_team.available_players.values():
         if player.id != commanded_player.id:
             if (commanded_player.pose.position - player.pose.position).norm + \

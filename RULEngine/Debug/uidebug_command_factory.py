@@ -13,7 +13,6 @@ __author__ = "Maxime Gagnon-Legault, Philippe Babin, and others"
 
 
 class Color(object):
-    # FIXME: hack
     def __init__(self, r=0, g=0, b=0):
         self.r = r
         self.g = g
