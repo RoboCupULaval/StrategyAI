@@ -4,29 +4,17 @@ from Util import Position
 
 
 class Path:
-    # FIXME remove speed from pathfinder, it shouldn't be its concern
     # TODO: Instead of start and end, should it be more logical to have the list of points?
-    def __init__(self, start=Position(),  end=Position(), start_speed=0, end_speed=0):
+    def __init__(self, start=Position(), end=Position()):
 
         self.points = [start, end]
-        self.speeds = [start_speed, end_speed]
+        self.speeds = [0, 0]
         self.turns = self.points
 
-    def join_segments(self, other):
+    def __add__(self, other):
         new_path = Path()
         new_path.points = self.points+other.points[1:]
         return new_path
-
-    def split_path(self, idx):
-        if idx < 1:
-            path_1 = Path()
-            path_2 = self
-        else:
-            path_1 = Path()
-            path_1.points = self.points[:idx+1]
-            path_2 = Path()
-            path_2.points = self.points[idx:]
-        return path_1, path_2
 
     @staticmethod
     def generate_path_from_points(points_list, speed_list=None, threshold=None, turns_list=None):
@@ -66,20 +54,10 @@ class Path:
     def goal(self, v):
         self.points[-1] = v
 
-    @classmethod
-    def from_dict(cls, dict):
-        points = [Position.from_dict(p) for p in dict]
-        path = Path.generate_path_from_points(points)
-        return path
-
-    def to_dict(self):
-        return [p.to_dict() for p in self.points]
-
-    def get_path_length(self):
-        length = 0
-        for idx, point in enumerate(self.points[:-1]):
-            length += np.linalg.norm(point - self.points[idx+1])
-        return length
+    @property
+    def length(self):
+        segments = [(point - next_point).view(Position).norm for point, next_point in zip(self.points, self.points[1:])]
+        return sum(segments)
 
     def quick_update_path(self, position):
         self.points[0] = position

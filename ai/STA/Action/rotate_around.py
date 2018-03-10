@@ -97,7 +97,7 @@ class RotateAround(Action):
         if self.approach:
             return CmdBuilder().addMoveTo(self.generate_destination(),
                                           cruise_speed=self.approach_speed,
-                                          end_speed=self.tangential_speed).build()
+                                          target_speed=self.tangential_speed).build()
         else:
             return CmdBuilder().addMoveTo(self.generate_destination(),
-                                          end_speed=self.tangential_speed).build()
+                                          target_speed=self.tangential_speed).build()

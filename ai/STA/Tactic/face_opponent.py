@@ -17,23 +17,23 @@ from ai.states.game_state import GameState
 class FaceOpponent(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
                  args: List[str]=None, distance=500, collision_ball=False,
-                 cruise_speed=2, charge_kick=False, end_speed=0, dribbler_on=False):
+                 cruise_speed=2, charge_kick=False, target_speed=0, dribbler_on=False):
         super().__init__(game_state, player, target, args)
         self.target = target
         self.distance = distance
         self.status_flag = Flags.INIT
         self.collision_ball = collision_ball
         self.charge_kick = charge_kick
-        self.end_speed = end_speed
+        self.target_speed = target_speed
         self.dribbler_on = dribbler_on
         self.cruise_speed = cruise_speed
 
     def exec(self):
-        self.target_player = closest_player_to_point(self.game_state.get_ball_position(), our_team=False).player
+        self.target_player = closest_player_to_point(self.game_state.ball_position, our_team=False).player
         orientation_opponent = np.array([math.cos(self.target_player.pose.orientation),
                                          math.sin(self.target_player.pose.orientation)])
         destination_position = self.target_player.pose.position + self.distance * orientation_opponent
-        ball_to_player = self.game_state.get_ball_position() - self.player.pose.orientation
+        ball_to_player = self.game_state.ball_position - self.player.pose.orientation
         destination_orientation = ball_to_player.angle
         destination_pose = Pose(destination_position, destination_orientation)
 
@@ -48,7 +48,7 @@ class FaceOpponent(Tactic):
                               cruise_speed=self.cruise_speed,
                               collision_ball=self.collision_ball,
                               charge_kick=self.charge_kick,
-                              end_speed=self.end_speed,
+                              target_speed=self.target_speed,
                               dribbler_on=self.dribbler_on).exec()
 
     def check_success(self):

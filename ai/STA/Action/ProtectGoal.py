@@ -46,7 +46,7 @@ class ProtectGoal(Action):
         :return: Un tuple (Pose, kick) où Pose est la destination du gardien et kick est nul (on ne botte pas)
         """
         goalkeeper_position = self.player.pose.position
-        ball_position = self.game_state.get_ball_position()
+        ball_position = self.game_state.ball_position
         goal_x = self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"]
         goal_position = Position(goal_x, 0)
 

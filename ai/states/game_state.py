@@ -4,55 +4,41 @@ import logging
 
 from Util import Position
 from Util.constant import TeamColor
-from Util.role import Role
 from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
 from Util.team_color_service import TeamColorService
 from ai.GameDomainObjects import Ball, Team, Field, Referee
 
 
-class GameState(object, metaclass=Singleton):
-    UPDATE_TIMEOUT = 0.5
+class GameState(metaclass=Singleton):
 
     def __init__(self):
-        """
-        initialise le GameState, initialise les variables avec des valeurs nulles
-        """
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self._role_mapper = RoleMapper()
-        self._delta_t = 0
-        self.our_team_color = None
 
-        self._balls = []
-        self._field = Field(self._balls)
+        self._ball = Ball()
+        self._field = Field(self._ball)
+
         self._referee = Referee()
+
         self._blue_team = Team(team_color=TeamColor.BLUE)
         self._yellow_team = Team(team_color=TeamColor.YELLOW)
-        self._our_team = None
-        self._enemy_team = None
-        self._assign_teams()
 
-    def _assign_teams(self):
-        if TeamColorService().our_team_color == TeamColor.BLUE:
-            self._our_team = self._blue_team
-            self._enemy_team = self._yellow_team
-        elif TeamColorService().our_team_color == TeamColor.YELLOW:
-            self._our_team = self._yellow_team
-            self._enemy_team = self._blue_team
+        self._our_team = self._yellow_team if TeamColorService().is_our_team_yellow else self._blue_team
+        self._enemy_team = self._blue_team if TeamColorService().is_our_team_yellow else self._yellow_team
 
     def update(self, new_game_state):
         if new_game_state:
             # Game State is a shared dict with the Engine. Might cause a race condition
             game_state = new_game_state.copy()  # FIX: this is a shallow copy. is it okay?
-
             self._blue_team.update(game_state['blue'])
             self._yellow_team.update(game_state['yellow'])
 
-            self._balls = [Ball.from_dict(ball_dict) for ball_dict in game_state['balls']]
-            self._field = Field(self._balls)
+            if game_state['balls']:
+                self._ball.update(game_state['balls'][0])
 
-    def get_player_by_role(self, role: object) -> object:
+    def get_player_by_role(self, role):
         return self._role_mapper.roles_translation[role]
 
     def get_role_by_player_id(self, player_id: int):
@@ -72,37 +58,16 @@ class GameState(object, metaclass=Singleton):
         player = self.our_team.available_players[player_id]
         return self._role_mapper.map_player_to_first_available_role(player)
 
-    def get_role_mapping(self):
+    @property
+    def role_mapping(self):
         return self._role_mapper.roles_translation
 
-    def update_player_for_locked_role(self, player_id, role):
-        player = self._get_player_from_all_possible_player(player_id)
-        return self._role_mapper.update_player_for_locked_role(player, role)
-
-    def _get_player_from_all_possible_player(self, player_id):
-        return self.our_team.players[player_id]
-
-    def get_player(self, id: int):
-        return self.our_team.players[id]  # tODO
-
-    def get_ball_position(self) -> Position:
-        """
-            Retourne la position de la balle
-            :return: L'instance de Position, la position de la balle
-        """
+    @property
+    def ball_position(self) -> Position:
         return self._field.ball.position
 
     @property
-    def delta_t(self) -> float:
-        return self._delta_t
-
-    def get_ball_velocity(self) -> Position:
-        """
-        Retourne le vecteur vélocité de la balle.
-        Use with care, probably not implemented correctly
-
-        :return: la vélocité de la balle.
-        """
+    def ball_velocity(self) -> Position:
         return self._field.ball.velocity
 
     @property
@@ -116,6 +81,10 @@ class GameState(object, metaclass=Singleton):
     @property
     def ball(self) -> Ball:
         return self._field.ball
+
+    @property
+    def is_ball_on_field(self):
+        return self._field.ball is not None
 
     @property
     def referee(self) -> Referee:
