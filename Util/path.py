@@ -1,81 +1,82 @@
-import numpy as np
+from typing import List
+
+import collections
 
 from Util import Position
 
 
-class Path:
+class Path(collections.MutableSequence):
 
-    def __init__(self, start=Position(),  end=Position(), start_speed=0, end_speed=0):
-
+    def __init__(self, start=Position(),  end=Position()):
         self.points = [start, end]
-        self.speeds = [0, 0]
-        self.turns = self.points
 
-    def __add__(self, other):
-        new_path = Path()
-        new_path.points = self.points+other.points[1:]
-        return new_path
+    def filter(self, threshold):
+        if len(self) > 2:
+            new_points = [self.start]
+            for p1, p2 in zip(self[1:], self[2:]):
+                if (p1 - p2).norm >= threshold:
+                    new_points.append(p1)
+            new_points.append(self.goal)
+            self.points = new_points
 
-    @staticmethod
-    def generate_path_from_points(points_list, speed_list=None, threshold=None, turns_list=None):
-        if speed_list is None or len(speed_list) < 2:
-            speed_list = [0, 0]
+    @classmethod
+    def from_points(cls, points_list: List[Position]):
         if len(points_list) < 2:
-            points_list = [points_list[0], points_list[0]] # Why?
-        if len(points_list) < 3:
-            pass
-        elif threshold is not None:
-            for i in range(0, len(points_list)-1):
-                if np.linalg.norm(points_list[i] - points_list[i+1]) < threshold:
-                    del points_list[i+1]
-        # points étant une liste de positions
-        new_path = Path()
-        if turns_list is None or len(turns_list) < 2:
-            turns_list = [new_path.start, new_path.goal]
-        new_path.points = points_list
-        new_path.speeds = speed_list
-        new_path.turns = turns_list
+            raise ValueError('Cannot create a path with less then two points')
 
-        return new_path
+        path = cls()
+        path.points = points_list
+        return path
 
     @property
     def start(self):
-        return self.points[0]
+        return self[0]
 
     @start.setter
-    def start(self, v):
-        self.points[0] = v
+    def start(self, v: Position):
+        self[0] = v
 
     @property
     def goal(self):
-        return self.points[-1]
+        return self[-1]
 
     @goal.setter
-    def goal(self, v):
-        self.points[-1] = v
+    def goal(self, v: Position):
+        self[-1] = v
+
+    @property
+    def next_position(self):
+        return self[1]
+
+    def copy(self):
+        return Path.from_points(self.points)
 
     @property
     def length(self):
-        segments = [(point - next_point).view(Position).norm for point, next_point in zip(self.points, self.points[1:])]
+        segments = [(point - next_point).view(Position).norm for point, next_point in zip(self, self[1:])]
         return sum(segments)
-
-    def quick_update_path(self, position):
-        self.points[0] = position
-        new_path = Path().generate_path_from_points(self.points, self.speeds, None)
-        self.points = new_path.points
-        self.speeds = new_path.speeds
-        self.turns = new_path.turns
-
-    def copy(self):
-        new_path = Path()
-        new_path.points = self.points.copy()
-        new_path.speeds = self.speeds.copy()
-        new_path.turns = self.turns.copy()
-        return new_path
 
     def __iter__(self):
         for p in self.points:
             yield p
 
+    def __getitem__(self, item):
+        return self.points[item]
+
+    def __setitem__(self, key, value):
+        self.points[key] = value
+
+    def __delitem__(self, key):
+        del self.points[key]
+
+    def insert(self, index, value):
+        self.points.insert(index, value)
+
     def __len__(self):
         return len(self.points)
+
+    def __add__(self, other):
+        return Path.from_points(self.points + other.points[1:])
+
+    def __repr__(self):
+        return 'Path(start={}, goal={})'.format(self.start, self.goal)

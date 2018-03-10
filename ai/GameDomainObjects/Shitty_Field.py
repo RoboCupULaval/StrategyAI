@@ -2,7 +2,6 @@
 from enum import Enum
 
 from Util import Position
-from ai.Algorithm.path_partitionner import CollisionBody
 from ai.GameDomainObjects import Ball
 # from Engine.Debug.debug_interface import DebugInterface
 from config.config_service import ConfigService
@@ -49,8 +48,8 @@ class Shitty_Field:
         x_our_goal = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
         radius = self.constant["FIELD_GOAL_RADIUS"]
 
-        self.field_collision_body = [CollisionBody(Position(x_their_goal, 0), Position(0, 0), radius, CollisionType.ZONE),
-                                     CollisionBody(Position(x_our_goal, 0), Position(0, 0), radius, CollisionType.ZONE)]
+        # self.field_collision_body = [CollisionBody(Position(x_their_goal, 0), Position(0, 0), radius, CollisionType.ZONE),
+        #                              CollisionBody(Position(x_our_goal, 0), Position(0, 0), radius, CollisionType.ZONE)]
 
         # self.debug_interface.add_circle((x_their_goal, 0), radius=radius, timeout=0, color=(255, 0, 0))
         # self.debug_interface.add_circle((x_our_goal, 0), radius=radius, timeout=0, color=(255, 0, 0))

@@ -3,7 +3,6 @@ from typing import List
 
 from Util import Pose
 from Util.area import stayOutsideCircle
-from ai.Algorithm.path_partitionner import CollisionBody
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic
@@ -17,11 +16,11 @@ class StayAwayFromBall(Tactic):
         self.current_state = self.stay_out_of_circle
         self.next_state = self.stay_out_of_circle
         self.keepout_radius = keepout_radius
-        self.player.collision_body_mask.append(CollisionBody.COLLIDABLE)
+        # self.player.collision_body_mask.append(CollisionBody.COLLIDABLE)
 
     def stay_out_of_circle(self):
-        self.game_state.field.field_collision_body.append(
-            CollisionBody(self.game_state.ball_position, self.game_state.ball_velocity, 500))
+        #self.game_state.field.field_collision_body.append(
+        #    CollisionBody(self.game_state.ball_position, self.game_state.ball_velocity, 500))
         position = stayOutsideCircle(self.player.pose.position,
                                      self.game_state.ball_position,
                                      self.keepout_radius)

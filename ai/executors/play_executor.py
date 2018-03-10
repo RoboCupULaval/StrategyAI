@@ -12,7 +12,7 @@ from ai.STA.Strategy.human_control import HumanControl
 
 from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
 
-from ai.executors.pathfinder_module import generate_path
+from ai.executors.pathfinder_module import PathfinderModule
 from config.config_service import ConfigService
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
@@ -34,6 +34,8 @@ class PlayExecutor(metaclass=Singleton):
         self.goalie_id = -1
         self.ui_send_queue = ui_send_queue
 
+        self.pathfinder_module = PathfinderModule()
+
     def exec(self) -> List[EngineCommand]:
         """
         Execute la stratégie courante et envoie le status des robots et les livres de tactiques et stratégies
@@ -49,25 +51,12 @@ class PlayExecutor(metaclass=Singleton):
         ai_cmds = self._execute_strategy()
         engine_cmds = []
 
-        for player, ai_cmd in ai_cmds.items():
-            if ai_cmd.pathfinder_on and ai_cmd.target:
-                path = generate_path(self.game_state, player, ai_cmd)
-            else:
-                path = None
-            engine_cmds.append(self.generate_engine_cmd(player, ai_cmd, path))
+        paths = self.pathfinder_module.exec(self.game_state, ai_cmds)
+
+        for player, path in paths.items():
+            engine_cmds.append(generate_engine_cmd(player, ai_cmds[player], path))
 
         return engine_cmds
-
-    def generate_engine_cmd(self, player: Player, ai_cmd: AICommand, path):
-        return EngineCommand(robot_id=player.id,
-                             path=path,
-                             kick_type=ai_cmd.kick_type,
-                             kick_force=ai_cmd.kick_force,
-                             dribbler_active=ai_cmd.dribbler_active,
-                             cruise_speed=ai_cmd.cruise_speed * 1000,
-                             target_orientation=ai_cmd.target.orientation if ai_cmd.target else None,
-                             target_speed=ai_cmd.target_speed,
-                             charge_kick=ai_cmd.charge_kick)
 
     def order_change_of_sta(self, cmd: STAChangeCommand):
         if cmd.is_strategy_change_command():
@@ -83,7 +72,7 @@ class PlayExecutor(metaclass=Singleton):
         try:
             this_player = GameState().our_team.available_players[cmd.data['id']]
         except KeyError as id:
-            print("Invalid player id: {}".format(cmd.data['id']))
+            self.logger.debug("Invalid player id: {}".format(cmd.data['id']))
             return
         player_id = this_player.id
         tactic_name = cmd.data['tactic']
@@ -93,17 +82,13 @@ class PlayExecutor(metaclass=Singleton):
         try:
             tactic = self.play_state.get_new_tactic(tactic_name)(GameState(), this_player, target, args)
         except Exception as e:
-            print(e)
-            print("La tactique n'a pas été appliquée par "
-                  "cause de mauvais arguments.")
+            self.logger.debug(e)
+            self.logger.debug("La tactique n'a pas été appliquée par cause de mauvais arguments.")
             raise e
 
-        if isinstance(self.play_state.current_strategy, HumanControl):
-            hc = self.play_state.current_strategy
-            hc.assign_tactic(tactic, player_id)
-        else:
+        if not isinstance(self.play_state.current_strategy, HumanControl):
             self.play_state.current_strategy = "HumanControl"
-            self.play_state.current_strategy.assign_tactic(tactic, player_id)
+        self.play_state.current_strategy.assign_tactic(tactic, player_id)
 
     def _execute_strategy(self) -> Dict[Player, AICommand]:
         # Applique un stratégie par défault s'il n'en a pas (lors du démarage par exemple)
@@ -140,3 +125,14 @@ class PlayExecutor(metaclass=Singleton):
     #     self.last_available_players = available_players.copy()
     #     return player_change
 
+
+def generate_engine_cmd(player: Player, ai_cmd: AICommand, path):
+    return EngineCommand(player.id,
+                         cruise_speed=ai_cmd.cruise_speed * 1000,
+                         path=path,
+                         kick_type=ai_cmd.kick_type,
+                         kick_force=ai_cmd.kick_force,
+                         dribbler_active=ai_cmd.dribbler_active,
+                         target_orientation=ai_cmd.target.orientation if ai_cmd.target else None,
+                         end_speed=ai_cmd.end_speed,
+                         charge_kick=ai_cmd.charge_kick)

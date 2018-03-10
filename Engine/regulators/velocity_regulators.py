@@ -3,10 +3,9 @@ from math import sqrt
 
 from Engine.regulators.PID import PID
 from Engine.regulators.regulator_base_class import RegulatorBaseClass
-from Engine.robot import Robot
-from Engine.trapezoidal_speed_profile import get_next_velocity
+from Engine.robot import Robot, MAX_LINEAR_ACCELERATION
 from Util import Pose
-from Util.geometry import wrap_to_pi, rotate
+from Util.geometry import rotate, clamp
 
 
 class RealVelocityController(RegulatorBaseClass):
@@ -21,24 +20,35 @@ class RealVelocityController(RegulatorBaseClass):
         return self.orientation_controller.dt
 
     def execute(self, robot: Robot):
-        target_orientation = \
-            robot.target_orientation if robot.target_orientation is not None else robot.pose.orientation
-        target = Pose(robot.path.points[1], target_orientation)
 
-        error = Pose(target.position - robot.pose.position)
-        error.orientation = wrap_to_pi(target.orientation - robot.pose.orientation)
+        speed_norm = self.get_next_speed(robot)
 
-        speed_norm = get_next_velocity(robot, self.dt)
+        velocity = robot.position_error * speed_norm / robot.position_error.norm
 
-        vel = error.position * speed_norm / error.norm
-
-        cmd_pos = rotate(vel, -robot.pose.orientation)
-        cmd_orientation = self.orientation_controller.execute(error.orientation)
+        cmd_pos = rotate(velocity, -robot.orientation)
+        cmd_orientation = self.orientation_controller.execute(robot.orientation_error)
 
         return Pose(cmd_pos, cmd_orientation)
 
+    def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION, offset=10):
+
+        if robot.target_speed > robot.current_speed:
+            next_speed = robot.current_speed + acc * self.dt * offset
+        else:
+            if not self.reach_acceleration_dist(robot, acc):
+                next_speed = robot.current_speed + acc * self.dt * offset
+            else:
+                next_speed = robot.current_speed - acc * self.dt * offset
+
+        return clamp(next_speed, 0, robot.cruise_speed)
+
+    @staticmethod
+    def reach_acceleration_dist(robot, acc, offset=2) -> bool:
+        distance = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc
+        return robot.position_error.norm < distance * offset
+
     def reset(self):
-        pass
+            pass
 
 
 class GrSimVelocityController(RealVelocityController):
