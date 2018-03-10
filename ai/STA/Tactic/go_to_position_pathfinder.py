@@ -15,13 +15,13 @@ from ai.states.game_state import GameState
 
 class GoToPositionPathfinder(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
-                 args: List[str]=None, ball_collision=True, cruise_speed=1, charge_kick=False, target_speed=0):
+                 args: List[str]=None, ball_collision=True, cruise_speed=1, charge_kick=False, end_speed=0):
         super().__init__(game_state, player, target, args)
         self.target = target
         self.status_flag = Flags.INIT
         self.ball_collision = ball_collision
         self.charge_kick = charge_kick
-        self.target_speed = target_speed
+        self.end_speed = end_speed
         self.cruise_speed = float(args[0]) if len(self.args) > 0 else cruise_speed
         #print("Assign move to position to robot id {}".format(self.player.id))
 
@@ -33,7 +33,7 @@ class GoToPositionPathfinder(Tactic):
 
         return CmdBuilder().addMoveTo(self.target,
                                       cruise_speed=self.cruise_speed,
-                                      target_speed=self.target_speed,
+                                      end_speed=self.end_speed,
                                       ball_collision=self.ball_collision).build()
 
     def check_success(self):

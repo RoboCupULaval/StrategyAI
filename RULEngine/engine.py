@@ -104,9 +104,8 @@ class Engine(Process):
         self.referee_recver.start()
 
     def run(self):
-        own_pid = os.getpid()
         self.wait_for_vision()
-        self.logger.debug('Running with process ID {}'.format(own_pid))
+        self.logger.debug('Running with process ID {}'.format(os.getpid()))
 
         self.time_bank = time()
         try:
