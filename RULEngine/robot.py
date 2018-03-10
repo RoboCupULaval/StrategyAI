@@ -71,7 +71,7 @@ class Robot:
 
     @property
     def orientation_error(self):
-        if self.target_orientation and self.pose:
+        if self.target_orientation is not None and self.pose:
             return self.target_orientation - self.orientation
 
     @property
