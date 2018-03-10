@@ -66,7 +66,7 @@ class PlayExecutor(metaclass=Singleton):
                              dribbler_active=ai_cmd.dribbler_active,
                              cruise_speed=ai_cmd.cruise_speed * 1000,
                              target_orientation=ai_cmd.target.orientation if ai_cmd.target else None,
-                             target_speed=ai_cmd.target_speed,
+                             end_speed=ai_cmd.end_speed,
                              charge_kick=ai_cmd.charge_kick)
 
     def order_change_of_sta(self, cmd: STAChangeCommand):
@@ -83,7 +83,7 @@ class PlayExecutor(metaclass=Singleton):
         try:
             this_player = GameState().our_team.available_players[cmd.data['id']]
         except KeyError as id:
-            print("Invalid player id: {}".format(cmd.data['id']))
+            self.logger.debug("Invalid player id: {}".format(cmd.data['id']))
             return
         player_id = this_player.id
         tactic_name = cmd.data['tactic']
@@ -93,9 +93,8 @@ class PlayExecutor(metaclass=Singleton):
         try:
             tactic = self.play_state.get_new_tactic(tactic_name)(GameState(), this_player, target, args)
         except Exception as e:
-            print(e)
-            print("La tactique n'a pas été appliquée par "
-                  "cause de mauvais arguments.")
+            self.logger.debug(e)
+            self.logger.debug("La tactique n'a pas été appliquée par cause de mauvais arguments.")
             raise e
 
         if isinstance(self.play_state.current_strategy, HumanControl):

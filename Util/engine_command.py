@@ -10,5 +10,5 @@ class EngineCommand(namedtuple('EngineCommand',
                                'dribbler_active,'
                                'charge_kick,'
                                'target_orientation,'
-                               'target_speed,')):
+                               'end_speed,')):
     pass

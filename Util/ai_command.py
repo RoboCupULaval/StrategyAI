@@ -11,7 +11,7 @@ AICommand = namedtuple('AICommand', 'target,'
                                     'charge_kick,'
                                     'dribbler_active,'
                                     'cruise_speed,'
-                                    'target_speed,'
+                                    'end_speed,'
                                     'ball_collision,'
                                     'pathfinder_on')
 
@@ -27,15 +27,15 @@ class CmdBuilder:
         self._charge_kick = False
         self._dribbler_active = False
         self._cruise_speed = 0
-        self._target_speed = 0
+        self._end_speed = 0
         self._ball_collision = True
         self._pathfinder_on = True
 
-    def addMoveTo(self, target: [Pose, Position], cruise_speed=1, target_speed=0, ball_collision=True):
+    def addMoveTo(self, target: [Pose, Position], cruise_speed=1, end_speed=0, ball_collision=True):
         assert isinstance(target, (Pose, Position))
         self._target = Pose(target) if isinstance(target, Position) else target
         self._cruise_speed = cruise_speed
-        self._target_speed = target_speed
+        self._end_speed = end_speed
         self._ball_collision = ball_collision
         self._pathfinder_on = True
         return self
@@ -60,13 +60,13 @@ class CmdBuilder:
                          self._charge_kick,
                          self._dribbler_active,
                          self._cruise_speed,
-                         self._target_speed,
+                         self._end_speed,
                          self._ball_collision,
                          self._pathfinder_on)
 
 
-def MoveTo(target: [Pose, Position], cruise_speed=1, target_speed=0, ball_collision=True):
-    return CmdBuilder().addMoveTo(target, cruise_speed, target_speed, ball_collision).build()
+def MoveTo(target: [Pose, Position], cruise_speed=1, end_speed=0, ball_collision=True):
+    return CmdBuilder().addMoveTo(target, cruise_speed, end_speed, ball_collision).build()
 
 
 Idle = CmdBuilder().build()

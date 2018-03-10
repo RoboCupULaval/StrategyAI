@@ -45,13 +45,9 @@ class Controller(list):
         active_robots = [robot for robot in self if robot.pose is not None and robot.raw_path is not None]
 
         for robot in active_robots:
-            
-            robot.raw_path.quick_update_path(robot.pose.position)
-            robot.path = path_smoother(robot, robot.raw_path)
+            robot.path, robot.target_speed = path_smoother(robot)
 
-            error = robot.target_position - robot.pose.position
-
-            if error.norm < 200 and robot.target_speed < 0.05:
+            if robot.position_error.norm < 200 and robot.target_speed == 0:
                 commands[robot.robot_id] = robot.position_regulator.execute(robot)
             else:
                 commands[robot.robot_id] = robot.velocity_regulator.execute(robot)

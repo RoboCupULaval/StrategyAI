@@ -4,70 +4,51 @@ from Util.path import Path
 from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION
 from math import sqrt, sin
 
-
-def path_smoother(robot: Robot, path):
-    path = path.copy()
-    path = remove_close_points(path, threshold=10)
-
-    point_list = [path.start]
-    speed_list = [path.speeds[0]]
-
-    for p1, p2, p3 in zip(path.points[:], path.points[1:], path.points[2:]):
-        p4, p5, turn_radius = compute_circle_points(p1, p2, p3, robot.cruise_speed)
-        point_list += [p4, p5]
-        speed_list += [speed_in_corner(turn_radius), speed_in_corner(turn_radius)]
-
-    speed_list += [path.speeds[-1]]
-    point_list += [path.goal]
-
-    point_list, speed_list = filter_points_and_speed(point_list, speed_list, threshold=100)
-
-    return Path().generate_path_from_points(point_list, speed_list, threshold=None)
+max_acc = MAX_LINEAR_ACCELERATION
 
 
-def filter_points_and_speed(point_list, speed_list, threshold):
-    position_list = []
-    new_speed_list = []
-    
-    for idx, (p1, p2) in enumerate(zip(point_list, point_list[1:])):    
-        if (p1 - p2).norm >= threshold:
-            position_list.append(p1)
-            new_speed_list.append(speed_list[idx])
+def path_smoother(robot: Robot):
 
-    position_list.append(point_list[-1])
-    new_speed_list.append(speed_list[-1])
+    path = robot.raw_path.copy()
+    path.start = robot.position
+    path.filter(threshold=10)
 
-    return position_list, new_speed_list
+    if len(path) < 3:
+        return path, robot.end_speed
+
+    #  This is kinda broken. Nothing assert that the new points are continuous. It's not really useful in this form.
+    # point_list = [robot.pose.position]
+    # for p1, p2, p3 in zip(path, path[1:], path[2:]):
+    #     p4, p5 = compute_circle_points(p1, p2, p3, robot.cruise_speed)
+    #     point_list += [p4, p5]
+    # point_list.append(path.goal)
+    # new_path = Path().from_points(point_list)
+    # new_path.filter(threshold=10)
+
+    turn_radius, _ = compute_turn_radius(*path[0:3], speed=robot.cruise_speed, acc=max_acc)
+    next_speed = speed_in_corner(turn_radius, acc=max_acc)
+
+    return path, next_speed
 
 
-def remove_close_points(path, threshold=10):
-    points_in_between = path.points[1:-1]
-    points_in_between_kept = []
-    for point, next_point in zip(points_in_between, points_in_between[1:]):
-        if (point - next_point).norm >= threshold:
-            points_in_between_kept.append(point)
-    path.points = [path.start] + points_in_between_kept + [path.goal]
-    return path
-
-
-def compute_circle_points(p1, p2, p3, speed, acc=MAX_LINEAR_ACCELERATION):
+def compute_circle_points(p1, p2, p3, speed, acc=max_acc):
     turn_radius, deviation_from_path = compute_turn_radius(p1, p2, p3, speed, acc)
 
     distance_on_segment = sqrt((deviation_from_path + turn_radius) ** 2 - turn_radius ** 2)
     p4 = point_on_segment(p2, p1, distance_on_segment)
     p5 = point_on_segment(p2, p3, distance_on_segment)
 
-    return p4, p5, turn_radius
+    return p4, p5
 
 
-def speed_in_corner(radius, acc=MAX_LINEAR_ACCELERATION):
+def speed_in_corner(radius, acc=max_acc):
 
     speed = sqrt(radius * acc)
 
     return speed
 
 
-def compute_turn_radius(p1, p2, p3, speed, max_deviation=50, acc=MAX_LINEAR_ACCELERATION):
+def compute_turn_radius(p1, p2, p3, speed, max_deviation=50, acc=max_acc):
     """Assume the raw path is p1->p2->p3.
        Deviation is compute from p2 to the circle with a line passing by the center of the circle."""
 
@@ -86,10 +67,10 @@ def compute_turn_radius(p1, p2, p3, speed, max_deviation=50, acc=MAX_LINEAR_ACCE
     return turn_radius, deviation_from_path
 
 
-def deviation(radius: float, theta: float):
+def deviation(radius, theta):
     return radius / sin(theta / 2) - radius if sin(theta/2) != 0 else 0
 
 
-def point_on_segment(start: Position, end: Position, distance: float):
+def point_on_segment(start: Position, end: Position, distance):
     ratio = distance / (start-end).norm
     return (1-ratio) * start + ratio * end

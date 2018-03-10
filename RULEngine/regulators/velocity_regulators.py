@@ -21,19 +21,13 @@ class RealVelocityController(RegulatorBaseClass):
         return self.orientation_controller.dt
 
     def execute(self, robot: Robot):
-        target_orientation = \
-            robot.target_orientation if robot.target_orientation is not None else robot.pose.orientation
-        target = Pose(robot.path.points[1], target_orientation)
-
-        error = Pose(target.position - robot.pose.position)
-        error.orientation = wrap_to_pi(target.orientation - robot.pose.orientation)
 
         speed_norm = get_next_velocity(robot, self.dt)
 
-        vel = error.position * speed_norm / error.norm
+        velocity = robot.position_error * speed_norm / robot.position_error.norm
 
-        cmd_pos = rotate(vel, -robot.pose.orientation)
-        cmd_orientation = self.orientation_controller.execute(error.orientation)
+        cmd_pos = rotate(velocity, -robot.orientation)
+        cmd_orientation = self.orientation_controller.execute(robot.orientation_error)
 
         return Pose(cmd_pos, cmd_orientation)
 
