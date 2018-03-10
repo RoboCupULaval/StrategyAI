@@ -65,10 +65,8 @@ class Coach(Process):
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
     def run(self) -> None:
-        own_pid = os.getpid()
-        self.logger.debug('Running with process ID {}'.format(own_pid))
         self.wait_for_geometry()
-        self.logger.debug('Running')
+        self.logger.debug('Running with process ID {}'.format(os.getpid() ))
         try:
             while True:
                 self.main_loop()
