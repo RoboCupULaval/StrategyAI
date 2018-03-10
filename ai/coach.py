@@ -53,6 +53,10 @@ class Coach(Process):
         self.play_executor = PlayExecutor(self.ui_send_queue)
         self.debug_executor = DebugExecutor(self.play_executor, self.ui_send_queue, self.ui_recv_queue)
 
+        # print frame rate
+        self.frame_count = 0
+        self.time_last_print = time()
+
     def wait_for_geometry(self):
         self.logger.debug('Waiting for geometry from the Engine.')
         start = time()
@@ -68,7 +72,8 @@ class Coach(Process):
         try:
             while True:
                 self.main_loop()
-                sleep(0.05)
+                self.print_frame_rate()
+                sleep(0.1)
 
         except KeyboardInterrupt:
             pass
@@ -81,3 +86,11 @@ class Coach(Process):
 
     def _send_cmd(self, engine_commands: List[EngineCommand]):
         self.ai_queue.put(engine_commands)
+
+    def print_frame_rate(self):
+        self.frame_count += 1
+        dt = time() - self.time_last_print
+        if dt > 20:
+            self.logger.info('Updating at {:.2f} fps'.format(self.frame_count / dt))
+            self.time_last_print = time()
+            self.frame_count = 0
