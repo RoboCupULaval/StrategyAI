@@ -47,7 +47,7 @@ class Robot:
 
     @property
     def position(self):
-        if self.pose:
+        if self.pose is not None:
             return self.pose.position
 
     @property
@@ -56,41 +56,41 @@ class Robot:
 
     @property
     def target_position(self):
-        if self.path:
+        if self.path is not None:
             return self.path.next_position
 
     @property
     def orientation(self):
-        if self.pose:
+        if self.pose is not None:
             return self.pose.orientation
 
     @property
     def target_orientation(self):
-        if self.engine_cmd:
+        if self.engine_cmd is not None:
             return self.engine_cmd.target_orientation
 
     @property
     def orientation_error(self):
-        if self.target_orientation and self.pose:
+        if self.target_orientation is not None and self.pose:
             return self.target_orientation - self.orientation
 
     @property
     def end_speed(self):
-        if self.engine_cmd:
+        if self.engine_cmd is not None:
             return self.engine_cmd.end_speed
 
     @property
     def cruise_speed(self):
-        if self.engine_cmd:
+        if self.engine_cmd is not None:
             return self.engine_cmd.cruise_speed
 
     @property
     def current_speed(self):
-        if self.velocity:
+        if self.velocity is not None:
             return self.velocity.position.norm
 
     @property
     def raw_path(self):
-        if self.engine_cmd:
+        if self.engine_cmd is not None:
             return self.engine_cmd.path
 

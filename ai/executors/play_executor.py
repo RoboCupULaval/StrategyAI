@@ -56,6 +56,8 @@ class PlayExecutor(metaclass=Singleton):
         for player, path in paths.items():
             engine_cmds.append(generate_engine_cmd(player, ai_cmds[player], path))
 
+        self._send_robots_status()
+
         return engine_cmds
 
     def order_change_of_sta(self, cmd: STAChangeCommand):
