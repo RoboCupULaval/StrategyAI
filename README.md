@@ -26,3 +26,11 @@ Le dépôt StrategyIA fonctionne avec les forks et les pull requests.
 ### Standard de code
 Pour que le code soit considéré comme valide, celui-ci doit respecter le standard de code [PEP-8](https://www.python.org/dev/peps/pep-0008/).
 De plus, le code doit avoir les tests unitaires associés ainsi que les docstring pour respecter le standard de code [PEP-257](https://www.python.org/dev/peps/pep-0257/).
+
+### Exemple pour lancer deux équipes:
+À modifier selon vos chemins, à lancer à partir de la racine du dépôt de StrategyIA. Ce fichier est disponible à la racine du dépôt sous le nom de dual_launch.sh
+
+>#!/bin/bash
+>
+>#start ai blue
+>python main.py config/sim.cfg | python main.py config/sim_yellow.cfg | python ../UI-Debug/main.py config/field/sim.cfg blue | python ../UI-Debug/main.py config/field/sim.cfg yellow
