@@ -11,9 +11,6 @@ install:
 # Enable the latter options for a super clean project: linting
 script: "pytest tests -v -R : --cov . --cov-report term-missing #--pylint --pylint-rcfile=.pylintrc"
 
-after_success:
-    - "coveralls"
-
 env:
     - PYTHONPATH=.
 
