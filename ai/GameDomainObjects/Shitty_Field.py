@@ -3,7 +3,7 @@ from enum import Enum
 
 from Util import Position
 from ai.GameDomainObjects import Ball
-# from RULEngine.Debug.debug_interface import DebugInterface
+# from Engine.Debug.debug_interface import DebugInterface
 from config.config_service import ConfigService
 
 

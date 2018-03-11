@@ -1,6 +1,6 @@
 
 from Util import Position
-from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION
+from Engine.robot import Robot, MAX_LINEAR_ACCELERATION
 from math import sqrt, sin
 
 

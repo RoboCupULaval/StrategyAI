@@ -1,4 +1,4 @@
-from RULEngine.Communication.sender.sender_base_class import Sender
+from Engine.Communication.sender.sender_base_class import Sender
 
 
 class FakeSender(Sender):

@@ -6,8 +6,8 @@ from queue import Full
 from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY
 from struct import pack
 
-from RULEngine.Communication.receiver.receiver_base_class import ReceiverProcess
-from RULEngine.Communication.monitor import monitor_queue
+from Engine.Communication.receiver.receiver_base_class import ReceiverProcess
+from Engine.Communication.monitor import monitor_queue
 
 
 @monitor_queue

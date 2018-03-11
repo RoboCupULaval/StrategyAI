@@ -3,11 +3,11 @@
 
 import pickle
 
-from RULEngine.Communication.sender.sender_base_class import SenderProcess
-from RULEngine.Communication.sender.udp_socket import udp_socket
-from RULEngine.Communication.monitor import monitor_queue
+from Engine.Communication.sender.sender_base_class import SenderProcess
+from Engine.Communication.sender.udp_socket import udp_socket
+from Engine.Communication.monitor import monitor_queue
 
-from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
+from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
 
 
 __author__ = "Maxime Gagnon-Legault"

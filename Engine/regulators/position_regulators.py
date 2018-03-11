@@ -1,7 +1,7 @@
 
-from RULEngine.regulators.PID import PID
-from RULEngine.regulators.regulator_base_class import RegulatorBaseClass
-from RULEngine.robot import Robot, MAX_LINEAR_SPEED, MAX_ANGULAR_SPEED
+from Engine.regulators.PID import PID
+from Engine.regulators.regulator_base_class import RegulatorBaseClass
+from Engine.robot import Robot, MAX_LINEAR_SPEED, MAX_ANGULAR_SPEED
 from Util import Pose
 from Util.geometry import wrap_to_pi, rotate
 

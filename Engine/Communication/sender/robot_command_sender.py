@@ -1,6 +1,6 @@
-from RULEngine.Communication.sender.fake_sender import FakeSender
-from RULEngine.Communication.sender.grsim_command_sender import GrSimCommandSender
-from RULEngine.Communication.sender.serial_command_sender import SerialCommandSender
+from Engine.Communication.sender.fake_sender import FakeSender
+from Engine.Communication.sender.grsim_command_sender import GrSimCommandSender
+from Engine.Communication.sender.serial_command_sender import SerialCommandSender
 from config.config_service import ConfigService
 
 

@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from RULEngine.filters.ball_kalman_filter import BallFilter
+from Engine.filters.ball_kalman_filter import BallFilter
 
 
 class MultiBallService(list):

@@ -1,9 +1,9 @@
 
 from math import sqrt
 
-from RULEngine.regulators.PID import PID
-from RULEngine.regulators.regulator_base_class import RegulatorBaseClass
-from RULEngine.robot import Robot, MAX_LINEAR_ACCELERATION
+from Engine.regulators.PID import PID
+from Engine.regulators.regulator_base_class import RegulatorBaseClass
+from Engine.robot import Robot, MAX_LINEAR_ACCELERATION
 from Util import Pose
 from Util.geometry import rotate, clamp
 
