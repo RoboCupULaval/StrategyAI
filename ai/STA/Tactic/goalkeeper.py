@@ -33,13 +33,11 @@ class GoalKeeper(Tactic):
     l'intérieur de son demi-cercle. Si la balle entre dans son demi-cercle, le gardien tente d'aller en prendre
     possession.
     """
-    # TODO: À complexifier pour prendre en compte la position des joueurs adverses et la vitesse de la balle.
 
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(),
                  penalty_kick=False, args: List[str]=None,):
         super().__init__(game_state, player, target, args)
 
-        # TODO: Evil hack to force goalkeeper to be goal
         if len(self.args) > 0:
             print("Active secret mode")
             role_mapping = {Role.GOALKEEPER: player.id}
@@ -55,7 +53,6 @@ class GoalKeeper(Tactic):
         self.kick_force = 5
         self.penalty_kick = penalty_kick
 
-        # TODO: go_kick is copy paste in goalkeeper, we need to find a way to schedule a go tactic in another tactic
         self.tries_flag = 0
         self.grab_ball_tries = 0
         self.kick_last_time = time.time()
@@ -63,7 +60,6 @@ class GoalKeeper(Tactic):
     def kick_charge(self):
         self.next_state = self.protect_goal
 
-        # todo charge kick here please/ask Simon what kicktype is supposed to be
         return AICommand(self.player.id,  kick_type=1)
 
     def protect_goal(self):

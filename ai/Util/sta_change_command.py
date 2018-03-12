@@ -48,5 +48,3 @@ class STAChangeCommand:
 
     def is_autoplay_change_command(self):
         return self.type == STAType.AUTONOMOUS_PLAY
-
-    # TODO add for action command

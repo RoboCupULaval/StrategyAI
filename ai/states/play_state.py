@@ -6,7 +6,7 @@ from Util import Singleton
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.strategy_book import StrategyBook
 from ai.STA.Tactic.tactic_book import TacticBook
-from ai.states import GameState
+from ai.states.game_state import GameState
 
 
 class PlayState(metaclass=Singleton):

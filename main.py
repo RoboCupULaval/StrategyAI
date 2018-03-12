@@ -3,7 +3,7 @@
 
 import argparse
 
-from RULEngine.Framework import Framework
+from Engine.Framework import Framework
 from config.config_service import ConfigService
 
 
@@ -23,5 +23,5 @@ if __name__ == '__main__':
     ARGS = PARSER.parse_args()
     ConfigService().load_file(ARGS.config_file)
 
-    # RULEngine init
+    # Engine init
     FRAMEWORK = Framework()

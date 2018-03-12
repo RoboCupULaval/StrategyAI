@@ -51,7 +51,6 @@ def clamp(val, min_val, max_val):
 
 
 def remove_duplicates(seq, concurent_list=None, round_up_threshold=1):
-    # TODO: Clean that. Seems to complicate for nothing. + Varible return argument
 
     seen = set()
     seen2 = set()

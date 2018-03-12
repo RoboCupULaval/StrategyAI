@@ -1,7 +1,5 @@
 # Under MIT license, see LICENSE.txt
 
-# TODO: Create a new UT for the new IA command
-#
 # import unittest
 # from unittest.mock import Mock
 #
@@ -38,7 +36,7 @@
 #             'pose_goal': pose,
 #             'speed': speed_pose,
 #             'cruise_speed': 1,
-#             'end_speed': 0,
+#             'target_speed': 0,
 #             'collision_ball': False,
 #             'control_loop_type': self.OPEN,
 #             'path': [1, 2, 3],

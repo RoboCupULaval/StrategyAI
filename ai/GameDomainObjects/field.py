@@ -13,7 +13,7 @@ class Field:
     @property
     def ball(self):
         if not self._ball:
-            raise RuntimeError("There is no ball to detect")
+            raise RuntimeError('There is no ball to detect')
         return self._ball
 
     @property

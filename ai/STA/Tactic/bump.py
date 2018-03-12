@@ -7,7 +7,7 @@ import time
 from typing import List
 import numpy as np
 
-from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
+from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from Util import Pose, Position, AICommand
 from Util.constant import ROBOT_RADIUS
 

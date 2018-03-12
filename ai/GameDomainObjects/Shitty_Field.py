@@ -2,9 +2,8 @@
 from enum import Enum
 
 from Util import Position
-from ai.Algorithm.path_partitionner import CollisionBody, CollisionType
 from ai.GameDomainObjects import Ball
-# from RULEngine.Debug.debug_interface import DebugInterface
+# from Engine.Debug.debug_interface import DebugInterface
 from config.config_service import ConfigService
 
 
@@ -49,8 +48,8 @@ class Shitty_Field:
         x_our_goal = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
         radius = self.constant["FIELD_GOAL_RADIUS"]
 
-        self.field_collision_body = [CollisionBody(Position(x_their_goal, 0), Position(0, 0), radius, CollisionType.ZONE),
-                                     CollisionBody(Position(x_our_goal, 0), Position(0, 0), radius, CollisionType.ZONE)]
+        # self.field_collision_body = [CollisionBody(Position(x_their_goal, 0), Position(0, 0), radius, CollisionType.ZONE),
+        #                              CollisionBody(Position(x_our_goal, 0), Position(0, 0), radius, CollisionType.ZONE)]
 
         # self.debug_interface.add_circle((x_their_goal, 0), radius=radius, timeout=0, color=(255, 0, 0))
         # self.debug_interface.add_circle((x_our_goal, 0), radius=radius, timeout=0, color=(255, 0, 0))
@@ -86,7 +85,6 @@ class Shitty_Field:
         return not self.is_inside_goal_area(position, dist_from_goal_area, our_goal)
 
     def stay_inside_goal_area(self, position, our_goal=True):
-        # TODO Not tested: stayInsideGoalArea
         if self.is_inside_goal_area(position, our_goal):
             return Position(position.x, position.y)
         else:
@@ -115,7 +113,6 @@ class Shitty_Field:
                     return stayInsideCircle(position, circle_bot, self.constant["FIELD_GOAL_RADIUS"])
 
     def stay_outside_goal_area(self, position, dist_from_goal_area=200, our_goal=True):
-        # TODO Not tested: stayOutsideGoalArea
         if self.is_outside_goal_area(position, dist_from_goal_area, our_goal):
             return Position(position.x, position.y)
         else:
@@ -256,7 +253,6 @@ positive_side_constant = {
     "ROBOT_RADIUS": 90,
     "BALL_RADIUS": 22,
     "PLAYER_PER_TEAM": 6,
-    # TODO KICKSPEED
     "KICK_MAX_SPD": 4,
     # Field Parameters
     "FIELD_Y_TOP": 3000,
@@ -338,7 +334,6 @@ negative_side_constant = {
     "ROBOT_RADIUS": 90,
     "BALL_RADIUS": 22,
     "PLAYER_PER_TEAM": 6,
-    # TODO KICKSPEED
     "KICK_MAX_SPD": 4,
 
     # Field Parameters
