@@ -1,4 +1,3 @@
-from typing import List
 
 from Util import Position
 from ai.GameDomainObjects import Ball

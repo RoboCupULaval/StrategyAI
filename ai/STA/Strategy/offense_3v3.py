@@ -13,6 +13,8 @@ from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.states.game_state import GameState
 from ai.STA.Strategy.strategy import Strategy
 
+
+# noinspection PyArgumentList,PyArgumentList,PyPep8Naming,PyTypeChecker,PyUnresolvedReferences,PyUnresolvedReferences
 class Offense_3v3(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state, keep_roles=False)

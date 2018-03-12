@@ -12,6 +12,7 @@ class FieldSide(Enum):
     NEGATIVE = 1
 
 
+# noinspection PyPep8
 class FieldCircularArc:
     def __init__(self, protobuf_arc):
         self.center = Position(protobuf_arc.center.x,
@@ -30,7 +31,8 @@ class FieldLineSegment:
         self.thickness = protobuf_line.thickness
 
 
-class Shitty_Field:
+# noinspection PyPep8,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyMethodMayBeStatic,PyMethodMayBeStatic,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
+class ShittyField:
     def __init__(self, ball: Ball):
         self.ball = ball
         # self.debug_interface = DebugInterface()
@@ -43,6 +45,7 @@ class Shitty_Field:
             self.our_side = FieldSide.NEGATIVE
             self.constant = negative_side_constant
 
+    # noinspection PyUnusedLocal
     def set_collision_body(self):
         x_their_goal = self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
         x_our_goal = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
@@ -53,10 +56,6 @@ class Shitty_Field:
 
         # self.debug_interface.add_circle((x_their_goal, 0), radius=radius, timeout=0, color=(255, 0, 0))
         # self.debug_interface.add_circle((x_our_goal, 0), radius=radius, timeout=0, color=(255, 0, 0))
-
-
-    def move_ball(self, position, delta):
-        self.ball.set_position(position, delta)
 
     def is_inside_goal_area(self, position, dist_from_goal_area=0, our_goal=True):
         assert (isinstance(position, Position))
@@ -294,40 +293,9 @@ positive_side_constant = {
 
     # Legal field dimensions
     "LEGAL_Y_TOP": 3000,
-    # LEGAL_Y_TOP": 0
     "LEGAL_Y_BOTTOM": -3000,
     "LEGAL_X_LEFT": -4500,
     "LEGAL_X_RIGHT": 4500,
-    # LEGAL_X_RIGHT": 0
-
-    # Simulation param
-    "DELTA_T": 17,  # ms, hack, à éviter
-
-    # Communication information
-    "DEBUG_RECEIVE_BUFFER_SIZE": 100,
-
-    # Deadzones
-    "SPEED_DEAD_ZONE_DISTANCE": 150,
-    "POSITION_DEADZONE": 20,  # ROBOT_RADIUS*1.5
-
-    # Radius and angles for tactics
-    "DISTANCE_BEHIND": 120,  # ROBOT_RADIUS + 30  # in millimeters
-    "ANGLE_TO_GRAB_BALL": 1,  # in radians; must be large in case ball moves fast
-    "RADIUS_TO_GRAB_BALL": 120,  # ROBOT_RADIUS + 30
-    "ANGLE_TO_HALT": 0.09,
-    "RADIUS_TO_HALT": 102,  # ROBOT_RADIUS + BALL_RADIUS
-
-    # Orientation abs_tol
-    "ORIENTATION_ABSOLUTE_TOLERANCE": 1e-4,
-    "SPEED_ABSOLUTE_TOLERANCE": 1e-3,
-
-    # Speed
-    "DEFAULT_MAX_SPEED": 1,
-    "DEFAULT_MIN_SPEED": 0.65,
-
-    # Kick tactic
-    "KICK_BALL_DISTANCE": 80,
-    "KISS_BALL_DISTANCE": 80
 }
 
 negative_side_constant = {
@@ -376,38 +344,7 @@ negative_side_constant = {
 
     # Legal field dimensions
     "LEGAL_Y_TOP": 3000,
-    # LEGAL_Y_TOP": 0
     "LEGAL_Y_BOTTOM": -3000,
     "LEGAL_X_LEFT": -4500,
     "LEGAL_X_RIGHT": 4500,
-    # LEGAL_X_RIGHT": 0
-
-    # Simulation param
-    "DELTA_T": 17,  # ms, hack, à éviter
-
-    # Communication information
-    "DEBUG_RECEIVE_BUFFER_SIZE": 100,
-
-    # Deadzones
-    "SPEED_DEAD_ZONE_DISTANCE": 150,
-    "POSITION_DEADZONE": 20,  # ROBOT_RADIUS*1.5
-
-    # Radius and angles for tactics
-    "DISTANCE_BEHIND": 120,  # ROBOT_RADIUS + 30  # in millimeters
-    "ANGLE_TO_GRAB_BALL": 1,  # in radians; must be large in case ball moves fast
-    "RADIUS_TO_GRAB_BALL": 120,  # ROBOT_RADIUS + 30
-    "ANGLE_TO_HALT": 0.09,
-    "RADIUS_TO_HALT": 102,  # ROBOT_RADIUS + BALL_RADIUS
-
-    # Orientation abs_tol
-    "ORIENTATION_ABSOLUTE_TOLERANCE": 1e-4,
-    "SPEED_ABSOLUTE_TOLERANCE": 1e-3,
-
-    # Speed
-    "DEFAULT_MAX_SPEED": 1,
-    "DEFAULT_MIN_SPEED": 0.65,
-
-    # Kick tactic
-    "KICK_BALL_DISTANCE": 80,
-    "KISS_BALL_DISTANCE": 80
 }

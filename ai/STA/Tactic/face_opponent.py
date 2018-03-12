@@ -14,6 +14,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
+# noinspection PyArgumentList,PyArgumentList,PyArgumentList,PyArgumentList,PyArgumentList,PyAttributeOutsideInit,PyTypeChecker
 class FaceOpponent(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
                  args: List[str]=None, distance=500, collision_ball=False,

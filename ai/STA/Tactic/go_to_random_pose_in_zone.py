@@ -2,7 +2,6 @@
 import random
 from typing import List
 
-import numpy as np
 from Util import Pose, Position
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
 from ai.GameDomainObjects.player import Player

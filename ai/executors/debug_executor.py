@@ -1,33 +1,31 @@
 # Under MIT License, see LICENSE.txt
 import time
-
-from ai.states.game_state import GameState
-
 import logging
 from multiprocessing import Queue
 from queue import Empty
-from pickle import loads
 
-from Util.singleton import Singleton
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.executors.play_executor import PlayExecutor
-from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from ai.states.play_state import PlayState
+from ai.states.game_state import GameState
+
+from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
 
 
-class DebugExecutor(metaclass=Singleton):
-    def __init__(self, play_executor, ui_send_queue: Queue, ui_recv_queue: Queue):
+class DebugExecutor:
+    def __init__(self, play_state: PlayState, play_executor: PlayExecutor, ui_send_queue: Queue, ui_recv_queue: Queue):
         self.logger = logging.getLogger("DebugExecutor")
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
-        self.play_executor_ref = play_executor
+        self.play_executor = play_executor
+        self.play_state = play_state
         self.last_time = 0
 
     def exec(self) -> None:
         while not self.ui_recv_queue.empty():
             try:
                 cmd = self.ui_recv_queue.get(block=False)
-                self.play_executor_ref.order_change_of_sta(STAChangeCommand(cmd))
+                self.play_executor.order_change_of_sta(STAChangeCommand(cmd))
             except Empty:
                 break
 
@@ -53,8 +51,8 @@ class DebugExecutor(metaclass=Singleton):
     def _send_auto_state(self) -> None:
         msg = UIDebugCommandFactory.autoplay_info(GameState().referee.info,
                                                   GameState().referee.team_info,
-                                                  PlayState().auto_play.info,
-                                                  PlayState().autonomous_flag)
+                                                  self.play_executor.auto_play.info,
+                                                  self.play_state.autonomous_flag)
         self.ui_send_queue.put(msg)
 
         # def _parse_command(self, cmd: UIDebugCommand)->None:

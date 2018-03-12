@@ -9,6 +9,7 @@ from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.states.game_state import GameState
 
 
+# noinspection PyUnresolvedReferences,PyUnresolvedReferences
 class DefenseWallNoKick(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4):
         super().__init__(game_state)

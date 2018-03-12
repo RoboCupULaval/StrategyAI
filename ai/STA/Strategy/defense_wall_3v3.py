@@ -6,12 +6,13 @@ from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point, Position
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
 from ai.STA.Tactic.goalkeeper import GoalKeeper
-from ai.STA.Tactic.face_opponent import FaceOpponent
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 from ai.STA.Strategy.strategy import Strategy
 
+
+# noinspection PyMethodMayBeStatic,PyMethodMayBeStatic,PyPep8Naming,PyUnresolvedReferences,PyUnresolvedReferences
 class DefenseWall_3v3(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 3):
         super().__init__(game_state)

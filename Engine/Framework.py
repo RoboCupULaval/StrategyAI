@@ -85,7 +85,5 @@ class Framework:
 
         exit(0)
 
-    # noinspection PyUnusedLocal
-    # pylint: disable=unused-argument
     def _sigint_handler(self, *args):
         self.stop_game()

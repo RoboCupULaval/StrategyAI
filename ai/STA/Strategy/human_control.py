@@ -12,7 +12,7 @@ class HumanControl(Strategy):
         super().__init__(game_state)
 
         # Stop all player that where doing stuff
-        for r in Role:
+        for r in Role.as_list():
             p = self.game_state.get_player_by_role(r)
             if p is None:
                 continue

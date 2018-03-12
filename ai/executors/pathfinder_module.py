@@ -7,7 +7,7 @@ from ai.Algorithm.path_partitionner import PathPartitionner
 MIN_DISTANCE_FROM_OBSTACLE = 250
 
 
-class PathfinderModule():
+class PathfinderModule:
     def __init__(self):
         self.paths = defaultdict(lambda: None)
         self.logger = logging.getLogger("PathfinderModule")

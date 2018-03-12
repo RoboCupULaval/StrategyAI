@@ -4,6 +4,7 @@ from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.stop import Stop
 
 
+# noinspection PyTypeChecker
 class DoNothing(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)

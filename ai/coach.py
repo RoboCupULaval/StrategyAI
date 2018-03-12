@@ -30,9 +30,8 @@ class Coach(Process):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.cfg = ConfigService()
 
-        cfg = ConfigService()
-        self.mode_debug_active = cfg.config_dict['DEBUG']['using_debug'] == 'true'
-        self.is_simulation = cfg.config_dict['GAME']['type'] == 'sim'
+        self.mode_debug_active = self.cfg.config_dict['DEBUG']['using_debug'] == 'true'
+        self.is_simulation = self.cfg.config_dict['GAME']['type'] == 'sim'
 
         # Managers for shared memory between process
         self.engine_game_state = engine_game_state
@@ -50,8 +49,8 @@ class Coach(Process):
         self.play_state = PlayState()
 
         # the executors
-        self.play_executor = PlayExecutor(self.ui_send_queue)
-        self.debug_executor = DebugExecutor(self.play_executor, self.ui_send_queue, self.ui_recv_queue)
+        self.play_executor = PlayExecutor(self.play_state, self.ui_send_queue)
+        self.debug_executor = DebugExecutor(self.play_state, self.play_executor, self.ui_send_queue, self.ui_recv_queue)
 
         # print frame rate
         self.frame_count = 0
@@ -66,7 +65,7 @@ class Coach(Process):
 
     def run(self) -> None:
         self.wait_for_geometry()
-        self.logger.debug('Running with process ID {}'.format(os.getpid() ))
+        self.logger.debug('Running with process ID {}'.format(os.getpid()))
         try:
             while True:
                 self.main_loop()

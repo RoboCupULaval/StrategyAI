@@ -1,5 +1,4 @@
 # Under MIT License, see LICENSE.txt
-from typing import Dict
 
 from Util.pose import Pose
 

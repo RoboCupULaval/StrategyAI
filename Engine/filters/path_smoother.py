@@ -72,5 +72,5 @@ def deviation(radius, theta):
 
 
 def point_on_segment(start: Position, end: Position, distance: float):
-    ratio = distance / (start-end).view(Position).norm
-    return (1-ratio) * start + ratio * end
+    ratio = distance / (start-end).norm
+    return start * (1-ratio) + end * ratio
