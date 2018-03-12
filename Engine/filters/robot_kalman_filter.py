@@ -1,4 +1,3 @@
-from math import fabs
 
 import numpy as np
 
@@ -50,7 +49,9 @@ class RobotFilter(KalmanFilter):
         sigma_acc_x = 1000
         sigma_acc_y = 1000
         sigma_acc_o = 10 * np.pi/180
-        G = np.array([
+
+        process_covariance = \
+            np.array([
                 np.array([0.25 * dt ** 4, 0.50 * dt ** 3,              0,              0,              0,              0]) * sigma_acc_x ** 2,
                 np.array([0.50 * dt ** 3, 1.00 * dt ** 2,              0,              0,              0,              0]) * sigma_acc_x ** 2,
                 np.array([             0,              0, 0.25 * dt ** 4, 0.50 * dt ** 3,              0,              0]) * sigma_acc_y ** 2,
@@ -58,17 +59,10 @@ class RobotFilter(KalmanFilter):
                 np.array([             0,              0,              0,              0, 0.25 * dt ** 4, 0.50 * dt ** 3]) * sigma_acc_o ** 2,
                 np.array([             0,              0,              0,              0, 0.50 * dt ** 3, 1.00 * dt ** 2]) * sigma_acc_o ** 2])
 
-        return G
+        return process_covariance
 
     def observation_covariance(self):
-        # SB: This need to be tweak to the new fps
-        #if fabs(self.x[0]) < 30 or fabs(self.x[2]) < 30:
-        #    R = np.diag([50, 50, 0.01])
-        #else:
-
-        R = np.diag([1, 1, 0.1 * np.pi/180])
-
-        return R
+        return np.diag([1, 1, 0.1 * np.pi/180])
 
     def initial_state_covariance(self):
         return np.diag([10000, 1, 10000, 1, 90 * np.pi/180, 10 * np.pi/180])

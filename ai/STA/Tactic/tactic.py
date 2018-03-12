@@ -2,7 +2,7 @@
 from typing import List
 
 from Util import Pose
-from Util.ai_command import CmdBuilder, AICommand
+from Util.ai_command import AICommand
 from ai.GameDomainObjects import Player
 from ai.STA.Action import Action
 from Util.ai_command import Idle

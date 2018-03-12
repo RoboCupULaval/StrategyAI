@@ -7,9 +7,6 @@ from Engine.Communication.sender.sender_base_class import SenderProcess
 from Engine.Communication.sender.udp_socket import udp_socket
 from Engine.Communication.monitor import monitor_queue
 
-from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
-
-
 __author__ = "Maxime Gagnon-Legault"
 
 

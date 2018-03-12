@@ -6,7 +6,7 @@ from typing import List, Union
 
 import numpy as np
 
-from Util import Pose, Position, AICommand
+from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
 from Util.geometry import compare_angle, wrap_to_pi
 from ai.Algorithm.evaluation_module import best_passing_option
@@ -26,6 +26,7 @@ KICK_SUCCEED_THRESHOLD = 600
 COMMAND_DELAY = 0.5
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences,PyUnresolvedReferences
 class GoKick(Tactic):
     def __init__(self, game_state: GameState, player: Player,
                  target: Pose=Pose(),
@@ -60,7 +61,9 @@ class GoKick(Tactic):
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.player.pose.position).angle
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3)
-        if (self.player.pose.position - distance_behind).norm < 50 and wrap_to_pi(self.player.pose.orientation - orientation) < 0.2:
+
+        if (self.player.pose.position - distance_behind).norm < 50 \
+                and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -69,6 +72,7 @@ class GoKick(Tactic):
         # ball_collision = self.tries_flag == 0
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=2,
+                                      end_speed=0.2,
                                       ball_collision=True).build()
 
     def grab_ball(self):
@@ -78,8 +82,8 @@ class GoKick(Tactic):
         orientation = (self.target.position - self.player.pose.position).angle
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=2,
-                                      end_speed=0,
+                                      cruise_speed=1,
+                                      end_speed=0.2,
                                       ball_collision=False).addChargeKicker().build()
 
     def kick(self):
@@ -130,7 +134,7 @@ class GoKick(Tactic):
 
             self.target_assignation_last_time = time.time()
 
-    def get_destination_behind_ball(self, ball_spacing):
+    def get_destination_behind_ball(self, ball_spacing) -> Position:
         """
             Calcule le point situé à  x pixels derrière la position 1 par rapport à la position 2
             :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)

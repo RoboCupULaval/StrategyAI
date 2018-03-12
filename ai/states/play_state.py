@@ -1,15 +1,16 @@
 # Under MIT License, see LICENSE.txt
 
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 
-from Util import Singleton
-from ai.STA.Strategy.strategy import Strategy
+from Util import Pose
+from ai.GameDomainObjects import Player
+
 from ai.STA.Strategy.strategy_book import StrategyBook
 from ai.STA.Tactic.tactic_book import TacticBook
 from ai.states.game_state import GameState
 
 
-class PlayState(metaclass=Singleton):
+class PlayState:
 
     def __init__(self):
         self.strategy_book = StrategyBook()
@@ -32,7 +33,7 @@ class PlayState(metaclass=Singleton):
         self.autonomous_flag = flag
 
     @property
-    def current_tactical_state(self) -> List[Tuple[int, str, str, str]]:
+    def current_tactical_state(self) -> List[Tuple[Player, str, str, Pose]]:
         """
         Retourne le nom des tactics en cours dans la stratégie en cours
         :return: List[Tuple[int, str, str, str]] les informations actuelles des tactiques courantes
@@ -40,7 +41,7 @@ class PlayState(metaclass=Singleton):
 
         return self.current_strategy.get_current_state()
 
-    def get_new_tactic(self, tactic_name: str):  # -> Callable[[GameState, Player, Pose, Any], Tactic]:
+    def get_new_tactic(self, tactic_name: str) -> Callable:
         """
         Retourne un callable sur la tactic spécifiée par le tactic_name.
 

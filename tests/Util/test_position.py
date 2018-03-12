@@ -26,7 +26,7 @@ A_POS = Position(A_X, A_Y)
 A_SAME_POS = Position(A_X, A_Y)
 A_DIFFERENT_POS = Position(A_X+123, A_Y-456)
 
-A_POS_NORM = np.linalg.norm(A_POS)
+A_POS_NORM = np.linalg.norm(A_POS.array)
 
 
 class TestPosition(unittest.TestCase):

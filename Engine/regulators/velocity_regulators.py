@@ -3,14 +3,14 @@ from math import sqrt
 
 from Engine.regulators.PID import PID
 from Engine.regulators.regulator_base_class import RegulatorBaseClass
-from Engine.robot import Robot, MAX_LINEAR_ACCELERATION
+from Engine.robot import Robot, MAX_LINEAR_ACCELERATION, MAX_ANGULAR_SPEED
 from Util import Pose
 from Util.geometry import rotate, clamp
 
 
 class RealVelocityController(RegulatorBaseClass):
 
-    settings = {'kp': 0.5, 'ki': 0.02, 'kd': 0.0}
+    settings = {'kp': 0.5, 'ki': 0.4, 'kd': 0.0}
 
     def __init__(self):
         self.orientation_controller = PID(**self.settings, wrap_error=True)
@@ -27,6 +27,7 @@ class RealVelocityController(RegulatorBaseClass):
 
         cmd_pos = rotate(velocity, -robot.orientation)
         cmd_orientation = self.orientation_controller.execute(robot.orientation_error)
+        cmd_orientation /= max(1, abs(cmd_orientation) / MAX_ANGULAR_SPEED)
 
         return Pose(cmd_pos, cmd_orientation)
 
@@ -48,7 +49,7 @@ class RealVelocityController(RegulatorBaseClass):
         return robot.position_error.norm < distance * offset
 
     def reset(self):
-            pass
+        pass
 
 
 class GrSimVelocityController(RealVelocityController):

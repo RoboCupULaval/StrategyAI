@@ -13,6 +13,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from Util.role import Role
 
 
+# noinspection PyTypeChecker,PyTypeChecker
 class RobocupChoreography(Strategy):
 
     def __init__(self, p_game_state):
@@ -21,7 +22,7 @@ class RobocupChoreography(Strategy):
         robot1 = Role.FIRST_ATTACK
         robot2 = Role.SECOND_ATTACK
         robot3 = Role.MIDDLE
-        self.tactic_conditions = [False for i in range(PLAYER_PER_TEAM)]
+        self.tactic_conditions = [False for _ in range(PLAYER_PER_TEAM)]
         dist_inter_robot = 300
         positions_on_xaxis = [Pose(Position(-dist_inter_robot*3, 0), 1.57),
                               Pose(Position(-dist_inter_robot*2, 0), 1.57),
@@ -67,11 +68,5 @@ class RobocupChoreography(Strategy):
         try:
             role = self.game_state.get_role_by_player_id(i)
             return self.roles_graph[role].get_current_tactic().status_flag == Flags.SUCCESS
-        except:
+        except IndexError:
             return False
-        '''
-        for k in range(PLAYER_PER_TEAM):
-            if not self.tactic_conditions[k]:
-                return False
-        '''
-        return True

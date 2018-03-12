@@ -15,7 +15,6 @@ AICommand = namedtuple('AICommand', 'target,'
                                     'ball_collision,'
                                     'pathfinder_on')
 
-
 class CmdBuilder:
 
     def __init__(self):

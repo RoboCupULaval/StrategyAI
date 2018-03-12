@@ -17,7 +17,6 @@ def monitor_queue(cls):
         def monitor_queue(self, s):
             s.enter(1, 1, self.monitor_queue, argument=(s,))
 
-            # noinspection PyProtectedMember
             usage = self.queue.qsize() / self.queue._maxsize
 
             if usage > 0.5:

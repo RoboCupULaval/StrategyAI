@@ -17,4 +17,6 @@ class MoveToPosition(Action):
         self.ball_collision = ball_collision
 
     def exec(self):
-        return AICommand(self.player.id, self.destination, cruise_speed=self.cruise_speed, ball_collision=self.ball_collision)
+        return AICommand(self.player.id, self.destination,
+                         cruise_speed=self.cruise_speed,
+                         ball_collision=self.ball_collision)

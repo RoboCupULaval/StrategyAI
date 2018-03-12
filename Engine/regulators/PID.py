@@ -7,15 +7,6 @@ from collections import deque
 
 class PID(object):
     def __init__(self, kp: float, ki: float, kd: float, *, wrap_error=False):
-        """
-        Simple PID parallel implementation
-        Args:
-            kp: proportional gain
-            ki: integral gain
-            kd: derivative gain
-            antiwindup_size: max error accumulation of the error integration
-            wrap_err: wrap the error. Use with angle control
-        """
 
         self.kp = kp
         self.ki = ki

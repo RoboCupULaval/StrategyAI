@@ -20,9 +20,9 @@ class PassesWithDecisions(Strategy):
 
 
 
-        goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
+        #  goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
         roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE]
-        role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
+        #  role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
         self.goal_ID = None
         self.goal = (Pose(Position(self.game_state.const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0))
 

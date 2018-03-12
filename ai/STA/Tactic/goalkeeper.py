@@ -11,13 +11,11 @@ from Util.constant import ROBOT_RADIUS
 from Util.constant import TeamColor
 from Util.geometry import clamp, compare_angle, wrap_to_pi
 from ai.Algorithm.evaluation_module import closest_player_to_point, best_passing_option, player_with_ball
-from ai.GameDomainObjects.Shitty_Field import FieldSide
+from ai.GameDomainObjects.ShittyField import FieldSide
 from ai.GameDomainObjects import Player
-from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Action.Kick import Kick
 from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Action.ProtectGoal import ProtectGoal
-from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.go_kick import GRAB_BALL_SPACING, KICK_DISTANCE, VALIDATE_KICK_DELAY, KICK_SUCCEED_THRESHOLD
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic
@@ -27,6 +25,7 @@ from ai.states.game_state import GameState
 TARGET_ASSIGNATION_DELAY = 1
 
 
+# noinspection PyArgumentList,PyArgumentList,PyArgumentList,PyArgumentList,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 class GoalKeeper(Tactic):
     """
     Tactique du gardien de but standard. Le gardien doit se placer entre la balle et le but, tout en restant à

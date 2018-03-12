@@ -28,7 +28,7 @@ AN_ANGLE_GREATER_THAN_PI = m.pi + 1
 A_POS_ROTATED_BY_A_POS_ANGLE = Position(94.294, 97.730)
 A_POS_ROTATED_BY_A_NEG_ANGLE = Position(-12.735, -135.205)
 
-A_POS_NORM = np.linalg.norm(A_POS)
+A_POS_NORM = np.linalg.norm(A_POS.array)
 A_POS_NORMALIZED = Position(A_X, A_Y) / A_POS_NORM
 
 A_POS_PERPENDICULAR = Position(-A_Y, A_X) / A_POS_NORM

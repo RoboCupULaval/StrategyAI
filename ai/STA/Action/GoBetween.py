@@ -9,6 +9,7 @@ from ai.STA.Action import Action
 from ai.states.game_state import GameState
 
 
+# noinspection PyTypeChecker,PyTypeChecker
 class GoBetween(Action):
     """
     Action GoBetween: Déplace le robot au point le plus proche sur la droite entre deux positions passées en paramètres

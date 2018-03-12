@@ -5,6 +5,7 @@ from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
 
 
+# noinspection PyTypeChecker
 class StayAway(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)

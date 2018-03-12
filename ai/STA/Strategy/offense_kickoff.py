@@ -10,6 +10,7 @@ from ai.STA.Tactic.stop import Stop
 from ai.states.game_state import GameState
 
 
+# noinspection PyUnresolvedReferences
 class OffenseKickOff(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
