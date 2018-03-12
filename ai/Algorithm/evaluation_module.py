@@ -79,7 +79,7 @@ def best_position_option(player, pointA: Position, pointB: Position):
     for i in range(ncounts):
         positions += [Position(pointA.x + i * (pointB.x - pointA.x) / (ncounts - 1),
                                pointA.y + i * (pointB.y - pointA.y) / (ncounts-1))]
-    positions = np.stack(positions)
+    #  positions = np.stack(positions)
     scores = line_of_sight_clearance(player, positions)
     best_score_index = np.argmin(scores)
     best_position = positions[best_score_index, :]
@@ -98,7 +98,7 @@ def best_passing_option(passing_player, consider_goal=True):
 
         if i.id != passing_player.id:
             # Calcul du score pour passeur vers receveur
-            score = line_of_sight_clearance(passing_player, np.array(i.pose.position))
+            score = line_of_sight_clearance(passing_player,i.pose.position)
 
             # Calcul du score pour receveur vers but
             score += line_of_sight_clearance(i, goal)
@@ -107,7 +107,7 @@ def best_passing_option(passing_player, consider_goal=True):
                 receiver_id = i.id
 
     if consider_goal and not is_ball_our_side():
-        score = (line_of_sight_clearance(passing_player, np.array(goal)))
+        score = (line_of_sight_clearance(passing_player, goal))
         if score_min > score:
             receiver_id = None
 
@@ -126,7 +126,7 @@ def best_goal_score_option(passing_player):
 
 def line_of_sight_clearance(player, targets):
     # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est petit)
-    score = np.linalg.norm(player.pose.position.array - targets)
+    score = np.linalg.norm(player.pose.position.target - targets)
     for j in GameState().our_team.available_players.values():
         # Obstacle : les players friends
         condition = []
@@ -157,7 +157,7 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
     #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
     for j in GameState().enemy_team.available_players.values():
         # Obstacle : les players ennemis
-        scores *= trajectory_score(np.array(GameState().ball_position), targets, np.array(j.pose.position))
+        scores *= trajectory_score(GameState().ball_position, targets, j.pose.position)
         #print(scores)
         #print(scores_temp)
     return scores
