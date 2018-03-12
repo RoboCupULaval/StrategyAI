@@ -1,15 +1,14 @@
 # Under MIT License, see LICENSE.txt
-import time
 import logging
+import time
 from multiprocessing import Queue
 from queue import Empty
 
+from Debug.uidebug_command_factory import UIDebugCommandFactory
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.executors.play_executor import PlayExecutor
-from ai.states.play_state import PlayState
 from ai.states.game_state import GameState
-
-from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
+from ai.states.play_state import PlayState
 
 
 class DebugExecutor:
@@ -33,39 +32,23 @@ class DebugExecutor:
             self._send_books()
             self.last_time = time.time()
 
-    def _send_books(self) -> None:
-        cmd_tactics = {'strategy': PlayState().strategy_book.strategies_name,
-                       'strategy_default': PlayState().strategy_book.default_strategies,
-                       'tactic': PlayState().tactic_book.tactics_name,
-                       'tactic_default': PlayState().tactic_book.default_tactics,
-                       'action': ['None']}
+    def _send_books(self):
 
-        msg = UIDebugCommandFactory().books(cmd_tactics)
+        msg = UIDebugCommandFactory().books(strategy_book=PlayState().strategy_book.strategies_name,
+                                            strategy_default=PlayState().strategy_book.default_strategies,
+                                            tactic_book=PlayState().tactic_book.tactics_name,
+                                            tactic_default=PlayState().tactic_book.default_tactics,
+                                            action=['None'])
         self.ui_send_queue.put(msg)
 
-    def _send_state(self) -> None:
+    def _send_state(self):
         pass
         # for player in GameState().our_team.players:
         #     self.ui_send_queue.put(UIDebugCommandFactory.robot_strategic_state())
 
-    def _send_auto_state(self) -> None:
-        msg = UIDebugCommandFactory.autoplay_info(GameState().referee.info,
-                                                  GameState().referee.team_info,
-                                                  self.play_executor.auto_play.info,
-                                                  self.play_state.autonomous_flag)
+    def _send_auto_state(self):
+        msg = UIDebugCommandFactory.auto_play_info(GameState().referee.info,
+                                                   GameState().referee.team_info,
+                                                   self.play_executor.auto_play.info,
+                                                   self.play_state.autonomous_flag)
         self.ui_send_queue.put(msg)
-
-        # def _parse_command(self, cmd: UIDebugCommand)->None:
-    #     if cmd.is_strategy_cmd():
-    #         self._parse_strategy(cmd)
-    #
-    #     elif cmd.is_tactic_cmd():
-    #         self._parse_tactic(cmd)
-    #
-    #     elif cmd.is_auto_play_cmd():
-    #         self.ws.play_state.autonomous_flag = cmd.data['status']
-    #         if not self.ws.play_state.autonomous_flag:
-    #             self.ws.play_state.set_strategy(self.ws.play_state.get_new_strategy("DoNothing")(self.ws.game_state))
-    #     else:
-    #         self.logger.warning("received undefined debug command from UI-Debug of type: {0}".format(cmd.cmd_type))
-    #

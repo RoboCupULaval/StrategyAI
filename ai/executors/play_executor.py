@@ -1,21 +1,20 @@
 # Under MIT License, see LICENSE.txt
 
-from typing import List, Dict
 import logging
 from multiprocessing import Queue
 
-from Util import Pose, Position, AICommand, EngineCommand
-from config.config_service import ConfigService
-from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
+from typing import List, Dict
 
+from Debug.uidebug_command_factory import UIDebugCommandFactory
+from Util import Pose, Position, AICommand, EngineCommand
+from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.GameDomainObjects import Player
 from ai.STA.Strategy.human_control import HumanControl
-
-from ai.executors.pathfinder_module import PathfinderModule
 from ai.Util.sta_change_command import STAChangeCommand
-from ai.Algorithm.auto_play import SimpleAutoPlay
+from ai.executors.pathfinder_module import PathfinderModule
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
+from config.config_service import ConfigService
 
 
 class PlayExecutor:

@@ -5,19 +5,15 @@ import os
 import sys
 from multiprocessing import Process, Queue, Manager
 from multiprocessing.managers import DictProxy
-
 from queue import Empty
 from time import time, sleep
 
+from Debug.uidebug_command_factory import UIDebugCommandFactory
+from Engine.Communication.receiver.referee_receiver import RefereeReceiver
 from Engine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from Engine.Communication.receiver.vision_receiver import VisionReceiver
-from Engine.Communication.receiver.referee_receiver import RefereeReceiver
-
 from Engine.Communication.sender.robot_command_sender import RobotCommandSender
 from Engine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
-
-from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
-
 from Engine.controller import Controller
 from Engine.tracker import Tracker
 
@@ -142,9 +138,12 @@ class Engine(Process):
         self.robot_cmd_sender.send_packet(robot_state)
         self.tracker.predict(robot_state)
 
-        # self.ui_send_queue.put_nowait(UIDebugCommandFactory.robot_state(robot_state))
-        self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(self.game_state))
-        self.ui_send_queue.put_nowait(UIDebugCommandFactory.robots_path(self.controller))
+        if any(robot.path for robot in self.controller.robots):
+            self.ui_send_queue.put_nowait(UIDebugCommandFactory.paths(self.controller.robots))
+
+        self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(blue=self.game_state['blue'],
+                                                                       yellow=self.game_state['yellow'],
+                                                                       balls=self.game_state['balls']))
 
     def get_engine_commands(self):
         try:
