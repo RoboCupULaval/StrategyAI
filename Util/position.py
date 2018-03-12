@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+from typing import Dict, List
 
 import numpy as np
 
@@ -11,17 +12,17 @@ class Position:
         self._array = np.array([x, y])
 
     @classmethod
-    def from_array(cls, array):
-        if len(array) != 2:
-            raise ValueError('Position can only be create with a length 2 array.')
+    def from_array(cls, array: np.ndarray):
+        if array.size != 2:
+            raise ValueError('Position can only be create with a size 2 array.')
         return cls(array[0], array[1])
 
     @classmethod
-    def from_list(cls, new_list):
+    def from_list(cls, new_list: List):
         return cls(new_list[0], new_list[1])
 
     @classmethod
-    def from_dict(cls, new_dict):
+    def from_dict(cls, new_dict: Dict):
         return cls(new_dict['x'], new_dict['y'])
 
     @property

@@ -126,7 +126,7 @@ def best_goal_score_option(passing_player):
 
 def line_of_sight_clearance(player, targets):
     # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est petit)
-    score = np.linalg.norm(player.pose.position - targets)
+    score = np.linalg.norm(player.pose.position.array - targets)
     for j in GameState().our_team.available_players.values():
         # Obstacle : les players friends
         condition = []
@@ -183,12 +183,12 @@ def line_of_sight_clearance_ball_legacy(player, target: Position):
 def trajectory_score(pointA, pointsB, obstacle):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
     proportion_max = 15  # Proportion du triangle rectancle derrière les robots obstacles
-    if len(pointsB.shape) == 1:
+    if len(pointsB.array.shape) == 1:
         scores = np.array([0])
     else:
-        scores = np.zeros(pointsB.shape[0])
-    AB = np.array(pointsB) - np.array(pointA)
-    AO = np.array(obstacle - pointA)
+        scores = np.zeros(pointsB.array.shape[0])
+    AB = pointsB.array - pointA.array
+    AO = obstacle.array - pointA.array
     # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
     normsAB = np.sqrt(np.transpose((AB*AB)).sum(axis=0))
     normsAC = np.divide(np.dot(AB, AO), normsAB)
