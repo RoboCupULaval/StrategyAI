@@ -3,6 +3,7 @@
 from ipaddress import ip_address
 from pickle import loads
 from queue import Full
+# noinspection PyUnresolvedReferences
 from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY
 from struct import pack
 
@@ -17,7 +18,9 @@ class UIDebugCommandReceiver(ReceiverProcess):
         connection = socket(AF_INET, SOCK_DGRAM)
         connection.bind(connection_info)
         if ip_address(connection_info[0]).is_multicast:
-            connection.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, pack("=4sl", inet_aton(connection_info[0]), INADDR_ANY))
+            connection.setsockopt(IPPROTO_IP,
+                                  IP_ADD_MEMBERSHIP,
+                                  pack("=4sl", inet_aton(connection_info[0]), INADDR_ANY))
 
         return connection
 

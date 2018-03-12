@@ -19,6 +19,8 @@ Tactique qui positionne un joueur à un point donné pour faire face à la balle
 automatiquement selon son rôle
 """
 
+
+# noinspection PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming
 class PositionForPass(Tactic):
 
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None,
@@ -69,12 +71,12 @@ class PositionForPass(Tactic):
                 our_goal_field_limit = self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"] - pad
                 our_side_center_field_limit = pad
                 their_goal_field_limit = GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"] + pad
-                their_side_center_field_limit = -pad
+                #  their_side_center_field_limit = -pad
             else:
                 our_goal_field_limit = self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"] + pad
                 our_side_center_field_limit = -pad
                 their_goal_field_limit = self.game_state.const["FIELD_THEIR_GOAL_X_EXTERNAL"] - pad
-                their_side_center_field_limit = pad
+                #  their_side_center_field_limit = pad
             field_width = self.game_state.const["FIELD_Y_TOP"] - self.game_state.const["FIELD_Y_BOTTOM"]
 
             self.role = self.game_state.get_role_by_player_id(self.player.id)

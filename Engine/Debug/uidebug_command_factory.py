@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from math import sin, cos
-from typing import Dict
+from typing import Dict, Tuple
 
 from Util import Pose
 from Util.constant import TeamColor
@@ -90,7 +90,7 @@ class UIDebugCommandFactory(metaclass=Singleton):
         return DebugCommand(1001, cmd_tactics_dict)
 
     @staticmethod
-    def robot_strategic_state(player: Player, tactic: str, action: str, target: str="not implemented"):
+    def robot_strategic_state(player: Player, tactic: str, action: str, target: Tuple[int, int]):
         teamcolor_str = player.team.team_color.__str__()
         data = {teamcolor_str: {player.id: {'tactic': tactic,
                                             'action': action,
@@ -112,11 +112,11 @@ class UIDebugCommandFactory(metaclass=Singleton):
         cmd += UIDebugCommandFactory.balls(state['balls'])
         return cmd
 
-    @staticmethod
-    def robot_state(state):
-        cmd = []
-        cmd += UIDebugCommandFactory.robot_commands(state.packet)
-        return cmd
+    # @staticmethod
+        # def robot_state(state):
+        #     cmd = []
+        # cmd += UIDebugCommandFactory.robot_commands(state.packet)
+        # return cmd
 
     @staticmethod
     def robots_path(robots):
@@ -166,6 +166,7 @@ class UIDebugCommandFactory(metaclass=Singleton):
                                    'end':  (float(end_point[0]), float(end_point[1])),
                                    'color': color,
                                    'timeout': timeout})
+
     @staticmethod
     def multiple_points(points, color=VIOLET, width=5, link=None, timeout=DEFAULT_DEBUG_TIMEOUT):
         points_as_tuple = [(int(point[0]), int(point[1])) for point in points]
@@ -207,7 +208,10 @@ class UIDebugCommandFactory(metaclass=Singleton):
         end_point = (pose.x + radius * cos(pose.orientation),
                      pose.y + radius * sin(pose.orientation))
 
-        return DebugCommand(3003, data_circle), UIDebugCommandFactory.line(player_center, end_point, color_angle, timeout)
+        circle_command = DebugCommand(3003, data_circle)
+        line_command = UIDebugCommandFactory.line(player_center, end_point, color_angle, timeout)
+
+        return circle_command, line_command
 
     @staticmethod
     def ball(pose: Pose, color=(255, 127, 80), timeout=0.05):

@@ -11,6 +11,8 @@ class Action:
     """
     Classe mère de toutes les actions
     """
+
+    # noinspection PyUnreachableCode
     def __init__(self, game_state: GameState, player: Player):
         """
             :param game_state: L'état courant du jeu.

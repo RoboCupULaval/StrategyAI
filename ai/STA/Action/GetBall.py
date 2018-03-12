@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 from Util.ai_command import CmdBuilder
 from ai.GameDomainObjects import Player
-from Util import AICommand, Pose
+from Util import Pose
 from ai.STA.Action import Action
 from ai.states.game_state import GameState
 

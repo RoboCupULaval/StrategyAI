@@ -17,6 +17,7 @@ class PathPartitionner:
     def __init__(self, avoid_radius):
         self.avoid_radius = avoid_radius
 
+    # noinspection PyUnusedLocal
     def get_path(self, start: Position, target: Position, obstacles=np.array([]), last_path=None):
 
         obstacles = np.array(obstacles)

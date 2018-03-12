@@ -53,9 +53,7 @@ def clamp(val, min_val, max_val):
 def remove_duplicates(seq, concurent_list=None, round_up_threshold=1):
 
     seen = set()
-    seen2 = set()
     seen_add = seen.add
-    seen2_add = seen2.add
     seq_rounded = round_position_to_number(seq, round_up_threshold)
     if concurent_list is None:
         return [x for idx, x in enumerate(seq) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])]
@@ -94,6 +92,8 @@ def get_closest_point_on_line(reference: Position,
 
     delta_x = position2.x - position1.x
     delta_y = position2.y - position1.y
+
+    pos_x, pos_y = 0, 0
 
     if delta_x != 0 and delta_y != 0:   # droite quelconque
         pente = delta_y / delta_x

@@ -5,9 +5,8 @@ __author__ = "Maxime Gagnon-Legault"
 import math
 import numpy as np
 
-from Util import Pose, Position, AICommand
+from Util import Pose, AICommand
 
-from ai.GameDomainObjects import Player
 from Util.position import Position
 from Util.geometry import wrap_to_pi
 from ai.GameDomainObjects import Player
@@ -15,6 +14,7 @@ from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
 
 
+# noinspection PyUnresolvedReferences
 class GoBehind(Action):
     """
     Action GoBehind: Déplace le robot au point le plus proche sur la droite, derrière un objet dont la position

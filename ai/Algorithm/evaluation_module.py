@@ -1,8 +1,8 @@
 # Under MIT License, see LICENSE.txt
-from Util import Position
+
 from Util.position import Position
 from Util.constant import ROBOT_RADIUS
-from ai.GameDomainObjects.Shitty_Field import FieldSide
+from ai.GameDomainObjects.ShittyField import FieldSide
 from ai.states.game_state import GameState
 
 import numpy as np
@@ -23,6 +23,7 @@ def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
         return None
 
 
+# noinspection PyUnusedLocal
 def closest_players_to_point(point: Position, our_team=None, robots=None):
     # Retourne une liste de tuples (player, distance) en ordre croissant de distance,
     # our_team pour obtenir une liste contenant une équipe en particulier
@@ -50,6 +51,8 @@ def closest_player_to_point(point: Position, our_team=None, robots=None):
 def is_ball_moving(min_speed=0.1):
     return GameState().ball_velocity.norm > min_speed
 
+
+# noinspection PyUnresolvedReferences
 def is_ball_kicked(player, min_distance=150, min_speed=1000):
     if (player.pose.position - GameState.ball_position).norm > min_distance and \
                     GameState.ball_velocity.norm > min_speed:
@@ -57,6 +60,8 @@ def is_ball_kicked(player, min_distance=150, min_speed=1000):
     else:
         return False
 
+
+# noinspection PyUnresolvedReferences
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
     if GameState().field.our_side == FieldSide.POSITIVE: # POSITIVE
@@ -65,6 +70,7 @@ def is_ball_our_side():
         return GameState().ball_position.x < 0
 
 
+# noinspection PyPep8Naming,PyPep8Naming
 def best_position_option(player, pointA: Position, pointB: Position):
     # Retourne la position (entre pointA et pointB) la mieux placée pour une passe
     ncounts = 11
@@ -80,6 +86,7 @@ def best_position_option(player, pointA: Position, pointB: Position):
     return best_position
 
 
+# noinspection PyUnresolvedReferences
 def best_passing_option(passing_player, consider_goal=True):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si but est la meilleure possibilité
 
@@ -106,6 +113,8 @@ def best_passing_option(passing_player, consider_goal=True):
 
     return receiver_id
 
+
+# noinspection PyPep8Naming,PyPep8Naming,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 def best_goal_score_option(passing_player):
     # Retourne la meilleure position dans le but pour kick
     goalA = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"],
@@ -131,6 +140,7 @@ def line_of_sight_clearance(player, targets):
     return score
 
 
+# noinspection PyUnusedLocal
 def line_of_sight_clearance_ball(player, targets, distances=None):
     # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
     # (plus c'est dégagé plus le score est petit)
@@ -153,6 +163,7 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
     return scores
 
 
+# noinspection PyUnusedLocal,PyTypeChecker
 def line_of_sight_clearance_ball_legacy(player, target: Position):
     # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
     # (plus c'est dégagé plus le score est petit)
@@ -168,6 +179,7 @@ def line_of_sight_clearance_ball_legacy(player, target: Position):
     return score
 
 
+# noinspection PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming
 def trajectory_score(pointA, pointsB, obstacle):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
     proportion_max = 15  # Proportion du triangle rectancle derrière les robots obstacles
@@ -197,6 +209,7 @@ def trajectory_score(pointA, pointsB, obstacle):
     return scores
 
 
+# noinspection PyUnresolvedReferences
 def is_player_facing_target(player, target_position: Position, tolerated_angle: float) -> bool:
     """
         Détermine si l'angle entre le devant du joueur et la cible est suffisamment petit
@@ -215,10 +228,12 @@ def is_player_facing_target(player, target_position: Position, tolerated_angle: 
     return get_angle_between_three_points(player_front, player.pose.position, target_position) < tolerated_angle
 
 
+# noinspection PyUnusedLocal
 def ball_direction(self):
     pass
 
 
+# noinspection PyPep8Naming,PyPep8Naming,PyUnresolvedReferences
 def best_position_in_region(player, A, B):
     # Retourne la position (dans un rectangle aux coins A et B) la mieux placée pour une passe
     ncounts = 5
@@ -252,11 +267,13 @@ def best_position_in_region(player, A, B):
     try:
         best_score_index = np.argmin(scores)
         best_position = positions[best_score_index, :]
-    except:
+    except IndexError:
         best_position = Position()
 
     return best_position
 
+
+# noinspection PyUnresolvedReferences
 def score_strategy_other_team():
     # Retourne le score de l'équipe ennemie (négatif = ils sont en offensive, positif = ils sont en défensive)
     i = 0

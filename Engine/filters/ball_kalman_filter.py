@@ -1,4 +1,3 @@
-from math import fabs
 
 import numpy as np
 
@@ -28,6 +27,7 @@ class BallFilter(KalmanFilter):
         return np.array([[1, 0, 0, 0],   # Position x
                          [0, 0, 1, 0]])  # Position y
 
+    # noinspection PyPep8Naming
     def process_covariance(self):
         dt = self._dt
         sigma_acc_x = 10

@@ -11,16 +11,8 @@ class IntelligentModule(object, metaclass=ABCMeta):
         Actuellement ne défini que l'attribut *state*
     """
 
-    def __init__(self):
-        """
-            Reçoit une référence vers InfoManager. Cette référence est renomée
-            comme étant *state*.
-
-            :param world_state: (WorldState) Référence vers le worldstate.
-        """
-
     @abstractmethod
-    def update(self):
+    def update(self, *args, **kwargs):
         """ Effectue la mise à jour du module """
         pass
 

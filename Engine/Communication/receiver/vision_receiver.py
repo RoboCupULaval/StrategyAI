@@ -1,7 +1,11 @@
 # Under MIT License, see LICENSE.txt
 
 from ipaddress import ip_address
-from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY, timeout, SOL_SOCKET, SO_REUSEADDR
+
+# noinspection PyUnresolvedReferences
+from socket import AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, INADDR_ANY, SOL_SOCKET, SO_REUSEADDR
+# noinspection PyUnresolvedReferences
+from socket import inet_aton, socket, timeout
 from struct import pack
 
 from multiprocessing.managers import DictProxy
@@ -23,11 +27,13 @@ class VisionReceiver(ReceiverProcess):
         super().__init__(connection_info, link)
 
     def connect(self, connection_info):
-        connection = socket(AF_INET, SOCK_DGRAM)
+        connection = socket.socket(AF_INET, SOCK_DGRAM)
         connection.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         connection.bind(connection_info)
         if ip_address(connection_info[0]).is_multicast:
-            connection.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, pack('=4sl', inet_aton(connection_info[0]), INADDR_ANY))
+            connection.setsockopt(IPPROTO_IP,
+                                  IP_ADD_MEMBERSHIP,
+                                  pack('=4sl', inet_aton(connection_info[0]), INADDR_ANY))
         connection.settimeout(VisionReceiver.TIME_OUT)
 
         return connection

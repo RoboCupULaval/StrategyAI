@@ -12,6 +12,7 @@ class FieldSide(Enum):
     NEGATIVE = 1
 
 
+# noinspection PyPep8
 class FieldCircularArc:
     def __init__(self, protobuf_arc):
         self.center = Position(protobuf_arc.center.x,
@@ -30,7 +31,8 @@ class FieldLineSegment:
         self.thickness = protobuf_line.thickness
 
 
-class Shitty_Field:
+# noinspection PyPep8,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyMethodMayBeStatic,PyMethodMayBeStatic,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
+class ShittyField:
     def __init__(self, ball: Ball):
         self.ball = ball
         # self.debug_interface = DebugInterface()
@@ -43,6 +45,7 @@ class Shitty_Field:
             self.our_side = FieldSide.NEGATIVE
             self.constant = negative_side_constant
 
+    # noinspection PyUnusedLocal
     def set_collision_body(self):
         x_their_goal = self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"]
         x_our_goal = self.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
@@ -53,10 +56,6 @@ class Shitty_Field:
 
         # self.debug_interface.add_circle((x_their_goal, 0), radius=radius, timeout=0, color=(255, 0, 0))
         # self.debug_interface.add_circle((x_our_goal, 0), radius=radius, timeout=0, color=(255, 0, 0))
-
-
-    def move_ball(self, position, delta):
-        self.ball.set_position(position, delta)
 
     def is_inside_goal_area(self, position, dist_from_goal_area=0, our_goal=True):
         assert (isinstance(position, Position))

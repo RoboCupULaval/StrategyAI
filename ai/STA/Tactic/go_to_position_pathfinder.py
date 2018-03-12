@@ -1,5 +1,5 @@
 # Under MIT license, see LICENSE.txt
-from math import pi
+
 from typing import List
 
 from Util import Pose
@@ -7,7 +7,6 @@ from Util.ai_command import CmdBuilder
 from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 from Util.geometry import compare_angle
 from ai.GameDomainObjects.player import Player
-from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
