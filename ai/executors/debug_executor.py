@@ -4,7 +4,7 @@ import time
 from multiprocessing import Queue
 from queue import Empty
 
-from Debug.uidebug_command_factory import UIDebugCommandFactory
+from Debug.debug_command_factory import DebugCommandFactory
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.executors.play_executor import PlayExecutor
 from ai.states.game_state import GameState
@@ -34,11 +34,11 @@ class DebugExecutor:
 
     def _send_books(self):
 
-        msg = UIDebugCommandFactory().books(strategy_book=PlayState().strategy_book.strategies_name,
-                                            strategy_default=PlayState().strategy_book.default_strategies,
-                                            tactic_book=PlayState().tactic_book.tactics_name,
-                                            tactic_default=PlayState().tactic_book.default_tactics,
-                                            action=['None'])
+        msg = DebugCommandFactory().books(strategy_book=PlayState().strategy_book.strategies_name,
+                                          strategy_default=PlayState().strategy_book.default_strategies,
+                                          tactic_book=PlayState().tactic_book.tactics_name,
+                                          tactic_default=PlayState().tactic_book.default_tactics,
+                                          action=['None'])
         self.ui_send_queue.put(msg)
 
     def _send_state(self):
@@ -47,8 +47,8 @@ class DebugExecutor:
         #     self.ui_send_queue.put(UIDebugCommandFactory.robot_strategic_state())
 
     def _send_auto_state(self):
-        msg = UIDebugCommandFactory.auto_play_info(GameState().referee.info,
-                                                   GameState().referee.team_info,
-                                                   self.play_executor.auto_play.info,
-                                                   self.play_state.autonomous_flag)
+        msg = DebugCommandFactory.auto_play_info(GameState().referee.info,
+                                                 GameState().referee.team_info,
+                                                 self.play_executor.auto_play.info,
+                                                 self.play_state.autonomous_flag)
         self.ui_send_queue.put(msg)

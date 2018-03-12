@@ -5,7 +5,7 @@ from multiprocessing import Queue
 
 from typing import List, Dict
 
-from Debug.uidebug_command_factory import UIDebugCommandFactory
+from Debug.debug_command_factory import DebugCommandFactory
 from Util import Pose, Position, AICommand, EngineCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.GameDomainObjects import Player
@@ -100,11 +100,10 @@ class PlayExecutor:
         cmds = []
         for player, tactic_name, action_name, target in states:
             if action_name != 'Stop':
-                target_tuple = (int(target.position.x), int(target.position.y))
-                cmd = UIDebugCommandFactory().robot_strategic_state(player,
-                                                                    tactic_name,
-                                                                    action_name,
-                                                                    target_tuple)
+                cmd = DebugCommandFactory.robot_strategic_state(player,
+                                                                tactic_name,
+                                                                action_name,
+                                                                target.position.to_tuple())
                 cmds.append(cmd)
         self.ui_send_queue.put(cmds)
 

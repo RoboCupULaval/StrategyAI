@@ -8,7 +8,7 @@ from multiprocessing.managers import DictProxy
 from queue import Empty
 from time import time, sleep
 
-from Debug.uidebug_command_factory import UIDebugCommandFactory
+from Debug.debug_command_factory import DebugCommandFactory
 from Engine.Communication.receiver.referee_receiver import RefereeReceiver
 from Engine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from Engine.Communication.receiver.vision_receiver import VisionReceiver
@@ -139,11 +139,11 @@ class Engine(Process):
         self.tracker.predict(robot_state)
 
         if any(robot.path for robot in self.controller.robots):
-            self.ui_send_queue.put_nowait(UIDebugCommandFactory.paths(self.controller.robots))
+            self.ui_send_queue.put_nowait(DebugCommandFactory.paths(self.controller.robots))
 
-        self.ui_send_queue.put_nowait(UIDebugCommandFactory.game_state(blue=self.game_state['blue'],
-                                                                       yellow=self.game_state['yellow'],
-                                                                       balls=self.game_state['balls']))
+        self.ui_send_queue.put_nowait(DebugCommandFactory.game_state(blue=self.game_state['blue'],
+                                                                     yellow=self.game_state['yellow'],
+                                                                     balls=self.game_state['balls']))
 
     def get_engine_commands(self):
         try:

@@ -57,7 +57,7 @@ class Position:
         return {'x': self.x, 'y': self.y}
 
     def to_tuple(self):
-        return self.x, self.y
+        return int(self.x), int(self.y)
 
     def copy(self):
         return Position.from_array(self.array.copy())

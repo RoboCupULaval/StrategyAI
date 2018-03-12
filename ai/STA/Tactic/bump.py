@@ -8,7 +8,7 @@ import time
 import numpy as np
 from typing import List
 
-from Debug.uidebug_command_factory import UIDebugCommandFactory
+from Debug.debug_command_factory import DebugCommandFactory
 from Util import Pose, Position, AICommand
 from Util.ai_command import Idle
 from Util.constant import ROBOT_RADIUS
@@ -25,7 +25,7 @@ class Bump(Tactic):
         super().__init__(game_state, player, target, args)
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball
-        self.debug_interface = UIDebugCommandFactory()
+        self.debug_interface = DebugCommandFactory()
         self.move_action = self._generate_move_to()
         self.move_action.status_flag = Flags.SUCCESS
         self.last_ball_position = self.game_state.ball_position
