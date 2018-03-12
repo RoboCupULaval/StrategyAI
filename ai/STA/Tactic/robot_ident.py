@@ -5,7 +5,7 @@ from typing import List
 
 from Util import Pose
 from ai.GameDomainObjects import Player
-from Util.ai_command import Idle, AICommand
+from Util.ai_command import Idle
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -34,7 +34,7 @@ class RobotIdent(Tactic):
             self.status_flag = Flags.WIP
 
             # Creating speed pose
-            speed_pose = Pose(self.commands[self.cmd_id])
+            #  speed_pose = Pose(self.commands[self.cmd_id])
             self.cmd_id += 1
 
             # Saving data

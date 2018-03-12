@@ -15,6 +15,7 @@ DEFAULT_ROTATION_SPEED = 6*m.pi  # rad/s
 DEFAULT_RADIUS = 150  # mm
 
 
+# noinspection PyTypeChecker
 class RotateAround(Action):
     def __init__(self, game_state: GameState,
                  player: Player,

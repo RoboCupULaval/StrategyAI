@@ -2,6 +2,8 @@ from typing import List
 
 import collections
 
+from numpy.core.multiarray import ndarray
+
 from Util import Position
 
 
@@ -18,6 +20,10 @@ class Path(collections.MutableSequence):
                     new_points.append(p1)
             new_points.append(self.goal)
             self.points = new_points
+
+    @classmethod
+    def from_array(cls, start: ndarray, target: ndarray):
+        return Path(Position.from_array(start), Position.from_array(target))
 
     @classmethod
     def from_points(cls, points_list: List[Position]):
@@ -53,7 +59,7 @@ class Path(collections.MutableSequence):
 
     @property
     def length(self):
-        segments = [(point - next_point).view(Position).norm for point, next_point in zip(self, self[1:])]
+        segments = [(point - next_point).norm for point, next_point in zip(self, self[1:])]
         return sum(segments)
 
     def __iter__(self):

@@ -7,10 +7,10 @@ from ai.STA.Action import Action
 from ai.states.game_state import GameState
 
 
+# noinspection PyUnresolvedReferences
 class Kick(Action):
 
-    def __init__(self, game_state: GameState, player: Player, force: [int, float], target: Pose=Pose(), end_speed=0,
-                 cruise_speed=0.1):
+    def __init__(self, game_state: GameState, player: Player, force: [int, float], target: Pose=Pose(), end_speed=0):
         """
             :param game_state: Current state of the game
             :param player: Instance of the player

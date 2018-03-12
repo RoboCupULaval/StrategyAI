@@ -1,11 +1,11 @@
 # Under MIT license, see LICENSE.txt
-import time
 
-from Util import Pose, AICommand
+from Util import AICommand
 from ai.GameDomainObjects import Player
 from ai.STA.Action import Action
 from ai.states.game_state import GameState
 COMMAND_DELAY = 0.5
+
 
 class KickCharge(Action):
 

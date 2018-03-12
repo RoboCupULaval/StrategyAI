@@ -1,9 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
-__author__ = "Maxime Gagnon-Legault"
-
 from socket import socket, SOL_SOCKET, AF_INET, SOCK_DGRAM, SO_REUSEADDR
 from typing import Tuple
+
+__author__ = "Maxime Gagnon-Legault"
 
 
 def udp_socket(connection_info: Tuple) -> socket:

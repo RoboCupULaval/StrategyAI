@@ -72,7 +72,7 @@ class Robot:
     @property
     def orientation_error(self):
         if self.target_orientation is not None and self.pose:
-            return self.target_orientation - self.orientation
+            return wrap_to_pi(self.target_orientation - self.orientation)
 
     @property
     def end_speed(self):

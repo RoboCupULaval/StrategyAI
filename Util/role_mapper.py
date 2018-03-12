@@ -12,7 +12,7 @@ class RoleMapper(object):
     LOCKED_ROLES = []
 
     def __init__(self):
-        self.roles_translation = {r: None for r in Role}
+        self.roles_translation = {r: None for r in Role.as_list()}
 
     def map_by_player(self, desired_map):
         saved_roles = self._save_locked_roles(self.roles_translation)
@@ -21,7 +21,7 @@ class RoleMapper(object):
         for key, value in desired_map.items():
             base_map[key] = value
 
-        results = self._apply_locked_roles(saved_roles, base_map)
+        results = RoleMapper._apply_locked_roles(saved_roles, base_map)
 
         if abs(len(results.values()) - len(set(results.values()))) > Counter(results.values())[None]:
             raise ValueError("Tried to assign a locked robot to another role, {}".format(Counter(results.values())))
@@ -39,7 +39,8 @@ class RoleMapper(object):
     def available_roles(self):
         return [role for role, player in self.roles_translation.items() if player is None]
 
-    def _remove_undesired_roles(self, base_map, new_map):
+    @staticmethod
+    def _remove_undesired_roles(base_map, new_map):
         keys = [key for key in base_map.keys()]
         for key in keys :
             if key not in new_map :
@@ -49,7 +50,8 @@ class RoleMapper(object):
     def _save_locked_roles(self, base_map):
         return {role: base_map[role] for role in self.LOCKED_ROLES}
 
-    def _apply_locked_roles(self, locked_roles_map, result_map):
+    @staticmethod
+    def _apply_locked_roles(locked_roles_map, result_map):
         for key, value in locked_roles_map.items():
             result_map[key] = value if value is not None else result_map[key]
         return result_map

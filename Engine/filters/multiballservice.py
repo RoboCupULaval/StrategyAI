@@ -50,7 +50,7 @@ class MultiBallService(list):
 
         closest_ball = None
         if position_differences is not None and np.min(position_differences) < self.BALL_SEPARATION_THRESHOLD:
-            idx = np.argmin(position_differences)
+            idx = np.argmin(position_differences).view(int)
             closest_ball = self[idx]
 
         return closest_ball

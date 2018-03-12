@@ -24,6 +24,7 @@ DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
 COMMAND_DELAY = 1.0
 
 
+# noinspection PyAttributeOutsideInit,PyTypeChecker,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 class AlignToDefenseWall(Tactic):
     def __init__(self, game_state: GameState, player: Player, robots_in_formation: List[Player], auto_pick=False,
                  args: List[str]=None):

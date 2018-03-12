@@ -6,7 +6,7 @@ from typing import List, Union
 
 import numpy as np
 
-from Util import Pose, Position, AICommand
+from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
 from Util.geometry import compare_angle, wrap_to_pi
 from ai.Algorithm.evaluation_module import best_passing_option
@@ -26,6 +26,7 @@ KICK_SUCCEED_THRESHOLD = 600
 COMMAND_DELAY = 0.5
 
 
+# noinspection PyArgumentList,PyUnresolvedReferences,PyUnresolvedReferences
 class GoKick(Tactic):
     def __init__(self, game_state: GameState, player: Player,
                  target: Pose=Pose(),

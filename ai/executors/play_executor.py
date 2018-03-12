@@ -2,32 +2,30 @@
 
 from typing import List, Dict
 import logging
-
 from multiprocessing import Queue
 
-from Util.engine_command import EngineCommand
-from Util import Pose, Position, AICommand, Singleton
+from Util import Pose, Position, AICommand, EngineCommand
+from config.config_service import ConfigService
+from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
+
 from ai.GameDomainObjects import Player
 from ai.STA.Strategy.human_control import HumanControl
 
-from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
-
 from ai.executors.pathfinder_module import PathfinderModule
-from config.config_service import ConfigService
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 
 
-class PlayExecutor(metaclass=Singleton):
+class PlayExecutor:
 
-    def __init__(self, ui_send_queue: Queue):
+    def __init__(self, play_state: PlayState, ui_send_queue: Queue):
         self.logger = logging.getLogger(self.__class__.__name__)
 
         cfg = ConfigService()
-        self.auto_play = SimpleAutoPlay()
-        self.play_state = PlayState()
+        self.auto_play = SimpleAutoPlay(play_state)
+        self.play_state = play_state
         self.game_state = GameState()
         self.play_state.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
         self.last_available_players = {}
@@ -73,7 +71,7 @@ class PlayExecutor(metaclass=Singleton):
 
         try:
             this_player = GameState().our_team.available_players[cmd.data['id']]
-        except KeyError as id:
+        except KeyError:
             self.logger.debug("Invalid player id: {}".format(cmd.data['id']))
             return
         player_id = this_player.id
@@ -110,7 +108,6 @@ class PlayExecutor(metaclass=Singleton):
                                                                     target_tuple)
                 cmds.append(cmd)
         self.ui_send_queue.put(cmds)
-
 
     # def _has_available_players_changed(self) -> bool:
     #     available_players = GameState().our_team.available_players
