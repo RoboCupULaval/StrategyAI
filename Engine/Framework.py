@@ -21,7 +21,7 @@ class Framework:
          l'ia.
     """
 
-    def __init__(self, cli_args: Namespace):
+    def __init__(self, cli_args):
         """ Constructeur de la classe, établis les propriétés de bases et
         construit les objets qui sont toujours necéssaire à son fonctionnement
         correct.
