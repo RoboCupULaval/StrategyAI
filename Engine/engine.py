@@ -33,6 +33,7 @@ __author__ = 'Maxime Gagnon-Legault and Simon Bouchard'
 
 
 class Engine(Process):
+
     FPS = 30  # same as camera's fps! (or Frame Rate in GrSim)
     NUM_CAMERA = 4
     FIX_FRAME_RATE = True
