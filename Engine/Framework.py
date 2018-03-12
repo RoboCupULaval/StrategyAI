@@ -2,6 +2,7 @@
 
 import logging
 import time
+from argparse import Namespace
 from multiprocessing import Queue, Manager
 import signal  # so we can stop gracefully
 
@@ -20,7 +21,7 @@ class Framework:
          l'ia.
     """
 
-    def __init__(self, cli_args):
+    def __init__(self, cli_args: Namespace):
         """ Constructeur de la classe, établis les propriétés de bases et
         construit les objets qui sont toujours necéssaire à son fonctionnement
         correct.
@@ -32,7 +33,6 @@ class Framework:
 
         # config
         self.cfg = ConfigService()
-        self.cli_args = cli_args  # Arguments dict from the command line interface
 
         # Managers
         self.game_state = Manager().dict()
@@ -52,8 +52,8 @@ class Framework:
                              self.ui_send_queue,
                              self.ui_recv_queue)
 
-        self.engine.fps = self.cli_args.engine_fps
-        if self.cli_args.unlock_engine_fps:
+        self.engine.fps = cli_args.engine_fps
+        if cli_args.unlock_engine_fps:
             self.engine.unlock_fps()
 
         self.engine.start()
