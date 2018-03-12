@@ -70,7 +70,7 @@ class Coach(Process):
             while True:
                 self.main_loop()
                 self.print_frame_rate()
-                sleep(0.1)
+                sleep(self.cfg.config_dict['GAME']['ai_timestamp'])
 
         except KeyboardInterrupt:
             pass

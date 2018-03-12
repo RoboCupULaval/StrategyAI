@@ -60,6 +60,8 @@ class ConfigService(metaclass=Singleton):
 
         # [print(key,':' ,value) for key, value in self.config_dict['COMMUNICATION'].items()]
 
+        self.config_dict['GAME']['ai_timestamp'] = float(self.config_dict['GAME']['ai_timestamp'])
+
     @staticmethod
     def _load_defaults():
         config_parser = ConfigParser(allow_no_value=False)

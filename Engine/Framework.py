@@ -39,10 +39,10 @@ class Framework:
         self.field = Manager().dict()
 
         # Queues
-        self.ai_queue = Queue(maxsize=100)
-        self.referee_queue = Queue(maxsize=100)
-        self.ui_send_queue = Queue(maxsize=100)
-        self.ui_recv_queue = Queue(maxsize=100)
+        self.ai_queue = Queue(maxsize=cli_args.queue_size)
+        self.referee_queue = Queue(maxsize=cli_args.queue_size)
+        self.ui_send_queue = Queue(maxsize=cli_args.queue_size)
+        self.ui_recv_queue = Queue(maxsize=cli_args.queue_size)
 
         # Engine
         self.engine = Engine(self.game_state,

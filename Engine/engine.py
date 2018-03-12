@@ -34,7 +34,9 @@ __author__ = 'Maxime Gagnon-Legault and Simon Bouchard'
 
 class Engine(Process):
 
-    NUM_CAMERA = 4
+    DEFAULT_CAMERA_NUMBER = 4
+    DEFAULT_FPS_LOCK_STATE = True
+    DEFAULT_FPS = 30
 
     def __init__(self,
                  game_state: DictProxy,
@@ -51,7 +53,8 @@ class Engine(Process):
 
         # Managers for shared memory between process
         manager = Manager()
-        self.vision_state = manager.list([manager.dict() for _ in range(Engine.NUM_CAMERA)])
+        self._camera_number = int(self.cfg.config_dict['IMAGE'].get('number_of_camera', Engine.DEFAULT_CAMERA_NUMBER))
+        self.vision_state = manager.list([manager.dict() for _ in range(self._camera_number)])
         self.game_state = game_state
         self.field = field
 
@@ -88,8 +91,8 @@ class Engine(Process):
         self.tracker = Tracker(self.vision_state)
         self.controller = Controller(observer=CsvPlotter)
 
-        self._fps = None
-        self._is_fps_locked = True
+        self._fps = Engine.DEFAULT_FPS
+        self._is_fps_locked = Engine.DEFAULT_FPS_LOCK_STATE
 
         # print frame rate
         self.frame_count = 0
@@ -105,10 +108,13 @@ class Engine(Process):
 
     def run(self):
         self.wait_for_vision()
+
+        logged_string = 'Running with process ID {}'.format(os.getpid())
         if self.is_fps_locked:
-            logged_string = 'Running with process ID {} at {} fps.'.format(os.getpid(), self.fps)
+            logged_string += ' at {} fps'.format(self.fps)
         else:
-            logged_string = 'Running with process ID {} without fps limitation.'.format(os.getpid())
+            logged_string += ' without fps limitation'
+        logged_string += ' with {} cameras.'.format(self.camera_number)
 
         self.logger.debug(logged_string)
         self.time_bank = time()
@@ -209,3 +215,14 @@ class Engine(Process):
     @is_fps_locked.setter
     def is_fps_locked(self, is_lock):
         self._is_fps_locked = is_lock
+
+    @property
+    def camera_number(self):
+        return self._camera_number
+
+    @camera_number.setter
+    def camera_number(self, num):
+        if 0 > num > 4:
+            raise ValueError('Invalid number of camera.')
+        self._camera_number = num
+        self.vision_state = Manager().list([Manager().dict() for _ in range(self._camera_number)])
