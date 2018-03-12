@@ -3,7 +3,7 @@
 from abc import ABCMeta
 from typing import List, Tuple, Callable, Dict
 
-from Util import AICommand
+from Util import AICommand, Pose
 from Util.role import Role
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
@@ -60,13 +60,13 @@ class Strategy(metaclass=ABCMeta):
         assert(isinstance(role, Role))
         self.roles_graph[role].add_vertex(start_node, end_node, condition)
 
-    def get_current_state(self) -> List[Tuple[Player, str, str, str]]:
-        """
-            Retourne l'état actuel de la stratégie, dans une liste de 6 tuples. Chaque tuple contient:
-                -L'id d'un robot;
-                -Le nom de la Tactic qui lui est présentement assignée sous forme d'une chaîne de caractères;
-                -Le nom de l'Action en cours sous forme d'une chaîne de caractères;
-                -Sa target, soit un objet Pose.
+    def get_current_state(self) -> List[Tuple[Player, str, str, Pose]]:
+        """ [
+                Player: Player;
+                Tactic Name: str
+                Action name: str
+                Tactic target: Pose
+            ]
         """
         state = []
         for r in self.roles:
