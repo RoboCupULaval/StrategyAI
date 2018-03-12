@@ -1,21 +1,21 @@
 # Under MIT license, see LICENSE.txt
+import math
 from typing import List
 
-import math
 import numpy as np
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
-from ai.Algorithm.evaluation_module import closest_player_to_point
 
-from ai.states.game_state import GameState
+from Util import Pose
+from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
+from ai.Algorithm.evaluation_module import closest_player_to_point
+from ai.GameDomainObjects import Player
+from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.STA.Action.MoveToPosition import MoveToPosition
-from RULEngine.Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
+from ai.states.game_state import GameState
 
 
 class FaceOpponent(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose,
+    def __init__(self, game_state: GameState, player: Player, target: Pose,
                  args: List[str]=None, distance=500, collision_ball=False,
                  cruise_speed=2, charge_kick=False, end_speed=0, dribbler_on=False):
         super().__init__(game_state, player, target, args)
@@ -29,12 +29,12 @@ class FaceOpponent(Tactic):
         self.cruise_speed = cruise_speed
 
     def exec(self):
-        self.target_player = closest_player_to_point(self.game_state.get_ball_position(), our_team=False).player
+        self.target_player = closest_player_to_point(self.game_state.ball_position, our_team=False).player
         orientation_opponent = np.array([math.cos(self.target_player.pose.orientation),
                                          math.sin(self.target_player.pose.orientation)])
         destination_position = self.target_player.pose.position + self.distance * orientation_opponent
-        ball_to_player = self.game_state.get_ball_position() - self.player.pose.orientation
-        destination_orientation = ball_to_player.angle()
+        ball_to_player = self.game_state.ball_position - self.player.pose.orientation
+        destination_orientation = ball_to_player.angle
         destination_pose = Pose(destination_position, destination_orientation)
 
         if self.check_success():
@@ -52,6 +52,6 @@ class FaceOpponent(Tactic):
                               dribbler_on=self.dribbler_on).exec()
 
     def check_success(self):
-        distance = (self.player.pose - self.target).position.norm()
+        distance = (self.player.pose - self.target).position.norm
         return distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.target, abs_tol=ANGLE_TO_HALT)
 

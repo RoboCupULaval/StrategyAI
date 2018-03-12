@@ -1,17 +1,14 @@
 # Under MIT licence, see LICENCE.txt
-from typing import List
 import time
+from typing import List
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
+from Util import Pose, Position
+from Util.role import Role
 from ai.Algorithm.evaluation_module import best_position_in_region
-from ai.STA.Tactic.tactic import Tactic
+from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
-
-from RULEngine.Debug.debug_interface import COLOR_ID_MAP
-from ai.Util.role import Role
 
 __author__ = 'RoboCupULaval'
 
@@ -24,8 +21,8 @@ automatiquement selon son rôle
 
 class PositionForPass(Tactic):
 
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None,
-                 auto_position=False, robots_in_formation: List[OurPlayer] = None):
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None,
+                 auto_position=False):
         super().__init__(game_state, player, target, args)
         self.current_state = self.move_to_pass_position
         self.next_state = self.move_to_pass_position
@@ -61,7 +58,7 @@ class PositionForPass(Tactic):
         if self.player.receiver_pass_flag is False:
             self.target_position = self._find_best_player_position()
         self.last_time = time.time()
-        destination_orientation = (self.game_state.get_ball_position() - self.player.pose.position).angle()
+        destination_orientation = (self.game_state.ball_position - self.player.pose.position).angle
         return Pose(self.target_position, destination_orientation)
 
     def _find_best_player_position(self):
@@ -116,13 +113,13 @@ class PositionForPass(Tactic):
 
     def compute_offence_offset(self):
         if self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"] < 0:
-            if self.game_state.get_ball_position()[0] < 0:
-                offset = Position(self.game_state.get_ball_position()[0] - 1000, 0)
+            if self.game_state.ball_position[0] < 0:
+                offset = Position(self.game_state.ball_position[0] - 1000, 0)
             else:
                 offset = Position(0, 0)
         else:
-            if self.game_state.get_ball_position()[0] > 0:
-                offset = Position(self.game_state.get_ball_position()[0] + 1000, 0)
+            if self.game_state.ball_position[0] > 0:
+                offset = Position(self.game_state.ball_position[0] + 1000, 0)
             else:
                 offset = Position(0, 0)
         if abs(offset[0]) > 2000:
@@ -131,13 +128,13 @@ class PositionForPass(Tactic):
 
     def compute_defense_offset(self):
         if GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] < 0:
-            if self.game_state.get_ball_position()[0] > 0:
-                offset = Position(self.game_state.get_ball_position()[0] - 1000, 0)
+            if self.game_state.ball_position[0] > 0:
+                offset = Position(self.game_state.ball_position[0] - 1000, 0)
             else:
                 offset = Position(0, 0)
         else:
-            if self.game_state.get_ball_position()[0] < 0:
-                offset = Position(self.game_state.get_ball_position()[0] + 1000, 0)
+            if self.game_state.ball_position[0] < 0:
+                offset = Position(self.game_state.ball_position[0] + 1000, 0)
             else:
                 offset = Position(0, 0)
         if abs(offset[0]) > 2000:

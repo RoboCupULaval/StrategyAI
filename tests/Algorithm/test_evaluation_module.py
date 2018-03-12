@@ -1,13 +1,14 @@
-import unittest
-import numpy as np
 
+import unittest
 from unittest.mock import create_autospec
-from RULEngine.Util.Position import Position
-from RULEngine.Util.Pose import Pose
-from RULEngine.Game.Player import Player
-from RULEngine.Game.Team import Team
-from ai.states.game_state import GameState
+
+import numpy as np
+from Util import Pose, Position
+
 from ai.Algorithm.evaluation_module import line_of_sight_clearance, trajectory_score
+from ai.GameDomainObjects import Player
+from ai.GameDomainObjects import Team
+from ai.states.game_state import GameState
 
 
 class TestEvaluationModule(unittest.TestCase):
@@ -68,6 +69,7 @@ class TestEvaluationModule(unittest.TestCase):
         path_score_to_p3 = trajectory_score(player1.pose.position, self.goal, player3.pose.position)
 
         assert line_of_sight_clearance(player1, self.goal) == distance_to_target * path_score_to_p2 * path_score_to_p3
+
     def test_givenOnePlayerInOtherTeamFarFromGoal_thenLineOfSightClearanceIsDistanceToTarget(self):
         player1 = self._build_mock_player(Position(100, 100), 1)
         player2 = self._build_mock_player(Position(1500, 1500), 2)
@@ -113,11 +115,12 @@ class TestEvaluationModule(unittest.TestCase):
     def _create_mock_teams(self, allies, opponents):
         team1 = create_autospec(Team)
         team1.available_players = allies
-        GameState().my_team = team1
+        GameState()._our_team = team1
+        print(GameState().our_team.available_players.values())
 
         team2 = create_autospec(Team)
         team2.available_players = opponents
-        GameState().other_team = team2
+        GameState()._enemy_team = team2
 
     def _define_points_obstacle(self, start_point, goal, obstacle):
         self.start_point.x, self.start_point.y = start_point

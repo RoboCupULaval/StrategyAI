@@ -4,8 +4,6 @@ from ai.Algorithm.Graph.Node import Node
 from ai.Algorithm.Graph.Vertex import Vertex
 from ai.STA.Tactic.tactic_constants import Flags
 
-__author__ = 'RoboCupULaval'
-
 
 class Graph:
     """

@@ -2,11 +2,11 @@
 
 from functools import partial
 
-from RULEngine.Util.Pose import Position, Pose
+from Util.pose import Position, Pose
+from Util.role import Role
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.role import Role
 
 
 class IndianaJones(Strategy):
@@ -28,7 +28,6 @@ class IndianaJones(Strategy):
         obs_left = self.game_state.get_player_by_role(Role.SECOND_DEFENCE)
         obs_left_role = Role.SECOND_DEFENCE
 
-        # TODO: The position must be update to fit to the current field
         # Positions objectifs d'Indiana Jones
         goal_left = (Pose(Position(self.game_state.const["FIELD_OUR_GOAL_X_INTERNAL"], 0), self.game_state.get_player_by_role(indiana_role).pose.orientation))
         goal_right = (Pose(Position(self.game_state.const["FIELD_THEIR_GOAL_X_INTERNAL"], 0), self.game_state.get_player_by_role(indiana_role).pose.orientation))
@@ -61,4 +60,3 @@ class IndianaJones(Strategy):
 
     def condition(self, i):
         return self.roles_graph[i].get_current_tactic().status_flag == Flags.SUCCESS
-

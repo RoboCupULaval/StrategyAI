@@ -1,46 +1,38 @@
 # Under MIT License, see LICENSE.txt
 
-from typing import List, Tuple, Callable, Any
+from typing import List, Tuple
 
-from RULEngine.Game.Player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.singleton import Singleton
+from Util import Singleton
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.strategy_book import StrategyBook
-from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_book import TacticBook
 from ai.states.game_state import GameState
 
 
-class PlayState(object, metaclass=Singleton):
-    """
-    Garde les éléments correspondant aux STA
-    """
+class PlayState(metaclass=Singleton):
+
     def __init__(self):
-        """
-        initialise le PlayState
-        """
-        # Livres
         self.strategy_book = StrategyBook()
         self.tactic_book = TacticBook()
         self.autonomous_flag = False
-        self.current_strategy = None
+        self._current_strategy = None
 
-    def set_strategy(self, strategy: Strategy) -> None:
-        """
-        applique un stratégie du STA à executer
+    @property
+    def current_strategy(self):
+        return self._current_strategy
 
-        :param strategy: Strategy object déjà instancier, la stratégie à executer
-        :return: None
-        """
-        assert self.strategy_book.check_existance_strategy(str(strategy))
+    @current_strategy.setter
+    def current_strategy(self, strategy_name: str):
+        assert isinstance(strategy_name, str)
 
-        self.current_strategy = strategy
+        strategy_class = self.strategy_book.get_strategy(strategy_name)
+        self._current_strategy = strategy_class(GameState())
 
     def set_autonomous_flag(self, flag: bool) -> None:
         self.autonomous_flag = flag
 
-    def get_current_tactical_state(self) -> List[Tuple[int, str, str, str]]:
+    @property
+    def current_tactical_state(self) -> List[Tuple[int, str, str, str]]:
         """
         Retourne le nom des tactics en cours dans la stratégie en cours
         :return: List[Tuple[int, str, str, str]] les informations actuelles des tactiques courantes
@@ -48,16 +40,7 @@ class PlayState(object, metaclass=Singleton):
 
         return self.current_strategy.get_current_state()
 
-    def get_new_strategy(self, strategy_name: str) -> Callable[[GameState], Strategy]:
-        """
-        Retourne un callable sur la stratégie spécifiée par le strategy_name.
-
-        :param strategy_name: (str) le nom de la stratégie à retourner
-        :return: Callable[[GameState], Strategy] une Stratégie non initialisé (non créer)
-        """
-        return self.strategy_book.get_strategy(strategy_name)
-
-    def get_new_tactic(self, tactic_name: str) -> Callable[[GameState, Player, Pose, Any], Tactic]:
+    def get_new_tactic(self, tactic_name: str):  # -> Callable[[GameState, Player, Pose, Any], Tactic]:
         """
         Retourne un callable sur la tactic spécifiée par le tactic_name.
 

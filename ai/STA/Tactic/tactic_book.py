@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 from typing import List
-import sys
+
+import logging
 
 from ai.STA.Tactic.pass_to_player import PassToPlayer
 from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot
@@ -26,18 +27,19 @@ from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.face_target import FaceTarget
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
 
-try:
-    from ai.STA.Tactic.joystick import Joystick
-except ImportError:
-    import warnings
-    warnings.warn('Pygame is not installed, disabling Joystick tactic.', stacklevel=1)
+# try:
+#     from ai.STA.Tactic.joystick import Joystick
+# except ImportError as e:
+#     import warnings
+#     warnings.warn(str(e), stacklevel=1)
+#     warnings.warn('Pygame is not installed, disabling Joystick tactic.', stacklevel=1)
 
 
 class TacticBook(object):
     def __init__(self):
-        """
-        Initialise le dictionnaire des tactiques présentées au reste de l'IA.
-        """
+
+        self.logger = logging.getLogger('TacticBook')
+
         self.tactic_book = {
             'AlignToDefenseWall': AlignToDefenseWall,
             'Bump': Bump,
@@ -62,10 +64,22 @@ class TacticBook(object):
             'StayAwayFromBall': StayAwayFromBall,
             'Stop': Stop,
         }
-        if 'Joystick' in sys.modules:
-            self.tactic_book['Joystick'] = Joystick
+        self.default_tactics = ['GoToPositionPathfinder',
+                               'GoKick']
 
-    def get_tactics_name_list(self) -> List[str]:
+        for name, tactic_class in self.tactic_book.items():
+            if name != tactic_class.__name__:
+                raise TypeError("You give the wrong name to a tactic in tactic book: {} != {}".format(name, tactic_class.__name__))
+
+        for name in self.default_tactics:
+            if not name in self.tactic_book:
+                raise TypeError("Default tactic ({}) is not in tactic book".format(name))
+
+        # if 'Joystick' in sys.modules:
+        #     self.tactic_book['Joystick'] = Joystick
+
+    @property
+    def tactics_name(self) -> List[str]:
         """
         Retourne une liste des nomd des tactiques disponibles à l'IA.
 
@@ -92,4 +106,5 @@ class TacticBook(object):
         """
         if self.check_existance_tactic(tactic_name):
             return self.tactic_book[tactic_name]
+        self.logger.error("Something asked for this non-existing tactic: {}".format(tactic_name))
         return self.tactic_book['Stop']

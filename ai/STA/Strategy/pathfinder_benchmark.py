@@ -1,10 +1,8 @@
 # Under MIT license, see LICENSE.txt
-from RULEngine.Util.Position import Position
-from ai.Algorithm.Graph.Graph import Graph
-from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
-from ai.Util.role import Role
+from Util.position import Position
+from Util.role import Role
 from ai.STA.Strategy.strategy import Strategy
-
+from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 
 
 class Pathfinder_Benchmark(Strategy):

@@ -1,13 +1,14 @@
 # Under MIT License, see LICENSE.txt
 
 from functools import partial
-from RULEngine.Util.Pose import Pose
+
+from Util.pose import Pose
+from Util.role import Role
 from ai.STA.Strategy.strategy import Strategy
-from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.role import Role
 from ai.states.game_state import GameState
 
 
@@ -25,7 +26,6 @@ class PrepareKickOffOffense(Strategy):
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
 
         # Positions objectifs des joueurs
-        # TODO: Why are those constant different in kickoff_offense and kickoff_defense
         attack_top_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15,
                                    GameState().const["FIELD_Y_BOTTOM"] * 3 / 5, 0)
         attack_bottom_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15,

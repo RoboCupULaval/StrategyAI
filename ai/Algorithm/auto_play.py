@@ -1,10 +1,11 @@
 from abc import abstractmethod, ABCMeta
 from enum import IntEnum
 
-from RULEngine.Game.Referee import RefereeCommand
 from ai.Algorithm.IntelligentModule import IntelligentModule
-
 from ai.Algorithm.evaluation_module import *
+from ai.GameDomainObjects.referee import RefereeCommand
+from ai.states.play_state import PlayState
+
 
 class AutoPlay(IntelligentModule, metaclass=ABCMeta):
     """
@@ -13,8 +14,8 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
         des stratégies en prenant en compte différents aspects du jeu, notamment le referee
         et la position des robots et de la balle.
     """
-    def __init__(self, worldstate):
-        super().__init__(worldstate)
+    def __init__(self):
+        super().__init__()
         self.selected_strategy = None
         self.current_state = None
         self.next_state = None
@@ -43,6 +44,7 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
             log.
         """
 
+
 class SimpleAutoPlayState(IntEnum):
     HALT = 0
     STOP = 1
@@ -65,13 +67,14 @@ class SimpleAutoPlayState(IntEnum):
     DIRECT_FREE_DEFENSE = 18
     INDIRECT_FREE_OFFENSE = 19
     INDIRECT_FREE_DEFENSE = 20
-        
+
+
 class SimpleAutoPlay(AutoPlay):
     """
         Classe simple implémentant la sélection de stratégies.
     """
-    def __init__(self, worldstate):
-        super().__init__(worldstate)
+    def __init__(self):
+        super().__init__()
         self.last_ref_command = RefereeCommand.HALT
         
     def update(self, available_players_changed: bool):
@@ -79,14 +82,12 @@ class SimpleAutoPlay(AutoPlay):
 
         if self.next_state is None:
             self.next_state = SimpleAutoPlayState.HALT
-            self.selected_strategy = self._get_new_strategy(self.next_state)
+            PlayState().current_strategy = self._state_to_strategy_name(self.next_state)
 
         elif self.next_state != self.current_state or available_players_changed:
-            self.selected_strategy = self._get_new_strategy(self.next_state)
+            PlayState().current_strategy = self._state_to_strategy_name(self.next_state)
 
         self.current_state = self.next_state
-
-        self.ws.play_state.set_strategy(self.selected_strategy)
     
     def str(self):
         pass
@@ -117,7 +118,7 @@ class SimpleAutoPlay(AutoPlay):
         }.get(self.last_ref_command, RefereeCommand.NORMAL_START)
 
     def _select_next_state(self):
-        referee = self.ws.game_state.game.referee
+        referee = GameState().game.referee
         next_state = self.current_state
         # On command change
         if self.last_ref_command != referee.command:
@@ -129,7 +130,7 @@ class SimpleAutoPlay(AutoPlay):
                 RefereeCommand.GOAL_THEM: self.current_state,
                 RefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
 
-                RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.HALT, #TODO send ball new position to strategy...
+                RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.HALT,
 
                 RefereeCommand.FORCE_START: self._analyse_game(),
                 RefereeCommand.NORMAL_START: self._normal_start(),
@@ -150,18 +151,13 @@ class SimpleAutoPlay(AutoPlay):
             }.get(referee.command, RefereeCommand.HALT)
 
         # During the game
-        elif referee.command == RefereeCommand.FORCE_START or\
-            referee.command == RefereeCommand.NORMAL_START:
+        elif referee.command == RefereeCommand.FORCE_START or referee.command == RefereeCommand.NORMAL_START:
             next_state = self._analyse_game()
 
         self.last_ref_command = referee.command
         return next_state
 
-    def _get_new_strategy(self, state):
-        name = self._get_strategy_name(state)
-        return self.ws.play_state.get_new_strategy(name)(self.ws.game_state)
-
-    def _get_strategy_name(self, state):
+    def _state_to_strategy_name(self, state):
         return {
             # Robots must be stopped
             SimpleAutoPlayState.HALT: 'DoNothing',

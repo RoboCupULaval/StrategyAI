@@ -1,10 +1,13 @@
 # Under MIT license, see LICENSE.txt
-from ai.Algorithm.evaluation_module import Pose, Position
+
+from Util.role import Role
+from Util.position import Position
+from Util.pose import Pose
+from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
 from ai.STA.Tactic.goalkeeper import GoalKeeper
-from ai.Util.role import Role
 from ai.states.game_state import GameState
-from ai.STA.Strategy.strategy import Strategy
+
 
 class DefenseWallNoKick(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4):
@@ -26,5 +29,3 @@ class DefenseWallNoKick(Strategy):
         for role, player in role_by_robots:
             if player:
                 self.add_tactic(role, AlignToDefenseWall(self.game_state, player, self.robots))
-
-

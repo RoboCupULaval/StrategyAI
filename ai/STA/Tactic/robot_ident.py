@@ -3,18 +3,16 @@ import csv
 import time
 from typing import List
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.SpeedPose import SpeedPose
-from ai.STA.Action.Idle import Idle
-from ai.Util.ai_command import AICommandType, AICommand, AIControlLoopType
+from Util import Pose
+from ai.GameDomainObjects import Player
+from Util.ai_command import Idle, AICommand
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
 class RobotIdent(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose, args: List[str]):
+    def __init__(self, game_state: GameState, player: Player, target: Pose, args: List[str]):
         super().__init__(game_state, player, target, args)
         self.status_flag = Flags.INIT
         self.cmd_filename = str(args[0])
@@ -36,7 +34,7 @@ class RobotIdent(Tactic):
             self.status_flag = Flags.WIP
 
             # Creating speed pose
-            speed_pose = SpeedPose(self.commands[self.cmd_id])
+            speed_pose = Pose(self.commands[self.cmd_id])
             self.cmd_id += 1
 
             # Saving data
@@ -54,10 +52,11 @@ class RobotIdent(Tactic):
             with open(self.output_filename, 'a') as f:
                 f.write('{},{},{},{},{},{},{}\n'.format(t, px, vx, py, vy, pt, vt))
 
-            next_action = AICommand(self.player, AICommandType.MOVE, **{"pose_goal": speed_pose,
-                                                                        "control_loop_type": AIControlLoopType.OPEN})
+            raise RuntimeError("You need to implement a open control loop in the rest of system")
+            # next_action = AICommand(self.player, AICommandType.MOVE, **{"pose_goal": speed_pose,
+            #                                                             "control_loop_type": AIControlLoopType.OPEN})
         else:
-            next_action = Idle(self.game_state, self.player)
+            next_action = Idle
 
         return next_action
 

@@ -2,15 +2,14 @@
 
 from functools import partial
 
-from RULEngine.Util.Pose import Position, Pose
+from Util.pose import Position, Pose
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.STA.Strategy.strategy import Strategy
-from RULEngine.Util.constant import PLAYER_PER_TEAM
-from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.pass_to_player import PassToPlayer
+from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.Util.role import Role
+from Util.role import Role
 
 
 class PassesWithDecisions(Strategy):
