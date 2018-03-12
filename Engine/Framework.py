@@ -20,7 +20,7 @@ class Framework:
          l'ia.
     """
 
-    def __init__(self):
+    def __init__(self, cli_args):
         """ Constructeur de la classe, établis les propriétés de bases et
         construit les objets qui sont toujours necéssaire à son fonctionnement
         correct.
@@ -29,8 +29,10 @@ class Framework:
         # logger
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger("Framework")
+
         # config
         self.cfg = ConfigService()
+        self.cli_args = cli_args  # Arguments dict from the command line interface
 
         # Managers
         self.game_state = Manager().dict()
@@ -49,6 +51,11 @@ class Framework:
                              self.referee_queue,
                              self.ui_send_queue,
                              self.ui_recv_queue)
+
+        self.engine.fps = self.cli_args.engine_fps
+        if self.cli_args.unlock_engine_fps:
+            self.engine.unlock_fps()
+
         self.engine.start()
 
         # AI

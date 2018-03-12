@@ -34,9 +34,7 @@ __author__ = 'Maxime Gagnon-Legault and Simon Bouchard'
 
 class Engine(Process):
 
-    FPS = 30  # same as camera's fps! (or Frame Rate in GrSim)
     NUM_CAMERA = 4
-    FIX_FRAME_RATE = True
 
     def __init__(self,
                  game_state: DictProxy,
@@ -90,10 +88,12 @@ class Engine(Process):
         self.tracker = Tracker(self.vision_state)
         self.controller = Controller(observer=CsvPlotter)
 
+        self._fps = None
+        self._is_fps_locked = True
+
         # print frame rate
         self.frame_count = 0
         self.time_last_print = time()
-
         self.time_bank = 0
 
     def start(self):
@@ -105,12 +105,16 @@ class Engine(Process):
 
     def run(self):
         self.wait_for_vision()
-        self.logger.debug('Running with process ID {}'.format(os.getpid()))
+        if self.is_fps_locked:
+            logged_string = 'Running with process ID {} at {} fps.'.format(os.getpid(), self.fps)
+        else:
+            logged_string = 'Running with process ID {} without fps limitation.'.format(os.getpid())
 
+        self.logger.debug(logged_string)
         self.time_bank = time()
         try:
             while True:
-                self.time_bank += 1.0 / Engine.FPS
+                self.time_bank += 1.0 / self.fps
 
                 self.main_loop()
 
@@ -166,14 +170,14 @@ class Engine(Process):
 
     def limit_frame_rate(self):
         time_ahead = self.time_bank - time()
-        if not Engine.FIX_FRAME_RATE:
+        if not self.is_fps_locked:
             return
         if time_ahead > 0:
             sleep(time_ahead)
         if time_ahead < -2:
             raise RuntimeError(
-                'The required frame rate is too fast for the engine. '
-                'To find out what is the best frame rate for your computer,'
+                'The required frame rate is too fast for the engine.\n'
+                'To find out what is the best frame rate for your computer,\n'
                 'launch the engine with FIX_FRAME_RATE at false and use the minimum FPS that you get.')
 
     def print_frame_rate(self):
@@ -183,3 +187,25 @@ class Engine(Process):
             self.logger.info('Updating at {:.2f} fps'.format(self.frame_count / dt))
             self.time_last_print = time()
             self.frame_count = 0
+
+    def unlock_fps(self):
+        self.is_fps_locked = False
+
+    @property
+    def fps(self):
+        return self._fps
+
+    @fps.setter
+    def fps(self, engine_fps):
+        self._fps = engine_fps
+
+    @property
+    def is_fps_locked(self):
+        if not self.fps:
+            return False
+        else:
+            return self._is_fps_locked
+
+    @is_fps_locked.setter
+    def is_fps_locked(self, is_lock):
+        self._is_fps_locked = is_lock
