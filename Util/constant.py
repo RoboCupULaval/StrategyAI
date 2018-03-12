@@ -27,9 +27,6 @@ ORIENTATION_ABSOLUTE_TOLERANCE = 0.01  # 0.5 degree
 # TeamColor
 class TeamColor(Enum):
 
-    def from_str(self):
-        return TeamColor.BLUE if self == 'blue' else TeamColor.YELLOW
-
     def __str__(self):
         return 'blue' if self == TeamColor.BLUE else 'yellow'
     YELLOW = 0

@@ -27,7 +27,7 @@ class VisionReceiver(ReceiverProcess):
         super().__init__(connection_info, link)
 
     def connect(self, connection_info):
-        connection = socket.socket(AF_INET, SOCK_DGRAM)
+        connection = socket(AF_INET, SOCK_DGRAM)
         connection.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         connection.bind(connection_info)
         if ip_address(connection_info[0]).is_multicast:

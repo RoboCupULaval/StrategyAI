@@ -47,7 +47,7 @@ class StrategyBook(object):
                               'BambaFollow': BambaFollow,
                               'PassesWithDecisions': PassesWithDecisions,
                               'DefenseWall': DefenseWall,
-                              'Pathfinder_Benchmark': PathfinderBenchmark,
+                              'PathfinderBenchmark': PathfinderBenchmark,
                               'PrepareKickOffOffense': PrepareKickOffOffense,
                               'StayAway': StayAway,
                               'PrepareKickOffDefense': PrepareKickOffDefense,
