@@ -60,6 +60,7 @@ class ConfigService(metaclass=Singleton):
 
         # [print(key,':' ,value) for key, value in self.config_dict['COMMUNICATION'].items()]
 
+        self.config_dict['IMAGE']['number_of_camera'] = int(self.config_dict['IMAGE']['number_of_camera'])
         self.config_dict['GAME']['ai_timestamp'] = float(self.config_dict['GAME']['ai_timestamp'])
 
     @staticmethod

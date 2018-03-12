@@ -53,7 +53,7 @@ class Engine(Process):
 
         # Managers for shared memory between process
         manager = Manager()
-        self._camera_number = int(self.cfg.config_dict['IMAGE'].get('number_of_camera', Engine.DEFAULT_CAMERA_NUMBER))
+        self._camera_number = self.cfg.config_dict['IMAGE'].get('number_of_camera', Engine.DEFAULT_CAMERA_NUMBER)
         self.vision_state = manager.list([manager.dict() for _ in range(self._camera_number)])
         self.game_state = game_state
         self.field = field
