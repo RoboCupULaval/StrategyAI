@@ -1,6 +1,5 @@
 # Under MIT License, see LICENSE.txt
 
-# noinspection PyUnresolvedReferences
 from socket import socket, SOL_SOCKET, AF_INET, SOCK_DGRAM, SO_REUSEADDR
 from typing import Tuple
 

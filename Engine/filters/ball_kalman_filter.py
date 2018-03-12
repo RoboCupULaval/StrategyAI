@@ -27,19 +27,19 @@ class BallFilter(KalmanFilter):
         return np.array([[1, 0, 0, 0],   # Position x
                          [0, 0, 1, 0]])  # Position y
 
-    # noinspection PyPep8Naming
     def process_covariance(self):
         dt = self._dt
         sigma_acc_x = 10
         sigma_acc_y = sigma_acc_x
-        G = np.array([
-            np.array([0.25 * dt ** 4, 0.50 * dt ** 3, 0, 0]) * sigma_acc_x ** 2,
-            np.array([0.50 * dt ** 3, 1.00 * dt ** 2, 0, 0]) * sigma_acc_x ** 2,
-            np.array([0, 0, 0.25 * dt ** 4, 0.50 * dt ** 3]) * sigma_acc_y ** 2,
-            np.array([0, 0, 0.50 * dt ** 3, 1.00 * dt ** 2]) * sigma_acc_y ** 2
-        ])
+        process_covariance = \
+            np.array([
+                np.array([0.25 * dt ** 4, 0.50 * dt ** 3, 0, 0]) * sigma_acc_x ** 2,
+                np.array([0.50 * dt ** 3, 1.00 * dt ** 2, 0, 0]) * sigma_acc_x ** 2,
+                np.array([0, 0, 0.25 * dt ** 4, 0.50 * dt ** 3]) * sigma_acc_y ** 2,
+                np.array([0, 0, 0.50 * dt ** 3, 1.00 * dt ** 2]) * sigma_acc_y ** 2
+            ])
 
-        return G
+        return process_covariance
 
     def observation_covariance(self):
         return np.diag([1, 1])

@@ -44,14 +44,14 @@ class RobotFilter(KalmanFilter):
                          [0,  0,  0],  # Position Theta
                          [0,  0, dt]])  # Speed Theta
 
-    # noinspection PyPep8,PyPep8Naming
     def process_covariance(self):
         dt = self._dt
         sigma_acc_x = 1000
         sigma_acc_y = 1000
         sigma_acc_o = 10 * np.pi/180
 
-        G = np.array([
+        process_covariance = \
+            np.array([
                 np.array([0.25 * dt ** 4, 0.50 * dt ** 3,              0,              0,              0,              0]) * sigma_acc_x ** 2,
                 np.array([0.50 * dt ** 3, 1.00 * dt ** 2,              0,              0,              0,              0]) * sigma_acc_x ** 2,
                 np.array([             0,              0, 0.25 * dt ** 4, 0.50 * dt ** 3,              0,              0]) * sigma_acc_y ** 2,
@@ -59,9 +59,8 @@ class RobotFilter(KalmanFilter):
                 np.array([             0,              0,              0,              0, 0.25 * dt ** 4, 0.50 * dt ** 3]) * sigma_acc_o ** 2,
                 np.array([             0,              0,              0,              0, 0.50 * dt ** 3, 1.00 * dt ** 2]) * sigma_acc_o ** 2])
 
-        return G
+        return process_covariance
 
-    # noinspection PyPep8
     def observation_covariance(self):
         return np.diag([1, 1, 0.1 * np.pi/180])
 

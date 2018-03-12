@@ -2,7 +2,6 @@
 
 from ipaddress import ip_address
 
-# noinspection PyUnresolvedReferences
 from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY, SOL_SOCKET, SO_REUSEADDR
 from struct import pack
 

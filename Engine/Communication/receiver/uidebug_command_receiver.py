@@ -3,7 +3,7 @@
 from ipaddress import ip_address
 from pickle import loads
 from queue import Full
-# noinspection PyUnresolvedReferences
+
 from socket import socket, AF_INET, SOCK_DGRAM, IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton, INADDR_ANY
 from struct import pack
 

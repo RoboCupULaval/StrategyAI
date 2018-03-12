@@ -10,7 +10,6 @@ class Role(IntEnum):
     FIRST_ATTACK = 4
     SECOND_ATTACK = 0
 
-    # noinspection PyTypeChecker
     @classmethod
     def as_list(cls):
         return list(cls)  # Enum doesn't seems to support the iterable protocol

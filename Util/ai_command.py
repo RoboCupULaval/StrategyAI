@@ -15,7 +15,6 @@ AICommand = namedtuple('AICommand', 'target,'
                                     'ball_collision,'
                                     'pathfinder_on')
 
-# noinspection PyPep8Naming
 class CmdBuilder:
 
     def __init__(self):
@@ -65,7 +64,6 @@ class CmdBuilder:
                          self._pathfinder_on)
 
 
-# noinspection PyPep8Naming
 def MoveTo(target: [Pose, Position], cruise_speed=1, end_speed=0, ball_collision=True):
     return CmdBuilder().addMoveTo(target, cruise_speed, end_speed, ball_collision).build()
 
