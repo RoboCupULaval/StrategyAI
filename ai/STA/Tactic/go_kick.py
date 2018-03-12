@@ -8,7 +8,7 @@ import numpy as np
 
 from Util import Pose, Position, AICommand
 from Util.ai_command import CmdBuilder, Idle
-from Util.geometry import compare_angle
+from Util.geometry import compare_angle, wrap_to_pi
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
@@ -60,7 +60,7 @@ class GoKick(Tactic):
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.player.pose.position).angle
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3)
-        if (self.player.pose.position - distance_behind).norm < 50:
+        if (self.player.pose.position - distance_behind).norm < 50 and wrap_to_pi(self.player.pose.orientation - orientation) < 0.2:
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
@@ -68,7 +68,7 @@ class GoKick(Tactic):
                 self._find_best_passing_option()
         # ball_collision = self.tries_flag == 0
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=1,
+                                      cruise_speed=2,
                                       ball_collision=True).build()
 
     def grab_ball(self):
@@ -86,13 +86,13 @@ class GoKick(Tactic):
         self.ball_spacing = GRAB_BALL_SPACING
         self.next_state = self.validate_kick
         self.tries_flag += 1
-        ball_position = self.game_state.get_ball_position()
+        ball_position = self.game_state.ball_position
         orientation = (self.target.position - self.player.pose.position).angle
 
         return CmdBuilder().addMoveTo(Pose(ball_position, orientation), cruise_speed=2).addKick(self.kick_force).build()
 
     def validate_kick(self):
-        if self.game_state.get_ball_velocity().norm > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
+        if self.game_state.ball_velocity.norm > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.halt
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
             self.next_state = self.kick
@@ -110,10 +110,10 @@ class GoKick(Tactic):
         return Idle
 
     def _get_distance_from_ball(self):
-        return (self.player.pose.position - self.game_state.get_ball_position()).norm
+        return (self.player.pose.position - self.game_state.ball_position).norm
 
     def _is_player_towards_ball_and_target(self, abs_tol=m.pi/30):
-        ball_position = self.game_state.get_ball_position()
+        ball_position = self.game_state.ball_position
         target_to_ball = ball_position - self.target.position
         ball_to_player = self.player.pose.position - ball_position
         return compare_angle(target_to_ball.angle, ball_to_player.angle, abs_tol=abs_tol)
@@ -136,12 +136,12 @@ class GoKick(Tactic):
             :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
             """
 
-        delta_x = self.target.position.x - self.game_state.get_ball_position().x
-        delta_y = self.target.position.y - self.game_state.get_ball_position().y
+        delta_x = self.target.position.x - self.game_state.ball_position.x
+        delta_y = self.target.position.y - self.game_state.ball_position.y
         theta = np.math.atan2(delta_y, delta_x)
 
-        x = self.game_state.get_ball_position().x - ball_spacing * np.math.cos(theta)
-        y = self.game_state.get_ball_position().y - ball_spacing * np.math.sin(theta)
+        x = self.game_state.ball_position.x - ball_spacing * np.math.cos(theta)
+        y = self.game_state.ball_position.y - ball_spacing * np.math.sin(theta)
 
         player_x = self.player.pose.position.x
         player_y = self.player.pose.position.y

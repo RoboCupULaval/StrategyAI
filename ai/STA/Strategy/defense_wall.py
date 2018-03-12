@@ -41,12 +41,12 @@ class DefenseWall(Strategy):
                 self.add_condition(role, 1, 0, partial(self.is_not_closest, player))
 
     def is_closest(self, player):
-        if player == closest_players_to_point(GameState().get_ball_position(), True)[0].player:
+        if player == closest_players_to_point(GameState().ball_position, True)[0].player:
             return True
         return False
 
     def is_second_closest(self, player):
-        if player == closest_players_to_point(GameState().get_ball_position(), True)[1].player:
+        if player == closest_players_to_point(GameState().ball_position, True)[1].player:
             return True
         return False
 

@@ -22,7 +22,7 @@ class Strategy(metaclass=ABCMeta):
         assert isinstance(p_game_state, GameState)
         self.game_state = p_game_state
         self.roles_graph = {r: Graph() for r in Role}
-        players = [p for p in self.game_state.our_team.available_players.values()]
+        players = [p for p in self.game_state.our_team.players.values()]
         roles = [r for r in Role]
         role_mapping = dict(zip(roles, players))
         # Magnifique hack pour bypasser un mapping de goalkeeper
@@ -80,6 +80,9 @@ class Strategy(metaclass=ABCMeta):
                           current_tactic.current_state.__name__, str(current_tactic), current_tactic.target))
         return state
 
+    def clear_graph_of_role(self, r: Role):
+        self.roles_graph[r] = Graph()
+
     def exec(self) -> Dict[Player, AICommand]:
         """
         Appelle la méthode exec de chacune des Tactics assignées aux robots.
@@ -89,8 +92,6 @@ class Strategy(metaclass=ABCMeta):
         commands = {}
         # for i, g in enumerate(self.roles_graph):
         #     print(i,"->",g)
-        # TODO We should probably iterate over game_state.RoleMapping instead of Role
-        # TODO It would allow us to deal with fewer than 6 roles
         for r in Role:
             player = self.game_state.get_player_by_role(r)
             if player is None:
@@ -109,7 +110,6 @@ class Strategy(metaclass=ABCMeta):
     def __str__(self):
         return self.__class__.__name__
 
-    # TODO check if this is correct MGL 2017/06/16
     def __eq__(self, other):
         """
         La comparaison est basée sur le nom des stratégies. Deux stratégies possédant le même nom sont considérée égale.

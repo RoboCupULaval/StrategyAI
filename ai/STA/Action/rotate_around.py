@@ -93,7 +93,6 @@ class RotateAround(Action):
         return Pose(next_position, next_orientation)
 
     def exec(self):
-        # TODO The old code used "use_pathfinder"
         if self.approach:
             return CmdBuilder().addMoveTo(self.generate_destination(),
                                           cruise_speed=self.approach_speed,

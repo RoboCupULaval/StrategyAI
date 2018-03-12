@@ -3,9 +3,9 @@
 from enum import IntEnum
 from typing import Dict
 
-from RULEngine.services.team_color_service import TeamColorService
-from Util.position import Position
 from Util.constant import TeamColor
+from Util.position import Position
+from Util.team_color_service import TeamColorService
 
 
 class RefereeCommand(IntEnum):
@@ -134,7 +134,6 @@ class Referee:
             self.team_info[key]['timeout_time'] = info[key].timeout_time
             self.team_info[key]['goalie'] = info[key].goalie
 
-    # TODO
     # def _convert_raw_to_us(self, command):
     #     if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW:
     #         return command + 30

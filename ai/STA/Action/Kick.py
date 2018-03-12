@@ -16,7 +16,6 @@ class Kick(Action):
             :param player: Instance of the player
             :param p_force: Kick force [0, 10]
         """
-        # TODO check the force not used by the new interface! MGL 2017/05/23
         Action.__init__(self, game_state, player)
         assert(isinstance(force, (int, float)))
         self.force = force
@@ -29,7 +28,7 @@ class Kick(Action):
         :return: Un AIcommand
         """
         if self.target is not None:
-            ball_position = self.game_state.get_ball_position()
+            ball_position = self.game_state.ball_position
             orientation = (self.target.position - self.player.pose.position).angle
         else:
             ball_position = self.player.pose.position

@@ -36,13 +36,12 @@ class PassToPlayer(Tactic):
             self.next_state = self.get_behind_ball
             self.last_time = time.time()
 
-        # todo charge kick here please/ask Simon what kicktype is supposed to be
         return AICommand(self.player.id, kick_type=1, dribbler_active=True)
 
     def get_behind_ball(self):
         self.status_flag = Flags.WIP
         player = self.player.pose.position
-        ball = self.game_state.get_ball_position()
+        ball = self.game_state.ball_position
         target = self.game_state.get_player_position(self.target_id, True)
 
         vector_player_2_ball = ball - player
@@ -52,7 +51,7 @@ class PassToPlayer(Tactic):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.get_behind_ball
-        return GoBehind(self.game_state, self.player, self.game_state.get_ball_position(),
+        return GoBehind(self.game_state, self.player, self.game_state.ball_position,
                         Position.from_array(target), 120, pathfinder_on=True)
 
     def grab_ball(self):
@@ -83,11 +82,11 @@ class PassToPlayer(Tactic):
         return Idle(self.game_state, self.player)
 
     def _get_distance_from_ball(self):
-        return (self.player.pose.position - self.game_state.get_ball_position()).norm
+        return (self.player.pose.position - self.game_state.ball_position).norm
 
     def _is_player_towards_ball_and_target(self, fact=-0.99):
         player = self.player.pose.position
-        ball = self.game_state.get_ball_position()
+        ball = self.game_state.ball_position
         target = self.game_state.get_player_position(self.target_id, True)
 
         vector_player_2_ball = ball - player

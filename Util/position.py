@@ -7,7 +7,7 @@ POSITION_ABS_TOL = 0.01
 
 class Position(np.ndarray):
 
-    def __new__(cls, x: float=0, y: float=0):
+    def __new__(cls, x=0, y=0):
         obj = np.asarray((x, y)).view(cls)
         obj.x, obj.y = obj
         return obj
@@ -50,6 +50,9 @@ class Position(np.ndarray):
 
     def to_dict(self):
         return {'x': self.x, 'y': self.y}
+
+    def to_array(self):
+        return np.array([self[0], self[1]])
 
     def __add__(self, other):
         return super().__add__(other).view(Position)

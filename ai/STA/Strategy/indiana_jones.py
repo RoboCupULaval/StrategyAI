@@ -28,7 +28,6 @@ class IndianaJones(Strategy):
         obs_left = self.game_state.get_player_by_role(Role.SECOND_DEFENCE)
         obs_left_role = Role.SECOND_DEFENCE
 
-        # TODO: The position must be update to fit to the current field
         # Positions objectifs d'Indiana Jones
         goal_left = (Pose(Position(self.game_state.const["FIELD_OUR_GOAL_X_INTERNAL"], 0), self.game_state.get_player_by_role(indiana_role).pose.orientation))
         goal_right = (Pose(Position(self.game_state.const["FIELD_THEIR_GOAL_X_INTERNAL"], 0), self.game_state.get_player_by_role(indiana_role).pose.orientation))

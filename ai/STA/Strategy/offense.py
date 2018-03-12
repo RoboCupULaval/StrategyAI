@@ -49,10 +49,10 @@ class Offense(Strategy):
                 node_go_kick.connect_to(node_go_kick, when=player_has_kicked)
 
     def is_closest(self, player):
-        return player == closest_player_to_point(GameState().get_ball_position(), True).player
+        return player == closest_player_to_point(GameState().ball_position, True).player
 
     def is_not_closest(self, player):
-        return player != closest_player_to_point(GameState().get_ball_position(), True).player
+        return player != closest_player_to_point(GameState().ball_position, True).player
 
     def has_kicked(self, player):
         role = GameState().get_role_by_player_id(player.id)

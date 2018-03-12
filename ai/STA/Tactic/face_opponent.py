@@ -29,11 +29,11 @@ class FaceOpponent(Tactic):
         self.cruise_speed = cruise_speed
 
     def exec(self):
-        self.target_player = closest_player_to_point(self.game_state.get_ball_position(), our_team=False).player
+        self.target_player = closest_player_to_point(self.game_state.ball_position, our_team=False).player
         orientation_opponent = np.array([math.cos(self.target_player.pose.orientation),
                                          math.sin(self.target_player.pose.orientation)])
         destination_position = self.target_player.pose.position + self.distance * orientation_opponent
-        ball_to_player = self.game_state.get_ball_position() - self.player.pose.orientation
+        ball_to_player = self.game_state.ball_position - self.player.pose.orientation
         destination_orientation = ball_to_player.angle
         destination_pose = Pose(destination_position, destination_orientation)
 

@@ -11,7 +11,7 @@ from pickle import loads
 from Util.singleton import Singleton
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.executors.play_executor import PlayExecutor
-from RULEngine.Debug.uidebug_command_factory import UIDebugCommandFactory
+from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
 from ai.states.play_state import PlayState
 
 
@@ -36,8 +36,10 @@ class DebugExecutor(metaclass=Singleton):
             self.last_time = time.time()
 
     def _send_books(self) -> None:
-        cmd_tactics = {'strategy': PlayState().strategy_book.get_strategies_name_list(),
-                       'tactic': PlayState().tactic_book.get_tactics_name_list(),
+        cmd_tactics = {'strategy': PlayState().strategy_book.strategies_name,
+                       'strategy_default': PlayState().strategy_book.default_strategies,
+                       'tactic': PlayState().tactic_book.tactics_name,
+                       'tactic_default': PlayState().tactic_book.default_tactics,
                        'action': ['None']}
 
         msg = UIDebugCommandFactory().books(cmd_tactics)

@@ -21,11 +21,9 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
         self.next_state = None
         self.last_state = None
 
-    # todo check usage, doesn't seem to be used
     def get_selected_strategy(self):
         return self.selected_strategy
 
-    # todo check usage, doesn't seem to be used
     @property
     def info(self):
         return {
@@ -84,14 +82,12 @@ class SimpleAutoPlay(AutoPlay):
 
         if self.next_state is None:
             self.next_state = SimpleAutoPlayState.HALT
-            self.selected_strategy = self._get_new_strategy(self.next_state)
+            PlayState().current_strategy = self._state_to_strategy_name(self.next_state)
 
         elif self.next_state != self.current_state or available_players_changed:
-            self.selected_strategy = self._get_new_strategy(self.next_state)
+            PlayState().current_strategy = self._state_to_strategy_name(self.next_state)
 
         self.current_state = self.next_state
-
-        PlayState().set_strategy(self.selected_strategy)
     
     def str(self):
         pass
@@ -134,7 +130,7 @@ class SimpleAutoPlay(AutoPlay):
                 RefereeCommand.GOAL_THEM: self.current_state,
                 RefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
 
-                RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.HALT, #TODO send ball new position to strategy...
+                RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.HALT,
 
                 RefereeCommand.FORCE_START: self._analyse_game(),
                 RefereeCommand.NORMAL_START: self._normal_start(),
@@ -161,11 +157,7 @@ class SimpleAutoPlay(AutoPlay):
         self.last_ref_command = referee.command
         return next_state
 
-    def _get_new_strategy(self, state):
-        name = self._get_strategy_name(state)
-        return PlayState().get_new_strategy(name)(GameState())
-
-    def _get_strategy_name(self, state):
+    def _state_to_strategy_name(self, state):
         return {
             # Robots must be stopped
             SimpleAutoPlayState.HALT: 'DoNothing',
