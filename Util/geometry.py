@@ -27,8 +27,8 @@ def compare_pose_orientation(pose1: Pose, pose2: Pose, abs_tol=0.004) -> bool:
 
 
 def rotate(vec: Position, angle) -> Position:
-    rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]).view(Position)
-    return rotation @ vec
+    rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    return Position.from_array(rotation @ vec.array)
 
 
 def normalize(vec: Position) -> Position:

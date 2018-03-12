@@ -40,7 +40,7 @@ class Pose:
 
     @property
     def position(self) -> Position:
-        return self._position.view(Position)
+        return self._position
 
     @position.setter
     def position(self, position: Position):
@@ -66,7 +66,7 @@ class Pose:
 
     def __add__(self, other: Position):
         assert(isinstance(other, Position))
-        return Pose(self.position + other.view(Position), self.orientation)
+        return Pose(self.position + other, self.orientation)
 
     def __sub__(self, other: Position):
         return self + (-other)

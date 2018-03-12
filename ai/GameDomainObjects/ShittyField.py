@@ -293,40 +293,9 @@ positive_side_constant = {
 
     # Legal field dimensions
     "LEGAL_Y_TOP": 3000,
-    # LEGAL_Y_TOP": 0
     "LEGAL_Y_BOTTOM": -3000,
     "LEGAL_X_LEFT": -4500,
     "LEGAL_X_RIGHT": 4500,
-    # LEGAL_X_RIGHT": 0
-
-    # Simulation param
-    "DELTA_T": 17,  # ms, hack, à éviter
-
-    # Communication information
-    "DEBUG_RECEIVE_BUFFER_SIZE": 100,
-
-    # Deadzones
-    "SPEED_DEAD_ZONE_DISTANCE": 150,
-    "POSITION_DEADZONE": 20,  # ROBOT_RADIUS*1.5
-
-    # Radius and angles for tactics
-    "DISTANCE_BEHIND": 120,  # ROBOT_RADIUS + 30  # in millimeters
-    "ANGLE_TO_GRAB_BALL": 1,  # in radians; must be large in case ball moves fast
-    "RADIUS_TO_GRAB_BALL": 120,  # ROBOT_RADIUS + 30
-    "ANGLE_TO_HALT": 0.09,
-    "RADIUS_TO_HALT": 102,  # ROBOT_RADIUS + BALL_RADIUS
-
-    # Orientation abs_tol
-    "ORIENTATION_ABSOLUTE_TOLERANCE": 1e-4,
-    "SPEED_ABSOLUTE_TOLERANCE": 1e-3,
-
-    # Speed
-    "DEFAULT_MAX_SPEED": 1,
-    "DEFAULT_MIN_SPEED": 0.65,
-
-    # Kick tactic
-    "KICK_BALL_DISTANCE": 80,
-    "KISS_BALL_DISTANCE": 80
 }
 
 negative_side_constant = {
@@ -375,38 +344,7 @@ negative_side_constant = {
 
     # Legal field dimensions
     "LEGAL_Y_TOP": 3000,
-    # LEGAL_Y_TOP": 0
     "LEGAL_Y_BOTTOM": -3000,
     "LEGAL_X_LEFT": -4500,
     "LEGAL_X_RIGHT": 4500,
-    # LEGAL_X_RIGHT": 0
-
-    # Simulation param
-    "DELTA_T": 17,  # ms, hack, à éviter
-
-    # Communication information
-    "DEBUG_RECEIVE_BUFFER_SIZE": 100,
-
-    # Deadzones
-    "SPEED_DEAD_ZONE_DISTANCE": 150,
-    "POSITION_DEADZONE": 20,  # ROBOT_RADIUS*1.5
-
-    # Radius and angles for tactics
-    "DISTANCE_BEHIND": 120,  # ROBOT_RADIUS + 30  # in millimeters
-    "ANGLE_TO_GRAB_BALL": 1,  # in radians; must be large in case ball moves fast
-    "RADIUS_TO_GRAB_BALL": 120,  # ROBOT_RADIUS + 30
-    "ANGLE_TO_HALT": 0.09,
-    "RADIUS_TO_HALT": 102,  # ROBOT_RADIUS + BALL_RADIUS
-
-    # Orientation abs_tol
-    "ORIENTATION_ABSOLUTE_TOLERANCE": 1e-4,
-    "SPEED_ABSOLUTE_TOLERANCE": 1e-3,
-
-    # Speed
-    "DEFAULT_MAX_SPEED": 1,
-    "DEFAULT_MIN_SPEED": 0.65,
-
-    # Kick tactic
-    "KICK_BALL_DISTANCE": 80,
-    "KISS_BALL_DISTANCE": 80
 }

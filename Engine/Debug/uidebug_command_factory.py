@@ -169,7 +169,7 @@ class UIDebugCommandFactory(metaclass=Singleton):
 
     @staticmethod
     def multiple_points(points, color=VIOLET, width=5, link=None, timeout=DEFAULT_DEBUG_TIMEOUT):
-        points_as_tuple = [(int(point[0]), int(point[1])) for point in points]
+        points_as_tuple = [(int(point.x), int(point.y)) for point in points]
 
         return DebugCommand(3005, {'points': points_as_tuple,
                                    'color': color.repr(),
