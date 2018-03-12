@@ -114,7 +114,7 @@ def best_passing_option(passing_player, consider_goal=True):
     return receiver_id
 
 
-# noinspection PyPep8Naming,PyPep8Naming,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
+# noinspection PyPep8Naming,PyUnresolvedReferences
 def best_goal_score_option(passing_player):
     # Retourne la meilleure position dans le but pour kick
     goalA = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"],
@@ -179,7 +179,7 @@ def line_of_sight_clearance_ball_legacy(player, target: Position):
     return score
 
 
-# noinspection PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming
+# noinspection PyPep8Naming
 def trajectory_score(pointA, pointsB, obstacle):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
     proportion_max = 15  # Proportion du triangle rectancle derrière les robots obstacles
@@ -233,7 +233,7 @@ def ball_direction(self):
     pass
 
 
-# noinspection PyPep8Naming,PyPep8Naming,PyUnresolvedReferences
+# noinspection PyPep8Naming,PyUnresolvedReferences
 def best_position_in_region(player, A, B):
     # Retourne la position (dans un rectangle aux coins A et B) la mieux placée pour une passe
     ncounts = 5

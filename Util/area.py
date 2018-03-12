@@ -6,7 +6,7 @@ import math as m
 from Util import Position
 
 
-# noinspection PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming
+# noinspection PyPep8Naming
 def isInsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
     # Parameters assertions
     assert(isinstance(position, Position))
@@ -37,7 +37,7 @@ def is_inside_circle(position, center, radius):
         return False
 
 
-# noinspection PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming
+# noinspection PyPep8Naming
 def isOutsideSquare(position, X_TOP, X_BOTTOM, Y_LEFT, Y_RIGHT):
     return not isInsideSquare(position, X_TOP, X_BOTTOM, Y_LEFT, Y_RIGHT)
 
@@ -48,7 +48,7 @@ def isOutsideCircle(position, center, radius):
 
 
 # Reform
-# noinspection PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming
+# noinspection PyPep8Naming
 def stayInsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
     # Parameters assertions
     assert(isinstance(position, Position))
@@ -90,7 +90,7 @@ def stayInsideCircle(position, center, radius):
         return Position(pos_x, pos_y)
 
 
-# noinspection PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming
+# noinspection PyPep8Naming
 def stayOutsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
     # Parameters assertions
     assert(isinstance(position, Position))
