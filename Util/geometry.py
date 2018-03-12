@@ -50,18 +50,6 @@ def clamp(val, min_val, max_val):
     return max(min(val, max_val), min_val)
 
 
-def remove_duplicates(seq, concurent_list=None, round_up_threshold=1):
-
-    seen = set()
-    seen_add = seen.add
-    seq_rounded = round_position_to_number(seq, round_up_threshold)
-    if concurent_list is None:
-        return [x for idx, x in enumerate(seq) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])]
-    else:
-        return [x for idx, x in enumerate(seq) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])], \
-               [y for idx, y in enumerate(concurent_list) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])]
-
-
 def round_position_to_number(positions, base=2):
 
     for position in positions:
