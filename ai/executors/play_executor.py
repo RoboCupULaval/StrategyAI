@@ -50,8 +50,8 @@ class PlayExecutor:
 
         paths = self.pathfinder_module.exec(self.game_state, ai_cmds)
 
-        for player, path in paths.items():
-            engine_cmds.append(generate_engine_cmd(player, ai_cmds[player], path))
+        for player, ai_cmd in ai_cmds.items():
+            engine_cmds.append(generate_engine_cmd(player, ai_cmd, paths[player]))
 
         self._send_robots_status()
 
