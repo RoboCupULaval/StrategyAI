@@ -14,6 +14,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
+# noinspection PyMethodMayBeStatic,PyMethodMayBeStatic,PyUnresolvedReferences,PyUnresolvedReferences
 class Offense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
@@ -38,10 +39,10 @@ class Offense(Strategy):
                 self.add_condition(index, 1, 1, partial(self.has_kicked, player))
 
     def is_closest(self, player):
-        return player == closest_player_to_point(GameState().get_ball_position(), True).player
+        return player == closest_player_to_point(GameState().ball_position, True).player
 
     def is_not_closest(self, player):
-        return player != closest_player_to_point(GameState().get_ball_position(), True).player
+        return player != closest_player_to_point(GameState().ball_position, True).player
 
     def has_kicked(self, player):
         role = GameState().get_role_by_player_id(player.id)

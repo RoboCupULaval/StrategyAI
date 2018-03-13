@@ -3,9 +3,9 @@
 from enum import IntEnum
 from typing import Dict
 
-from RULEngine.services.team_color_service import TeamColorService
-from Util.position import Position
 from Util.constant import TeamColor
+from Util.position import Position
+from Util.team_color_service import TeamColorService
 
 
 class RefereeCommand(IntEnum):
@@ -97,7 +97,8 @@ class Referee:
 
         raw_command = RefereeCommand(referee_info["command"])
         self.command = self._parse_command(raw_command)
-        if self.command == RefereeCommand.BALL_PLACEMENT_US or self.command == RefereeCommand.BALL_PLACEMENT_THEM:
+        if self.command == InternalRefereeCommand.BALL_PLACEMENT_US \
+                or self.command == InternalRefereeCommand.BALL_PLACEMENT_THEM:
             self.ball_placement_point = (referee_info["point"]["x"], referee_info["point"]["y"])
 
         self._parse_team_info(referee_info)
@@ -119,7 +120,7 @@ class Referee:
             info['ours'] = frame.yellow
             info['theirs'] = frame.blue
         else:
-            info['ours']  = frame.blue
+            info['ours'] = frame.blue
             info['theirs'] = frame.yellow
 
         for key in info.keys():
@@ -134,25 +135,29 @@ class Referee:
             self.team_info[key]['timeout_time'] = info[key].timeout_time
             self.team_info[key]['goalie'] = info[key].goalie
 
-    # TODO
-    # def _convert_raw_to_us(self, command):
-    #     if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW:
-    #         return command + 30
-    #     else:
-    #         return command + 29
-    #
-    # def _convert_raw_to_them(self, command):
-    #     if TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW:
-    #         return command + 30
-    #     else:
-    #         return command + 31
+    @staticmethod
+    def _convert_raw_to_us(command):
+        if TeamColorService().our_team_color is TeamColor.YELLOW:
+            return command + 30
+        else:
+            return command + 29
 
-    # def _is_our_team_command(self, command):
-    #     return (self._is_yellow_command(command) and TeamColorService().OUR_TEAM_COLOR is TeamColor.YELLOW) or\
-    #             (self._is_blue_command(command) and TeamColorService().OUR_TEAM_COLOR is TeamColor.BLUE)
-    #
-    # def _is_yellow_command(self, command):
-    #     return (command % 2) == 0 # even commands are yellow commands
-    #
-    # def _is_blue_command(self, command):
-    #     return not self._is_yellow_command(command)
+    @staticmethod
+    def _convert_raw_to_them(command):
+        if TeamColorService().our_team_color is TeamColor.YELLOW:
+            return command + 30
+        else:
+            return command + 31
+
+    @staticmethod
+    def _is_our_team_command(command):
+        return (Referee._is_yellow_command(command) and TeamColorService().our_team_color is TeamColor.YELLOW) or\
+             (Referee._is_blue_command(command) and TeamColorService().our_team_color is TeamColor.BLUE)
+
+    @staticmethod
+    def _is_yellow_command(command):
+        return (command % 2) == 0  # even commands are yellow commands
+
+    @staticmethod
+    def _is_blue_command(command):
+        return not Referee._is_yellow_command(command)

@@ -5,9 +5,8 @@ __author__ = "Maxime Gagnon-Legault"
 import math
 import numpy as np
 
-from Util import Pose, Position, AICommand
+from Util import Pose, AICommand
 
-from ai.GameDomainObjects import Player
 from Util.position import Position
 from Util.geometry import wrap_to_pi
 from ai.GameDomainObjects import Player
@@ -15,6 +14,7 @@ from ai.STA.Action.Action import Action
 from ai.states.game_state import GameState
 
 
+# noinspection PyUnresolvedReferences
 class GoBehind(Action):
     """
     Action GoBehind: Déplace le robot au point le plus proche sur la droite, derrière un objet dont la position
@@ -50,7 +50,6 @@ class GoBehind(Action):
         self.cruise_speed = cruise_speed
         self.orientation = orientation
 
-        # TODO find something better MGL 2017/05/22 TODO repair MGL 2018/01/25
         if self.position2 is None:
             self.position2 = game_state.const["FIELD_THEIR_GOAL_MID_GOAL"]
 
@@ -74,7 +73,6 @@ class GoBehind(Action):
         norm_position1_2_position2 = math.sqrt((self.position1.x - self.position2.x) ** 2 +
                                                (self.position1.y - self.position2.y) ** 2)
 
-        # TODO: Remove this part of the logic, since we have a pathfinder to do all of that...
         if norm_player_2_position2 < norm_position1_2_position2:
             # on doit contourner l'objectif
 
@@ -105,7 +103,6 @@ class GoBehind(Action):
             destination_position = Position(x, y)
 
         # Calcul de l'orientation de la pose de destination
-        # TODO why?!? MGL 2017/05/22
         destination_orientation = 0
         if self.orientation == 'front':
             destination_orientation = (self.position1 - destination_position).angle

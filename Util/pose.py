@@ -1,5 +1,6 @@
 # Under MIT License, see LICENSE.txt
 import math as m
+import numpy as np
 
 from Util.position import Position
 
@@ -18,7 +19,7 @@ class Pose:
         return cls(Position(my_dict['x'], my_dict['y']), my_dict['orientation'])
 
     @classmethod
-    def from_values(cls, x, y, orientation):
+    def from_values(cls, x, y, orientation=0):
         return cls(Position(x, y), orientation)
 
     @property
@@ -43,7 +44,11 @@ class Pose:
 
     @position.setter
     def position(self, position: Position):
-            self._position = position.copy()
+        self._position = position.copy()
+
+    @property
+    def norm(self):
+        return self.position.norm
 
     @property
     def orientation(self):
@@ -53,14 +58,18 @@ class Pose:
     def orientation(self, orientation):
         self._orientation = orientation
 
+    def to_array(self):
+        return np.array([self.x, self.y, self.orientation])
+
     def to_dict(self):
         return {'x': self.x, 'y': self.y, 'orientation': self.orientation}
 
     def __add__(self, other: Position):
+        assert(isinstance(other, Position))
         return Pose(self.position + other, self.orientation)
 
     def __sub__(self, other: Position):
-        return self + (-other.position)
+        return self + (-other)
 
     def __eq__(self, other):
         orientation_equal = m.isclose(self.orientation, other.orientation,
@@ -76,11 +85,3 @@ class Pose:
 
     def __repr__(self):
         return 'Pose' + str(self)
-
-
-def wrap_to_pi(angle: float):
-    return (angle + m.pi) % (2 * m.pi) - m.pi
-
-
-def compare_angle(angle1: float, angle2: float, *, abs_tol=0.004):
-    return m.isclose(wrap_to_pi(angle1 - angle2), 0, abs_tol=abs_tol, rel_tol=0)

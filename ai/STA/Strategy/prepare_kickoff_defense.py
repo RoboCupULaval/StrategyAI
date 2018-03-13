@@ -12,6 +12,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
+# noinspection PyArgumentList,PyArgumentList,PyArgumentList,PyArgumentList,PyArgumentList,PyArgumentList,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 class PrepareKickOffDefense(Strategy):
 
     def __init__(self, p_game_state):
@@ -30,15 +31,15 @@ class PrepareKickOffDefense(Strategy):
 
         # Positions objectifs des joueurs
         attack_top_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
-                                   GameState().const["FIELD_Y_BOTTOM"] * 3 / 5)
+                                   GameState().const["FIELD_Y_BOTTOM"] * 3 / 5, 0)
         attack_bottom_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
-                                      GameState().const["FIELD_Y_TOP"] * 3 / 5)
-        middle_position = Pose(center_offset + GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10, 0)
+                                      GameState().const["FIELD_Y_TOP"] * 3 / 5, 0)
+        middle_position = Pose(center_offset + GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10, 0, 0)
 
         defense_top_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                    GameState().const["FIELD_Y_TOP"] / 10)
+                                    GameState().const["FIELD_Y_TOP"] / 10, 0)
         defense_bottom_position = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                       GameState().const["FIELD_Y_BOTTOM"] / 10)
+                                       GameState().const["FIELD_Y_BOTTOM"] / 10, 0)
 
         our_goal = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0, 0)
 

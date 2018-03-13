@@ -27,8 +27,8 @@ def compare_pose_orientation(pose1: Pose, pose2: Pose, abs_tol=0.004) -> bool:
 
 
 def rotate(vec: Position, angle) -> Position:
-    rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]).view(Position)
-    return rotation @ vec
+    rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    return Position.from_array(rotation @ vec.array)
 
 
 def normalize(vec: Position) -> Position:
@@ -48,21 +48,6 @@ def are_close(vec1: Position, vec2: Position, abs_tol=0.001) -> bool:
 
 def clamp(val, min_val, max_val):
     return max(min(val, max_val), min_val)
-
-
-def remove_duplicates(seq, concurent_list=None, round_up_threshold=1):
-    # TODO: Clean that. Seems to complicate for nothing. + Varible return argument
-
-    seen = set()
-    seen2 = set()
-    seen_add = seen.add
-    seen2_add = seen2.add
-    seq_rounded = round_position_to_number(seq, round_up_threshold)
-    if concurent_list is None:
-        return [x for idx, x in enumerate(seq) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])]
-    else:
-        return [x for idx, x in enumerate(seq) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])], \
-               [y for idx, y in enumerate(concurent_list) if not seq_rounded[idx] in seen or seen_add(seq_rounded[idx])]
 
 
 def round_position_to_number(positions, base=2):
@@ -95,6 +80,8 @@ def get_closest_point_on_line(reference: Position,
 
     delta_x = position2.x - position1.x
     delta_y = position2.y - position1.y
+
+    pos_x, pos_y = 0, 0
 
     if delta_x != 0 and delta_y != 0:   # droite quelconque
         pente = delta_y / delta_x

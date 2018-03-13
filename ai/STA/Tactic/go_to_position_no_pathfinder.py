@@ -11,6 +11,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
+# noinspection PyArgumentList
 class GoToPositionNoPathfinder(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose, args: List[str]=None):
         super().__init__(game_state, player, target, args)

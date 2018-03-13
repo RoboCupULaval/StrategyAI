@@ -2,7 +2,7 @@
 from typing import List
 
 from Util import Pose
-from Util.ai_command import CmdBuilder, AICommand
+from Util.ai_command import AICommand
 from ai.GameDomainObjects import Player
 from ai.STA.Action import Action
 from Util.ai_command import Idle
@@ -50,7 +50,7 @@ class Tactic(object):
             :return: un nouvelle instance de l'action Idle pour le robot
         """
         self.next_state = self.halt
-        return CmdBuilder().build()
+        return Idle
 
     def exec(self) -> AICommand:
         """

@@ -1,22 +1,29 @@
 import numpy as np
 import csv
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import time
 import os
 
 
+class Observer:
+    def __init__(self):
+        pass
+
+    def write(self, poses):
+        pass
+
+
 class CsvPlotter:
     def __init__(self):
+        self.time = time.time() - self.time_init
         self.time_init = time.time()
         try:
             os.remove("data234.csv")
-        except:
+        except FileNotFoundError:
             pass
         self.file = open("data234.csv", 'w')
 
-
     def write(self, values):
-        self.time = time.time() - self.time_init
         writer = csv.writer(self.file, dialect='excel')
         values += [self.time]
         writer.writerow(values)

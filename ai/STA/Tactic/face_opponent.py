@@ -14,6 +14,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
+# noinspection PyArgumentList,PyArgumentList,PyArgumentList,PyArgumentList,PyArgumentList,PyAttributeOutsideInit,PyTypeChecker
 class FaceOpponent(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
                  args: List[str]=None, distance=500, collision_ball=False,
@@ -26,14 +27,14 @@ class FaceOpponent(Tactic):
         self.charge_kick = charge_kick
         self.end_speed = end_speed
         self.dribbler_on = dribbler_on
-        self.cruise_speed = float(args[0]) if len(self.args > 0) else cruise_speed
+        self.cruise_speed = cruise_speed
 
     def exec(self):
-        self.target_player = closest_player_to_point(self.game_state.get_ball_position(), our_team=False).player
+        self.target_player = closest_player_to_point(self.game_state.ball_position, our_team=False).player
         orientation_opponent = np.array([math.cos(self.target_player.pose.orientation),
                                          math.sin(self.target_player.pose.orientation)])
         destination_position = self.target_player.pose.position + self.distance * orientation_opponent
-        ball_to_player = self.game_state.get_ball_position() - self.player.pose.orientation
+        ball_to_player = self.game_state.ball_position - self.player.pose.orientation
         destination_orientation = ball_to_player.angle
         destination_pose = Pose(destination_position, destination_orientation)
 

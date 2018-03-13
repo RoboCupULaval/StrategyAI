@@ -1,24 +1,19 @@
-from typing import List
 
 from Util import Position
 from ai.GameDomainObjects import Ball
 
 
 class Field:
-    def __init__(self, balls: List[Ball]):
+    def __init__(self, ball: Ball):
 
-        self._balls = balls
+        self._ball = ball
         self._constant = constant
 
     @property
     def ball(self):
-        if len(self._balls) == 0:
-            raise RuntimeError("There is no ball to detect")
-        return self._balls[0]
-
-    @property
-    def balls(self):
-        return self._balls
+        if not self._ball:
+            raise RuntimeError('There is no ball to detect')
+        return self._ball
 
     @property
     def constant(self):

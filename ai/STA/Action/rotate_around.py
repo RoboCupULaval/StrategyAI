@@ -4,9 +4,8 @@ import math as m
 from typing import Union
 
 from Util import Pose
-from Util.ai_command_shit import AICommand, AICommandType
+from Util.ai_command import CmdBuilder
 
-from Util.ai_command_shit import AICommand, AICommandType
 from Util.geometry import compare_angle, wrap_to_pi, rotate, normalize
 from ai.GameDomainObjects import Player
 from ai.STA.Action import Action
@@ -16,6 +15,7 @@ DEFAULT_ROTATION_SPEED = 6*m.pi  # rad/s
 DEFAULT_RADIUS = 150  # mm
 
 
+# noinspection PyTypeChecker
 class RotateAround(Action):
     def __init__(self, game_state: GameState,
                  player: Player,
@@ -95,15 +95,9 @@ class RotateAround(Action):
 
     def exec(self):
         if self.approach:
-            return AICommand(self.player,
-                             AICommandType.MOVE,
-                             pose_goal=self.generate_destination(),
-                             pathfinder_on=self.pathfinder_on,
-                             cruise_speed=self.approach_speed,
-                             end_speed=self.tangential_speed)
+            return CmdBuilder().addMoveTo(self.generate_destination(),
+                                          cruise_speed=self.approach_speed,
+                                          end_speed=self.tangential_speed).build()
         else:
-            return AICommand(self.player,
-                             AICommandType.MOVE,
-                             pose_goal=self.generate_destination(),
-                             pathfinder_on=self.pathfinder_on,
-                             end_speed=self.tangential_speed)
+            return CmdBuilder().addMoveTo(self.generate_destination(),
+                                          end_speed=self.tangential_speed).build()

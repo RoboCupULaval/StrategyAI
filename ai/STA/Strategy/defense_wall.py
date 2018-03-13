@@ -8,13 +8,13 @@ from Util.pose import Pose
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
-from ai.STA.Tactic.face_opponent import FaceOpponent
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
+# noinspection PyMethodMayBeStatic,PyMethodMayBeStatic,PyUnresolvedReferences,PyUnresolvedReferences
 class DefenseWall(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4):
         super().__init__(game_state)
@@ -35,22 +35,18 @@ class DefenseWall(Strategy):
             if player:
                 self.add_tactic(role, AlignToDefenseWall(self.game_state, player, self.robots))
                 self.add_tactic(role, GoKick(self.game_state, player, target=self.theirgoal))
-                self.add_tactic(role, FaceOpponent(self.game_state, player, Pose()))
 
                 self.add_condition(role, 0, 1, partial(self.is_closest, player))
-                self.add_condition(role, 2, 1, partial(self.is_closest, player))
                 self.add_condition(role, 1, 1, partial(self.is_closest, player))
-                self.add_condition(role, 1, 2, partial(self.is_not_closest, player))
-                self.add_condition(role, 2, 0, partial(self.is_not_one_of_the_closests, player))
-                self.add_condition(role, 0, 2, partial(self.is_second_closest, player))
+                self.add_condition(role, 1, 0, partial(self.is_not_closest, player))
 
     def is_closest(self, player):
-        if player == closest_players_to_point(GameState().get_ball_position(), True)[0].player:
+        if player == closest_players_to_point(GameState().ball_position, True)[0].player:
             return True
         return False
 
     def is_second_closest(self, player):
-        if player == closest_players_to_point(GameState().get_ball_position(), True)[1].player:
+        if player == closest_players_to_point(GameState().ball_position, True)[1].player:
             return True
         return False
 

@@ -24,6 +24,7 @@ DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
 COMMAND_DELAY = 1.0
 
 
+# noinspection PyAttributeOutsideInit,PyTypeChecker,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 class AlignToDefenseWall(Tactic):
     def __init__(self, game_state: GameState, player: Player, robots_in_formation: List[Player], auto_pick=False,
                  args: List[str]=None):
@@ -35,11 +36,11 @@ class AlignToDefenseWall(Tactic):
         self.last_time = time.time()
         self.robots_in_formation = robots_in_formation
         self.auto_pick = auto_pick
-        self.robots = robots_in_formation
+        self.robots = robots_in_formation.copy()
         self.player = player
         self.field_goal_radius = self.game_state.const["FIELD_GOAL_RADIUS"]
         self.field_goal_segment = self.game_state.const["FIELD_GOAL_SEGMENT"]
-        self.keep_out_distance = self.field_goal_radius + np.divide(self.field_goal_segment, 2.)
+        self.keep_out_distance = self.field_goal_radius * 1.5
         self.goal_width = self.game_state.const["FIELD_GOAL_WIDTH"]
         self.goal_middle = Position(self.game_state.field.constant["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
         self.position_middle_formation = Position(0, 0)
@@ -53,9 +54,9 @@ class AlignToDefenseWall(Tactic):
     def get_players_in_formation(self):
         self.player_number_in_formation = None
         self.robots_in_formation = self.robots
-        for idx, player in enumerate(self.robots):
-            if not self.is_not_one_of_the_closests(player):
-                del self.robots_in_formation[idx]
+        # for idx, player in enumerate(self.robots):
+        #     if not self.is_not_one_of_the_closests(player):
+        #         del self.robots_in_formation[idx]
         for idx, player in enumerate(self.robots_in_formation):
             if self.player == player:
                 self.player_number_in_formation = idx
@@ -84,7 +85,7 @@ class AlignToDefenseWall(Tactic):
         propriété des triangles semblables.
         """
 
-        self.ball_position = self.game_state.get_ball_position()
+        self.ball_position = self.game_state.ball_position
         self.vec_ball_2_goal = self.goal_middle - self.ball_position
         """
         respecte la règle de la main droite et pointe toujours vers le coin suppérieur du but si on est à gauche du 
@@ -166,6 +167,7 @@ class AlignToDefenseWall(Tactic):
                 break
         # print(self.robots_in_formation)
         # print(self.player_number_in_formation)
+        # print(self.player.id)
         if self.check_success():
             return self.halt
         else:
@@ -187,19 +189,19 @@ class AlignToDefenseWall(Tactic):
         return False
 
     @staticmethod
-    def is_closest(player):
-        if player == closest_players_to_point(GameState().get_ball_position(), True)[0].player:
+    def is_closest(robots, player):
+        if player == closest_players_to_point(GameState().ball_position, True, robots)[0].player:
             return True
         return False
 
     @staticmethod
-    def is_second_closest(player):
-        if player == closest_players_to_point(GameState().get_ball_position(), True)[1].player:
+    def is_second_closest(robots, player):
+        if player == closest_players_to_point(GameState().ball_position, True, robots)[1].player:
             return True
         return False
 
     def is_not_closest(self, player):
-        return not(self.is_closest(player))
+        return not(self.is_closest(self.robots, player))
 
     def is_not_one_of_the_closests(self, player):
-        return not(self.is_closest(player) or self.is_second_closest(player))
+        return not(self.is_closest(self.robots, player) or self.is_second_closest(self.robots, player))
