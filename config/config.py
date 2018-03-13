@@ -1,108 +1,97 @@
-from configparser import ConfigParser, ParsingError
 
+from configparser import ConfigParser, ParsingError
+import logging
 from Util import Singleton
+
+mandatory_fields = {
+    'COMMUNICATION': ['type', 'field_port_file', 'vision_port', 'ui_debug_address'],
+    'GAME': ['our_color', 'type', 'our_side', 'autonomous_play', 'ai_timestamp'],
+    'IMAGE': ['number_of_camera'],
+    'DEBUG': ['using_debug'],
+}
 
 
 class Config(metaclass=Singleton):
 
     def __init__(self):
-        self._config_dict = self._load_defaults()
+        self._config = None
         self._config_was_set = False
+        self.logger = logging.getLogger('Config')
 
-    def load_file(self, input_config_file) -> None:
-        config_parser = ConfigParser(allow_no_value=False)
-        try:
-            config_parser.read_file(open(input_config_file))
-        except FileNotFoundError:
-            print('Impossible de lire le fichier de configuration.\nLoading default simulation with kalman settings')
-            config_parser.read_dict(default_dict)
-        except ParsingError:
-            print('Le fichier de configuration est mal configuré.\nExiting!')
-            exit(1)
+    def load_file(self, filename: str):
 
-        self._config_dict = {s: dict(config_parser.items(s)) for s in config_parser.sections()}
+        self._config = self.read_config_file(filename)
 
-        if 'field_port_file' not in self['COMMUNICATION']:
-            raise RuntimeError('field_port_file must now be specify and point to the port of vision and ref')
-        if 'vision_port' in self['COMMUNICATION']:
-            raise RuntimeError('The vision_port must be specify in the \'field_port_file\' file')
-
-        if 'ui_cmd_sender_port' in self['COMMUNICATION'] or \
-           'ui_cmd_receiver_port' in self['COMMUNICATION']:
-            raise RuntimeError('The ui_cmd_sender_port and ui_cmd_receiver_port are hardcoded base'
-                               ' on the our team color, removed them from config file')
-        field_port_file = self['COMMUNICATION']['field_port_file']
-        try:
-            config_parser.read_file(open(field_port_file))
-        except FileNotFoundError:
-            print('Impossible de lire le fichier de configuration.\nLoading default simulation with kalman settings')
-            config_parser.read_dict(default_dict)
-        except ParsingError:
-            print('Le fichier de configuration est mal configuré.\nExiting!')
-            exit(1)
-        field_port = {s: dict(config_parser.items(s)) for s in config_parser.sections()}
-        self['COMMUNICATION'] = field_port['COMMUNICATION']
-
-        if 'play_zone' not in self['GAME']:
-            self['GAME']['play_zone'] = 'full'
-        if self['GAME']['play_zone'] not in ['full', 'positive', 'negative']:
-            raise RuntimeError('play_zone is either full, positive or negative')
-
-        # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
-        our_color = self['GAME']['our_color']
-        if our_color == 'blue':
-            self['COMMUNICATION']['ui_cmd_sender_port'] = 14444    # DO NOT TOUCH
-            self['COMMUNICATION']['ui_cmd_receiver_port'] = 15555  # DO NOT TOUCH
-        elif our_color == "yellow":
-            self['COMMUNICATION']['ui_cmd_sender_port'] = 16666    # DO NOT TOUCH
-            self['COMMUNICATION']['ui_cmd_receiver_port'] = 17777  # DO NOT TOUCH
+        field_config_filename = self['COMMUNICATION']['field_port_file']
+        if 'field_port_file' in self['COMMUNICATION']:
+            field_config = self.read_config_file(field_config_filename)
+            self._config['COMMUNICATION'].update(field_config['COMMUNICATION'])
         else:
-            ValueError("Config file contains wrong colors! Should be either blue or yellow, not {}".format(our_color))
+            self.logger.critical('Cannot find the field_port_file field in {}.'.format(field_config_filename))
+            exit(1)
 
-        # [print(key,':' ,value) for key, value in self['COMMUNICATION'].items()]
-        self['IMAGE']['number_of_camera'] = int(self['IMAGE']['number_of_camera'])
-        self['GAME']['ai_timestamp'] = float(self['GAME']['ai_timestamp'])
+        self.validate_user_input()
+        self.update_content()
 
         self._config_was_set = True
 
+    def read_config_file(self, filename: str):
+
+        config_parser = ConfigParser(allow_no_value=False)
+        try:
+            config_parser.read_file(open(filename))
+        except FileNotFoundError:
+            self.logger.critical('The .cfg file {} was not found.'.format(filename))
+            exit(1)
+        except ParsingError:
+            self.logger.critical('The .cfg file {} was not parse correctly.'.format(filename))
+            exit(1)
+
+        config_dict = {section: dict(config_parser.items(section)) for section in config_parser.sections()}
+
+        return config_dict
+
+    def update_content(self):
+
+        if 'play_zone' not in self['GAME']:
+            self['GAME']['play_zone'] = 'full'
+
+        self['IMAGE']['number_of_camera'] = int(self['IMAGE']['number_of_camera'])
+        self['GAME']['ai_timestamp'] = float(self['GAME']['ai_timestamp'])
+
+        # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
+        if self['GAME']['our_color'] == 'blue':
+            self['COMMUNICATION']['ui_cmd_sender_port'] = 14444    # DO NOT TOUCH
+            self['COMMUNICATION']['ui_cmd_receiver_port'] = 15555  # DO NOT TOUCH
+        else:
+            self['COMMUNICATION']['ui_cmd_sender_port'] = 16666    # DO NOT TOUCH
+            self['COMMUNICATION']['ui_cmd_receiver_port'] = 17777  # DO NOT TOUCH
+
+    def validate_user_input(self):
+
+        do_exit = False
+        for section, fields in mandatory_fields.items():
+            for field in fields:
+                if field not in self[section]:
+                    self.logger.critical('Mandatory field \'{}\' is missing from section \'{}\''.format(field, section))
+                    do_exit = True
+
+        if 'play_zone' in self['GAME']:
+            if self['GAME']['play_zone'] not in ['full', 'positive', 'negative']:
+                self.logger.critical('play_zone is either full, positive or negative.')
+                do_exit = True
+
+        if self['GAME']['our_color'] not in ['yellow', 'blue']:
+            self.logger.critical('our_color should be either blue or yellow, not {}.'.format(self['GAME']['our_color']))
+            do_exit = True
+
+        if do_exit:
+            exit(1)
+
     def __getitem__(self, item):
-        return self._config_dict[item]
+        return self._config[item]
 
     def __setitem__(self, key, value):
         if self._config_was_set:
-            raise RuntimeError("You can't change the configuration after it has been loaded from a file.")
-        self._config_dict[key] = value
-
-
-    @staticmethod
-    def _load_defaults():
-        config_parser = ConfigParser(allow_no_value=False)
-        config_parser.read_dict(default_dict)
-        return {s: dict(config_parser.items(s)) for s in config_parser.sections()}
-
-
-default_dict = {'GAME': {'type': 'sim',
-                         'our_color': 'blue',
-                         'their_color': 'yellow',
-                         'our_side': 'positive',
-                         'autonomous_play': 'false',
-                         'ai_timestamp': '0.05',
-                         'play_zone': 'full',
-                         'kalman_matrix_flag': 'false'},
-                'COMMUNICATION': {'type': 'sim',
-                                  'redirect': 'true',
-                                  'referee_udp_address': '224.5.23.2',
-                                  'referee_port': '10003',
-                                  'vision_referee_udp_address': '224.5.23.2',
-                                  'vision_port': '10020',
-                                  'ui_debug_address': '127.0.0.1',
-                                  'ui_cmd_sender_port': '14444',
-                                  'ui_cmd_receiver_port': '15555',
-                                  'ui_vision_sender_port': '10022'},
-                'IMAGE': {'kalman': 'true',
-                          'number_of_camera': '1',
-                          'frames_to_extrapolate': '20'},
-                'STRATEGY': {'pathfinder': 'path_part'},
-                'DEBUG': {'using_debug': 'true',
-                          'allow_debug': 'true'}
-                }
+            raise RuntimeError('You can\'t change the configuration after it has been loaded from a file.')
+        self._config[key] = value
