@@ -14,7 +14,7 @@ mandatory_fields = {
 class Config(metaclass=Singleton):
 
     def __init__(self):
-        self._config = None
+        self._config = {}
         self._config_was_set = False
         self.logger = logging.getLogger('Config')
 
@@ -87,6 +87,12 @@ class Config(metaclass=Singleton):
 
         if do_exit:
             exit(1)
+
+    def set_default(self):
+        self['GAME'] = {}
+        self['GAME']['our_color'] = 'yellow'
+        self['GAME']['their_color'] = 'blue'
+        self._config_was_set = True
 
     def __getitem__(self, item):
         return self._config[item]
