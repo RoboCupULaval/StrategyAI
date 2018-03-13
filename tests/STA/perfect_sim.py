@@ -2,7 +2,7 @@
 import logging
 
 from Util import Pose, Position
-from Util.constant import ROBOT_RADIUS
+from Util.constant import ROBOT_RADIUS, ROBOT_CENTER_TO_KICKER, BALL_RADIUS
 from Util.geometry import compare_angle
 from ai.GameDomainObjects import Ball
 from ai.STA.Tactic.tactic import Tactic
@@ -72,8 +72,8 @@ class PerfectSim:
             self.has_charge_kick = True
 
     def _robot_can_hit_ball(self, robot):
-        KICK_DISTANCE_MIN = ROBOT_RADIUS - 30
-        KICK_DISTANCE_MAX = ROBOT_RADIUS + 100
+        KICK_DISTANCE_MIN = ROBOT_CENTER_TO_KICKER + BALL_RADIUS * 0.5
+        KICK_DISTANCE_MAX = ROBOT_CENTER_TO_KICKER + BALL_RADIUS * 1.5
         MAX_ANGLE_FOR_KICK = 15
 
         ball_position = self.game_state.ball.position

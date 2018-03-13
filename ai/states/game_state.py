@@ -86,7 +86,10 @@ class GameState(metaclass=Singleton):
 
     @ball.setter
     def ball(self, ball: Ball):
-        self._field = Field([ball])
+        """
+        Should only used by PerfectSim or other testing utility
+        """
+        self._field = Field(ball)
 
     @property
     def is_ball_on_field(self):

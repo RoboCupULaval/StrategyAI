@@ -92,7 +92,7 @@ class GoKick(Tactic):
         self.tries_flag += 1
 
         player_to_target = (self.target.position - self.player.pose.position)
-        behind_ball = self.game_state.ball_position - normalize(player_to_target) * (2 * BALL_RADIUS + ROBOT_CENTER_TO_KICKER)
+        behind_ball = self.game_state.ball_position - normalize(player_to_target) * (BALL_RADIUS + ROBOT_CENTER_TO_KICKER)
         orientation = player_to_target.angle
 
         return CmdBuilder().addMoveTo(Pose(behind_ball, orientation)).addKick(self.kick_force).build()
