@@ -66,6 +66,9 @@ class ConfigService(metaclass=Singleton):
     def __setitem__(self, key, value):
         self._config_dict[key] = value
 
+        self.config_dict['IMAGE']['number_of_camera'] = int(self.config_dict['IMAGE']['number_of_camera'])
+        self.config_dict['GAME']['ai_timestamp'] = float(self.config_dict['GAME']['ai_timestamp'])
+
     @staticmethod
     def _load_defaults():
         config_parser = ConfigParser(allow_no_value=False)
