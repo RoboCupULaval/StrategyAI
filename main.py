@@ -32,21 +32,15 @@ def set_arg_parser():
                             action='store_true',
                             help='Flag when we are on the negative x side of the field.',
                             default=False)
-    
-    arg_parser.add_argument('--queue_size',
-                            action='store',
-                            type=int,
-                            help='Max size of the inter process queues.',
-                            default=100)
 
     return arg_parser
 
 
 if __name__ == '__main__':
     # parser for command line arguments
-    PARSER = set_arg_parser()
-    ARGS = PARSER.parse_args()
-    ConfigService().load_file(ARGS.config_file)
+    parser = set_arg_parser()
+    cli_args = set_arg_parser().parse_args()
+    ConfigService().load_file(cli_args.config_file)
 
     # Engine init
-    FRAMEWORK = Framework(ARGS)
+    FRAMEWORK = Framework(cli_args)

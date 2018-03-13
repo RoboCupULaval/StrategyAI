@@ -2,30 +2,19 @@
 
 import logging
 import time
-from argparse import Namespace
 from multiprocessing import Queue, Manager
-import signal  # so we can stop gracefully
+import signal
 
 from Engine.engine import Engine
 from ai.coach import Coach
 from config.config_service import ConfigService
 
-__author__ = "Maxime Gagnon-Legault"
-
 
 class Framework:
-    """
-        La classe contient la logique nécessaire pour communiquer avec
-        les différentes parties(simulation, vision, uidebug et/ou autres),
-         maintenir l'état du monde (jeu, referree, debug, etc...) et appeller
-         l'ia.
-    """
+
+    QUEUE_SIZE = 100
 
     def __init__(self, cli_args):
-        """ Constructeur de la classe, établis les propriétés de bases et
-        construit les objets qui sont toujours necéssaire à son fonctionnement
-        correct.
-        """
 
         # logger
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
@@ -39,10 +28,10 @@ class Framework:
         self.field = Manager().dict()
 
         # Queues
-        self.ai_queue = Queue(maxsize=cli_args.queue_size)
-        self.referee_queue = Queue(maxsize=cli_args.queue_size)
-        self.ui_send_queue = Queue(maxsize=cli_args.queue_size)
-        self.ui_recv_queue = Queue(maxsize=cli_args.queue_size)
+        self.ai_queue = Queue(maxsize=Framework.QUEUE_SIZE)
+        self.referee_queue = Queue(maxsize=Framework.QUEUE_SIZE)
+        self.ui_send_queue = Queue(maxsize=Framework.QUEUE_SIZE)
+        self.ui_recv_queue = Queue(maxsize=Framework.QUEUE_SIZE)
 
         # Engine
         self.engine = Engine(self.game_state,
