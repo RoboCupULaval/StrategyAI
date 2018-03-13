@@ -6,9 +6,6 @@ from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS
 from Util.geometry import compare_angle
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
-from config.config import Config
-
-Config().set_default()
 
 
 class PerfectSim:
