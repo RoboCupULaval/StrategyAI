@@ -14,7 +14,7 @@ from ai.Util.sta_change_command import STAChangeCommand
 from ai.executors.pathfinder_module import PathfinderModule
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
-from config.config_service import ConfigService
+from config.config import Config
 
 
 class PlayExecutor:
@@ -22,7 +22,7 @@ class PlayExecutor:
     def __init__(self, play_state: PlayState, ui_send_queue: Queue):
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        cfg = ConfigService()
+        cfg = Config()
         self.auto_play = SimpleAutoPlay(play_state)
         self.play_state = play_state
         self.game_state = GameState()
@@ -50,8 +50,8 @@ class PlayExecutor:
 
         paths = self.pathfinder_module.exec(self.game_state, ai_cmds)
 
-        for player, path in paths.items():
-            engine_cmds.append(generate_engine_cmd(player, ai_cmds[player], path))
+        for player, ai_cmd in ai_cmds.items():
+            engine_cmds.append(generate_engine_cmd(player, ai_cmd, paths[player]))
 
         self._send_robots_status()
 
@@ -91,8 +91,9 @@ class PlayExecutor:
 
     def _execute_strategy(self) -> Dict[Player, AICommand]:
         # Applique un stratégie par défault s'il n'en a pas (lors du démarage par exemple)
+        # Apply the default strategy if there is none (for example at startup)
         if self.play_state.current_strategy is None:
-            self.play_state.current_strategy = "HumanControl"
+            self.play_state.current_strategy = "DoNothing"
         return self.play_state.current_strategy.exec()
 
     def _send_robots_status(self) -> None:

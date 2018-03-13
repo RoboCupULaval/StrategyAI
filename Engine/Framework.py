@@ -7,7 +7,7 @@ import signal
 
 from Engine.engine import Engine
 from ai.coach import Coach
-from config.config_service import ConfigService
+from config.config import Config
 
 
 class Framework:
@@ -21,7 +21,7 @@ class Framework:
         self.logger = logging.getLogger("Framework")
 
         # config
-        self.cfg = ConfigService()
+        self.cfg = Config()
 
         # Managers
         self.game_state = Manager().dict()

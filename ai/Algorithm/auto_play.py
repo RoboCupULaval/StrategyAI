@@ -22,9 +22,6 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
         self.next_state = None
         self.last_state = None
 
-    def get_selected_strategy(self):
-        return self.selected_strategy
-
     @property
     def info(self):
         return {

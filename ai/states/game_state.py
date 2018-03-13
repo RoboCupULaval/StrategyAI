@@ -14,7 +14,9 @@ class GameState(metaclass=Singleton):
 
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.reset()
 
+    def reset(self):
         self._role_mapper = RoleMapper()
 
         self._ball = Ball()
@@ -81,6 +83,13 @@ class GameState(metaclass=Singleton):
     @property
     def ball(self) -> Ball:
         return self._field.ball
+
+    @ball.setter
+    def ball(self, ball: Ball):
+        """
+        Should only used by PerfectSim or other testing utility
+        """
+        self._field = Field(ball)
 
     @property
     def is_ball_on_field(self):
