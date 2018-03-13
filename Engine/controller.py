@@ -14,7 +14,7 @@ from Util.team_color_service import TeamColorService
 from Util.csv_plotter import Observer
 
 
-class Controller(list):
+class Controller:
 
     def __init__(self, observer=Observer):
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
@@ -23,9 +23,9 @@ class Controller(list):
         self.timestamp = None
         self.observer = observer
 
-        super().__init__(Robot(robot_id) for robot_id in range(PLAYER_PER_TEAM))
+        self.robots = [Robot(robot_id) for robot_id in range(PLAYER_PER_TEAM)]
 
-        for robot in self:
+        for robot in self.robots:
             robot.position_regulator = PositionRegulator()
             robot.velocity_regulator = VelocityRegulator()
 
@@ -70,3 +70,13 @@ class Controller(list):
                             dribbler_active=self[robot_id].engine_cmd.dribbler_active,
                             charge_kick=self[robot_id].engine_cmd.charge_kick))
         return packet
+
+    def __iter__(self):
+        for robot in self.robots:
+            yield robot
+
+    def __getitem__(self, item):
+        return self.robots[item]
+
+    def __setitem__(self, key, item):
+        self.robots[key] = item

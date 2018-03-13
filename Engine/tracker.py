@@ -26,8 +26,8 @@ class Tracker:
         self.logger = logging.getLogger('Tracker')
 
         self.cfg = ConfigService()
-        self.team_color = self.cfg.config_dict['GAME']['our_color']
-        self.our_side = self.cfg.config_dict['GAME']['our_side']
+        self.team_color = self.cfg['GAME']['our_color']
+        self.our_side = self.cfg['GAME']['our_side']
 
         self.vision_state = vision_state
 
