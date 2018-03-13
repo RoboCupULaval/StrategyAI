@@ -34,26 +34,26 @@ class TestPosition(unittest.TestCase):
     def test_givenStartTarget_whenNew_thenReturnPath(self):
         path = Path(start=A_START, target=A_TARGET)
         self.assertEqual(path.start, A_START)
-        self.assertEqual(path.target, A_TARGET)
+        assert path.target == A_TARGET
 
     def test_givenStartTargetArray_whenFromArray_thenReturnPath(self):
         path = Path.from_array(A_START_ARRAY, A_TARGET_ARRAY)
         self.assertEqual(path.start, A_START)
-        self.assertEqual(path.target, A_TARGET)
+        assert path.target == A_TARGET
 
-    def test_givenListOfPosition_whenFromPoints_thenReturnPath(self):
+    def test_whenInitializingFromAListOfPoints_thenAListOfPointsIsAssigned(self):
         path = Path.from_points(A_LIST_OF_POSITION)
-        self.assertEqual(path.points, A_LIST_OF_POSITION)
+        assert path.points == A_LIST_OF_POSITION
 
     def test_givenPath_whenFilter_thenRemoveClosePointsAndKeepTarget(self):
         path = A_PATH_WITH_CLOSE_POINTS.copy()
         path.filter(threshold=5)
-        self.assertEqual(path.points, [Position(1,-1), Position(10,2), Position(10, 22)])
+        assert path.points == [Position(1,-1), Position(10,2), Position(10, 22)]
 
     def test_givenPath_whenCopy_thenReturnPathCopy(self):
         path = A_PATH.copy()
-        self.assertIsNot(path, A_PATH)
+        assert path is not A_PATH
 
     def test_givenPath_whenGettingLength_thenReturnLength(self):
         length = A_LONG_PATH.length
-        self.assertEqual(length, PATH_LENGTH)
+        assert length == PATH_LENGTH
