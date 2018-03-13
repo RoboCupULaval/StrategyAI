@@ -38,7 +38,7 @@ class ShittyField:
         # self.debug_interface = DebugInterface()
         cfg = ConfigService()
 
-        if cfg.config_dict["GAME"]["our_side"] == "positive":
+        if cfg["GAME"]["our_side"] == "positive":
             self.our_side = FieldSide.POSITIVE
             self.constant = positive_side_constant
         else:

@@ -26,7 +26,7 @@ class PlayExecutor:
         self.auto_play = SimpleAutoPlay(play_state)
         self.play_state = play_state
         self.game_state = GameState()
-        self.play_state.autonomous_flag = cfg.config_dict["GAME"]["autonomous_play"] == "true"
+        self.play_state.autonomous_flag = cfg["GAME"]["autonomous_play"] == "true"
         self.last_available_players = {}
         self.goalie_id = -1
         self.ui_send_queue = ui_send_queue

@@ -9,8 +9,7 @@ class TeamColorService(metaclass=Singleton):
     YELLOW = 'yellow'
 
     def __init__(self):
-        cfg = ConfigService().config_dict
-
+        cfg = ConfigService()
         self._our_team_color = self.convert_color_from_str(cfg['GAME']['our_color'])
         self._enemy_team_color = self.convert_color_from_str(cfg['GAME']['their_color'])
 

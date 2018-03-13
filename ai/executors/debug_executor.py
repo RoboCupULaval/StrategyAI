@@ -34,10 +34,10 @@ class DebugExecutor:
 
     def _send_books(self):
 
-        msg = DebugCommandFactory().books(strategy_book=PlayState().strategy_book.strategies_name,
-                                          strategy_default=PlayState().strategy_book.default_strategies,
-                                          tactic_book=PlayState().tactic_book.tactics_name,
-                                          tactic_default=PlayState().tactic_book.default_tactics,
+        msg = DebugCommandFactory().books(strategy_book=self.play_state.strategy_book.strategies_name,
+                                          strategy_default=self.play_state.strategy_book.default_strategies,
+                                          tactic_book=self.play_state.tactic_book.tactics_name,
+                                          tactic_default=self.play_state.tactic_book.default_tactics,
                                           action=['None'])
         self.ui_send_queue.put(msg)
 

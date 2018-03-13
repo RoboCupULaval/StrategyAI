@@ -45,7 +45,7 @@ class Engine(Process):
 
         self.logger = logging.getLogger('Engine')
         self.cfg = ConfigService()
-        self.team_color = self.cfg.config_dict['GAME']['our_color']
+        self.team_color = self.cfg['GAME']['our_color']
 
         # Managers for shared memory between process
         manager = Manager()
@@ -60,26 +60,26 @@ class Engine(Process):
         self.referee_queue = referee_queue
 
         # vision subprocess
-        vision_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'],
-                                  int(self.cfg.config_dict['COMMUNICATION']['vision_port']))
+        vision_connection_info = (self.cfg['COMMUNICATION']['vision_udp_address'],
+                                  int(self.cfg['COMMUNICATION']['vision_port']))
 
         self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_state, self.field)
 
         # UIDebug communication sub processes
-        ui_debug_host = self.cfg.config_dict['COMMUNICATION']['ui_debug_address']
-        ui_sender_connection_info = (ui_debug_host, int(self.cfg.config_dict['COMMUNICATION']['ui_cmd_sender_port']))
-        ui_recver_connection_info = (ui_debug_host, int(self.cfg.config_dict['COMMUNICATION']['ui_cmd_receiver_port']))
+        ui_debug_host = self.cfg['COMMUNICATION']['ui_debug_address']
+        ui_sender_connection_info = (ui_debug_host, int(self.cfg['COMMUNICATION']['ui_cmd_sender_port']))
+        ui_recver_connection_info = (ui_debug_host, int(self.cfg['COMMUNICATION']['ui_cmd_receiver_port']))
 
         self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue)
         self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue)
 
         # Referee communication
-        referee_recver_connection_info = (self.cfg.config_dict['COMMUNICATION']['referee_udp_address'],
-                                          int(self.cfg.config_dict['COMMUNICATION']['referee_port']))
+        referee_recver_connection_info = (self.cfg['COMMUNICATION']['referee_udp_address'],
+                                          int(self.cfg['COMMUNICATION']['referee_port']))
         self.referee_recver = RefereeReceiver(referee_recver_connection_info, self.referee_queue)
 
         # Subprocess to send robot commands
-        robot_connection_info = (self.cfg.config_dict['COMMUNICATION']['vision_udp_address'], 20011)
+        robot_connection_info = (self.cfg['COMMUNICATION']['vision_udp_address'], 20011)
 
         self.robot_cmd_sender = RobotCommandSender(robot_connection_info)
 
