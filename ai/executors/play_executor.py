@@ -91,8 +91,9 @@ class PlayExecutor:
 
     def _execute_strategy(self) -> Dict[Player, AICommand]:
         # Applique un stratégie par défault s'il n'en a pas (lors du démarage par exemple)
+        # Apply the default strategy if there is none (for example at startup)
         if self.play_state.current_strategy is None:
-            self.play_state.current_strategy = "HumanControl"
+            self.play_state.current_strategy = "DoNothing"
         return self.play_state.current_strategy.exec()
 
     def _send_robots_status(self) -> None:
