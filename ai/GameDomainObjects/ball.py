@@ -13,7 +13,6 @@ class Ball:
     def update(self, new_dict: Dict):
         self.position = new_dict['position']
         self.velocity = new_dict['velocity']
-        self.velocity = new_velocity
 
     @property
     def position(self) -> Position:

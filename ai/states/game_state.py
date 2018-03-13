@@ -85,7 +85,7 @@ class GameState(metaclass=Singleton):
         return self._field.ball
 
     @ball.setter
-    def ball(self, ball: Ball) -> Ball:
+    def ball(self, ball: Ball):
         self._field = Field([ball])
 
     @property

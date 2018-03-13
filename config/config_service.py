@@ -59,6 +59,8 @@ class ConfigService(metaclass=Singleton):
             ValueError("Config file contains wrong colors! Should be either blue or yellow, not {}".format(our_color))
 
         # [print(key,':' ,value) for key, value in self['COMMUNICATION'].items()]
+        self['IMAGE']['number_of_camera'] = int(self['IMAGE']['number_of_camera'])
+        self['GAME']['ai_timestamp'] = float(self['GAME']['ai_timestamp'])
 
     def __getitem__(self, item):
         return self._config_dict[item]
@@ -66,8 +68,6 @@ class ConfigService(metaclass=Singleton):
     def __setitem__(self, key, value):
         self._config_dict[key] = value
 
-        self.config_dict['IMAGE']['number_of_camera'] = int(self.config_dict['IMAGE']['number_of_camera'])
-        self.config_dict['GAME']['ai_timestamp'] = float(self.config_dict['GAME']['ai_timestamp'])
 
     @staticmethod
     def _load_defaults():

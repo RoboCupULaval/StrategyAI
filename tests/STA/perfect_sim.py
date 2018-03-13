@@ -6,7 +6,7 @@ from Util.constant import ROBOT_RADIUS
 from Util.geometry import compare_angle
 from ai.GameDomainObjects import Ball
 from ai.STA.Tactic.tactic import Tactic
-from ai.states import GameState
+from ai.states.game_state import GameState
 
 
 class PerfectSim:
@@ -36,7 +36,7 @@ class PerfectSim:
         self.game_state.enemy_team.players[robot_id].pose = pose
 
     def move_ball(self, position: Position):
-        self.game_state.ball = Ball(0, position)
+        self.game_state.ball.position = position
 
     def start(self, robot_id, target: Pose):
         self.hero_robot = GameState().our_team.players[robot_id]
@@ -58,7 +58,7 @@ class PerfectSim:
         self.last_ia_cmd = ia_cmd
 
         if ia_cmd.target:
-            print("Hero robot moved to {}".format(ia_cmd.target))
+            print("Hero Robot moved to {}".format(ia_cmd.target))
             self.hero_robot.pose = ia_cmd.target
 
         if ia_cmd.kick_type == 1:
