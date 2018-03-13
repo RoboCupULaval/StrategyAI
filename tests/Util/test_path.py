@@ -52,7 +52,7 @@ class TestPosition(unittest.TestCase):
     def test_givenPath_whenFilter_thenRemoveClosePointsAndKeepTarget(self):
         path = A_PATH_WITH_CLOSE_POINTS.copy()
         path.filter(threshold=5)
-        assert path.points == A_PATH_WITH_CLOSE_POINTS_FILTERED
+        assert path.points == A_PATH_WITH_CLOSE_POINTS_FILTERED.points
         assert path.start == A_PATH_WITH_CLOSE_POINTS_FILTERED.start
         assert path.target == A_PATH_WITH_CLOSE_POINTS_FILTERED.target
 
