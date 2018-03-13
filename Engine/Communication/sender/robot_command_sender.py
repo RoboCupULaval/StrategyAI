@@ -12,7 +12,7 @@ class RobotCommandSender:
                             'sim':      GrSimCommandSender,
                             'serial':   SerialCommandSender}
 
-        sender_type = ConfigService().config_dict['COMMUNICATION']['type']
+        sender_type = ConfigService()['COMMUNICATION']['type']
 
         sender_class = available_sender.get(sender_type, None)
 

@@ -7,7 +7,7 @@ class RegulatorFactory:
     available_regulators = None
 
     def __new__(cls):
-        regulator_type = ConfigService().config_dict['COMMUNICATION']['type']
+        regulator_type = ConfigService()['COMMUNICATION']['type']
         regulator_class = cls.available_regulators.get(regulator_type, None)
 
         if not regulator_class:

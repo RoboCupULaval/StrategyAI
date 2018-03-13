@@ -30,8 +30,8 @@ class Coach(Process):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.cfg = ConfigService()
 
-        self.mode_debug_active = self.cfg.config_dict['DEBUG']['using_debug'] == 'true'
-        self.is_simulation = self.cfg.config_dict['GAME']['type'] == 'sim'
+        self.mode_debug_active = self.cfg['DEBUG']['using_debug'] == 'true'
+        self.is_simulation = self.cfg['GAME']['type'] == 'sim'
 
         # Managers for shared memory between process
         self.engine_game_state = engine_game_state
