@@ -16,8 +16,6 @@ class Tactic(object):
     """
         Classe mère de toutes les tactiques
     """
-    # IM SORRY MGL 2017/06/16
-    initialized = False
 
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List=None):
         """
@@ -43,7 +41,6 @@ class Tactic(object):
         self.next_state = self.halt
         self.status_flag = Flags.INIT
         self.target = target
-        self.initialized = True
 
     def halt(self) -> Idle:
         """

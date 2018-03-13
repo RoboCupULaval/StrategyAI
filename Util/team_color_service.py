@@ -1,7 +1,7 @@
 from Util.constant import TeamColor
 from Util.exception import WrongRobotColorError
 from Util.singleton import Singleton
-from config.config_service import ConfigService
+from config.config import Config
 
 
 class TeamColorService(metaclass=Singleton):
@@ -9,7 +9,7 @@ class TeamColorService(metaclass=Singleton):
     YELLOW = 'yellow'
 
     def __init__(self):
-        cfg = ConfigService()
+        cfg = Config()
         self._our_team_color = self.convert_color_from_str(cfg['GAME']['our_color'])
         self._enemy_team_color = self.convert_color_from_str(cfg['GAME']['their_color'])
 

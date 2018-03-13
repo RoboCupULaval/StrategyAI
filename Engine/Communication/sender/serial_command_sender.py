@@ -19,7 +19,7 @@ class SerialCommandSender(Sender):
                                       packet.command.y/1000,
                                       packet.command.orientation)
             if packet.kick_force > 0:
-                self.connection.kick(packet.robot_id, packet.kick_force)
+                self.connection.kick
 
             if packet.dribbler_active:
                 self.connection.turnOnDribbler(packet.robot_id)
