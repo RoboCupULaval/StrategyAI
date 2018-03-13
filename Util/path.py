@@ -9,17 +9,22 @@ from Util import Position
 
 class Path(collections.MutableSequence):
 
-    def __init__(self, start=Position(),  end=Position()):
-        self.points = [start, end]
+    def __init__(self, start=None, target=None):
+        self.points = [start, target]
 
     def filter(self, threshold):
         if len(self) > 2:
-            new_points = [self.start]
-            for p1, p2 in zip(self[1:], self[2:]):
-                if (p1 - p2).norm >= threshold:
-                    new_points.append(p1)
-            new_points.append(self.goal)
-            self.points = new_points
+            kept_points = [self.start]
+            for point in self[1:]:
+                if (point - kept_points[-1]).norm >= threshold:
+                    kept_points.append(point)
+
+            kept_points.append(self.target)
+
+            if (kept_points[-2] - kept_points[-1]).norm < threshold:
+                kept_points.pop(-2)
+
+            self.points = kept_points
 
     @classmethod
     def from_array(cls, start: ndarray, target: ndarray):
@@ -43,11 +48,11 @@ class Path(collections.MutableSequence):
         self[0] = v
 
     @property
-    def goal(self):
+    def target(self):
         return self[-1]
 
-    @goal.setter
-    def goal(self, v: Position):
+    @target.setter
+    def target(self, v: Position):
         self[-1] = v
 
     @property
@@ -85,4 +90,4 @@ class Path(collections.MutableSequence):
         return Path.from_points(self.points + other.points[1:])
 
     def __repr__(self):
-        return 'Path(start={}, goal={})'.format(self.start, self.goal)
+        return 'Path(start={}, target={})'.format(self.start, self.target)
