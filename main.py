@@ -37,10 +37,6 @@ def set_arg_parser():
 
 
 if __name__ == '__main__':
-    # parser for command line arguments
-    parser = set_arg_parser()
     cli_args = set_arg_parser().parse_args()
     ConfigService().load_file(cli_args.config_file)
-
-    # Engine init
     FRAMEWORK = Framework(cli_args)
