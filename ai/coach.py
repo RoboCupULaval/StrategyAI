@@ -60,7 +60,7 @@ class Coach(Process):
         self.logger.debug('Waiting for geometry from the Engine.')
         start = time()
         while not self.field:
-            sleep(0.1)
+            sleep(self.cfg['GAME']['ai_timestamp'])
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
     def run(self) -> None:
@@ -70,7 +70,7 @@ class Coach(Process):
             while True:
                 self.main_loop()
                 self.print_frame_rate()
-                sleep(self.cfg.config_dict['GAME']['ai_timestamp'])
+                sleep(self.cfg['GAME']['ai_timestamp'])
 
         except KeyboardInterrupt:
             pass
