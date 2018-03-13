@@ -14,12 +14,17 @@ class Path(collections.MutableSequence):
 
     def filter(self, threshold):
         if len(self) > 2:
-            new_points = []
-            for p1, p2 in zip(self, self[1:]):
-                if (p1 - p2).norm >= threshold:
-                    new_points.append(p1)
-            new_points.append(self.target)
-            self.points = new_points
+            kept_points = [self.start]
+            for point in self[1:]:
+                if (point - kept_points[-1]).norm >= threshold:
+                    kept_points.append(point)
+
+            kept_points.append(self.target)
+
+            if (kept_points[-2] - kept_points[-1]).norm < threshold:
+                kept_points.pop(-2)
+
+            self.points = kept_points
 
     @classmethod
     def from_array(cls, start: ndarray, target: ndarray):

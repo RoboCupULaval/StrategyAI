@@ -22,9 +22,10 @@ A_LIST_OF_POSITION = [Position(0, 0),
 A_LONG_PATH = Path.from_points(A_LIST_OF_POSITION)
 PATH_LENGTH = 50
 
-A_LIST_OF_CLOSE_POSITION =  [Position(1,1), Position(1,-1),
+A_LIST_OF_CLOSE_POSITION =  [Position(1,1), Position(1,-1), Position(1, -2),
                              Position(10,1), Position(10,1), Position(10,2),
-                             Position(10, 21), Position(10, 20), Position(10, 22)]
+                             Position(10, 21), Position(10, 20), Position(10, 22),
+                             Position(30, 21), Position(30, 20), Position(30, 22)]
 
 A_PATH_WITH_CLOSE_POINTS = Path.from_points(A_LIST_OF_CLOSE_POSITION)
 
@@ -48,7 +49,9 @@ class TestPosition(unittest.TestCase):
     def test_givenPath_whenFilter_thenRemoveClosePointsAndKeepTarget(self):
         path = A_PATH_WITH_CLOSE_POINTS.copy()
         path.filter(threshold=5)
-        assert path.points == [Position(1,-1), Position(10,2), Position(10, 22)]
+        assert path.points == [Position(1, 1), Position(10, 1), Position(10, 21), Position(30, 22)]
+        assert path.start == A_PATH_WITH_CLOSE_POINTS.start
+        assert path.target == A_PATH_WITH_CLOSE_POINTS.target
 
     def test_givenPath_whenCopy_thenReturnPathCopy(self):
         path = A_PATH.copy()
