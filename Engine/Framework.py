@@ -3,32 +3,23 @@
 import logging
 import time
 from multiprocessing import Queue, Manager
-import signal  # so we can stop gracefully
+import signal
 
 from Engine.engine import Engine
 from ai.coach import Coach
 from config.config_service import ConfigService
 
-__author__ = "Maxime Gagnon-Legault"
-
 
 class Framework:
-    """
-        La classe contient la logique nécessaire pour communiquer avec
-        les différentes parties(simulation, vision, uidebug et/ou autres),
-         maintenir l'état du monde (jeu, referree, debug, etc...) et appeller
-         l'ia.
-    """
 
-    def __init__(self):
-        """ Constructeur de la classe, établis les propriétés de bases et
-        construit les objets qui sont toujours necéssaire à son fonctionnement
-        correct.
-        """
+    QUEUE_SIZE = 100
+
+    def __init__(self, cli_args):
 
         # logger
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger("Framework")
+
         # config
         self.cfg = ConfigService()
 
@@ -37,10 +28,10 @@ class Framework:
         self.field = Manager().dict()
 
         # Queues
-        self.ai_queue = Queue(maxsize=100)
-        self.referee_queue = Queue(maxsize=100)
-        self.ui_send_queue = Queue(maxsize=100)
-        self.ui_recv_queue = Queue(maxsize=100)
+        self.ai_queue = Queue(maxsize=Framework.QUEUE_SIZE)
+        self.referee_queue = Queue(maxsize=Framework.QUEUE_SIZE)
+        self.ui_send_queue = Queue(maxsize=Framework.QUEUE_SIZE)
+        self.ui_recv_queue = Queue(maxsize=Framework.QUEUE_SIZE)
 
         # Engine
         self.engine = Engine(self.game_state,
@@ -49,6 +40,11 @@ class Framework:
                              self.referee_queue,
                              self.ui_send_queue,
                              self.ui_recv_queue)
+
+        self.engine.fps = cli_args.engine_fps
+        if cli_args.unlock_engine_fps:
+            self.engine.unlock_fps()
+
         self.engine.start()
 
         # AI
