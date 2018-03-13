@@ -23,7 +23,7 @@ except ImportError:
     print('Fail to import csv_plotter. It will be disable.')
     from Util.csv_plotter import Observer as CsvPlotter
 
-from config.config_service import ConfigService
+from config.config import Config
 
 __author__ = 'Maxime Gagnon-Legault and Simon Bouchard'
 
@@ -44,7 +44,7 @@ class Engine(Process):
         super().__init__(name=__name__)
 
         self.logger = logging.getLogger('Engine')
-        self.cfg = ConfigService()
+        self.cfg = Config()
         self.team_color = self.cfg['GAME']['our_color']
 
         # Managers for shared memory between process

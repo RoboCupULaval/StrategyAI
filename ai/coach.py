@@ -12,7 +12,7 @@ from ai.executors.debug_executor import DebugExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
-from config.config_service import ConfigService
+from config.config import Config
 
 
 class Coach(Process):
@@ -28,7 +28,7 @@ class Coach(Process):
         super().__init__(name=__name__)
 
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.cfg = ConfigService()
+        self.cfg = Config()
 
         self.mode_debug_active = self.cfg['DEBUG']['using_debug'] == 'true'
         self.is_simulation = self.cfg['GAME']['type'] == 'sim'

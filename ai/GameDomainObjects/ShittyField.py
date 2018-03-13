@@ -4,7 +4,7 @@ from enum import Enum
 from Util import Position
 from ai.GameDomainObjects import Ball
 # from Engine.Debug.debug_interface import DebugInterface
-from config.config_service import ConfigService
+from config.config import Config
 
 
 class FieldSide(Enum):
@@ -36,7 +36,7 @@ class ShittyField:
     def __init__(self, ball: Ball):
         self.ball = ball
         # self.debug_interface = DebugInterface()
-        cfg = ConfigService()
+        cfg = Config()
 
         if cfg["GAME"]["our_side"] == "positive":
             self.our_side = FieldSide.POSITIVE

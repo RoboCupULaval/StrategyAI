@@ -3,10 +3,11 @@ from configparser import ConfigParser, ParsingError
 from Util import Singleton
 
 
-class ConfigService(metaclass=Singleton):
+class Config(metaclass=Singleton):
 
     def __init__(self):
         self._config_dict = self._load_defaults()
+        self._config_was_set = False
 
     def load_file(self, input_config_file) -> None:
         config_parser = ConfigParser(allow_no_value=False)
@@ -62,10 +63,14 @@ class ConfigService(metaclass=Singleton):
         self['IMAGE']['number_of_camera'] = int(self['IMAGE']['number_of_camera'])
         self['GAME']['ai_timestamp'] = float(self['GAME']['ai_timestamp'])
 
+        self._config_was_set = True
+
     def __getitem__(self, item):
         return self._config_dict[item]
 
     def __setitem__(self, key, value):
+        if self._config_was_set:
+            raise RuntimeError("You can't change the configuration after it has been loaded from a file.")
         self._config_dict[key] = value
 
 

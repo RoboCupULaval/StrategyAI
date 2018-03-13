@@ -14,7 +14,7 @@ from ai.Util.sta_change_command import STAChangeCommand
 from ai.executors.pathfinder_module import PathfinderModule
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
-from config.config_service import ConfigService
+from config.config import Config
 
 
 class PlayExecutor:
@@ -22,7 +22,7 @@ class PlayExecutor:
     def __init__(self, play_state: PlayState, ui_send_queue: Queue):
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        cfg = ConfigService()
+        cfg = Config()
         self.auto_play = SimpleAutoPlay(play_state)
         self.play_state = play_state
         self.game_state = GameState()
