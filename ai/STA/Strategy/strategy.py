@@ -78,8 +78,10 @@ class Strategy(metaclass=ABCMeta):
                 state_of_current_tactic = current_tactic.current_state.__name__
             except AttributeError:
                 state_of_current_tactic = "DEFAULT"
-            state.append((current_tactic.player, str(current_tactic)+" "+current_tactic.status_flag.name+" " +
-                          state_of_current_tactic, str(current_tactic), current_tactic.target))
+            clear_name_for_tatic = str(current_tactic) + " " + \
+                                   current_tactic.status_flag.name+" " + \
+                                   state_of_current_tactic
+            state.append((current_tactic.player, clear_name_for_tatic, str(current_tactic), current_tactic.target))
         return state
 
     def clear_graph_of_role(self, r: Role):

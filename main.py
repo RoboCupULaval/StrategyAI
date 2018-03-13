@@ -4,7 +4,7 @@
 import argparse
 
 from Engine.Framework import Framework
-from config.config_service import ConfigService
+from config.config import Config
 
 
 def set_arg_parser():
@@ -38,5 +38,5 @@ def set_arg_parser():
 
 if __name__ == '__main__':
     cli_args = set_arg_parser().parse_args()
-    ConfigService().load_file(cli_args.config_file)
+    Config().load_file(cli_args.config_file)
     FRAMEWORK = Framework(cli_args)
