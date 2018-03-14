@@ -21,23 +21,23 @@ class TestEvaluationModule(unittest.TestCase):
         self.goal = Position(0, 0)
         self.obstacle = Position(0, 0)
 
-    def test_givenObstacleBehindPlayer_thenReturnsMultiplicativeNullValue(self):
+    def test_obstacle_behind(self):
         self._define_points_obstacle((100, 100), (200, 200), (50, 50))
 
         assert trajectory_score(self.start_point, self.goal, self.obstacle) == self.MULTIPLICATIVE_NULL_VALUE
 
-    def test_givenObstacleVeryFarFromPlayer_thenTrajectoryScoreReturnsMultiplicativeNullValue(self):
+    def test_obstacle_far(self):
         self._define_points_obstacle((100, 100), (200, 200), (1500, 1500))
 
         assert trajectory_score(self.start_point, self.goal, self.obstacle) == self.MULTIPLICATIVE_NULL_VALUE
 
-    def test_givenObstacleOnPath_thenTrajectoryScoreReturnsMaxValue(self):
+    def test_obstacle_on_path(self):
         self._define_points_obstacle((100, 100), (200, 200), (150, 150))
 
         assert trajectory_score(self.start_point, self.goal, self.obstacle) == self.MAX_VALUE
 
     @unittest.skip
-    def test_givenOnePlayerInMyTeamFarFromGoal_thenLineOfSightClearanceIsDistanceToTarget(self):
+    def test_clearance_equal_distance(self):
         player1 = build_mock_player(Position(100, 100), 1)
         player2 = build_mock_player(Position(1500, 1500), 2)
         self.goal = Position(200, 200)
@@ -48,7 +48,7 @@ class TestEvaluationModule(unittest.TestCase):
         assert line_of_sight_clearance(player1, self.goal) == distance_to_target
 
     @unittest.skip
-    def test_givenOnePlayerInMyTeamNearFromGoal_thenLineOfSightClearanceIsDistanceToTargetTimesPathScore(self):
+    def test_our_player_near_goal(self):
         player1 = build_mock_player(Position(100, 100), 1)
         player2 = build_mock_player(Position(130, 130), 2)
         self.goal.x, self.goal.y = (200, 200)
@@ -60,7 +60,7 @@ class TestEvaluationModule(unittest.TestCase):
         assert line_of_sight_clearance(player1, self.goal) == distance_to_target * path_score
 
     @unittest.skip
-    def test_givenTwoPlayerInMyTeamNearFromGoal_thenLineOfSightClearanceIsDistanceToTargetTimesBothPathScores(self):
+    def test_two_our_player_near_goal(self):
         player1 = build_mock_player(Position(100, 100), 1)
         player2 = build_mock_player(Position(130, 130), 2)
         player3 = build_mock_player(Position(160, 170), 3)
@@ -74,7 +74,7 @@ class TestEvaluationModule(unittest.TestCase):
         assert line_of_sight_clearance(player1, self.goal) == distance_to_target * path_score_to_p2 * path_score_to_p3
 
     @unittest.skip
-    def test_givenOnePlayerInOtherTeamFarFromGoal_thenLineOfSightClearanceIsDistanceToTarget(self):
+    def test_enemy_player_far_distance(self):
         player1 = build_mock_player(Position(100, 100), 1)
         player2 = build_mock_player(Position(1500, 1500), 2)
         self.goal.x, self.goal.y = (200, 200)
@@ -85,7 +85,7 @@ class TestEvaluationModule(unittest.TestCase):
         assert line_of_sight_clearance(player1, self.goal) == distance_to_target
 
     @unittest.skip
-    def test_givenOnePlayerInOtherTeamNearGoal_thenLineOfSightClearanceIsDistanceToTargetTimesPathScore(self):
+    def test_enemy_player_near_goal(self):
         player1 = build_mock_player(Position(100, 100), 1)
         player2 = build_mock_player(Position(130, 130), 2)
         self.goal.x, self.goal.y = (200, 200)
@@ -97,7 +97,7 @@ class TestEvaluationModule(unittest.TestCase):
         assert line_of_sight_clearance(player1, self.goal) == distance_to_target * path_score
 
     @unittest.skip
-    def test_givenTwoPlayerInOtherTeamNearGoal_thenLineOfSightClearanceIsDistanceToTargetTimesBothPathScores(self):
+    def test_two_enemy_near_goal(self):
         player1 = build_mock_player(Position(100, 100), 1)
         player2 = build_mock_player(Position(130, 130), 2)
         player3 = build_mock_player(Position(160, 170), 3)
@@ -114,8 +114,8 @@ class TestEvaluationModule(unittest.TestCase):
         self.start_point.x, self.start_point.y = start_point
         self.goal.x, self.goal.y = goal
         self.obstacle.x, self.obstacle.y = obstacle
-     
-        
+
+
 def build_mock_player(position, pid):
     player = create_autospec(Player)
     pose = create_autospec(Pose)
@@ -128,9 +128,11 @@ def build_mock_player(position, pid):
 def create_mock_teams(allies, opponents):
     team1 = create_autospec(Team)
     team1.available_players = allies
+    # pylint: disable=protected-access
     GameState()._our_team = team1
     print(GameState().our_team.available_players.values())
 
     team2 = create_autospec(Team)
+    # pylint: disable=protected-access
     team2.available_players = opponents
     GameState()._enemy_team = team2

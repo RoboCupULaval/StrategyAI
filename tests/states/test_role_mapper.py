@@ -5,43 +5,43 @@ from ai.states.game_state import GameState
 
 
 class RoleMapperTests(TestCase):
-    def test_givenNoMapping_whenMapById_thenMapsAllPlayers(self):
+    def test_map_roles_no_mapping(self):
         state = GameState()
-        state.map_players_to_roles_by_player(basic_roles)
-        self.assertDictEqual(state.role_mapping, basic_roles)
+        state.map_players_to_roles_by_player(BASIC_ROLES)
+        self.assertDictEqual(state.role_mapping, BASIC_ROLES)
 
-    def test_givenBasicMapping_whenMapOtherwise_thenMapsPlayersProperly(self):
+    def test_switch_mapping(self):
         state = GameState()
-        state.map_players_to_roles_by_player(basic_roles)
-        state.map_players_to_roles_by_player(inverted_roles_no_goal)
-        self.assertDictEqual(state.role_mapping, inverted_roles_no_goal)
+        state.map_players_to_roles_by_player(BASIC_ROLES)
+        state.map_players_to_roles_by_player(INVERTED_ROLES_NO_GOAL)
+        self.assertDictEqual(state.role_mapping, INVERTED_ROLES_NO_GOAL)
 
-    def test_givenBasicMapping_whenMapFewerRobots_thenRemovesUnasignedOnes(self):
+    def test_remove_unassigned_mappings(self):
         state = GameState()
-        state.map_players_to_roles_by_player(basic_roles)
-        state.map_players_to_roles_by_player(missing_middle)
-        self.assertDictEqual(state.role_mapping, missing_middle_expected)
+        state.map_players_to_roles_by_player(BASIC_ROLES)
+        state.map_players_to_roles_by_player(MISSING_MIDDLE)
+        self.assertDictEqual(state.role_mapping, MISSING_MIDDLE_EXPECTED)
 
     # def test_givenBasicMapping_whenMapMissingLockedRole_thenKeepsLockedRole(self):
     #     state = GameState()
-    #     state.map_players_to_roles_by_player(basic_roles)
-    #     state.map_players_to_roles_by_player(missing_required)
-    #     self.assertDictEqual(state.get_role_mapping(), missing_required_expected)
+    #     state.map_players_to_roles_by_player(BASIC_ROLES)
+    #     state.map_players_to_roles_by_player(MISSING_REQUIRED)
+    #     self.assertDictEqual(state.get_role_mapping(), MISSING_REQUIRED_EXPECTED)
 
     # def test_givenBasicMapping_whenRemapLockedRole_thenThrowsValueError(self):
     #     state = GameState()
-    #     state.map_players_to_roles_by_player(basic_roles)
+    #     state.map_players_to_roles_by_player(BASIC_ROLES)
     #     with self.assertRaises(ValueError):
-    #         state.map_players_to_roles_by_player(inverted_roles)
+    #         state.map_players_to_roles_by_player(INVERTED_ROLES)
 
     # def test_givenLockedRole_whenUpdateLockedRole_thenSwapsRobots(self):
     #     state = GameState()
-    #     state.map_players_to_roles_by_player(basic_roles)
+    #     state.map_players_to_roles_by_player(BASIC_ROLES)
     #     state.update_id_for_locked_role(1, Role.GOALKEEPER)
-    #     self.assertDictEqual(state.get_role_mapping(), goalkeeper_swapped)
+    #     self.assertDictEqual(state.get_role_mapping(), GOALKEEPER_SWAPPED)
 
 
-basic_roles = {
+BASIC_ROLES = {
     Role.GOALKEEPER: 0,
     Role.FIRST_DEFENCE: 1,
     Role.SECOND_DEFENCE: 2,
@@ -50,7 +50,7 @@ basic_roles = {
     Role.SECOND_ATTACK: 5
 }
 
-goalkeeper_swapped = {
+GOALKEEPER_SWAPPED = {
     Role.GOALKEEPER: 1,
     Role.FIRST_DEFENCE: 0,
     Role.SECOND_DEFENCE: 2,
@@ -59,7 +59,7 @@ goalkeeper_swapped = {
     Role.SECOND_ATTACK: 5
 }
 
-inverted_roles = {
+INVERTED_ROLES = {
     Role.GOALKEEPER: 5,
     Role.FIRST_DEFENCE: 4,
     Role.SECOND_DEFENCE: 3,
@@ -68,7 +68,7 @@ inverted_roles = {
     Role.SECOND_ATTACK: 0
 }
 
-inverted_roles_no_goal = {
+INVERTED_ROLES_NO_GOAL = {
     Role.FIRST_DEFENCE: 4,
     Role.SECOND_DEFENCE: 3,
     Role.MIDDLE: 2,
@@ -77,14 +77,14 @@ inverted_roles_no_goal = {
     Role.GOALKEEPER: 0
 }
 
-missing_middle = {
+MISSING_MIDDLE = {
     Role.GOALKEEPER: 0,
     Role.FIRST_DEFENCE: 1,
     Role.SECOND_DEFENCE: 2,
     Role.FIRST_ATTACK: 4,
     Role.SECOND_ATTACK: 5
 }
-missing_middle_expected = {
+MISSING_MIDDLE_EXPECTED = {
     Role.GOALKEEPER: 0,
     Role.FIRST_DEFENCE: 1,
     Role.SECOND_DEFENCE: 2,
@@ -93,7 +93,7 @@ missing_middle_expected = {
     Role.SECOND_ATTACK: 5
 }
 
-missing_required = {
+MISSING_REQUIRED = {
     Role.MIDDLE: 3,
     Role.FIRST_DEFENCE: 1,
     Role.SECOND_DEFENCE: 2,
@@ -101,7 +101,7 @@ missing_required = {
     Role.SECOND_ATTACK: 4
 }
 
-missing_required_expected = {
+MISSING_REQUIRED_EXPECTED = {
     Role.MIDDLE: 3,
     Role.FIRST_DEFENCE: 1,
     Role.SECOND_DEFENCE: 2,

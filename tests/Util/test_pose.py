@@ -29,65 +29,64 @@ AN_ANGLE_GREATER_THAN_PI = pi + 1
 
 class TestPose(unittest.TestCase):
 
-    def test_givenNoArg_whenNew_thenZeroPose(self):
+    def test_zero_pose_orientation(self):
         pose = Pose()
         self.assertEqual(pose.position, Position())
         self.assertEqual(pose.orientation, 0)
 
-    def test_givenPositionAndOrientation_whenNew_thenReturnNewPose(self):
+    def test_pose_orientation_args(self):
         pose = Pose(A_POS, A_ORIENTATION)
         self.assertEqual(pose.position, A_POS)
         self.assertEqual(pose.orientation, A_ORIENTATION)
 
-    def test_givenPosition_whenNew_thenReturnNewPose(self):
+    def test_new_with_position(self):
         pose = Pose(A_POS)
         self.assertEqual(pose.position, A_POS)
         self.assertEqual(pose.orientation, 0)
 
-    def test_givenPosition_whenNew_thenReturnPoseWithPositionCopy(self):
+    def test_new_with_pos_position_copy(self):
         pose = Pose(A_POS)
         self.assertIsNot(pose.position, A_POS)
 
-    def test_givenXYOrientation_whenFromValues_thenReturnNewPose(self):
+    def test_x_y_orientation_args(self):
         pose = Pose.from_values(A_X, A_Y, A_ORIENTATION)
         self.assertEqual(pose.x, A_X)
         self.assertEqual(pose.y, A_Y)
         self.assertEqual(pose.orientation, A_ORIENTATION)
 
-    def test_givenDict_whenFromDict_thenReturnNewPose(self):
+    def test_pose_from_dict(self):
         pose = Pose.from_dict(A_DICT)
         self.assertEqual(pose.x, A_DICT['x'])
         self.assertEqual(pose.y, A_DICT['y'])
         self.assertEqual(pose.orientation, A_DICT['orientation'])
 
-    def test_givenWrongDict_whenFromDict_thenThrowsKeyError(self):
+    def test_wrong_dict(self):
         with self.assertRaises(KeyError):
             Pose.from_dict(A_WRONG_DICT)
 
-    def test_givenPose_whenToDict_thenReturnDict(self):
+    def test_extract_dict(self):
         pose_dict = A_POSE.to_dict()
         self.assertDictEqual(pose_dict, A_DICT)
 
-    def test_givenPose_whenSettingPosition_thenSetPositionCopy(self):
+    def test_copy_position_from_pose(self):
         A_POSE.position = A_POS
         self.assertIsNot(A_POSE.position, A_POS)
 
-    def test_givenPoseAndPosition_whenAddingPosition_thenReturnAddition(self):
+    def test_add_pose_and_position(self):
         self.assertEqual(A_POSE + A_DIFFERENT_POS, Pose(A_POSE.position + A_DIFFERENT_POS, A_POSE.orientation))
 
-    def test_givenPoseAndPosition_whenAddingPosition_thenReturnDifferentPose(self):
+    def test_pose_plus_position_to_pose(self):
         added_pose = A_POSE + A_DIFFERENT_POS
         self.assertIsNot(added_pose, A_POSE)
 
-    def test_givenPoseAndSamePose_whenTestEquality_thenTrue(self):
+    def test_equality(self):
         self.assertEqual(A_POSE, A_SAME_POSE)
 
-    def test_givenPoseAndDifferentOrientationPose_whenTestEquality_thenFalse(self):
+    def test_unequality_orientation(self):
         self.assertNotEqual(A_POSE, A_POSE_WITH_DIFFERENT_ORIENTATION)
 
-    def test_givenPoseAndDifferentPositionPose_whenTestEquality_thenFalse(self):
+    def test_unequality_with_position(self):
         self.assertNotEqual(A_POSE, A_POSE_WITH_DIFFERENT_POS)
 
-    def test_givenPoseAndDifferentPose_whenTestEquality_thenFalse(self):
+    def test_unequality(self):
         self.assertNotEqual(A_POSE, A_DIFFERENT_POSE)
-

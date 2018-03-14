@@ -14,13 +14,13 @@ class TestGraph(unittest.TestCase):
     def setUp(self):
         self.graph = Graph()
 
-    def test_givenAGraphWithANode_whenGetCurrentTactic_thenReturnTacticOfANode(self):
+    def test_get_node_tactic(self):
         a_node = self._create_mock_node()
         self.graph.add_node(a_node)
 
         assert self.graph.get_current_tactic() == a_node.tactic
 
-    def test_givenAGraphWithANode_whenExecGraph_thenNodeIsCall(self):
+    def test_exec_graph_node(self):
         a_node = self._create_mock_node()
         self.graph.add_node(a_node)
 
@@ -28,7 +28,7 @@ class TestGraph(unittest.TestCase):
 
         a_node.exec.assert_any_call()
 
-    def test_givenAGraphWithTwoNodeLinked_whenExecTwice_thenBothNodeAreCalled(self):
+    def test_exec_two_linked_nodes(self):
         a_node = TestGraph._create_mock_node(id_next_node=1)
         another_node = TestGraph._create_mock_node()
         self.graph.add_node(a_node)
@@ -40,7 +40,7 @@ class TestGraph(unittest.TestCase):
         a_node.exec.assert_any_call()
         another_node.exec.assert_any_call()
 
-    def test_givenAGraphWithTwoNodeUnLinked_whenExecTwice_thenOnlyTheFirstNodeIsCalled(self):
+    def test_exec_first_node_only(self):
         a_node = TestGraph._create_mock_node()
         another_node = TestGraph._create_mock_node()
         self.graph.add_node(a_node)

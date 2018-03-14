@@ -7,11 +7,13 @@ from Util.geometry import compare_angle
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
 
-
+# pylint: disable=too-many-instance-attributes
 class PerfectSim:
 
     def __init__(self, tactic_obj):
-        assert not isinstance(tactic_obj, Tactic), "You must pass the class, not an instance of the class. (ex: 'GoToPosition', not 'GoToPosition()')"
+
+        errormsg = "You must pass the class, not an instance of the class. (ex: 'GoToPosition', not 'GoToPosition()')"
+        assert not isinstance(tactic_obj, Tactic), errormsg
 
         self.logger = logging.getLogger(self.__class__.__name__)
         self.tactic_obj = tactic_obj
@@ -71,17 +73,12 @@ class PerfectSim:
             self.has_charge_kick = True
 
     def _robot_can_hit_ball(self, robot):
-        KICK_DISTANCE_MIN = ROBOT_CENTER_TO_KICKER + BALL_RADIUS * 0.5
-        KICK_DISTANCE_MAX = ROBOT_CENTER_TO_KICKER + BALL_RADIUS * 1.5
-        MAX_ANGLE_FOR_KICK = 15
+        kick_distance_min = ROBOT_CENTER_TO_KICKER + BALL_RADIUS * 0.5
+        kick_distance_max = ROBOT_CENTER_TO_KICKER + BALL_RADIUS * 1.5
+        max_angle_for_kick = 15
 
         ball_position = self.game_state.ball.position
         robot_to_ball = robot.pose.position - ball_position
 
-        return KICK_DISTANCE_MIN < robot_to_ball.norm <  KICK_DISTANCE_MAX \
-               and compare_angle(robot.pose.orientation, robot_to_ball.angle, abs_tol=MAX_ANGLE_FOR_KICK)
-
-
-
-
-
+        return kick_distance_min < robot_to_ball.norm < kick_distance_max \
+               and compare_angle(robot.pose.orientation, robot_to_ball.angle, abs_tol=max_angle_for_kick)
