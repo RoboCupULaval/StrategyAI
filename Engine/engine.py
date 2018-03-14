@@ -9,6 +9,7 @@ from queue import Empty
 from time import time, sleep
 
 from Debug.debug_command_factory import DebugCommandFactory
+
 from Engine.Communication.receiver.referee_receiver import RefereeReceiver
 from Engine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from Engine.Communication.receiver.vision_receiver import VisionReceiver
@@ -24,8 +25,6 @@ except ImportError:
     from Util.csv_plotter import Observer as CsvPlotter
 
 from config.config import Config
-
-__author__ = 'Maxime Gagnon-Legault and Simon Bouchard'
 
 
 class Engine(Process):

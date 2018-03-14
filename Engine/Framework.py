@@ -7,7 +7,6 @@ import signal
 
 from Engine.engine import Engine
 from ai.coach import Coach
-from config.config import Config
 
 
 class Framework:
@@ -18,8 +17,6 @@ class Framework:
 
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger(self.__class__.__name__)
-
-        self.cfg = Config()
 
         self.game_state = Manager().dict()
         self.field = Manager().dict()
