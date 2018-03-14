@@ -188,9 +188,8 @@ class Engine(Process):
             sleep(time_ahead)
         if time_ahead < -2:
             raise RuntimeError(
-                'The required frame rate is too fast for the engine.\n'
-                'To find out what is the best frame rate for your computer,\n'
-                'launch the engine with FIX_FRAME_RATE at false and use the minimum FPS that you get.')
+                'The required frame rate is too high for the engine.\n'
+                'Launch the engine with the flag --unlock_fps and use the minimum FPS that you get.')
 
     def print_frame_rate(self):
         dt = time() - self.time_last_print
@@ -221,6 +220,8 @@ class Engine(Process):
 
     @fps.setter
     def fps(self, engine_fps):
+        if not engine_fps > 0:
+            raise ValueError('FPS must be greater than zero.')
         self._fps = engine_fps
 
     @property

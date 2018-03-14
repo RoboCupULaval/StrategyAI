@@ -19,7 +19,7 @@ from config.config import Config
 
 class Coach(Process):
 
-    PROFILE_DATA_TICK_CYCLE = 100
+    PROFILE_DATA_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_ai.prof'
 
     def __init__(self,
@@ -35,7 +35,7 @@ class Coach(Process):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.cfg = Config()
 
-        self.mode_debug_active = self.cfg['DEBUG']['using_debug'] == 'true'
+        self.mode_debug_active = self.cfg['DEBUG']['using_debug']
         self.is_simulation = self.cfg['GAME']['type'] == 'sim'
 
         # Managers for shared memory between process
@@ -58,6 +58,7 @@ class Coach(Process):
         self.debug_executor = DebugExecutor(self.play_state, self.play_executor, self.ui_send_queue, self.ui_recv_queue)
 
         # print frame rate
+        self.fps = 1/self.cfg['GAME']['ai_timestamp']
         self.frame_count = 0
         self.time_last_print = time()
         self.last_frame_count = 0
@@ -71,7 +72,7 @@ class Coach(Process):
         self.logger.debug('Waiting for geometry from the Engine.')
         start = time()
         while not self.field:
-            sleep(self.cfg['GAME']['ai_timestamp'])
+            sleep(1/self.fps)
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
     def run(self) -> None:
@@ -106,7 +107,7 @@ class Coach(Process):
 
     def dump_profiling_stats(self):
         if self.profiling_enabled:
-            if self.frame_count % Coach.PROFILE_DATA_TICK_CYCLE == 0:
+            if self.frame_count % (self.fps * Coach.PROFILE_DATA_TIME) == 0:
                 self.profiler.dump_stats(Coach.PROFILE_DATA_FILENAME)
                 self.logger.debug('Profile data written to {}.'.format(Coach.PROFILE_DATA_FILENAME))
 
