@@ -89,12 +89,13 @@ class Engine(Process):
         self.tracker = Tracker(self.vision_state)
         self.controller = Controller(observer=CsvPlotter)
 
+        self.frame_count = 0
         self._fps = Engine.DEFAULT_FPS
         self._is_fps_locked = Engine.DEFAULT_FPS_LOCK_STATE
 
         # print frame rate
-        self.frame_count = 0
         self.time_last_print = time()
+        self.last_frame_count = 0
         self.time_bank = 0
 
         # profiling
@@ -123,6 +124,7 @@ class Engine(Process):
         try:
             while True:
                 self.time_bank += 1.0 / self.fps
+                self.frame_count += 1
                 self.main_loop()
                 self.profiling()
                 self.print_frame_rate()
@@ -191,12 +193,12 @@ class Engine(Process):
                 'launch the engine with FIX_FRAME_RATE at false and use the minimum FPS that you get.')
 
     def print_frame_rate(self):
-        self.frame_count += 1
         dt = time() - self.time_last_print
-        if dt > 10:
-            self.logger.info('Updating at {:.2f} fps'.format(self.frame_count / dt))
+        if dt > 20:
+            df = self.frame_count - self.last_frame_count
+            self.logger.info('Updating at {:.2f} fps'.format(df / dt))
             self.time_last_print = time()
-            self.frame_count = 0
+            self.last_frame_count = 0
 
     def enabled_profiling(self):
         self.profiling_enabled = True
