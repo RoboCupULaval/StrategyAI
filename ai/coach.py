@@ -16,7 +16,7 @@ from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 from config.config import Config
 
-PROFILE_AI = True
+AI_CPROFILING_ENABLED = True
 PROFILE_DATA_TICK_NUMBER = 100
 PROFILE_DATA_FILENAME = 'profile_data_ai.prof'
 
@@ -71,7 +71,7 @@ class Coach(Process):
     def run(self) -> None:
         self.wait_for_geometry()
         self.logger.debug('Running with process ID {}'.format(os.getpid()))
-        if PROFILE_AI:
+        if AI_CPROFILING_ENABLED:
             self.pr = cProfile.Profile()
             self.pr.enable()
         cycle_tick_count = 0
@@ -83,13 +83,11 @@ class Coach(Process):
                 cycle_tick_count += 1
                 if cycle_tick_count == PROFILE_DATA_TICK_NUMBER:
                     cycle_tick_count = 0
-                    if PROFILE_AI:
+                    if AI_CPROFILING_ENABLED:
                         self.pr.dump_stats(PROFILE_DATA_FILENAME)
-                        print('ai profile data written.')
+                        self.logger.debug('ai profile data written.')
 
         except KeyboardInterrupt:
-            self.pr.dump_stats(PROFILE_DATA_FILENAME)
-            print('ai profile data written during keyboard interrupt.')
             pass
 
     def main_loop(self) -> None:
