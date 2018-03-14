@@ -3,6 +3,7 @@
 from pyhermes import McuCommunicator
 
 from Engine.Communication.sender.sender_base_class import Sender
+from Util.constant import KickForce
 
 
 class SerialCommandSender(Sender):
@@ -19,10 +20,18 @@ class SerialCommandSender(Sender):
                                       packet.command.y/1000,
                                       packet.command.orientation)
             if packet.kick_force > 0:
-                self.connection.kick
+                self.connection.kick(packet.robot_id, self.translate_kick_force(packet.kick_force))
 
             if packet.dribbler_active:
                 self.connection.turnOnDribbler(packet.robot_id)
 
             if packet.charge_kick:
                 self.connection.charge(packet.robot_id)
+
+    @staticmethod
+    def translate_kick_force(kick_force: KickForce) -> int:
+        kick_translation = {KickForce.NONE: 0,
+                            KickForce.LOW: 1,
+                            KickForce.MEDIUM: 3,
+                            KickForce.HIGH: 5}
+        return kick_translation[kick_force]

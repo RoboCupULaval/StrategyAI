@@ -2,6 +2,7 @@
 
 from collections import namedtuple
 
+from Util.constant import KickForce
 from Util.position import Position
 from Util.pose import Pose
 
@@ -22,7 +23,7 @@ class CmdBuilder:
         # A robot should stay idle with those value
         self._target = None
         self._kick_type = None
-        self._kick_force = 0
+        self._kick_force = KickForce.NONE
         self._charge_kick = False
         self._dribbler_active = False
         self._cruise_speed = 0
@@ -39,7 +40,7 @@ class CmdBuilder:
         self._pathfinder_on = True
         return self
 
-    def addKick(self, kick_force=1):
+    def addKick(self, kick_force:KickForce=KickForce.LOW):
         self._kick_force = kick_force
         self._kick_type = 1  # For the moment we only have one type
         return self

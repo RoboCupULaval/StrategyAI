@@ -6,7 +6,7 @@ from typing import List, Union
 
 import numpy as np
 
-from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS
+from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
 from Util.geometry import compare_angle, normalize
@@ -32,7 +32,7 @@ class GoKick(Tactic):
     def __init__(self, game_state: GameState, player: Player,
                  target: Pose=Pose(),
                  args: List[str]=None,
-                 kick_force: Union[int, float]=5,
+                 kick_force: KickForce=KickForce.MEDIUM,
                  auto_update_target=False):
 
         super().__init__(game_state, player, target, args)
