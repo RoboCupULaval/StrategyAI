@@ -15,7 +15,6 @@ class Framework:
 
     def __init__(self, cli_args):
 
-        logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self.game_state = Manager().dict()
@@ -76,7 +75,9 @@ class Framework:
             # use the time you want here, 0.5 seems sane to me.
             time.sleep(0.5)
 
+        self.stop_game()
+
     def stop_game(self):
         self.engine.terminate()
         self.coach.terminate()
-        exit(0)
+        raise SystemExit('Stop Game')

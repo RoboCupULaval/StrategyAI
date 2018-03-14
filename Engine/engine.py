@@ -177,13 +177,15 @@ class Engine(Process):
     def is_any_subprocess_borked(self):
         borked_process_found = not all((self.vision_receiver.is_alive(),
                                         self.ui_sender.is_alive(),
-                                        self.ui_recver.is_alive()))
+                                        self.ui_recver.is_alive(),
+                                        self.referee_recver.is_alive()))
         return borked_process_found
 
     def terminate_subprocesses(self):
         self.vision_receiver.terminate()
         self.ui_sender.terminate()
         self.ui_recver.terminate()
+        self.referee_recver.terminate()
 
     def enable_profiling(self):
         self.profiling_enabled = True
