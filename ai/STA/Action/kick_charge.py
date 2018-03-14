@@ -1,4 +1,5 @@
 # Under MIT license, see LICENSE.txt
+import time
 
 from Util import AICommand
 from ai.GameDomainObjects import Player
@@ -16,5 +17,4 @@ class KickCharge(Action):
         self.player = player
 
     def exec(self):
-
         return AICommand(self.player.id, kick_type=self.kick_type)

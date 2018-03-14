@@ -10,7 +10,7 @@ from Engine.filters.robot_kalman_filter import RobotFilter
 from Util.geometry import wrap_to_pi
 from Util import Pose, Position
 
-from config.config_service import ConfigService
+from config.config import Config
 
 
 class Tracker:
@@ -25,9 +25,9 @@ class Tracker:
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger('Tracker')
 
-        self.cfg = ConfigService()
-        self.team_color = self.cfg.config_dict['GAME']['our_color']
-        self.our_side = self.cfg.config_dict['GAME']['our_side']
+        self.cfg = Config()
+        self.team_color = self.cfg['GAME']['our_color']
+        self.our_side = self.cfg['GAME']['our_side']
 
         self.vision_state = vision_state
 

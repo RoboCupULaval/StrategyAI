@@ -1,7 +1,7 @@
 from Engine.Communication.sender.fake_sender import FakeSender
 from Engine.Communication.sender.grsim_command_sender import GrSimCommandSender
 from Engine.Communication.sender.serial_command_sender import SerialCommandSender
-from config.config_service import ConfigService
+from config.config import Config
 
 
 class RobotCommandSender:
@@ -12,7 +12,7 @@ class RobotCommandSender:
                             'sim':      GrSimCommandSender,
                             'serial':   SerialCommandSender}
 
-        sender_type = ConfigService().config_dict['COMMUNICATION']['type']
+        sender_type = Config()['COMMUNICATION']['type']
 
         sender_class = available_sender.get(sender_type, None)
 
