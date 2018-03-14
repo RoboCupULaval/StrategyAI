@@ -1,5 +1,4 @@
 # Under MIT license, see LICENSE.txt
-from ai.Algorithm.Graph import Node
 
 
 class Vertex:
@@ -15,15 +14,14 @@ class Vertex:
         next_node: Le numéro du noeud suivant, pointé par l'extrémité du vertex.
         condition: Une fonction retournant un booléen indiquant si on peut passer au noeud suivant.
     """
-    def __init__(self, p_next_node, p_condition):
+    def __init__(self, next_node, p_condition):
         """
-        :param p_next_node: Un entier positif représentant le numéro du noeud suivant, pointé par l'extrémité du vertex.
+        :param next_node: Un entier positif représentant le numéro du noeud suivant, pointé par l'extrémité du vertex.
         :param p_condition: Une fonction retournant un booléen indiquant si on peut passer au noeud suivant.
         """
-        assert isinstance(p_next_node, Node)
         assert callable(p_condition)
 
-        self.next_node = p_next_node
+        self.next_node = next_node
         self.condition = p_condition
 
     def evaluate_condition(self):

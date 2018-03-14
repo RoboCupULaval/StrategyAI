@@ -50,7 +50,7 @@ class Strategy(metaclass=ABCMeta):
         self.roles_graph[role].add_node(tactic_node)
         return tactic_node
 
-    def add_condition(self, role: Role, start_node: int, end_node: int, condition: Callable[..., bool]):
+    def add_condition(self, role: Role, start_node: Node, end_node: Node, condition: Callable[..., bool]):
         """
         Ajoute une condition permettant de gérer la transition entre deux tactiques d'un robot.
         :param role: Le role qui a la tactic.

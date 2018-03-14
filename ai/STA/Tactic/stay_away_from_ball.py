@@ -2,6 +2,7 @@
 from typing import List
 
 from Util import Pose
+from Util.ai_command import CmdBuilder
 from Util.area import stayOutsideCircle
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
@@ -24,4 +25,5 @@ class StayAwayFromBall(Tactic):
         position = stayOutsideCircle(self.player.pose.position,
                                      self.game_state.ball_position,
                                      self.keepout_radius)
-        return GoToPositionPathfinder(self.game_state, self.player, Pose(position, self.player.pose.orientation))
+
+        return CmdBuilder().addMoveTo(Pose(position, self.player.pose.orientation)).build()

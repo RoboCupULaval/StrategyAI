@@ -45,18 +45,6 @@ class Node:
     def connect_to(self, dst_node, *, when: Callable[..., bool]):
         self.add_vertex(Vertex(dst_node, when))
 
-    def remove_vertex(self, p_ending):
-        """
-        Retire un vertex du noeud, spécifié par le numéro de son noeud d'arrivé. Si le noeud courant ne possède pas de
-        vertex vers le noeud spécifé, rien ne se passe.
-        :param p_ending: Un entier positif représentant le numéro du noeud d'arrivé du vertex à retirer.
-        """
-        assert isinstance(p_ending, int)
-        assert 0 <= p_ending
-        for i in range(len(self.vertices)):
-            if self.vertices[i].next_node == p_ending:
-                self.vertices.pop(i)
-
     def exec(self):
         """
         Fait avancer la machine d'état de la tactique d'une itération et évalue la condition de chacun des vertices du

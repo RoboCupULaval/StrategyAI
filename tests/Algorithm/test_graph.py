@@ -29,8 +29,8 @@ class TestGraph(unittest.TestCase):
         a_node.exec.assert_any_call()
 
     def test_givenAGraphWithTwoNodeLinked_whenExecTwice_thenBothNodeAreCalled(self):
-        a_node = TestGraph._create_mock_node(id_next_node=1)
         another_node = TestGraph._create_mock_node()
+        a_node = TestGraph._create_mock_node(another_node)
         self.graph.add_node(a_node)
         self.graph.add_node(another_node)
 
@@ -53,10 +53,10 @@ class TestGraph(unittest.TestCase):
         another_node.exec.assert_not_called()
 
     @staticmethod
-    def _create_mock_node(id_next_node=-1):
+    def _create_mock_node(next_node=None):
         node = create_autospec(Node)
         node.tactic = TestGraph._create_mock_tactic("my command")
-        node.exec = MagicMock(return_value=("my command", id_next_node))
+        node.exec = MagicMock(return_value=("my command", next_node))
         return node
 
     @staticmethod

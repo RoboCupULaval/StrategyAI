@@ -53,7 +53,7 @@ class Graph:
         assert isinstance(p_node, Node)
         self.nodes.append(p_node)
 
-        if len(self.nodes) > 0:
+        if len(self.nodes) == 1:
             self.set_current_node(p_node)
 
     def remove_node(self, dst_node):
@@ -82,18 +82,6 @@ class Graph:
         assert callable(condition)
         starting_node.add_vertex(Vertex(ending_node, condition))
 
-    def remove_vertex(self, starting_node, ending_node):
-        """
-        Retire un vertex entre deux noeuds du graphe.
-        :param starting_node: Le noeud de départ dans la liste de noeuds.
-        :param ending_node: Le noeud d'arrivée dans la liste de noeuds.
-        """
-        assert isinstance(starting_node, Node)
-        assert starting_node in self.nodes
-        assert isinstance(ending_node, Node)
-        assert ending_node in self.nodes
-        starting_node.remove_vertex(ending_node)
-
     def exec(self):
         """
         Appelle la méthode exec du noeud courant et effectue la transition vers un noued suivant si une des conditions
@@ -101,7 +89,7 @@ class Graph:
         """
         if len(self.nodes) > 0:
             next_ai_command, next_node = self.current_node.exec()
-            if next_node != self.current_node:
+            if next_node is not None and next_node != self.current_node:
                 self.set_current_node(next_node)
             return next_ai_command
         else:
