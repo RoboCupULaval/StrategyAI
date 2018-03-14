@@ -17,8 +17,8 @@ from config.config import Config
 
 class Coach(Process):
 
-    PROFILE_DATA_TIME = 10
-    STATUS_PRINT_TIME = 10
+    PROFILE_DUMP_TIME = 10
+    STATUS_LOG_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_ai.prof'
 
     def __init__(self,
@@ -95,12 +95,12 @@ class Coach(Process):
 
     def dump_profiling_stats(self):
         if self.profiling_enabled:
-            if self.frame_count % (self.fps * Coach.PROFILE_DATA_TIME) == 0:
+            if self.frame_count % (self.fps * Coach.PROFILE_DUMP_TIME) == 0:
                 self.profiler.dump_stats(Coach.PROFILE_DATA_FILENAME)
                 self.logger.debug('Profile data written to {}.'.format(Coach.PROFILE_DATA_FILENAME))
 
     def log_status(self):
-        if self.frame_count % (self.fps * Coach.STATUS_PRINT_TIME) == 0:
+        if self.frame_count % (self.fps * Coach.STATUS_LOG_TIME) == 0:
             df, self.last_frame_count = self.frame_count - self.last_frame_count, self.frame_count
             dt, self.last_log_time = time() - self.last_log_time, time()
             self.logger.info('Updating at {:.2f} fps'.format(df / dt))

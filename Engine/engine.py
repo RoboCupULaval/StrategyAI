@@ -33,8 +33,8 @@ class Engine(Process):
     DEFAULT_FPS_LOCK_STATE = True
     DEFAULT_FPS = 30  # Please don't change this constant, instead run 'python main.py --engine_fps desired_fps'
     MAX_TIME_BEHIND = 2
-    STATUS_PRINT_TIME = 10
-    PROFILE_DATA_TIME = 10
+    STATUS_LOG_TIME = 10
+    PROFILE_DUMP_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_engine.prof'
 
     def __init__(self,
@@ -163,14 +163,14 @@ class Engine(Process):
                 'Launch the engine with the flag --unlock_fps and use the minimum FPS that you get.')
 
     def log_status(self):
-        if self.frame_count % (self.fps * Engine.STATUS_PRINT_TIME) == 0:
+        if self.frame_count % (self.fps * Engine.STATUS_LOG_TIME) == 0:
             df, self.last_frame_count = self.frame_count - self.last_frame_count, self.frame_count
             dt, self.last_log_time = time() - self.last_log_time, time()
             self.logger.info('Updating at {:.2f} fps'.format(df / dt))
 
     def dump_profiling_stats(self):
         if self.profiling_enabled:
-            if self.frame_count % (self.fps * Engine.PROFILE_DATA_TIME) == 0:
+            if self.frame_count % (self.fps * Engine.PROFILE_DUMP_TIME) == 0:
                 self.profiler.dump_stats(Engine.PROFILE_DATA_FILENAME)
                 self.logger.debug('Profile data written to {}.'.format(Engine.PROFILE_DATA_FILENAME))
 
