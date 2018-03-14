@@ -58,6 +58,7 @@ class Config(metaclass=Singleton):
 
         self['IMAGE']['number_of_camera'] = int(self['IMAGE']['number_of_camera'])
         self['GAME']['ai_timestamp'] = float(self['GAME']['ai_timestamp'])
+        self['DEBUG']['using_debug'] = self['DEBUG']['using_debug'] == 'true'
 
         # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
         if self['GAME']['our_color'] == 'blue':
