@@ -126,7 +126,7 @@ class Engine(Process):
                 self.time_bank += 1.0 / self.fps
                 self.frame_count += 1
                 self.main_loop()
-                self.profiling()
+                self.dump_profiling_stats()
                 self.print_frame_rate()
                 self.limit_frame_rate()
         except KeyboardInterrupt:
@@ -200,13 +200,13 @@ class Engine(Process):
             self.time_last_print = time()
             self.last_frame_count = 0
 
-    def enabled_profiling(self):
+    def enable_profiling(self):
         self.profiling_enabled = True
         self.profiler = cProfile.Profile()
         self.profiler.enable()
         self.logger.debug('Profiling mode activate.')
 
-    def profiling(self):
+    def dump_profiling_stats(self):
         if self.profiling_enabled:
             if self.frame_count % (self.fps * Engine.PROFILE_DATA_TIME) == 0:
                 self.profiler.dump_stats(Engine.PROFILE_DATA_FILENAME)

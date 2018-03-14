@@ -83,7 +83,7 @@ class Coach(Process):
                 self.frame_count += 1
                 self.main_loop()
                 self.print_frame_rate()
-                self.profiling()
+                self.dump_profiling_stats()
                 sleep(self.cfg['GAME']['ai_timestamp'])
 
         except KeyboardInterrupt:
@@ -98,13 +98,13 @@ class Coach(Process):
     def _send_cmd(self, engine_commands: List[EngineCommand]):
         self.ai_queue.put(engine_commands)
 
-    def enabled_profiling(self):
+    def enable_profiling(self):
         self.profiling_enabled = True
         self.profiler = cProfile.Profile()
         self.profiler.enable()
         self.logger.debug('Profiling mode activate.')
 
-    def profiling(self):
+    def dump_profiling_stats(self):
         if self.profiling_enabled:
             if self.frame_count % Coach.PROFILE_DATA_TICK_CYCLE == 0:
                 self.profiler.dump_stats(Coach.PROFILE_DATA_FILENAME)

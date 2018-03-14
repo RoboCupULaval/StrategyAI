@@ -49,8 +49,8 @@ class Framework:
             self.engine.unlock_fps()
 
         if cli_args.enable_profiling:
-            self.coach.enabled_profiling()
-            self.engine.enabled_profiling()
+            self.coach.enable_profiling()
+            self.engine.enable_profiling()
 
     def start(self):
 
