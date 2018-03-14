@@ -17,7 +17,7 @@ class Framework:
     def __init__(self, cli_args):
 
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
-        self.logger = logging.getLogger("Framework")
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         self.cfg = Config()
 

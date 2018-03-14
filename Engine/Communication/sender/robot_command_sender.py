@@ -6,7 +6,7 @@ from config.config import Config
 
 class RobotCommandSender:
 
-    def __new__(cls, connection_info):
+    def __new__(cls):
 
         connection_infos = {'sim': Config()['COMMUNICATION']['grsim_info']}
 

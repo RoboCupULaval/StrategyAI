@@ -32,7 +32,9 @@ class Engine(Process):
 
     DEFAULT_CAMERA_NUMBER = 4
     DEFAULT_FPS_LOCK_STATE = True
-    DEFAULT_FPS = 30  # Please don't change this constant, instead run the AI with the optional argument --engine_fps
+    DEFAULT_FPS = 30  # Please don't change this constant, instead run 'python main.py --engine_fps desired_fps'
+    MAX_TIME_BEHIND = 2
+    STATUS_PRINT_TIME = 10
     PROFILE_DATA_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_engine.prof'
 
@@ -43,48 +45,40 @@ class Engine(Process):
                  referee_queue: Queue,
                  ui_send_queue: Queue,
                  ui_recv_queue: Queue):
+
         super().__init__(name=__name__)
 
-        self.logger = logging.getLogger('Engine')
-        self.cfg = Config()
-        self.team_color = self.cfg['GAME']['our_color']
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         # Managers for shared memory between process
         manager = Manager()
-        self._camera_number = self.cfg['IMAGE'].get('number_of_camera', Engine.DEFAULT_CAMERA_NUMBER)
-        self.vision_state = manager.list([manager.dict() for _ in range(self._camera_number)])
+        self.vision_state = manager.list([manager.dict() for _ in range(Config()['IMAGE']['number_of_camera'])])
         self.game_state = game_state
         self.field = field
 
-        # Queues for inter process communication with the AI
+        # Queues for process communication
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
         self.ai_queue = ai_queue
         self.referee_queue = referee_queue
 
-        # vision subprocess
-        self.vision_receiver = VisionReceiver(self.cfg['COMMUNICATION']['vision_info'], self.vision_state, self.field)
+        # External communication
+        self.vision_receiver = VisionReceiver(Config()['COMMUNICATION']['vision_info'], self.vision_state, self.field)
+        self.ui_sender = UIDebugCommandSender(Config()['COMMUNICATION']['ui_sender_info'], self.ui_send_queue)
+        self.ui_recver = UIDebugCommandReceiver(Config()['COMMUNICATION']['ui_recver_info'], self.ui_recv_queue)
+        self.referee_recver = RefereeReceiver(Config()['COMMUNICATION']['referee_info'], self.referee_queue)
+        self.robot_cmd_sender = RobotCommandSender()
 
-        # UIDebug communication sub processes
-        self.ui_sender = UIDebugCommandSender(self.cfg['COMMUNICATION']['ui_sender_info'], self.ui_send_queue)
-        self.ui_recver = UIDebugCommandReceiver(self.cfg['COMMUNICATION']['ui_recver_info'], self.ui_recv_queue)
-
-        # Referee communication
-        self.referee_recver = RefereeReceiver(self.cfg['COMMUNICATION']['referee_info'], self.referee_queue)
-
-        # Robots communication
-        self.robot_cmd_sender = RobotCommandSender(self.cfg['COMMUNICATION']['grsim_info'])
-
+        # main engine module
         self.tracker = Tracker(self.vision_state)
         self.controller = Controller(observer=CsvPlotter)
 
-        self.frame_count = 0
+        # fps and limitation
         self._fps = Engine.DEFAULT_FPS
         self._is_fps_locked = Engine.DEFAULT_FPS_LOCK_STATE
-
-        # print frame rate
-        self.time_last_print = time()
+        self.frame_count = 0
         self.last_frame_count = 0
+        self.last_log_time = time()
         self.time_bank = 0
 
         # profiling
@@ -100,7 +94,15 @@ class Engine(Process):
 
     def run(self):
         self.wait_for_vision()
-        self.logger.debug(self.status)
+
+        logged_string = 'Running with process ID {}'.format(os.getpid())
+        if self.is_fps_locked:
+            logged_string += ' at {} fps.'.format(self.fps)
+        else:
+            logged_string += ' without fps limitation.'
+
+        self.logger.debug(logged_string)
+
         self.time_bank = time()
         try:
             while True:
@@ -108,7 +110,7 @@ class Engine(Process):
                 self.frame_count += 1
                 self.main_loop()
                 self.dump_profiling_stats()
-                self.print_frame_rate()
+                self.log_status()
                 self.limit_frame_rate()
         except KeyboardInterrupt:
             pass
@@ -150,6 +152,29 @@ class Engine(Process):
             engine_cmds = []
         return engine_cmds
 
+    def limit_frame_rate(self):
+        time_ahead = self.time_bank - time()
+        if not self.is_fps_locked:
+            return
+        if time_ahead > 0:
+            sleep(time_ahead)
+        if time_ahead < -Engine.MAX_TIME_BEHIND:
+            raise RuntimeError(
+                'The required frame rate is too high for the engine.\n'
+                'Launch the engine with the flag --unlock_fps and use the minimum FPS that you get.')
+
+    def log_status(self):
+        if self.frame_count % (self.fps * Engine.STATUS_PRINT_TIME) == 0:
+            df, self.last_frame_count = self.frame_count - self.last_frame_count, self.frame_count
+            dt, self.last_log_time = time() - self.last_log_time, time()
+            self.logger.info('Updating at {:.2f} fps'.format(df / dt))
+
+    def dump_profiling_stats(self):
+        if self.profiling_enabled:
+            if self.frame_count % (self.fps * Engine.PROFILE_DATA_TIME) == 0:
+                self.profiler.dump_stats(Engine.PROFILE_DATA_FILENAME)
+                self.logger.debug('Profile data written to {}.'.format(Engine.PROFILE_DATA_FILENAME))
+
     def is_any_subprocess_borked(self):
         borked_process_found = not all((self.vision_receiver.is_alive(),
                                         self.ui_sender.is_alive(),
@@ -161,35 +186,11 @@ class Engine(Process):
         self.ui_sender.terminate()
         self.ui_recver.terminate()
 
-    def limit_frame_rate(self):
-        time_ahead = self.time_bank - time()
-        if not self.is_fps_locked:
-            return
-        if time_ahead > 0:
-            sleep(time_ahead)
-        if time_ahead < -2:
-            raise RuntimeError(
-                'The required frame rate is too high for the engine.\n'
-                'Launch the engine with the flag --unlock_fps and use the minimum FPS that you get.')
-
-    def print_frame_rate(self):
-        dt = time() - self.time_last_print
-        if dt > 10:
-            df, self.last_frame_count = self.frame_count - self.last_frame_count, self.frame_count
-            self.logger.info('Updating at {:.2f} fps'.format(df / dt))
-            self.time_last_print = time()
-
     def enable_profiling(self):
         self.profiling_enabled = True
         self.profiler = cProfile.Profile()
         self.profiler.enable()
         self.logger.debug('Profiling mode activate.')
-
-    def dump_profiling_stats(self):
-        if self.profiling_enabled:
-            if self.frame_count % (self.fps * Engine.PROFILE_DATA_TIME) == 0:
-                self.profiler.dump_stats(Engine.PROFILE_DATA_FILENAME)
-                self.logger.debug('Profile data written to {}.'.format(Engine.PROFILE_DATA_FILENAME))
 
     def unlock_fps(self):
         self.is_fps_locked = False
@@ -214,23 +215,3 @@ class Engine(Process):
     @is_fps_locked.setter
     def is_fps_locked(self, is_lock):
         self._is_fps_locked = is_lock
-
-    @property
-    def camera_number(self):
-        return self._camera_number
-
-    @camera_number.setter
-    def camera_number(self, num):
-        if 0 > num > 4:
-            raise ValueError('Invalid number of camera.')
-        self._camera_number = num
-        self.vision_state = Manager().list([Manager().dict() for _ in range(self._camera_number)])
-
-    @property
-    def status(self):
-        logged_string = 'Running with process ID {}'.format(os.getpid())
-        if self.is_fps_locked:
-            logged_string += ' at {} fps.'.format(self.fps)
-        else:
-            logged_string += ' without fps limitation.'
-        return logged_string

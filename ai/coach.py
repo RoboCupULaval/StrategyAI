@@ -9,7 +9,6 @@ from time import sleep, time
 from typing import List
 
 from Util.engine_command import EngineCommand
-from Util.team_color_service import TeamColorService
 from ai.executors.debug_executor import DebugExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.states.game_state import GameState
@@ -20,6 +19,7 @@ from config.config import Config
 class Coach(Process):
 
     PROFILE_DATA_TIME = 10
+    STATUS_PRINT_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_ai.prof'
 
     def __init__(self,
@@ -33,40 +33,37 @@ class Coach(Process):
         super().__init__(name=__name__)
 
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.cfg = Config()
 
         # Managers for shared memory between process
         self.engine_game_state = engine_game_state
         self.field = field
 
-        # Queues for interprocess communication with the engine
+        # Queues for process communication
         self.ai_queue = ai_queue
         self.referee_queue = referee_queue
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
 
-        # the states
-        self.team_color_service = TeamColorService()
+        # States
         self.game_state = GameState()
         self.play_state = PlayState()
 
-        # the executors
+        # Executors
         self.play_executor = PlayExecutor(self.play_state, self.ui_send_queue)
         self.debug_executor = DebugExecutor(self.play_state, self.play_executor,
                                             self.ui_send_queue, self.ui_recv_queue)
 
-        # print frame rate
-        self.fps = self.cfg['GAME']['coach_fps']
+        # fps and limitation
+        self.fps = Config()['GAME']['coach_fps']
         self.frame_count = 0
-        self.time_last_print = time()
         self.last_frame_count = 0
+        self.last_log_time = time()
+        self.time_bank = 0
 
         # profiling
         self.profiling_enabled = False
         self.profiler = None
 
-        # limit fps
-        self.time_bank = 0
 
     def wait_for_geometry(self):
         self.logger.debug('Waiting for geometry from the Engine.')
@@ -85,7 +82,7 @@ class Coach(Process):
                 self.frame_count += 1
                 self.main_loop()
                 self.dump_profiling_stats()
-                self.print_frame_rate()
+                self.log_status()
                 self.limit_frame_rate()
 
         except KeyboardInterrupt:
@@ -95,16 +92,7 @@ class Coach(Process):
         self.game_state.update(self.engine_game_state)
         self.debug_executor.exec()
         engine_commands = self.play_executor.exec()
-        self._send_cmd(engine_commands)
-
-    def _send_cmd(self, engine_commands: List[EngineCommand]):
         self.ai_queue.put(engine_commands)
-
-    def enable_profiling(self):
-        self.profiling_enabled = True
-        self.profiler = cProfile.Profile()
-        self.profiler.enable()
-        self.logger.debug('Profiling mode activate.')
 
     def dump_profiling_stats(self):
         if self.profiling_enabled:
@@ -112,14 +100,19 @@ class Coach(Process):
                 self.profiler.dump_stats(Coach.PROFILE_DATA_FILENAME)
                 self.logger.debug('Profile data written to {}.'.format(Coach.PROFILE_DATA_FILENAME))
 
-    def print_frame_rate(self):
-        dt = time() - self.time_last_print
-        if dt > 10:
+    def log_status(self):
+        if self.frame_count % (self.fps * Coach.STATUS_PRINT_TIME) == 0:
             df, self.last_frame_count = self.frame_count - self.last_frame_count, self.frame_count
+            dt, self.last_log_time = time() - self.last_log_time, time()
             self.logger.info('Updating at {:.2f} fps'.format(df / dt))
-            self.time_last_print = time()
 
     def limit_frame_rate(self):
         time_ahead = self.time_bank - time()
         if time_ahead > 0:
             sleep(time_ahead)
+
+    def enable_profiling(self):
+        self.profiling_enabled = True
+        self.profiler = cProfile.Profile()
+        self.profiler.enable()
+        self.logger.debug('Profiling mode activate.')
