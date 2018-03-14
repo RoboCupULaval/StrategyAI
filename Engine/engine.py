@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+import cProfile
 import logging
 import os
 import sys
@@ -33,6 +33,8 @@ class Engine(Process):
     DEFAULT_CAMERA_NUMBER = 4
     DEFAULT_FPS_LOCK_STATE = True
     DEFAULT_FPS = 30
+    PROFILE_DATA_TIME = 10
+    PROFILE_DATA_FILENAME = 'profile_data_engine.prof'
 
     def __init__(self,
                  game_state: DictProxy,
@@ -95,6 +97,10 @@ class Engine(Process):
         self.time_last_print = time()
         self.time_bank = 0
 
+        # profiling
+        self.profiling_enabled = False
+        self.profiler = None
+
     def start(self):
         super().start()
         self.vision_receiver.start()
@@ -117,9 +123,8 @@ class Engine(Process):
         try:
             while True:
                 self.time_bank += 1.0 / self.fps
-
                 self.main_loop()
-
+                self.profiling()
                 self.print_frame_rate()
                 self.limit_frame_rate()
         except KeyboardInterrupt:
@@ -192,6 +197,18 @@ class Engine(Process):
             self.logger.info('Updating at {:.2f} fps'.format(self.frame_count / dt))
             self.time_last_print = time()
             self.frame_count = 0
+
+    def enabled_profiling(self):
+        self.profiling_enabled = True
+        self.profiler = cProfile.Profile()
+        self.profiler.enable()
+        self.logger.debug('Profiling mode activate.')
+
+    def profiling(self):
+        if self.profiling_enabled:
+            if self.frame_count % (self.fps * Engine.PROFILE_DATA_TIME) == 0:
+                self.profiler.dump_stats(Engine.PROFILE_DATA_FILENAME)
+                self.logger.debug('Profile data written to {}.'.format(Engine.PROFILE_DATA_FILENAME))
 
     def unlock_fps(self):
         self.is_fps_locked = False

@@ -44,4 +44,4 @@ def set_arg_parser():
 if __name__ == '__main__':
     cli_args = set_arg_parser().parse_args()
     Config().load_file(cli_args.config_file)
-    FRAMEWORK = Framework(cli_args)
+    Framework(cli_args).start()

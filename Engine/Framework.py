@@ -16,24 +16,19 @@ class Framework:
 
     def __init__(self, cli_args):
 
-        # logger
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger("Framework")
 
-        # config
         self.cfg = Config()
 
-        # Managers
         self.game_state = Manager().dict()
         self.field = Manager().dict()
 
-        # Queues
         self.ai_queue = Queue(maxsize=Framework.QUEUE_SIZE)
         self.referee_queue = Queue(maxsize=Framework.QUEUE_SIZE)
         self.ui_send_queue = Queue(maxsize=Framework.QUEUE_SIZE)
         self.ui_recv_queue = Queue(maxsize=Framework.QUEUE_SIZE)
 
-        # Engine
         self.engine = Engine(self.game_state,
                              self.field,
                              self.ai_queue,
@@ -41,26 +36,29 @@ class Framework:
                              self.ui_send_queue,
                              self.ui_recv_queue)
 
-        self.engine.fps = cli_args.engine_fps
-        if cli_args.unlock_engine_fps:
-            self.engine.unlock_fps()
-
-        self.profiling_enabled = cli_args.enable_profiling
-
-        self.engine.start()
-
-        # AI
         self.coach = Coach(self.game_state,
                            self.field,
                            self.ai_queue,
                            self.referee_queue,
                            self.ui_send_queue,
-                           self.ui_recv_queue,
-                           self.profiling_enabled)
+                           self.ui_recv_queue)
+
+        self.engine.fps = cli_args.engine_fps
+
+        if cli_args.unlock_engine_fps:
+            self.engine.unlock_fps()
+
+        if cli_args.enable_profiling:
+            self.coach.enabled_profiling()
+            self.engine.enabled_profiling()
+
+    def start(self):
+
+        self.engine.start()
         self.coach.start()
 
         # end signal - do you like to stop gracefully? DO NOT MOVE! MUST BE PLACED AFTER PROCESSES
-        signal.signal(signal.SIGINT, self._sigint_handler)
+        signal.signal(signal.SIGINT, lambda *args: self.stop_game())
 
         # stop until someone manually stop us / we receive interrupt signal from os
         # also check if one of the subprocess died
@@ -81,8 +79,4 @@ class Framework:
     def stop_game(self):
         self.engine.terminate()
         self.coach.terminate()
-
         exit(0)
-
-    def _sigint_handler(self, *args):
-        self.stop_game()
