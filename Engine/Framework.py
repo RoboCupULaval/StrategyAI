@@ -45,6 +45,9 @@ class Framework:
 
         self.engine.fps = cli_args.engine_fps
 
+        if cli_args.on_negative_side:
+            self.engine.on_negative_side = True
+
         if cli_args.unlock_engine_fps:
             self.engine.unlock_fps()
 

@@ -27,7 +27,7 @@ class Tracker:
 
         self.cfg = Config()
         self.team_color = self.cfg['GAME']['our_color']
-        self.our_side = self.cfg['GAME']['our_side']
+        self.on_negative_side = False
 
         self.vision_state = vision_state
 

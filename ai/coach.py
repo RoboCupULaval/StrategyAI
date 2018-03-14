@@ -35,9 +35,6 @@ class Coach(Process):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.cfg = Config()
 
-        self.mode_debug_active = self.cfg['DEBUG']['using_debug']
-        self.is_simulation = self.cfg['GAME']['type'] == 'sim'
-
         # Managers for shared memory between process
         self.engine_game_state = engine_game_state
         self.field = field
@@ -55,10 +52,11 @@ class Coach(Process):
 
         # the executors
         self.play_executor = PlayExecutor(self.play_state, self.ui_send_queue)
-        self.debug_executor = DebugExecutor(self.play_state, self.play_executor, self.ui_send_queue, self.ui_recv_queue)
+        self.debug_executor = DebugExecutor(self.play_state, self.play_executor,
+                                            self.ui_send_queue, self.ui_recv_queue)
 
         # print frame rate
-        self.fps = 1/self.cfg['GAME']['ai_timestamp']
+        self.fps = self.cfg['GAME']['coach_fps']
         self.frame_count = 0
         self.time_last_print = time()
         self.last_frame_count = 0
@@ -67,6 +65,8 @@ class Coach(Process):
         self.profiling_enabled = False
         self.profiler = None
 
+        # limit fps
+        self.time_bank = 0
 
     def wait_for_geometry(self):
         self.logger.debug('Waiting for geometry from the Engine.')
@@ -77,15 +77,16 @@ class Coach(Process):
 
     def run(self) -> None:
         self.wait_for_geometry()
-        self.logger.debug('Running with process ID {}'.format(os.getpid()))
-
+        self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
+        self.time_bank = time()
         try:
             while True:
+                self.time_bank += 1.0 / self.fps
                 self.frame_count += 1
                 self.main_loop()
-                self.print_frame_rate()
                 self.dump_profiling_stats()
-                sleep(self.cfg['GAME']['ai_timestamp'])
+                self.print_frame_rate()
+                self.limit_frame_rate()
 
         except KeyboardInterrupt:
             pass
@@ -113,8 +114,12 @@ class Coach(Process):
 
     def print_frame_rate(self):
         dt = time() - self.time_last_print
-        if dt > 20:
-            df = self.frame_count - self.last_frame_count
+        if dt > 10:
+            df, self.last_frame_count = self.frame_count - self.last_frame_count, self.frame_count
             self.logger.info('Updating at {:.2f} fps'.format(df / dt))
             self.time_last_print = time()
-            self.last_frame_count = 0
+
+    def limit_frame_rate(self):
+        time_ahead = self.time_bank - time()
+        if time_ahead > 0:
+            sleep(time_ahead)

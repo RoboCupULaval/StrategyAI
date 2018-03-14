@@ -63,28 +63,17 @@ class Engine(Process):
         self.referee_queue = referee_queue
 
         # vision subprocess
-        vision_connection_info = (self.cfg['COMMUNICATION']['vision_udp_address'],
-                                  int(self.cfg['COMMUNICATION']['vision_port']))
-
-        self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_state, self.field)
+        self.vision_receiver = VisionReceiver(self.cfg['COMMUNICATION']['vision_info'], self.vision_state, self.field)
 
         # UIDebug communication sub processes
-        ui_debug_host = self.cfg['COMMUNICATION']['ui_debug_address']
-        ui_sender_connection_info = (ui_debug_host, int(self.cfg['COMMUNICATION']['ui_cmd_sender_port']))
-        ui_recver_connection_info = (ui_debug_host, int(self.cfg['COMMUNICATION']['ui_cmd_receiver_port']))
-
-        self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue)
-        self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue)
+        self.ui_sender = UIDebugCommandSender(self.cfg['COMMUNICATION']['ui_sender_info'], self.ui_send_queue)
+        self.ui_recver = UIDebugCommandReceiver(self.cfg['COMMUNICATION']['ui_recver_info'], self.ui_recv_queue)
 
         # Referee communication
-        referee_recver_connection_info = (self.cfg['COMMUNICATION']['referee_udp_address'],
-                                          int(self.cfg['COMMUNICATION']['referee_port']))
-        self.referee_recver = RefereeReceiver(referee_recver_connection_info, self.referee_queue)
+        self.referee_recver = RefereeReceiver(self.cfg['COMMUNICATION']['referee_info'], self.referee_queue)
 
-        # Subprocess to send robot commands
-        robot_connection_info = (self.cfg['COMMUNICATION']['vision_udp_address'], 20011)
-
-        self.robot_cmd_sender = RobotCommandSender(robot_connection_info)
+        # Robots communication
+        self.robot_cmd_sender = RobotCommandSender(self.cfg['COMMUNICATION']['grsim_info'])
 
         self.tracker = Tracker(self.vision_state)
         self.controller = Controller(observer=CsvPlotter)
@@ -111,15 +100,7 @@ class Engine(Process):
 
     def run(self):
         self.wait_for_vision()
-
-        logged_string = 'Running with process ID {}'.format(os.getpid())
-        if self.is_fps_locked:
-            logged_string += ' at {} fps'.format(self.fps)
-        else:
-            logged_string += ' without fps limitation'
-        logged_string += ' with {} cameras.'.format(self.camera_number)
-
-        self.logger.debug(logged_string)
+        self.logger.debug(self.status)
         self.time_bank = time()
         try:
             while True:
@@ -140,7 +121,7 @@ class Engine(Process):
     def wait_for_vision(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
         while not any(self.vision_state):
-            sleep(0.1)
+            sleep(1/self.fps)
 
     def main_loop(self):
 
@@ -193,11 +174,10 @@ class Engine(Process):
 
     def print_frame_rate(self):
         dt = time() - self.time_last_print
-        if dt > 20:
-            df = self.frame_count - self.last_frame_count
+        if dt > 10:
+            df, self.last_frame_count = self.frame_count - self.last_frame_count, self.frame_count
             self.logger.info('Updating at {:.2f} fps'.format(df / dt))
             self.time_last_print = time()
-            self.last_frame_count = 0
 
     def enable_profiling(self):
         self.profiling_enabled = True
@@ -245,3 +225,12 @@ class Engine(Process):
             raise ValueError('Invalid number of camera.')
         self._camera_number = num
         self.vision_state = Manager().list([Manager().dict() for _ in range(self._camera_number)])
+
+    @property
+    def status(self):
+        logged_string = 'Running with process ID {}'.format(os.getpid())
+        if self.is_fps_locked:
+            logged_string += ' at {} fps.'.format(self.fps)
+        else:
+            logged_string += ' without fps limitation.'
+        return logged_string

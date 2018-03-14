@@ -11,10 +11,7 @@ class TeamColorService(metaclass=Singleton):
     def __init__(self):
         cfg = Config()
         self._our_team_color = self.convert_color_from_str(cfg['GAME']['our_color'])
-        self._enemy_team_color = self.convert_color_from_str(cfg['GAME']['their_color'])
-
-        if self._our_team_color == self._enemy_team_color:
-            raise WrongRobotColorError('Both team color are the same in the config file.')
+        self._enemy_team_color = TeamColor.BLUE if self.is_our_team_yellow else TeamColor.YELLOW
 
     @property
     def our_team_color(self):
