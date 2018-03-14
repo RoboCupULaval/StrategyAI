@@ -32,7 +32,7 @@ class Engine(Process):
 
     DEFAULT_CAMERA_NUMBER = 4
     DEFAULT_FPS_LOCK_STATE = True
-    DEFAULT_FPS = 30
+    DEFAULT_FPS = 30  # Please don't change this constant, instead run the AI with the optional argument --engine_fps
     PROFILE_DATA_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_engine.prof'
 
