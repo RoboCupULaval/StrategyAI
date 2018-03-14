@@ -72,5 +72,8 @@ filtered.txt
 unfiltered.txt
 *.csv
 
+# profiling data files
+*.prof
+
 # Config custom
 *.custom.cfg

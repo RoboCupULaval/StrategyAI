@@ -33,10 +33,15 @@ def set_arg_parser():
                             help='Flag when we are on the negative x side of the field.',
                             default=False)
 
+    arg_parser.add_argument('--enable_profiling',
+                            action='store_true',
+                            help='Enables profiling options through the project.',
+                            default=False)
+
     return arg_parser
 
 
 if __name__ == '__main__':
     cli_args = set_arg_parser().parse_args()
     Config().load_file(cli_args.config_file)
-    FRAMEWORK = Framework(cli_args)
+    Framework(cli_args).start()
