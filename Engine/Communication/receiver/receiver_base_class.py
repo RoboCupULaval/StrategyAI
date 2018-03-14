@@ -1,4 +1,4 @@
-
+import os
 from abc import ABCMeta, abstractmethod
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
@@ -36,7 +36,7 @@ class ReceiverProcess(Process, ReceiverBaseClass, metaclass=ABCMeta):
 
     def run(self):
 
-        self.logger.debug('Running')
+        self.logger.debug('Running with process ID {}.'.format(os.getpid()))
 
         try:
             while True:

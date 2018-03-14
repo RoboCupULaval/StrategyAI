@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+import cProfile
 import logging
 import os
 import sys
@@ -32,7 +32,9 @@ class Engine(Process):
 
     DEFAULT_CAMERA_NUMBER = 4
     DEFAULT_FPS_LOCK_STATE = True
-    DEFAULT_FPS = 30
+    DEFAULT_FPS = 30  # Please don't change this constant, instead run the AI with the optional argument --engine_fps
+    PROFILE_DATA_TIME = 10
+    PROFILE_DATA_FILENAME = 'profile_data_engine.prof'
 
     def __init__(self,
                  game_state: DictProxy,
@@ -87,13 +89,18 @@ class Engine(Process):
         self.tracker = Tracker(self.vision_state)
         self.controller = Controller(observer=CsvPlotter)
 
+        self.frame_count = 0
         self._fps = Engine.DEFAULT_FPS
         self._is_fps_locked = Engine.DEFAULT_FPS_LOCK_STATE
 
         # print frame rate
-        self.frame_count = 0
         self.time_last_print = time()
+        self.last_frame_count = 0
         self.time_bank = 0
+
+        # profiling
+        self.profiling_enabled = False
+        self.profiler = None
 
     def start(self):
         super().start()
@@ -117,9 +124,9 @@ class Engine(Process):
         try:
             while True:
                 self.time_bank += 1.0 / self.fps
-
+                self.frame_count += 1
                 self.main_loop()
-
+                self.dump_profiling_stats()
                 self.print_frame_rate()
                 self.limit_frame_rate()
         except KeyboardInterrupt:
@@ -181,17 +188,28 @@ class Engine(Process):
             sleep(time_ahead)
         if time_ahead < -2:
             raise RuntimeError(
-                'The required frame rate is too fast for the engine.\n'
-                'To find out what is the best frame rate for your computer,\n'
-                'launch the engine with FIX_FRAME_RATE at false and use the minimum FPS that you get.')
+                'The required frame rate is too high for the engine.\n'
+                'Launch the engine with the flag --unlock_fps and use the minimum FPS that you get.')
 
     def print_frame_rate(self):
-        self.frame_count += 1
         dt = time() - self.time_last_print
-        if dt > 10:
-            self.logger.info('Updating at {:.2f} fps'.format(self.frame_count / dt))
+        if dt > 20:
+            df = self.frame_count - self.last_frame_count
+            self.logger.info('Updating at {:.2f} fps'.format(df / dt))
             self.time_last_print = time()
-            self.frame_count = 0
+            self.last_frame_count = 0
+
+    def enable_profiling(self):
+        self.profiling_enabled = True
+        self.profiler = cProfile.Profile()
+        self.profiler.enable()
+        self.logger.debug('Profiling mode activate.')
+
+    def dump_profiling_stats(self):
+        if self.profiling_enabled:
+            if self.frame_count % (self.fps * Engine.PROFILE_DATA_TIME) == 0:
+                self.profiler.dump_stats(Engine.PROFILE_DATA_FILENAME)
+                self.logger.debug('Profile data written to {}.'.format(Engine.PROFILE_DATA_FILENAME))
 
     def unlock_fps(self):
         self.is_fps_locked = False
@@ -202,6 +220,8 @@ class Engine(Process):
 
     @fps.setter
     def fps(self, engine_fps):
+        if not engine_fps > 0:
+            raise ValueError('FPS must be greater than zero.')
         self._fps = engine_fps
 
     @property

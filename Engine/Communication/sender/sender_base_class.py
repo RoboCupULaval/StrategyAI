@@ -1,3 +1,4 @@
+import os
 from abc import ABCMeta, abstractmethod
 from multiprocessing import Process, Queue
 
@@ -33,7 +34,7 @@ class SenderProcess(Process, SenderBaseClass, metaclass=ABCMeta):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def run(self):
-        self.logger.debug('Running')
+        self.logger.debug('Running with process ID {}.'.format(os.getpid()))
         try:
             while True:
                 self.send_packet()
