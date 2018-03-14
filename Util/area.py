@@ -7,7 +7,7 @@ from Util import Position
 
 
 # noinspection PyPep8Naming
-def isInsideSquare(position, y_top, y_bottom, x_left, x_right):
+def is_inside_square(position, y_top, y_bottom, x_left, x_right):
     # Parameters assertions
     assert isinstance(position, Position)
     assert isinstance(y_top, (int, float))
@@ -35,18 +35,18 @@ def is_inside_circle(position, center, radius):
 
 
 # noinspection PyPep8Naming
-def isOutsideSquare(position, x_top, x_bottom, y_left, y_right):
-    return not isInsideSquare(position, x_top, x_bottom, y_left, y_right)
+def is_outside_square(position, x_top, x_bottom, y_left, y_right):
+    return not is_inside_square(position, x_top, x_bottom, y_left, y_right)
 
 
 # noinspection PyPep8Naming
-def isOutsideCircle(position, center, radius):
+def is_outside_circle(position, center, radius):
     return not is_inside_circle(position, center, radius)
 
 
 # Reform
 # noinspection PyPep8Naming
-def stayInsideSquare(position, y_top, y_bottom, x_left, x_right):
+def stay_inside_square(position, y_top, y_bottom, x_left, x_right):
     # Parameters assertions
     assert isinstance(position, Position)
     assert isinstance(y_top, (int, float))
@@ -56,7 +56,7 @@ def stayInsideSquare(position, y_top, y_bottom, x_left, x_right):
     assert y_top > y_bottom
     assert x_right > x_left
 
-    if isInsideSquare(position, y_top, y_bottom, x_left, x_right):
+    if is_inside_square(position, y_top, y_bottom, x_left, x_right):
         return Position(position.x, position.y)
     else:
         pos_x = position.x
@@ -76,7 +76,7 @@ def stayInsideSquare(position, y_top, y_bottom, x_left, x_right):
 
 
 # noinspection PyPep8Naming
-def stayInsideCircle(position, center, radius):
+def stay_inside_circle(position, center, radius):
     # Parameters assertions
     if is_inside_circle(position, center, radius):
         return Position(position.x, position.y)
@@ -87,7 +87,7 @@ def stayInsideCircle(position, center, radius):
 
 
 # noinspection PyPep8Naming
-def stayOutsideSquare(position, y_top, y_bottom, x_left, x_right):
+def stay_outside_square(position, y_top, y_bottom, x_left, x_right):
     # Parameters assertions
     assert isinstance(position, Position)
     assert isinstance(y_top, (int, float))
@@ -97,7 +97,7 @@ def stayOutsideSquare(position, y_top, y_bottom, x_left, x_right):
     assert y_top > y_bottom
     assert x_right > x_left
 
-    if isOutsideSquare(position, y_top, y_bottom, x_left, x_right):
+    if is_outside_square(position, y_top, y_bottom, x_left, x_right):
         return Position(position.x, position.y)
     pos_y = y_top if position.y > y_top - (y_top - y_bottom) / 2 else y_bottom
     pos_x = x_right if position.x > x_right - (x_right - x_left) / 2 else x_left
@@ -106,9 +106,9 @@ def stayOutsideSquare(position, y_top, y_bottom, x_left, x_right):
 
 
 # noinspection PyPep8Naming
-def stayOutsideCircle(position, center, radius):
+def stay_outside_circle(position, center, radius):
     # Parameters assertions
-    if isOutsideCircle(position, center, radius):
+    if is_outside_circle(position, center, radius):
         return Position(position.x, position.y)
     pos_angle = (position - center).angle
     pos_x = radius * m.cos(pos_angle) + center.x
