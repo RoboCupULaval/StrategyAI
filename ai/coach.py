@@ -16,7 +16,6 @@ from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 from config.config import Config
 
-AI_CPROFILING_ENABLED = True
 PROFILE_DATA_TICK_NUMBER = 100
 PROFILE_DATA_FILENAME = 'profile_data_ai.prof'
 
@@ -28,7 +27,8 @@ class Coach(Process):
                  ai_queue: Queue,
                  referee_queue: Queue,
                  ui_send_queue: Queue,
-                 ui_recv_queue: Queue):
+                 ui_recv_queue: Queue,
+                 profiling_enabled=False):
 
         super().__init__(name=__name__)
 
@@ -60,6 +60,7 @@ class Coach(Process):
         # print frame rate
         self.frame_count = 0
         self.time_last_print = time()
+        self.profiling_enabled = profiling_enabled
 
     def wait_for_geometry(self):
         self.logger.debug('Waiting for geometry from the Engine.')
@@ -71,7 +72,7 @@ class Coach(Process):
     def run(self) -> None:
         self.wait_for_geometry()
         self.logger.debug('Running with process ID {}'.format(os.getpid()))
-        if AI_CPROFILING_ENABLED:
+        if self.profiling_enabled:
             self.pr = cProfile.Profile()
             self.pr.enable()
         cycle_tick_count = 0
@@ -83,7 +84,7 @@ class Coach(Process):
                 cycle_tick_count += 1
                 if cycle_tick_count == PROFILE_DATA_TICK_NUMBER:
                     cycle_tick_count = 0
-                    if AI_CPROFILING_ENABLED:
+                    if self.profiling_enabled:
                         self.pr.dump_stats(PROFILE_DATA_FILENAME)
                         self.logger.debug('ai profile data written.')
 

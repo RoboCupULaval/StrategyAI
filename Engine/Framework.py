@@ -45,6 +45,8 @@ class Framework:
         if cli_args.unlock_engine_fps:
             self.engine.unlock_fps()
 
+        self.profiling_enabled = cli_args.enable_profiling
+
         self.engine.start()
 
         # AI
@@ -53,7 +55,8 @@ class Framework:
                            self.ai_queue,
                            self.referee_queue,
                            self.ui_send_queue,
-                           self.ui_recv_queue)
+                           self.ui_recv_queue,
+                           self.profiling_enabled)
         self.coach.start()
 
         # end signal - do you like to stop gracefully? DO NOT MOVE! MUST BE PLACED AFTER PROCESSES
