@@ -32,9 +32,6 @@ class HumanControl(Strategy):
                 # When all else fail, just force it
                 role = Role.FIRST_ATTACK
                 self.game_state.map_players_to_roles_by_player_id({role: robot_id})
-        else:
-            self.roles_graph[role].remove_node(0)  # This crash.
 
         self.clear_graph_of_role(role)
         self.create_node(role, tactic)
-

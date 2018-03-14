@@ -21,7 +21,7 @@ class Graph:
         __str__: Retourne une représentation du graphe sous forme d'une chaîne de caractères.
     Attributs:
         nodes: Une liste des noeuds du graphe.
-        current_node: L'index du noeud courant dans la liste des noeuds.
+        current_node: Un pointeur vers le noeud courant dans la liste des noeuds.
     """
     def __init__(self):
         self.nodes = []
@@ -59,7 +59,7 @@ class Graph:
     def remove_node(self, dst_node):
         """
         Retire un noeud de la liste de noeuds, puis détruit tous les vertices pointant vers ce noeud.
-        :param p_node_index: L'index du noeud à retirer dans la liste de noeuds.
+        :param dst_node: Le noeud à retirer dans la liste de noeuds.
         """
         assert isinstance(dst_node, Node)
         assert dst_node in self.nodes
@@ -71,9 +71,9 @@ class Graph:
         """
         Ajoute un vertex entre deux noeuds du graphe. Il ne peut y avoir qu'un seul vertex entre deux noeuds donnés dans
         un certain sens. Si on en ajoute un autre, celui-ci remplacera l'ancien.
-        :param p_starting_node: L'index du noeud de départ dans la liste de noeuds.
-        :param p_ending_node: L'index du noeud d'arrivée dans la liste de noeuds.
-        :param p_condition: Une fonction retournant un booléen indiquant si on peut passer au noeud suivant.
+        :param starting_node: Le noeud de départ dans la liste de noeuds.
+        :param ending_node: Le noeud d'arrivée dans la liste de noeuds.
+        :param condition: Une fonction retournant un booléen indiquant si on peut passer au noeud suivant.
         """
         assert isinstance(starting_node, Node)
         assert starting_node in self.nodes
@@ -85,8 +85,8 @@ class Graph:
     def remove_vertex(self, starting_node, ending_node):
         """
         Retire un vertex entre deux noeuds du graphe.
-        :param p_starting_node: L'index du noeud de départ dans la liste de noeuds.
-        :param p_ending_node: L'index du noeud d'arrivée dans la liste de noeuds.
+        :param starting_node: Le noeud de départ dans la liste de noeuds.
+        :param ending_node: Le noeud d'arrivée dans la liste de noeuds.
         """
         assert isinstance(starting_node, Node)
         assert starting_node in self.nodes
@@ -111,7 +111,7 @@ class Graph:
     def set_current_node(self, node):
         """
         Change le noeud courant du graphe, ce qui a pour effet de changer la tactique en cours.
-        :param node_index: L'index du prochain noeud courant dans la liste de noeuds.
+        :param node: Le prochain noeud courant dans la liste de noeuds.
         """
         assert isinstance(node, Node)
         assert node in self.nodes

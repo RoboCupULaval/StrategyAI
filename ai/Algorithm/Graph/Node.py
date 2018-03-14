@@ -42,7 +42,7 @@ class Node:
                 return
         self.vertices.append(p_vertex)
 
-    def connect_to(self, dst_node, when: Callable[..., bool]):
+    def connect_to(self, dst_node, *, when: Callable[..., bool]):
         self.add_vertex(Vertex(dst_node, when))
 
     def remove_vertex(self, p_ending):
