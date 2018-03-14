@@ -1,10 +1,18 @@
 from unittest import TestCase
 
+import pytest
+
 from Util.role import Role
+from Util.role_mapper import RoleMapper
 from ai.states.game_state import GameState
 
 
+
+def fakeRule(game_state, target_role, role_mapping):
+    pass
+
 class RoleMapperTests(TestCase):
+
     def test_givenNoMapping_whenMapById_thenMapsAllPlayers(self):
         state = GameState()
         state.map_players_to_roles_by_player(basic_roles)
@@ -21,6 +29,18 @@ class RoleMapperTests(TestCase):
         state.map_players_to_roles_by_player(basic_roles)
         state.map_players_to_roles_by_player(missing_middle)
         self.assertDictEqual(state.role_mapping, missing_middle_expected)
+
+    def test_whenMapRuleWithDuplicateRole_thenAssertError(self):
+        A_ROLE_RULE = {Role.GOALKEEPER: fakeRule}
+
+        role_mapper = RoleMapper()
+
+        with pytest.raises(AssertionError):
+            role_mapper.map_with_rules(A_ROLE_RULE, A_ROLE_RULE)
+
+    def test_when(self):
+        pass
+
 
     # def test_givenBasicMapping_whenMapMissingLockedRole_thenKeepsLockedRole(self):
     #     state = GameState()

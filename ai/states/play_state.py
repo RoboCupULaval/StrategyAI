@@ -15,6 +15,7 @@ class PlayState:
     def __init__(self):
         self.strategy_book = StrategyBook()
         self.tactic_book = TacticBook()
+        self.game_state = GameState()
         self.autonomous_flag = False
         self._current_strategy = None
 
@@ -27,7 +28,8 @@ class PlayState:
         assert isinstance(strategy_name, str)
 
         strategy_class = self.strategy_book.get_strategy(strategy_name)
-        self._current_strategy = strategy_class(GameState())
+        self.game_state.map_players_for_strategy(strategy_class)
+        self._current_strategy = strategy_class(self.game_state)
 
     def set_autonomous_flag(self, flag: bool) -> None:
         self.autonomous_flag = flag

@@ -40,6 +40,11 @@ class GameState(metaclass=Singleton):
             if game_state['balls']:
                 self._ball.update(game_state['balls'][0])
 
+
+    def map_players_for_strategy(self, strategy_class):
+        self._role_mapper.map_with_rules(strategy_class.required_roles(),
+                                         strategy_class.optional_roles())
+
     def get_player_by_role(self, role):
         return self._role_mapper.roles_translation[role]
 
@@ -98,3 +103,4 @@ class GameState(metaclass=Singleton):
     @property
     def referee(self) -> Referee:
         return self._referee
+

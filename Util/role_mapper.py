@@ -66,3 +66,10 @@ class RoleMapper(object):
                 self.roles_translation[key] = old_locked_player
                 break
         self.roles_translation[role] = player
+
+    def map_with_rules(self, required_rules, optional_rules):
+        nbr_unique_role = len(set(required_rules.keys()) | set(optional_rules.keys()))
+        nbr_role = len(required_rules) + len(optional_rules)
+        assert nbr_unique_role == nbr_role, "The same role can not be in the required rules and the optional rules"
+        prev_mapping = self.roles_translation
+

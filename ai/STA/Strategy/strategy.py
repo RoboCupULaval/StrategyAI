@@ -5,6 +5,7 @@ from typing import List, Tuple, Callable, Dict
 
 from Util import AICommand, Pose
 from Util.role import Role
+from Util.role_mapping_rule import RoleMappingRule
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
 from ai.GameDomainObjects import Player
@@ -38,6 +39,17 @@ class Strategy(metaclass=ABCMeta):
             role_mapping[Role.GOALKEEPER] = current_goaler
             role_mapping[new_goaler_old_role] = new_goaler
         return role_mapping
+
+    @classmethod
+    def required_roles(cls) -> Dict[Role, Callable]:
+        """
+        The required roles are the one that must be available otherwise the strategy's goal is unreachable
+        """
+        raise NotImplementedError("A strategy must provide the list of required roles in a {role: MyRoleMappingRule")
+
+    @classmethod
+    def optional_roles(cls) -> Dict[Role, Callable]:
+        return {}
 
     def add_tactic(self, role: Role, tactic: Tactic) -> None:
         """
