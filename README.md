@@ -1,4 +1,4 @@
-[![Travis Build Status](https://travis-ci.org/RoboCupULaval/StrategyIA.svg?branch=dev)](https://travis-ci.org/RoboCupULaval/StrategyIA)
+[![Travis Build Status](https://travis-ci.org/RoboCupULaval/StrategyAI.svg?branch=dev)](https://travis-ci.org/RoboCupULaval/StrategyAI)
 
 # StrategyIA
 
