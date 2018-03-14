@@ -1,6 +1,8 @@
 # Under MIT License, see LICENSE.txt
 import logging
 import os
+import cProfile
+
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
 from time import sleep, time
@@ -14,6 +16,9 @@ from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 from config.config import Config
 
+PROFILE_AI = True
+PROFILE_DATA_TICK_NUMBER = 100
+PROFILE_DATA_FILENAME = 'profile_data_ai.prof'
 
 class Coach(Process):
 
@@ -66,13 +71,25 @@ class Coach(Process):
     def run(self) -> None:
         self.wait_for_geometry()
         self.logger.debug('Running with process ID {}'.format(os.getpid()))
+        if PROFILE_AI:
+            self.pr = cProfile.Profile()
+            self.pr.enable()
+        cycle_tick_count = 0
         try:
             while True:
                 self.main_loop()
                 self.print_frame_rate()
                 sleep(self.cfg['GAME']['ai_timestamp'])
+                cycle_tick_count += 1
+                if cycle_tick_count == PROFILE_DATA_TICK_NUMBER:
+                    cycle_tick_count = 0
+                    if PROFILE_AI:
+                        self.pr.dump_stats(PROFILE_DATA_FILENAME)
+                        print('ai profile data written.')
 
         except KeyboardInterrupt:
+            self.pr.dump_stats(PROFILE_DATA_FILENAME)
+            print('ai profile data written during keyboard interrupt.')
             pass
 
     def main_loop(self) -> None:
