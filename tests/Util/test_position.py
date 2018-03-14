@@ -31,46 +31,46 @@ A_POS_NORM = np.linalg.norm(A_POS.array)
 
 class TestPosition(unittest.TestCase):
 
-    def test_default_position_zero(self):
+    def test_givenNoArgs_whenNew_thenReturnZeroPosition(self):
         self.assertEqual(Position(), A_ZERO_POS)
 
-    def test_new_position_with_args(self):
+    def test_givenArgs_whenNew_thenReturnNewPosition(self):
         pos = Position(A_X, A_Y)
         self.assertEqual(pos.x, A_X)
         self.assertEqual(pos.y, A_Y)
 
-    def test_new_position_from_np_array(self):
+    def test_givenNumpyArray_whenFromArray_thenReturnNewPosition(self):
         pos = Position.from_array(A_ARRAY)
         self.assertEqual(pos.x, A_ARRAY[0])
         self.assertEqual(pos.y, A_ARRAY[1])
 
-    def test_new_position_from_np_copy(self):
-        # VERIFY THIS TEST
+    def test_givenNumpyArray_whenFromArray_thenPositionIsCopy(self):
         pos = Position.from_array(A_ARRAY)
         self.assertIsNot(pos, A_ARRAY)
 
-    def test_new_position_from_list(self):
+    def test_givenList_whenFromList_thenPositionIsInstantiated(self):
         pos = Position.from_list(A_LIST)
         self.assertEqual(pos.x, A_LIST[0])
         self.assertEqual(pos.y, A_LIST[1])
 
-    def test_new_position_from_dict(self):
+    def test_givenDict_whenFromDict_thenPositionIsInstantiated(self):
         pos = Position.from_dict(A_DICT)
         self.assertEqual(pos.x, A_DICT['x'])
         self.assertEqual(pos.y, A_DICT['y'])
 
-    def test_position_equality(self):
+    def test_givenSamePosition_whenTestEquality_thenTrue(self):
         self.assertTrue(A_POS == A_SAME_POS)
 
-    def test_inequality(self):
+    def test_givenDifferentPosition_whenTestEquality_thenFalse(self):
         self.assertFalse(A_POS == A_DIFFERENT_POS)
 
-    def test_angle(self):
+    def test_givenPosition_whenGetAngle_thenAngle(self):
         pos_angle = m.atan2(A_POS.y, A_POS.x)
         self.assertEqual(A_POS.angle, pos_angle)
 
-    def test_zero_position_angle(self):
+    def test_givenZeroPosition_whenGetAngle_thenZero(self):
         self.assertEqual(A_ZERO_POS.angle, A_ZERO_ANGLE)
 
-    def test_norm(self):
+    def test_givenPosition_whenGetNorm_thenNorm(self):
         self.assertEqual(A_POS.norm, A_POS_NORM)
+

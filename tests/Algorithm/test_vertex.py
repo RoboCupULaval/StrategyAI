@@ -7,24 +7,24 @@ from ai.Algorithm.Graph.Vertex import Vertex
 __author__ = 'RoboCupULaval'
 
 
-def return_true():
+def foo():
     return True
 
 
-def return_false():
+def foo2():
     return 1 == 2
 
 
 class TestVertex(unittest.TestCase):
     def setUp(self):
-        self.vertex1 = Vertex(1, return_true)
-        self.vertex2 = Vertex(123, return_false)
+        self.vertex1 = Vertex(1, foo)
+        self.vertex2 = Vertex(123, foo2)
 
     def test_init(self):
         self.assertEqual(self.vertex1.next_node, 1)
-        self.assertEqual(self.vertex1.condition, return_true)
-        self.assertRaises(AssertionError, Vertex, 1.2, return_true)
-        self.assertRaises(AssertionError, Vertex, -4, return_true)
+        self.assertEqual(self.vertex1.condition, foo)
+        self.assertRaises(AssertionError, Vertex, 1.2, foo)
+        self.assertRaises(AssertionError, Vertex, -4, foo)
         self.assertRaises(AssertionError, Vertex, 2, "not a function")
 
     def test_evaluate_condition(self):
@@ -34,3 +34,4 @@ class TestVertex(unittest.TestCase):
     def test_str(self):
         expected_string = "Next node: " + str(self.vertex1.next_node) + " Condition: " + self.vertex1.condition.__name__
         self.assertEqual(str(self.vertex1), expected_string)
+

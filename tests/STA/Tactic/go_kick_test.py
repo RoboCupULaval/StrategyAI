@@ -18,7 +18,7 @@ class TestGoKick(unittest.TestCase):
     def setUp(self):
         self.sim = PerfectSim(GoKick)
 
-    def test_kick_the_ball(self):
+    def test_givenARobotAndABall_thenKickTheBall(self):
         self.sim.add_robot(A_ROBOT_ID, START_POSE)
         self.sim.move_ball(START_BALL_POSITION)
         self.sim.start(A_ROBOT_ID, target=GOAL_POSE)
@@ -33,3 +33,5 @@ class TestGoKick(unittest.TestCase):
                 assert self.sim.has_hit_ball
                 return
         assert False, "Reach max number of tick and no kick"
+
+

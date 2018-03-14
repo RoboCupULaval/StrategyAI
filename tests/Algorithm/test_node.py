@@ -11,23 +11,23 @@ from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 
 
-def return_true():
+def foo():
     return True
 
 
-def return_false():
+def foo2():
     return False
 
 
 class TestNode(unittest.TestCase):
 
     def setUp(self):
-        self.a_tactic = TestNode._create_mock_tactic("A command")
-        self.another_tactic = TestNode._create_mock_tactic("Another command")
-        self.node1 = Node(self.a_tactic)
-        self.node2 = Node(self.another_tactic)
-        self.vertex1 = Vertex(0, return_true)
-        self.vertex2 = Vertex(1, return_false)
+        self.aTactic = TestNode._create_mock_tactic("A command")
+        self.anotherTactic = TestNode._create_mock_tactic("Another command")
+        self.node1 = Node(self.aTactic)
+        self.node2 = Node(self.anotherTactic)
+        self.vertex1 = Vertex(0, foo)
+        self.vertex2 = Vertex(1, foo2)
 
     @staticmethod
     def _create_mock_tactic(command):
@@ -65,12 +65,12 @@ class TestNode(unittest.TestCase):
         self.node1.add_vertex(self.vertex2)
         command_from_tactic, next_node = self.node1.exec()
         self.assertEqual(next_node, 0)
-        self.assertEqual(command_from_tactic, self.a_tactic.exec())
+        self.assertEqual(command_from_tactic, self.aTactic.exec())
 
         self.node2.add_vertex(self.vertex2)
         command_from_tactic, next_node = self.node2.exec()
         self.assertEqual(next_node, -1)
-        self.assertEqual(command_from_tactic, self.another_tactic.exec())
+        self.assertEqual(command_from_tactic, self.anotherTactic.exec())
 
     def test_set_flag(self):
         self.assertRaises(AssertionError, self.node1.set_flag, "not a flag")
