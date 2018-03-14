@@ -18,7 +18,7 @@ la STA, dont le papier de recherche se retrouve
 Pour les détails d'installations voir le fichier [INSTALLATION.md](https://github.com/RoboCupULaval/StrategyAI/blob/dev/INSTALLATION.md)
 
 ### Workflow Git
-Le dépôt StrategyIA fonctionne avec les pull requests:
+Le dépôt StrategyAI fonctionne avec les pull requests:
 * Chaque nouvelle feature/issue doit être sur sa propre branche (git checkout -b branch_name).
 * Une fois qu'une feature/issue est résolue, faire un pull-request.
 
@@ -27,7 +27,7 @@ Pour que le code soit considéré comme valide, celui-ci doit respecter le stand
 De plus, le code doit avoir les tests unitaires associés.
 
 ### Exemple pour lancer deux équipes:
-À modifier selon vos chemins, à lancer à partir de la racine du dépôt de StrategyIA. Ce fichier est disponible à la racine du dépôt sous le nom de dual_launch.sh
+À modifier selon vos chemins, à lancer à partir de la racine du dépôt de StrategyAI. Ce fichier est disponible à la racine du dépôt sous le nom de dual_launch.sh
 
 >#!/bin/bash
 >
