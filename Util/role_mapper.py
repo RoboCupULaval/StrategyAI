@@ -27,6 +27,7 @@ class RoleMapper(object):
             raise ValueError("Tried to assign a locked robot to another role, {}".format(Counter(results.values())))
         self.roles_translation = results
 
+    # pylint: disable=invalid-name
     def map_player_to_first_available_role(self, player):
         try:
             role = self.available_roles[0]
@@ -42,8 +43,8 @@ class RoleMapper(object):
     @staticmethod
     def _remove_undesired_roles(base_map, new_map):
         keys = [key for key in base_map.keys()]
-        for key in keys :
-            if key not in new_map :
+        for key in keys:
+            if key not in new_map:
                 base_map[key] = None
         return base_map
 

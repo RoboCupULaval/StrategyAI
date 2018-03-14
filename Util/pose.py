@@ -6,10 +6,10 @@ from Util.position import Position
 
 ORIENTATION_ABSOLUTE_TOLERANCE = 0.004
 
-
+# pylint: disable=invalid-name
 class Pose:
 
-    def __init__(self, position: Position=Position(), orientation: float=0):
+    def __init__(self, position: Position = Position(), orientation: float = 0):
 
         self._orientation = orientation
         self._position = position.copy()
@@ -65,7 +65,7 @@ class Pose:
         return {'x': self.x, 'y': self.y, 'orientation': self.orientation}
 
     def __add__(self, other: Position):
-        assert(isinstance(other, Position))
+        assert isinstance(other, Position)
         return Pose(self.position + other, self.orientation)
 
     def __sub__(self, other: Position):

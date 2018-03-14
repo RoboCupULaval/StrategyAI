@@ -7,7 +7,8 @@ from numpy.core.multiarray import ndarray
 from Util import Position
 
 
-class Path(collections.MutableSequence):
+# pylint: disable=invalid-name
+class Path(collections.MutableSequence):  # pylint: disable=too-many-ancestors
 
     def __init__(self, start=None, target=None):
         self.points = [start, target]

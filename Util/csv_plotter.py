@@ -1,11 +1,11 @@
-import numpy as np
 import csv
-import matplotlib.pyplot as plt
 import time
 import os
+import matplotlib.pyplot as plt
+import numpy as np
 
 
-class Observer:
+class Observer:  # pylint: disable=too-few-public-methods
     def __init__(self):
         pass
 
@@ -13,10 +13,10 @@ class Observer:
         pass
 
 
-class CsvPlotter:
+class CsvPlotter:  # pylint: disable=too-few-public-methods
     def __init__(self):
-        self.time = time.time() - self.time_init
         self.time_init = time.time()
+        self.time = time.time() - self.time_init
         try:
             os.remove("data234.csv")
         except FileNotFoundError:
@@ -28,7 +28,9 @@ class CsvPlotter:
         values += [self.time]
         writer.writerow(values)
 
+
 if __name__ == '__main__':
+    # pylint: disable=invalid-name
     fig = plt.figure()
     data = np.genfromtxt('../data234.csv', delimiter=',', skip_header=10,
                          skip_footer=10, names=['x1', 'x2', 't'])

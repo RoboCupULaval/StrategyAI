@@ -32,4 +32,3 @@ class TeamColor(Enum):
         return 'blue' if self == TeamColor.BLUE else 'yellow'
     YELLOW = 0
     BLUE = 1
-
