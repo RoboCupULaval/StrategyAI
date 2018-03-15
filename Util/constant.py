@@ -38,3 +38,7 @@ class KickForce(Enum):
     LOW = 1
     MEDIUM = 2
     HIGH = 3
+
+class KickType(Enum):
+    DIRECT = 0
+    CHIP = 1
