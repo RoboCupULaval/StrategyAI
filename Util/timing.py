@@ -32,18 +32,3 @@ def get_fps_timer(desired_fps: float):
             next_time = current_time
 
     return fps_wait
-
-if __name__=='__main__':
-    # example preliminary test
-    START = time.time()
-    TIME_TOTAL = 5
-    FPS = 10
-    NUM_ITERATIONS = TIME_TOTAL*FPS
-    sleep = get_fps_timer(10)
-    sleep()  # to initialize it
-    for i in range(NUM_ITERATIONS-1):  # -1 because of the first sleep
-        time.sleep(1/(FPS+0.05))  # simulate load very close to full load
-        print(time.time()-START)
-        sleep()
-    print(time.time()-START)
-
