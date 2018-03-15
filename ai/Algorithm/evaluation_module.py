@@ -13,6 +13,13 @@ class PlayerPosition(object):
         self.player = player
         self.distance = distance
 
+# team_with_ball
+# closest_point -> geometry
+# is_ball_moving
+# is_ball_kicked
+# ball_direction
+# lines_of_sight -> geometry
+
 
 def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
     # Retourne le joueur qui possède la balle, NONE si balle libre

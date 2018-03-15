@@ -1,16 +1,14 @@
 # Under MIT License, see LICENSE.txt
 
-import unittest
-
 import numpy as np
 import math as m
 
+import pytest
+
 from Util import Position
+from Util.geometry import closest_point_on_line
 from Util.geometry import compare_angle, wrap_to_pi, perpendicular, normalize, are_close, rotate
-# from Util.geometry import get_closest_point_on_segment, get_closest_point_on_line
 
-
-__author__ = 'RoboCupULaval'
 
 A_X = 123.4
 A_Y = -56.7
@@ -37,77 +35,102 @@ A_POS_OFFSET_BY_1 = A_POS + Position(1, 0)
 A_POS_OFFSET_BY_LESS_THAN_1 = A_POS_OFFSET_BY_1 - Position(0.001, 0)
 
 
-class TestGeometry(unittest.TestCase):
+def test_closest_point_on_line_vertical():
+    reference = Position(50, 50)
+    start = Position(10, 0)
+    end = Position(100, 0)
+    assert closest_point_on_line(reference, start=start, end=end) == Position(50, 0)
 
-    def test_get_closest_point_on_line(self):
-        pass
+def test_closest_point_on_line_horizontal():
+    reference = Position(50, 50)
+    start = Position(0, 10)
+    end = Position(0, 100)
+    assert closest_point_on_line(reference, start=start, end=end) == Position(0, 50)
 
-    def test_get_closest_point_on_segment(self):
-        pass
+def test_closest_point_on_line_diagonal():
+    reference = Position(50, 50)
+    start = Position(0, 0)
+    end = Position(100, 100)
+    assert closest_point_on_line(reference, start=start, end=end) == Position(50, 50)
 
-    def test_givenOrientationLessThanPi_whenWrapToPi_thenReturnWrappedOrientation(self):
-        self.assertEqual(wrap_to_pi(AN_ANGLE_LESS_THAN_PI), AN_ANGLE_LESS_THAN_PI)
+def test_closest_point_on_line_at_zero():
+    reference = Position(0, 50)
+    start = Position(-100, 0)
+    end = Position(100, 0)
+    assert closest_point_on_line(reference, start=start, end=end) == Position(0, 0)
 
-    def test_givenOrientationGreaterThanPi_whenWrapToPi_thenReturnWrappedOrientation(self):
-        self.assertEqual(wrap_to_pi(AN_ANGLE_GREATER_THAN_PI), AN_ANGLE_GREATER_THAN_PI - 2*m.pi)
+def test_closest_point_on_line_outside_range():
+    reference = Position(-50, 50)
+    start = Position(10, 0)
+    end = Position(100, 0)
+    assert closest_point_on_line(reference, start=start, end=end) == Position(-50, 0)
 
-    def test_givenAngleAndSameAngle_whenCompareAngle_thenTrue(self):
-        self.assertTrue(compare_angle(AN_ANGLE_LESS_THAN_PI, AN_ANGLE_LESS_THAN_PI))
 
-    def test_givenAngleAndSameAnglePlus2Pi_whenCompareAngle_thenTrue(self):
-        self.assertTrue(compare_angle(AN_ANGLE_LESS_THAN_PI, AN_ANGLE_LESS_THAN_PI + 2*m.pi))
+def test_wrap_to_pi_with_angle_less_than_pi():
+    assert wrap_to_pi(AN_ANGLE_LESS_THAN_PI) == AN_ANGLE_LESS_THAN_PI
 
-    def test_givenAngleAndDifferentAngle_whenCompareAngle_thenFalse(self):
-        self.assertFalse(compare_angle(AN_ANGLE_LESS_THAN_PI, AN_ANGLE_GREATER_THAN_PI))
+def test_wrap_to_pi_with_angle_greater_than_pi():
+    assert wrap_to_pi(AN_ANGLE_GREATER_THAN_PI) == AN_ANGLE_GREATER_THAN_PI - 2*m.pi
 
-    def test_givenDifferentAngleInTolAndTol_whenCompareAngle_thenTrue(self):
-        self.assertTrue(compare_angle(AN_ANGLE_LESS_THAN_PI, AN_ANGLE_LESS_THAN_PI+0.99, abs_tol=1))
 
-    def test_givenPositionAndPositiveAngle_whenRotate_thenReturnRotatedPosition(self):
-        self.assertEqual(rotate(A_POS, A_POS_ANGLE), A_POS_ROTATED_BY_A_POS_ANGLE)
+def test_compare_angle_with_same_angle():
+    assert compare_angle(AN_ANGLE_LESS_THAN_PI, AN_ANGLE_LESS_THAN_PI)
 
-    def test_givenPositionAndNegativeAngle_whenRotate_thenReturnRotatedPosition(self):
-        self.assertEqual(rotate(A_POS, A_NEG_ANGLE), A_POS_ROTATED_BY_A_NEG_ANGLE)
+def test_compare_angle_with_same_angle_offset_by_2pi():
+    assert compare_angle(AN_ANGLE_LESS_THAN_PI, AN_ANGLE_LESS_THAN_PI + 2*m.pi)
 
-    def test_givenPositionAndAngle_whenRotate_thenReturnIsPosition(self):
-        self.assertIsInstance(rotate(A_POS, A_POS_ANGLE), Position)
+def test_compare_angle_with_different_angle():
+    assert not compare_angle(AN_ANGLE_LESS_THAN_PI, AN_ANGLE_GREATER_THAN_PI)
 
-    def test_givenPositionAndAngle_whenRotate_thenReturnIsNotSame(self):
-        self.assertIsNot(rotate(A_POS, A_POS_ANGLE), A_POS)
+def test_compare_angle_with_tolerance():
+    assert compare_angle(AN_ANGLE_LESS_THAN_PI, AN_ANGLE_LESS_THAN_PI+0.99, abs_tol=1)
 
-    def test_givenPosition_whenNormalized_thenReturnNormalizedPosition(self):
-        self.assertEqual(normalize(A_POS), A_POS_NORMALIZED)
 
-    def test_givenZeroPosition_whenNormalized_thenThrowsZeroDivisionError(self):
-        with self.assertRaises(ZeroDivisionError):
-            print(normalize(A_ZERO_POS))
+def test_rotate_by_positive_angle():
+    assert rotate(A_POS, A_POS_ANGLE) == A_POS_ROTATED_BY_A_POS_ANGLE
 
-    def test_givenPosition_whenNormalized_thenReturnIsPosition(self):
-        self.assertIsInstance(normalize(A_POS), Position)
+def test_rotate_by_negative_angle():
+    assert rotate(A_POS, A_NEG_ANGLE) == A_POS_ROTATED_BY_A_NEG_ANGLE
 
-    def test_givenPosition_whenNormalized_thenReturnIsNotSame(self):
-        self.assertIsNot(normalize(A_POS), A_POS)
+def test_rotate_return_type():
+    assert isinstance(rotate(A_POS, A_POS_ANGLE), Position)
 
-    def test_givenPosition_whenPerpendicular_thenReturnPerpendicularPosition(self):
-        self.assertEqual(perpendicular(A_POS), A_POS_PERPENDICULAR)
+def test_rotate_identity():
+    assert rotate(A_POS, A_POS_ANGLE) is not A_POS
 
-    def test_givenPosition_whenPerpendicular_thenReturnIsNotSame(self):
-        self.assertIsNot(perpendicular(A_POS), A_POS)
 
-    def test_givenPosition_whenPerpendicular_thenReturnIsPosition(self):
-        self.assertIsInstance(perpendicular(A_POS), Position)
+def test_normalize_base_case():
+    assert normalize(A_POS) == A_POS_NORMALIZED
 
-    def test_givenSamePositions_whenIsClose_thenReturnTrue(self):
-        self.assertTrue(are_close(A_POS, A_SAME_POS))
+def test_normalize_with_zero_posisiton():
+    with pytest.raises(ZeroDivisionError):
+        normalize(A_ZERO_POS)
 
-    def test_givenDifferentPositions_whenIsClose_thenReturnFalse(self):
-        self.assertFalse(are_close(A_POS, A_DIFFERENT_POS))
+def test_normalize_return_type():
+    assert isinstance(normalize(A_POS), Position)
 
-    def test_givenPositionOffsetByTolerance_whenIsClose_thenReturnFalse(self):
-        self.assertFalse(are_close(A_POS, A_POS_OFFSET_BY_1, abs_tol=1))
+def test_normalize_identity():
+    assert normalize(A_POS) is not A_POS
 
-    def test_givenPositionOffsetByLessThanTolerance_whenIsClose_thenReturnTrue(self):
-        self.assertTrue(are_close(A_POS, A_POS_OFFSET_BY_LESS_THAN_1, abs_tol=1))
 
-if __name__ == '__main__':
-    unittest.main()
+def test_perpendicular_base_case():
+    assert perpendicular(A_POS) == A_POS_PERPENDICULAR
+
+def test_perpendicular_return_type():
+    assert isinstance(perpendicular(A_POS), Position)
+
+def test_perpendicular_identity():
+    assert perpendicular(A_POS) is not A_POS
+
+
+def test_are_close_same_positions():
+    assert are_close(A_POS, A_SAME_POS)
+
+def test_are_close_different_positions():
+    assert not are_close(A_POS, A_DIFFERENT_POS)
+
+def test_are_close_tolerance_limit():
+    assert not are_close(A_POS, A_POS_OFFSET_BY_1, abs_tol=1)
+
+def test_are_close_tolerance():
+    assert are_close(A_POS, A_POS_OFFSET_BY_LESS_THAN_1, abs_tol=1)
