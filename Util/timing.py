@@ -1,15 +1,16 @@
 import time
-import typing
+from typing import Optional, Callable
 
-def create_fps_timer(desired_fps: float, on_miss_callback: typing.Callable = None):
-    ''' Returns a timing function that sleeps to allow constant time between iterations.
+
+def create_fps_timer(desired_fps: float, on_miss_callback: Optional[Callable] = None):
+    """ Returns a timing function that sleeps to allow constant time between iterations.
     The precision of the time between iterations is up to the host operating system.
     ON AVERAGE, it should be around the desired_fps value.
 
     The callback is a function reference that accepts one parameter, which is the time
     that lateness delay in seconds. This function is only called when the desired_fps
     cannot be respected (in other words, the function would need to go back in time).
-    '''
+    """
     assert desired_fps > 0, 'the desired_fps must be a strictly positive value.'
     timer_period = 1/desired_fps
 
