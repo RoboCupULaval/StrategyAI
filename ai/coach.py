@@ -5,8 +5,12 @@ import cProfile
 
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
-from time import sleep, time
+from time import time
+from typing import List
 
+from Util.engine_command import EngineCommand
+from Util.team_color_service import TeamColorService
+from Util.timing import create_fps_timer
 from ai.executors.debug_executor import DebugExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.states.game_state import GameState
@@ -17,8 +21,8 @@ from config.config import Config
 
 class Coach(Process):
 
+    MAX_EXCESS_TIME = 0.1
     PROFILE_DUMP_TIME = 10
-    STATUS_LOG_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_ai.prof'
 
     def __init__(self,
@@ -56,8 +60,12 @@ class Coach(Process):
         self.fps = Config()['GAME']['coach_fps']
         self.frame_count = 0
         self.last_frame_count = 0
-        self.last_log_time = time()
-        self.time_bank = 0
+
+        def callback(excess_time):
+            if excess_time > Coach.MAX_EXCESS_TIME:
+                self.logger.debug('Overloaded (%.1f ms behind schedule)', 1000*excess_time)
+
+        self.fps_sleep = create_fps_timer(self.fps, on_miss_callback=callback)
 
         # profiling
         self.profiling_enabled = False
@@ -68,22 +76,18 @@ class Coach(Process):
         self.logger.debug('Waiting for geometry from the Engine.')
         start = time()
         while not self.field:
-            sleep(1/self.fps)
+            self.fps_sleep()
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
     def run(self) -> None:
         self.wait_for_geometry()
         self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
-        self.time_bank = time()
         try:
             while True:
-                self.time_bank += 1.0 / self.fps
                 self.frame_count += 1
                 self.main_loop()
                 self.dump_profiling_stats()
-                self.log_status()
-                self.limit_frame_rate()
-
+                self.fps_sleep()
         except KeyboardInterrupt:
             pass
 
@@ -93,25 +97,15 @@ class Coach(Process):
         engine_commands = self.play_executor.exec()
         self.ai_queue.put(engine_commands)
 
+    def enable_profiling(self):
+        self.profiling_enabled = True
+        self.profiler = cProfile.Profile()
+        self.profiler.enable()
+        self.logger.debug('Profiling mode activate.')
+
     def dump_profiling_stats(self):
         if self.profiling_enabled:
             if self.frame_count % (self.fps * Coach.PROFILE_DUMP_TIME) == 0:
                 self.profiler.dump_stats(Coach.PROFILE_DATA_FILENAME)
                 self.logger.debug('Profile data written to {}.'.format(Coach.PROFILE_DATA_FILENAME))
 
-    def log_status(self):
-        if self.frame_count % (self.fps * Coach.STATUS_LOG_TIME) == 0:
-            df, self.last_frame_count = self.frame_count - self.last_frame_count, self.frame_count
-            dt, self.last_log_time = time() - self.last_log_time, time()
-            self.logger.info('Updating at {:.2f} fps'.format(df / dt))
-
-    def limit_frame_rate(self):
-        time_ahead = self.time_bank - time()
-        if time_ahead > 0:
-            sleep(time_ahead)
-
-    def enable_profiling(self):
-        self.profiling_enabled = True
-        self.profiler = cProfile.Profile()
-        self.profiler.enable()
-        self.logger.debug('Profiling mode activate.')
