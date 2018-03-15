@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from collections import namedtuple
+from typing import Union
 
 from Util.constant import KickForce
 from Util.position import Position
@@ -13,13 +14,12 @@ AICommand = namedtuple('AICommand', 'target,'
                                     'dribbler_active,'
                                     'cruise_speed,'
                                     'end_speed,'
-                                    'ball_collision,'
-                                    'pathfinder_on')
+                                    'ball_collision')
 
 class CmdBuilder:
 
     def __init__(self):
-        # Does are the defaults values of AICommand
+        # Those are the defaults values of AICommand
         # A robot should stay idle with those value
         self._target = None
         self._kick_type = None
@@ -29,18 +29,17 @@ class CmdBuilder:
         self._cruise_speed = 0
         self._end_speed = 0
         self._ball_collision = True
-        self._pathfinder_on = True
 
-    def addMoveTo(self, target: [Pose, Position], cruise_speed=1, end_speed=0, ball_collision=True):
+    def addMoveTo(self, target: Union[Pose, Position], cruise_speed=1, end_speed=0, ball_collision=True):
         assert isinstance(target, (Pose, Position))
         self._target = Pose(target) if isinstance(target, Position) else target
         self._cruise_speed = cruise_speed
         self._end_speed = end_speed
         self._ball_collision = ball_collision
-        self._pathfinder_on = True
         return self
 
     def addKick(self, kick_force:KickForce=KickForce.LOW):
+        assert isinstance(kick_force, KickForce), 'kick_force should be a KickForce, not a {}'.format(type(kick_force))
         self._kick_force = kick_force
         self._kick_type = 1  # For the moment we only have one type
         return self
@@ -61,11 +60,10 @@ class CmdBuilder:
                          self._dribbler_active,
                          self._cruise_speed,
                          self._end_speed,
-                         self._ball_collision,
-                         self._pathfinder_on)
+                         self._ball_collision)
 
 
-def MoveTo(target: [Pose, Position], cruise_speed=1, end_speed=0, ball_collision=True):
+def MoveTo(target: Union[Pose, Position], cruise_speed=1, end_speed=0, ball_collision=True):
     return CmdBuilder().addMoveTo(target, cruise_speed, end_speed, ball_collision).build()
 
 
