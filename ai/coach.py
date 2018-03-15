@@ -5,11 +5,12 @@ import cProfile
 
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
-from time import sleep, time
+from time import time
 from typing import List
 
 from Util.engine_command import EngineCommand
 from Util.team_color_service import TeamColorService
+from Util.timing import create_fps_timer
 from ai.executors.debug_executor import DebugExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.states.game_state import GameState
@@ -19,6 +20,7 @@ from config.config import Config
 
 class Coach(Process):
 
+    MAX_EXCESS_TIME = 0.1
     PROFILE_DATA_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_ai.prof'
 
@@ -63,6 +65,12 @@ class Coach(Process):
         self.time_last_print = time()
         self.last_frame_count = 0
 
+        def callback(excess_time):
+            if excess_time > Coach.MAX_EXCESS_TIME:
+                self.logger.debug('Overloaded (%.1f ms behind schedule)', 1000*excess_time)
+
+        self.fps_sleep = create_fps_timer(self.fps, on_miss_callback=callback)
+
         # profiling
         self.profiling_enabled = False
         self.profiler = None
@@ -72,7 +80,7 @@ class Coach(Process):
         self.logger.debug('Waiting for geometry from the Engine.')
         start = time()
         while not self.field:
-            sleep(1/self.fps)
+            self.fps_sleep()
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
     def run(self) -> None:
@@ -83,10 +91,8 @@ class Coach(Process):
             while True:
                 self.frame_count += 1
                 self.main_loop()
-                self.print_frame_rate()
                 self.dump_profiling_stats()
-                sleep(self.cfg['GAME']['ai_timestamp'])
-
+                self.fps_sleep()
         except KeyboardInterrupt:
             pass
 
@@ -111,10 +117,3 @@ class Coach(Process):
                 self.profiler.dump_stats(Coach.PROFILE_DATA_FILENAME)
                 self.logger.debug('Profile data written to {}.'.format(Coach.PROFILE_DATA_FILENAME))
 
-    def print_frame_rate(self):
-        dt = time() - self.time_last_print
-        if dt > 20:
-            df = self.frame_count - self.last_frame_count
-            self.logger.info('Updating at {:.2f} fps'.format(df / dt))
-            self.time_last_print = time()
-            self.last_frame_count = 0
