@@ -20,6 +20,7 @@ from config.config import Config
 
 class Coach(Process):
 
+    MAX_EXCESS_TIME = 0.1
     PROFILE_DATA_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_ai.prof'
 
@@ -64,6 +65,12 @@ class Coach(Process):
         self.time_last_print = time()
         self.last_frame_count = 0
 
+        def callback(excess_time):
+            if excess_time > Coach.MAX_EXCESS_TIME:
+                self.logger.debug('Overloaded (%.1f ms behind schedule)', 1000*excess_time)
+
+        self.fps_sleep = create_fps_timer(self.fps, on_miss_callback=callback)
+
         # profiling
         self.profiling_enabled = False
         self.profiler = None
@@ -72,24 +79,20 @@ class Coach(Process):
     def wait_for_geometry(self):
         self.logger.debug('Waiting for geometry from the Engine.')
         start = time()
-        fps_sleep = create_fps_timer(self.fps)
         while not self.field:
-            fps_sleep()
+            self.fps_sleep()
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
     def run(self) -> None:
         self.wait_for_geometry()
         self.logger.debug('Running with process ID {}'.format(os.getpid()))
-        fps_sleep = create_fps_timer(self.fps)
 
         try:
             while True:
                 self.frame_count += 1
                 self.main_loop()
-                self.print_frame_rate()
                 self.dump_profiling_stats()
-                fps_sleep()
-
+                self.fps_sleep()
         except KeyboardInterrupt:
             pass
 
@@ -114,10 +117,3 @@ class Coach(Process):
                 self.profiler.dump_stats(Coach.PROFILE_DATA_FILENAME)
                 self.logger.debug('Profile data written to {}.'.format(Coach.PROFILE_DATA_FILENAME))
 
-    def print_frame_rate(self):
-        dt = time() - self.time_last_print
-        if dt > 20:
-            df = self.frame_count - self.last_frame_count
-            self.logger.info('Updating at {:.2f} fps'.format(df / dt))
-            self.time_last_print = time()
-            self.last_frame_count = self.frame_count
