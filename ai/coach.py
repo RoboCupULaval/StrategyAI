@@ -5,11 +5,12 @@ import cProfile
 
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
-from time import sleep, time
+from time import time
 from typing import List
 
 from Util.engine_command import EngineCommand
 from Util.team_color_service import TeamColorService
+from Util.timing import get_fps_timer
 from ai.executors.debug_executor import DebugExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.states.game_state import GameState
@@ -71,13 +72,15 @@ class Coach(Process):
     def wait_for_geometry(self):
         self.logger.debug('Waiting for geometry from the Engine.')
         start = time()
+        fps_sleep = get_fps_timer(self.fps)
         while not self.field:
-            sleep(1/self.fps)
+            fps_sleep()
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
     def run(self) -> None:
         self.wait_for_geometry()
         self.logger.debug('Running with process ID {}'.format(os.getpid()))
+        fps_sleep = get_fps_timer(self.fps)
 
         try:
             while True:
@@ -85,7 +88,7 @@ class Coach(Process):
                 self.main_loop()
                 self.print_frame_rate()
                 self.dump_profiling_stats()
-                sleep(self.cfg['GAME']['ai_timestamp'])
+                fps_sleep()
 
         except KeyboardInterrupt:
             pass
@@ -117,4 +120,4 @@ class Coach(Process):
             df = self.frame_count - self.last_frame_count
             self.logger.info('Updating at {:.2f} fps'.format(df / dt))
             self.time_last_print = time()
-            self.last_frame_count = 0
+            self.last_frame_count = self.frame_count

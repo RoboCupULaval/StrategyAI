@@ -6,7 +6,7 @@ import sys
 from multiprocessing import Process, Queue, Manager
 from multiprocessing.managers import DictProxy
 from queue import Empty
-from time import time, sleep
+from time import time
 
 from Debug.debug_command_factory import DebugCommandFactory
 from Engine.Communication.receiver.referee_receiver import RefereeReceiver
@@ -16,6 +16,7 @@ from Engine.Communication.sender.robot_command_sender import RobotCommandSender
 from Engine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 from Engine.controller import Controller
 from Engine.tracker import Tracker
+from Util.timing import get_fps_timer
 
 try:
     from Util.csv_plotter import CsvPlotter
@@ -96,7 +97,7 @@ class Engine(Process):
         # print frame rate
         self.time_last_print = time()
         self.last_frame_count = 0
-        self.time_bank = 0
+        self.fps_sleep = get_fps_timer(self.fps)
 
         # profiling
         self.profiling_enabled = False
@@ -120,10 +121,8 @@ class Engine(Process):
         logged_string += ' with {} cameras.'.format(self.camera_number)
 
         self.logger.debug(logged_string)
-        self.time_bank = time()
         try:
             while True:
-                self.time_bank += 1.0 / self.fps
                 self.frame_count += 1
                 self.main_loop()
                 self.dump_profiling_stats()
@@ -139,8 +138,9 @@ class Engine(Process):
 
     def wait_for_vision(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
+        sleep_vision = get_fps_timer(10)
         while not any(self.vision_state):
-            sleep(0.1)
+            sleep_vision()
 
     def main_loop(self):
 
@@ -181,15 +181,8 @@ class Engine(Process):
         self.ui_recver.terminate()
 
     def limit_frame_rate(self):
-        time_ahead = self.time_bank - time()
-        if not self.is_fps_locked:
-            return
-        if time_ahead > 0:
-            sleep(time_ahead)
-        if time_ahead < -2:
-            raise RuntimeError(
-                'The required frame rate is too high for the engine.\n'
-                'Launch the engine with the flag --unlock_fps and use the minimum FPS that you get.')
+        if self.is_fps_locked:
+            self.fps_sleep()
 
     def print_frame_rate(self):
         dt = time() - self.time_last_print
@@ -197,7 +190,7 @@ class Engine(Process):
             df = self.frame_count - self.last_frame_count
             self.logger.info('Updating at {:.2f} fps'.format(df / dt))
             self.time_last_print = time()
-            self.last_frame_count = 0
+            self.last_frame_count = self.frame_count
 
     def enable_profiling(self):
         self.profiling_enabled = True
