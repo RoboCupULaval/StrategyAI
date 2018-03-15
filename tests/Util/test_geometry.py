@@ -6,7 +6,7 @@ import math as m
 import pytest
 
 from Util import Position
-from Util.geometry import closest_point_on_line
+from Util.geometry import closest_point_on_line, closest_point_on_segment, closest_point_to_points
 from Util.geometry import compare_angle, wrap_to_pi, perpendicular, normalize, are_close, rotate
 
 
@@ -53,6 +53,18 @@ def test_closest_point_on_line_diagonal():
     end = Position(100, 100)
     assert closest_point_on_line(reference, start=start, end=end) == Position(50, 50)
 
+def test_closest_point_on_line_diagonal_under():
+    reference = Position(0, 100)
+    start = Position(0, 0)
+    end = Position(100, 100)
+    assert closest_point_on_line(reference, start=start, end=end) == Position(50, 50)
+
+def test_closest_point_on_line_diagonal_reverse():
+    reference = Position(50, 50)
+    end = Position(0, 0)
+    start = Position(100, 100)
+    assert closest_point_on_line(reference, start=start, end=end) == Position(50, 50)
+
 def test_closest_point_on_line_at_zero():
     reference = Position(0, 50)
     start = Position(-100, 0)
@@ -64,6 +76,62 @@ def test_closest_point_on_line_outside_range():
     start = Position(10, 0)
     end = Position(100, 0)
     assert closest_point_on_line(reference, start=start, end=end) == Position(-50, 0)
+
+
+def test_closest_point_on_segment():
+    reference = Position(50, 50)
+    start = Position(10, 0)
+    end = Position(100, 0)
+    assert closest_point_on_segment(reference, start=start, end=end) == Position(50, 0)
+
+def test_closest_point_on_segment_under():
+    reference = Position(0, 100)
+    start = Position(10, 10)
+    end = Position(100, 100)
+    assert closest_point_on_segment(reference, start=start, end=end) == Position(50, 50)
+
+def test_closest_point_on_segment_outside_positive():
+    reference = Position(110, 0)
+    start = Position(10, 0)
+    end = Position(100, 0)
+    assert closest_point_on_segment(reference, start=start, end=end) == Position(100, 0)
+
+def test_closest_point_on_segment_outside_negative():
+    reference = Position(-10, 0)
+    start = Position(10, 0)
+    end = Position(100, 0)
+    assert closest_point_on_segment(reference, start=start, end=end) == Position(10, 0)
+
+def test_closest_point_on_segment_outside_diagonal():
+    reference = Position(91, 110)
+    start = Position(10, 10)
+    end = Position(100, 100)
+    assert closest_point_on_segment(reference, start=start, end=end) == Position(100, 100)
+
+def test_closest_point_on_segment_outside_diagonal_reverse():
+    reference = Position(91, 110)
+    end = Position(10, 10)
+    start = Position(100, 100)
+    assert closest_point_on_segment(reference, start=start, end=end) == Position(100, 100)
+
+def test_closest_point_on_segment_outside_diagonal2():
+    reference = Position(9, 10)
+    start = Position(10, 10)
+    end = Position(100, 100)
+    assert closest_point_on_segment(reference, start=start, end=end) == Position(10, 10)
+
+def test_closest_point_on_segment_outside_diagonal2_reverse():
+    reference = Position(9, 10)
+    end = Position(10, 10)
+    start = Position(100, 100)
+    assert closest_point_on_segment(reference, start=start, end=end) == Position(10, 10)
+
+
+def test_closest_point_to_points():
+    point = Position(0,0)
+    points = [Position(0,1), Position(1,1), Position(-2,-1), Position(2,1)]
+    assert closest_point_to_points(point, points=points) is points[0]
+
 
 
 def test_wrap_to_pi_with_angle_less_than_pi():

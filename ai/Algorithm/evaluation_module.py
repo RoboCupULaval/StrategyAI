@@ -13,13 +13,6 @@ class PlayerPosition(object):
         self.player = player
         self.distance = distance
 
-# team_with_ball
-# closest_point -> geometry
-# is_ball_moving
-# is_ball_kicked
-# ball_direction
-# lines_of_sight -> geometry
-
 
 def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
     # Retourne le joueur qui possède la balle, NONE si balle libre
@@ -60,37 +53,12 @@ def is_ball_moving(min_speed=0.1):
 
 
 # noinspection PyUnresolvedReferences
-def is_ball_kicked(player, min_distance=150, min_speed=1000):
-    if (player.pose.position - GameState.ball_position).norm > min_distance and \
-                    GameState.ball_velocity.norm > min_speed:
-        return True
-    else:
-        return False
-
-
-# noinspection PyUnresolvedReferences
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
     if GameState().field.our_side == FieldSide.POSITIVE: # POSITIVE
         return GameState().ball_position.x > 0
     else:
         return GameState().ball_position.x < 0
-
-
-# noinspection PyPep8Naming,PyPep8Naming
-def best_position_option(player, pointA: Position, pointB: Position):
-    # Retourne la position (entre pointA et pointB) la mieux placée pour une passe
-    ncounts = 11
-    positions = []
-
-    for i in range(ncounts):
-        positions += [Position(pointA.x + i * (pointB.x - pointA.x) / (ncounts - 1),
-                               pointA.y + i * (pointB.y - pointA.y) / (ncounts-1))]
-    #  positions = np.stack(positions)
-    scores = line_of_sight_clearance(player, positions)
-    best_score_index = np.argmin(scores)
-    best_position = positions[best_score_index, :]
-    return best_position
 
 
 # noinspection PyUnresolvedReferences
@@ -121,32 +89,6 @@ def best_passing_option(passing_player, consider_goal=True):
     return receiver_id
 
 
-# noinspection PyPep8Naming,PyUnresolvedReferences
-def best_goal_score_option(passing_player):
-    # Retourne la meilleure position dans le but pour kick
-    goalA = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"],
-                     GameState().field.constant["FIELD_GOAL_WIDTH"] / 2)
-    goalB = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"],
-                     -GameState().field.constant["FIELD_GOAL_WIDTH"] / 2)
-    best_position = best_position_option(passing_player, goalA, goalB)
-    return best_position
-
-def line_of_sight_clearance(player, targets):
-    # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est petit)
-    score = np.linalg.norm(player.pose.position.target - targets)
-    for j in GameState().our_team.available_players.values():
-        # Obstacle : les players friends
-        condition = []
-        if not (j.id == player.id):
-            condition += [target is not j.pose.position for target in targets]
-            if any(condition):
-                score *= trajectory_score(player.pose.position, targets[condition], j.pose.position)
-    for j in GameState().enemy_team.available_players.values():
-        # Obstacle : les players ennemis
-        score *= trajectory_score(player.pose.position, targets, j.pose.position)
-    return score
-
-
 # noinspection PyUnusedLocal
 def line_of_sight_clearance_ball(player, targets, distances=None):
     # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
@@ -169,21 +111,6 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
         #print(scores_temp)
     return scores
 
-
-# noinspection PyUnusedLocal,PyTypeChecker
-def line_of_sight_clearance_ball_legacy(player, target: Position):
-    # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
-    # (plus c'est dégagé plus le score est petit)
-    score = np.linalg.norm(GameState().ball_position - target)
-
-    # for j in GameState().my_team.available_players.values():
-    #     # Obstacle : les players friends
-    #     if not (j.id == player.id or j.pose.position == target):
-    #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
-    for j in GameState().enemy_team.available_players.values():
-        # Obstacle : les players ennemis
-        score *= trajectory_score(GameState().ball_position, target, j.pose.position)
-    return score
 
 
 # noinspection PyPep8Naming
@@ -214,30 +141,6 @@ def trajectory_score(pointA, pointsB, obstacle):
         temp[temp < 1] = 1
         scores[scores == 0] = temp
     return scores
-
-
-# noinspection PyUnresolvedReferences
-def is_player_facing_target(player, target_position: Position, tolerated_angle: float) -> bool:
-    """
-        Détermine si l'angle entre le devant du joueur et la cible est suffisamment petit
-        Args:
-            player: Le joueur
-            target_position: La position où le joueur veut faire face
-            tolerated_angle: Angle en radians
-        Returns:
-            Si le joueur est face à la cible.
-    """
-    assert isinstance(target_position, Position), "target_position is not a Position"
-    assert isinstance(tolerated_angle, (int, float)), "tolerated_angle is neither a int nor a float"
-
-    player_front = Position(player.pose.position.x + np.cos(player.pose.orientation),
-                            player.pose.position.y + np.sin(player.pose.orientation))
-    return get_angle_between_three_points(player_front, player.pose.position, target_position) < tolerated_angle
-
-
-# noinspection PyUnusedLocal
-def ball_direction(self):
-    pass
 
 
 # noinspection PyPep8Naming,PyUnresolvedReferences
@@ -278,30 +181,4 @@ def best_position_in_region(player, A, B):
         best_position = Position()
 
     return best_position
-
-
-# noinspection PyUnresolvedReferences
-def score_strategy_other_team():
-    # Retourne le score de l'équipe ennemie (négatif = ils sont en offensive, positif = ils sont en défensive)
-    i = 0
-    x_sum = 0
-    for player in GameState().enemy_team.available_players.values():
-        x_sum += player.pose.position.x
-        i += 1
-    if GameState().field.our_side == FieldSide.POSITIVE:
-        score = -x_sum/i - GameState().ball_position.x
-    else:
-        score = x_sum/i + GameState().ball_position.x
-
-    player_their_team = player_with_ball(our_team=False)
-    player_our_team = player_with_ball(our_team=True)
-
-    if player_their_team is not None and player_our_team is not None:
-        their_player_to_ball = GameState().ball_position - player_their_team.pose.position
-        our_player_to_ball = GameState().ball_position - player_our_team.pose.position
-        score += their_player_to_ball.norm - our_player_to_ball.norm
-
-    return score
-
-
 

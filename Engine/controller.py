@@ -7,6 +7,7 @@ from Engine.regulators import VelocityRegulator, PositionRegulator
 from Engine.filters.path_smoother import path_smoother
 from Engine.robot import Robot
 from Engine.Communication.robot_state import RobotPacket, RobotState
+from Util import Pose
 
 from Util.engine_command import EngineCommand
 from Util.constant import PLAYER_PER_TEAM
@@ -16,7 +17,7 @@ from Util.csv_plotter import Observer
 
 class Controller:
 
-    def __init__(self, observer=Observer):
+    def __init__(self, observer: Observer=Observer()):
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger("Controller")
 
@@ -56,7 +57,7 @@ class Controller:
 
         return self.generate_packet(commands)
 
-    def generate_packet(self, commands: Dict):
+    def generate_packet(self, commands: Dict[int, Pose]) -> RobotState:
         packet = RobotState(timestamp=self.timestamp,
                             is_team_yellow=TeamColorService().is_our_team_yellow,
                             packet=[])
@@ -71,12 +72,9 @@ class Controller:
                             charge_kick=self[robot_id].engine_cmd.charge_kick))
         return packet
 
-    def __iter__(self):
+    def __iter__(self) -> Robot:
         for robot in self.robots:
             yield robot
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> Robot:
         return self.robots[item]
-
-    def __setitem__(self, key, item):
-        self.robots[key] = item

@@ -1,9 +1,11 @@
 # Under MIT License, see LICENSE.txt
 
 from collections import namedtuple
-
+from typing import TypeVar, Union
 from Util.position import Position
 from Util.pose import Pose
+
+T = TypeVar('T', int, float)
 
 AICommand = namedtuple('AICommand', 'target,'
                                     'kick_type,'
@@ -30,7 +32,7 @@ class CmdBuilder:
         self._ball_collision = True
         self._pathfinder_on = True
 
-    def addMoveTo(self, target: [Pose, Position], cruise_speed=1, end_speed=0, ball_collision=True):
+    def addMoveTo(self, target: Union[Pose, Position], cruise_speed: T=1, end_speed: T=0, ball_collision: bool=True):
         assert isinstance(target, (Pose, Position))
         self._target = Pose(target) if isinstance(target, Position) else target
         self._cruise_speed = cruise_speed
@@ -52,7 +54,7 @@ class CmdBuilder:
         self._charge_kick = True
         return self
 
-    def build(self):
+    def build(self) -> AICommand:
         return AICommand(self._target,
                          self._kick_type,
                          self._kick_force,
@@ -64,7 +66,7 @@ class CmdBuilder:
                          self._pathfinder_on)
 
 
-def MoveTo(target: [Pose, Position], cruise_speed=1, end_speed=0, ball_collision=True):
+def MoveTo(target: Union[Pose, Position], cruise_speed: T=1, end_speed: T=0, ball_collision: bool=True) -> AICommand:
     return CmdBuilder().addMoveTo(target, cruise_speed, end_speed, ball_collision).build()
 
 
