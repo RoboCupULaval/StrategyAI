@@ -16,7 +16,7 @@ from Engine.Communication.sender.robot_command_sender import RobotCommandSender
 from Engine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 from Engine.controller import Controller
 from Engine.tracker import Tracker
-from Util.timing import get_fps_timer
+from Util.timing import create_fps_timer
 
 try:
     from Util.csv_plotter import CsvPlotter
@@ -97,7 +97,7 @@ class Engine(Process):
         # print frame rate
         self.time_last_print = time()
         self.last_frame_count = 0
-        self.fps_sleep = get_fps_timer(self.fps)
+        self.fps_sleep = create_fps_timer(self.fps)
 
         # profiling
         self.profiling_enabled = False
@@ -138,7 +138,7 @@ class Engine(Process):
 
     def wait_for_vision(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
-        sleep_vision = get_fps_timer(10)
+        sleep_vision = create_fps_timer(10)
         while not any(self.vision_state):
             sleep_vision()
 

@@ -7,7 +7,7 @@ import signal
 from Engine.engine import Engine
 from ai.coach import Coach
 from config.config import Config
-from Util.timing import get_fps_timer
+from Util.timing import create_fps_timer
 
 
 class Framework:
@@ -63,7 +63,7 @@ class Framework:
         # stop until someone manually stop us / we receive interrupt signal from os
         # also check if one of the subprocess died
         every_process_is_alright = True
-        sleep = get_fps_timer(2)  # 2 is a somewhat sane value for occasional checks
+        sleep = create_fps_timer(2)  # 2 is a somewhat sane value for occasional checks
         while every_process_is_alright:
             every_process_is_alright = self.engine.is_alive() and \
                                        self.coach.is_alive() and \

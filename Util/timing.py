@@ -1,15 +1,13 @@
 import time
 
-def get_fps_timer(desired_fps: float):
+def create_fps_timer(desired_fps: float):
     ''' Returns a timing function that sleeps to allow constant time between iterations.
     The precision of the time between iterations is up to the host operating system.
     ON AVERAGE, it should be around the desired_fps value.
 
     '''
-    if desired_fps > 0:
-        timer_period = 1/desired_fps
-    else:
-        raise ValueError('the desired_fps must be a strictly positive value.')
+    assert desired_fps > 0, 'the desired_fps must be a strictly positive value.'
+    timer_period = 1/desired_fps
 
     next_time = None  # None initialization so a pause causes no borking
 

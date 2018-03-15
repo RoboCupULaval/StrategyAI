@@ -10,7 +10,7 @@ from typing import List
 
 from Util.engine_command import EngineCommand
 from Util.team_color_service import TeamColorService
-from Util.timing import get_fps_timer
+from Util.timing import create_fps_timer
 from ai.executors.debug_executor import DebugExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.states.game_state import GameState
@@ -72,7 +72,7 @@ class Coach(Process):
     def wait_for_geometry(self):
         self.logger.debug('Waiting for geometry from the Engine.')
         start = time()
-        fps_sleep = get_fps_timer(self.fps)
+        fps_sleep = create_fps_timer(self.fps)
         while not self.field:
             fps_sleep()
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
@@ -80,7 +80,7 @@ class Coach(Process):
     def run(self) -> None:
         self.wait_for_geometry()
         self.logger.debug('Running with process ID {}'.format(os.getpid()))
-        fps_sleep = get_fps_timer(self.fps)
+        fps_sleep = create_fps_timer(self.fps)
 
         try:
             while True:
