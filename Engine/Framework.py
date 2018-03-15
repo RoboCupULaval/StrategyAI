@@ -1,12 +1,13 @@
 # Under MIT License, see LICENSE.txt
 
 import logging
-import time
 from multiprocessing import Queue, Manager
 import signal
 
 from Engine.engine import Engine
 from ai.coach import Coach
+from Util.timing import create_fps_timer
+
 
 
 class Framework:
@@ -63,6 +64,7 @@ class Framework:
         # stop until someone manually stop us / we receive interrupt signal from os
         # also check if one of the subprocess died
         every_process_is_alright = True
+        sleep = create_fps_timer(2)  # 2 is a somewhat sane value for occasional checks
         while every_process_is_alright:
             every_process_is_alright = self.engine.is_alive() and \
                                        self.coach.is_alive() and \
@@ -73,8 +75,7 @@ class Framework:
                 self.engine.terminate()
                 self.coach.terminate()
 
-            # use the time you want here, 0.5 seems sane to me.
-            time.sleep(0.5)
+            sleep()
 
     def stop_game(self):
         self.engine.terminate()
