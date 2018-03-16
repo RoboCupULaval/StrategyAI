@@ -19,7 +19,7 @@ A_LIST_OF_POSITION = [Position(0, 0),
                       Position(20, 20),
                       Position(20, 30)]
 
-A_LONG_PATH = Path.from_points(A_LIST_OF_POSITION)
+A_LONG_PATH = Path.from_sequence(A_LIST_OF_POSITION)
 PATH_LENGTH = 50
 
 A_LIST_OF_CLOSE_POSITION =  [Position(1,1), Position(1,-1), Position(1, -2),
@@ -27,13 +27,13 @@ A_LIST_OF_CLOSE_POSITION =  [Position(1,1), Position(1,-1), Position(1, -2),
                              Position(10, 21), Position(10, 20), Position(10, 22),
                              Position(30, 21), Position(30, 20), Position(30, 22)]
 
-A_PATH_WITH_CLOSE_POINTS = Path.from_points(A_LIST_OF_CLOSE_POSITION)
-A_PATH_WITH_CLOSE_POINTS_FILTERED = Path.from_points([Position(1, 1),
-                                                      Position(10, 1),
-                                                      Position(10, 21),
-                                                      Position(30, 22)])
+A_PATH_WITH_CLOSE_POINTS = Path.from_sequence(A_LIST_OF_CLOSE_POSITION)
+A_PATH_WITH_CLOSE_POINTS_FILTERED = Path.from_sequence([Position(1, 1),
+                                                        Position(10, 1),
+                                                        Position(10, 21),
+                                                        Position(30, 22)])
 
-class TestPosition(unittest.TestCase):
+class TestPath(unittest.TestCase):
 
     def test_givenStartTarget_whenNew_thenReturnPath(self):
         path = Path(start=A_START, target=A_TARGET)
@@ -46,7 +46,7 @@ class TestPosition(unittest.TestCase):
         assert path.target == A_TARGET
 
     def test_whenInitializingFromAListOfPoints_thenAListOfPointsIsAssigned(self):
-        path = Path.from_points(A_LIST_OF_POSITION)
+        path = Path.from_sequence(A_LIST_OF_POSITION)
         assert path.points == A_LIST_OF_POSITION
 
     def test_givenPath_whenFilter_thenRemoveClosePointsAndKeepTarget(self):
