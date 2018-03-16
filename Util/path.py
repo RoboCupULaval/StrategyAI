@@ -1,4 +1,4 @@
-from typing import Sequence, Union
+from typing import Sequence, List
 
 from collections import MutableSequence
 
@@ -12,11 +12,13 @@ class Path(MutableSequence):
     def __init__(self, start: Position, target: Position):
         self.points = [start, target]
 
-    def filter(self, threshold: Union[int, float]):
+    def filter(self, threshold: float):
         if len(self) > 2:
             kept_points = [self.start]
-            for point in self[1:]:
-                if (point - kept_points[-1]).norm >= threshold:
+            for point in self[1:]: # type: Position
+                last_point = kept_points[-1]
+                segment_length = (point - last_point).norm
+                if segment_length >= threshold:
                     kept_points.append(point)
 
             kept_points.append(self.target)

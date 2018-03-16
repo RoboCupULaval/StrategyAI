@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 import math as m
-from typing import TypeVar, Dict
+from typing import Dict
 
 import numpy as np
 
@@ -8,38 +8,36 @@ from Util.position import Position
 
 ORIENTATION_ABSOLUTE_TOLERANCE = 0.004
 
-T = TypeVar('T', int, float)
-
 
 class Pose:
 
-    def __init__(self, position: Position=Position(), orientation: T=0):
+    def __init__(self, position: Position=Position(), orientation: float=0):
 
         self._orientation = orientation
         self._position = position.copy()
 
     @classmethod
-    def from_dict(cls, my_dict: Dict[str, T]) -> 'Pose':
+    def from_dict(cls, my_dict: Dict[str, float]) -> 'Pose':
         return cls(Position(my_dict['x'], my_dict['y']), my_dict['orientation'])
 
     @classmethod
-    def from_values(cls, x: T, y: T, orientation: T=0) -> 'Pose':
+    def from_values(cls, x: float, y: float, orientation: float=0) -> 'Pose':
         return cls(Position(x, y), orientation)
 
     @property
-    def x(self) -> T:
+    def x(self) -> float:
         return self._position.x
 
     @x.setter
-    def x(self, new_x: T):
+    def x(self, new_x: float):
         self.position.x = new_x
 
     @property
-    def y(self) -> T:
+    def y(self) -> float:
         return self._position.y
 
     @y.setter
-    def y(self, new_y: T):
+    def y(self, new_y: float):
         self.position.y = new_y
 
     @property
@@ -51,21 +49,21 @@ class Pose:
         self._position = position.copy()
 
     @property
-    def norm(self) -> T:
+    def norm(self) -> float:
         return self.position.norm
 
     @property
-    def orientation(self) -> T:
+    def orientation(self) -> float:
         return self._orientation
 
     @orientation.setter
-    def orientation(self, orientation: T):
+    def orientation(self, orientation: float):
         self._orientation = orientation
 
     def to_array(self) -> np.ndarray:
         return np.array([self.x, self.y, self.orientation])
 
-    def to_dict(self) -> Dict[str, T]:
+    def to_dict(self) -> Dict[str, float]:
         return {'x': self.x, 'y': self.y, 'orientation': self.orientation}
 
     def __add__(self, other: Position) -> 'Pose':

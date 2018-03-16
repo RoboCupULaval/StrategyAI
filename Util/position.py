@@ -1,16 +1,14 @@
 # Under MIT License, see LICENSE.txt
-from typing import Dict, List, Tuple, TypeVar, cast
-
+from typing import Dict, Tuple, Sequence
+import math as m
 import numpy as np
 
 POSITION_ABS_TOL = 0.01
 
-T = TypeVar('T', int, float)
-
 
 class Position:
 
-    def __init__(self, x: T=0, y: T=0):
+    def __init__(self, x: float=0, y: float=0):
         self._array = np.array([x, y])
 
     @classmethod
@@ -20,42 +18,44 @@ class Position:
         return cls(array[0], array[1])
 
     @classmethod
-    def from_list(cls, new_list: List[T]) -> 'Position':
+    def from_list(cls, new_list: Sequence[float]) -> 'Position':
+        if len(new_list) < 2:
+            raise ValueError('Position can only be create with a length 2 sequences.')
         return cls(new_list[0], new_list[1])
 
     @classmethod
-    def from_dict(cls, new_dict: Dict[str, T]) -> 'Position':
+    def from_dict(cls, new_dict: Dict[str, float]) -> 'Position':
         return cls(new_dict['x'], new_dict['y'])
 
     @property
-    def x(self) -> T:
+    def x(self) -> float:
         return self.array[0]
 
     @x.setter
-    def x(self, x: T):
+    def x(self, x: float):
         self._array[0] = x
 
     @property
-    def y(self) -> T:
+    def y(self) -> float:
         return self.array[1]
 
     @y.setter
-    def y(self, y: T):
+    def y(self, y: float):
         self._array[1] = y
 
     @property
-    def norm(self) -> T:
-        return cast(T, np.sqrt(self.x ** 2 + self.y ** 2))
+    def norm(self) -> float:
+        return m.sqrt(self.x ** 2 + self.y ** 2)
 
     @property
-    def angle(self) -> T:
-        return cast(T, np.arctan2(self.y, self.x))
+    def angle(self) -> float:
+        return m.atan2(self.y, self.x)
 
     @property
     def array(self) -> np.ndarray:
         return self._array
 
-    def to_dict(self) -> Dict[str, T]:
+    def to_dict(self) -> Dict[str, float]:
         return {'x': self.x, 'y': self.y}
 
     def to_tuple(self) -> Tuple[int, int]:
@@ -67,13 +67,22 @@ class Position:
     def __add__(self, other: 'Position') -> 'Position':
         return Position.from_array(self.array + other.array)
 
+    def __radd__(self, other: 'Position') -> 'Position':
+        return Position.from_array(self.array + other.array)
+
     def __sub__(self, other: 'Position') -> 'Position':
         return Position.from_array(self.array - other.array)
 
-    def __mul__(self, other) -> 'Position':
+    def __rsub__(self, other: 'Position') -> 'Position':
+        return Position.from_array(-self.array + other.array)
+
+    def __mul__(self, other: float) -> 'Position':
         return Position.from_array(self.array * other)
 
-    def __truediv__(self, other: 'Position') -> 'Position':
+    def __rmul__(self, other: float) -> 'Position':
+        return Position.from_array(self.array * other)
+
+    def __truediv__(self, other: float) -> 'Position':
         return Position.from_array(self.array / other)
 
     def __neg__(self) -> 'Position':
@@ -85,11 +94,11 @@ class Position:
     def __ne__(self, other: 'Position') -> bool:
         return not self.__eq__(other)
 
-    def __getitem__(self, key: T) -> T:
+    def __getitem__(self, key: int) -> float:
         return self.array[key]
 
-    def __setitem__(self, key: T, item: T):
-        self.array[key] = item
+    def __setitem__(self, key: int, value: float):
+        self.array[key] = value
 
     def __repr__(self) -> str:
         return 'Position' + str(self)

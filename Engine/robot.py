@@ -1,4 +1,4 @@
-from typing import TypeVar, Optional, cast
+from typing import Optional
 
 from Util import Pose, Position, Path
 from Util.geometry import wrap_to_pi
@@ -8,8 +8,6 @@ MAX_LINEAR_ACCELERATION = 2000  # mm/s^2
 MAX_ANGULAR_SPEED = 1  # rad/s
 MAX_ANGULAR_ACCELERATION = 1  # rad/s^2
 MIN_LINEAR_SPEED = 200  # mm/s Speed near zero, but still move the robot
-
-T = TypeVar('T', int, float)
 
 
 class Robot:
@@ -64,32 +62,32 @@ class Robot:
             return self.path.next_position
 
     @property
-    def orientation(self) -> Optional[T]:
+    def orientation(self) -> Optional[float]:
         if self.pose is not None:
             return self.pose.orientation
 
     @property
-    def target_orientation(self) -> Optional[T]:
+    def target_orientation(self) -> Optional[float]:
         if self.engine_cmd is not None:
             return self.engine_cmd.target_orientation
 
     @property
-    def orientation_error(self) -> Optional[T]:
+    def orientation_error(self) -> Optional[float]:
         if self.target_orientation is not None and self.orientation is not None:
-            return cast(T, wrap_to_pi(self.target_orientation - self.orientation))
+            return wrap_to_pi(self.target_orientation - self.orientation)
 
     @property
-    def end_speed(self) -> Optional[T]:
+    def end_speed(self) -> Optional[float]:
         if self.engine_cmd is not None:
             return self.engine_cmd.end_speed
 
     @property
-    def cruise_speed(self) -> Optional[T]:
+    def cruise_speed(self) -> Optional[float]:
         if self.engine_cmd is not None:
             return self.engine_cmd.cruise_speed
 
     @property
-    def current_speed(self) -> Optional[T]:
+    def current_speed(self) -> Optional[float]:
         if self.velocity is not None:
             return self.velocity.position.norm
 

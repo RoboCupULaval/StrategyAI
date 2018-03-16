@@ -4,19 +4,18 @@ import math as m
 import numpy as np
 
 from Util import Position
-from typing import cast, TypeVar, Iterable, Sequence, List
-
-T = TypeVar('T', int, float)
-
-def wrap_to_pi(angle: T) -> T:
-    return cast(T, (angle + m.pi) % (2 * m.pi) - m.pi)
+from typing import cast, Sequence, List
 
 
-def compare_angle(angle1: T, angle2: T, abs_tol: T=0.004) -> bool:
+def wrap_to_pi(angle: float) -> float:
+    return (angle + m.pi) % (2 * m.pi) - m.pi
+
+
+def compare_angle(angle1: float, angle2: float, abs_tol: float=0.004) -> bool:
     return m.fabs(wrap_to_pi(angle1 - angle2)) < abs_tol
 
 
-def rotate(vec: Position, angle: T) -> Position:
+def rotate(vec: Position, angle: float) -> Position:
     rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
     return Position.from_array(rotation @ vec.array)
 
@@ -31,18 +30,18 @@ def perpendicular(vec: Position) -> Position:
     return normalize(Position(-vec.y, vec.x))
 
 
-def are_close(vec1: Position, vec2: Position, abs_tol: T=0.001) -> bool:
+def are_close(vec1: Position, vec2: Position, abs_tol: float=0.001) -> bool:
     return (vec1 - vec2).norm < abs_tol
 
 
-def clamp(val: T, min_val: T, max_val: T) -> T:
+def clamp(val: float, min_val: float, max_val: float) -> float:
     return max(min(val, max_val), min_val)
 
 
-def projection(reference: Position, start: Position, end: Position) -> T:
+def projection(reference: Position, start: Position, end: Position) -> float:
     start_to_end = normalize(end - start)
     start_to_reference = reference - start
-    return cast(T, np.inner(start_to_reference.array, start_to_end.array))
+    return np.inner(start_to_reference.array, start_to_end.array).view(float)
 
 
 def closest_point_on_line(reference: Position, start: Position, end: Position) -> Position:
@@ -70,9 +69,10 @@ def closest_point_to_points(point: Position, points: Sequence[Position]) -> Posi
 
 def closest_points_from_points(point: Position, points: Sequence[Position]) -> List[Position]:
     distances = distance_from_points(point, points=points)
-    return [p for _, p in sorted(zip(points, distances), key=lambda pair: pair[1])]
+    sorted_points_distances = sorted(zip(points, distances), key=lambda pair: pair[1])
+    return  [p for p, _ in sorted_points_distances]
 
 
-def distance_from_points(point: Position, points: Sequence[Position]) -> Iterable[T]:
+def distance_from_points(point: Position, points: Sequence[Position]) -> List[float]:
     points_array = np.array([p.array for p in points])
-    return np.linalg.norm(points_array - point.array).tolist()
+    return cast(List, np.linalg.norm(points_array - point.array).tolist())
