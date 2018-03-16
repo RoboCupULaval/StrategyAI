@@ -5,7 +5,7 @@ import numpy as np
 
 POSITION_ABS_TOL = 0.01
 
-
+#pylint: disable=invalid-name, invalid-unary-operand-type
 class Position:
 
     def __init__(self, x: float=0, y: float=0):
@@ -108,4 +108,3 @@ class Position:
 
     def __hash__(self) -> int:
         return hash(str(self))
-

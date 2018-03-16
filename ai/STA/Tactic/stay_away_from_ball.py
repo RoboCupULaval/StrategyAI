@@ -2,7 +2,7 @@
 from typing import List
 
 from Util import Pose
-from Util.area import stayOutsideCircle
+from Util.area import stay_outside_circle
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic
@@ -21,7 +21,7 @@ class StayAwayFromBall(Tactic):
     def stay_out_of_circle(self):
         #self.game_state.field.field_collision_body.append(
         #    CollisionBody(self.game_state.ball_position, self.game_state.ball_velocity, 500))
-        position = stayOutsideCircle(self.player.pose.position,
+        position = stay_outside_circle(self.player.pose.position,
                                      self.game_state.ball_position,
                                      self.keepout_radius)
         return GoToPositionPathfinder(self.game_state, self.player, Pose(position, self.player.pose.orientation))
