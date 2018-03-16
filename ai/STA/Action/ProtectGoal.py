@@ -1,7 +1,8 @@
 # Under MIT licence, see LICENCE.txt
 from Util import Pose, Position, AICommand
 from Util.area import stay_inside_circle
-from Util.geometry import get_closest_point_on_segment
+from Util.geometry import closest_point_on_segment
+
 from ai.GameDomainObjects import Player
 from ai.STA.Action import Action
 from ai.states.game_state import GameState
@@ -54,9 +55,9 @@ class ProtectGoal(Action):
         inner_circle_position = stay_inside_circle(ball_position, goal_position, self.minimum_distance)
         outer_circle_position = stay_inside_circle(ball_position, goal_position, self.maximum_distance)
 
-        destination_position = get_closest_point_on_segment(goalkeeper_position,
-                                                            inner_circle_position,
-                                                            outer_circle_position)
+        destination_position = closest_point_on_segment(goalkeeper_position,
+                                                        inner_circle_position,
+                                                        outer_circle_position)
 
         # Vérification que destination_position respecte la distance maximale
         if self.maximum_distance is None:

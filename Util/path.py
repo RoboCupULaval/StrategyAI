@@ -1,6 +1,6 @@
-from typing import List
+from typing import Sequence, List
 
-import collections
+from collections import MutableSequence
 
 from numpy.core.multiarray import ndarray
 
@@ -8,16 +8,18 @@ from Util import Position
 
 
 # pylint: disable=invalid-name
-class Path(collections.MutableSequence):  # pylint: disable=too-many-ancestors
+class Path(MutableSequence):  # pylint: disable=too-many-ancestors
 
-    def __init__(self, start=None, target=None):
+    def __init__(self, start: Position, target: Position):
         self.points = [start, target]
 
-    def filter(self, threshold):
+    def filter(self, threshold: float):
         if len(self) > 2:
             kept_points = [self.start]
-            for point in self[1:]:
-                if (point - kept_points[-1]).norm >= threshold:
+            for point in self[1:]: # type: Position
+                last_point = kept_points[-1]
+                segment_length = (point - last_point).norm
+                if segment_length >= threshold:
                     kept_points.append(point)
 
             kept_points.append(self.target)
@@ -28,20 +30,21 @@ class Path(collections.MutableSequence):  # pylint: disable=too-many-ancestors
             self.points = kept_points
 
     @classmethod
-    def from_array(cls, start: ndarray, target: ndarray):
-        return Path(Position.from_array(start), Position.from_array(target))
+    def from_array(cls, start: ndarray, target: ndarray) -> 'Path':
+        if start.size != 2 or start.size != 2:
+            raise ValueError('Cannot create a path with less then two points')
+        return cls(Position.from_array(start), Position.from_array(target))
 
     @classmethod
-    def from_points(cls, points_list: List[Position]):
+    def from_sequence(cls, points_list: Sequence[Position]) -> 'Path':
         if len(points_list) < 2:
             raise ValueError('Cannot create a path with less then two points')
-
-        path = cls()
+        path = cls(start=Position(), target=Position())
         path.points = points_list
         return path
 
     @property
-    def start(self):
+    def start(self) -> Position:
         return self[0]
 
     @start.setter
@@ -49,7 +52,7 @@ class Path(collections.MutableSequence):  # pylint: disable=too-many-ancestors
         self[0] = v
 
     @property
-    def target(self):
+    def target(self) -> Position:
         return self[-1]
 
     @target.setter
@@ -57,38 +60,38 @@ class Path(collections.MutableSequence):  # pylint: disable=too-many-ancestors
         self[-1] = v
 
     @property
-    def next_position(self):
+    def next_position(self) -> Position:
         return self[1]
 
-    def copy(self):
-        return Path.from_points(self.points)
+    def copy(self) -> 'Path':
+        return Path.from_sequence(self.points)
 
     @property
-    def length(self):
+    def length(self) -> float:
         segments = [(point - next_point).norm for point, next_point in zip(self, self[1:])]
         return sum(segments)
 
-    def __iter__(self):
+    def __iter__(self) -> Position:
         for p in self.points:
             yield p
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> Position:
         return self.points[item]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: int, value: Position):
         self.points[key] = value
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: int):
         del self.points[key]
 
     def insert(self, index, value):
         self.points.insert(index, value)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.points)
 
-    def __add__(self, other):
-        return Path.from_points(self.points + other.points[1:])
+    def __add__(self, other) -> 'Path':
+        return Path.from_sequence(self.points + other.points[1:])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Path(start={}, target={})'.format(self.start, self.target)

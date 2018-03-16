@@ -1,5 +1,7 @@
 # Under MIT License, see LICENSE.txt
 import math as m
+from typing import Dict
+
 import numpy as np
 
 from Util.position import Position
@@ -15,11 +17,11 @@ class Pose:
         self._position = position.copy()
 
     @classmethod
-    def from_dict(cls, my_dict):
+    def from_dict(cls, my_dict: Dict[str, float]) -> 'Pose':
         return cls(Position(my_dict['x'], my_dict['y']), my_dict['orientation'])
 
     @classmethod
-    def from_values(cls, x, y, orientation=0):
+    def from_values(cls, x: float, y: float, orientation: float=0) -> 'Pose':
         return cls(Position(x, y), orientation)
 
     @property
@@ -47,41 +49,41 @@ class Pose:
         self._position = position.copy()
 
     @property
-    def norm(self):
+    def norm(self) -> float:
         return self.position.norm
 
     @property
-    def orientation(self):
+    def orientation(self) -> float:
         return self._orientation
 
     @orientation.setter
-    def orientation(self, orientation):
+    def orientation(self, orientation: float):
         self._orientation = orientation
 
-    def to_array(self):
+    def to_array(self) -> np.ndarray:
         return np.array([self.x, self.y, self.orientation])
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, float]:
         return {'x': self.x, 'y': self.y, 'orientation': self.orientation}
 
-    def __add__(self, other: Position):
-        assert isinstance(other, Position)
+    def __add__(self, other: Position) -> 'Pose':
+        assert(isinstance(other, Position))
         return Pose(self.position + other, self.orientation)
 
-    def __sub__(self, other: Position):
+    def __sub__(self, other: Position) -> 'Pose':
         return self + (-other)
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Pose') -> bool:
         orientation_equal = m.isclose(self.orientation, other.orientation,
                                       abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE, rel_tol=0)
         position_equal = self.position == other.position
         return position_equal and orientation_equal
 
-    def __ne__(self, other):
+    def __ne__(self, other: 'Pose') -> bool:
         return not self.__eq__(other)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{}, orientation = {:5.3f}'.format(self.position, self.orientation)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Pose' + str(self)

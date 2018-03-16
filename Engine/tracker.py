@@ -1,9 +1,10 @@
 
 import logging
 from multiprocessing.managers import DictProxy
-from typing import Dict, List
+from typing import Dict, List, Union, Any
 import numpy as np
 
+from Engine.Communication.robot_state import RobotState
 from Engine.filters.ball_kalman_filter import BallFilter
 from Engine.filters.robot_kalman_filter import RobotFilter
 
@@ -38,7 +39,7 @@ class Tracker:
         self._camera_frame_number = [-1 for _ in range(Tracker.NUMBER_OF_CAMERA)]
         self._current_timestamp = 0
 
-    def update(self) -> Dict:
+    def update(self) -> Dict[str, List[Dict[str, Any]]]:
 
         camera_frames = [frame for frame in self.vision_state
                          if frame and frame['frame_number'] > self._camera_frame_number[frame['camera_id']]]
@@ -58,7 +59,7 @@ class Tracker:
 
         return self.game_state
 
-    def _update(self, detection_frame: Dict, timestamp):
+    def _update(self, detection_frame: Dict[str, List[Dict[str, Any]]], timestamp: int):
 
         for robot_obs in detection_frame.get('robots_blue', ()):
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
@@ -72,7 +73,7 @@ class Tracker:
             obs = np.array([ball_obs['x'], ball_obs['y']])
             self._ball.update(obs, timestamp)
 
-    def predict(self, robot_state):
+    def predict(self, robot_state: RobotState):
 
         input_commands = [None for _ in range(12)]
         for packet in robot_state.packet:
@@ -97,14 +98,15 @@ class Tracker:
                 self.logger.info('Deactivating ball')
 
     @staticmethod
-    def change_reference(detection_frame):
+    def change_reference(detection_frame: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
 
         teams = detection_frame.get('robots_blue', ())\
                 + detection_frame.get('robots_yellow', ())
 
         for robot_obs in teams:
-            robot_obs.position *= -1
-            robot_obs.orientation = wrap_to_pi(robot_obs.orientation + np.pi)
+            robot_obs['x'] *= -1
+            robot_obs['y'] *= -1
+            robot_obs['orientation'] = wrap_to_pi(robot_obs['orientation'] + np.pi)
 
         for ball_obs in detection_frame.get('balls', ()):
             ball_obs.position *= -1
@@ -112,7 +114,7 @@ class Tracker:
         return detection_frame
 
     @property
-    def _our_team(self):
+    def _our_team(self) -> List[RobotFilter]:
         if self.team_color == 'yellow':
             our_team = self._yellow_team
         else:
@@ -120,7 +122,7 @@ class Tracker:
         return our_team
 
     @property
-    def _their_team(self):
+    def _their_team(self) -> List[RobotFilter]:
         if self.team_color == 'yellow':
             their_team = self._blue_team
         else:
@@ -128,7 +130,7 @@ class Tracker:
         return their_team
 
     @property
-    def game_state(self) -> Dict:
+    def game_state(self) -> Dict[str, Union[float, List[Dict[str, Any]]]]:
         game_fields = dict()
         game_fields['timestamp'] = self._current_timestamp
         game_fields['blue'] = self.blue_team
@@ -137,21 +139,21 @@ class Tracker:
         return game_fields
 
     @property
-    def balls(self) -> List[Position]:
-        return Tracker.format_ball([self._ball]) if self._ball.is_active else []
+    def balls(self) -> List[Dict[str, Any]]:
+        return Tracker.format_balls([self._ball]) if self._ball.is_active else []
 
     @property
-    def blue_team(self) -> List[Pose]:
+    def blue_team(self) -> List[Dict[str, Any]]:
         active_players = {p_id: p for p_id, p in enumerate(self._blue_team) if p.is_active}
         return Tracker.format_team(active_players)
 
     @property
-    def yellow_team(self) -> List[Pose]:
+    def yellow_team(self) -> List[Dict[str, Any]]:
         active_players = {p_id: p for p_id, p in enumerate(self._yellow_team) if p.is_active}
         return Tracker.format_team(active_players)
 
     @staticmethod
-    def format_team(entities: Dict) -> List[Pose]:
+    def format_team(entities: Dict) -> List[Dict[str, Any]]:
         formatted_list = []
         for entity_id, entity in entities.items():
             fields = dict()
@@ -162,7 +164,7 @@ class Tracker:
         return formatted_list
 
     @staticmethod
-    def format_ball(entities: List) -> List[Position]:
+    def format_balls(entities: List) -> List[Dict[str, Any]]:
         formatted_list = []
         for entity_id, entity in enumerate(entities):
             fields = dict()
