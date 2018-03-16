@@ -19,7 +19,7 @@ class PathfinderModule:
         self.updates_obstacles(game_state)
 
         for player, ai_cmd in ai_cmds.items():
-            if ai_cmd.pathfinder_on and ai_cmd.target:
+            if ai_cmd.target is not None:
                 player_obstacles = self.player_obstacles(game_state, player, ai_cmd)
                 self.paths[player] = self.pathfinder.get_path(start=player.pose.position,
                                                               target=ai_cmd.target.position,

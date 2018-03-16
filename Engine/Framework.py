@@ -4,6 +4,8 @@ import logging
 from multiprocessing import Queue, Manager
 import signal
 
+import sys
+
 from Engine.engine import Engine
 from ai.coach import Coach
 from Util.timing import create_fps_timer
@@ -80,4 +82,4 @@ class Framework:
     def stop_game(self):
         self.engine.terminate()
         self.coach.terminate()
-        raise SystemExit('Stop Game')
+        sys.exit()
