@@ -2,10 +2,12 @@ import pathlib
 import importlib
 import inspect
 
+import ai.STA.Tactic.tactic
 from tests.STA.perfect_sim import PerfectSim
 from Util import Pose, Position
 
-TACTIC_PATH = ('ai', 'STA', 'Tactic')
+# the tuple of the file path
+TACTIC_PATH = pathlib.Path(ai.STA.Tactic.tactic.__file__).parent.relative_to(pathlib.Path('.').resolve()).parts
 
 
 def pytest_generate_tests(metafunc):
