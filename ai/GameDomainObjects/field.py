@@ -1,3 +1,4 @@
+from typing import Dict
 
 from Util import Position
 from ai.GameDomainObjects import Ball
@@ -18,6 +19,76 @@ class Field:
     @property
     def constant(self):
         return self._constant
+
+    @constant.setter
+    def constant(self, field: Dict):
+        self._constant["FIELD_Y_TOP"] = self._field_width / 2
+        self._constant["FIELD_Y_BOTTOM"] = -self._field_width / 2
+        self._constant["FIELD_X_LEFT"] = -self._field_length / 2
+        self._constant["FIELD_X_RIGHT"] = self._field_length / 2
+
+        self._constant["CENTER_CENTER_RADIUS"] = self._center_circle_radius
+
+        self._constant["FIELD_Y_POSITIVE"] = self._field_width / 2
+        self._constant["FIELD_Y_NEGATIVE"] = -self._field_width / 2
+        self._constant["FIELD_X_NEGATIVE"] = -self._field_length / 2
+        self._constant["FIELD_X_POSITIVE"] = self._field_length / 2
+
+        self._constant["FIELD_BOUNDARY_WIDTH"] = self._boundary_width
+
+        self._constant["FIELD_GOAL_RADIUS"] = self._defense_radius
+        self._constant["FIELD_GOAL_SEGMENT"] = self._defense_stretch
+        self._constant["FIELD_GOAL_WIDTH"] = self._goal_width
+
+        self._constant["FIELD_GOAL_Y_TOP"] = self._defense_radius + (self._defense_stretch / 2)
+        self._constant["FIELD_GOAL_Y_BOTTOM"] = -self._constant["FIELD_GOAL_Y_TOP"]
+
+        if self.our_side == FieldSide.POSITIVE:
+            self._constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self._constant["FIELD_X_NEGATIVE"]
+            self._constant["FIELD_THEIR_GOAL_X_INTERNAL"] = self._constant["FIELD_X_NEGATIVE"] + self._constant[
+                "FIELD_GOAL_RADIUS"]
+
+            self._constant["FIELD_OUR_GOAL_X_INTERNAL"] = self._constant["FIELD_X_POSITIVE"] - self._constant[
+                "FIELD_GOAL_RADIUS"]
+            self._constant["FIELD_OUR_GOAL_X_EXTERNAL"] = self._constant["FIELD_X_POSITIVE"]
+
+            self._constant["FIELD_THEIR_GOAL_TOP_CIRCLE"] = Position(self._constant["FIELD_X_NEGATIVE"],
+                                                                    self._constant["FIELD_GOAL_SEGMENT"] / 2)
+            self._constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"] = Position(self._constant["FIELD_X_NEGATIVE"],
+                                                                       -self._constant["FIELD_GOAL_SEGMENT"] / 2)
+            self._constant["FIELD_THEIR_GOAL_MID_GOAL"] = Position(self._constant["FIELD_X_NEGATIVE"], 0)
+
+            self._constant["FIELD_OUR_GOAL_TOP_CIRCLE"] = Position(self._constant["FIELD_X_POSITIVE"],
+                                                                  self._constant["FIELD_GOAL_SEGMENT"] / 2)
+            self._constant["FIELD_OUR_GOAL_BOTTOM_CIRCLE"] = Position(self._constant["FIELD_X_POSITIVE"],
+                                                                     -self._constant["FIELD_GOAL_SEGMENT"] / 2)
+            self._constant["FIELD_OUR_GOAL_MID_GOAL"] = Position(self._constant["FIELD_X_POSITIVE"], 0)
+
+        else:
+            self._constant["FIELD_OUR_GOAL_X_EXTERNAL"] = self._constant["FIELD_X_NEGATIVE"]
+            self._constant["FIELD_OUR_GOAL_X_INTERNAL"] = self._constant["FIELD_X_NEGATIVE"] + self._constant[
+                "FIELD_GOAL_RADIUS"]
+
+            self._constant["FIELD_THEIR_GOAL_X_INTERNAL"] = self._constant["FIELD_X_POSITIVE"] - self._constant[
+                "FIELD_GOAL_RADIUS"]
+            self._constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self._constant["FIELD_X_POSITIVE"]
+
+            self._constant["FIELD_OUR_GOAL_TOP_CIRCLE"] = Position(self._constant["FIELD_X_NEGATIVE"],
+                                                                  self._constant["FIELD_GOAL_SEGMENT"] / 2)
+            self._constant["FIELD_OUR_GOAL_BOTTOM_CIRCLE"] = Position(self._constant["FIELD_X_NEGATIVE"],
+                                                                     -self._constant["FIELD_GOAL_SEGMENT"] / 2)
+            self._constant["FIELD_OUR_GOAL_MID_GOAL"] = Position(self._constant["FIELD_X_NEGATIVE"], 0)
+
+            self._constant["FIELD_THEIR_GOAL_TOP_CIRCLE"] = Position(self._constant["FIELD_X_POSITIVE"],
+                                                                    self._constant["FIELD_GOAL_SEGMENT"] / 2)
+            self._constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"] = Position(self._constant["FIELD_X_POSITIVE"],
+                                                                       -self._constant["FIELD_GOAL_SEGMENT"] / 2)
+            self._constant["FIELD_THEIR_GOAL_MID_GOAL"] = Position(self._constant["FIELD_X_POSITIVE"], 0)
+        
+        
+        
+        
+        
 
 
 constant = {
