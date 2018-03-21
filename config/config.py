@@ -5,9 +5,8 @@ from Util import Singleton
 
 mandatory_fields = {
     'COMMUNICATION': ['type', 'field_port_file', 'vision_port', 'ui_debug_address'],
-    'GAME': ['our_color', 'type', 'our_side', 'autonomous_play', 'ai_timestamp'],
+    'GAME': ['our_color', 'type', 'autonomous_play', 'coach_fps'],
     'IMAGE': ['number_of_camera'],
-    'DEBUG': ['using_debug'],
 }
 
 
@@ -53,12 +52,9 @@ class Config(metaclass=Singleton):
 
     def update_content(self):
 
-        if 'play_zone' not in self['GAME']:
-            self['GAME']['play_zone'] = 'full'
-
         self['IMAGE']['number_of_camera'] = int(self['IMAGE']['number_of_camera'])
-        self['GAME']['ai_timestamp'] = float(self['GAME']['ai_timestamp'])
-        self['DEBUG']['using_debug'] = self['DEBUG']['using_debug'] == 'true'
+        self['GAME']['coach_fps'] = int(self['GAME']['coach_fps'])
+        self['GAME']['autonomous_play'] = self['GAME']['autonomous_play'] == 'true'
 
         # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
         if self['GAME']['our_color'] == 'blue':
@@ -67,6 +63,23 @@ class Config(metaclass=Singleton):
         else:
             self['COMMUNICATION']['ui_cmd_sender_port'] = 16666    # DO NOT TOUCH
             self['COMMUNICATION']['ui_cmd_receiver_port'] = 17777  # DO NOT TOUCH
+
+        self['COMMUNICATION']['ui_sender_info'] = (self['COMMUNICATION']['ui_debug_address'],
+                                                   int(self['COMMUNICATION']['ui_cmd_sender_port']))
+
+        self['COMMUNICATION']['ui_recver_info'] = (self['COMMUNICATION']['ui_debug_address'],
+                                                   int(self['COMMUNICATION']['ui_cmd_receiver_port']))
+
+        self['COMMUNICATION']['vision_info'] = (self['COMMUNICATION']['vision_udp_address'],
+                                                int(self['COMMUNICATION']['vision_port']))
+
+        self['COMMUNICATION']['referee_info'] = (self['COMMUNICATION']['referee_udp_address'],
+                                                 int(self['COMMUNICATION']['referee_port']))
+
+        if self['COMMUNICATION']['type'] == 'sim':
+            self['COMMUNICATION']['grsim_info'] = (self['COMMUNICATION']['grsim_udp_address'],
+                                                   int(self['COMMUNICATION']['grsim_port']))
+
 
     def validate_user_input(self):
 

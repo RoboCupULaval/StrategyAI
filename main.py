@@ -1,10 +1,13 @@
 # Under MIT License, see LICENSE.txt
-""" Point d'entrée de l'intelligence artificielle. """
 
 import argparse
+import logging
+from time import sleep
 
 from Engine.Framework import Framework
 from config.config import Config
+
+logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
 
 
 def set_arg_parser():
@@ -38,10 +41,27 @@ def set_arg_parser():
                             help='Enables profiling options through the project.',
                             default=False)
 
+    arg_parser.add_argument('--competition_mode',
+                            action='store_true',
+                            help='Enables watchdog which reset the Framework if it stop.',
+                            default=False)
     return arg_parser
 
 
 if __name__ == '__main__':
     cli_args = set_arg_parser().parse_args()
     Config().load_file(cli_args.config_file)
-    Framework(cli_args).start()
+    logging = logging.getLogger('Main')
+
+    stop_framework = False
+    while not stop_framework:
+        try:
+            Framework(cli_args).start()
+        except SystemExit:
+            logging.debug('Framework stopped.')
+        finally:
+            if not cli_args.enable_watchdog:
+                stop_framework = True
+            else:
+                logging.debug('Restarting Framework.')
+                sleep(0.5)
