@@ -60,7 +60,7 @@ if __name__ == '__main__':
         except SystemExit:
             logging.debug('Framework stopped.')
         finally:
-            if not cli_args.enable_watchdog:
+            if not cli_args.competition_mode:
                 stop_framework = True
             else:
                 logging.debug('Restarting Framework.')
