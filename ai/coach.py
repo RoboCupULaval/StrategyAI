@@ -6,22 +6,21 @@ import cProfile
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
 from time import time
-from typing import List
 
-from Util.engine_command import EngineCommand
-from Util.team_color_service import TeamColorService
 from Util.timing import create_fps_timer
+
 from ai.executors.debug_executor import DebugExecutor
 from ai.executors.play_executor import PlayExecutor
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
+
 from config.config import Config
 
 
 class Coach(Process):
 
     MAX_EXCESS_TIME = 0.1
-    PROFILE_DATA_TIME = 10
+    PROFILE_DUMP_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_ai.prof'
 
     def __init__(self,
@@ -35,34 +34,29 @@ class Coach(Process):
         super().__init__(name=__name__)
 
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.cfg = Config()
-
-        self.mode_debug_active = self.cfg['DEBUG']['using_debug']
-        self.is_simulation = self.cfg['GAME']['type'] == 'sim'
 
         # Managers for shared memory between process
         self.engine_game_state = engine_game_state
         self.field = field
 
-        # Queues for interprocess communication with the engine
+        # Queues for process communication
         self.ai_queue = ai_queue
         self.referee_queue = referee_queue
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
 
-        # the states
-        self.team_color_service = TeamColorService()
+        # States
         self.game_state = GameState()
         self.play_state = PlayState()
 
-        # the executors
+        # Executors
         self.play_executor = PlayExecutor(self.play_state, self.ui_send_queue)
-        self.debug_executor = DebugExecutor(self.play_state, self.play_executor, self.ui_send_queue, self.ui_recv_queue)
+        self.debug_executor = DebugExecutor(self.play_state, self.play_executor,
+                                            self.ui_send_queue, self.ui_recv_queue)
 
-        # print frame rate
-        self.fps = 1/self.cfg['GAME']['ai_timestamp']
+        # fps and limitation
+        self.fps = Config()['GAME']['coach_fps']
         self.frame_count = 0
-        self.time_last_print = time()
         self.last_frame_count = 0
 
         def callback(excess_time):
@@ -85,8 +79,7 @@ class Coach(Process):
 
     def run(self) -> None:
         self.wait_for_geometry()
-        self.logger.debug('Running with process ID {}'.format(os.getpid()))
-
+        self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
         try:
             while True:
                 self.frame_count += 1
@@ -100,9 +93,6 @@ class Coach(Process):
         self.game_state.update(self.engine_game_state)
         self.debug_executor.exec()
         engine_commands = self.play_executor.exec()
-        self._send_cmd(engine_commands)
-
-    def _send_cmd(self, engine_commands: List[EngineCommand]):
         self.ai_queue.put(engine_commands)
 
     def enable_profiling(self):
@@ -113,7 +103,7 @@ class Coach(Process):
 
     def dump_profiling_stats(self):
         if self.profiling_enabled:
-            if self.frame_count % (self.fps * Coach.PROFILE_DATA_TIME) == 0:
+            if self.frame_count % (self.fps * Coach.PROFILE_DUMP_TIME) == 0:
                 self.profiler.dump_stats(Coach.PROFILE_DATA_FILENAME)
                 self.logger.debug('Profile data written to {}.'.format(Coach.PROFILE_DATA_FILENAME))
 

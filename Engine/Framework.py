@@ -4,9 +4,10 @@ import logging
 from multiprocessing import Queue, Manager
 import signal
 
+import sys
+
 from Engine.engine import Engine
 from ai.coach import Coach
-from config.config import Config
 from Util.timing import create_fps_timer
 
 
@@ -16,10 +17,7 @@ class Framework:
 
     def __init__(self, cli_args):
 
-        logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
-        self.logger = logging.getLogger("Framework")
-
-        self.cfg = Config()
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         self.game_state = Manager().dict()
         self.field = Manager().dict()
@@ -44,6 +42,9 @@ class Framework:
                            self.ui_recv_queue)
 
         self.engine.fps = cli_args.engine_fps
+
+        if cli_args.on_negative_side:
+            self.engine.on_negative_side = True
 
         if cli_args.unlock_engine_fps:
             self.engine.unlock_fps()
@@ -76,7 +77,10 @@ class Framework:
 
             sleep()
 
+        self.stop_game()
+
     def stop_game(self):
         self.engine.terminate()
         self.coach.terminate()
-        exit(0)
+        sys.exit()
+

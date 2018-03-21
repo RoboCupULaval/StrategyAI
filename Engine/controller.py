@@ -1,7 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 import logging
-from typing import Dict, List
+from typing import Dict, List, Type
 
 from Engine.regulators import VelocityRegulator, PositionRegulator
 from Engine.filters.path_smoother import path_smoother
@@ -17,7 +17,7 @@ from Util.csv_plotter import Observer
 
 class Controller:
 
-    def __init__(self, observer: Observer=Observer()):
+    def __init__(self, observer: Type[Observer]=Observer()):
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger("Controller")
 

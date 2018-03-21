@@ -44,3 +44,7 @@ class SenderProcess(Process, SenderBaseClass, metaclass=ABCMeta):
             self.logger.debug('Killed')
             self._queue.close()
             exit(0)
+
+    def terminate(self):
+        self.connection.close()
+        super().terminate()
