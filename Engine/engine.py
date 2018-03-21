@@ -32,10 +32,9 @@ class Engine(Process):
 
     DEFAULT_CAMERA_NUMBER = 4
     DEFAULT_FPS_LOCK_STATE = True
-
     DEFAULT_FPS = 30  # Please don't change this constant, instead run 'python main.py --engine_fps desired_fps'
-    PROFILE_DUMP_TIME = 10
     MAX_EXCESS_TIME = 0.050
+    PROFILE_DUMP_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_engine.prof'
 
     def __init__(self,
