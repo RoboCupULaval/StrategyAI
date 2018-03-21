@@ -40,31 +40,39 @@ class RobocupChoreography(Strategy):
         shuffle(positions_on_yaxis)
         '''
         for i in range(PLAYER_PER_TEAM):
-            self.create_node(i, GoToPositionPathfinder(self.game_state, i, positions_on_xaxis[i]))
-            self.create_node(i, GoToPositionPathfinder(self.game_state, i, positions_on_yaxis[i]))
-            self.add_condition(i, 0, 1, partial(self.condition, i))
-            self.add_condition(i, 1, 0, partial(self.condition, i))
+            node_go_to_x = self.create_node(i, GoToPositionPathfinder(self.game_state, i, positions_on_xaxis[i]))
+            node_go_to_y = self.create_node(i, GoToPositionPathfinder(self.game_state, i, positions_on_yaxis[i]))
+            robot_i_succeeded = partial(self.condition, i)
+            
+            node_go_to_x.connect_to(node_go_to_y, when=robot_i_succeeded)
+            node_go_to_y.connect_to(node_go_to_x, when=robot_i_succeeded)
         '''
-        self.create_node(robot1, GoToPositionPathfinder(self.game_state, self.game_state.get_player_by_role(robot1), positions_on_xaxis[1], cruise_speed=2))
-        self.create_node(robot1, GoToPositionPathfinder(self.game_state, self.game_state.get_player_by_role(robot1), positions_on_yaxis[2], cruise_speed=2))
-        self.add_condition(robot1, 0, 1, partial(self.condition, robot1))
-        self.add_condition(robot1, 1, 0, partial(self.condition, robot1))
+        node_robot1_go_to_x = self.create_node(robot1, GoToPositionPathfinder(self.game_state, self.game_state.get_player_by_role(robot1), positions_on_xaxis[1], cruise_speed=2))
+        node_robot1_go_to_y = self.create_node(robot1, GoToPositionPathfinder(self.game_state, self.game_state.get_player_by_role(robot1), positions_on_yaxis[2], cruise_speed=2))
+        robot_1_succeeded = partial(self.current_tactic_succeed, robot1)
 
-        self.create_node(robot2, GoToPositionPathfinder(self.game_state, self.game_state.get_player_by_role(robot2), positions_on_xaxis[3], cruise_speed=2))
-        self.create_node(robot2, GoToPositionPathfinder(self.game_state, self.game_state.get_player_by_role(robot2), positions_on_yaxis[4], cruise_speed=2))
-        self.add_condition(robot2, 0, 1, partial(self.condition, robot2))
-        self.add_condition(robot2, 1, 0, partial(self.condition, robot2))
+        node_robot1_go_to_x.connect_to(node_robot1_go_to_y, when=robot_1_succeeded)
+        node_robot1_go_to_y.connect_to(node_robot1_go_to_x, when=robot_1_succeeded)
 
-        self.create_node(robot3, GoToPositionPathfinder(self.game_state, self.game_state.get_player_by_role(robot3), positions_on_xaxis[5], cruise_speed=2))
-        self.create_node(robot3, GoToPositionPathfinder(self.game_state, self.game_state.get_player_by_role(robot3), positions_on_yaxis[0], cruise_speed=2))
-        self.add_condition(robot3, 0, 1, partial(self.condition, robot3))
-        self.add_condition(robot3, 1, 0, partial(self.condition, robot3))
+        node_robot_2_go_to_x = self.create_node(robot2, GoToPositionPathfinder(self.game_state, self.game_state.get_player_by_role(robot2), positions_on_xaxis[3], cruise_speed=2))
+        node_robot_2_go_to_y = self.create_node(robot2, GoToPositionPathfinder(self.game_state, self.game_state.get_player_by_role(robot2), positions_on_yaxis[4], cruise_speed=2))
+        robot2_succeeded = partial(self.current_tactic_succeed, robot2)
+
+        node_robot_2_go_to_x.connect_to(node_robot_2_go_to_y, when=robot2_succeeded)
+        node_robot_2_go_to_y.connect_to(node_robot_2_go_to_x, when=robot2_succeeded)
+
+        node_robot3_go_to_x = self.create_node(robot3, GoToPositionPathfinder(self.game_state, self.game_state.get_player_by_role(robot3), positions_on_xaxis[5], cruise_speed=2))
+        node_robot3_go_to_y = self.create_node(robot3, GoToPositionPathfinder(self.game_state, self.game_state.get_player_by_role(robot3), positions_on_yaxis[0], cruise_speed=2))
+        robot3_succeeded = partial(self.current_tactic_succeed, robot3)
+
+        node_robot3_go_to_x.connect_to(node_robot3_go_to_y, when=robot3_succeeded)
+        node_robot3_go_to_y.connect_to(node_robot3_go_to_x, when=robot3_succeeded)
 
         for i in range(PLAYER_PER_TEAM):
             if not (i == robot1 or i == robot2 or i == robot3):
                 self.create_node(i, Stop(self.game_state, i))
 
-    def condition(self, i):
+    def current_tactic_succeed(self, i):
         try:
             role = self.game_state.get_role_by_player_id(i)
             return self.roles_graph[role].get_current_tactic().status_flag == Flags.SUCCESS

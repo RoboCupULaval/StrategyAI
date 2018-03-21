@@ -27,20 +27,22 @@ class Graph:
         self.nodes = []
         self.current_node = None
 
+    @property
     def get_current_tactic_name(self):
         """
         :return: Le nom de la tactique en cours, sous forme d'une chaîne de caractères.
         """
-        if len(self.nodes) > 0:
+        if self.current_node is not None:
             return str(self.current_node.tactic)
         else:
             return None
 
+    @property
     def get_current_tactic(self):
         """
         :return: La tactique en cours.
         """
-        if len(self.nodes) > 0:
+        if self.current_node is not None:
             return self.current_node.tactic
         else:
             return None

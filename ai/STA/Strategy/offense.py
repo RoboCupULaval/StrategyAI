@@ -31,13 +31,6 @@ class Offense(Strategy):
 
         for index, player in role_by_robots:
             if player:
-#                self.create_node(index, PositionForPass(self.game_state, player, auto_position=True))
-#                self.create_node(index, GoKick(self.game_state, player, auto_update_target=True))
-
-#                self.add_condition(index, 0, 1, partial(self.is_closest, player))
-#                self.add_condition(index, 1, 0, partial(self.is_not_closest, player))
-#                self.add_condition(index, 1, 1, partial(self.has_kicked, player))
-
                 node_pass = self.create_node(index, PositionForPass(self.game_state, player, auto_position=True))
                 node_go_kick = self.create_node(index, GoKick(self.game_state, player, auto_update_target=True))
 

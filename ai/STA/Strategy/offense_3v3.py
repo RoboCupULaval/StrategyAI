@@ -36,13 +36,17 @@ class Offense_3v3(Strategy):
 
         for index, player in role_by_robots:
             if player:
-                self.create_node(index, PositionForPass(self.game_state, player, auto_position=True,
+                node_pass = self.create_node(index, PositionForPass(self.game_state, player, auto_position=True,
                                                        robots_in_formation=self.robots))
-                self.create_node(index, GoKick(self.game_state, player, target=self.theirgoal))
+                node_go_kick = self.create_node(index, GoKick(self.game_state, player, target=self.theirgoal))
 
-                self.add_condition(index, 0, 1, partial(self.is_closest, player))
-                self.add_condition(index, 1, 0, partial(self.is_not_closest, player))
-                self.add_condition(index, 1, 1, partial(self.has_kicked, player))
+                player_is_closest = partial(self.is_closest, player)
+                player_is_not_closest = partial(self.is_not_closest, player)
+                player_has_kicked = partial(self.has_kicked, player)
+
+                node_pass.connect_to(node_go_kick, when=player_is_closest)
+                node_go_kick.connect_to(node_pass, when=player_is_not_closest)
+                node_go_kick.connect_to(node_go_kick, when=player_has_kicked)
 
     def is_closest(self, player):
         return player == closest_player_to_point(GameState().ball_position, True, robots=self.robots).player

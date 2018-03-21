@@ -11,14 +11,6 @@ from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 
 
-def return_true():
-    return True
-
-
-def return_false():
-    return False
-
-
 class TestNode(unittest.TestCase):
 
     def setUp(self):
@@ -26,8 +18,8 @@ class TestNode(unittest.TestCase):
         self.anotherTactic = TestNode._create_mock_tactic("Another command")
         self.node1 = Node(self.aTactic)
         self.node2 = Node(self.anotherTactic)
-        self.vertex1 = Vertex(self.node1, return_true)
-        self.vertex2 = Vertex(self.node2, return_false)
+        self.vertex1 = Vertex(self.node1, lambda: True)
+        self.vertex2 = Vertex(self.node2, lambda: False)
 
     @staticmethod
     def _create_mock_tactic(command):

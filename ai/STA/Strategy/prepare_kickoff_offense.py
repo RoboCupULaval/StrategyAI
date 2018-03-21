@@ -50,9 +50,10 @@ class PrepareKickOffOffense(Strategy):
         for player, position in robots_and_positions:
             if player:
                 role = GameState().get_role_by_player_id(player.id)
-                self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))
-                self.create_node(role, Stop(self.game_state, player))
-                self.add_condition(role, 0, 1, partial(self.arrived_to_position, player))
+                node_go_to_position = self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))
+                node_stop = self.create_node(role, Stop(self.game_state, player))
+                player_arrived_to_position = partial(self.arrived_to_position, player)
+                node_go_to_position.connect_to(node_stop, when=player_arrived_to_position)
 
     def arrived_to_position(self, player):
         role = GameState().get_role_by_player_id(player.id)

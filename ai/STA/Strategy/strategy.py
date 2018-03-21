@@ -50,18 +50,6 @@ class Strategy(metaclass=ABCMeta):
         self.roles_graph[role].add_node(tactic_node)
         return tactic_node
 
-    def add_condition(self, role: Role, start_node: Node, end_node: Node, condition: Callable[..., bool]):
-        """
-        Ajoute une condition permettant de gérer la transition entre deux tactiques d'un robot.
-        :param role: Le role qui a la tactic.
-        :param start_node: Le noeud de départ du vertex.
-        :param end_node: Le noeud d'arrivée du vertex.
-        :param condition: Une fonction retournant un booléen permettant de déterminer si on peut effectuer la transition
-        du noeud de départ vers le noeud d'arrivé.
-        """
-        assert(isinstance(role, Role))
-        self.roles_graph[role].add_vertex(start_node, end_node, condition)
-
     def get_current_state(self) -> List[Tuple[Player, str, str, Pose]]:
         """ [
                 Player: Player;
