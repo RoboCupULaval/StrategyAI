@@ -21,7 +21,7 @@ class Graph:
         __str__: Retourne une représentation du graphe sous forme d'une chaîne de caractères.
     Attributs:
         nodes: Une liste des noeuds du graphe.
-        current_node: Un pointeur vers le noeud courant dans la liste des noeuds.
+        current_node: Une reference vers le noeud courant dans la liste des noeuds.
     """
     def __init__(self):
         self.nodes = []
