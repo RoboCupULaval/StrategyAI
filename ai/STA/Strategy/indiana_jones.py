@@ -66,4 +66,4 @@ class IndianaJones(Strategy):
         node_go_to_bottom_right.connect_to(node_go_to_top_right, when=obs_right_role_succeeded)
 
     def current_tactic_succeed(self, i):
-        return self.roles_graph[i].get_current_tactic().status_flag == Flags.SUCCESS
+        return self.roles_graph[i].current_tactic.status_flag == Flags.SUCCESS

@@ -75,6 +75,6 @@ class RobocupChoreography(Strategy):
     def current_tactic_succeed(self, i):
         try:
             role = self.game_state.get_role_by_player_id(i)
-            return self.roles_graph[role].get_current_tactic().status_flag == Flags.SUCCESS
+            return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
         except IndexError:
             return False

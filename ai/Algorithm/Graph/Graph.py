@@ -28,7 +28,7 @@ class Graph:
         self.current_node = None
 
     @property
-    def get_current_tactic_name(self):
+    def current_tactic_name(self):
         """
         :return: Le nom de la tactique en cours, sous forme d'une chaîne de caractères.
         """
@@ -38,7 +38,7 @@ class Graph:
             return None
 
     @property
-    def get_current_tactic(self):
+    def current_tactic(self):
         """
         :return: La tactique en cours.
         """
@@ -57,17 +57,6 @@ class Graph:
 
         if len(self.nodes) == 1:
             self.set_current_node(p_node)
-
-    def remove_node(self, dst_node):
-        """
-        Retire un noeud de la liste de noeuds, puis détruit tous les vertices pointant vers ce noeud.
-        :param dst_node: Le noeud à retirer dans la liste de noeuds.
-        """
-        assert isinstance(dst_node, Node)
-        assert dst_node in self.nodes
-        for src_node in self.nodes:
-            self.remove_vertex(src_node, dst_node)
-        self.nodes.pop(dst_node)
 
     def add_vertex(self, starting_node, ending_node, condition):
         """

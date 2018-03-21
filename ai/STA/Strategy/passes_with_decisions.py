@@ -46,8 +46,8 @@ class PassesWithDecisions(Strategy):
                 self.create_node(i, Stop(self.game_state, self.game_state.get_player_by_role(i)))
 
     def current_tactic_succeed(self, role):
-        if self.roles_graph[role].get_current_tactic_name() == 'PassToPlayer':
-            return self.roles_graph[role].get_current_tactic().status_flag == Flags.SUCCESS
+        if self.roles_graph[role].current_tactic_name == 'PassToPlayer':
+            return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
         else:
             return False
 

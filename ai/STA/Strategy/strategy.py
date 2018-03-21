@@ -60,7 +60,7 @@ class Strategy(metaclass=ABCMeta):
         """
         state = []
         for r in self.roles:
-            current_tactic = self.roles_graph[r].get_current_tactic()
+            current_tactic = self.roles_graph[r].current_tactic
             if current_tactic is None:
                 continue
 

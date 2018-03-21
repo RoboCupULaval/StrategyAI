@@ -62,4 +62,4 @@ class PrepareKickOffDefense(Strategy):
 
     def arrived_to_position(self, player):
         role = GameState().get_role_by_player_id(player.id)
-        return self.roles_graph[role].get_current_tactic().status_flag == Flags.SUCCESS
+        return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS

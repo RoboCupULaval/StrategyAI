@@ -17,8 +17,7 @@ class TestGraph(unittest.TestCase):
     def test_givenAGraphWithANode_whenGetCurrentTactic_thenReturnTacticOfANode(self):
         a_node = self._create_mock_node()
         self.graph.add_node(a_node)
-
-        assert self.graph.get_current_tactic() == a_node.tactic
+        assert self.graph.current_tactic == a_node.tactic
 
     def test_givenAGraphWithANode_whenExecGraph_thenNodeIsCall(self):
         a_node = self._create_mock_node()
