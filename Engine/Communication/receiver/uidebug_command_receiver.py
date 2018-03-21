@@ -32,4 +32,3 @@ class UIDebugCommandReceiver(ReceiverProcess):
             self._link.put(loads(data))
         except Full as e:
             self.logger.debug("{}".format(e))
-

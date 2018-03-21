@@ -2,7 +2,7 @@
 import logging
 
 from Util import Pose, Position
-from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS
+from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce
 from Util.geometry import compare_angle
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
@@ -51,7 +51,7 @@ class PerfectSim:
         self._apply_cmd(ia_cmd)
 
     def has_kick(self):
-        return self.last_ia_cmd.kick_type == 1
+        return self.last_ia_cmd.kick_force != KickForce.NONE
 
     def _apply_cmd(self, ia_cmd):
         self.last_ia_cmd = ia_cmd
@@ -60,7 +60,7 @@ class PerfectSim:
             print("Hero Robot moved to {}".format(ia_cmd.target))
             self.hero_robot.pose = ia_cmd.target
 
-        if ia_cmd.kick_type == 1:
+        if ia_cmd.kick_force != KickForce.NONE:
             if self._robot_can_hit_ball(self.hero_robot):
                 print("Hero Robot has kick and hit the ball")
                 self.has_hit_ball = True

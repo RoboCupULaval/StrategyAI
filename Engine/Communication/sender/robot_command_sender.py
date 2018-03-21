@@ -6,7 +6,9 @@ from config.config import Config
 
 class RobotCommandSender:
 
-    def __new__(cls, connection_info):
+    def __new__(cls):
+
+        connection_infos = {'sim': Config()['COMMUNICATION']['grsim_info']}
 
         available_sender = {'disabled': FakeSender,
                             'sim':      GrSimCommandSender,
@@ -15,6 +17,7 @@ class RobotCommandSender:
         sender_type = Config()['COMMUNICATION']['type']
 
         sender_class = available_sender.get(sender_type, None)
+        connection_info = connection_infos.get(sender_type, None)
 
         if sender_class is not None:
             instance = sender_class(connection_info)
