@@ -9,6 +9,7 @@ from queue import Empty
 from time import time
 
 from Debug.debug_command_factory import DebugCommandFactory
+
 from Engine.Communication.receiver.referee_receiver import RefereeReceiver
 from Engine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from Engine.Communication.receiver.vision_receiver import VisionReceiver
@@ -26,16 +27,15 @@ except ImportError:
 
 from config.config import Config
 
-__author__ = 'Maxime Gagnon-Legault and Simon Bouchard'
-
 
 class Engine(Process):
 
     DEFAULT_CAMERA_NUMBER = 4
     DEFAULT_FPS_LOCK_STATE = True
-    DEFAULT_FPS = 30  # Please don't change this constant, instead run the AI with the optional argument --engine_fps
+
+    DEFAULT_FPS = 30  # Please don't change this constant, instead run 'python main.py --engine_fps desired_fps'
+    PROFILE_DUMP_TIME = 10
     MAX_EXCESS_TIME = 0.050
-    PROFILE_DATA_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_engine.prof'
 
     def __init__(self,
@@ -45,58 +45,38 @@ class Engine(Process):
                  referee_queue: Queue,
                  ui_send_queue: Queue,
                  ui_recv_queue: Queue):
+
         super().__init__(name=__name__)
 
-        self.logger = logging.getLogger('Engine')
-        self.cfg = Config()
-        self.team_color = self.cfg['GAME']['our_color']
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         # Managers for shared memory between process
         manager = Manager()
-        self._camera_number = self.cfg['IMAGE'].get('number_of_camera', Engine.DEFAULT_CAMERA_NUMBER)
-        self.vision_state = manager.list([manager.dict() for _ in range(self._camera_number)])
+        self.vision_state = manager.list([manager.dict() for _ in range(Config()['IMAGE']['number_of_camera'])])
         self.game_state = game_state
         self.field = field
 
-        # Queues for inter process communication with the AI
+        # Queues for process communication
         self.ui_send_queue = ui_send_queue
         self.ui_recv_queue = ui_recv_queue
         self.ai_queue = ai_queue
         self.referee_queue = referee_queue
 
-        # vision subprocess
-        vision_connection_info = (self.cfg['COMMUNICATION']['vision_udp_address'],
-                                  int(self.cfg['COMMUNICATION']['vision_port']))
+        # External communication
+        self.vision_receiver = VisionReceiver(Config()['COMMUNICATION']['vision_info'], self.vision_state, self.field)
+        self.ui_sender = UIDebugCommandSender(Config()['COMMUNICATION']['ui_sender_info'], self.ui_send_queue)
+        self.ui_recver = UIDebugCommandReceiver(Config()['COMMUNICATION']['ui_recver_info'], self.ui_recv_queue)
+        self.referee_recver = RefereeReceiver(Config()['COMMUNICATION']['referee_info'], self.referee_queue)
+        self.robot_cmd_sender = RobotCommandSender()
 
-        self.vision_receiver = VisionReceiver(vision_connection_info, self.vision_state, self.field)
-
-        # UIDebug communication sub processes
-        ui_debug_host = self.cfg['COMMUNICATION']['ui_debug_address']
-        ui_sender_connection_info = (ui_debug_host, int(self.cfg['COMMUNICATION']['ui_cmd_sender_port']))
-        ui_recver_connection_info = (ui_debug_host, int(self.cfg['COMMUNICATION']['ui_cmd_receiver_port']))
-
-        self.ui_sender = UIDebugCommandSender(ui_sender_connection_info, self.ui_send_queue)
-        self.ui_recver = UIDebugCommandReceiver(ui_recver_connection_info, self.ui_recv_queue)
-
-        # Referee communication
-        referee_recver_connection_info = (self.cfg['COMMUNICATION']['referee_udp_address'],
-                                          int(self.cfg['COMMUNICATION']['referee_port']))
-        self.referee_recver = RefereeReceiver(referee_recver_connection_info, self.referee_queue)
-
-        # Subprocess to send robot commands
-        robot_connection_info = (self.cfg['COMMUNICATION']['vision_udp_address'], 20011)
-
-        self.robot_cmd_sender = RobotCommandSender(robot_connection_info)
-
+        # main engine module
         self.tracker = Tracker(self.vision_state)
         self.controller = Controller(observer=CsvPlotter)
 
-        self.frame_count = 0
+        # fps and limitation
         self._fps = Engine.DEFAULT_FPS
         self._is_fps_locked = Engine.DEFAULT_FPS_LOCK_STATE
-
-        # print frame rate
-        self.time_last_print = time()
+        self.frame_count = 0
         self.last_frame_count = 0
 
         def callback(excess_time):
@@ -121,12 +101,12 @@ class Engine(Process):
 
         logged_string = 'Running with process ID {}'.format(os.getpid())
         if self.is_fps_locked:
-            logged_string += ' at {} fps'.format(self.fps)
+            logged_string += ' at {} fps.'.format(self.fps)
         else:
-            logged_string += ' without fps limitation'
-        logged_string += ' with {} cameras.'.format(self.camera_number)
+            logged_string += ' without fps limitation.'
 
         self.logger.debug(logged_string)
+
         try:
             while True:
                 self.frame_count += 1
@@ -175,6 +155,12 @@ class Engine(Process):
             engine_cmds = []
         return engine_cmds
 
+    def dump_profiling_stats(self):
+        if self.profiling_enabled:
+            if self.frame_count % (self.fps * Engine.PROFILE_DUMP_TIME) == 0:
+                self.profiler.dump_stats(Engine.PROFILE_DATA_FILENAME)
+                self.logger.debug('Profile data written to {}.'.format(Engine.PROFILE_DATA_FILENAME))
+
     def is_any_subprocess_borked(self):
         borked_process_found = not all((self.vision_receiver.is_alive(),
                                         self.ui_sender.is_alive(),
@@ -191,12 +177,6 @@ class Engine(Process):
         self.profiler = cProfile.Profile()
         self.profiler.enable()
         self.logger.debug('Profiling mode activate.')
-
-    def dump_profiling_stats(self):
-        if self.profiling_enabled:
-            if self.frame_count % (self.fps * Engine.PROFILE_DATA_TIME) == 0:
-                self.profiler.dump_stats(Engine.PROFILE_DATA_FILENAME)
-                self.logger.debug('Profile data written to {}.'.format(Engine.PROFILE_DATA_FILENAME))
 
     def unlock_fps(self):
         self.is_fps_locked = False
@@ -221,14 +201,3 @@ class Engine(Process):
     @is_fps_locked.setter
     def is_fps_locked(self, is_lock):
         self._is_fps_locked = is_lock
-
-    @property
-    def camera_number(self):
-        return self._camera_number
-
-    @camera_number.setter
-    def camera_number(self, num):
-        if 0 > num > 4:
-            raise ValueError('Invalid number of camera.')
-        self._camera_number = num
-        self.vision_state = Manager().list([Manager().dict() for _ in range(self._camera_number)])

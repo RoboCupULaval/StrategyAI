@@ -10,8 +10,7 @@ from Engine.filters.robot_kalman_filter import RobotFilter
 
 from Util.geometry import wrap_to_pi
 from Util import Pose, Position
-
-from config.config import Config
+from Util.team_color_service import TeamColorService
 
 
 class Tracker:
@@ -26,9 +25,7 @@ class Tracker:
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger('Tracker')
 
-        self.cfg = Config()
-        self.team_color = self.cfg['GAME']['our_color']
-        self.our_side = self.cfg['GAME']['our_side']
+        self.on_negative_side = False
 
         self.vision_state = vision_state
 
@@ -48,7 +45,7 @@ class Tracker:
 
             for frame in camera_frames:
 
-                # if self.our_side == 'negative':
+                # if self.on_negative_side:
                 #     vision_frame = Tracker.change_reference(frame)
 
                 self._camera_frame_number[frame['camera_id']] = frame['frame_number']
@@ -114,16 +111,16 @@ class Tracker:
         return detection_frame
 
     @property
-    def _our_team(self) -> List[RobotFilter]:
-        if self.team_color == 'yellow':
+    def _our_team(self):
+        if TeamColorService().is_our_team_yellow:
             our_team = self._yellow_team
         else:
             our_team = self._blue_team
         return our_team
 
     @property
-    def _their_team(self) -> List[RobotFilter]:
-        if self.team_color == 'yellow':
+    def _their_team(self):
+        if TeamColorService().is_our_team_yellow:
             their_team = self._blue_team
         else:
             their_team = self._yellow_team
