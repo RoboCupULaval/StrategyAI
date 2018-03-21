@@ -41,7 +41,7 @@ def set_arg_parser():
                             help='Enables profiling options through the project.',
                             default=False)
 
-    arg_parser.add_argument('--enable_watchdog',
+    arg_parser.add_argument('--competition_mode',
                             action='store_true',
                             help='Enables watchdog which reset the Framework if it stop.',
                             default=False)
