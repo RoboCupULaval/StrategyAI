@@ -2,6 +2,7 @@ from typing import Dict
 
 from Util import Position
 from ai.GameDomainObjects import Ball
+from config.config import Config
 
 
 class Field:
@@ -22,28 +23,49 @@ class Field:
 
     @constant.setter
     def constant(self, field: Dict):
-        self._constant["FIELD_Y_TOP"] = self._field_width / 2
-        self._constant["FIELD_Y_BOTTOM"] = -self._field_width / 2
-        self._constant["FIELD_X_LEFT"] = -self._field_length / 2
-        self._constant["FIELD_X_RIGHT"] = self._field_length / 2
+        print(field)
+        if len(field.field_lines) == 0:
+            raise RuntimeError(
+                "Receiving legacy geometry message instead of the new geometry message. Update your grsim or check your vision port.")
 
-        self._constant["CENTER_CENTER_RADIUS"] = self._center_circle_radius
+        field_lines = self._convert_field_line_segments(field.field_lines)
+        field_arcs = self._convert_field_circular_arc(field.field_arcs)
 
-        self._constant["FIELD_Y_POSITIVE"] = self._field_width / 2
-        self._constant["FIELD_Y_NEGATIVE"] = -self._field_width / 2
-        self._constant["FIELD_X_NEGATIVE"] = -self._field_length / 2
-        self._constant["FIELD_X_POSITIVE"] = self._field_length / 2
+        if "RightFieldLeftPenaltyArc" not in self.field_arcs:
+            # This is a new type of field for Robocup 2018, it does not have a circular goal zone
+            defense_radius = self.field_lines["LeftFieldLeftPenaltyStretch"].length
+        else:
+            defense_radius = self.field_arcs['RightFieldLeftPenaltyArc'].radius
 
-        self._constant["FIELD_BOUNDARY_WIDTH"] = self._boundary_width
+        field_length = field.field_length
+        field_width = field.field_width
+        boundary_width = field.boundary_width
+        goal_width = field.goal_width
+        center_circle_radius = self.field_arcs['CenterCircle'].radius
+        defense_stretch = 100  # hard coded parce que cette valeur d'est plus valide et que plusieurs modules en ont de besoin
+        # la valeur qu'on avait apres le fix a Babin était de 9295 mm, ce qui est 90 fois la grandeur d'avant.
+        self._constant["FIELD_Y_TOP"] = field_width / 2
+        self._constant["FIELD_Y_BOTTOM"] = -field_width / 2
+        self._constant["FIELD_X_LEFT"] = -field_length / 2
+        self._constant["FIELD_X_RIGHT"] = field_length / 2
 
-        self._constant["FIELD_GOAL_RADIUS"] = self._defense_radius
-        self._constant["FIELD_GOAL_SEGMENT"] = self._defense_stretch
-        self._constant["FIELD_GOAL_WIDTH"] = self._goal_width
+        self._constant["CENTER_CENTER_RADIUS"] = center_circle_radius
 
-        self._constant["FIELD_GOAL_Y_TOP"] = self._defense_radius + (self._defense_stretch / 2)
+        self._constant["FIELD_Y_POSITIVE"] = field_width / 2
+        self._constant["FIELD_Y_NEGATIVE"] = -field_width / 2
+        self._constant["FIELD_X_NEGATIVE"] = -field_length / 2
+        self._constant["FIELD_X_POSITIVE"] = field_length / 2
+
+        self._constant["FIELD_BOUNDARY_WIDTH"] = boundary_width
+
+        self._constant["FIELD_GOAL_RADIUS"] = defense_radius
+        self._constant["FIELD_GOAL_SEGMENT"] = defense_stretch
+        self._constant["FIELD_GOAL_WIDTH"] = goal_width
+
+        self._constant["FIELD_GOAL_Y_TOP"] = defense_radius + (defense_stretch / 2)
         self._constant["FIELD_GOAL_Y_BOTTOM"] = -self._constant["FIELD_GOAL_Y_TOP"]
 
-        if self.our_side == FieldSide.POSITIVE:
+        if not Config()['ENGINE']['on_negative_side']:
             self._constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self._constant["FIELD_X_NEGATIVE"]
             self._constant["FIELD_THEIR_GOAL_X_INTERNAL"] = self._constant["FIELD_X_NEGATIVE"] + self._constant[
                 "FIELD_GOAL_RADIUS"]

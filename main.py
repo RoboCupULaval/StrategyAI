@@ -51,6 +51,7 @@ def set_arg_parser():
 if __name__ == '__main__':
     cli_args = set_arg_parser().parse_args()
     Config().load_file(cli_args.config_file)
+    Config().load_parameters(cli_args)
     logging = logging.getLogger('Main')
 
     stop_framework = False
