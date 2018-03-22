@@ -17,13 +17,14 @@ class HumanControl(Strategy):
             if p is None:
                 continue
             self.clear_graph_of_role(r)
-            self.add_tactic(r, Stop(self.game_state, p))
+            self.create_node(r, Stop(self.game_state, p))
 
     def assign_tactic(self, tactic: Tactic, robot_id: int):
         assert isinstance(tactic, Tactic)
         assert isinstance(robot_id, int)
 
         role = self.game_state.get_role_by_player_id(robot_id)
+
         if role is None:
             try:
                 role = self.game_state.map_player_to_first_available_role(robot_id)
@@ -33,5 +34,4 @@ class HumanControl(Strategy):
                 self.game_state.map_players_to_roles_by_player_id({role: robot_id})
 
         self.clear_graph_of_role(role)
-        self.add_tactic(role, tactic)
-
+        self.create_node(role, tactic)

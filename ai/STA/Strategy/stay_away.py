@@ -13,4 +13,4 @@ class StayAway(Strategy):
         for r in Role:
             p = self.game_state.get_player_by_role(r)
             if p:
-                self.add_tactic(r, StayAwayFromBall(self.game_state, p))
+                self.create_node(r, StayAwayFromBall(self.game_state, p))

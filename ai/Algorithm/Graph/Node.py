@@ -3,6 +3,7 @@
 from ai.Algorithm.Graph.Vertex import Vertex
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
+from typing import Callable
 
 
 class Node:
@@ -41,17 +42,8 @@ class Node:
                 return
         self.vertices.append(p_vertex)
 
-    def remove_vertex(self, p_ending):
-        """
-        Retire un vertex du noeud, spécifié par le numéro de son noeud d'arrivé. Si le noeud courant ne possède pas de
-        vertex vers le noeud spécifé, rien ne se passe.
-        :param p_ending: Un entier positif représentant le numéro du noeud d'arrivé du vertex à retirer.
-        """
-        assert isinstance(p_ending, int)
-        assert 0 <= p_ending
-        for i in range(len(self.vertices)):
-            if self.vertices[i].next_node == p_ending:
-                self.vertices.pop(i)
+    def connect_to(self, dst_node, *, when: Callable[..., bool]):
+        self.add_vertex(Vertex(dst_node, when))
 
     def exec(self):
         """
@@ -64,7 +56,7 @@ class Node:
         for vertex in self.vertices:
             if vertex.evaluate_condition():
                 return next_ai_command, vertex.next_node
-        return next_ai_command, -1
+        return next_ai_command, self
 
     def set_flag(self, status_flag):
         """
