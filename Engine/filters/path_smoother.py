@@ -26,7 +26,7 @@ def path_smoother(robot: Robot):
     turn_radius, _ = compute_turn_radius(*point_list, speed=robot.cruise_speed, acc=MAX_LINEAR_ACCELERATION)
     next_speed = speed_in_corner(turn_radius, acc=MAX_LINEAR_ACCELERATION)
 
-    return Path.from_points(point_list), next_speed
+    return Path.from_sequence(point_list), next_speed
 
 
 def compute_circle_points(p1, p2, p3, speed, acc):
