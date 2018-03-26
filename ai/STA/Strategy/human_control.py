@@ -12,12 +12,12 @@ class HumanControl(Strategy):
         super().__init__(game_state)
 
         # Stop all player that where doing stuff
-        for r in Role.as_list():
-            p = self.game_state.get_player_by_role(r)
-            if p is None:
-                continue
-            self.clear_graph_of_role(r)
-            self.add_tactic(r, Stop(self.game_state, p))
+        # for r in Role.as_list():
+        #     p = self.game_state.get_player_by_role(r)
+        #     if p is None:
+        #         continue
+        #     self.clear_graph_of_role(r)
+        #     self.add_tactic(r, Stop(self.game_state, p))
 
     def assign_tactic(self, tactic: Tactic, robot_id: int):
         assert isinstance(tactic, Tactic)

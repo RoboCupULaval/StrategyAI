@@ -1,6 +1,7 @@
 from collections import Counter
 
 from Util.role import Role
+from Util.role_mapping_rule import ImpossibleToMap
 
 
 class NoRoleAvailable(RuntimeError):
@@ -12,6 +13,9 @@ class RoleMapper(object):
     LOCKED_ROLES = []
 
     def __init__(self):
+        self.roles_translation = {r: None for r in Role.as_list()}
+
+    def clear(self):
         self.roles_translation = {r: None for r in Role.as_list()}
 
     def map_by_player(self, desired_map):
@@ -67,9 +71,17 @@ class RoleMapper(object):
                 break
         self.roles_translation[role] = player
 
-    def map_with_rules(self, required_rules, optional_rules):
+    def map_with_rules(self, available_players, required_rules, optional_rules):
         nbr_unique_role = len(set(required_rules.keys()) | set(optional_rules.keys()))
         nbr_role = len(required_rules) + len(optional_rules)
         assert nbr_unique_role == nbr_role, "The same role can not be in the required rules and the optional rules"
-        prev_mapping = self.roles_translation
+
+        for role, rule in required_rules.items():
+            self.roles_translation[role] = rule(available_players, role, self.roles_translation)
+
+        try:
+            for role, rule in optional_rules.items():
+                self.roles_translation[role] = rule(available_players, role, self.roles_translation)
+        except ImpossibleToMap:
+            pass
 

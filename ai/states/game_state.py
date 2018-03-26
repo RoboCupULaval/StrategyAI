@@ -40,6 +40,12 @@ class GameState(metaclass=Singleton):
             if game_state['balls']:
                 self._ball.update(game_state['balls'][0])
 
+    def clear_roles(self):
+        self._role_mapper.clear()
+
+    @property
+    def assigned_roles(self):
+        return {r: p for r, p in self._role_mapper.roles_translation.items() if p is not None]
 
     def map_players_for_strategy(self, strategy_class):
         self._role_mapper.map_with_rules(strategy_class.required_roles(),
