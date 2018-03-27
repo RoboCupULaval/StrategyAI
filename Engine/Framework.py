@@ -1,13 +1,14 @@
 # Under MIT License, see LICENSE.txt
 
 import logging
-import time
 from multiprocessing import Queue, Manager
 import signal
 
+import sys
+
 from Engine.engine import Engine
 from ai.coach import Coach
-from config.config import Config
+from Util.timing import create_fps_timer
 
 
 class Framework:
@@ -16,10 +17,7 @@ class Framework:
 
     def __init__(self, cli_args):
 
-        logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
-        self.logger = logging.getLogger("Framework")
-
-        self.cfg = Config()
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         self.game_state = Manager().dict()
         self.field = Manager().dict()
@@ -45,6 +43,9 @@ class Framework:
 
         self.engine.fps = cli_args.engine_fps
 
+        if cli_args.on_negative_side:
+            self.engine.on_negative_side = True
+
         if cli_args.unlock_engine_fps:
             self.engine.unlock_fps()
 
@@ -63,6 +64,7 @@ class Framework:
         # stop until someone manually stop us / we receive interrupt signal from os
         # also check if one of the subprocess died
         every_process_is_alright = True
+        sleep = create_fps_timer(2)  # 2 is a somewhat sane value for occasional checks
         while every_process_is_alright:
             every_process_is_alright = self.engine.is_alive() and \
                                        self.coach.is_alive() and \
@@ -73,10 +75,12 @@ class Framework:
                 self.engine.terminate()
                 self.coach.terminate()
 
-            # use the time you want here, 0.5 seems sane to me.
-            time.sleep(0.5)
+            sleep()
+
+        self.stop_game()
 
     def stop_game(self):
         self.engine.terminate()
         self.coach.terminate()
-        exit(0)
+        sys.exit()
+

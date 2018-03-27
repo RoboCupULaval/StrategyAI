@@ -68,7 +68,7 @@ class DebugCommandFactory:
     @staticmethod
     def robot_strategic_state(player: Player, tactic: str, action: str, target: Tuple[int, int]):
         team_color = str(player.team.team_color)
-        player_info = {player.id: {'tactic': tactic, 'action': action, 'target': target, 'role'}}
+        player_info = {player.id: {'tactic': tactic, 'action': action, 'target': target}}
         team_info = {team_color: player_info}
         return DebugCommand(1002, team_info)
 
@@ -92,7 +92,7 @@ class DebugCommandFactory:
             if robot.raw_path:
                 raw_path_cmds += DebugCommandFactory.path(robot.raw_path, robot.robot_id, color=BLUE)
             if robot.path:
-                path_cmds += DebugCommandFactory.path(robot.path, robot.robot_id, color=RED)
+                path_cmds += DebugCommandFactory.path(robot.path, robot.robot_id+12, color=RED) # allow multiple point with same function
         return raw_path_cmds + path_cmds
 
     @staticmethod
@@ -112,7 +112,7 @@ class DebugCommandFactory:
     @staticmethod
     def path(path: Path, path_id: int, color=BLUE):
         cmds = [DebugCommandFactory.line(start, end, color=color, timeout=0.1) for start, end in zip(path, path[1:])]
-        cmds += [DebugCommandFactory.multiple_points(path[1:], color=color, link=str(path_id), timeout=0)]
+        cmds += [DebugCommandFactory.multiple_points(path[1:], color=color, link=path_id, timeout=0)]
         return cmds
 
     @staticmethod

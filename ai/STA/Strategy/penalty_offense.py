@@ -25,13 +25,13 @@ class PenaltyOffense(Strategy):
         postions_for_roles = dict(zip(roles_in_waiting_line, position_list))
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
-        self.add_tactic(Role.GOALKEEPER, GoToPositionPathfinder(self.game_state, goalkeeper, ourgoal))
+        self.create_node(Role.GOALKEEPER, GoToPositionPathfinder(self.game_state, goalkeeper, ourgoal))
 
         kicker = self.game_state.get_player_by_role(Role.FIRST_ATTACK)
-        self.add_tactic(Role.FIRST_ATTACK, GoKick(self.game_state, kicker, self.theirgoal))
+        self.create_node(Role.FIRST_ATTACK, GoKick(self.game_state, kicker, self.theirgoal))
 
         for role in roles_in_waiting_line:
             position = postions_for_roles[role]
             player = self.game_state.get_player_by_role(role)
             if player:
-                self.add_tactic(role, GoToPositionPathfinder(self.game_state, player, position))
+                self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))

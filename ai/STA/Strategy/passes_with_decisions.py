@@ -17,34 +17,37 @@ class PassesWithDecisions(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-
-
-
         #  goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
         roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE]
         #  role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
         self.goal_ID = None
         self.goal = (Pose(Position(self.game_state.const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0))
 
-        self.add_tactic(Role.FIRST_ATTACK, PassToPlayer(self.game_state, self.game_state.get_player_by_role(Role.FIRST_ATTACK), target_id=self.game_state.get_player_by_role(Role.SECOND_ATTACK).id))
-        self.add_tactic(Role.FIRST_ATTACK, PassToPlayer(self.game_state, self.game_state.get_player_by_role(Role.FIRST_ATTACK), target_id=self.game_state.get_player_by_role(Role.MIDDLE).id))
-        self.add_tactic(Role.FIRST_ATTACK, GoKick(self.game_state, self.game_state.get_player_by_role(Role.FIRST_ATTACK), self.goal))
+        node_pass_to_second_attack = self.create_node(Role.FIRST_ATTACK, PassToPlayer(self.game_state, self.game_state.get_player_by_role(Role.FIRST_ATTACK),
+                                                                                      target_id=self.game_state.get_player_by_role(Role.SECOND_ATTACK).id))
 
-        self.add_condition(Role.FIRST_ATTACK, 0, 1, partial(self.is_best_receiver, Role.SECOND_ATTACK))
-        self.add_condition(Role.FIRST_ATTACK, 0, 2, partial(self.is_best_receiver, Role.MIDDLE))
+        node_pass_to_middle = self.create_node(Role.FIRST_ATTACK, PassToPlayer(self.game_state, self.game_state.get_player_by_role(Role.FIRST_ATTACK),
+                                                                               target_id=self.game_state.get_player_by_role(Role.MIDDLE).id))
 
-        self.add_condition(Role.FIRST_ATTACK, 0, 0, partial(self.condition, Role.FIRST_ATTACK))
-        self.add_condition(Role.FIRST_ATTACK, 1, 0, partial(self.condition, Role.FIRST_ATTACK))
-        self.add_condition(Role.FIRST_ATTACK, 2, 0, partial(self.condition, Role.FIRST_ATTACK))
+        node_go_kick = self.create_node(Role.FIRST_ATTACK, GoKick(self.game_state, self.game_state.get_player_by_role(Role.FIRST_ATTACK), self.goal))
+
+        second_attack_is_best_receiver = partial(self.is_best_receiver, Role.SECOND_ATTACK)
+        middle_is_best_receiver = partial(self.is_best_receiver, Role.MIDDLE)
+        current_tactic_succeeded = partial(self.current_tactic_succeed, Role.FIRST_ATTACK)
+
+        node_pass_to_second_attack.connect_to(node_pass_to_middle, when=second_attack_is_best_receiver)
+        node_pass_to_second_attack.connect_to(node_go_kick, when=middle_is_best_receiver)
+        node_pass_to_second_attack.connect_to(node_pass_to_second_attack, when=current_tactic_succeeded)
+        node_pass_to_middle.connect_to(node_pass_to_second_attack, when=current_tactic_succeeded)
+        node_go_kick.connect_to(node_pass_to_second_attack, when=current_tactic_succeeded)
 
         for i in roles_to_consider:
             if not (i == Role.FIRST_ATTACK):
-                self.add_tactic(i, Stop(self.game_state, self.game_state.get_player_by_role(i)))
+                self.create_node(i, Stop(self.game_state, self.game_state.get_player_by_role(i)))
 
-    def condition(self, role):
-
-        if self.roles_graph[role].get_current_tactic_name() == 'PassToPlayer':
-            return self.roles_graph[role].get_current_tactic().status_flag == Flags.SUCCESS
+    def current_tactic_succeed(self, role):
+        if self.roles_graph[role].current_tactic_name == 'PassToPlayer':
+            return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
         else:
             return False
 

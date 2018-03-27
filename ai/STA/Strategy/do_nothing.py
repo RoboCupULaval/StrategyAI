@@ -11,7 +11,7 @@ class DoNothing(Strategy):
         super().__init__(p_game_state)
 
         for r, p in self.assigned_roles.items():
-            self.add_tactic(r, Stop(self.game_state, p))
+            self.create_node(r, Stop(self.game_state, p))
 
     @classmethod
     def required_roles(cls):

@@ -4,16 +4,14 @@ import matplotlib.pyplot as plt
 import time
 import os
 
-
 class Observer:
-    def __init__(self):
-        pass
 
     def write(self, poses):
         pass
 
 
-class CsvPlotter:
+class CsvPlotter(Observer):
+
     def __init__(self):
         self.time = time.time() - self.time_init
         self.time_init = time.time()

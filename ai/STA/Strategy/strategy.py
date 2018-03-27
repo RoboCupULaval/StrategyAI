@@ -25,16 +25,6 @@ class Strategy(metaclass=ABCMeta):
 
         self.roles_graph = {role: Graph() for role in self.assigned_roles.keys()}
 
-
-    # def hack_goalkeeper(self, role_mapping):
-    #     current_goaler = self.game_state.get_player_by_role(Role.GOALKEEPER)
-    #     if current_goaler is not None:
-    #         new_goaler = role_mapping[Role.GOALKEEPER]
-    #         new_goaler_old_role = self.game_state.get_role_by_player_id(new_goaler.id)
-    #         role_mapping[Role.GOALKEEPER] = current_goaler
-    #         role_mapping[new_goaler_old_role] = new_goaler
-    #     return role_mapping
-
     @classmethod
     def required_roles(cls) -> Dict[Role, Callable]:
         """
@@ -46,26 +36,16 @@ class Strategy(metaclass=ABCMeta):
     def optional_roles(cls) -> Dict[Role, Callable]:
         return {}
 
-    def add_tactic(self, role: Role, tactic: Tactic) -> None:
+    def create_node(self, role: Role, tactic: Tactic) -> Node:
         """
         Ajoute une tactique au graph des tactiques d'un robot.
         :param role: Le role auquel est assignée la tactique.
         :param tactic: La tactique à assigner au robot du role.
         """
         assert(isinstance(role, Role))
-        self.roles_graph[role].add_node(Node(tactic))
-
-    def add_condition(self, role: Role, start_node: int, end_node: int, condition: Callable[..., bool]):
-        """
-        Ajoute une condition permettant de gérer la transition entre deux tactiques d'un robot.
-        :param role: Le role qui a la tactic.
-        :param start_node: Le noeud de départ du vertex.
-        :param end_node: Le noeud d'arrivée du vertex.
-        :param condition: Une fonction retournant un booléen permettant de déterminer si on peut effectuer la transition
-        du noeud de départ vers le noeud d'arrivé.
-        """
-        assert(isinstance(role, Role))
-        self.roles_graph[role].add_vertex(start_node, end_node, condition)
+        tactic_node = Node(tactic)
+        self.roles_graph[role].add_node(tactic_node)
+        return tactic_node
 
     def get_current_state(self) -> List[Tuple[Player, str, str, Pose]]:
         """ [
@@ -77,7 +57,7 @@ class Strategy(metaclass=ABCMeta):
         """
         state = []
         for r, graph in self.roles_graph.items():
-            current_tactic = graph.get_current_tactic()
+            current_tactic = graph.current_tactic
             if current_tactic is None:
                 continue
 
