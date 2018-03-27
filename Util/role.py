@@ -1,14 +1,14 @@
-from enum import Enum, auto
+from enum import Enum
 
 
 class Role(Enum):
     """Enum representing the role of one of our player playing on the field"""
-    GOALKEEPER = auto()
-    MIDDLE = auto()
-    FIRST_DEFENCE = auto()
-    SECOND_DEFENCE = auto()
-    FIRST_ATTACK = auto()
-    SECOND_ATTACK = auto()
+    GOALKEEPER = 0
+    MIDDLE = 1
+    FIRST_DEFENCE = 2
+    SECOND_DEFENCE = 3
+    FIRST_ATTACK = 4
+    SECOND_ATTACK = 5
 
     @classmethod
     def as_list(cls):

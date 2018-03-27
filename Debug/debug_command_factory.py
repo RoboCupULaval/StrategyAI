@@ -68,7 +68,7 @@ class DebugCommandFactory:
     @staticmethod
     def robot_strategic_state(player: Player, tactic: str, action: str, target: Tuple[int, int]):
         team_color = str(player.team.team_color)
-        player_info = {player.id: {'tactic': tactic, 'action': action, 'target': target}}
+        player_info = {player.id: {'tactic': tactic, 'action': action, 'target': target, 'role'}}
         team_info = {team_color: player_info}
         return DebugCommand(1002, team_info)
 

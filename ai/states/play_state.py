@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+import logging
 from typing import List, Tuple, Callable
 
 from Util import Pose
@@ -18,6 +18,7 @@ class PlayState:
         self.game_state = GameState()
         self.autonomous_flag = False
         self._current_strategy = None
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     @property
     def current_strategy(self):
@@ -27,8 +28,10 @@ class PlayState:
     def current_strategy(self, strategy_name: str):
         assert isinstance(strategy_name, str)
 
+        self.logger.debug("Switching to strategy '{}'".format(strategy_name))
+
         strategy_class = self.strategy_book.get_strategy(strategy_name)
-        # self.game_state.map_players_for_strategy(strategy_class)
+        self.game_state.map_players_for_strategy(strategy_class)
         self._current_strategy = strategy_class(self.game_state)
 
     def set_autonomous_flag(self, flag: bool) -> None:

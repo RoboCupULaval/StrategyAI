@@ -35,3 +35,8 @@ class HumanControl(Strategy):
         self.clear_graph_of_role(role)
         self.add_tactic(role, tactic)
 
+
+    @classmethod
+    def required_roles(cls):
+        return {}
+

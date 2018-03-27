@@ -21,17 +21,9 @@ class Strategy(metaclass=ABCMeta):
         """
         assert isinstance(p_game_state, GameState)
         self.game_state = p_game_state
-
-        # self.game_state.clear_roles()
-        self.game_state.map_players_for_strategy(self)
-
         self.assigned_roles = self.game_state.assigned_roles
-        # players = [p for p in self.game_state.our_team.players.values()]
-        #
-        # role_mapping = dict(zip(self.roles, players))
-        # role_mapping = self.hack_goalkeeper(role_mapping)
-        #
-        # self.game_state.map_players_to_roles_by_player(role_mapping)
+
+        self.roles_graph = {role: Graph() for role in self.assigned_roles.keys()}
 
 
     # def hack_goalkeeper(self, role_mapping):
@@ -84,8 +76,8 @@ class Strategy(metaclass=ABCMeta):
             ]
         """
         state = []
-        for r in self.roles:
-            current_tactic = self.roles_graph[r].get_current_tactic()
+        for r, graph in self.roles_graph.items():
+            current_tactic = graph.get_current_tactic()
             if current_tactic is None:
                 continue
 
@@ -110,14 +102,7 @@ class Strategy(metaclass=ABCMeta):
         """
         commands = {}
 
-        for r in self.roles:
-            player = self.game_state.get_player_by_role(r)
-            if player is None:
-                continue
-            tactic = self.roles_graph.get(r, None)
-            if tactic is None:
-                continue
-
+        for r, player in self.assigned_roles.items():
             try:
                 commands[player] = self.roles_graph[r].exec()
             except EmptyGraphException:

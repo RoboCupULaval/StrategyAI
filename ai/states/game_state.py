@@ -45,10 +45,11 @@ class GameState(metaclass=Singleton):
 
     @property
     def assigned_roles(self):
-        return {r: p for r, p in self._role_mapper.roles_translation.items() if p is not None]
+        return {r: p for r, p in self._role_mapper.roles_translation.items() if p is not None}
 
     def map_players_for_strategy(self, strategy_class):
-        self._role_mapper.map_with_rules(strategy_class.required_roles(),
+        self._role_mapper.map_with_rules(self.our_team.available_players,
+                                         strategy_class.required_roles(),
                                          strategy_class.optional_roles())
 
     def get_player_by_role(self, role):

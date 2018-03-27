@@ -2,6 +2,7 @@ from collections import Counter
 
 from Util.role import Role
 from Util.role_mapping_rule import ImpossibleToMap
+from ai.GameDomainObjects import Player
 
 
 class NoRoleAvailable(RuntimeError):
@@ -77,8 +78,10 @@ class RoleMapper(object):
         assert nbr_unique_role == nbr_role, "The same role can not be in the required rules and the optional rules"
 
         for role, rule in required_rules.items():
-            self.roles_translation[role] = rule(available_players, role, self.roles_translation)
-
+            player = rule(available_players, role, self.roles_translation)
+            if not isinstance(player, Player):
+                raise TypeError("A rule must return a player, not a '{}'".format(player))
+            self.roles_translation[role] = player
         try:
             for role, rule in optional_rules.items():
                 self.roles_translation[role] = rule(available_players, role, self.roles_translation)
