@@ -21,9 +21,12 @@ class Strategy(metaclass=ABCMeta):
         """
         assert isinstance(p_game_state, GameState)
         self.game_state = p_game_state
-        self.assigned_roles = self.game_state.assigned_roles
 
         self.roles_graph = {role: Graph() for role in self.assigned_roles.keys()}
+
+    @property
+    def assigned_roles(self):
+        return self.game_state.assigned_roles
 
     @classmethod
     def required_roles(cls) -> Dict[Role, Callable]:
@@ -33,6 +36,7 @@ class Strategy(metaclass=ABCMeta):
         raise NotImplementedError("A strategy must provide the list of required roles in a {role: MyRoleMappingRule")
 
     @classmethod
+
     def optional_roles(cls) -> Dict[Role, Callable]:
         return {}
 
@@ -43,6 +47,7 @@ class Strategy(metaclass=ABCMeta):
         :param tactic: La tactique à assigner au robot du role.
         """
         assert(isinstance(role, Role))
+
         tactic_node = Node(tactic)
         self.roles_graph[role].add_node(tactic_node)
         return tactic_node
