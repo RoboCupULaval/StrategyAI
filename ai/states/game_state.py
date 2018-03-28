@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 import logging
+from multiprocessing.managers import DictProxy
 
 from Util import Position
 from Util.constant import TeamColor
@@ -83,6 +84,14 @@ class GameState(metaclass=Singleton):
     @property
     def ball(self) -> Ball:
         return self._field.ball
+
+    @property
+    def const(self):
+        pass
+
+    @const.setter
+    def const(self, field: DictProxy):
+        self._field.constant = field
 
     @ball.setter
     def ball(self, ball: Ball):
