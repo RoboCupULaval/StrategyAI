@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 
 import logging
-from typing import List
+from typing import List, Dict
 
 from ai.STA.Strategy.defense_wall_no_kick import DefenseWallNoKick
 from ai.STA.Strategy.defense_wall import DefenseWall
@@ -80,6 +80,16 @@ class StrategyBook(object):
         :return: (List[str]) une liste de string, les noms des stratégies disponibles.
         """
         return list(self.strategy_book.keys())
+
+    @property
+    def strategies_required_roles(self) -> Dict[str, str]:
+        results = {}
+        for name, strategy_class in self.strategy_book.items():
+            try:
+                results[name] = list([r.name for r in strategy_class.required_roles().keys()])
+            except NotImplementedError:
+                results[name] = [] # FIXME pb: When all strategy will have their required roles listed, we shoud remove that catch
+        return results
 
     def get_strategy(self, strategy_name: str):  # -> Strategy: Wrong return type
         """

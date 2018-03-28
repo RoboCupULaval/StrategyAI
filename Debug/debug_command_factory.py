@@ -58,12 +58,11 @@ class DebugCommandFactory:
         return DebugCommand(2, {'level': level, 'message': message})
 
     @staticmethod
-    def books(strategy_book: Dict, strategy_default: Dict, tactic_book: Dict, tactic_default: Dict, action: List):
+    def books(strategy_book: Dict, strategy_default: Dict, tactic_book: Dict, tactic_default: Dict):
         return DebugCommand(1001, {'strategy': strategy_book,
-                                     'strategy_default': strategy_default,
-                                     'tactic': tactic_book,
-                                     'tactic_default': tactic_default,
-                                     'action': action})
+                                   'strategy_default': strategy_default,
+                                   'tactic': tactic_book,
+                                   'tactic_default': tactic_default})
 
     @staticmethod
     def robot_strategic_state(player: Player, tactic: str, action: str, target: Tuple[int, int]):
