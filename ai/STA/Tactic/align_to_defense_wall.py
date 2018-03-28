@@ -10,7 +10,7 @@ from Util.geometry import perpendicular, normalize
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
-from Util.ai_command import Idle
+from Util.ai_command import Idle, CmdBuilder
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -172,13 +172,12 @@ class AlignToDefenseWall(Tactic):
         else:
             destination_orientation = (self.ball_position -
                                        self.positions_in_formations[self.player_number_in_formation]).angle
-            return GoToPositionPathfinder(self.game_state, self.player,
-                                          Pose(self.positions_in_formations[self.player_number_in_formation],
-                                               destination_orientation)).exec()
+            return CmdBuilder().addMoveTo(Pose(self.positions_in_formations[self.player_number_in_formation],
+                                               destination_orientation)).build()
 
     def halt(self):
         self.status_flag = Flags.SUCCESS
-        return Idle(self.game_state, self.player)
+        return Idle
 
     def check_success(self):
         player_position = self.player.pose.position

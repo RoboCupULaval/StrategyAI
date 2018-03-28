@@ -3,6 +3,7 @@ import time
 from typing import List
 
 from Util import Pose, Position
+from Util.ai_command import CmdBuilder
 from Util.role import Role
 from ai.Algorithm.evaluation_module import best_position_in_region
 from ai.GameDomainObjects import Player
@@ -22,7 +23,7 @@ automatiquement selon son rôle
 class PositionForPass(Tactic):
 
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None,
-                 auto_position=False):
+                 auto_position=False, robots_in_formation: List[Player] = None):
         super().__init__(game_state, player, target, args)
         self.current_state = self.move_to_pass_position
         self.next_state = self.move_to_pass_position
@@ -52,7 +53,7 @@ class PositionForPass(Tactic):
     def move_to_pass_position(self):
 
         self.next_state = self.move_to_pass_position
-        return GoToPositionPathfinder(self.game_state, self.player, self._get_destination_pose())
+        return CmdBuilder().addMoveTo(self._get_destination_pose()).build()
 
     def _get_destination_pose(self):
         if self.player.receiver_pass_flag is False:
@@ -109,7 +110,6 @@ class PositionForPass(Tactic):
             return best_position_in_region(self.player, A, B)
         else:
             return self.target_position
-
 
     def compute_offence_offset(self):
         if self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"] < 0:

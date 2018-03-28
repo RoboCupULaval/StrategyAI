@@ -3,6 +3,9 @@ import math as m
 
 
 # Question
+from Util import Position
+
+
 def isInsideSquare(position, Y_TOP, Y_BOTTOM, X_LEFT, X_RIGHT):
     # Parameters assertions
     assert(isinstance(position, Position))

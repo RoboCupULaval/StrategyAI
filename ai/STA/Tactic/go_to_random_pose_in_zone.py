@@ -4,6 +4,7 @@ from typing import List
 
 import numpy as np
 from Util import Pose, Position
+from Util.ai_command import CmdBuilder
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
 from ai.GameDomainObjects.player import Player
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
@@ -48,7 +49,7 @@ class GoToRandomPosition(Tactic):
             self.next_pose = Pose(self.current_position_to_go, self.current_angle_to_go)
         self.next_state = self.exec
 
-        return GoToPositionPathfinder(self.game_state, self.player, self.next_pose).exec()
+        return CmdBuilder().addMoveTo(self.next_pose).build()
 
     def check_success(self):
         distance = (self.player.pose - self.next_pose).position.norm

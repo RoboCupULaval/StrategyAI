@@ -4,6 +4,7 @@ from collections import namedtuple
 
 from Util.position import Position
 from Util.pose import Pose
+from Util.geometry import get_closest_point_on_segment, normalize
 
 AICommand = namedtuple('AICommand', 'target,'
                                     'kick_type,'
@@ -64,8 +65,18 @@ class CmdBuilder:
                          self._ball_collision,
                          self._pathfinder_on)
 
+
 def MoveTo(target: [Pose, Position], cruise_speed=1, end_speed=0, ball_collision=True):
     return CmdBuilder().addMoveTo(target, cruise_speed, end_speed, ball_collision).build()
+
+
+def GoBetween(position1: Position, position2: Position, target: Position, minimum_distance: [int, float]=0):
+    delta = minimum_distance * normalize(position2 - position1)
+    position1 = position1 + delta
+    position2 = position2 - delta
+    destination = get_closest_point_on_segment(target, position1, position2)
+    dest_to_target = target - destination
+    return CmdBuilder().addMoveTo(Pose(destination, dest_to_target.angle)).build()
 
 
 Idle = CmdBuilder().build()
