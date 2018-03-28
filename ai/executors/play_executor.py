@@ -7,6 +7,7 @@ from typing import List, Dict
 
 from Debug.debug_command_factory import DebugCommandFactory
 from Util import Pose, Position, AICommand, EngineCommand
+from Util.role import Role
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.GameDomainObjects import Player
 from ai.STA.Strategy.human_control import HumanControl
@@ -64,7 +65,9 @@ class PlayExecutor:
             self._change_tactic(cmd)
 
     def _change_strategy(self, cmd: STAChangeCommand):
-        self.play_state.current_strategy = cmd.data["strategy"]
+        # Convert string role to their enum equivalent
+        roles = {Role[r]: i for r, i in cmd.data["roles"].items()}
+        self.play_state.change_strategy(cmd.data["strategy"], roles)
 
     def _change_tactic(self, cmd: STAChangeCommand):
 

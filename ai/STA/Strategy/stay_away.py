@@ -15,8 +15,8 @@ class StayAway(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return {Role.FIRST_ATTACK: keep_prev_mapping_otherwise_random}
+        return {Role.FIRST_ATTACK: keep_prev_mapping_otherwise_random} # Just to test required_roles
 
     @classmethod
     def optional_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in Role}
+        return {r: keep_prev_mapping_otherwise_random for r in Role if r != Role.FIRST_ATTACK}

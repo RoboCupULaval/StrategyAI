@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 import logging
-from typing import List, Tuple, Callable
+from typing import List, Tuple, Callable, Dict
 
 from Util import Pose
 from ai.GameDomainObjects import Player
@@ -26,12 +26,21 @@ class PlayState:
 
     @current_strategy.setter
     def current_strategy(self, strategy_name: str):
+        self.change_strategy(strategy_name)
+
+    def change_strategy(self, strategy_name: str, role=None):
         assert isinstance(strategy_name, str)
 
         self.logger.debug("Switching to strategy '{}'".format(strategy_name))
 
         strategy_class = self.strategy_book.get_strategy(strategy_name)
-        self.game_state.map_players_for_strategy(strategy_class)
+
+        # Use default rule of the strategy
+        if role is None:
+            self.game_state.map_players_for_strategy(strategy_class)
+        else: # Use role mapping from UI-debug
+            self.game_state.map_players_to_roles_by_player_id(role)
+            
         self._current_strategy = strategy_class(self.game_state)
 
     def set_autonomous_flag(self, flag: bool) -> None:
