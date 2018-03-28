@@ -10,6 +10,7 @@ from ai.STA.Tactic.stop import Stop
 from ai.states.game_state import GameState
 
 
+# noinspection PyUnresolvedReferences
 class OffenseKickOff(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
@@ -21,8 +22,8 @@ class OffenseKickOff(Strategy):
 
         middle_player = self.game_state.get_player_by_role(Role.MIDDLE)
 
-        self.add_tactic(Role.MIDDLE, GoKick(self.game_state, middle_player, self.theirgoal))
+        self.create_node(Role.MIDDLE, GoKick(self.game_state, middle_player, self.theirgoal))
 
         for index, player in role_by_robots:
             if player:
-                self.add_tactic(index, Stop(self.game_state, player))
+                self.create_node(index, Stop(self.game_state, player))

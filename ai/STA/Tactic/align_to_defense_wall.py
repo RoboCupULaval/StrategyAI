@@ -24,6 +24,7 @@ DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
 COMMAND_DELAY = 1.0
 
 
+# noinspection PyAttributeOutsideInit,PyTypeChecker,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 class AlignToDefenseWall(Tactic):
     def __init__(self, game_state: GameState, player: Player, robots_in_formation: List[Player], auto_pick=False,
                  args: List[str]=None):
@@ -84,7 +85,7 @@ class AlignToDefenseWall(Tactic):
         propriété des triangles semblables.
         """
 
-        self.ball_position = self.game_state.get_ball_position()
+        self.ball_position = self.game_state.ball_position
         self.vec_ball_2_goal = self.goal_middle - self.ball_position
         """
         respecte la règle de la main droite et pointe toujours vers le coin suppérieur du but si on est à gauche du 
@@ -188,13 +189,13 @@ class AlignToDefenseWall(Tactic):
 
     @staticmethod
     def is_closest(robots, player):
-        if player == closest_players_to_point(GameState().get_ball_position(), True, robots)[0].player:
+        if player == closest_players_to_point(GameState().ball_position, True, robots)[0].player:
             return True
         return False
 
     @staticmethod
     def is_second_closest(robots, player):
-        if player == closest_players_to_point(GameState().get_ball_position(), True, robots)[1].player:
+        if player == closest_players_to_point(GameState().ball_position, True, robots)[1].player:
             return True
         return False
 

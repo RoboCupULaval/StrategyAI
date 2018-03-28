@@ -12,6 +12,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
+# noinspection PyArgumentList,PyArgumentList,PyArgumentList,PyArgumentList,PyArgumentList,PyArgumentList,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 class PrepareKickOffDefense(Strategy):
 
     def __init__(self, p_game_state):
@@ -42,7 +43,7 @@ class PrepareKickOffDefense(Strategy):
 
         our_goal = Pose(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0, 0)
 
-        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, our_goal))
+        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, our_goal))
 
         robots_and_positions = [(attack_top, attack_top_position),
                                 (attack_bottom, attack_bottom_position),
@@ -53,10 +54,12 @@ class PrepareKickOffDefense(Strategy):
         for player, position in robots_and_positions:
             if player:
                 role = GameState().get_role_by_player_id(player.id)
-                self.add_tactic(role, GoToPositionPathfinder(self.game_state, player, position))
-                self.add_tactic(role, Stop(self.game_state, player))
-                self.add_condition(role, 0, 1, partial(self.arrived_to_position, player))
+                node_go_to_position = self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))
+                node_stop = self.create_node(role, Stop(self.game_state, player))
+                player_arrived_to_position = partial(self.arrived_to_position, player)
+
+                node_go_to_position.connect_to(node_stop, when=player_arrived_to_position)
 
     def arrived_to_position(self, player):
         role = GameState().get_role_by_player_id(player.id)
-        return self.roles_graph[role].get_current_tactic().status_flag == Flags.SUCCESS
+        return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS

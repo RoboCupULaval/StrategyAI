@@ -4,11 +4,12 @@ from Util import Pose, Position
 from Util import AICommand
 from ai.GameDomainObjects.player import Player
 
-from Util.geometry import get_closest_point_on_segment, normalize
+from Util.geometry import closest_point_on_segment, normalize
 from ai.STA.Action import Action
 from ai.states.game_state import GameState
 
 
+# noinspection PyTypeChecker,PyTypeChecker
 class GoBetween(Action):
     """
     Action GoBetween: Déplace le robot au point le plus proche sur la droite entre deux positions passées en paramètres
@@ -53,7 +54,7 @@ class GoBetween(Action):
         pt1 = pt1 + delta
         pt2 = pt2 - delta
 
-        destination = get_closest_point_on_segment(target, pt1, pt2)
+        destination = closest_point_on_segment(target, pt1, pt2)
         dest_to_target = target - destination
         destination_orientation = dest_to_target.angle
 

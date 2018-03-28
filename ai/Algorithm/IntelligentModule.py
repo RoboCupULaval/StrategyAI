@@ -11,16 +11,8 @@ class IntelligentModule(object, metaclass=ABCMeta):
         Actuellement ne défini que l'attribut *state*
     """
 
-    def __init__(self):
-        """
-            Reçoit une référence vers InfoManager. Cette référence est renomée
-            comme étant *state*.
-
-            :param world_state: (WorldState) Référence vers le worldstate.
-        """
-
     @abstractmethod
-    def update(self):
+    def update(self, *args, **kwargs):
         """ Effectue la mise à jour du module """
         pass
 
@@ -41,13 +33,10 @@ class Pathfinder(IntelligentModule, metaclass=ABCMeta):
         Cet attribut est un dictionnaire où les clefs sont les ids des robots.
         La valeur associée est une liste de *Pose*.
     """
-    # TODO Make this class better please!
     def __init__(self):
         super().__init__()
 
-        # TODO see if we can remove this part!
         self.paths = {}
-        # TODO insert constant for max numbers of robots below instead of 11!
         for i in range(11):
             self.paths[i] = []
 

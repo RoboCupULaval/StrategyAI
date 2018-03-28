@@ -9,6 +9,7 @@ from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.states.game_state import GameState
 
 
+# noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 class PreparePenaltyOffense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
@@ -26,10 +27,10 @@ class PreparePenaltyOffense(Strategy):
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
 
-        self.add_tactic(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal, penalty_kick=True))
+        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal, penalty_kick=True))
 
         for role in roles_to_consider:
             position = postions_for_roles[role]
             player = self.game_state.get_player_by_role(role)
             if player:
-                self.add_tactic(role, GoToPositionPathfinder(self.game_state, player, position))
+                self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))

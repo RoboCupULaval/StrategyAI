@@ -35,7 +35,7 @@ class DemoFollowRobot(Tactic):
     def halt(self):
         self.status_flag = Flags.SUCCESS
 
-        if (self.player.pose.position - self.game_state.get_ball_position()).norm < POSITION_DEADZONE + ROBOT_RADIUS:
+        if (self.player.pose.position - self.game_state.ball_position).norm < POSITION_DEADZONE + ROBOT_RADIUS:
             self.next_state = self.halt
         else:
             self.next_state = self.move_to_ball

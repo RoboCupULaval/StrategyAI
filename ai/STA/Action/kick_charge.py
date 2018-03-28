@@ -1,11 +1,12 @@
 # Under MIT license, see LICENSE.txt
 import time
 
-from Util import Pose, AICommand
+from Util import AICommand
 from ai.GameDomainObjects import Player
 from ai.STA.Action import Action
-from ai.states import GameState
+from ai.states.game_state import GameState
 COMMAND_DELAY = 0.5
+
 
 class KickCharge(Action):
 
@@ -16,7 +17,4 @@ class KickCharge(Action):
         self.player = player
 
     def exec(self):
-
-
-        # todo charge kick here please/ask Simon what kicktype is supposed to be
         return AICommand(self.player.id, kick_type=self.kick_type)

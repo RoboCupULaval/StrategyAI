@@ -5,6 +5,7 @@ from enum import Enum
 
 
 ROBOT_RADIUS = 90
+ROBOT_CENTER_TO_KICKER = 60
 BALL_RADIUS = 21
 PLAYER_PER_TEAM = 12
 MAX_PLAYER_ON_FIELD_PER_TEAM = 6
@@ -27,11 +28,17 @@ ORIENTATION_ABSOLUTE_TOLERANCE = 0.01  # 0.5 degree
 # TeamColor
 class TeamColor(Enum):
 
-    def from_str(self, color: str):
-        return TeamColor.BLUE if self == 'blue' else TeamColor.YELLOW
-
     def __str__(self):
         return 'blue' if self == TeamColor.BLUE else 'yellow'
     YELLOW = 0
     BLUE = 1
 
+class KickForce(Enum):
+    NONE = 0
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
+
+class KickType(Enum):
+    DIRECT = 0
+    CHIP = 1

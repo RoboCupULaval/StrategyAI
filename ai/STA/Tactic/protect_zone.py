@@ -52,7 +52,7 @@ class ProtectZone(Tactic):
 
     def cover_zone(self):
         enemy_positions = self.get_enemy_in_zone()
-        ball_pos = self.game_state.get_ball_position()
+        ball_pos = self.game_state.ball_position
 
         if len(enemy_positions) == 0:
             self.next_state = self.support_other_zone
@@ -75,10 +75,10 @@ class ProtectZone(Tactic):
         else:
             self.next_state = self.cover_zone
 
-        destination = stayInsideSquare(self.game_state.get_ball_position(), self.y_top, self.y_bottom, self.x_left,
+        destination = stayInsideSquare(self.game_state.ball_position, self.y_top, self.y_bottom, self.x_left,
                                        self.x_right)
         destination = self.game_state.game.field.stay_outside_goal_area(destination, our_goal=True)
-        orientation = (self.game_state.get_ball_position()-destination).angle
+        orientation = (self.game_state.ball_position-destination).angle
         return MoveTo(Pose(destination, orientation))
 
     def get_enemy_in_zone(self):

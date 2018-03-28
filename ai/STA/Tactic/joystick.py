@@ -4,7 +4,7 @@
 # import pygame
 # from Util.Pose import Pose
 #
-# from RULEngine.GameDomainObjects.player import Player
+# from Engine.GameDomainObjects.player import Player
 # # from Util import AICommandType, AIControlLoopType
 # from Util import Position
 # # from Util import RobotJoystick

@@ -21,6 +21,6 @@ class StayAwayFromBall(Tactic):
 
     def stay_out_of_circle(self):
         position = stayOutsideCircle(self.player.pose.position,
-                                     self.game_state.get_ball_position(),
+                                     self.game_state.ball_position,
                                      self.keepout_radius)
         return CmdBuilder().addMoveTo(Pose(position, self.player.pose.orientation)).build()

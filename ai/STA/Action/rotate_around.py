@@ -15,6 +15,7 @@ DEFAULT_ROTATION_SPEED = 6*m.pi  # rad/s
 DEFAULT_RADIUS = 150  # mm
 
 
+# noinspection PyTypeChecker
 class RotateAround(Action):
     def __init__(self, game_state: GameState,
                  player: Player,
@@ -93,7 +94,6 @@ class RotateAround(Action):
         return Pose(next_position, next_orientation)
 
     def exec(self):
-        # TODO The old code used "use_pathfinder"
         if self.approach:
             return CmdBuilder().addMoveTo(self.generate_destination(),
                                           cruise_speed=self.approach_speed,

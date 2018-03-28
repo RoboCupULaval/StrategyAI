@@ -2,10 +2,10 @@
 import random
 from typing import List
 
-import numpy as np
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
+from Util.geometry import compare_angle
 from ai.GameDomainObjects.player import Player
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic
@@ -52,7 +52,7 @@ class GoToRandomPosition(Tactic):
         return CmdBuilder().addMoveTo(self.next_pose).build()
 
     def check_success(self):
-        distance = (self.player.pose - self.next_pose).position.norm
-        if distance < POSITION_DEADZONE and self.player.pose.compare_orientation(self.next_pose, abs_tol=ANGLE_TO_HALT):
+        distance = (self.player.pose.position - self.next_pose.position).norm
+        if distance < POSITION_DEADZONE and compare_angle(self.player.pose.orientation, self.next_pose.orientation, abs_tol=ANGLE_TO_HALT):
             return True
         return False
