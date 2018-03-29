@@ -15,7 +15,7 @@ class Pose:
         if isinstance(position, np.ndarray):
             raise TypeError("You need to pass a Position to Pose, use Position.from_array() to convert it.")
         self._orientation = orientation
-        self._position = position
+        self._position = position.copy()
 
     @classmethod
     def from_dict(cls, my_dict: Dict[str, float]) -> 'Pose':
