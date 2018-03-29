@@ -58,11 +58,12 @@ class PositionForPass(Tactic):
         return CmdBuilder().addMoveTo(self._get_destination_pose()).build()
 
     def _get_destination_pose(self):
-        if self.player.receiver_pass_flag is False:
-            self.target_position = self._find_best_player_position()
+        # FIXME: There is flag that does not exist anymore and it seem important...
+        # if self.player.receiver_pass_flag is False:
+        #     self.target_position = self._find_best_player_position()
         self.last_time = time.time()
         destination_orientation = (self.game_state.ball_position - self.player.pose.position).angle
-        return Pose(self.target_position, destination_orientation)
+        return Pose(Position.from_array(self.target_position), destination_orientation)
 
     def _find_best_player_position(self):
         if self.auto_position:
@@ -81,7 +82,7 @@ class PositionForPass(Tactic):
             field_width = self.game_state.const["FIELD_Y_TOP"] - self.game_state.const["FIELD_Y_BOTTOM"]
 
             self.role = self.game_state.get_role_by_player_id(self.player.id)
-            offense_offset = 0
+            offense_offset = self.compute_offence_offset() # FIXME ok?
             defense_offset = self.compute_defense_offset()
             if self.is_player_defense(self.player):  # role is in defense:
                 if self.role is Role.FIRST_DEFENCE:

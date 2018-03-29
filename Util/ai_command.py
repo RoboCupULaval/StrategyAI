@@ -4,6 +4,8 @@ from collections import namedtuple
 
 from typing import Union
 
+import numpy as np
+
 from Util.constant import KickForce, KickType
 from Util.position import Position
 from Util.pose import Pose
@@ -34,6 +36,7 @@ class CmdBuilder:
 
     def addMoveTo(self, target: Union[Pose, Position], cruise_speed: float=1, end_speed: float=0, ball_collision: bool=True):
         assert isinstance(target, (Pose, Position))
+        assert isinstance(target, Pose) and not isinstance(target.position, np.ndarray)
         self._target = Pose(target) if isinstance(target, Position) else target
         self._cruise_speed = cruise_speed
         self._end_speed = end_speed

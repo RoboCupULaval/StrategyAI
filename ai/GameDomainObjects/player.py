@@ -33,6 +33,10 @@ class Player:
         return self._team
 
     @property
+    def position(self):
+        return self._pose.position
+
+    @property
     def pose(self):
         return self._pose
 

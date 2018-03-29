@@ -12,9 +12,11 @@ ORIENTATION_ABSOLUTE_TOLERANCE = 0.004
 class Pose:
 
     def __init__(self, position: Position=Position(), orientation: float=0):
-
+        if isinstance(position, np.ndarray):
+            print("fuck")
+            raise TypeError("You need to pass a Position to Pose, use Position.from_array() to convert it.")
         self._orientation = orientation
-        self._position = position.copy()
+        self._position = Position()
 
     @classmethod
     def from_dict(cls, my_dict: Dict[str, float]) -> 'Pose':
