@@ -8,7 +8,6 @@ from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.GameDomainObjects.player import Player
 from ai.STA.Action.GoBehind import GoBehind
 from Util.ai_command import Idle, MoveTo
-from ai.STA.Action.grab import Grab
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState

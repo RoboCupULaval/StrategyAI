@@ -52,7 +52,7 @@ class PassesWithDecisions(Strategy):
             return False
 
     def is_best_receiver(self, role):
-        if self.condition(role):
+        if self.current_tactic_succeed(role):
             if best_passing_option(self.game_state.get_player_by_role(Role.FIRST_ATTACK).id) == self.game_state.get_player_by_role(role).id:
                 return True
         return False

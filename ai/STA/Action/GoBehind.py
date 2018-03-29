@@ -1,21 +1,22 @@
 # Under MIT licence, see LICENCE.txt
+from Util.ai_command import MoveTo
 
 __author__ = "Maxime Gagnon-Legault"
 
 import math
 import numpy as np
 
-from Util import Pose, AICommand
+from Util import Pose
 
 from Util.position import Position
 from Util.geometry import wrap_to_pi
 from ai.GameDomainObjects import Player
-from ai.STA.Action.Action import Action
-from ai.states.game_state import GameState
 
+RAYON_AVOID = 300  # (mm)
 
-# noinspection PyUnresolvedReferences
-class GoBehind(Action):
+def GoBehind(player: Player, position1: Position, position2: Position=None,
+             distance_behind: [int, float]=250,
+             orientation: str= 'front'):
     """
     Action GoBehind: Déplace le robot au point le plus proche sur la droite, derrière un objet dont la position
     est passée en paramètre, de sorte que cet objet se retrouve entre le robot et la seconde position passée
@@ -28,89 +29,55 @@ class GoBehind(Action):
         position2 : La position par rapport à laquelle le robot doit être "derrière" l'objet de la position 1
                     (exemple: le but)
     """
-    def __init__(self, game_state: GameState, player: Player, position1: Position, position2: Position=None,
-                 distance_behind: [int, float]=250, cruise_speed: [int, float]=1,
-                 pathfinder_on: bool=False, orientation: str= 'front'):
-        """
-            :param game_state: L'état courant du jeu.
-            :param player: Instance du joueur qui doit se déplacer
-            :param position1: La position de l'objet derrière lequel le robot doit se placer (exemple: le ballon)
-            :param position2: La position par rapport à laquelle le robot doit être "derrière" l'objet
-                                de la position 1 (exemple: le but)
-            :param distance_behind: La distance a atteindre derriere la position 1
-        """
-        Action.__init__(self, game_state, player)
-        assert(isinstance(position1, Position))
-        assert(isinstance(position2, Position))
-        self.position1 = position1
-        self.position2 = position2
-        self.distance_behind = distance_behind
-        self.pathfinder_on = pathfinder_on
-        self.rayon_avoid = 300  # (mm)
-        self.cruise_speed = cruise_speed
-        self.orientation = orientation
+    delta_x = position2.x - position1.x
+    delta_y = position2.y - position1.y
+    theta = math.atan2(delta_y, delta_x)
 
-        if self.position2 is None:
-            self.position2 = game_state.const["FIELD_THEIR_GOAL_MID_GOAL"]
+    x = position1.x - distance_behind * math.cos(theta)
+    y = position1.y - distance_behind * math.sin(theta)
 
-    def get_destination(self):
-        """
-            Calcule le point situé à  x pixels derrière la position 1 par rapport à la position 2
-            :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
-            """
+    player_x = player.pose.position.x
+    player_y = player.pose.position.y
 
-        delta_x = self.position2.x - self.position1.x
-        delta_y = self.position2.y - self.position1.y
-        theta = math.atan2(delta_y, delta_x)
+    norm_player_2_position2 = math.sqrt((player_x - position2.x) ** 2+(player_y - position2.y) ** 2)
+    norm_position1_2_position2 = math.sqrt((position1.x - position2.x) ** 2 +
+                                           (position1.y - position2.y) ** 2)
 
-        x = self.position1.x - self.distance_behind * math.cos(theta)
-        y = self.position1.y - self.distance_behind * math.sin(theta)
+    if norm_player_2_position2 < norm_position1_2_position2:
+        # on doit contourner l'objectif
 
-        player_x = self.player.pose.position.x
-        player_y = self.player.pose.position.y
+        vecteur_position1_2_position2 = np.array([position1.x - position2.x,
+                                                  position1.y - position2.y, 0])
+        vecteur_vertical = np.array([0, 0, 1])
 
-        norm_player_2_position2 = math.sqrt((player_x - self.position2.x) ** 2+(player_y - self.position2.y) ** 2)
-        norm_position1_2_position2 = math.sqrt((self.position1.x - self.position2.x) ** 2 +
-                                               (self.position1.y - self.position2.y) ** 2)
+        vecteur_player_2_position1 = np.array([position1.x - player_x,
+                                               position1.y - player_y, 0])
 
-        if norm_player_2_position2 < norm_position1_2_position2:
-            # on doit contourner l'objectif
+        vecteur_perp = np.cross(vecteur_position1_2_position2, vecteur_vertical)
+        vecteur_perp /= np.linalg.norm(vecteur_perp)
 
-            vecteur_position1_2_position2 = np.array([self.position1.x - self.position2.x,
-                                                      self.position1.y - self.position2.y, 0])
-            vecteur_vertical = np.array([0, 0, 1])
+        if np.dot(vecteur_perp, vecteur_player_2_position1) > 0:
+            vecteur_perp = -vecteur_perp
 
-            vecteur_player_2_position1 = np.array([self.position1.x - player_x,
-                                                   self.position1.y - player_y, 0])
+        position_intermediaire_x = x + vecteur_perp[0] * RAYON_AVOID
+        position_intermediaire_y = y + vecteur_perp[1] * RAYON_AVOID
+        if math.sqrt((player_x-position_intermediaire_x)**2+(player_y-position_intermediaire_y)**2) < 50:
+            position_intermediaire_x += vecteur_perp[0] * RAYON_AVOID * 2
+            position_intermediaire_y += vecteur_perp[1] * RAYON_AVOID * 2
 
-            vecteur_perp = np.cross(vecteur_position1_2_position2, vecteur_vertical)
-            vecteur_perp /= np.linalg.norm(vecteur_perp)
+        destination_position = Position(position_intermediaire_x, position_intermediaire_y)
+    else:
+        if math.sqrt((player_x-x)**2+(player_y-y)**2) < 50:
+            x -= math.cos(theta) * 2
+            y -= math.sin(theta) * 2
+        destination_position = Position(x, y)
 
-            if np.dot(vecteur_perp, vecteur_player_2_position1) > 0:
-                vecteur_perp = -vecteur_perp
+    # Calcul de l'orientation de la pose de destination
+    destination_orientation = 0
+    if orientation == 'front':
+        destination_orientation = (position1 - destination_position).angle
+    elif orientation == 'back':
+        destination_orientation = wrap_to_pi((position1 - destination_position).angle + np.pi)
 
-            position_intermediaire_x = x + vecteur_perp[0] * self.rayon_avoid
-            position_intermediaire_y = y + vecteur_perp[1] * self.rayon_avoid
-            if math.sqrt((player_x-position_intermediaire_x)**2+(player_y-position_intermediaire_y)**2) < 50:
-                position_intermediaire_x += vecteur_perp[0] * self.rayon_avoid * 2
-                position_intermediaire_y += vecteur_perp[1] * self.rayon_avoid * 2
-
-            destination_position = Position(position_intermediaire_x, position_intermediaire_y)
-        else:
-            if math.sqrt((player_x-x)**2+(player_y-y)**2) < 50:
-                x -= math.cos(theta) * 2
-                y -= math.sin(theta) * 2
-            destination_position = Position(x, y)
-
-        # Calcul de l'orientation de la pose de destination
-        destination_orientation = 0
-        if self.orientation == 'front':
-            destination_orientation = (self.position1 - destination_position).angle
-        elif self.orientation == 'back':
-            destination_orientation = wrap_to_pi((self.position1 - destination_position).angle + np.pi)
-
-        destination_pose = Pose(destination_position, destination_orientation)
-        return destination_pose
-
-    def exec(self) -> AICommand:
-        return AICommand(self.player.id, target=self.get_destination().to_dict())
+    destination_pose = Pose(destination_position, destination_orientation)
+    return MoveTo(destination_pose)
