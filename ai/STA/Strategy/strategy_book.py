@@ -79,10 +79,10 @@ class StrategyBook(object):
 
         :return: (List[str]) une liste de string, les noms des stratégies disponibles.
         """
-        return list(self.strategy_book.keys())
+        return list(self.strategy_book)
 
     @property
-    def strategies_required_roles(self) -> Dict[str, str]:
+    def strategies_required_roles(self) -> Dict[str, List[str]]:
         results = {}
         for name, strategy_class in self.strategy_book.items():
             try:

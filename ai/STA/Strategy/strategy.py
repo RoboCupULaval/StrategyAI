@@ -22,7 +22,7 @@ class Strategy(metaclass=ABCMeta):
         assert isinstance(p_game_state, GameState)
         self.game_state = p_game_state
 
-        self.roles_graph = {role: Graph() for role in self.assigned_roles.keys()}
+        self.roles_graph = {role: Graph() for role in self.assigned_roles}
 
     @property
     def assigned_roles(self):
@@ -36,7 +36,6 @@ class Strategy(metaclass=ABCMeta):
         raise NotImplementedError("A strategy must provide the list of required roles in a {role: MyRoleMappingRule")
 
     @classmethod
-
     def optional_roles(cls) -> Dict[Role, Callable]:
         return {}
 
@@ -61,7 +60,7 @@ class Strategy(metaclass=ABCMeta):
             ]
         """
         state = []
-        for r, graph in self.roles_graph.items():
+        for graph in self.roles_graph.values():
             current_tactic = graph.current_tactic
             if current_tactic is None:
                 continue

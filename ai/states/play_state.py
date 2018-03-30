@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 import logging
-from typing import List, Tuple, Callable, Dict
+from typing import List, Tuple, Callable
 
 from Util import Pose
 from ai.GameDomainObjects import Player
