@@ -51,7 +51,7 @@ class Strategy(metaclass=ABCMeta):
         self.roles_graph[role].add_node(tactic_node)
         return tactic_node
 
-    def get_current_state(self) -> List[Tuple[Player, str, str, Pose]]:
+    def get_current_state(self) -> List[Tuple[Player, str, str, Role]]:
         """ [
                 Player: Player;
                 Tactic Name: str
@@ -60,19 +60,16 @@ class Strategy(metaclass=ABCMeta):
             ]
         """
         state = []
-        for graph in self.roles_graph.values():
+        for role, graph in self.roles_graph.items():
             current_tactic = graph.current_tactic
             if current_tactic is None:
                 continue
 
-            try:
-                state_of_current_tactic = current_tactic.current_state.__name__
-            except AttributeError:
-                state_of_current_tactic = "DEFAULT"
+            state_of_current_tactic = current_tactic.current_state.__name__
+
             clear_name_for_tatic = str(current_tactic) + " " + \
-                                   current_tactic.status_flag.name+" " + \
-                                   state_of_current_tactic
-            state.append((current_tactic.player, clear_name_for_tatic, str(current_tactic), current_tactic.target))
+                                   current_tactic.status_flag.name
+            state.append((current_tactic.player, clear_name_for_tatic, state_of_current_tactic, role))
         return state
 
     def clear_graph_of_role(self, r: Role):

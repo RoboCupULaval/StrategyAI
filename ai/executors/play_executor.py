@@ -103,15 +103,9 @@ class PlayExecutor:
 
     def _send_robots_status(self) -> None:
         states = self.play_state.current_tactical_state
-        cmds = []
-        for player, tactic_name, action_name, target in states:
-            if action_name != 'Stop':
-                cmd = DebugCommandFactory.robot_strategic_state(player,
-                                                                tactic_name,
-                                                                action_name,
-                                                                target.position.to_tuple())
-                cmds.append(cmd)
-        self.ui_send_queue.put(cmds)
+        if len(states) > 0:
+            cmd = DebugCommandFactory.robots_strategic_state(states)
+            self.ui_send_queue.put(cmd)
 
     # def _has_available_players_changed(self) -> bool:
     #     available_players = GameState().our_team.available_players

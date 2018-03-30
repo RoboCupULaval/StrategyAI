@@ -6,6 +6,7 @@ from typing import Dict, Tuple, List
 from Engine.robot import Robot
 from Util import Pose, Position
 from Util.path import Path
+from Util.role import Role
 from ai.GameDomainObjects.player import Player
 
 __author__ = "Maxime Gagnon-Legault, Philippe Babin, Simon Bouchard, and others"
@@ -65,18 +66,24 @@ class DebugCommandFactory:
                                    'tactic_default': tactic_default})
 
     @staticmethod
-    def robot_strategic_state(player: Player, tactic: str, action: str, target: Tuple[int, int]):
-        team_color = str(player.team.team_color)
-        player_info = {player.id: {'tactic': tactic, 'action': action, 'target': target}}
-        team_info = {team_color: player_info}
-        return DebugCommand(1002, team_info)
+    def robots_strategic_state(states: List[Tuple[Player, str, str, Role]]):
+        cmd = {}
+        for player, tactic_name, state_name, role in states:
+            color = str(player.team.team_color)
+            if color not in cmd:
+                cmd[color] = {}
+            if tactic_name != 'Stop INIT':
+                cmd[color][player.id] = {'tactic': tactic_name,
+                                         'state': state_name,
+                                         'role': role.name}
+        return DebugCommand(1002, cmd)
 
     @staticmethod
     def auto_play_info(referee_info: str, referee_team_info: Dict, auto_play_info: Dict, auto_flag: bool):
         return DebugCommand(1005, {'referee': referee_info,
-                                     'referee_team': referee_team_info,
-                                     'auto_play': auto_play_info,
-                                     'auto_flag': auto_flag})
+                                   'referee_team': referee_team_info,
+                                   'auto_play': auto_play_info,
+                                   'auto_flag': auto_flag})
 
     @staticmethod
     def game_state(blue: List[Dict], yellow: List[Dict], balls: List[Dict]):

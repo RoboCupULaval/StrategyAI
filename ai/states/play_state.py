@@ -3,6 +3,7 @@ import logging
 from typing import List, Tuple, Callable
 
 from Util import Pose
+from Util.role import Role
 from ai.GameDomainObjects import Player
 
 from ai.STA.Strategy.strategy_book import StrategyBook
@@ -47,7 +48,7 @@ class PlayState:
         self.autonomous_flag = flag
 
     @property
-    def current_tactical_state(self) -> List[Tuple[Player, str, str, Pose]]:
+    def current_tactical_state(self) -> List[Tuple[Player, str, str, Role]]:
         """
         Retourne le nom des tactics en cours dans la stratégie en cours
         :return: List[Tuple[int, str, str, str]] les informations actuelles des tactiques courantes

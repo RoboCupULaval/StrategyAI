@@ -4,6 +4,7 @@ from functools import partial
 from Util.role import Role
 from Util.position import Position
 from Util.pose import Pose
+from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
 
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.STA.Strategy.strategy import Strategy
@@ -14,27 +15,22 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
-# noinspection PyMethodMayBeStatic,PyMethodMayBeStatic,PyUnresolvedReferences,PyUnresolvedReferences
+# noinspection PyMethodMayBeStatic,
 class DefenseWall(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4):
         super().__init__(game_state)
         self.number_of_players = number_of_players
-        self.robots = []
-        ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
-        self.theirgoal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
+        our_goal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
+        self.their_goal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
 
-        roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE,
-                             Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
-
-        goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
-        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
-
-        role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
-        self.robots = [player for _, player in role_by_robots if player is not None]
-        for role, player in role_by_robots:
-            if player:
-                node_align_to_defense_wall = self.create_node(role, AlignToDefenseWall(self.game_state, player, self.robots))
-                node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=self.theirgoal))
+        self.robots = self.assigned_roles.values()
+        for role, player in self.assigned_roles:
+            if role == Role.GOALKEEPER:
+                self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player, our_goal))
+            else:
+                node_align_to_defense_wall = self.create_node(role, AlignToDefenseWall(self.game_state, player,
+                                                                                       self.robots))
+                node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=self.their_goal))
 
                 player_is_closest = partial(self.is_closest, player)
                 player_is_not_closest = partial(self.is_not_closest, player)
@@ -42,6 +38,16 @@ class DefenseWall(Strategy):
                 node_align_to_defense_wall.connect_to(node_go_kick, when=player_is_closest)
                 node_go_kick.connect_to(node_go_kick, when=player_is_closest)
                 node_go_kick.connect_to(node_align_to_defense_wall, when=player_is_not_closest)
+
+    @classmethod
+    def required_roles(cls):
+        return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
+                                                                Role.FIRST_ATTACK,
+                                                                Role.SECOND_ATTACK,
+                                                                Role.MIDDLE,
+                                                                Role.FIRST_DEFENCE,
+                                                                Role.SECOND_DEFENCE]
+                }
 
     def is_closest(self, player):
         if player == closest_players_to_point(GameState().ball_position, True)[0].player:
@@ -57,8 +63,6 @@ class DefenseWall(Strategy):
         return not(self.is_closest(player))
 
     def is_not_one_of_the_closests(self, player):
-        # print(player.id)
-        # print(not(self.is_closest(player) or self.is_second_closest(player)))
         return not(self.is_closest(player) or self.is_second_closest(player))
 
     def has_kicked(self, player):
