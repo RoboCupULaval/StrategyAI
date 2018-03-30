@@ -68,13 +68,11 @@ class RobocupChoreography(Strategy):
         node_robot3_go_to_x.connect_to(node_robot3_go_to_y, when=robot3_succeeded)
         node_robot3_go_to_y.connect_to(node_robot3_go_to_x, when=robot3_succeeded)
 
-        for i in range(PLAYER_PER_TEAM):
-            if not (i == robot1 or i == robot2 or i == robot3):
-                self.create_node(i, Stop(self.game_state, i))
 
     def current_tactic_succeed(self, i):
         try:
             role = self.game_state.get_role_by_player_id(i)
-            return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
+            tactic = self.roles_graph[role].current_tactic
+            return tactic is not None and  tactic.status_flag == Flags.SUCCESS
         except IndexError:
             return False

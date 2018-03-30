@@ -2,6 +2,9 @@
 import logging
 from collections import defaultdict
 from typing import Dict
+
+import numpy as np
+
 from ai.Algorithm.path_partitionner import PathPartitionner
 
 MIN_DISTANCE_FROM_OBSTACLE = 250

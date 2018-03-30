@@ -66,7 +66,9 @@ class PlayExecutor:
 
     def _change_strategy(self, cmd: STAChangeCommand):
         # Convert string role to their enum equivalent
-        roles = {Role[r]: i for r, i in cmd.data["roles"].items()}
+        roles = cmd.data["roles"]
+        if roles is not None:
+            roles = {Role[r]: i for r, i in cmd.data["roles"].items()}
         self.play_state.change_strategy(cmd.data["strategy"], roles)
 
     def _change_tactic(self, cmd: STAChangeCommand):

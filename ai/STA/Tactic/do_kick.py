@@ -2,6 +2,7 @@
 from typing import List
 
 from Util import Pose
+from Util.ai_command import CmdBuilder
 from ai.GameDomainObjects import Player
 
 from ai.STA.Action.Kick import Kick
@@ -21,4 +22,4 @@ class DoKick(Tactic):
 
     def kick(self):
         self.next_state = self.halt
-        return Kick(self.game_state, self.player, self.kick_force)
+        return CmdBuilder().addKick(kick_force=self.kick_force).build()

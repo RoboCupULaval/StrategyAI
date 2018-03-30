@@ -10,7 +10,7 @@ from Util.geometry import perpendicular, normalize
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
-from Util.ai_command import Idle
+from Util.ai_command import Idle, CmdBuilder
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -23,6 +23,7 @@ DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
 COMMAND_DELAY = 1.0
 
+DEAD_ZONE = 30 # We lost the true value, but who cares
 
 # noinspection PyAttributeOutsideInit,PyTypeChecker,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 class AlignToDefenseWall(Tactic):
@@ -42,7 +43,7 @@ class AlignToDefenseWall(Tactic):
         self.field_goal_segment = self.game_state.const["FIELD_GOAL_SEGMENT"]
         self.keep_out_distance = self.field_goal_radius * 1.5
         self.goal_width = self.game_state.const["FIELD_GOAL_WIDTH"]
-        self.goal_middle = Position(self.game_state.field.constant["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
+        self.goal_middle = Position(self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
         self.position_middle_formation = Position(0, 0)
         self.positions_in_formations = []
         self.vec_ball_2_goal = Position(1, 0)
@@ -173,18 +174,17 @@ class AlignToDefenseWall(Tactic):
         else:
             destination_orientation = (self.ball_position -
                                        self.positions_in_formations[self.player_number_in_formation]).angle
-            return GoToPositionPathfinder(self.game_state, self.player,
-                                          Pose(self.positions_in_formations[self.player_number_in_formation],
-                                               destination_orientation)).exec()
+            return CmdBuilder().addMoveTo(Pose(self.positions_in_formations[self.player_number_in_formation],
+                                               destination_orientation)).build()
 
     def halt(self):
         self.status_flag = Flags.SUCCESS
-        return Idle(self.game_state, self.player)
+        return Idle
 
     def check_success(self):
         player_position = self.player.pose.position
         distance = (player_position - self.target.position).norm
-        if distance < self.game_state.const["POSITION_DEADZONE"]:
+        if distance < DEAD_ZONE:
             return True
         return False
 

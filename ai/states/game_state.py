@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 import logging
+from multiprocessing.managers import DictProxy
 
 from Util import Position
 from Util.constant import TeamColor
@@ -8,6 +9,7 @@ from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
 from Util.team_color_service import TeamColorService
 from ai.GameDomainObjects import Ball, Team, Field, Referee
+from ai.GameDomainObjects.ShittyField import FieldSide
 
 
 class GameState(metaclass=Singleton):
@@ -39,6 +41,13 @@ class GameState(metaclass=Singleton):
 
             if game_state['balls']:
                 self._ball.update(game_state['balls'][0])
+
+    # FIXME
+    def get_player_position(self, player_id):
+        if player_id not in self.our_team.available_players:
+            raise RuntimeError("No player available with that player_id {}".format(player_id))
+        return self.our_team.available_players[player_id].position
+
 
     def clear_roles(self):
         self._role_mapper.clear()
@@ -76,6 +85,10 @@ class GameState(metaclass=Singleton):
         return self._role_mapper.map_player_to_first_available_role(player)
 
     @property
+    def our_side(self):
+        return FieldSide.POSITIVE # FIXME HACK
+
+    @property
     def role_mapping(self):
         return self._role_mapper.roles_translation
 
@@ -99,6 +112,14 @@ class GameState(metaclass=Singleton):
     def ball(self) -> Ball:
         return self._field.ball
 
+    @property
+    def const(self):
+        return self._field.constant
+
+    @const.setter
+    def const(self, field: DictProxy):
+        self._field.constant = field
+
     @ball.setter
     def ball(self, ball: Ball):
         """
@@ -113,4 +134,3 @@ class GameState(metaclass=Singleton):
     @property
     def referee(self) -> Referee:
         return self._referee
-

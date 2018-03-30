@@ -3,8 +3,14 @@
 import math as m
 import numpy as np
 
-from Util import Position
+from Util.pose import Pose
+from Util.position import Position
 from typing import cast, Sequence, List
+
+
+def get_angle_between_three_points(start: Position, mid: Position, end: Position):
+    return abs(wrap_to_pi((mid - start).angle - (end - mid).angle))
+
 
 
 def wrap_to_pi(angle: float) -> float:
