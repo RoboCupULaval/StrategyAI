@@ -80,7 +80,7 @@ class GoalKeeper(Tactic):
             if opponent_kicker is not None:
                 ball_to_goal = our_goal.x - ball_position.x
 
-                if self.game_state.field.our_side is FieldSide.POSITIVE:
+                if self.game_state.our_side is FieldSide.POSITIVE:
                     opponent_kicker_orientation = clamp(opponent_kicker.pose.orientation, -pi/5, pi/5)
                     goalkeeper_orientation = wrap_to_pi(opponent_kicker_orientation - pi)
                 else:

@@ -13,7 +13,7 @@ from ai.STA.Strategy.human_control import HumanControl
 from ai.STA.Strategy.do_nothing import DoNothing
 from ai.STA.Strategy.offense_kickoff import OffenseKickOff
 from ai.STA.Strategy.passes_with_decisions import PassesWithDecisions
-from ai.STA.Strategy.pathfinderbenchmark import PathfinderBenchmark
+from ai.STA.Strategy.pathfinder_benchmark import PathfinderBenchmark
 from ai.STA.Strategy.penalty_defense import PenaltyDefense
 from ai.STA.Strategy.penalty_offense import PenaltyOffense
 from ai.STA.Strategy.prepare_kickoff_defense import PrepareKickOffDefense

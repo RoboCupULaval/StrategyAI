@@ -10,7 +10,7 @@ from Util.geometry import perpendicular, normalize
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
-from Util.ai_command import Idle, CmdBuilder
+from Util.ai_command import Idle, CmdBuilder, MoveTo
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -25,20 +25,18 @@ COMMAND_DELAY = 1.0
 
 DEAD_ZONE = 30 # We lost the true value, but who cares
 
-# noinspection PyAttributeOutsideInit,PyTypeChecker,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
+# noinspection PyAttributeOutsideInit,PyTypeChecker
 class AlignToDefenseWall(Tactic):
     def __init__(self, game_state: GameState, player: Player, robots_in_formation: List[Player], auto_pick=False,
                  args: List[str]=None):
         assert isinstance(robots_in_formation[0], Player)
         super().__init__(game_state, player, args=args)
-        self.current_state = self.define_center_of_formation
-        self.next_state = self.get_players_in_formation
-        self.game_state = game_state
         self.last_time = time.time()
         self.robots_in_formation = robots_in_formation
         self.auto_pick = auto_pick
-        self.robots = robots_in_formation.copy()
-        self.player = player
+
+        self.robots = robots_in_formation.copy() # why
+
         self.field_goal_radius = self.game_state.const["FIELD_GOAL_RADIUS"]
         self.field_goal_segment = self.game_state.const["FIELD_GOAL_SEGMENT"]
         self.keep_out_distance = self.field_goal_radius * 1.5
@@ -50,28 +48,24 @@ class AlignToDefenseWall(Tactic):
         self.vec_perp_of_ball_2_goal = Position(0, 1)
         self.player_number_in_formation = None
         self.number_of_robots = 0
-        self.get_players_in_formation()
 
-    def get_players_in_formation(self):
+        self.init_players_in_formation()
+
+    def init_players_in_formation(self):
         self.player_number_in_formation = None
         self.robots_in_formation = self.robots
-        # for idx, player in enumerate(self.robots):
-        #     if not self.is_not_one_of_the_closests(player):
-        #         del self.robots_in_formation[idx]
+
         for idx, player in enumerate(self.robots_in_formation):
             if self.player == player:
                 self.player_number_in_formation = idx
                 break
-        if len(self.robots_in_formation) == 0:
-            self.next_state = self.halt
-            self.number_of_robots = 0
-        else:
-            self.number_of_robots = len(self.robots_in_formation)
+
         if self.player_number_in_formation is None:
-            self.player_number_in_formation = 0
-            self.next_state = self.halt
-        else:
-            self.next_state = self.define_center_of_formation
+            raise RuntimeError("The current player is not in the formation")
+
+        self.number_of_robots = len(self.robots_in_formation)
+
+        self.next_state = self.define_center_of_formation
 
     def define_center_of_formation(self):
         """
@@ -154,18 +148,20 @@ class AlignToDefenseWall(Tactic):
                          normalize(self.vec_ball_2_goal) * 3. * ROBOT_RADIUS * 0.9
 
             self.positions_in_formations = [position_0, position_1, position_2, position_3, position_4]
+        else:
+            raise RuntimeError("Usupported number of player in formation {}".format(self.number_of_robots))
         # print(self.positions_in_formations)
 
     def exec(self):
         self.define_center_of_formation()
         self.compute_positions_in_formation()
         # print(self.player_number_in_formation)
-        for idx, player in enumerate(self.robots_in_formation):
-            if not self.is_not_one_of_the_closests(player):
-                self.get_players_in_formation()
-                self.define_center_of_formation()
-                self.compute_positions_in_formation()
-                break
+        # for idx, player in enumerate(self.robots_in_formation):
+        #     if not self.is_not_one_of_the_closests(player):
+        #         self.init_players_in_formation()
+        #         self.define_center_of_formation()
+        #         self.compute_positions_in_formation()
+        #         break
         # print(self.robots_in_formation)
         # print(self.player_number_in_formation)
         # print(self.player.id)
@@ -174,8 +170,8 @@ class AlignToDefenseWall(Tactic):
         else:
             destination_orientation = (self.ball_position -
                                        self.positions_in_formations[self.player_number_in_formation]).angle
-            return CmdBuilder().addMoveTo(Pose(self.positions_in_formations[self.player_number_in_formation],
-                                               destination_orientation)).build()
+            return MoveTo(Pose(self.positions_in_formations[self.player_number_in_formation],
+                               destination_orientation))
 
     def halt(self):
         self.status_flag = Flags.SUCCESS

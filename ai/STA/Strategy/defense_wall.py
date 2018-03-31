@@ -19,17 +19,17 @@ from ai.states.game_state import GameState
 class DefenseWall(Strategy):
     def __init__(self, game_state: GameState, number_of_players: int = 4):
         super().__init__(game_state)
-        self.number_of_players = number_of_players
+
         our_goal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
         self.their_goal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
 
-        self.robots = self.assigned_roles.values()
-        for role, player in self.assigned_roles:
+        self.robots_in_formation = [p for r, p in self.assigned_roles.items() if r != Role.GOALKEEPER]
+        for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player, our_goal))
             else:
                 node_align_to_defense_wall = self.create_node(role, AlignToDefenseWall(self.game_state, player,
-                                                                                       self.robots))
+                                                                                       self.robots_in_formation))
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=self.their_goal))
 
                 player_is_closest = partial(self.is_closest, player)

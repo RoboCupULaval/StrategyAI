@@ -33,7 +33,7 @@ class Strategy(metaclass=ABCMeta):
         """
         The required roles are the one that must be available otherwise the strategy's goal is unreachable
         """
-        raise NotImplementedError("A strategy must provide the list of required roles in a {role: MyRoleMappingRule")
+        raise NotImplementedError("Strategy '{}' must provide the list of required roles".format(cls.__name__))
 
     @classmethod
     def optional_roles(cls) -> Dict[Role, Callable]:

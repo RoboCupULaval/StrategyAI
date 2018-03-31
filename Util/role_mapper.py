@@ -1,4 +1,5 @@
 from collections import Counter
+from typing import Dict
 
 from Util.role import Role
 from Util.role_mapping_rule import ImpossibleToMap
@@ -19,7 +20,7 @@ class RoleMapper(object):
     def clear(self):
         self.roles_translation = {r: None for r in Role.as_list()}
 
-    def map_by_player(self, desired_map):
+    def map_by_player(self, desired_map: Dict[Role, Player]):
         saved_roles = self._save_locked_roles(self.roles_translation)
         base_map = self._remove_undesired_roles(self.roles_translation, desired_map)
 
