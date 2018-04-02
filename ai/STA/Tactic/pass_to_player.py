@@ -4,15 +4,12 @@ import time
 
 import numpy as np
 
-# noinspection PyUnresolvedReferences
 from Util import Pose, Position, AICommand
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS, KickForce
-from Util.position import Position
 
 from ai.GameDomainObjects import Player
 from Util.ai_command import Idle, CmdBuilder, MoveTo
 from ai.STA.Action.GoBehind import GoBehind
-from ai.STA.Action.Kick import Kick
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState

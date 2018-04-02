@@ -1,10 +1,9 @@
 # Under MIT licence, see LICENCE.txt
-from Util import Pose, Position, AICommand
+from Util import Pose, Position
 from Util.ai_command import MoveTo
 from Util.area import stayInsideCircle
 from Util.geometry import closest_point_on_segment
 from ai.GameDomainObjects import Player
-from ai.STA.Action import Action
 from ai.states.game_state import GameState
 
 
