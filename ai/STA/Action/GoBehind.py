@@ -15,7 +15,7 @@ from ai.GameDomainObjects import Player
 RAYON_AVOID = 300  # (mm)
 
 def GoBehind(player: Player, position1: Position, position2: Position=None,
-             distance_behind: [int, float]=250,
+             distance_behind: float=250,
              orientation: str= 'front'):
     """
     Action GoBehind: Déplace le robot au point le plus proche sur la droite, derrière un objet dont la position

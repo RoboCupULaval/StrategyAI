@@ -30,6 +30,8 @@ class PrepareKickOffDefense(Strategy):
             else -GameState().const["CENTER_CENTER_RADIUS"]
 
         # Positions objectifs des joueurs
+        # FIXME: This is bad, the orientation of the player will always be the same,
+        # independently of if we are in a positive or negative x
         attack_top_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
                                    GameState().const["FIELD_Y_BOTTOM"] * 3 / 5, 0)
         attack_bottom_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,

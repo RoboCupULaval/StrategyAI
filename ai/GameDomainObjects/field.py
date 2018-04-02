@@ -23,7 +23,6 @@ class Field:
 
     @constant.setter
     def constant(self, field: Dict):
-        print(field)
         if len(field.field_lines) == 0:
             raise RuntimeError(
                 "Receiving legacy geometry message instead of the new geometry message. Update your grsim or check your vision port.")
@@ -75,15 +74,15 @@ class Field:
             self._constant["FIELD_OUR_GOAL_X_EXTERNAL"] = self._constant["FIELD_X_POSITIVE"]
 
             self._constant["FIELD_THEIR_GOAL_TOP_CIRCLE"] = Position(self._constant["FIELD_X_NEGATIVE"],
-                                                                    self._constant["FIELD_GOAL_SEGMENT"] / 2)
+                                                                     self._constant["FIELD_GOAL_SEGMENT"] / 2)
             self._constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"] = Position(self._constant["FIELD_X_NEGATIVE"],
-                                                                       -self._constant["FIELD_GOAL_SEGMENT"] / 2)
+                                                                        -self._constant["FIELD_GOAL_SEGMENT"] / 2)
             self._constant["FIELD_THEIR_GOAL_MID_GOAL"] = Position(self._constant["FIELD_X_NEGATIVE"], 0)
 
             self._constant["FIELD_OUR_GOAL_TOP_CIRCLE"] = Position(self._constant["FIELD_X_POSITIVE"],
-                                                                  self._constant["FIELD_GOAL_SEGMENT"] / 2)
+                                                                   self._constant["FIELD_GOAL_SEGMENT"] / 2)
             self._constant["FIELD_OUR_GOAL_BOTTOM_CIRCLE"] = Position(self._constant["FIELD_X_POSITIVE"],
-                                                                     -self._constant["FIELD_GOAL_SEGMENT"] / 2)
+                                                                      -self._constant["FIELD_GOAL_SEGMENT"] / 2)
             self._constant["FIELD_OUR_GOAL_MID_GOAL"] = Position(self._constant["FIELD_X_POSITIVE"], 0)
 
         else:
@@ -96,15 +95,15 @@ class Field:
             self._constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self._constant["FIELD_X_POSITIVE"]
 
             self._constant["FIELD_OUR_GOAL_TOP_CIRCLE"] = Position(self._constant["FIELD_X_NEGATIVE"],
-                                                                  self._constant["FIELD_GOAL_SEGMENT"] / 2)
+                                                                   self._constant["FIELD_GOAL_SEGMENT"] / 2)
             self._constant["FIELD_OUR_GOAL_BOTTOM_CIRCLE"] = Position(self._constant["FIELD_X_NEGATIVE"],
-                                                                     -self._constant["FIELD_GOAL_SEGMENT"] / 2)
+                                                                      -self._constant["FIELD_GOAL_SEGMENT"] / 2)
             self._constant["FIELD_OUR_GOAL_MID_GOAL"] = Position(self._constant["FIELD_X_NEGATIVE"], 0)
 
             self._constant["FIELD_THEIR_GOAL_TOP_CIRCLE"] = Position(self._constant["FIELD_X_POSITIVE"],
-                                                                    self._constant["FIELD_GOAL_SEGMENT"] / 2)
+                                                                     self._constant["FIELD_GOAL_SEGMENT"] / 2)
             self._constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"] = Position(self._constant["FIELD_X_POSITIVE"],
-                                                                       -self._constant["FIELD_GOAL_SEGMENT"] / 2)
+                                                                        -self._constant["FIELD_GOAL_SEGMENT"] / 2)
             self._constant["FIELD_THEIR_GOAL_MID_GOAL"] = Position(self._constant["FIELD_X_POSITIVE"], 0)
         
         

@@ -62,7 +62,7 @@ class Tactic(object):
         if isinstance(next_ai_command, Action):
             raise RuntimeError("Action are deprecaded use CmdBuilder")
         if not isinstance(next_ai_command, AICommand):
-            raise RuntimeError("A tactic MUST return an AICommand, not a {}. It's {} the cuprid.".format(type(next_ai_command), self.current_state))
+            raise RuntimeError("A tactic MUST return an AICommand, not a {}. {} is the culprit.".format(type(next_ai_command), self.current_state))
         self.current_state = self.next_state
         return next_ai_command
 

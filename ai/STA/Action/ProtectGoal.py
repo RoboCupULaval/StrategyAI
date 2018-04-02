@@ -9,7 +9,7 @@ from ai.states.game_state import GameState
 
 
 def ProtectGoal(game_state: GameState, player: Player, is_right_goal: bool=True,
-                 minimum_distance: [int, float]=150 / 2, maximum_distance: [int, float, None]=None):
+                 minimum_distance: float=150 / 2, maximum_distance: float=None):
 
         """
         Calcul la pose que doit prendre le gardien en fonction de la position de la balle.
