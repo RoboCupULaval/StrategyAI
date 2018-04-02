@@ -34,7 +34,11 @@ class CmdBuilder:
         self._end_speed = 0
         self._ball_collision = True
 
-    def addMoveTo(self, target: Union[Pose, Position], cruise_speed: float=1, end_speed: float=0, ball_collision: bool=True):
+    def addMoveTo(self,
+                  target: Union[Pose, Position],
+                  cruise_speed: float=1,
+                  end_speed: float=0,
+                  ball_collision: bool=True):
         assert isinstance(target, (Pose, Position))
         if isinstance(target, Pose) and isinstance(target.position, np.ndarray):
             raise ValueError("The pose field must not have ndarray has position")
@@ -69,11 +73,16 @@ class CmdBuilder:
                          self._end_speed,
                          self._ball_collision)
 
-def MoveTo(target: Union[Pose, Position], cruise_speed: float=1, end_speed: float=0, ball_collision: bool=True) -> AICommand:
+
+def MoveTo(target: Union[Pose, Position],
+           cruise_speed: float=1,
+           end_speed: float=0,
+           ball_collision:
+           bool=True) -> AICommand:
     return CmdBuilder().addMoveTo(target, cruise_speed, end_speed, ball_collision).build()
 
 
-def GoBetween(position1: Position, position2: Position, target: Position, minimum_distance: [int, float]=0):
+def GoBetween(position1: Position, position2: Position, target: Position, minimum_distance: float=0):
     delta = minimum_distance * normalize(position2 - position1)
     position1 = position1 + delta
     position2 = position2 - delta

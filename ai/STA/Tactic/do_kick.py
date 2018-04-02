@@ -5,7 +5,6 @@ from Util import Pose
 from Util.ai_command import CmdBuilder
 from ai.GameDomainObjects import Player
 
-from ai.STA.Action.Kick import Kick
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
 

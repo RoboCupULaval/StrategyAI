@@ -1,15 +1,14 @@
 # Under MIT licence, see LICENCE.txt
-from Util import Pose, Position, AICommand
+from Util import Pose, Position
 from Util.ai_command import MoveTo
 from Util.area import stayInsideCircle
 from Util.geometry import closest_point_on_segment
 from ai.GameDomainObjects import Player
-from ai.STA.Action import Action
 from ai.states.game_state import GameState
 
 
 def ProtectGoal(game_state: GameState, player: Player, is_right_goal: bool=True,
-                 minimum_distance: [int, float]=150 / 2, maximum_distance: [int, float, None]=None):
+                 minimum_distance: float=150 / 2, maximum_distance: float=None):
 
         """
         Calcul la pose que doit prendre le gardien en fonction de la position de la balle.

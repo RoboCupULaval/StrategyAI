@@ -9,7 +9,6 @@ from Util.ai_command import CmdBuilder
 from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 from ai.Algorithm.evaluation_module import closest_player_to_point
 from ai.GameDomainObjects import Player
-from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState

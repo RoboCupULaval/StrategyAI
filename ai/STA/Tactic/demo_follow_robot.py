@@ -6,7 +6,6 @@ from Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
 
 from ai.GameDomainObjects import Player
 from Util.ai_command import Idle, CmdBuilder
-from ai.STA.Action.MoveToPosition import MoveToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
