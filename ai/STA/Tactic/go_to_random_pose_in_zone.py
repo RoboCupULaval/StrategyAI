@@ -19,8 +19,12 @@ COMMAND_DELAY = 1.5
 
 
 class GoToRandomPosition(Tactic):
-    def __init__(self, game_state: GameState, player: Player, center_of_zone: Position, height_of_zone,
-                 width_of_zone, args: List[str]=None):
+    def __init__(self, game_state: GameState,
+                 player: Player,
+                 args: List[str]=None,
+                 center_of_zone=Position(0, 0),
+                 height_of_zone=800,
+                 width_of_zone=800):
         super().__init__(game_state, player, args=args)
         self.current_state = self.exec
         self.next_state = self.exec

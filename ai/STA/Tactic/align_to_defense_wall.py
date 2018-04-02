@@ -27,15 +27,23 @@ DEAD_ZONE = 30 # We lost the true value, but who cares
 
 # noinspection PyAttributeOutsideInit,PyTypeChecker
 class AlignToDefenseWall(Tactic):
-    def __init__(self, game_state: GameState, player: Player, robots_in_formation: List[Player], auto_pick=False,
-                 args: List[str]=None):
-        assert isinstance(robots_in_formation[0], Player)
+    def __init__(self, game_state: GameState,
+                 player: Player,
+                 args: List[str]=None,
+                 robots_in_formation: List[Player]=[],
+                 auto_pick=False):
         super().__init__(game_state, player, args=args)
+
+        if len(robots_in_formation) == 0:
+            self.robots_in_formation = [player]
+        else:
+            self.robots_in_formation = robots_in_formation
+        assert isinstance(self.robots_in_formation[0], Player)
+
         self.last_time = time.time()
-        self.robots_in_formation = robots_in_formation
         self.auto_pick = auto_pick
 
-        self.robots = robots_in_formation.copy() # why
+        self.robots = self.robots_in_formation.copy() # why
 
         self.field_goal_radius = self.game_state.const["FIELD_GOAL_RADIUS"]
         self.field_goal_segment = self.game_state.const["FIELD_GOAL_SEGMENT"]

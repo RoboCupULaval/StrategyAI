@@ -12,7 +12,10 @@ class PathfinderBenchmark(Strategy):
         super().__init__(p_game_state)
 
         for role, player in self.assigned_roles.items():
-            self.create_node(role, GoToRandomPosition(self.game_state, player, Position(-1400, 900), 1800, 2700))
+            self.create_node(role, GoToRandomPosition(self.game_state, player,
+                                                      center_of_zone=Position(-1400, 900),
+                                                      width_of_zone=1800,
+                                                      height_of_zone=2700))
 
     @classmethod
     def required_roles(cls):
