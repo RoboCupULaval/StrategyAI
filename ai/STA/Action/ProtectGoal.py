@@ -29,8 +29,8 @@ def ProtectGoal(game_state: GameState, player: Player, is_right_goal: bool=True,
 
         # Vérification que destination_position respecte la distance maximale
         if maximum_distance is None:
-            destination_position = self.game_state.game.field.stay_inside_goal_area(destination_position,
-                                                                                    our_goal=True)
+            destination_position = game_state.game.field.stay_inside_goal_area(destination_position,
+                                                                               our_goal=True)
         else:
             destination_position = stayInsideCircle(destination_position, goal_position, maximum_distance)
 
