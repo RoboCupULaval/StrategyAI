@@ -201,7 +201,7 @@ class ShittyField:
             self.constant["FIELD_GOAL_Y_BOTTOM"] = -self.constant["FIELD_GOAL_Y_TOP"]
 
 
-            if self.our_side == FieldSide.POSITIVE:
+            if self.our_side is FieldSide.POSITIVE:
                 self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self.constant["FIELD_X_NEGATIVE"]
                 self.constant["FIELD_THEIR_GOAL_X_INTERNAL"] = self.constant["FIELD_X_NEGATIVE"] + self.constant["FIELD_GOAL_RADIUS"]
 
