@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 import time
+from typing import Optional, List
 
 import numpy as np
 
@@ -21,7 +22,7 @@ COMMAND_DELAY = 1.5
 
 
 class PassToPlayer(Tactic):
-    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), target_id=1, args=None):
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), target_id=1, args: Optional[List[str]]=None):
         super().__init__(game_state, player, target, args)
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge

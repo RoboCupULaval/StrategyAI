@@ -170,7 +170,7 @@ def trajectory_score(pointA, pointsB, obstacle):
 
 # noinspection PyPep8Naming,PyUnresolvedReferences
 def best_position_in_region(player, A, B):
-    # Retourne la position (dans un rectangle aux monitor A et B) la mieux placée pour une passe
+    # Retourne la position (dans un rectangle aux points A et B) la mieux placée pour une passe
     ncounts = 5
     bottom_left = Position(min(A.x, B.x), min(A.y, B.y))
     top_right = Position(max(A.x, B.x), max(A.y, B.y))

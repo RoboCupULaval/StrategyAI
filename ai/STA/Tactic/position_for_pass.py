@@ -1,9 +1,9 @@
 # Under MIT licence, see LICENCE.txt
 import time
-from typing import List
+from typing import List, Optional
 
 from Util import Pose, Position
-from Util.ai_command import CmdBuilder
+from Util.ai_command import CmdBuilder, MoveTo
 from Util.role import Role
 from ai.Algorithm.evaluation_module import best_position_in_region
 from ai.GameDomainObjects import Player
@@ -21,11 +21,10 @@ automatiquement selon son rôle
 """
 
 
-# noinspection PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming,PyPep8Naming
 class PositionForPass(Tactic):
 
-    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None,
-                 auto_position=False, robots_in_formation: List[Player] = None):
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: Optional[List[str]]=None,
+                 auto_position=False, robots_in_formation: Optional[List[Player]] = None):
         super().__init__(game_state, player, target, args)
         self.current_state = self.move_to_pass_position
         self.next_state = self.move_to_pass_position
@@ -55,7 +54,7 @@ class PositionForPass(Tactic):
     def move_to_pass_position(self):
 
         self.next_state = self.move_to_pass_position
-        return CmdBuilder().addMoveTo(self._get_destination_pose()).build()
+        return MoveTo(self._get_destination_pose())
 
     def _get_destination_pose(self):
         # FIXME: There is flag that does not exist anymore and it seem important...

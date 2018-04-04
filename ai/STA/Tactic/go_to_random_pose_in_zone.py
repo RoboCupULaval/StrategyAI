@@ -3,7 +3,7 @@ import random
 from typing import List
 
 from Util import Pose, Position
-from Util.ai_command import CmdBuilder
+from Util.ai_command import CmdBuilder, MoveTo
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
 from Util.geometry import compare_angle
 from ai.GameDomainObjects.player import Player
@@ -53,7 +53,7 @@ class GoToRandomPosition(Tactic):
             self.next_pose = Pose(self.current_position_to_go, self.current_angle_to_go)
         self.next_state = self.exec
 
-        return CmdBuilder().addMoveTo(self.next_pose).build()
+        return MoveTo(self.next_pose)
 
     def check_success(self):
         distance = (self.player.pose.position - self.next_pose.position).norm
