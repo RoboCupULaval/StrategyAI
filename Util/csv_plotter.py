@@ -4,11 +4,6 @@ import matplotlib.pyplot as plt
 import time
 import os
 
-class Observer:
-
-    def write(self, poses):
-        pass
-
 
 class CsvPlotter(Observer):
 

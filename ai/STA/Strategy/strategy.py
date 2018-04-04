@@ -26,7 +26,7 @@ class Strategy(metaclass=ABCMeta):
         players = [p for p in self.game_state.our_team.players.values()]
 
         role_mapping = dict(zip(self.roles, players))
-        role_mapping = self.hack_goalkeeper(role_mapping)
+        # role_mapping = self.hack_goalkeeper(role_mapping)
 
         self.game_state.map_players_to_roles_by_player(role_mapping)
 

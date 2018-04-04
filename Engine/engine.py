@@ -21,9 +21,9 @@ from Util.timing import create_fps_timer
 
 try:
     from Util.csv_plotter import CsvPlotter
-except ImportError:
+except:
     print('Fail to import csv_plotter. It will be disable.')
-    from Util.csv_plotter import Observer as CsvPlotter
+    from Engine.controller import Observer as CsvPlotter
 
 from config.config import Config
 

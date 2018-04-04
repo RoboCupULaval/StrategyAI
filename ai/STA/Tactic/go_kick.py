@@ -130,7 +130,7 @@ class GoKick(Tactic):
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
             tentative_target_id = best_passing_option(self.player)
             if tentative_target_id is None:
-                self.target = Pose(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0, 0)
+                self.target = Pose.from_values(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0, 0)
             else:
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
 

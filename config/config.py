@@ -5,8 +5,8 @@ from Util import Singleton
 
 mandatory_fields = {
     'COMMUNICATION': ['type', 'field_port_file', 'vision_port', 'ui_debug_address'],
-    'GAME': ['our_color', 'type', 'autonomous_play', 'coach_fps'],
-    'IMAGE': ['number_of_camera'],
+    'GAME': ['our_color', 'type', 'autonomous_play'],
+    'IMAGE': ['number_of_camera']
 }
 
 
@@ -51,7 +51,7 @@ class Config(metaclass=Singleton):
         return config_dict
 
     def update_content(self):
-
+        self['ENGINE'] = dict()
         self['IMAGE']['number_of_camera'] = int(self['IMAGE']['number_of_camera'])
         self['GAME']['coach_fps'] = int(self['GAME']['coach_fps'])
         self['GAME']['autonomous_play'] = self['GAME']['autonomous_play'] == 'true'
@@ -80,9 +80,7 @@ class Config(metaclass=Singleton):
             self['COMMUNICATION']['grsim_info'] = (self['COMMUNICATION']['grsim_udp_address'],
                                                    int(self['COMMUNICATION']['grsim_port']))
 
-
     def validate_user_input(self):
-
         do_exit = False
         for section, fields in mandatory_fields.items():
             for field in fields:
@@ -118,3 +116,10 @@ class Config(metaclass=Singleton):
         if self._config_was_set:
             raise RuntimeError('You can\'t change the configuration after it has been loaded from a file.')
         self._config[key] = value
+
+    def load_parameters(self, cli_args):
+        self._config['ENGINE']['engine_fps'] = cli_args.engine_fps
+        self._config['ENGINE']['unlock_engine_fps'] = cli_args.unlock_engine_fps
+        self._config['GAME']['on_negative_side'] = cli_args.on_negative_side
+        self._config['ENGINE']['enable_profiling'] = cli_args.enable_profiling
+        self._config['GAME']['competition_mode'] = cli_args.competition_mode

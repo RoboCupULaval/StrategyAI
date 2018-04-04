@@ -12,7 +12,11 @@ from Util import Pose
 from Util.engine_command import EngineCommand
 from Util.constant import PLAYER_PER_TEAM
 from Util.team_color_service import TeamColorService
-from Util.csv_plotter import Observer
+
+class Observer:
+
+    def write(self, poses):
+        pass
 
 
 class Controller:
