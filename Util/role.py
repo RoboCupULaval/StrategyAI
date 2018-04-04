@@ -1,15 +1,15 @@
-from enum import IntEnum
+from enum import Enum
 
 
-class Role(IntEnum):
+class Role(Enum):
     """Enum representing the role of one of our player playing on the field"""
-    GOALKEEPER = 1
-    MIDDLE = 2
-    FIRST_DEFENCE = 5
+    GOALKEEPER = 0
+    MIDDLE = 1
+    FIRST_DEFENCE = 2
     SECOND_DEFENCE = 3
     FIRST_ATTACK = 4
-    SECOND_ATTACK = 0
+    SECOND_ATTACK = 5
 
     @classmethod
     def as_list(cls):
-        return list(cls)  # Enum doesn't seems to support the iterable protocol
+        return list(cls.__members__.values())  # Enum doesn't seems to support the iterable protocol

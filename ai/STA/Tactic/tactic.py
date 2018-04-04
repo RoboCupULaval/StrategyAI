@@ -25,7 +25,7 @@ class Tactic(object):
         :param target: Pose général pouvant être utilisé par les classes enfants comme elles veulent
         """
         assert isinstance(game_state, GameState), "Le game_state doit être un GameState"
-        assert isinstance(player, Player), "Le player doit être un Player {}".format(player)
+        assert isinstance(player, Player), "Le player doit être un Player, non un '{}'".format(player)
         assert isinstance(target, Pose), "La target devrait être une Pose"
 
         self.game_state = game_state

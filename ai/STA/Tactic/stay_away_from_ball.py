@@ -1,10 +1,8 @@
 # Under MIT license, see LICENSE.txt
 from typing import List, Optional
 
-import numpy as np
-
 from Util import Pose
-from Util.ai_command import CmdBuilder, MoveTo
+from Util.ai_command import MoveTo
 from Util.area import stayOutsideCircle
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic

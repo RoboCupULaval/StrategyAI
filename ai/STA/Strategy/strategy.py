@@ -21,23 +21,23 @@ class Strategy(metaclass=ABCMeta):
         """
         assert isinstance(p_game_state, GameState)
         self.game_state = p_game_state
-        self.roles = Role.as_list()
-        self.roles_graph = {r: Graph() for r in self.roles}
-        players = [p for p in self.game_state.our_team.players.values()]
 
-        role_mapping = dict(zip(self.roles, players))
-        # role_mapping = self.hack_goalkeeper(role_mapping)
+        self.roles_graph = {role: Graph() for role in self.assigned_roles}
 
-        self.game_state.map_players_to_roles_by_player(role_mapping)
+    @property
+    def assigned_roles(self):
+        return self.game_state.assigned_roles
 
-    def hack_goalkeeper(self, role_mapping):
-        current_goaler = self.game_state.get_player_by_role(Role.GOALKEEPER)
-        if current_goaler is not None:
-            new_goaler = role_mapping[Role.GOALKEEPER]
-            new_goaler_old_role = self.game_state.get_role_by_player_id(new_goaler.id)
-            role_mapping[Role.GOALKEEPER] = current_goaler
-            role_mapping[new_goaler_old_role] = new_goaler
-        return role_mapping
+    @classmethod
+    def required_roles(cls) -> Dict[Role, Callable]:
+        """
+        The required roles are the one that must be available otherwise the strategy's goal is unreachable
+        """
+        raise NotImplementedError("Strategy '{}' must provide the list of required roles".format(cls.__name__))
+
+    @classmethod
+    def optional_roles(cls) -> Dict[Role, Callable]:
+        return {}
 
     def create_node(self, role: Role, tactic: Tactic) -> Node:
         """
@@ -46,32 +46,23 @@ class Strategy(metaclass=ABCMeta):
         :param tactic: La tactique à assigner au robot du role.
         """
         assert(isinstance(role, Role))
+
         tactic_node = Node(tactic)
         self.roles_graph[role].add_node(tactic_node)
         return tactic_node
 
-    def get_current_state(self) -> List[Tuple[Player, str, str, Pose]]:
-        """ [
-                Player: Player;
-                Tactic Name: str
-                Action name: str
-                Tactic target: Pose
-            ]
-        """
+    def get_current_state(self) -> List[Tuple[Player, str, str, Role]]:
         state = []
-        for r in self.roles:
-            current_tactic = self.roles_graph[r].current_tactic
+        for role, graph in self.roles_graph.items():
+            current_tactic = graph.current_tactic
             if current_tactic is None:
                 continue
 
-            try:
-                state_of_current_tactic = current_tactic.current_state.__name__
-            except AttributeError:
-                state_of_current_tactic = "DEFAULT"
+            state_of_current_tactic = current_tactic.current_state.__name__
+
             clear_name_for_tatic = str(current_tactic) + " " + \
-                                   current_tactic.status_flag.name+" " + \
-                                   state_of_current_tactic
-            state.append((current_tactic.player, clear_name_for_tatic, str(current_tactic), current_tactic.target))
+                                   current_tactic.status_flag.name
+            state.append((current_tactic.player, clear_name_for_tatic, state_of_current_tactic, role))
         return state
 
     def clear_graph_of_role(self, r: Role):
@@ -85,14 +76,7 @@ class Strategy(metaclass=ABCMeta):
         """
         commands = {}
 
-        for r in self.roles:
-            player = self.game_state.get_player_by_role(r)
-            if player is None:
-                continue
-            tactic = self.roles_graph.get(r, None)
-            if tactic is None:
-                continue
-
+        for r, player in self.assigned_roles.items():
             try:
                 commands[player] = self.roles_graph[r].exec()
             except EmptyGraphException:

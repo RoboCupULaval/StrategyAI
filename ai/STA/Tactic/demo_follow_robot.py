@@ -16,7 +16,12 @@ FOLLOW_SPEED = 1.5
 class DemoFollowRobot(Tactic):
     def __init__(self, game_state: GameState, player: Player, p_target: Pose=Pose(), args: List[str]=None):
         super().__init__(game_state, player, p_target, args)
-        self.robot_to_follow_id = int(args[0])
+
+        # Since there no target provided, let's follow oneself
+        if args is None:
+            self.robot_to_follow_id = player.id
+        else:
+            self.robot_to_follow_id = int(args[0])
         self.current_state = self.halt
         self.next_state = self.halt
 

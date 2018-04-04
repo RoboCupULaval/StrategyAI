@@ -7,6 +7,7 @@ from typing import List, Dict
 
 from Debug.debug_command_factory import DebugCommandFactory
 from Util import Pose, Position, AICommand, EngineCommand
+from Util.role import Role
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.GameDomainObjects import Player
 from ai.STA.Strategy.human_control import HumanControl
@@ -64,7 +65,11 @@ class PlayExecutor:
             self._change_tactic(cmd)
 
     def _change_strategy(self, cmd: STAChangeCommand):
-        self.play_state.current_strategy = cmd.data["strategy"]
+        # Convert string role to their enum equivalent
+        roles = cmd.data["roles"]
+        if roles is not None:
+            roles = {Role[r]: i for r, i in cmd.data["roles"].items()}
+        self.play_state.change_strategy(cmd.data["strategy"], roles)
 
     def _change_tactic(self, cmd: STAChangeCommand):
 
@@ -98,15 +103,9 @@ class PlayExecutor:
 
     def _send_robots_status(self) -> None:
         states = self.play_state.current_tactical_state
-        cmds = []
-        for player, tactic_name, action_name, target in states:
-            if action_name != 'Stop':
-                cmd = DebugCommandFactory.robot_strategic_state(player,
-                                                                tactic_name,
-                                                                action_name,
-                                                                target.position.to_tuple())
-                cmds.append(cmd)
-        self.ui_send_queue.put(cmds)
+        if len(states) > 0:
+            cmd = DebugCommandFactory.robots_strategic_state(states)
+            self.ui_send_queue.put(cmd)
 
     # def _has_available_players_changed(self) -> bool:
     #     available_players = GameState().our_team.available_players

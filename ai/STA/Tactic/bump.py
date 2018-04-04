@@ -9,8 +9,7 @@ import numpy as np
 from typing import List
 
 from Debug.debug_command_factory import DebugCommandFactory
-from Util import Pose, Position, AICommand
-from Util.ai_command import Idle
+from Util import Pose, Position
 from Util.constant import ROBOT_RADIUS
 from ai.GameDomainObjects.player import Player
 from ai.STA.Action.GoBehind import GoBehind
@@ -20,7 +19,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
-# noinspection PyTypeChecker,PyUnresolvedReferences
+# noinspection PyTypeChecker
 class Bump(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None):
         super().__init__(game_state, player, target, args)
@@ -28,7 +27,6 @@ class Bump(Tactic):
         self.next_state = self.get_behind_ball
         self.debug_interface = DebugCommandFactory()
         self.move_action = self._generate_move_to()
-        self.move_action.status_flag = Flags.SUCCESS
         self.last_ball_position = self.game_state.ball_position
         self.charge_time = 0
         self.last_time = time.time()
@@ -112,7 +110,7 @@ class Bump(Tactic):
         dest_position = self.get_behind_ball_position(ball_position)
         destination_pose = Pose(dest_position, player_pose.orientation)
 
-        return AICommand(self.player.id, destination_pose.to_dict())
+        return MoveTo(destination_pose)
 
     def get_behind_ball_position(self, ball_position):
         vec_dir = self.target.position - ball_position

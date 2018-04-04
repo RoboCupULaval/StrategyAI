@@ -40,7 +40,9 @@ class CmdBuilder:
                   end_speed: float=0,
                   ball_collision: bool=True):
         assert isinstance(target, (Pose, Position))
-        assert isinstance(target, Pose) and not isinstance(target.position, np.ndarray)
+        if isinstance(target, Pose) and isinstance(target.position, np.ndarray):
+            raise ValueError("The pose field must not have ndarray has position")
+
         self._target = Pose(target) if isinstance(target, Position) else target
         self._cruise_speed = cruise_speed
         self._end_speed = end_speed

@@ -49,6 +49,18 @@ class GameState(metaclass=Singleton):
         return self.our_team.available_players[player_id].position
 
 
+    def clear_roles(self):
+        self._role_mapper.clear()
+
+    @property
+    def assigned_roles(self):
+        return {r: p for r, p in self._role_mapper.roles_translation.items() if p is not None}
+
+    def map_players_for_strategy(self, strategy_class):
+        self._role_mapper.map_with_rules(self.our_team.available_players,
+                                         strategy_class.required_roles(),
+                                         strategy_class.optional_roles())
+
     def get_player_by_role(self, role):
         return self._role_mapper.roles_translation[role]
 
@@ -58,9 +70,12 @@ class GameState(metaclass=Singleton):
                 return r
 
     def map_players_to_roles_by_player_id(self, mapping_by_player_id):
-        mapping_by_player = {role: self.our_team.available_players[player_id]
-                             for role, player_id in mapping_by_player_id.items()}
-        self._role_mapper.map_by_player(mapping_by_player)
+        try:
+            mapping_by_player = {role: self.our_team.available_players[player_id]
+                                 for role, player_id in mapping_by_player_id.items()}
+            self._role_mapper.map_by_player(mapping_by_player)
+        except IndexError as e:
+            self.logger.debug("Try to map to a unavailable player ({})".format(e))
 
     def map_players_to_roles_by_player(self, mapping):
         self._role_mapper.map_by_player(mapping)
