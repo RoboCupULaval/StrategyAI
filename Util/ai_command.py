@@ -72,6 +72,10 @@ class CmdBuilder:
                          self._ball_collision)
 
 
+def Kick(kick_force: KickForce=KickForce.LOW):
+    return CmdBuilder.addKick(kick_force).build()
+
+
 def MoveTo(target: Union[Pose, Position],
            cruise_speed: float=1,
            end_speed: float=0,

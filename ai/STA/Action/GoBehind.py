@@ -1,4 +1,6 @@
 # Under MIT licence, see LICENCE.txt
+from typing import Optional
+
 from Util.ai_command import MoveTo
 
 __author__ = "Maxime Gagnon-Legault"
@@ -14,7 +16,7 @@ from ai.GameDomainObjects import Player
 
 RAYON_AVOID = 300  # (mm)
 
-def GoBehind(player: Player, position1: Position, position2: Position=None,
+def GoBehind(player: Player, position1: Position, position2: Optional[Position]=None,
              distance_behind: float=250,
              orientation: str= 'front'):
     """
@@ -75,7 +77,7 @@ def GoBehind(player: Player, position1: Position, position2: Position=None,
     # Calcul de l'orientation de la pose de destination
     destination_orientation = 0
     if orientation == 'front':
-        destination_orientation = (position1 - destination_position).angle
+        destination_orientation = wrap_to_pi((position1 - destination_position).angle)
     elif orientation == 'back':
         destination_orientation = wrap_to_pi((position1 - destination_position).angle + np.pi)
 

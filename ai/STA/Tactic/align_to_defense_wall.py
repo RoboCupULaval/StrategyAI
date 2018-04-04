@@ -174,8 +174,8 @@ class AlignToDefenseWall(Tactic):
         else:
             destination_orientation = (self.ball_position -
                                        self.positions_in_formations[self.player_number_in_formation]).angle
-            return CmdBuilder().addMoveTo(Pose(self.positions_in_formations[self.player_number_in_formation],
-                                               destination_orientation)).build()
+            return MoveTo(Pose(self.positions_in_formations[self.player_number_in_formation],
+                               destination_orientation))
 
     def halt(self):
         self.status_flag = Flags.SUCCESS

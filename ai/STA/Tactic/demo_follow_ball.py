@@ -5,7 +5,7 @@ from Util import Pose
 from Util.constant import POSITION_DEADZONE, ROBOT_RADIUS
 
 from ai.GameDomainObjects import Player
-from Util.ai_command import Idle, CmdBuilder
+from Util.ai_command import Idle, CmdBuilder, MoveTo
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -28,4 +28,4 @@ class DemoFollowBall(Tactic):
             return Idle
         else:
             self.status_flag = Flags.WIP
-            return CmdBuilder().addMoveTo(ball_position).build()
+            return MoveTo(ball_position)
