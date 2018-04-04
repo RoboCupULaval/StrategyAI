@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 import logging
-from typing import List, Tuple, Callable
+from typing import List, Tuple, Callable, Optional
 
 from Util import Pose
 from Util.role import Role
@@ -29,7 +29,7 @@ class PlayState:
     def current_strategy(self, strategy_name: str):
         self.change_strategy(strategy_name)
 
-    def change_strategy(self, strategy_name: str, role=None):
+    def change_strategy(self, strategy_name: str, role: Optional[Role]=None):
         assert isinstance(strategy_name, str)
 
         self.logger.debug("Switching to strategy '{}'".format(strategy_name))

@@ -27,9 +27,9 @@ class DemoFollowRobot(Tactic):
 
     def move_to_ball(self):
         self.status_flag = Flags.WIP
-        self.target = self.game_state.get_player_position(self.robot_to_follow_id)
+        self.target = self.game_state.get_player(self.robot_to_follow_id).pose
 
-        if (self.player.pose.position - self.target).norm < POSITION_DEADZONE + ROBOT_RADIUS:
+        if (self.player.pose.position - self.target.position).norm < POSITION_DEADZONE + ROBOT_RADIUS:
             self.next_state = self.halt
         else:
             self.next_state = self.move_to_ball

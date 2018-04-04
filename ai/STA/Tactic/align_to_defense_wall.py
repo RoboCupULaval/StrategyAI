@@ -1,6 +1,6 @@
 # Under MIT licence, see LICENCE.txt
 import time
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 
@@ -23,18 +23,18 @@ DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4
 DISTANCE_TO_KICK_SIM = ROBOT_RADIUS + BALL_RADIUS
 COMMAND_DELAY = 1.0
 
-DEAD_ZONE = 30 # We lost the true value, but who cares
+DEAD_ZONE = 30  # We lost the true value, but who cares
 
-# noinspection PyAttributeOutsideInit,PyTypeChecker
+
 class AlignToDefenseWall(Tactic):
     def __init__(self, game_state: GameState,
                  player: Player,
-                 args: List[str]=None,
-                 robots_in_formation: List[Player]=[],
+                 args: Optional[List[str]]=None,
+                 robots_in_formation: Optional[List[Player]]=None,
                  auto_pick=False):
         super().__init__(game_state, player, args=args)
 
-        if len(robots_in_formation) == 0:
+        if robots_in_formation is None:
             self.robots_in_formation = [player]
         else:
             self.robots_in_formation = robots_in_formation

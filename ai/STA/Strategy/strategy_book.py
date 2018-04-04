@@ -85,10 +85,7 @@ class StrategyBook(object):
     def strategies_required_roles(self) -> Dict[str, List[str]]:
         results = {}
         for name, strategy_class in self.strategy_book.items():
-            try:
-                results[name] = list([r.name for r in strategy_class.required_roles().keys()])
-            except NotImplementedError:
-                results[name] = [] # FIXME pb: When all strategy will have their required roles listed, we shoud remove that catch
+            results[name] = list([r.name for r in strategy_class.required_roles().keys()])
         return results
 
     def get_strategy(self, strategy_name: str):  # -> Strategy: Wrong return type

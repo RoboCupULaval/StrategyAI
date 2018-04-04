@@ -52,13 +52,6 @@ class Strategy(metaclass=ABCMeta):
         return tactic_node
 
     def get_current_state(self) -> List[Tuple[Player, str, str, Role]]:
-        """ [
-                Player: Player;
-                Tactic Name: str
-                Action name: str
-                Tactic target: Pose
-            ]
-        """
         state = []
         for role, graph in self.roles_graph.items():
             current_tactic = graph.current_tactic
