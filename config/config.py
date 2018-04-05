@@ -105,7 +105,8 @@ class Config(metaclass=Singleton):
         return {
             'GAME': {
                 'our_color': 'yellow',
-                'their_color': 'blue'
+                'their_color': 'blue',
+                'on_negative_side': True
             }
         }
 

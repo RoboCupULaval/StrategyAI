@@ -87,7 +87,7 @@ class GameState(metaclass=Singleton):
 
     @property
     def our_side(self):
-        return FieldSide.NEGATIVE if Config()['ENGINE']['on_negative_side'] else FieldSide.POSITIVE
+        return FieldSide.NEGATIVE if Config()['GAME']['on_negative_side'] else FieldSide.POSITIVE
 
     @property
     def role_mapping(self):
