@@ -17,7 +17,6 @@ class PlayState:
         self.strategy_book = StrategyBook()
         self.tactic_book = TacticBook()
         self.game_state = GameState()
-        self.autonomous_flag = False
         self._current_strategy = None
         self.logger = logging.getLogger(self.__class__.__name__)
 
@@ -43,9 +42,6 @@ class PlayState:
             self.game_state.map_players_to_roles_by_player_id(role)
             
         self._current_strategy = strategy_class(self.game_state)
-
-    def set_autonomous_flag(self, flag: bool) -> None:
-        self.autonomous_flag = flag
 
     @property
     def current_tactical_state(self) -> List[Tuple[Player, str, str, Role]]:

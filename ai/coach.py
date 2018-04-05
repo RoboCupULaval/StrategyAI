@@ -50,9 +50,13 @@ class Coach(Process):
         self.play_state = PlayState()
 
         # Executors
-        self.play_executor = PlayExecutor(self.play_state, self.ui_send_queue)
-        self.debug_executor = DebugExecutor(self.play_state, self.play_executor,
-                                            self.ui_send_queue, self.ui_recv_queue)
+        self.play_executor = PlayExecutor(self.play_state,
+                                          self.ui_send_queue,
+                                          self.referee_queue)
+        self.debug_executor = DebugExecutor(self.play_state,
+                                            self.play_executor,
+                                            self.ui_send_queue,
+                                            self.ui_recv_queue)
 
         # fps and limitation
         self.fps = Config()['GAME']['coach_fps']

@@ -3,7 +3,7 @@ from enum import IntEnum
 
 from ai.Algorithm.IntelligentModule import IntelligentModule
 from ai.Algorithm.evaluation_module import *
-from ai.GameDomainObjects.referee import RefereeCommand, InternalRefereeCommand
+from ai.GameDomainObjects.referee_state import RefereeCommand, InternalRefereeCommand, RefereeState
 from ai.states.play_state import PlayState
 
 
@@ -74,9 +74,10 @@ class SimpleAutoPlay(AutoPlay):
     def __init__(self, play_state: PlayState):
         super().__init__(play_state)
         self.last_ref_command = RefereeCommand.HALT
-        
-    def update(self, available_players_changed: bool):
-        self.next_state = self._select_next_state()
+
+    # TODO: Check if role assignment works well enough, so we don't need available_players_changed
+    def update(self, referee_state: RefereeState, available_players_changed=False):
+        self.next_state = self._select_next_state(referee_state)
 
         if self.next_state is None:
             self.next_state = SimpleAutoPlayState.HALT
@@ -115,8 +116,7 @@ class SimpleAutoPlay(AutoPlay):
             RefereeCommand.NORMAL_START: self._analyse_game()
         }.get(self.last_ref_command, RefereeCommand.NORMAL_START)
 
-    def _select_next_state(self):
-        referee = GameState().referee
+    def _select_next_state(self, referee_state: RefereeState):
         next_state = self.current_state
         # On command change
         if self.last_ref_command != referee.command:

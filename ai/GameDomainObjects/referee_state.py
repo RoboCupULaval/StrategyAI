@@ -75,14 +75,16 @@ new_team_info = {"name": "",
                  "goalie": 0}
 
 
-class Referee:
+class RefereeState:
 
-    def __init__(self):
+    def __init__(self, referee_info: Dict):
         self.command = RefereeCommand.STOP
         self.stage = Stage.NORMAL_FIRST_HALF_PRE
         self.stage_time_left = 0
         self.ball_placement_point = Position()
         self.team_info = {"ours": dict(new_team_info), "theirs": dict(new_team_info)}
+
+        self._update(referee_info)
 
     @property
     def info(self) -> str:
@@ -90,7 +92,7 @@ class Referee:
                                                                  str(self.stage),
                                                                  self.stage_time_left)
 
-    def update(self, referee_info: Dict) -> None:
+    def _update(self, referee_info: Dict) -> None:
 
         self.stage = Stage(referee_info["stage"])
         self.stage_time_left = referee_info["stage_time_left"]
@@ -151,8 +153,8 @@ class Referee:
 
     @staticmethod
     def _is_our_team_command(command):
-        return (Referee._is_yellow_command(command) and TeamColorService().our_team_color is TeamColor.YELLOW) or\
-             (Referee._is_blue_command(command) and TeamColorService().our_team_color is TeamColor.BLUE)
+        return (RefereeState._is_yellow_command(command) and TeamColorService().our_team_color is TeamColor.YELLOW) or \
+               (RefereeState._is_blue_command(command) and TeamColorService().our_team_color is TeamColor.BLUE)
 
     @staticmethod
     def _is_yellow_command(command):
@@ -160,4 +162,4 @@ class Referee:
 
     @staticmethod
     def _is_blue_command(command):
-        return not Referee._is_yellow_command(command)
+        return not RefereeState._is_yellow_command(command)
