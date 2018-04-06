@@ -125,3 +125,4 @@ class Config(metaclass=Singleton):
         self._config['GAME']['on_negative_side'] = cli_args.on_negative_side
         self._config['ENGINE']['enable_profiling'] = cli_args.enable_profiling
         self._config['GAME']['competition_mode'] = cli_args.competition_mode
+        self._config['GAME']['is_autonomous_play_at_startup'] = cli_args.start_in_auto

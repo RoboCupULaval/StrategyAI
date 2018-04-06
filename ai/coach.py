@@ -5,7 +5,7 @@ import cProfile
 
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
-from time import time
+from time import time, sleep
 
 from Util.timing import create_fps_timer
 
@@ -82,8 +82,15 @@ class Coach(Process):
         self.game_state.const = self.field
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
+
     def run(self) -> None:
         self.wait_for_geometry()
+
+        # FIXME: At startup it takes a few seconds to have the player's positions,
+        # to prevent role assigment crash, let's sleep for a few secs.
+        if Config()["GAME"]["is_autonomous_play_at_startup"]:
+            sleep(3)
+
         self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
         try:
             while True:
