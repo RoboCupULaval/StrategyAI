@@ -106,7 +106,8 @@ class Config(metaclass=Singleton):
             'GAME': {
                 'our_color': 'yellow',
                 'their_color': 'blue',
-                'is_autonomous_play_at_startup': False
+                'is_autonomous_play_at_startup': False,
+                'on_negative_side': True
             }
         }
 
