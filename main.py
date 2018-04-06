@@ -54,6 +54,10 @@ if __name__ == '__main__':
     Config().load_parameters(cli_args)
     logging = logging.getLogger('Main')
 
+    logging.info("Color: {}, Field side: {}, Mode: {}".format(Config()["GAME"]["our_color"].upper(),
+                                                    "NEGATIVE" if Config()["GAME"]["on_negative_side"] else "POSITIVE",
+                                                    "COMPETITION" if cli_args.competition_mode else "NORMAL"))
+
     stop_framework = False
     while not stop_framework:
         try:

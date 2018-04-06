@@ -235,17 +235,6 @@ class ShittyField:
             return True
         return False
 
-    def _convert_field_circular_arc(self, field_arcs):
-        result = {}
-        for arc in field_arcs:
-            result[arc.name] = FieldCircularArc(arc)
-        return result
-
-    def _convert_field_line_segments(self, field_lines):
-        result = {}
-        for line in field_lines:
-            result[line.name] = FieldLineSegment(line)
-        return result
 
 
 positive_side_constant = {
