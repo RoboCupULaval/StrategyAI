@@ -64,7 +64,7 @@ class Field:
         self._constant["FIELD_GOAL_Y_TOP"] = defense_radius + (defense_stretch / 2)
         self._constant["FIELD_GOAL_Y_BOTTOM"] = -self._constant["FIELD_GOAL_Y_TOP"]
 
-        if not Config()['ENGINE']['on_negative_side']:
+        if not Config()['GAME']['on_negative_side']:
             self._constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self._constant["FIELD_X_NEGATIVE"]
             self._constant["FIELD_THEIR_GOAL_X_INTERNAL"] = self._constant["FIELD_X_NEGATIVE"] + self._constant[
                 "FIELD_GOAL_RADIUS"]
