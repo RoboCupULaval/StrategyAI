@@ -73,11 +73,11 @@ class SimpleAutoPlay(AutoPlay):
     """
     def __init__(self, play_state: PlayState):
         super().__init__(play_state)
-        self.last_ref_command = RefereeCommand.HALT
+        self.last_ref_state = InternalRefereeCommand.HALT
 
     # TODO: Check if role assignment works well enough, so we don't need available_players_changed
-    def update(self, referee_state: RefereeState, available_players_changed=False):
-        self.next_state = self._select_next_state(referee_state)
+    def update(self, ref_state: RefereeState, available_players_changed=False):
+        self.next_state = self._select_next_state(ref_state)
 
         if self.next_state is None:
             self.next_state = SimpleAutoPlayState.HALT
@@ -114,24 +114,24 @@ class SimpleAutoPlay(AutoPlay):
             InternalRefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.OFFENSE_PENALTY,
             InternalRefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.DEFENSE_PENALTY,
             RefereeCommand.NORMAL_START: self._analyse_game()
-        }.get(self.last_ref_command, RefereeCommand.NORMAL_START)
+        }.get(self.last_ref_state, RefereeCommand.NORMAL_START)
 
-    def _select_next_state(self, referee_state: RefereeState):
+    def _select_next_state(self, ref_state: RefereeState):
         next_state = self.current_state
         # On command change
-        if self.last_ref_command != referee.command:
+        if self.last_ref_state != ref_state.command:
             next_state = {
-                RefereeCommand.HALT: SimpleAutoPlayState.HALT,
+                InternalRefereeCommand.HALT: SimpleAutoPlayState.HALT,
 
-                RefereeCommand.STOP: SimpleAutoPlayState.STOP,
+                InternalRefereeCommand.STOP: SimpleAutoPlayState.STOP,
                 InternalRefereeCommand.GOAL_US: self.current_state,
                 InternalRefereeCommand.GOAL_THEM: self.current_state,
                 InternalRefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
 
                 InternalRefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.HALT,
 
-                RefereeCommand.FORCE_START: self._analyse_game(),
-                RefereeCommand.NORMAL_START: self._normal_start(),
+                InternalRefereeCommand.FORCE_START: self._analyse_game(),
+                InternalRefereeCommand.NORMAL_START: self._normal_start(),
 
                 InternalRefereeCommand.TIMEOUT_THEM: SimpleAutoPlayState.TIMEOUT,
                 InternalRefereeCommand.TIMEOUT_US: SimpleAutoPlayState.TIMEOUT,
@@ -146,13 +146,13 @@ class SimpleAutoPlay(AutoPlay):
                 InternalRefereeCommand.INDIRECT_FREE_US: SimpleAutoPlayState.INDIRECT_FREE_OFFENSE,
                 InternalRefereeCommand.INDIRECT_FREE_THEM: SimpleAutoPlayState.INDIRECT_FREE_DEFENSE
 
-            }.get(referee.command, RefereeCommand.HALT)
+            }.get(ref_state.command, RefereeCommand.HALT)
 
         # During the game
-        elif referee.command == RefereeCommand.FORCE_START or referee.command == RefereeCommand.NORMAL_START:
+        elif ref_state.command == RefereeCommand.FORCE_START or ref_state.command == RefereeCommand.NORMAL_START:
             next_state = self._analyse_game()
 
-        self.last_ref_command = referee.command
+        self.last_ref_state = ref_state.command
         return next_state
 
     @staticmethod

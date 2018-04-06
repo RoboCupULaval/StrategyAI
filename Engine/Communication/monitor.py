@@ -2,6 +2,14 @@ import sched
 import time
 from threading import Thread
 
+from multiprocessing import Queue
+
+
+def clear_queue(queue: Queue):
+    size = queue.qsize()
+    while size > 0:
+        queue.get()
+        size -= 1
 
 def monitor_queue(cls):
 
