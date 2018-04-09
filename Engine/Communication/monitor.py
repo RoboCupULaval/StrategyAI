@@ -6,10 +6,8 @@ from multiprocessing import Queue
 
 
 def clear_queue(queue: Queue):
-    size = queue.qsize()
-    while size > 0:
-        queue.get()
-        size -= 1
+    with queue.mutex:
+        queue.queue.clear()
 
 def monitor_queue(cls):
 

@@ -7,7 +7,6 @@ from queue import Empty
 from typing import List, Dict
 
 from Debug.debug_command_factory import DebugCommandFactory
-from Engine.Communication.monitor import clear_queue
 from Util import Pose, Position, AICommand, EngineCommand
 from Util.role import Role
 from ai.Algorithm.auto_play import SimpleAutoPlay
