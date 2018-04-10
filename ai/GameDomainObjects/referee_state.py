@@ -8,7 +8,7 @@ from Util.position import Position
 from Util.team_color_service import TeamColorService
 
 
-class RefereeCommand(IntEnum):
+class RawRefereeCommand(IntEnum):
     HALT = 0
     STOP = 1
     NORMAL_START = 2
@@ -31,7 +31,7 @@ class RefereeCommand(IntEnum):
     BALL_PLACEMENT_BLUE = 17
 
 
-class InternalRefereeCommand(IntEnum):
+class RefereeCommand(IntEnum):
     HALT = 0
     STOP = 1
     NORMAL_START = 2
@@ -83,7 +83,7 @@ new_team_info = {"name": "",
 class RefereeState:
 
     def __init__(self, referee_info: Dict):
-        self.command = RefereeCommand.STOP
+        self.command = RawRefereeCommand.STOP
         self.stage = Stage.NORMAL_FIRST_HALF_PRE
         self.stage_time_left = 0
         self.ball_placement_point = Position()
@@ -113,26 +113,26 @@ class RefereeState:
             self.blue_team_is_positive = referee_info["blueTeamOnPositiveHalf"]
 
         if "designated_position" in referee_info:
-            if self.command in [InternalRefereeCommand.BALL_PLACEMENT_US,
-                                InternalRefereeCommand.BALL_PLACEMENT_THEM]:
+            if self.command in [RefereeCommand.BALL_PLACEMENT_US,
+                                RefereeCommand.BALL_PLACEMENT_THEM]:
                 self.ball_placement_point = (referee_info["designated_position"]["x"],
                                              referee_info["designated_position"]["y"])
 
-        raw_command = RefereeCommand(referee_info["command"])
+        raw_command = RawRefereeCommand(referee_info["command"])
 
         self.command = self._parse_command(raw_command)
         self._parse_team_info(referee_info)
 
-    def _parse_command(self, command: RefereeCommand):
+    def _parse_command(self, command: RawRefereeCommand):
         # Color wise commands
         parsed_cmd = command
-        if command >= RefereeCommand.PREPARE_KICKOFF_YELLOW:
+        if command >= RawRefereeCommand.PREPARE_KICKOFF_YELLOW:
             if self._is_our_team_command(command):
                 parsed_cmd = self._convert_raw_to_us(command)
             else:
                 parsed_cmd = self._convert_raw_to_them(command)
         # None color wise commands
-        return InternalRefereeCommand(parsed_cmd)
+        return RefereeCommand(parsed_cmd)
 
     def _parse_team_info(self, frame):
         if TeamColorService().our_team_color is TeamColor.YELLOW:

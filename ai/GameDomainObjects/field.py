@@ -1,8 +1,14 @@
+from enum import Enum
 from typing import Dict
 
 from Util import Position
 from ai.GameDomainObjects import Ball
 from config.config import Config
+
+
+class FieldSide(Enum):
+    POSITIVE = 0
+    NEGATIVE = 1
 
 
 # noinspection PyPep8

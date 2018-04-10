@@ -2,8 +2,8 @@
 
 from Util.position import Position
 from Util.constant import ROBOT_RADIUS
-from ai.GameDomainObjects.ShittyField import FieldSide
 from ai.states.game_state import GameState
+from ai.GameDomainObjects.field import FieldSide
 
 import numpy as np
 

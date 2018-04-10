@@ -3,7 +3,7 @@ from enum import IntEnum
 
 from ai.Algorithm.IntelligentModule import IntelligentModule
 from ai.Algorithm.evaluation_module import *
-from ai.GameDomainObjects.referee_state import RefereeCommand, InternalRefereeCommand, RefereeState
+from ai.GameDomainObjects.referee_state import RefereeCommand, RefereeState
 from ai.states.play_state import PlayState
 
 
@@ -73,7 +73,7 @@ class SimpleAutoPlay(AutoPlay):
     """
     def __init__(self, play_state: PlayState):
         super().__init__(play_state)
-        self.last_ref_state = InternalRefereeCommand.HALT
+        self.last_ref_state = RefereeCommand.HALT
 
     # TODO: Check if role assignment works well enough, so we don't need available_players_changed
     def update(self, ref_state: RefereeState, available_players_changed=False):
@@ -109,10 +109,10 @@ class SimpleAutoPlay(AutoPlay):
 
     def _normal_start(self):
         return {
-            InternalRefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.OFFENSE_KICKOFF,
-            InternalRefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.DEFENSE_KICKOFF,
-            InternalRefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.OFFENSE_PENALTY,
-            InternalRefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.DEFENSE_PENALTY,
+            RefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.OFFENSE_KICKOFF,
+            RefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.DEFENSE_KICKOFF,
+            RefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.OFFENSE_PENALTY,
+            RefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.DEFENSE_PENALTY,
             RefereeCommand.NORMAL_START: self._analyse_game()
         }.get(self.last_ref_state, RefereeCommand.NORMAL_START)
 
@@ -121,30 +121,30 @@ class SimpleAutoPlay(AutoPlay):
         # On command change
         if self.last_ref_state != ref_state.command:
             next_state = {
-                InternalRefereeCommand.HALT: SimpleAutoPlayState.HALT,
+                RefereeCommand.HALT: SimpleAutoPlayState.HALT,
 
-                InternalRefereeCommand.STOP: SimpleAutoPlayState.STOP,
-                InternalRefereeCommand.GOAL_US: self.current_state,
-                InternalRefereeCommand.GOAL_THEM: self.current_state,
-                InternalRefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
+                RefereeCommand.STOP: SimpleAutoPlayState.STOP,
+                RefereeCommand.GOAL_US: self.current_state,
+                RefereeCommand.GOAL_THEM: self.current_state,
+                RefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
 
-                InternalRefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.HALT,
+                RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.HALT,
 
-                InternalRefereeCommand.FORCE_START: self._analyse_game(),
-                InternalRefereeCommand.NORMAL_START: self._normal_start(),
+                RefereeCommand.FORCE_START: self._analyse_game(),
+                RefereeCommand.NORMAL_START: self._normal_start(),
 
-                InternalRefereeCommand.TIMEOUT_THEM: SimpleAutoPlayState.TIMEOUT,
-                InternalRefereeCommand.TIMEOUT_US: SimpleAutoPlayState.TIMEOUT,
+                RefereeCommand.TIMEOUT_THEM: SimpleAutoPlayState.TIMEOUT,
+                RefereeCommand.TIMEOUT_US: SimpleAutoPlayState.TIMEOUT,
 
-                InternalRefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE,
-                InternalRefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE,
-                InternalRefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE,
-                InternalRefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE,
+                RefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE,
+                RefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE,
+                RefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE,
+                RefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE,
 
-                InternalRefereeCommand.DIRECT_FREE_US: SimpleAutoPlayState.DIRECT_FREE_OFFENSE,
-                InternalRefereeCommand.DIRECT_FREE_THEM: SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
-                InternalRefereeCommand.INDIRECT_FREE_US: SimpleAutoPlayState.INDIRECT_FREE_OFFENSE,
-                InternalRefereeCommand.INDIRECT_FREE_THEM: SimpleAutoPlayState.INDIRECT_FREE_DEFENSE
+                RefereeCommand.DIRECT_FREE_US: SimpleAutoPlayState.DIRECT_FREE_OFFENSE,
+                RefereeCommand.DIRECT_FREE_THEM: SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
+                RefereeCommand.INDIRECT_FREE_US: SimpleAutoPlayState.INDIRECT_FREE_OFFENSE,
+                RefereeCommand.INDIRECT_FREE_THEM: SimpleAutoPlayState.INDIRECT_FREE_DEFENSE
 
             }.get(ref_state.command, RefereeCommand.HALT)
 
