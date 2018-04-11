@@ -26,8 +26,8 @@ class GoToRandomPosition(Tactic):
                  height_of_zone=800,
                  width_of_zone=800):
         super().__init__(game_state, player, args=args)
-        self.current_state = self.exec
-        self.next_state = self.exec
+        self.current_state = self.main_state
+        self.next_state = self.main_state
         self.center_of_zone = center_of_zone
         self.height_of_zone = height_of_zone
         self.width_of_zone = width_of_zone
@@ -44,14 +44,13 @@ class GoToRandomPosition(Tactic):
         self.current_angle_to_go = 0 #random.randint(0, 100) * np.pi / 100.
         self.next_pose = Pose(self.current_position_to_go, self.current_angle_to_go)
 
-    def exec(self):
+    def main_state(self):
 
         if self.check_success():
             self.current_position_index_to_go = random.randint(0, len(self.grid_of_positions) - 1)
             self.current_position_to_go = self.grid_of_positions[self.current_position_index_to_go]
             #self.current_angle_to_go = random.randint(-1, 1) * np.pi / 100.
             self.next_pose = Pose(self.current_position_to_go, self.current_angle_to_go)
-        self.next_state = self.exec
 
         return MoveTo(self.next_pose)
 

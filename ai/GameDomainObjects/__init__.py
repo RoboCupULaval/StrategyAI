@@ -4,5 +4,5 @@
 from .ball import Ball
 from .field import Field
 from .player import Player
-from .referee import Referee
+from .referee_state import RefereeState
 from .team import Team

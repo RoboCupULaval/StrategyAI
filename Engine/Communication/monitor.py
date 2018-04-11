@@ -2,6 +2,12 @@ import sched
 import time
 from threading import Thread
 
+from multiprocessing import Queue
+
+
+def clear_queue(queue: Queue):
+    with queue.mutex:
+        queue.queue.clear()
 
 def monitor_queue(cls):
 

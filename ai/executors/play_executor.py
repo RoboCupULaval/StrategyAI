@@ -2,6 +2,7 @@
 
 import logging
 from multiprocessing import Queue
+from queue import Empty
 
 from typing import List, Dict
 
@@ -20,17 +21,20 @@ from config.config import Config
 
 class PlayExecutor:
 
-    def __init__(self, play_state: PlayState, ui_send_queue: Queue):
+    def __init__(self, play_state: PlayState, ui_send_queue: Queue, referee_queue: Queue):
         self.logger = logging.getLogger(self.__class__.__name__)
 
         cfg = Config()
         self.auto_play = SimpleAutoPlay(play_state)
         self.play_state = play_state
         self.game_state = GameState()
-        self.play_state.autonomous_flag = cfg["GAME"]["autonomous_play"]
-        self.last_available_players = {}
-        self.goalie_id = -1
         self.ui_send_queue = ui_send_queue
+        self.referee_queue = referee_queue
+
+        self.autonomous_flag = cfg["GAME"]["is_autonomous_play_at_startup"]
+        self._ref_states = []
+        # self.last_available_players = {}
+        # self.goalie_id = -1
 
         self.pathfinder_module = PathfinderModule()
 
@@ -41,11 +45,13 @@ class PlayExecutor:
         :return: None
         """
 
-        # if self.play_state.autonomous_flag:
-        #     if GameState().game.referee.team_info['ours']['goalie'] != self.goalie_id:
-        #         self.goalie_id = GameState().game.referee.team_info['ours']['goalie']
-        #         GameState().update_player_for_locked_role(self.goalie_id, Role.GOALKEEPER)
-        #     self.auto_play.update(self._has_available_players_changed())
+        self._fetch_referee_state()
+
+        # TODO: Add a warning when no ref has been received since the start
+        # It will indicate that the wrong referee port has been used
+        if self.autonomous_flag:
+            self._exec_auto_play()
+
         ai_cmds = self._execute_strategy()
         engine_cmds = []
 
@@ -63,6 +69,38 @@ class PlayExecutor:
             self._change_strategy(cmd)
         elif cmd.is_tactic_change_command():
             self._change_tactic(cmd)
+        elif cmd.is_autoplay_change_command():
+            self.order_change_of_autonomous_play(cmd.data['status'])
+
+    def order_change_of_autonomous_play(self, is_autonomous):
+        # If we switch from manual to autonomous we clear previous referee's command
+        if not self.autonomous_flag and is_autonomous:
+            self.logger.debug("Switching to autonomous mode")
+        elif self.autonomous_flag and not is_autonomous:
+            self.logger.debug("Switching to manual mode")
+            self.play_state.current_strategy = "DoNothing"
+
+        self.autonomous_flag = is_autonomous
+
+    @property
+    def ref_states(self):
+        return self._ref_states
+
+    def _fetch_referee_state(self):
+        self._ref_states = []
+        try:
+            while not self.referee_queue.empty():
+                referee_state = self.referee_queue.get(block=False)
+                self._ref_states.append(referee_state)
+        except Empty:
+            pass
+        # if GameState().game.referee.team_info['ours']['goalie'] != self.goalie_id:
+        #     self.goalie_id = GameState().game.referee.team_info['ours']['goalie']
+        #     GameState().update_player_for_locked_role(self.goalie_id, Role.GOALKEEPER)
+
+    def _exec_auto_play(self):
+        for state in self._ref_states:
+            self.auto_play.update(state)
 
     def _change_strategy(self, cmd: STAChangeCommand):
         # Convert string role to their enum equivalent
@@ -106,6 +144,7 @@ class PlayExecutor:
         if len(states) > 0:
             cmd = DebugCommandFactory.robots_strategic_state(states)
             self.ui_send_queue.put(cmd)
+
 
     # def _has_available_players_changed(self) -> bool:
     #     available_players = GameState().our_team.available_players

@@ -41,6 +41,11 @@ def set_arg_parser():
                             help='Enables profiling options through the project.',
                             default=False)
 
+    arg_parser.add_argument('--start_in_auto',
+                            action='store_true',
+                            help='Start the AI directly in autonomous mode.',
+                            default=False)
+
     arg_parser.add_argument('--competition_mode',
                             action='store_true',
                             help='Enables watchdog which reset the Framework if it stop.',
@@ -53,6 +58,10 @@ if __name__ == '__main__':
     Config().load_file(cli_args.config_file)
     Config().load_parameters(cli_args)
     logging = logging.getLogger('Main')
+
+    logging.info("Color: {}, Field side: {}, Mode: {}".format(Config()["GAME"]["our_color"].upper(),
+                                                    "NEGATIVE" if Config()["GAME"]["on_negative_side"] else "POSITIVE",
+                                                    "COMPETITION" if cli_args.competition_mode else "NORMAL"))
 
     stop_framework = False
     while not stop_framework:
