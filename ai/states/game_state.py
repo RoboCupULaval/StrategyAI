@@ -17,11 +17,8 @@ class GameState(metaclass=Singleton):
 
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.reset()
 
-    def reset(self):
         self._role_mapper = RoleMapper()
-
         self._ball = Ball()
         self._field = Field(self._ball)
 
@@ -30,6 +27,9 @@ class GameState(metaclass=Singleton):
 
         self._our_team = self._yellow_team if TeamColorService().is_our_team_yellow else self._blue_team
         self._enemy_team = self._blue_team if TeamColorService().is_our_team_yellow else self._yellow_team
+
+    def reset(self):
+        self.__init__()
 
     def update(self, new_game_state):
         if new_game_state:

@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from Util import Pose
 from Util.ai_command import MoveTo
-from Util.area import stayOutsideCircle
+from Util.area import stay_outside_circle
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
@@ -18,7 +18,7 @@ class StayAwayFromBall(Tactic):
         self.keepout_radius = keepout_radius
 
     def stay_out_of_circle(self):
-        position = stayOutsideCircle(self.player.pose.position,
+        position = stay_outside_circle(self.player.pose.position,
                                      self.game_state.ball_position,
                                      self.keepout_radius)
         return MoveTo(Pose(position, self.player.pose.orientation))
