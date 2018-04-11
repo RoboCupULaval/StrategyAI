@@ -54,6 +54,8 @@ def closest_point_on_line(reference: Position, start: Position, end: Position) -
 
 
 def closest_point_on_segment(reference: Position, start: Position, end: Position) -> Position:
+    if end == start:
+        return start
     proj = projection(reference, start=start, end=end)
     if proj >= (end - start).norm:
         return end

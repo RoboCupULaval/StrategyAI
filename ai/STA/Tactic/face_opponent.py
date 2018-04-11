@@ -29,7 +29,9 @@ class FaceOpponent(Tactic):
         self.dribbler_on = dribbler_on
         self.cruise_speed = cruise_speed
 
-    def exec(self):
+        self.next_state = self.main_state
+
+    def main_state(self):
         target_player = closest_player_to_point(self.game_state.ball_position, our_team=False).player
         orientation_opponent = np.array([math.cos(target_player.pose.orientation),
                                          math.sin(target_player.pose.orientation)])

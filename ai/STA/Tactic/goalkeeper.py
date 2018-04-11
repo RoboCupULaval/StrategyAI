@@ -13,7 +13,7 @@ from Util.constant import ROBOT_RADIUS, KickForce
 from Util.constant import TeamColor
 from Util.geometry import clamp, compare_angle, wrap_to_pi
 from ai.Algorithm.evaluation_module import closest_player_to_point, best_passing_option, player_with_ball
-from ai.GameDomainObjects.ShittyField import FieldSide
+from ai.GameDomainObjects.field import FieldSide
 from ai.GameDomainObjects import Player
 
 from ai.STA.Action.ProtectGoal import ProtectGoal

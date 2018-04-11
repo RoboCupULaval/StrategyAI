@@ -5,7 +5,7 @@ from Util import Singleton
 
 mandatory_fields = {
     'COMMUNICATION': ['type', 'field_port_file', 'vision_port', 'ui_debug_address'],
-    'GAME': ['our_color', 'type', 'autonomous_play'],
+    'GAME': ['our_color', 'type', 'is_autonomous_play_at_startup'],
     'IMAGE': ['number_of_camera']
 }
 
@@ -54,7 +54,7 @@ class Config(metaclass=Singleton):
         self['ENGINE'] = dict()
         self['IMAGE']['number_of_camera'] = int(self['IMAGE']['number_of_camera'])
         self['GAME']['coach_fps'] = int(self['GAME']['coach_fps'])
-        self['GAME']['autonomous_play'] = self['GAME']['autonomous_play'] == 'true'
+        self['GAME']['is_autonomous_play_at_startup'] = self['GAME']['is_autonomous_play_at_startup'] == 'true'
 
         # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
         if self['GAME']['our_color'] == 'blue':
@@ -106,6 +106,7 @@ class Config(metaclass=Singleton):
             'GAME': {
                 'our_color': 'yellow',
                 'their_color': 'blue',
+                'is_autonomous_play_at_startup': False,
                 'on_negative_side': True
             }
         }
@@ -124,3 +125,4 @@ class Config(metaclass=Singleton):
         self._config['GAME']['on_negative_side'] = cli_args.on_negative_side
         self._config['ENGINE']['enable_profiling'] = cli_args.enable_profiling
         self._config['GAME']['competition_mode'] = cli_args.competition_mode
+        self._config['GAME']['is_autonomous_play_at_startup'] = cli_args.start_in_auto

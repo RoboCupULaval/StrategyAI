@@ -59,6 +59,8 @@ class AlignToDefenseWall(Tactic):
 
         self.init_players_in_formation()
 
+        self.next_state = self.main_state
+
     def init_players_in_formation(self):
         self.player_number_in_formation = None
         self.robots_in_formation = self.robots
@@ -73,7 +75,6 @@ class AlignToDefenseWall(Tactic):
 
         self.number_of_robots = len(self.robots_in_formation)
 
-        self.next_state = self.define_center_of_formation
 
     def define_center_of_formation(self):
         """
@@ -160,7 +161,7 @@ class AlignToDefenseWall(Tactic):
             raise RuntimeError("Usupported number of player in formation {}".format(self.number_of_robots))
         # print(self.positions_in_formations)
 
-    def exec(self):
+    def main_state(self):
         self.define_center_of_formation()
         self.compute_positions_in_formation()
         # print(self.player_number_in_formation)
@@ -174,16 +175,13 @@ class AlignToDefenseWall(Tactic):
         # print(self.player_number_in_formation)
         # print(self.player.id)
         if self.check_success():
-            return self.halt
+            self.status_flag = Flags.SUCCESS
+            return Idle
         else:
             destination_orientation = (self.ball_position -
                                        self.positions_in_formations[self.player_number_in_formation]).angle
             return MoveTo(Pose(self.positions_in_formations[self.player_number_in_formation],
                                destination_orientation))
-
-    def halt(self):
-        self.status_flag = Flags.SUCCESS
-        return Idle
 
     def check_success(self):
         player_position = self.player.pose.position

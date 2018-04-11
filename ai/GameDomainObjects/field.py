@@ -1,9 +1,32 @@
+from enum import Enum
 from typing import Dict
 
 from Util import Position
 from ai.GameDomainObjects import Ball
 from config.config import Config
 
+
+class FieldSide(Enum):
+    POSITIVE = 0
+    NEGATIVE = 1
+
+
+# noinspection PyPep8
+class FieldCircularArc:
+    def __init__(self, arc: Dict):
+        self.center = Position.from_dict(arc["center"])
+        self.radius      = arc["radius"]
+        self.angle_start = arc["a1"]  # Counter clockwise order
+        self.angle_ened  = arc["a2"]
+        self.thickness   = arc["thickness"]
+
+
+class FieldLineSegment:
+    def __init__(self, line: Dict):
+        self.p1 = Position.from_dict(line["p1"])
+        self.p2 = Position.from_dict(line["p2"])
+        self.length = (self.p2 - self.p1).norm
+        self.thickness = line["thickness"]
 
 class Field:
     def __init__(self, ball: Ball):
@@ -23,12 +46,13 @@ class Field:
 
     @constant.setter
     def constant(self, field: Dict):
-        if len(field.field_lines) == 0:
+        field = field["field"]
+        if len(field["field_lines"]) == 0:
             raise RuntimeError(
                 "Receiving legacy geometry message instead of the new geometry message. Update your grsim or check your vision port.")
 
-        field_lines = self._convert_field_line_segments(field.field_lines)
-        field_arcs = self._convert_field_circular_arc(field.field_arcs)
+        self.field_lines = self._convert_field_line_segments(field["field_lines"])
+        self.field_arcs = self._convert_field_circular_arc(field["field_arcs"])
 
         if "RightFieldLeftPenaltyArc" not in self.field_arcs:
             # This is a new type of field for Robocup 2018, it does not have a circular goal zone
@@ -36,10 +60,10 @@ class Field:
         else:
             defense_radius = self.field_arcs['RightFieldLeftPenaltyArc'].radius
 
-        field_length = field.field_length
-        field_width = field.field_width
-        boundary_width = field.boundary_width
-        goal_width = field.goal_width
+        field_length = field["field_length"]
+        field_width = field["field_width"]
+        boundary_width = field["boundary_width"]
+        goal_width = field["goal_width"]
         center_circle_radius = self.field_arcs['CenterCircle'].radius
         defense_stretch = 100  # hard coded parce que cette valeur d'est plus valide et que plusieurs modules en ont de besoin
         # la valeur qu'on avait apres le fix a Babin était de 9295 mm, ce qui est 90 fois la grandeur d'avant.
@@ -105,8 +129,18 @@ class Field:
             self._constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"] = Position(self._constant["FIELD_X_POSITIVE"],
                                                                         -self._constant["FIELD_GOAL_SEGMENT"] / 2)
             self._constant["FIELD_THEIR_GOAL_MID_GOAL"] = Position(self._constant["FIELD_X_POSITIVE"], 0)
-        
-        
+
+    def _convert_field_circular_arc(self, field_arcs: Dict):
+        result = {}
+        for arc in field_arcs:
+            result[arc["name"]] = FieldCircularArc(arc)
+        return result
+
+    def _convert_field_line_segments(self, field_lines: Dict):
+        result = {}
+        for line in field_lines:
+            result[line["name"]] = FieldLineSegment(line)
+        return result
         
         
         

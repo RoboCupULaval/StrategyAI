@@ -8,8 +8,8 @@ from Util.constant import TeamColor
 from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
 from Util.team_color_service import TeamColorService
-from ai.GameDomainObjects import Ball, Team, Field, Referee
-from ai.GameDomainObjects.ShittyField import FieldSide
+from ai.GameDomainObjects import Ball, Team, Field, RefereeState
+from ai.GameDomainObjects.field import FieldSide
 from config.config import Config
 
 
@@ -24,8 +24,6 @@ class GameState(metaclass=Singleton):
 
         self._ball = Ball()
         self._field = Field(self._ball)
-
-        self._referee = Referee()
 
         self._blue_team = Team(team_color=TeamColor.BLUE)
         self._yellow_team = Team(team_color=TeamColor.YELLOW)
@@ -131,7 +129,3 @@ class GameState(metaclass=Singleton):
     @property
     def is_ball_on_field(self):
         return self._field.ball is not None
-
-    @property
-    def referee(self) -> Referee:
-        return self._referee

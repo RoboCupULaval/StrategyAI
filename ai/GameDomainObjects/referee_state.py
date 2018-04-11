@@ -8,7 +8,7 @@ from Util.position import Position
 from Util.team_color_service import TeamColorService
 
 
-class RefereeCommand(IntEnum):
+class RawRefereeCommand(IntEnum):
     HALT = 0
     STOP = 1
     NORMAL_START = 2
@@ -31,7 +31,12 @@ class RefereeCommand(IntEnum):
     BALL_PLACEMENT_BLUE = 17
 
 
-class InternalRefereeCommand(IntEnum):
+class RefereeCommand(IntEnum):
+    HALT = 0
+    STOP = 1
+    NORMAL_START = 2
+    FORCE_START = 3
+
     PREPARE_KICKOFF_US = 4
     PREPARE_KICKOFF_THEM = 5
     PREPARE_PENALTY_US = 6
@@ -75,38 +80,53 @@ new_team_info = {"name": "",
                  "goalie": 0}
 
 
-class Referee:
+class RefereeState:
 
-    def __init__(self):
-        self.command = RefereeCommand.STOP
+    def __init__(self, referee_info: Dict):
+        self.command = RawRefereeCommand.STOP
         self.stage = Stage.NORMAL_FIRST_HALF_PRE
         self.stage_time_left = 0
         self.ball_placement_point = Position()
         self.team_info = {"ours": dict(new_team_info), "theirs": dict(new_team_info)}
 
+        self.blue_team_is_positive = None
+
+        self._update(referee_info)
+
     @property
-    def info(self) -> str:
-        return "command {}\nstage {}\nstage_time_left {}".format(str(self.command),
-                                                                 str(self.stage),
-                                                                 self.stage_time_left)
+    def info(self) -> Dict:
+        return {
+            "command": str(self.command),
+            "stage": str(self.stage),
+            "stage_time_left": self.stage_time_left
+        }
 
-    def update(self, referee_info: Dict) -> None:
-
+    def _update(self, referee_info: Dict) -> None:
         self.stage = Stage(referee_info["stage"])
-        self.stage_time_left = referee_info["stage_time_left"]
 
-        raw_command = RefereeCommand(referee_info["command"])
+        # TODO: Currently the only optional field that we might rely on is the time left
+        # since most packet don't specify it we need a additional state to track it
+        if "stage_time_left" in referee_info:
+            self.stage_time_left = referee_info["stage_time_left"]
+
+        if "blueTeamOnPositiveHalf" in referee_info:
+            self.blue_team_is_positive = referee_info["blueTeamOnPositiveHalf"]
+
+        if "designated_position" in referee_info:
+            if self.command in [RefereeCommand.BALL_PLACEMENT_US,
+                                RefereeCommand.BALL_PLACEMENT_THEM]:
+                self.ball_placement_point = (referee_info["designated_position"]["x"],
+                                             referee_info["designated_position"]["y"])
+
+        raw_command = RawRefereeCommand(referee_info["command"])
+
         self.command = self._parse_command(raw_command)
-        if self.command == InternalRefereeCommand.BALL_PLACEMENT_US \
-                or self.command == InternalRefereeCommand.BALL_PLACEMENT_THEM:
-            self.ball_placement_point = (referee_info["point"]["x"], referee_info["point"]["y"])
-
         self._parse_team_info(referee_info)
 
-    def _parse_command(self, command: RefereeCommand):
+    def _parse_command(self, command: RawRefereeCommand):
         # Color wise commands
         parsed_cmd = command
-        if command >= RefereeCommand.PREPARE_KICKOFF_YELLOW:
+        if command >= RawRefereeCommand.PREPARE_KICKOFF_YELLOW:
             if self._is_our_team_command(command):
                 parsed_cmd = self._convert_raw_to_us(command)
             else:
@@ -115,44 +135,37 @@ class Referee:
         return RefereeCommand(parsed_cmd)
 
     def _parse_team_info(self, frame):
-        info = {}
         if TeamColorService().our_team_color is TeamColor.YELLOW:
-            info['ours'] = frame.yellow
-            info['theirs'] = frame.blue
+            self.team_info['ours'] = frame['yellow']
+            self.team_info['theirs'] = frame['blue']
         else:
-            info['ours'] = frame.blue
-            info['theirs'] = frame.yellow
+            self.team_info['ours'] = frame['blue']
+            self.team_info['theirs'] = frame['yellow']
 
-        for key in info.keys():
-            self.team_info[key]['name'] = info[key].name
-            self.team_info[key]['score'] = info[key].score
-            self.team_info[key]['red_cards'] = info[key].red_cards
-            self.team_info[key]['yellow_cards'] = info[key].yellow_cards
-            self.team_info[key]['yellow_card_times'].clear()
-            for time in info[key].yellow_card_times:
-                self.team_info[key]['yellow_card_times'].append(time)
-            self.team_info[key]['timeouts'] = info[key].timeouts
-            self.team_info[key]['timeout_time'] = info[key].timeout_time
-            self.team_info[key]['goalie'] = info[key].goalie
+        # Fixme : Since referee state is state-less, we can not keep track of the time since last yellow card
+        # Currently only ui-debug use it
+        for team in self.team_info:
+            self.team_info[team]["yellow_card_times"] = []
+
 
     @staticmethod
     def _convert_raw_to_us(command):
         if TeamColorService().our_team_color is TeamColor.YELLOW:
-            return command + 30
+            return command
         else:
-            return command + 29
+            return command - 1
 
     @staticmethod
     def _convert_raw_to_them(command):
         if TeamColorService().our_team_color is TeamColor.YELLOW:
-            return command + 30
+            return command + 1
         else:
-            return command + 31
+            return command
 
     @staticmethod
     def _is_our_team_command(command):
-        return (Referee._is_yellow_command(command) and TeamColorService().our_team_color is TeamColor.YELLOW) or\
-             (Referee._is_blue_command(command) and TeamColorService().our_team_color is TeamColor.BLUE)
+        return (RefereeState._is_yellow_command(command) and TeamColorService().our_team_color is TeamColor.YELLOW) or \
+               (RefereeState._is_blue_command(command) and TeamColorService().our_team_color is TeamColor.BLUE)
 
     @staticmethod
     def _is_yellow_command(command):
@@ -160,4 +173,4 @@ class Referee:
 
     @staticmethod
     def _is_blue_command(command):
-        return not Referee._is_yellow_command(command)
+        return not RefereeState._is_yellow_command(command)
