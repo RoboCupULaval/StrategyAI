@@ -33,12 +33,14 @@ class TeamColor(Enum):
     YELLOW = 0
     BLUE = 1
 
+    
 class KickForce(Enum):
     NONE = 0
     LOW = 1
     MEDIUM = 2
     HIGH = 3
 
+    
 class KickType(Enum):
     DIRECT = 0
     CHIP = 1

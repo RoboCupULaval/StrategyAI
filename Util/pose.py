@@ -8,7 +8,7 @@ from Util.position import Position
 
 ORIENTATION_ABSOLUTE_TOLERANCE = 0.004
 
-
+# pylint: disable=invalid-name
 class Pose:
 
     def __init__(self, position: Position=Position(), orientation: float=0):
