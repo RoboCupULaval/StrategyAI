@@ -86,8 +86,8 @@ class PathPartitionner:
         segment_direction = normalize(target - start)
         dists_from_path = np.abs(np.cross(segment_direction, robot_to_obstacles))
         is_collision = dists_from_path < self.obstacles_avoid_distance
-        collisions = [obs for obs, will_collide in zip(self.obstacles, is_collision) if will_collide]
-        return collisions, robot_to_obstacle_norm[is_collision]
+        obstacles = np.array(self.obstacles)
+        return obstacles[is_collision].tolist(), robot_to_obstacle_norm[is_collision]
 
     def next_sub_target(self, start, target, avoid_dir=None):
         collisions, distances = self.find_collisions(start, target)
