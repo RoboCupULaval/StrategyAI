@@ -99,14 +99,14 @@ class Tracker:
         for robot in active_robots:
             if self._current_timestamp - robot.last_capture_time > Tracker.MAX_UNDETECTED_DELAY:
                 robot.reset()
-                self.logger.info('Robot %d was undetected for more than %d seconds.',
+                self.logger.debug('Robot %d was undetected for more than %d seconds.',
                                  robot.id,
                                  Tracker.MAX_UNDETECTED_DELAY)
 
         if self._ball.is_active:
             if self._current_timestamp - self._ball.last_capture_time > Tracker.MAX_UNDETECTED_DELAY:
                 self._ball.reset()
-                self.logger.info('The ball was undetected for more than %d seconds.',
+                self.logger.debug('The ball was undetected for more than %d seconds.',
                                  Tracker.MAX_UNDETECTED_DELAY)
 
     @staticmethod
