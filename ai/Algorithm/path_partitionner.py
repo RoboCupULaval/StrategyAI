@@ -8,7 +8,6 @@ import numpy as np
 from Util import Position
 from Util.path import Path
 
-from abc import ABCMeta
 
 MIN_PATH_LENGTH = 250  # mm
 RECURSION_LIMIT = 3
@@ -16,51 +15,19 @@ SUB_TARGET_RESOLUTION_FACTOR = 10
 ELLIPSE_HALF_WIDTH = 500
 
 
-class Obstacle(metaclass=ABCMeta):
+class Obstacle:
     BASE_AVOID_DISTANCE = 100  # in mm
-    def __init__(self, avoid_distance):
+    def __init__(self, position: np.ndarray, *, avoid_distance: Optional[float] = None):
+        self.position = position
         self.avoid_distance = avoid_distance if avoid_distance is not None else self.BASE_AVOID_DISTANCE
     def __repr__(self):
-        return self.__str__()
-
-class PointObstacle(Obstacle):
-    def __init__(self, position: np.ndarray, *, avoid_distance: Optional[float] = None, avoid_direction: Optional[int] = 1):
-        super().__init__(avoid_distance)
-        self.position = position
-        self.avoid_direction = avoid_direction
-    def __str__(self):
-
         return self.__class__.__name__ + '({})'.format(self.position)
-
-class LineObstacle(Obstacle):
-    def __init__(self, start, end, *, avoid_distance=None):
-        super().__init__(avoid_distance)
-        self.start = start
-        self.end = end
-    def __str__(self):
-        return self.__class__.__name__ + '(start={}, end={})'.format(self.start, self.end)
-    def intersection(self, other_start, other_end) -> Optional[PointObstacle]:
-
-        s1 = self.end - self.start
-        s2 = other_end - other_start
-
-        s = (-s1[1] * (self.start[0] - other_start[0]) + s1[0] * (self.start[1] - other_start[1])) / (-s2[0] * s1[1] + s1[0] * s1[1])
-        t = ( s2[0] * (self.start[1] - other_start[1]) - s2[1] * (self.start[0] - other_start[0])) / (-s2[0] * s1[1] + s1[0] * s2[1])
-
-        if 0 <= s <= 1 and 0 <= t <= 1:
-            point = np.array([self.start[0] + (t * s1[0]), self.start[1] + (t * s1[1])])
-            intersection = PointObstacle(point, avoid_distance=300, avoid_direction=1)
-        else:
-            intersection = None
-
-        return intersection
 
 
 class PathPartitionner:
 
     def __init__(self):
         self.obstacles = []
-        self.lines = []
 
     @property
     def obstacles_position(self):
@@ -80,14 +47,8 @@ class PathPartitionner:
 
     def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], last_path: Optional[Path]=None):
 
-        self.obstacles = [obs for obs in obstacles if isinstance(obs, PointObstacle)]
-        self.lines = np.array([obs for obs in obstacles if isinstance(obs, LineObstacle)])
+        self.obstacles = obstacles
         self.filter_obstacles(start.array, target.array)
-
-        for line in self.lines:
-            intersection = line.intersection(start, target)
-            if intersection is not None:
-                self.obstacles.append(intersection)
 
         if any(self.obstacles):
             path = self.path_planner(start.array, target.array)
@@ -99,11 +60,6 @@ class PathPartitionner:
         return path
 
     def path_planner(self, start, target, avoid_dir=None, depth=0) -> Path:
-
-        for line in self.lines:
-            intersection = line.intersection(start, target)
-            if intersection is not None:
-                self.obstacles.append(intersection)
 
         if start is target or depth >= RECURSION_LIMIT:
             return Path.from_array(start, target)
@@ -143,7 +99,7 @@ class PathPartitionner:
             segment_direction = normalize(target - start)
             len_along_path = np.inner(closest_collision.position - start, segment_direction)
             if len_along_path > 0:
-                avoid_dir = perpendicular(segment_direction) * closest_collision.avoid_direction
+                avoid_dir = perpendicular(segment_direction) # TODO: choose the avoid direction which make the most sense
                 sub_target = start + segment_direction * len_along_path + avoid_dir * SUB_TARGET_RESOLUTION_FACTOR
                 while not self.is_valid_sub_target(sub_target, self.obstacles_position):
                     sub_target += avoid_dir * SUB_TARGET_RESOLUTION_FACTOR

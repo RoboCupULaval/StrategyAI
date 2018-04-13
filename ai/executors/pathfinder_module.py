@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import Dict, List
 
 from Util import AICommand, Position
-from ai.Algorithm.path_partitionner import PathPartitionner, PointObstacle, LineObstacle, Obstacle
+from ai.Algorithm.path_partitionner import PathPartitionner, Obstacle
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
 
@@ -42,22 +42,21 @@ class PathfinderModule:
         enemy_team = [player for player in game_state.enemy_team.available_players.values()]
 
         for other in our_team + enemy_team:
-            self.obstacles.append(PointObstacle(other.position.array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
+            self.obstacles.append(Obstacle(other.position.array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
 
 
     def player_optionnal_obstacles(self, game_state: GameState, ai_cmd: AICommand) -> List[Obstacle]:
         path_obstacles = self.obstacles.copy()
 
         if ai_cmd.ball_collision and game_state.is_ball_on_field:
-            path_obstacles.append(PointObstacle(game_state.ball_position.array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
+            path_obstacles.append(Obstacle(game_state.ball_position.array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
 
         if ai_cmd.ball_collision and game_state.is_ball_on_field:
-            path_obstacles.append(PointObstacle(game_state.ball_position.array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
+            path_obstacles.append(Obstacle(game_state.ball_position.array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
 
-        path_obstacles.append(LineObstacle(Position(-3500, 1100).array, Position(-3500, -1100).array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
-        path_obstacles.append(LineObstacle(Position(-10000, -1100).array, Position(-3500, -1100).array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
-        path_obstacles.append(LineObstacle(Position(-3500, 1100).array, Position(-10000, 1100).array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
-        # TODO: add enemy goal
-        # self.obstacles.add(LineObstacle(start, end, y_length, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
+        path_obstacles.append(Obstacle(Position(-4500, 500).array, avoid_distance=1000))
+        path_obstacles.append(Obstacle(Position(-4500, -500).array, avoid_distance=1000))
+        path_obstacles.append(Obstacle(Position(4500, 500).array, avoid_distance=1000))
+        path_obstacles.append(Obstacle(Position(4500, -500).array, avoid_distance=1000))
 
         return path_obstacles
