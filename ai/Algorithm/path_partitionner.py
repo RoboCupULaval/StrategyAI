@@ -5,10 +5,32 @@ import numpy as np
 from Util import Position
 from Util.path import Path
 
+from abc import abstractmethod, ABCMeta, ab
+
 MIN_PATH_LENGTH = 250  # mm
 RECURSION_LIMIT = 3
 SUB_TARGET_RESOLUTION_FACTOR = 10
 ELLIPSE_HALF_WIDTH = 500
+
+
+class Obstacle(metaclass=ABCMeta):
+    AVOID_DISTANCE = 100
+    def __init__(self, position: np.ndarray):
+        self.position = position
+
+    @property
+    def avoid_distance(self):
+        return Obstacle.AVOID_DISTANCE
+
+class Robot(Obstacle):
+    pass
+
+class Ball(Obstacle):
+    pass
+
+class GoalZone(Obstacle):
+    pass
+
 
 
 class PathPartitionner:
