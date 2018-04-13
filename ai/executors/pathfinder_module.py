@@ -34,7 +34,6 @@ class PathfinderModule:
         return self.paths
 
     def updates_obstacles(self, game_state):
-
         self.obstacles.clear()
 
         our_team = [player for player in game_state.our_team.available_players.values()]
