@@ -11,6 +11,7 @@ from Engine.filters.robot_kalman_filter import RobotFilter
 from Util.geometry import wrap_to_pi
 from Util import Pose, Position
 from Util.team_color_service import TeamColorService
+from config.config import Config
 
 
 class Tracker:
@@ -25,7 +26,7 @@ class Tracker:
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger('Tracker')
 
-        self.on_negative_side = False
+        self.on_negative_side = Config()["GAME"]["on_negative_side"]
 
         self.vision_state = vision_state
 
@@ -45,8 +46,8 @@ class Tracker:
 
             for frame in camera_frames:
 
-                # if self.on_negative_side:
-                #     vision_frame = Tracker.change_reference(frame)
+                if self.on_negative_side:
+                    frame = Tracker.change_reference(frame)
 
                 self._camera_frame_number[frame['camera_id']] = frame['frame_number']
                 self._update(frame, frame['t_capture'])
@@ -97,16 +98,15 @@ class Tracker:
     @staticmethod
     def change_reference(detection_frame: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
 
-        teams = detection_frame.get('robots_blue', ())\
-                + detection_frame.get('robots_yellow', ())
+        teams = detection_frame.get('robots_blue', []) \
+              + detection_frame.get('robots_yellow', [])
 
         for robot_obs in teams:
             robot_obs['x'] *= -1
-            robot_obs['y'] *= -1
-            robot_obs['orientation'] = wrap_to_pi(robot_obs['orientation'] + np.pi)
+            robot_obs['orientation'] = wrap_to_pi(np.pi - robot_obs['orientation'])
 
         for ball_obs in detection_frame.get('balls', ()):
-            ball_obs.position *= -1
+            ball_obs['x'] *= -1
 
         return detection_frame
 

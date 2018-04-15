@@ -15,9 +15,9 @@ def ProtectGoal(game_state: GameState, player: Player, is_right_goal: bool=True,
         Calcul la pose que doit prendre le gardien en fonction de la position de la balle.
         :return: Un tuple (Pose, kick) où Pose est la destination du gardien et kick est nul (on ne botte pas)
         """
-        goalkeeper_position = self.player.pose.position
-        ball_position = self.game_state.ball_position
-        goal_x = self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"]
+        goalkeeper_position = player.pose.position
+        ball_position = game_state.ball_position
+        goal_x = game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"]
         goal_position = Position(goal_x, 0)
 
         # Calcul des deux positions extremums entre la balle et le centre du but

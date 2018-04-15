@@ -67,6 +67,9 @@ class Pose:
     def to_dict(self) -> Dict[str, float]:
         return {'x': self.x, 'y': self.y, 'orientation': self.orientation}
 
+    def flip_x(self):
+        return Pose.from_values(-self.x, self.y, (2 * np.pi - self.orientation) % (2 * m.pi) - m.pi)
+
     def __add__(self, other: Position) -> 'Pose':
         assert(isinstance(other, Position))
         return Pose(self.position + other, self.orientation)

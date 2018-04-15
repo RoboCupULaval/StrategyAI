@@ -29,8 +29,6 @@ class RealPositionRegulator(RegulatorBaseClass):
                                    self.controllers['y'].execute(pos_error.y),
                                    self.controllers['orientation'].execute(orientation_error))
 
-        command.position = rotate(command.position, -pose.orientation)
-
         # Limit max linear speed
         command.position /= max(1, command.norm / MAX_LINEAR_SPEED)
         command.orientation /= max(1, abs(command.orientation) / MAX_ANGULAR_SPEED)
