@@ -14,12 +14,12 @@ class SerialCommandSender(Sender):
     def send_packet(self, packets_frame):
 
         for packet in packets_frame.packet:
-
             self.connection.sendSpeed(packet.robot_id,
                                       packet.command.x/1000,
                                       packet.command.y/1000,
                                       packet.command.orientation)
-            if packet.kick_force > 0:
+
+            if packet.kick_force is not KickForce.NONE:
                 self.connection.kick(packet.robot_id, self.translate_kick_force(packet.kick_force))
 
             if packet.dribbler_active:
