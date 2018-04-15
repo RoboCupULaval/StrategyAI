@@ -77,10 +77,13 @@ class Strategy(metaclass=ABCMeta):
         commands = {}
 
         for r, player in self.assigned_roles.items():
-            try:
-                commands[player] = self.roles_graph[r].exec()
-            except EmptyGraphException:
-                continue
+            # TODO: Might break a lot of thing.
+            # Eventually the entering and leaving of player should be directly handle by the coach of something
+            if player in self.game_state.our_team.available_players.values():
+                try:
+                    commands[player] = self.roles_graph[r].exec()
+                except EmptyGraphException:
+                    continue
 
         return commands
 
