@@ -60,7 +60,7 @@ def flip_pose(pose: Pose):
     assert isinstance(pose, Pose)
     if not Config()["GAME"]["on_negative_side"]:
         return pose
-    return pose.flip_x()
+    return pose.mirror_x()
 
 
 class DebugCommandFactory:
