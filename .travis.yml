@@ -6,6 +6,7 @@ python:
 cache: pip
 
 install:
+    - pip install -U pip wheel
     - pip install -r travis/requirements.txt
 
 # Enable the latter options for a super clean project: linting
