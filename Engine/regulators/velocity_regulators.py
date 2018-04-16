@@ -25,11 +25,10 @@ class RealVelocityController(RegulatorBaseClass):
 
         velocity = robot.position_error * speed_norm / robot.position_error.norm
 
-        cmd_pos = rotate(velocity, -robot.orientation)
         cmd_orientation = self.orientation_controller.execute(robot.orientation_error)
         cmd_orientation /= max(1, abs(cmd_orientation) / MAX_ANGULAR_SPEED)
 
-        return Pose(cmd_pos, cmd_orientation)
+        return Pose(velocity, cmd_orientation)
 
     def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION, offset=10):
 

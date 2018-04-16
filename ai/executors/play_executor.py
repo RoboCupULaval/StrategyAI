@@ -118,8 +118,10 @@ class PlayExecutor:
             return
         player_id = this_player.id
         tactic_name = cmd.data['tactic']
-        target = cmd.data['target']
-        target = Pose(Position(target[0], target[1]), this_player.pose.orientation)
+        target = Position.from_list(cmd.data['target'])
+        if Config()["GAME"]["on_negative_side"]:
+            target = target.flip_x()
+        target = Pose(target, this_player.pose.orientation)
         args = cmd.data.get('args', "")
         try:
             tactic = self.play_state.get_new_tactic(tactic_name)(GameState(), this_player, target, args)

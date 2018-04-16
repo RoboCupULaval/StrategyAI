@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 import logging
+import numpy as np
 from typing import Dict, List, Type
 
 from Engine.regulators import VelocityRegulator, PositionRegulator
@@ -11,7 +12,10 @@ from Util import Pose
 
 from Util.engine_command import EngineCommand
 from Util.constant import PLAYER_PER_TEAM
+from Util.geometry import rotate
 from Util.team_color_service import TeamColorService
+from config.config import Config
+
 
 class Observer:
 
@@ -55,9 +59,11 @@ class Controller:
             robot.path, robot.target_speed = path_smoother(robot)
 
             if robot.position_error.norm < 200 and robot.target_speed == 0:
-                commands[robot.robot_id] = robot.position_regulator.execute(robot)
+                cmd = robot.position_regulator.execute(robot)
             else:
-                commands[robot.robot_id] = robot.velocity_regulator.execute(robot)
+                cmd = robot.velocity_regulator.execute(robot)
+
+            commands[robot.robot_id] = self._put_in_robots_referencial(robot, cmd)
 
         return self.generate_packet(commands)
 
@@ -75,6 +81,16 @@ class Controller:
                             dribbler_active=self[robot_id].engine_cmd.dribbler_active,
                             charge_kick=self[robot_id].engine_cmd.charge_kick))
         return packet
+
+    @staticmethod
+    def _put_in_robots_referencial(robot, cmd):
+        if Config()["GAME"]["on_negative_side"]:
+            cmd.x *= -1
+            cmd.orientation *= -1
+            cmd.position = rotate(cmd.position, np.pi + robot.orientation)
+        else:
+            cmd.position = rotate(cmd.position, -robot.orientation)
+        return cmd
 
     def __iter__(self) -> Robot:
         for robot in self.robots:

@@ -1,10 +1,14 @@
 # Under MIT License, see LICENSE.txt
-import math as m
+
 from typing import Dict
 
 import numpy as np
 
-from Util.position import Position
+import Util.position
+Position = Util.position.Position
+
+import Util.geometry as geometry
+
 
 ORIENTATION_ABSOLUTE_TOLERANCE = 0.004
 
@@ -67,6 +71,9 @@ class Pose:
     def to_dict(self) -> Dict[str, float]:
         return {'x': self.x, 'y': self.y, 'orientation': self.orientation}
 
+    def mirror_x(self):
+        return Pose.from_values(-self.x, self.y, geometry.wrap_to_pi(np.pi - self.orientation))
+
     def __add__(self, other: Position) -> 'Pose':
         assert(isinstance(other, Position))
         return Pose(self.position + other, self.orientation)
@@ -75,8 +82,9 @@ class Pose:
         return self + (-other)
 
     def __eq__(self, other: 'Pose') -> bool:
-        orientation_equal = m.isclose(self.orientation, other.orientation,
-                                      abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE, rel_tol=0)
+        orientation_equal = geometry.compare_angle(self.orientation,
+                                                   other.orientation,
+                                                   abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE)
         position_equal = self.position == other.position
         return position_equal and orientation_equal
 

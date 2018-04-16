@@ -85,7 +85,10 @@ class GameState(metaclass=Singleton):
 
     @property
     def our_side(self):
-        return FieldSide.NEGATIVE if Config()['GAME']['on_negative_side'] else FieldSide.POSITIVE
+        # Note: The AI is independent from which side it is play on,
+        # the engine handle the mirroring of everything
+        return FieldSide.POSITIVE
+        # return FieldSide.NEGATIVE if Config()['GAME']['on_negative_side'] else FieldSide.POSITIVE
 
     @property
     def role_mapping(self):
