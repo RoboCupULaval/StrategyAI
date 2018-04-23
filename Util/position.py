@@ -5,7 +5,7 @@ import numpy as np
 
 POSITION_ABS_TOL = 0.01
 
-
+#pylint: disable=invalid-name, invalid-unary-operand-type
 class Position:
 
     def __init__(self, x: float=0, y: float=0):
@@ -64,6 +64,9 @@ class Position:
     def copy(self) -> 'Position':
         return Position.from_array(self.array.copy())
 
+    def flip_x(self):
+        return Position(-self.x, self.y)
+
     def __add__(self, other: 'Position') -> 'Position':
         return Position.from_array(self.array + other.array)
 
@@ -108,4 +111,3 @@ class Position:
 
     def __hash__(self) -> int:
         return hash(str(self))
-

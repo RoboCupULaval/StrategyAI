@@ -1,7 +1,7 @@
 
 import logging
 from multiprocessing.managers import DictProxy
-from typing import Dict, List, Union, Any
+from typing import Dict, List, Union, Any, Iterable
 import numpy as np
 
 from Engine.Communication.robot_state import RobotState
@@ -11,6 +11,7 @@ from Engine.filters.robot_kalman_filter import RobotFilter
 from Util.geometry import wrap_to_pi
 from Util import Pose, Position
 from Util.team_color_service import TeamColorService
+from config.config import Config
 
 
 class Tracker:
@@ -25,12 +26,12 @@ class Tracker:
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger('Tracker')
 
-        self.on_negative_side = False
+        self.on_negative_side = Config()["GAME"]["on_negative_side"]
 
         self.vision_state = vision_state
 
-        self._blue_team = [RobotFilter() for _ in range(Tracker.MAX_ROBOT_ID)]
-        self._yellow_team = [RobotFilter() for _ in range(Tracker.MAX_ROBOT_ID)]
+        self._blue_team = [RobotFilter(robot_id) for robot_id in range(Tracker.MAX_ROBOT_ID)]
+        self._yellow_team = [RobotFilter(robot_id) for robot_id in range(Tracker.MAX_ROBOT_ID)]
         self._ball = BallFilter()
 
         self._camera_frame_number = [-1 for _ in range(Tracker.NUMBER_OF_CAMERA)]
@@ -45,8 +46,8 @@ class Tracker:
 
             for frame in camera_frames:
 
-                # if self.on_negative_side:
-                #     vision_frame = Tracker.change_reference(frame)
+                if self.on_negative_side:
+                    frame = Tracker.change_reference(frame)
 
                 self._camera_frame_number[frame['camera_id']] = frame['frame_number']
                 self._update(frame, frame['t_capture'])
@@ -58,17 +59,28 @@ class Tracker:
 
     def _update(self, detection_frame: Dict[str, List[Dict[str, Any]]], timestamp: int):
 
+        new_robots = {'blue': set(), 'yellow': set()}
+
         for robot_obs in detection_frame.get('robots_blue', ()):
+            if not self._blue_team[robot_obs['robot_id']].is_active:
+                new_robots['blue'].add(robot_obs['robot_id'])
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
             self._blue_team[robot_obs['robot_id']].update(obs, timestamp)
 
         for robot_obs in detection_frame.get('robots_yellow', ()):
+            if not self._yellow_team[robot_obs['robot_id']].is_active:
+                new_robots['yellow'].add(robot_obs['robot_id'])
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
             self._yellow_team[robot_obs['robot_id']].update(obs, timestamp)
 
         for ball_obs in detection_frame.get('balls', ()):
             obs = np.array([ball_obs['x'], ball_obs['y']])
             self._ball.update(obs, timestamp)
+
+        if new_robots['blue']:
+            self.logger.debug('New blue robot(s) detected: %r', new_robots['blue'])
+        if new_robots['yellow']:
+            self.logger.debug('New yellow robot(s) detected: %r', new_robots['yellow'])
 
     def predict(self, robot_state: RobotState):
 
@@ -84,29 +96,32 @@ class Tracker:
         self._ball.predict()
 
     def remove_undetected(self):
-        active_robots = iter(robot for robot in self._yellow_team + self._blue_team if robot.is_active)
+        active_robots = (robot for robot in self._yellow_team + self._blue_team if robot.is_active)
         for robot in active_robots:
             if self._current_timestamp - robot.last_capture_time > Tracker.MAX_UNDETECTED_DELAY:
                 robot.reset()
+                self.logger.debug('Robot %d was undetected for more than %d seconds.',
+                                 robot.id,
+                                 Tracker.MAX_UNDETECTED_DELAY)
 
         if self._ball.is_active:
             if self._current_timestamp - self._ball.last_capture_time > Tracker.MAX_UNDETECTED_DELAY:
                 self._ball.reset()
-                self.logger.info('Deactivating ball')
+                self.logger.debug('The ball was undetected for more than %d seconds.',
+                                 Tracker.MAX_UNDETECTED_DELAY)
 
     @staticmethod
     def change_reference(detection_frame: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
 
-        teams = detection_frame.get('robots_blue', ())\
-                + detection_frame.get('robots_yellow', ())
+        teams = detection_frame.get('robots_blue', []) \
+              + detection_frame.get('robots_yellow', [])
 
         for robot_obs in teams:
             robot_obs['x'] *= -1
-            robot_obs['y'] *= -1
-            robot_obs['orientation'] = wrap_to_pi(robot_obs['orientation'] + np.pi)
+            robot_obs['orientation'] = wrap_to_pi(np.pi - robot_obs['orientation'])
 
         for ball_obs in detection_frame.get('balls', ()):
-            ball_obs.position *= -1
+            ball_obs['x'] *= -1
 
         return detection_frame
 
@@ -141,27 +156,27 @@ class Tracker:
 
     @property
     def blue_team(self) -> List[Dict[str, Any]]:
-        active_players = {p_id: p for p_id, p in enumerate(self._blue_team) if p.is_active}
+        active_players = (p for p in self._blue_team if p.is_active)
         return Tracker.format_team(active_players)
 
     @property
     def yellow_team(self) -> List[Dict[str, Any]]:
-        active_players = {p_id: p for p_id, p in enumerate(self._yellow_team) if p.is_active}
+        active_players = (p for p in self._yellow_team if p.is_active)
         return Tracker.format_team(active_players)
 
     @staticmethod
-    def format_team(entities: Dict) -> List[Dict[str, Any]]:
+    def format_team(team: Iterable[RobotFilter]) -> List[Dict[str, Any]]:
         formatted_list = []
-        for entity_id, entity in entities.items():
+        for robot in team:
             fields = dict()
-            fields['pose'] = Pose.from_values(*entity.pose)
-            fields['velocity'] = Pose.from_values(*entity.velocity)
-            fields['id'] = entity_id
+            fields['pose'] = Pose.from_values(*robot.pose)
+            fields['velocity'] = Pose.from_values(*robot.velocity)
+            fields['id'] = robot.id
             formatted_list.append(fields)
         return formatted_list
 
     @staticmethod
-    def format_balls(entities: List) -> List[Dict[str, Any]]:
+    def format_balls(entities: Iterable[BallFilter]) -> List[Dict[str, Any]]:
         formatted_list = []
         for entity_id, entity in enumerate(entities):
             fields = dict()

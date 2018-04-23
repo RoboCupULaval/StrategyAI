@@ -3,8 +3,12 @@
 import math as m
 import numpy as np
 
-from Util import Position
+from Util.position import Position
 from typing import cast, Sequence, List
+
+
+def get_angle_between_three_points(start: Position, mid: Position, end: Position) -> float:
+    return abs(wrap_to_pi((mid - start).angle - (end - mid).angle))
 
 
 def wrap_to_pi(angle: float) -> float:
@@ -49,6 +53,8 @@ def closest_point_on_line(reference: Position, start: Position, end: Position) -
 
 
 def closest_point_on_segment(reference: Position, start: Position, end: Position) -> Position:
+    if end == start:
+        return start
     proj = projection(reference, start=start, end=end)
     if proj >= (end - start).norm:
         return end

@@ -3,20 +3,20 @@ import matplotlib.pyplot as plt
 
 class DynamicUpdate:
     # Suppose we know the x range
-    
+
     def __init__(self):
         self.figure = None
         self.lines = None
-        self.ax = None
-    
+        self.axes = None
+
     def on_launch(self):
         # Set up plot
-        self.figure, self.ax = plt.subplots()
-        self.lines, = self.ax.plot([], [], 'o')
+        self.figure, self.axes = plt.subplots()
+        self.lines, = self.axes.plot([], [], 'o')
         # Auto scale on unknown axis and known lims on the other
-        self.ax.set_autoscaley_on(True)
+        self.axes.set_autoscaley_on(True)
         # Other stuff
-        self.ax.grid()        
+        self.axes.grid()
 
     def on_running(self, xdata, ydata):
         # xdata et ydata sont un buffer
@@ -25,8 +25,8 @@ class DynamicUpdate:
         self.lines.set_xdata(xdata)
         self.lines.set_ydata(ydata)
         # Need both of these in order to rescale
-        self.ax.relim()
-        self.ax.autoscale_view()
+        self.axes.relim()
+        self.axes.autoscale_view()
         # We need to draw *and* flush
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()

@@ -2,8 +2,8 @@
 
 from Util.position import Position
 from Util.constant import ROBOT_RADIUS
-from ai.GameDomainObjects.ShittyField import FieldSide
 from ai.states.game_state import GameState
+from ai.GameDomainObjects.field import FieldSide
 
 import numpy as np
 
@@ -55,7 +55,7 @@ def is_ball_moving(min_speed=0.1):
 # noinspection PyUnresolvedReferences
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
-    if GameState().field.our_side == FieldSide.POSITIVE: # POSITIVE
+    if GameState().our_side == FieldSide.POSITIVE: # POSITIVE
         return GameState().ball_position.x > 0
     else:
         return GameState().ball_position.x < 0
@@ -66,20 +66,20 @@ def best_passing_option(passing_player, consider_goal=True):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si but est la meilleure possibilité
 
     score_min = float("inf")
-    goal = Position(GameState().field.constant["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
+    goal = Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
 
     receiver_id = None
-    for i in GameState().our_team.available_players.values():
+    for p in GameState().our_team.available_players.values():
 
-        if i.id != passing_player.id:
+        if p.id != passing_player.id:
             # Calcul du score pour passeur vers receveur
-            score = line_of_sight_clearance(passing_player,i.pose.position)
+            score = line_of_sight_clearance(passing_player, p.pose.position)
 
             # Calcul du score pour receveur vers but
-            score += line_of_sight_clearance(i, goal)
-            if (score_min > score).any():
+            score += line_of_sight_clearance(p, goal)
+            if score_min > score:
                 score_min = score
-                receiver_id = i.id
+                receiver_id = p.id
 
     if consider_goal and not is_ball_our_side():
         score = (line_of_sight_clearance(passing_player, goal))
@@ -88,6 +88,21 @@ def best_passing_option(passing_player, consider_goal=True):
 
     return receiver_id
 
+
+def line_of_sight_clearance(player, targets):
+    # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est petit)
+    score = (player.pose.position - targets).norm
+    for j in GameState().our_team.available_players.values():
+        # Obstacle : les players friends
+        condition = []
+        if not (j.id == player.id):
+            condition += [target is not j.pose.position for target in targets]
+            if any(condition):
+                score *= trajectory_score(player.pose.position, Position.from_array(targets[condition]), j.pose.position)
+    for j in GameState().enemy_team.available_players.values():
+        # Obstacle : les players ennemis
+        score *= trajectory_score(player.pose.position, targets, j.pose.position)
+    return score
 
 # noinspection PyUnusedLocal
 def line_of_sight_clearance_ball(player, targets, distances=None):
@@ -117,12 +132,22 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
 def trajectory_score(pointA, pointsB, obstacle):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
     proportion_max = 15  # Proportion du triangle rectancle derrière les robots obstacles
-    if len(pointsB.array.shape) == 1:
+
+    # FIXME: HACK SALE, je ne comprends pas le fonctionnement de cette partie du code, analyser plus tard!
+    if isinstance(pointA, Position):
+        pointA = pointA.array
+    if isinstance(obstacle, Position):
+        obstacle = obstacle.array
+
+    if isinstance(pointsB, Position):
+        pointsB = pointsB.array
+
+    if len(pointsB.shape) == 1:
         scores = np.array([0])
     else:
-        scores = np.zeros(pointsB.array.shape[0])
-    AB = pointsB.array - pointA.array
-    AO = obstacle.array - pointA.array
+        scores = np.zeros(pointsB.shape[0])
+    AB = pointsB - pointA
+    AO = obstacle - pointA
     # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
     normsAB = np.sqrt(np.transpose((AB*AB)).sum(axis=0))
     normsAC = np.divide(np.dot(AB, AO), normsAB)
@@ -145,7 +170,7 @@ def trajectory_score(pointA, pointsB, obstacle):
 
 # noinspection PyPep8Naming,PyUnresolvedReferences
 def best_position_in_region(player, A, B):
-    # Retourne la position (dans un rectangle aux coins A et B) la mieux placée pour une passe
+    # Retourne la position (dans un rectangle aux points A et B) la mieux placée pour une passe
     ncounts = 5
     bottom_left = Position(min(A.x, B.x), min(A.y, B.y))
     top_right = Position(max(A.x, B.x), max(A.y, B.y))
@@ -156,15 +181,15 @@ def best_position_in_region(player, A, B):
         x_point = bottom_left.x + i * (top_right.x - bottom_left.x) / (ncounts - 1)
         for j in range(ncounts):
             y_point = bottom_left.y + j * (top_right.y - bottom_left.y) / (ncounts - 1)
-            positions += [Position(x_point, y_point)]
+            positions += [Position(x_point, y_point).array]
     positions = np.stack(positions)
     # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
-    dists_from_ball = np.sqrt(((positions - np.array(ball_position)) *
-                               (positions - np.array(ball_position))).sum(axis=1))
+    dists_from_ball = np.sqrt(((positions - ball_position.array) *
+                               (positions - ball_position.array)).sum(axis=1))
     positions = positions[dists_from_ball > 1000, :]
     dists_from_ball = dists_from_ball[dists_from_ball > 1000]
     scores = line_of_sight_clearance_ball(player, positions, dists_from_ball)
-    our_side = GameState().field.constant["FIELD_OUR_GOAL_X_EXTERNAL"]
+    our_side = GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"]
     if abs(A.x - our_side) < abs(B.x - our_side):
         x_closest_to_our_side = A.x
     else:

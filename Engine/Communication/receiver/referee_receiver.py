@@ -10,6 +10,7 @@ from protobuf_to_dict import protobuf_to_dict
 from Engine.Communication.protobuf.referee_pb2 import SSL_Referee
 from Engine.Communication.receiver.receiver_base_class import ReceiverProcess
 from Engine.Communication.monitor import monitor_queue
+from ai.GameDomainObjects import RefereeState
 
 __author__ = "Simon Bouchard"
 
@@ -34,4 +35,7 @@ class RefereeReceiver(ReceiverProcess):
 
         packet.ParseFromString(data)
         packet = protobuf_to_dict(packet)
-        self._link.put(packet)
+
+        ref_state = RefereeState(packet)
+
+        self._link.put(ref_state)

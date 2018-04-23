@@ -4,6 +4,7 @@ from functools import partial
 
 from Util.pose import Position, Pose
 from Util.role import Role
+from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
 from ai.Algorithm.evaluation_module import closest_player_to_point
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
@@ -13,26 +14,20 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
-# noinspection PyMethodMayBeStatic,PyMethodMayBeStatic,PyUnresolvedReferences,PyUnresolvedReferences
+# noinspection PyMethodMayBeStatic,PyMethodMayBeStatic
 class DirectFreeKick(Strategy):
 
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
-        ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
-        self.theirgoal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
 
-        roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE,
-                             Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
-        role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
+        our_goal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
 
-        goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
-
-        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal))
-
-        for index, player in role_by_robots:
-            if player:
-                node_position_for_pass = self.create_node(index, PositionForPass(self.game_state, player, auto_position=True))
-                node_go_kick = self.create_node(index, GoKick(self.game_state, player, auto_update_target=True))
+        for role, player in self.assigned_roles.items():
+            if role == Role.GOALKEEPER:
+                self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player, our_goal))
+            else:
+                node_position_for_pass = self.create_node(role, PositionForPass(self.game_state, player, auto_position=True))
+                node_go_kick = self.create_node(role, GoKick(self.game_state, player, auto_update_target=True))
 
                 player_is_closest = partial(self.is_closest, player)
                 player_is_not_closest = partial(self.is_not_closest, player)
@@ -41,6 +36,16 @@ class DirectFreeKick(Strategy):
                 node_position_for_pass.connect_to(node_go_kick, when=player_is_closest)
                 node_go_kick.connect_to(node_position_for_pass, when=player_is_not_closest)
                 node_go_kick.connect_to(node_go_kick, when=player_has_kicked)
+
+    @classmethod
+    def required_roles(cls):
+        return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
+                                                                Role.FIRST_ATTACK,
+                                                                Role.SECOND_ATTACK,
+                                                                Role.MIDDLE,
+                                                                Role.FIRST_DEFENCE,
+                                                                Role.SECOND_DEFENCE]
+                }
 
     def is_closest(self, player):
         return player == closest_player_to_point(GameState().ball_position, True).player

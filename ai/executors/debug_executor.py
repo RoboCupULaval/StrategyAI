@@ -30,15 +30,15 @@ class DebugExecutor:
 
         if time.time() - self.last_time > 0.25:
             self._send_books()
+            self._send_auto_state()
             self.last_time = time.time()
 
     def _send_books(self):
 
-        msg = DebugCommandFactory().books(strategy_book=self.play_state.strategy_book.strategies_name,
+        msg = DebugCommandFactory().books(strategy_book=self.play_state.strategy_book.strategies_required_roles,
                                           strategy_default=self.play_state.strategy_book.default_strategies,
                                           tactic_book=self.play_state.tactic_book.tactics_name,
-                                          tactic_default=self.play_state.tactic_book.default_tactics,
-                                          action=['None'])
+                                          tactic_default=self.play_state.tactic_book.default_tactics)
         self.ui_send_queue.put(msg)
 
     def _send_state(self):
@@ -47,8 +47,10 @@ class DebugExecutor:
         #     self.ui_send_queue.put(UIDebugCommandFactory.robot_strategic_state())
 
     def _send_auto_state(self):
-        msg = DebugCommandFactory.auto_play_info(GameState().referee.info,
-                                                 GameState().referee.team_info,
-                                                 self.play_executor.auto_play.info,
-                                                 self.play_state.autonomous_flag)
-        self.ui_send_queue.put(msg)
+        if self.play_executor.ref_states:
+            ref_state = self.play_executor.ref_states[-1]
+            msg = DebugCommandFactory().auto_play_info(ref_state.info,
+                                                       ref_state.team_info,
+                                                       self.play_executor.auto_play.info,
+                                                       self.play_executor.autonomous_flag)
+            self.ui_send_queue.put(msg)

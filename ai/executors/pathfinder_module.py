@@ -2,6 +2,9 @@
 import logging
 from collections import defaultdict
 from typing import Dict
+
+import numpy as np
+
 from ai.Algorithm.path_partitionner import PathPartitionner
 
 MIN_DISTANCE_FROM_OBSTACLE = 250
@@ -31,7 +34,6 @@ class PathfinderModule:
         return self.paths
 
     def updates_obstacles(self, game_state):
-
         self.obstacles.clear()
 
         our_team = [player for player in game_state.our_team.available_players.values()]

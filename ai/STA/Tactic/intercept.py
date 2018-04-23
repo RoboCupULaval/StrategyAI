@@ -7,8 +7,7 @@ from Util import Pose, Position
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS
 from ai.GameDomainObjects.player import Player
 from ai.STA.Action.GoBehind import GoBehind
-from Util.ai_command import Idle
-from ai.STA.Action.grab import Grab
+from Util.ai_command import Idle, MoveTo
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -42,7 +41,7 @@ class Intercept(Tactic):
                 self.next_state = self.grab_ball
         else:
             self.next_state = self.go_between_ball_and_target
-
+        #FIXME
         return GoBehind(self.game_state, self.player, ball, self.target.position, dist_behind)
 
     def _is_player_towards_ball_and_target(self):
@@ -73,7 +72,7 @@ class Intercept(Tactic):
         else:
             self.next_state = self.grab_ball
             self.status_flag = Flags.WIP
-        return Grab(self.game_state, self.player)
+        return MoveTo(Pose(self.game_state.ball.position, self.player.pose.orientation))
 
     def _is_player_between_ball_and_target(self, fact=-0.99):
         player = self.player.pose.position
@@ -105,4 +104,4 @@ class Intercept(Tactic):
 
     def halt(self):
         self.status_flag = Flags.SUCCESS
-        return Idle(self.game_state, self.player)
+        return Idle

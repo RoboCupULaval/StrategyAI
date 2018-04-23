@@ -3,10 +3,10 @@ from configparser import ConfigParser, ParsingError
 import logging
 from Util import Singleton
 
-mandatory_fields = {
+MANDATORY_FIELDS = {
     'COMMUNICATION': ['type', 'field_port_file', 'vision_port', 'ui_debug_address'],
-    'GAME': ['our_color', 'type', 'autonomous_play', 'coach_fps'],
-    'IMAGE': ['number_of_camera'],
+    'GAME': ['our_color', 'type', 'is_autonomous_play_at_startup'],
+    'IMAGE': ['number_of_camera']
 }
 
 
@@ -26,7 +26,7 @@ class Config(metaclass=Singleton):
             field_config = self.read_config_file(field_config_filename)
             self._config['COMMUNICATION'].update(field_config['COMMUNICATION'])
         else:
-            self.logger.critical('Cannot find the field_port_file field in {}.'.format(field_config_filename))
+            self.logger.critical('Cannot find the field_port_file field in %s.', field_config_filename)
             exit(1)
 
         self.validate_user_input()
@@ -35,15 +35,14 @@ class Config(metaclass=Singleton):
         self._config_was_set = True
 
     def read_config_file(self, filename: str):
-
         config_parser = ConfigParser(allow_no_value=False)
         try:
             config_parser.read_file(open(filename))
         except FileNotFoundError:
-            self.logger.critical('The .cfg file {} was not found.'.format(filename))
+            self.logger.critical('The .cfg file %s was not found.', filename)
             exit(1)
         except ParsingError:
-            self.logger.critical('The .cfg file {} was not parse correctly.'.format(filename))
+            self.logger.critical('The .cfg file %s was not parse correctly.', filename)
             exit(1)
 
         config_dict = {section: dict(config_parser.items(section)) for section in config_parser.sections()}
@@ -51,10 +50,10 @@ class Config(metaclass=Singleton):
         return config_dict
 
     def update_content(self):
-
+        self['ENGINE'] = dict()
         self['IMAGE']['number_of_camera'] = int(self['IMAGE']['number_of_camera'])
         self['GAME']['coach_fps'] = int(self['GAME']['coach_fps'])
-        self['GAME']['autonomous_play'] = self['GAME']['autonomous_play'] == 'true'
+        self['GAME']['is_autonomous_play_at_startup'] = self['GAME']['is_autonomous_play_at_startup'] == 'true'
 
         # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
         if self['GAME']['our_color'] == 'blue':
@@ -80,14 +79,12 @@ class Config(metaclass=Singleton):
             self['COMMUNICATION']['grsim_info'] = (self['COMMUNICATION']['grsim_udp_address'],
                                                    int(self['COMMUNICATION']['grsim_port']))
 
-
     def validate_user_input(self):
-
         do_exit = False
-        for section, fields in mandatory_fields.items():
+        for section, fields in MANDATORY_FIELDS.items():
             for field in fields:
                 if field not in self[section]:
-                    self.logger.critical('Mandatory field \'{}\' is missing from section \'{}\''.format(field, section))
+                    self.logger.critical('Mandatory field \'%s\' is missing from section \'%s\'', field, section)
                     do_exit = True
 
         if 'play_zone' in self['GAME']:
@@ -96,7 +93,7 @@ class Config(metaclass=Singleton):
                 do_exit = True
 
         if self['GAME']['our_color'] not in ['yellow', 'blue']:
-            self.logger.critical('our_color should be either blue or yellow, not {}.'.format(self['GAME']['our_color']))
+            self.logger.critical('our_color should be either blue or yellow, not %s.', self['GAME']['our_color'])
             do_exit = True
 
         if do_exit:
@@ -107,7 +104,9 @@ class Config(metaclass=Singleton):
         return {
             'GAME': {
                 'our_color': 'yellow',
-                'their_color': 'blue'
+                'their_color': 'blue',
+                'is_autonomous_play_at_startup': False,
+                'on_negative_side': True
             }
         }
 
@@ -118,3 +117,11 @@ class Config(metaclass=Singleton):
         if self._config_was_set:
             raise RuntimeError('You can\'t change the configuration after it has been loaded from a file.')
         self._config[key] = value
+
+    def load_parameters(self, cli_args):
+        self._config['ENGINE']['engine_fps'] = cli_args.engine_fps
+        self._config['ENGINE']['unlock_engine_fps'] = cli_args.unlock_engine_fps
+        self._config['GAME']['on_negative_side'] = cli_args.on_negative_side
+        self._config['ENGINE']['enable_profiling'] = cli_args.enable_profiling
+        self._config['GAME']['competition_mode'] = cli_args.competition_mode
+        self._config['GAME']['is_autonomous_play_at_startup'] = cli_args.start_in_auto

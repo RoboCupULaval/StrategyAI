@@ -1,4 +1,5 @@
 # Under MIT licence, see LICENCE.txt
+import numpy as np
 
 __author__ = 'RoboCupULaval'
 
@@ -7,17 +8,17 @@ from math import tan, pi
 from typing import List
 
 from Util import Pose, Position, AICommand
-from Util.constant import ROBOT_RADIUS
+from Util.ai_command import CmdBuilder, MoveTo
+from Util.constant import ROBOT_RADIUS, KickForce
 from Util.constant import TeamColor
 from Util.geometry import clamp, compare_angle, wrap_to_pi
 from ai.Algorithm.evaluation_module import closest_player_to_point, best_passing_option, player_with_ball
-from ai.GameDomainObjects.ShittyField import FieldSide
+from ai.GameDomainObjects.field import FieldSide
 from ai.GameDomainObjects import Player
-from ai.STA.Action.Kick import Kick
-from ai.STA.Action.MoveToPosition import MoveToPosition
+
 from ai.STA.Action.ProtectGoal import ProtectGoal
 from ai.STA.Tactic.go_kick import GRAB_BALL_SPACING, KICK_DISTANCE, VALIDATE_KICK_DELAY, KICK_SUCCEED_THRESHOLD
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -25,7 +26,6 @@ from ai.states.game_state import GameState
 TARGET_ASSIGNATION_DELAY = 1
 
 
-# noinspection PyArgumentList,PyArgumentList,PyArgumentList,PyArgumentList,PyAttributeOutsideInit,PyAttributeOutsideInit,PyAttributeOutsideInit,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 class GoalKeeper(Tactic):
     """
     Tactique du gardien de but standard. Le gardien doit se placer entre la balle et le but, tout en restant à
@@ -37,11 +37,6 @@ class GoalKeeper(Tactic):
                  penalty_kick=False, args: List[str]=None,):
         super().__init__(game_state, player, target, args)
 
-        if len(self.args) > 0:
-            print("Active secret mode")
-            role_mapping = {Role.GOALKEEPER: player.id}
-            self.game_state.map_players_to_roles_by_player_id(role_mapping)
-
         self.is_yellow = self.player.team.team_color == TeamColor.YELLOW
         self.current_state = self.protect_goal
         self.next_state = self.protect_goal
@@ -49,7 +44,7 @@ class GoalKeeper(Tactic):
         self.target_assignation_last_time = None
         self.target = target
         self._find_best_passing_option()
-        self.kick_force = 5
+        self.kick_force = KickForce.HIGH
         self.penalty_kick = penalty_kick
 
         self.tries_flag = 0
@@ -58,7 +53,7 @@ class GoalKeeper(Tactic):
 
     def kick_charge(self):
         self.next_state = self.protect_goal
-
+        # TODO: Switch to CmdBuilder eventually
         return AICommand(self.player.id,  kick_type=1)
 
     def protect_goal(self):
@@ -71,7 +66,7 @@ class GoalKeeper(Tactic):
                 self.next_state = self.protect_goal
             return ProtectGoal(self.game_state, self.player, self.is_yellow,
                                minimum_distance=300,
-                               maximum_distance=self.game_state.game.field.constant["FIELD_GOAL_RADIUS"]/2)
+                               maximum_distance=self.game_state.const["FIELD_GOAL_RADIUS"]/2)
         else:
             our_goal = Position(self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
             opponent_kicker = player_with_ball(2*ROBOT_RADIUS)
@@ -79,7 +74,7 @@ class GoalKeeper(Tactic):
             if opponent_kicker is not None:
                 ball_to_goal = our_goal.x - ball_position.x
 
-                if self.game_state.field.our_side is FieldSide.POSITIVE:
+                if self.game_state.our_side is FieldSide.POSITIVE:
                     opponent_kicker_orientation = clamp(opponent_kicker.pose.orientation, -pi/5, pi/5)
                     goalkeeper_orientation = wrap_to_pi(opponent_kicker_orientation - pi)
                 else:
@@ -90,17 +85,17 @@ class GoalKeeper(Tactic):
                 width = self.game_state.const["FIELD_GOAL_WIDTH"]
                 y_position_on_line = clamp(y_position_on_line, -width, width)
 
-                destination = Pose(our_goal.x, y_position_on_line, goalkeeper_orientation)
+                destination = Pose.from_values(our_goal.x, y_position_on_line, goalkeeper_orientation)
 
             else:
                 destination = Pose(our_goal)
-            return MoveToPosition(self.game_state, self.player, destination, pathfinder_on=True, cruise_speed=2)
+            return MoveTo(destination, cruise_speed=2)
 
     def go_behind_ball(self):
         if self._is_ball_too_far():
             self.next_state = self.protect_goal
 
-        self.ball_spacing = GRAB_BALL_SPACING
+        # self.ball_spacing = GRAB_BALL_SPACING
         self.status_flag = Flags.WIP
         ball_position = self.game_state.ball_position
         orientation = (self.target.position - ball_position).angle()
@@ -110,9 +105,11 @@ class GoalKeeper(Tactic):
         else:
             self.next_state = self.go_behind_ball
             self._find_best_passing_option()
-        collision_ball = self.tries_flag == 0
-        return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                      collision_ball=collision_ball, cruise_speed=2, end_speed=0.2)
+        ball_collision = self.tries_flag == 0
+        return MoveTo(Pose(distance_behind, orientation),
+                      ball_collision=ball_collision,
+                      cruise_speed=2,
+                      end_speed=0.2)
 
     def grab_ball(self):
         if self._is_ball_too_far():
@@ -127,16 +124,24 @@ class GoalKeeper(Tactic):
         ball_position = self.game_state.ball_position
         orientation = (self.target.position - ball_position).angle()
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
-        return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
-                                     cruise_speed=2, charge_kick=True, end_speed=0.3, collision_ball=False)
+        return MoveTo(Pose(distance_behind, orientation),
+                      cruise_speed=2,
+                      end_speed=0.3,
+                      ball_collision=False)
+        # charge_kick
+        # return GoToPositionPathfinder(self.game_state, self.player, Pose(distance_behind, orientation),
+        #                              cruise_speed=2, charge_kick=True, end_speed=0.3, collision_ball=False)
 
     def kick(self):
-        self.ball_spacing = GRAB_BALL_SPACING
+        # self.ball_spacing = GRAB_BALL_SPACING
         self.next_state = self.validate_kick
         self.tries_flag += 1
         ball_position = self.game_state.ball_position
         orientation = (self.target.position - ball_position).angle()
-        return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, end_speed=0)
+        return CmdBuilder()\
+            .addMoveTo(Pose(ball_position, orientation), cruise_speed=2, end_speed=0)\
+            .addKick(self.kick_force)\
+            .build()
 
     def validate_kick(self):
         self.ball_spacing = GRAB_BALL_SPACING
@@ -150,7 +155,10 @@ class GoalKeeper(Tactic):
             self.status_flag = Flags.INIT
             self.next_state = self.go_behind_ball
 
-        return Kick(self.game_state, self.player, self.kick_force, Pose(ball_position, orientation), cruise_speed=2, end_speed=0.2)
+        return CmdBuilder()\
+            .addMoveTo(Pose(ball_position, orientation), cruise_speed=2, end_speed=0.2)\
+            .addKick(self.kick_force)\
+            .build()
 
     def _get_distance_from_ball(self):
         return (self.player.pose.position - self.game_state.ball_position).norm

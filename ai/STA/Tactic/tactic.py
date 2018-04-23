@@ -4,7 +4,6 @@ from typing import List
 from Util import Pose
 from Util.ai_command import AICommand
 from ai.GameDomainObjects import Player
-from ai.STA.Action import Action
 from Util.ai_command import Idle
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -26,7 +25,7 @@ class Tactic(object):
         :param target: Pose général pouvant être utilisé par les classes enfants comme elles veulent
         """
         assert isinstance(game_state, GameState), "Le game_state doit être un GameState"
-        assert isinstance(player, Player), "Le player doit être un Player {}".format(player)
+        assert isinstance(player, Player), "Le player doit être un Player, non un '{}'".format(player)
         assert isinstance(target, Pose), "La target devrait être une Pose"
 
         self.game_state = game_state
@@ -59,10 +58,8 @@ class Tactic(object):
             :return: un AICommand
         """
         next_ai_command = self.current_state()
-        if isinstance(next_ai_command, Action):
-            raise RuntimeError("Action are deprecaded use CmdBuilder")
         if not isinstance(next_ai_command, AICommand):
-            raise RuntimeError("A tactic MUST return an AICommand, not a {}".format(type(next_ai_command)))
+            raise RuntimeError("A tactic MUST return an AICommand, not a {}. {} is the culprit.".format(type(next_ai_command), self.current_state))
         self.current_state = self.next_state
         return next_ai_command
 
