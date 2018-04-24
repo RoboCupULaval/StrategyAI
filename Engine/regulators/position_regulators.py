@@ -40,8 +40,4 @@ class RealPositionRegulator(RegulatorBaseClass):
 
 
 class GrSimPositionRegulator(RealPositionRegulator):
-
-    settings = {
-        'translation': {'kp': 2, 'ki': 0, 'kd': 0.01},
-        'rotation': {'kp': 1, 'ki': 0.02, 'kd': 0.0}
-    }
+    pass
