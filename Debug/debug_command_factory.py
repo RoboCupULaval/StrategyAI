@@ -171,3 +171,17 @@ class DebugCommandFactory:
                                     'color': color.repr(),
                                     'width': width,
                                     'timeout': timeout}, link=link)
+
+    @staticmethod
+    def plot_point(y_unit: str, y_label: str, x: List[float], y: List[float]):
+        """
+        If the y_unit plot does not exit, the ui will create it. The ui will remember the previously send (x,y) points
+        :param y_unit: Name of the plot
+        :param y_label: Name of the line that will be plot on the y_unit
+        :param x: list of x data to add
+        :param y: list of y data to add
+        """
+        return debug_command(1099, {'y_unit': y_unit,
+                                     'y_label': y_label,
+                                     'x': x,
+                                     'y': y})
