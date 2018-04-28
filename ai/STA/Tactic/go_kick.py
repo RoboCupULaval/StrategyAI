@@ -62,10 +62,9 @@ class GoKick(Tactic):
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.player.pose.position).angle
         ball_speed = self.game_state.ball.velocity.norm
-        ball_speed_moidifier = (ball_speed/100 + 1)
+        ball_speed_modifier = (ball_speed/100 + 1)
 
-
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3 * ball_speed_moidifier)
+        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3 * ball_speed_modifier)
 
         if (self.player.pose.position - distance_behind).norm < 50 \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
