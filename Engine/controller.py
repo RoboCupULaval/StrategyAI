@@ -35,6 +35,8 @@ class Controller:
             robot.position_regulator = PositionRegulator()
             robot.velocity_regulator = VelocityRegulator()
 
+        self.prev_time = time.time()
+
     def update(self, track_frame: Dict, engine_cmds: List[EngineCommand]):
         self.timestamp = track_frame['timestamp']
         our_team_color = str(TeamColorService().our_team_color)
@@ -52,6 +54,9 @@ class Controller:
         commands = {}
         active_robots = [robot for robot in self if robot.pose is not None and robot.raw_path is not None]
 
+        dt = time.time() - self.prev_time
+        self.prev_time = time.time()
+
         for robot in active_robots:
             robot.path, robot.target_speed = path_smoother(robot)
 
@@ -60,10 +65,25 @@ class Controller:
             else:
                 cmd = robot.velocity_regulator.execute(robot)
 
+
             self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("m/s",
-                                                                         "robot {}".format(robot.robot_id),
+                                                                         "robot {} cmd".format(robot.robot_id),
                                                                          [time.time()],
                                                                          [cmd.norm]))
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("m/s",
+                                                                         "robot {} kallman".format(robot.robot_id),
+                                                                         [time.time()],
+                                                                         [robot.current_speed]))
+            # For debug, don't merge this
+            if not hasattr(robot, "prev_position"):
+                robot.prev_position = robot.position
+            delta_pos = (robot.prev_position - robot.position) / dt
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("m/s",
+                                                                         "robot {} delta position".format(robot.robot_id),
+                                                                         [time.time()],
+                                                                         [delta_pos.norm]))
+            robot.prev_position = robot.position
+
             self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("m",
                                                                          "robot {}".format(robot.robot_id),
                                                                          [time.time()],

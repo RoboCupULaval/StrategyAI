@@ -41,6 +41,7 @@ class RealVelocityController(RegulatorBaseClass):
             else:
                 next_speed = robot.current_speed - acc * self.dt * offset
 
+        return robot.cruise_speed
         return clamp(next_speed, 0, robot.cruise_speed)
 
     @staticmethod
