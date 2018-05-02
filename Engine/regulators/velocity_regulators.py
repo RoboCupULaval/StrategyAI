@@ -11,6 +11,7 @@ from Util.geometry import rotate, clamp
 class RealVelocityController(RegulatorBaseClass):
 
     settings = {'kp': 0.5, 'ki': 0.4, 'kd': 0.0}
+    offset = 10
 
     def __init__(self):
         self.orientation_controller = PID(**self.settings, wrap_error=True)
@@ -21,7 +22,7 @@ class RealVelocityController(RegulatorBaseClass):
 
     def execute(self, robot: Robot):
 
-        speed_norm = self.get_next_speed(robot)
+        speed_norm = self.get_next_speed(robot, offset=self.offset)
 
         velocity = robot.position_error * speed_norm / robot.position_error.norm
 
@@ -40,6 +41,7 @@ class RealVelocityController(RegulatorBaseClass):
             else:
                 next_speed = robot.current_speed - acc * self.dt * offset
 
+        return robot.cruise_speed
         return clamp(next_speed, 0, robot.cruise_speed)
 
     @staticmethod
@@ -53,7 +55,7 @@ class RealVelocityController(RegulatorBaseClass):
 
 class GrSimVelocityController(RealVelocityController):
 
-    settings = {'kp': .75, 'ki': 0.05, 'kd': 0}
+    offset = 1
 
 
 def is_time_to_break(robot, destination, cruise_speed, acceleration, target_speed):
