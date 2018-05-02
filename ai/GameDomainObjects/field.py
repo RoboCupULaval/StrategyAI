@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Dict
 
-from Util import Position
+from Util import Position, Pose
 from ai.GameDomainObjects import Ball
 from config.config import Config
 
@@ -27,6 +27,17 @@ class FieldLineSegment:
         self.p2 = Position.from_dict(line["p2"])
         self.length = (self.p2 - self.p1).norm
         self.thickness = line["thickness"]
+
+
+class Area:
+    def __init__(self, upper_left, lower_right):
+        self.a = upper_left  # -x, +y
+        self.b = lower_right # +x, -y
+
+    def point_inside(self, p: Position) -> bool:
+        return self.a.x <= p.x <= self.b.x and \
+               self.b.y <= p.y <= self.a.y
+
 
 class Field:
     def __init__(self, ball: Ball):
@@ -67,6 +78,8 @@ class Field:
         center_circle_radius = self.field_arcs['CenterCircle'].radius
         defense_stretch = 100  # hard coded parce que cette valeur d'est plus valide et que plusieurs modules en ont de besoin
         # la valeur qu'on avait apres le fix a Babin était de 9295 mm, ce qui est 90 fois la grandeur d'avant.
+
+        # TODO: All of those const should removed and replaced by mostly line and area
         self._constant["FIELD_Y_TOP"] = field_width / 2
         self._constant["FIELD_Y_BOTTOM"] = -field_width / 2
         self._constant["FIELD_X_LEFT"] = -field_length / 2
@@ -88,25 +101,33 @@ class Field:
         self._constant["FIELD_GOAL_Y_TOP"] = defense_radius + (defense_stretch / 2)
         self._constant["FIELD_GOAL_Y_BOTTOM"] = -self._constant["FIELD_GOAL_Y_TOP"]
 
-        constant["FIELD_OUR_GOAL_X_EXTERNAL"] = self._constant["FIELD_X_NEGATIVE"]
-        self._constant["FIELD_OUR_GOAL_X_INTERNAL"] = self._constant["FIELD_X_NEGATIVE"] + \
-                                                      self._constant["FIELD_GOAL_RADIUS"]
-
-        self._constant["FIELD_THEIR_GOAL_X_INTERNAL"] = self._constant["FIELD_X_POSITIVE"] - self._constant[
+        self.constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self.constant["FIELD_X_NEGATIVE"]
+        self.constant["FIELD_THEIR_GOAL_X_INTERNAL"] = self.constant["FIELD_X_NEGATIVE"] + self.constant[
             "FIELD_GOAL_RADIUS"]
-        self._constant["FIELD_THEIR_GOAL_X_EXTERNAL"] = self._constant["FIELD_X_POSITIVE"]
 
-        self._constant["FIELD_OUR_GOAL_TOP_CIRCLE"] = Position(self._constant["FIELD_X_NEGATIVE"],
-                                                               self._constant["FIELD_GOAL_SEGMENT"] / 2)
-        self._constant["FIELD_OUR_GOAL_BOTTOM_CIRCLE"] = Position(self._constant["FIELD_X_NEGATIVE"],
-                                                                  -self._constant["FIELD_GOAL_SEGMENT"] / 2)
-        self._constant["FIELD_OUR_GOAL_MID_GOAL"] = Position(self._constant["FIELD_X_NEGATIVE"], 0)
+        self.constant["FIELD_OUR_GOAL_X_INTERNAL"] = self.constant["FIELD_X_POSITIVE"] - self.constant[
+            "FIELD_GOAL_RADIUS"]
+        self.constant["FIELD_OUR_GOAL_X_EXTERNAL"] = self.constant["FIELD_X_POSITIVE"]
 
-        self._constant["FIELD_THEIR_GOAL_TOP_CIRCLE"] = Position(self._constant["FIELD_X_POSITIVE"],
-                                                                 self._constant["FIELD_GOAL_SEGMENT"] / 2)
-        self._constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"] = Position(self._constant["FIELD_X_POSITIVE"],
-                                                                    -self._constant["FIELD_GOAL_SEGMENT"] / 2)
-        self._constant["FIELD_THEIR_GOAL_MID_GOAL"] = Position(self._constant["FIELD_X_POSITIVE"], 0)
+        self.constant["FIELD_THEIR_GOAL_TOP_CIRCLE"] = Position(self.constant["FIELD_X_NEGATIVE"],
+                                                                self.constant["FIELD_GOAL_SEGMENT"] / 2)
+        self.constant["FIELD_THEIR_GOAL_BOTTOM_CIRCLE"] = Position(self.constant["FIELD_X_NEGATIVE"],
+                                                                   -self.constant["FIELD_GOAL_SEGMENT"] / 2)
+        self.constant["FIELD_THEIR_GOAL_MID_GOAL"] = Position(self.constant["FIELD_X_NEGATIVE"], 0)
+
+        self.constant["FIELD_OUR_GOAL_TOP_CIRCLE"] = Position(self.constant["FIELD_X_POSITIVE"],
+                                                              self.constant["FIELD_GOAL_SEGMENT"] / 2)
+        self.constant["FIELD_OUR_GOAL_BOTTOM_CIRCLE"] = Position(self.constant["FIELD_X_POSITIVE"],
+                                                                 -self.constant["FIELD_GOAL_SEGMENT"] / 2)
+
+        self.constant["FIELD_OUR_GOAL_MID_GOAL"] = Position(self.constant["FIELD_X_POSITIVE"], 0)
+
+        self.our_goal = Position(self._constant["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
+        self.our_goal_pose = Pose(self.our_goal, 0) # TODO: Make goalkeeper not required a pose
+        self.there_goal = Position(self._constant["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
+
+        self.our_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2,
+                                  self.field_lines["RightFieldLeftPenaltyStretch"].p1)
 
     def _convert_field_circular_arc(self, field_arcs: Dict):
         result = {}

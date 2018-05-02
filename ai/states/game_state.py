@@ -115,6 +115,10 @@ class GameState(metaclass=Singleton):
         return self._field.ball
 
     @property
+    def field(self) -> Field:
+        return self._field
+
+    @property
     def const(self):
         return self._field.constant
 
