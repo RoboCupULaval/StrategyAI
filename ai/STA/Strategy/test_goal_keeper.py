@@ -23,7 +23,7 @@ class TestGoalKeeper(Strategy):
         our_goal = self.game_state.field.our_goal_pose
 
         self.create_node(Role.GOALKEEPER,
-                         GoalKeeper(self.game_state, self.assigned_roles[Role.GOALKEEPER], our_goal))
+                         GoalKeeper(self.game_state, self.assigned_roles[Role.GOALKEEPER]))
 
         attacker = self.assigned_roles[Role.FIRST_ATTACK]
         node_idle = self.create_node(Role.FIRST_ATTACK, Stop(self.game_state, attacker))

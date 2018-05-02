@@ -42,7 +42,7 @@ class GoalKeeper(Tactic):
         self.next_state = self.protect_goal
         self.status_flag = Flags.WIP
         self.target_assignation_last_time = None
-        self.target = target
+        self.target = Pose(self.game_state.field.our_goal, np.pi)  # Ignore target argument, always go for our goal
         self._find_best_passing_option()
         self.kick_force = KickForce.HIGH
         self.penalty_kick = penalty_kick

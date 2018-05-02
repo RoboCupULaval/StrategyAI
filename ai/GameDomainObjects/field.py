@@ -123,8 +123,9 @@ class Field:
         self.constant["FIELD_OUR_GOAL_MID_GOAL"] = Position(self.constant["FIELD_X_POSITIVE"], 0)
 
         self.our_goal = Position(self._constant["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
-        self.our_goal_pose = Pose(self.our_goal, 0) # TODO: Make goalkeeper not required a pose
-        self.there_goal = Position(self._constant["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
+        self.our_goal_pose = Pose(self.our_goal, 0)
+        self.their_goal = Position(self._constant["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
+        self.their_goal_pose = Pose(self.their_goal, 0)
 
         self.our_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2,
                                   self.field_lines["RightFieldLeftPenaltyStretch"].p1)
