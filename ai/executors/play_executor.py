@@ -52,11 +52,13 @@ class PlayExecutor:
         if self.autonomous_flag:
             self._exec_auto_play()
 
-        ai_cmds = self._execute_strategy()
-        engine_cmds = []
+        ai_cmds, debug_cmds = self._execute_strategy()
+
+        self.ui_send_queue.put_nowait(debug_cmds)
 
         paths = self.pathfinder_module.exec(self.game_state, ai_cmds)
 
+        engine_cmds = []
         for player, ai_cmd in ai_cmds.items():
             engine_cmds.append(generate_engine_cmd(player, ai_cmd, paths[player]))
 

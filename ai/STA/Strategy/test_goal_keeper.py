@@ -52,5 +52,6 @@ class TestGoalKeeper(Strategy):
         return not self.ball_is_inside_goal()
 
     def ball_is_inside_goal(self):
-        return self.game_state.field.our_goal_area.point_inside(self.game_state.ball_position)
+        return self.game_state.field.our_goal_area.point_inside(self.game_state.ball_position) \
+            or self.game_state.field.field_length / 2 < self.game_state.ball_position.x
 

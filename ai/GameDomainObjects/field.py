@@ -71,32 +71,33 @@ class Field:
         else:
             defense_radius = self.field_arcs['RightFieldLeftPenaltyArc'].radius
 
-        field_length = field["field_length"]
-        field_width = field["field_width"]
+        self.field_length = field["field_length"]
+        self.field_width = field["field_width"]
+
         boundary_width = field["boundary_width"]
-        goal_width = field["goal_width"]
+        self.goal_width = field["goal_width"]
         center_circle_radius = self.field_arcs['CenterCircle'].radius
         defense_stretch = 100  # hard coded parce que cette valeur d'est plus valide et que plusieurs modules en ont de besoin
         # la valeur qu'on avait apres le fix a Babin était de 9295 mm, ce qui est 90 fois la grandeur d'avant.
 
         # TODO: All of those const should removed and replaced by mostly line and area
-        self._constant["FIELD_Y_TOP"] = field_width / 2
-        self._constant["FIELD_Y_BOTTOM"] = -field_width / 2
-        self._constant["FIELD_X_LEFT"] = -field_length / 2
-        self._constant["FIELD_X_RIGHT"] = field_length / 2
+        self._constant["FIELD_Y_TOP"] = self.field_width / 2
+        self._constant["FIELD_Y_BOTTOM"] = -self.field_width / 2
+        self._constant["FIELD_X_LEFT"] = -self.field_length / 2
+        self._constant["FIELD_X_RIGHT"] = self.field_length / 2
 
         self._constant["CENTER_CENTER_RADIUS"] = center_circle_radius
 
-        self._constant["FIELD_Y_POSITIVE"] = field_width / 2
-        self._constant["FIELD_Y_NEGATIVE"] = -field_width / 2
-        self._constant["FIELD_X_NEGATIVE"] = -field_length / 2
-        self._constant["FIELD_X_POSITIVE"] = field_length / 2
+        self._constant["FIELD_Y_POSITIVE"] = self.field_width / 2
+        self._constant["FIELD_Y_NEGATIVE"] = -self.field_width / 2
+        self._constant["FIELD_X_NEGATIVE"] = -self.field_length / 2
+        self._constant["FIELD_X_POSITIVE"] = self.field_length / 2
 
         self._constant["FIELD_BOUNDARY_WIDTH"] = boundary_width
 
         self._constant["FIELD_GOAL_RADIUS"] = defense_radius
         self._constant["FIELD_GOAL_SEGMENT"] = defense_stretch
-        self._constant["FIELD_GOAL_WIDTH"] = goal_width
+        self._constant["FIELD_GOAL_WIDTH"] = self.goal_width
 
         self._constant["FIELD_GOAL_Y_TOP"] = defense_radius + (defense_stretch / 2)
         self._constant["FIELD_GOAL_Y_BOTTOM"] = -self._constant["FIELD_GOAL_Y_TOP"]
@@ -127,6 +128,7 @@ class Field:
         self.their_goal = Position(self._constant["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
         self.their_goal_pose = Pose(self.their_goal, 0)
 
+        # TODO in real these constant are not provided by ssl-vision, investigate
         self.our_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2,
                                   self.field_lines["RightFieldLeftPenaltyStretch"].p1)
 

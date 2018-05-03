@@ -1,5 +1,9 @@
 # Under MIT licence, see LICENCE.txt
+from unittest.suite import _DebugResult
+
 import numpy as np
+
+from Debug.debug_command_factory import DebugCommandFactory
 
 __author__ = 'RoboCupULaval'
 
@@ -11,7 +15,7 @@ from Util import Pose, Position, AICommand
 from Util.ai_command import CmdBuilder, MoveTo
 from Util.constant import ROBOT_RADIUS, KickForce
 from Util.constant import TeamColor
-from Util.geometry import clamp, compare_angle, wrap_to_pi
+from Util.geometry import clamp, compare_angle, wrap_to_pi, intersection_line_and_circle
 from ai.Algorithm.evaluation_module import closest_player_to_point, best_passing_option, player_with_ball
 from ai.GameDomainObjects.field import FieldSide
 from ai.GameDomainObjects import Player
@@ -38,8 +42,8 @@ class GoalKeeper(Tactic):
         super().__init__(game_state, player, target, args)
 
         self.is_yellow = self.player.team.team_color == TeamColor.YELLOW
-        self.current_state = self.chill
-        self.next_state = self.chill
+        self.current_state = self.defense
+        self.next_state = self.defense
         # self.current_state = self.protect_goal
         # self.next_state = self.protect_goal
         self.status_flag = Flags.WIP
@@ -53,13 +57,55 @@ class GoalKeeper(Tactic):
         self.grab_ball_tries = 0
         self.kick_last_time = time.time()
 
+        self.OFFSET_FROM_GOAL_LINE = Position(ROBOT_RADIUS + 10, 0)
+
     def chill(self):
-        position = self.game_state.field.our_goal - Position(ROBOT_RADIUS + 10, 0)
+        position = self.game_state.field.our_goal - self.OFFSET_FROM_GOAL_LINE
+        return MoveTo(Pose(position, np.pi))
+
+    def defense_dumb(self):
+        dest_y = self.game_state.ball_position.y \
+                 * self.game_state.const["FIELD_GOAL_WIDTH"] / 2 / self.game_state.const["FIELD_Y_TOP"]
+        position = self.game_state.field.our_goal - Position(ROBOT_RADIUS + 10, -dest_y)
         return MoveTo(Pose(position, np.pi))
 
     def defense(self):
-        dest_y = self.game_state.const["FIELD_GOAL_WIDTH"] / 2
-        return MoveTo(Pose(dest_y, np.pi))
+        circle_radius = self.game_state.const["FIELD_GOAL_WIDTH"] / 2
+        circle_center = self.game_state.field.our_goal - self.OFFSET_FROM_GOAL_LINE
+        solutions = intersection_line_and_circle(circle_center,
+                                                 circle_radius,
+                                                 self.game_state.ball_position,
+                                                 self._best_target_into_goal())
+        # Their is one or two intersection on the circle, take the one on the field
+        for solution in solutions:
+            if solution.x < self.game_state.field.field_length / 2\
+               and self.game_state.ball_position.x < self.game_state.field.field_length / 2:
+                return MoveTo(Pose(solution, np.pi))
+
+        return MoveTo(Pose(self.game_state.field.our_goal, np.pi),
+                      cruise_speed=2,
+                      end_speed=2)
+
+    def _best_target_into_goal(self):
+        # Find the bisectrice of the triangle made by the ball (a) and the two goals extremities(b, c)
+        a = self.game_state.ball_position
+        b = self.game_state.field.our_goal + Position(0, +self.game_state.const["FIELD_GOAL_WIDTH"] / 2)
+        c = self.game_state.field.our_goal + Position(0, -self.game_state.const["FIELD_GOAL_WIDTH"] / 2)
+
+        ab = a-b
+        ac = a-c
+
+        be = self.game_state.field.goal_width / (1 + ab.norm/ac.norm)
+
+        return b + Position(0, -be)
+
+    def debug_cmd(self):
+        return [DebugCommandFactory().line(self.game_state.ball_position,
+                                          self.game_state.field.our_goal - self.OFFSET_FROM_GOAL_LINE,#self._best_target_into_goal(),
+                                          timeout=0.1),
+                DebugCommandFactory().line(self.game_state.ball_position,
+                                          self._best_target_into_goal(),
+                                          timeout=0.1)]
 
     # def protect_goal(self):
     #     if not self.penalty_kick:
