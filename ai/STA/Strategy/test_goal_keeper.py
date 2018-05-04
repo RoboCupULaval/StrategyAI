@@ -29,7 +29,7 @@ class TestGoalKeeper(Strategy):
         node_idle = self.create_node(Role.FIRST_ATTACK, Stop(self.game_state, attacker))
         node_go_kick = self.create_node(Role.FIRST_ATTACK, GoKick(self.game_state, attacker, target=our_goal))
 
-        player_has_kicked = partial(self.has_kicked, attacker)
+        player_has_kicked = partial(self.has_kicked, Role.FIRST_ATTACK)
 
         node_idle.connect_to(node_go_kick, when=self.ball_is_outside_goal)
         node_go_kick.connect_to(node_idle, when=self.ball_is_inside_goal)
@@ -41,12 +41,8 @@ class TestGoalKeeper(Strategy):
                                                                 Role.FIRST_ATTACK]
                 }
 
-    def has_kicked(self, player):
-        role = GameState().get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'GoKick':
-            return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
-        else:
-            return False
+    def has_kicked(self, role):
+        return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
 
     def ball_is_outside_goal(self):
         return not self.ball_is_inside_goal()

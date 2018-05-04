@@ -143,6 +143,9 @@ class Field:
         for line in field_lines:
             result[line["name"]] = FieldLineSegment(line)
         return result
+
+    def is_ball_in_our_goal(self):
+        return self.our_goal_area.point_inside(self.ball.position)
         
         
         
