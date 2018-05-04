@@ -7,6 +7,27 @@ from Util.position import Position
 from typing import cast, Sequence, List
 
 
+class Area:
+    def __init__(self, upper_left, lower_right):
+        self.a = upper_left  # -x, +y
+        self.b = lower_right # +x, -y
+
+    def point_inside(self, p: Position) -> bool:
+        return self.a.x <= p.x <= self.b.x and \
+               self.b.y <= p.y <= self.a.y
+
+
+def intersection_between_lines(a1, a2, b1, b2) -> Position:
+    s = np.vstack([a1.array, a2.array, b1.array, b2.array])
+    h = np.hstack((s, np.ones((4, 1))))
+    l1 = np.cross(h[0], h[1])  # first line
+    l2 = np.cross(h[2], h[3])  # second line
+    x, y, z = np.cross(l1, l2)  # point of intersection
+    if z == 0:
+        raise ValueError("Parallel lines")
+    return Position(x / z, y / z)
+
+
 def intersection_line_and_circle(cp: Position, cr: float, lp1: Position, lp2: Position) -> List[Position]:
     # Based on http://mathworld.wolfram.com/Circle-LineIntersection.html
     lp1 = lp1.copy() - cp

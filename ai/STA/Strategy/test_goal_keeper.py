@@ -1,6 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from functools import partial
 
+from Util.constant import KickForce
 from Util.pose import Pose
 
 from Util.position import Position
@@ -27,7 +28,10 @@ class TestGoalKeeper(Strategy):
 
         attacker = self.assigned_roles[Role.FIRST_ATTACK]
         node_idle = self.create_node(Role.FIRST_ATTACK, Stop(self.game_state, attacker))
-        node_go_kick = self.create_node(Role.FIRST_ATTACK, GoKick(self.game_state, attacker, target=our_goal))
+        node_go_kick = self.create_node(Role.FIRST_ATTACK, GoKick(self.game_state,
+                                                                  attacker,
+                                                                  target=our_goal,
+                                                                  kick_force=KickForce.HIGH))
 
         player_has_kicked = partial(self.has_kicked, Role.FIRST_ATTACK)
 

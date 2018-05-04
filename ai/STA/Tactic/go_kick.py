@@ -33,7 +33,8 @@ class GoKick(Tactic):
                  target: Pose=Pose(),
                  args: List[str]=None,
                  kick_force: KickForce=KickForce.MEDIUM,
-                 auto_update_target=False):
+                 auto_update_target=False,
+                 go_behind_distance=GRAB_BALL_SPACING*3):
 
         super().__init__(game_state, player, target, args)
         self.current_state = self.kick_charge
@@ -46,7 +47,7 @@ class GoKick(Tactic):
         if self.auto_update_target:
             self._find_best_passing_option()
         self.kick_force = kick_force
-        self.ball_spacing = GRAB_BALL_SPACING
+        self.go_behind_distance = go_behind_distance
         self.tries_flag = 0
         self.grab_ball_tries = 0
 
@@ -58,10 +59,9 @@ class GoKick(Tactic):
         return CmdBuilder().addChargeKicker().build()
 
     def go_behind_ball(self):
-        self.ball_spacing = GRAB_BALL_SPACING
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.player.pose.position).angle
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3)
+        distance_behind = self.get_destination_behind_ball(self.go_behind_distance)
 
         if (self.player.pose.position - distance_behind).norm < 50 \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
@@ -87,7 +87,6 @@ class GoKick(Tactic):
                                       ball_collision=False).addChargeKicker().build()
 
     def kick(self):
-        self.ball_spacing = GRAB_BALL_SPACING
         self.next_state = self.validate_kick
         self.tries_flag += 1
 

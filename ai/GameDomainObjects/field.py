@@ -1,7 +1,9 @@
+import copy
 from enum import Enum
 from typing import Dict
 
 from Util import Position, Pose
+from Util.geometry import Area
 from ai.GameDomainObjects import Ball
 from config.config import Config
 
@@ -27,16 +29,6 @@ class FieldLineSegment:
         self.p2 = Position.from_dict(line["p2"])
         self.length = (self.p2 - self.p1).norm
         self.thickness = line["thickness"]
-
-
-class Area:
-    def __init__(self, upper_left, lower_right):
-        self.a = upper_left  # -x, +y
-        self.b = lower_right # +x, -y
-
-    def point_inside(self, p: Position) -> bool:
-        return self.a.x <= p.x <= self.b.x and \
-               self.b.y <= p.y <= self.a.y
 
 
 class Field:
@@ -131,6 +123,12 @@ class Field:
         # TODO in real these constant are not provided by ssl-vision, investigate
         self.our_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2,
                                   self.field_lines["RightFieldLeftPenaltyStretch"].p1)
+
+        self.goal_line = copy.deepcopy(self.field_lines["RightGoalDepthLine"])
+        self.goal_line.p1.x = self.our_goal.x # Move it to the entrance of the goal
+        self.goal_line.p2.x = self.our_goal.x
+
+
 
     def _convert_field_circular_arc(self, field_arcs: Dict):
         result = {}
