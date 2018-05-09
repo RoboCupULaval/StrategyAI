@@ -49,10 +49,17 @@ class GoKick(Tactic):
         self.ball_spacing = GRAB_BALL_SPACING
         self.tries_flag = 0
         self.grab_ball_tries = 0
+        self.grab_ball_modifier = 1
+        orientation = (self.target.position - self.game_state.ball_position).angle
+        self.is_quick_kick = self._is_player_towards_ball_and_target(abs_tol=0.1) and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.2)
 
     def kick_charge(self):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
-            self.next_state = self.go_behind_ball
+            if self.is_quick_kick: #si le robot est déjà allign avec la balle, on va tout de suite grab
+                self.grab_ball_modifier = -1 #semi hack pour par rallentir en débile avant de grab la balle
+                self.next_state = self.grab_ball
+            else:
+                self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
 
         return CmdBuilder().addChargeKicker().build()
@@ -60,7 +67,7 @@ class GoKick(Tactic):
     def go_behind_ball(self):
         self.ball_spacing = GRAB_BALL_SPACING
         self.status_flag = Flags.WIP
-        orientation = (self.target.position - self.player.pose.position).angle
+        orientation = (self.target.position - self.game_state.ball_position).angle
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3)
 
         if (self.player.pose.position - distance_behind).norm < 50 \
@@ -80,8 +87,8 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10):
             self.next_state = self.kick
 
-        orientation = (self.target.position - self.player.pose.position).angle
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
+        orientation = (self.target.position - self.game_state.ball_position).angle
+        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * self.grab_ball_modifier)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=1,
                                       ball_collision=False).addChargeKicker().build()

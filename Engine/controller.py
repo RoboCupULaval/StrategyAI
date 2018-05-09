@@ -60,14 +60,14 @@ class Controller:
             else:
                 cmd = robot.velocity_regulator.execute(robot)
 
-            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("m/s",
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("mm/s",
                                                                          "robot {}".format(robot.robot_id),
                                                                          [time.time()],
                                                                          [cmd.norm]))
-            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("m",
-                                                                         "robot {}".format(robot.robot_id),
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("mm/s",
+                                                                         "robot_real_s {}".format(robot.robot_id),
                                                                          [time.time()],
-                                                                         [robot.position.y]))
+                                                                         [robot.velocity.norm]))
 
             commands[robot.robot_id] = self._put_in_robots_referencial(robot, cmd)
 

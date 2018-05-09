@@ -30,7 +30,7 @@ class RealVelocityController(RegulatorBaseClass):
 
         return Pose(velocity, cmd_orientation)
 
-    def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION, offset=10):
+    def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION, offset=20):
 
         if robot.target_speed > robot.current_speed:
             next_speed = robot.current_speed + acc * self.dt * offset

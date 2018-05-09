@@ -54,8 +54,8 @@ class RobotFilter(KalmanFilter):
 
     def process_covariance(self):
         dt = self._dt
-        sigma_acc_x = 1000
-        sigma_acc_y = 1000
+        sigma_acc_x = 200
+        sigma_acc_y = 200
         sigma_acc_o = 10 * np.pi/180
 
         process_covariance = \
@@ -70,12 +70,16 @@ class RobotFilter(KalmanFilter):
         return process_covariance
 
     def observation_covariance(self):
-        return np.diag([1, 1, 0.1 * np.pi/180])
+        if (abs(self.x[0]) < 200) or (abs(self.x[2]) < 200):
+            return np.diag([100, 100, 1 * np.pi / 180])
+        else:
+            return np.diag([10, 10, 0.1 * np.pi/180])
 
     def initial_state_covariance(self):
-        return np.diag([10000, 1, 10000, 1, 90 * np.pi/180, 10 * np.pi/180])
+        return np.diag([10000, 10000, 10000, 10000, 90 * np.pi/180, 10 * np.pi/180])
 
     def update(self, observation, t_capture) -> None:
+
         error = observation - self.observation_model() @ self.x
         error[2] = RobotFilter.wrap_to_pi(error[2])
         self._update(error, t_capture)
@@ -86,6 +90,7 @@ class RobotFilter(KalmanFilter):
             input_command = RobotFilter.rotate(input_command, self.orientation)
         self._predict(input_command)
         self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
+
 
     @staticmethod
     def rotate(vec, angle):

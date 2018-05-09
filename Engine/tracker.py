@@ -45,7 +45,6 @@ class Tracker:
         if any(camera_frames):
 
             for frame in camera_frames:
-
                 if self.on_negative_side:
                     frame = Tracker.change_reference(frame)
 
@@ -89,7 +88,7 @@ class Tracker:
             input_commands[packet.robot_id] = packet.command.to_array()
 
         for robot, input_cmd in zip(self._our_team, input_commands):
-            robot.predict(input_cmd)
+            robot.predict()
         for robot in self._their_team:
             robot.predict()
 
