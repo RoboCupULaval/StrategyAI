@@ -50,16 +50,10 @@ class GoKick(Tactic):
         self.tries_flag = 0
         self.grab_ball_tries = 0
         self.grab_ball_modifier = 1
-        orientation = (self.target.position - self.game_state.ball_position).angle
-        self.is_quick_kick = self._is_player_towards_ball_and_target(abs_tol=0.1) and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.2)
 
     def kick_charge(self):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
-            if self.is_quick_kick: #si le robot est déjà allign avec la balle, on va tout de suite grab
-                self.grab_ball_modifier = -1 #semi hack pour par rallentir en débile avant de grab la balle
-                self.next_state = self.grab_ball
-            else:
-                self.next_state = self.go_behind_ball
+            self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
 
         return CmdBuilder().addChargeKicker().build()
