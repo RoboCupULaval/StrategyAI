@@ -61,7 +61,11 @@ class GoKick(Tactic):
         self.ball_spacing = GRAB_BALL_SPACING
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.player.pose.position).angle
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3)
+        ball_speed = self.game_state.ball.velocity.norm
+        ball_speed_modifier = (ball_speed/100 + 1)
+
+
+        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3 * ball_speed_modifier)
 
         if (self.player.pose.position - distance_behind).norm < 50 \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
@@ -141,7 +145,6 @@ class GoKick(Tactic):
             Calcule le point situé à  x pixels derrière la position 1 par rapport à la position 2
             :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
             """
-
         delta_x = self.target.position.x - self.game_state.ball_position.x
         delta_y = self.target.position.y - self.game_state.ball_position.y
         theta = np.math.atan2(delta_y, delta_x)
