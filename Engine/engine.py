@@ -3,6 +3,7 @@ import cProfile
 import logging
 import os
 import sys
+from math import sqrt
 from multiprocessing import Process, Queue, Manager
 from multiprocessing.managers import DictProxy
 from queue import Empty
@@ -18,12 +19,6 @@ from Engine.Communication.sender.uidebug_command_sender import UIDebugCommandSen
 from Engine.controller import Controller
 from Engine.tracker import Tracker
 from Util.timing import create_fps_timer
-
-try:
-    from Util.csv_plotter import CsvPlotter
-except:
-    print('Fail to import csv_plotter. It will be disable.')
-    from Engine.controller import Observer as CsvPlotter
 
 from config.config import Config
 
@@ -70,7 +65,7 @@ class Engine(Process):
 
         # main engine module
         self.tracker = Tracker(self.vision_state)
-        self.controller = Controller(observer=CsvPlotter)
+        self.controller = Controller(self.ui_send_queue)
 
         # fps and limitation
         self._fps = Engine.DEFAULT_FPS
