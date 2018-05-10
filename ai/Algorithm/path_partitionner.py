@@ -43,7 +43,12 @@ class PathPartitionner:
         if not self.is_path_colliding(start, target, obstacles):
             return Path.from_array(start, target)
 
-        sub_target, avoid_dir = self.next_sub_target(start, target, obstacles, avoid_dir)
+        sub_target_1, avoid_dir_1 = self.next_sub_target(start, target, obstacles, avoid_dir, avoid_dir_sign=1)
+        sub_target_2, avoid_dir_2 = self.next_sub_target(start, target, obstacles, avoid_dir, avoid_dir_sign=-1)
+        if np.linalg.norm((start-sub_target_1)) < np.linalg.norm(start-sub_target_2):
+            sub_target = sub_target_1
+        else:
+            sub_target = sub_target_2
         path_1 = self.path_planner(start, sub_target, obstacles, avoid_dir, depth=depth+1)
         path_2 = self.path_planner(sub_target, target, obstacles, avoid_dir, depth=depth+1)
 
@@ -74,7 +79,7 @@ class PathPartitionner:
         is_inside_ellipse = temp <= np.sqrt(np.linalg.norm(start - target) ** 2 + ELLIPSE_HALF_WIDTH ** 2)
         return obstacles[is_inside_ellipse]
 
-    def next_sub_target(self, start, target, obstacles, avoid_dir=None):
+    def next_sub_target(self, start, target, obstacles, avoid_dir=None, avoid_dir_sign=1):
         collisions, distances = self.find_collisions(start, target, obstacles)
 
         sub_target = target
@@ -84,7 +89,7 @@ class PathPartitionner:
             segment_direction = normalize(target - start)
             len_along_path = np.inner(closest_collision - start, segment_direction)
             if len_along_path > 0:
-                avoid_dir = perpendicular(segment_direction)
+                avoid_dir = perpendicular(segment_direction) * avoid_dir_sign
                 sub_target = start + segment_direction * len_along_path + avoid_dir * SUB_TARGET_RESOLUTION_FACTOR
                 while not self.is_valid_sub_target(sub_target, obstacles):
                     sub_target += avoid_dir * SUB_TARGET_RESOLUTION_FACTOR
