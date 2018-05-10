@@ -88,7 +88,7 @@ class Tracker:
             input_commands[packet.robot_id] = packet.command.to_array()
 
         for robot, input_cmd in zip(self._our_team, input_commands):
-            robot.predict()
+            robot.predict(input_cmd)
         for robot in self._their_team:
             robot.predict()
 
