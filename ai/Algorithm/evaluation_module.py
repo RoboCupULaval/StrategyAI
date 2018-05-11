@@ -206,4 +206,3 @@ def best_position_in_region(player, A, B):
         best_position = Position()
 
     return best_position
-

@@ -22,12 +22,15 @@ COMMAND_DELAY = 1.5
 
 
 class PassToPlayer(Tactic):
-    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), target_id=1, args: Optional[List[str]]=None):
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: Optional[List[str]]=None):
         super().__init__(game_state, player, target, args)
         self.current_state = self.kick_charge
         self.next_state = self.kick_charge
         self.last_time = time.time()
-        self.target_id = target_id
+        if args:
+            self.target_id = int(args[0])
+        else:
+            self.target_id = 1
 
     def kick_charge(self):
         if time.time() - self.last_time > COMMAND_DELAY:
