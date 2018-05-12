@@ -150,22 +150,6 @@ class PlayExecutor:
             self.ui_send_queue.put(cmd)
 
 
-    # def _has_available_players_changed(self) -> bool:
-    #     available_players = GameState().our_team.available_players
-    #     player_change = False
-    #     for i in available_players:
-    #         if i not in self.last_available_players:
-    #             player_change = True
-    #             break
-    #     if not player_change:
-    #         for i in self.last_available_players:
-    #             if i not in available_players:
-    #                 player_change = True
-    #                 break
-    #     self.last_available_players = available_players.copy()
-    #     return player_change
-
-
 def generate_engine_cmd(player: Player, ai_cmd: AICommand, path):
     return EngineCommand(player.id,
                          cruise_speed=ai_cmd.cruise_speed * 1000,
