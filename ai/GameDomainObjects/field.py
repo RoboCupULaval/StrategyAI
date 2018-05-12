@@ -13,17 +13,23 @@ class FieldSide(Enum):
     NEGATIVE = 1
 
 
+class Line:
+    def __init__(self, p1, p2):
+        self.p1 = p1
+        self.p2 = p2
+
+
 # noinspection PyPep8
 class FieldCircularArc:
     def __init__(self, arc: Dict):
         self.center = Position.from_dict(arc["center"])
-        self.radius      = arc["radius"]
+        self.radius = arc["radius"]
         self.angle_start = arc["a1"]  # Counter clockwise order
-        self.angle_ened  = arc["a2"]
-        self.thickness   = arc["thickness"]
+        self.angle_ened = arc["a2"]
+        self.thickness = arc["thickness"]
 
 
-class FieldLineSegment:
+class FieldLineSegment(Line):
     def __init__(self, line: Dict):
         self.p1 = Position.from_dict(line["p1"])
         self.p2 = Position.from_dict(line["p2"])
@@ -33,9 +39,52 @@ class FieldLineSegment:
 
 class Field:
     def __init__(self, ball: Ball):
+        #         <-------------------------field_length------------------------>
+        #
+        #  ^     +------------------------------+-------------------------------+
+        #  |     |                              |                               |
+        #  |     |                              |                               |
+        #  |     +-----------+                  |    Y+              E----------+
+        # f|     |           |                  |    ^               |          |
+        # i|     |           |                  |    |               |          |
+        # e|  +--+           |                  |    +--> X+         |          C--+ ^
+        # l|  |  |           |                  |                    |          |  | |
+        # d|  |  |           |                XX|XX                  |          |  | |
+        #  |  |  |           |               X  |  X                 |          |  | |
+        # w|  |  B--------------------------------------------------------------A  | |  goal_width
+        # i|  |  |           |               X  |  X                 |          |  | |
+        # d|  |  |           |                XX|XX                  |          |  | |
+        # t|  |  |           |                  |                    |          |  | |
+        # h|  +--+           |                  |                    |          D--+ v
+        #  |     |           |                  |                    |          |
+        #  |     |           |                  |                    |          |
+        #  |     +-----------+                  |                    +----------F
+        #  |     |                              |                               |
+        #  |     |                              |                               |
+        #  v     +------------------------------+-------------------------------+
+        #
+        self.our_goal = None  # Point A
+        self.our_goal_pose = None
+        self.their_goal = None  # Point B
+        self.their_goal_pose = None
+
+        self.goal_line = None  # Point C to D
+        self.our_goal_area = None # Area define by Point E to F
+
+        self.field_length = None
+        self.field_width = None
+        self.goal_width = None
 
         self._ball = ball
         self._constant = constant
+
+        self.field_lines = field_lines
+        self.field_arcs = {}
+
+        self._update_field_const()
+
+    def is_ball_in_our_goal(self):
+        return self.our_goal_area.point_inside(self.ball.position)
 
     @property
     def ball(self):
@@ -115,6 +164,13 @@ class Field:
 
         self.constant["FIELD_OUR_GOAL_MID_GOAL"] = Position(self.constant["FIELD_X_POSITIVE"], 0)
 
+        self._update_field_const()
+
+    def _update_field_const(self):
+        self.field_length = self._constant["FIELD_X_LEFT"] * 2
+        self.field_width = self._constant["FIELD_Y_TOP"] * 2
+        self.goal_width = self._constant["FIELD_GOAL_WIDTH"]
+
         self.our_goal = Position(self._constant["FIELD_OUR_GOAL_X_EXTERNAL"], 0)
         self.our_goal_pose = Pose(self.our_goal, 0)
         self.their_goal = Position(self._constant["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
@@ -125,10 +181,8 @@ class Field:
                                   self.field_lines["RightFieldLeftPenaltyStretch"].p1)
 
         self.goal_line = copy.deepcopy(self.field_lines["RightGoalDepthLine"])
-        self.goal_line.p1.x = self.our_goal.x # Move it to the entrance of the goal
+        self.goal_line.p1.x = self.our_goal.x  # Move it to the entrance of the goal
         self.goal_line.p2.x = self.our_goal.x
-
-
 
     def _convert_field_circular_arc(self, field_arcs: Dict):
         result = {}
@@ -142,12 +196,15 @@ class Field:
             result[line["name"]] = FieldLineSegment(line)
         return result
 
-    def is_ball_in_our_goal(self):
-        return self.our_goal_area.point_inside(self.ball.position)
-        
-        
-        
 
+field_lines = {
+    "RightPenaltyStretch": Line(p1=Position(3495, -1000),
+                                p2=Position(3495, +1000)),
+    "RightFieldLeftPenaltyStretch": Line(p1=Position(4490, -1000),
+                                         p2=Position(3490, -1000)),
+    "RightGoalDepthLine": Line(p1=Position(4685, -500),
+                               p2=Position(4685, +500))
+}
 
 constant = {
     # Field Parameters

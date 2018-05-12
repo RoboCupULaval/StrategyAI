@@ -70,8 +70,8 @@ class GoalKeeper(Tactic):
                and self.game_state.ball.position.x < self.game_state.field.field_length / 2:
                 orientation_to_ball = (self.game_state.ball.position - self.player.position).angle
                 return MoveTo(Pose(solution, orientation_to_ball),
-                      cruise_speed=3,
-                      end_speed=3)
+                              cruise_speed=3,
+                              end_speed=3)
 
         return MoveTo(Pose(self.game_state.field.our_goal, np.pi),
                       cruise_speed=3,
