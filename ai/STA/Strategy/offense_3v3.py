@@ -37,7 +37,7 @@ class Offense_3v3(Strategy):
         for index, player in role_by_robots:
             if player:
                 node_pass = self.create_node(index, PositionForPass(self.game_state, player, auto_position=True,
-                                                       robots_in_formation=self.robots))
+                                                                    robots_in_formation=self.robots))
                 node_go_kick = self.create_node(index, GoKick(self.game_state, player, target=self.theirgoal))
 
                 player_is_closest = partial(self.is_closest, player)
