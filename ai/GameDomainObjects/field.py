@@ -167,7 +167,7 @@ class Field:
         self._update_field_const()
 
     def _update_field_const(self):
-        self.field_length = self._constant["FIELD_X_LEFT"] * 2
+        self.field_length = self._constant["FIELD_X_RIGHT"] * 2
         self.field_width = self._constant["FIELD_Y_TOP"] * 2
         self.goal_width = self._constant["FIELD_GOAL_WIDTH"]
 
