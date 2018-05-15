@@ -112,6 +112,10 @@ class Field:
         else:
             defense_radius = self.field_arcs['RightFieldLeftPenaltyArc'].radius
 
+        if "RightFieldLeftPenaltyStretch" not in self.field_lines:
+            # In Ulaval local the line are those of the 2017 version, so we need to patch and convert them
+            self._fix_ulaval_field_line(field)
+
         self.field_length = field["field_length"]
         self.field_width = field["field_width"]
 
@@ -195,6 +199,22 @@ class Field:
         for line in field_lines:
             result[line["name"]] = FieldLineSegment(line)
         return result
+
+    def _fix_ulaval_field_line(self, field):
+        # The penalty x y is point E in the sketch
+        penalty_x = self.field_lines["RightPenaltyStretch"].p1.x
+        penalty_y = self.field_arcs["RightFieldRightPenaltyArc"].center.y \
+                    + self.field_arcs["RightFieldRightPenaltyArc"].radius
+        self.field_lines["RightPenaltyStretch"] \
+            = Line(p1=Position(penalty_x, -penalty_y),
+                   p2=Position(penalty_x, +penalty_y))
+        goal_x = field["field_length"] / 2
+        self.field_lines["RightFieldLeftPenaltyStretch"] \
+            = Line(p1=Position(goal_x, -penalty_y),
+                   p2=Position(penalty_x, -penalty_y))
+        self.field_lines["RightGoalDepthLine"] \
+            = Line(p1=Position(goal_x + field["goal_depth"], -field["goal_width"]/2),
+                   p2=Position(goal_x + field["goal_depth"], +field["goal_width"]/2))
 
 
 field_lines = {
