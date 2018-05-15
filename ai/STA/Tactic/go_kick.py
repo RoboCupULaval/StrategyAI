@@ -62,7 +62,7 @@ class GoKick(Tactic):
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.player.pose.position).angle
         ball_speed = self.game_state.ball.velocity.norm
-        ball_speed_modifier = (ball_speed/100 + 1)
+        ball_speed_modifier = (ball_speed/1000 + 1)
 
         distance_behind = self.get_destination_behind_ball(self.go_behind_distance * ball_speed_modifier)
 
