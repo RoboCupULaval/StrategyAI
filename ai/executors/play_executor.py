@@ -52,11 +52,13 @@ class PlayExecutor:
         if self.autonomous_flag:
             self._exec_auto_play()
 
-        ai_cmds = self._execute_strategy()
-        engine_cmds = []
+        ai_cmds, debug_cmds = self._execute_strategy()
+
+        self.ui_send_queue.put_nowait(debug_cmds)
 
         paths = self.pathfinder_module.exec(self.game_state, ai_cmds)
 
+        engine_cmds = []
         for player, ai_cmd in ai_cmds.items():
             engine_cmds.append(generate_engine_cmd(player, ai_cmd, paths[player]))
 
@@ -118,8 +120,10 @@ class PlayExecutor:
             return
         player_id = this_player.id
         tactic_name = cmd.data['tactic']
-        target = cmd.data['target']
-        target = Pose(Position(target[0], target[1]), this_player.pose.orientation)
+        target = Position.from_list(cmd.data['target'])
+        if Config()["GAME"]["on_negative_side"]:
+            target = target.flip_x()
+        target = Pose(target, this_player.pose.orientation)
         args = cmd.data.get('args', "")
         try:
             tactic = self.play_state.get_new_tactic(tactic_name)(GameState(), this_player, target, args)
@@ -144,22 +148,6 @@ class PlayExecutor:
         if len(states) > 0:
             cmd = DebugCommandFactory.robots_strategic_state(states)
             self.ui_send_queue.put(cmd)
-
-
-    # def _has_available_players_changed(self) -> bool:
-    #     available_players = GameState().our_team.available_players
-    #     player_change = False
-    #     for i in available_players:
-    #         if i not in self.last_available_players:
-    #             player_change = True
-    #             break
-    #     if not player_change:
-    #         for i in self.last_available_players:
-    #             if i not in available_players:
-    #                 player_change = True
-    #                 break
-    #     self.last_available_players = available_players.copy()
-    #     return player_change
 
 
 def generate_engine_cmd(player: Player, ai_cmd: AICommand, path):

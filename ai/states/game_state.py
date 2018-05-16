@@ -17,11 +17,8 @@ class GameState(metaclass=Singleton):
 
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.reset()
 
-    def reset(self):
         self._role_mapper = RoleMapper()
-
         self._ball = Ball()
         self._field = Field(self._ball)
 
@@ -30,6 +27,9 @@ class GameState(metaclass=Singleton):
 
         self._our_team = self._yellow_team if TeamColorService().is_our_team_yellow else self._blue_team
         self._enemy_team = self._blue_team if TeamColorService().is_our_team_yellow else self._yellow_team
+
+    def reset(self):
+        self.__init__()
 
     def update(self, new_game_state):
         if new_game_state:
@@ -46,7 +46,6 @@ class GameState(metaclass=Singleton):
         if player_id not in self.our_team.available_players:
             raise RuntimeError("No player available with that player_id {}".format(player_id))
         return self.our_team.available_players[player_id].position
-
 
     def clear_roles(self):
         self._role_mapper.clear()
@@ -85,7 +84,10 @@ class GameState(metaclass=Singleton):
 
     @property
     def our_side(self):
-        return FieldSide.NEGATIVE if Config()['GAME']['on_negative_side'] else FieldSide.POSITIVE
+        # Note: The AI is independent from which side it is play on,
+        # the engine handle the mirroring of everything
+        return FieldSide.POSITIVE
+        # return FieldSide.NEGATIVE if Config()['GAME']['on_negative_side'] else FieldSide.POSITIVE
 
     @property
     def role_mapping(self):
@@ -110,6 +112,10 @@ class GameState(metaclass=Singleton):
     @property
     def ball(self) -> Ball:
         return self._field.ball
+
+    @property
+    def field(self) -> Field:
+        return self._field
 
     @property
     def const(self):

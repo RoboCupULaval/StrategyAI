@@ -45,6 +45,13 @@ class Node:
     def connect_to(self, dst_node, *, when: Callable[..., bool]):
         self.add_vertex(Vertex(dst_node, when))
 
+    def debug_cmd(self):
+        cmd = self.tactic.debug_cmd()
+        if isinstance(cmd, dict):
+            return [cmd]
+        else:
+            return cmd
+
     def exec(self):
         """
         Fait avancer la machine d'état de la tactique d'une itération et évalue la condition de chacun des vertices du

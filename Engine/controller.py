@@ -1,8 +1,13 @@
 # Under MIT licence, see LICENCE.txt
 
 import logging
+import time
+from queue import Queue
+
+import numpy as np
 from typing import Dict, List, Type
 
+from Debug.debug_command_factory import DebugCommandFactory
 from Engine.regulators import VelocityRegulator, PositionRegulator
 from Engine.filters.path_smoother import path_smoother
 from Engine.robot import Robot
@@ -11,22 +16,19 @@ from Util import Pose
 
 from Util.engine_command import EngineCommand
 from Util.constant import PLAYER_PER_TEAM
+from Util.geometry import rotate
 from Util.team_color_service import TeamColorService
-
-class Observer:
-
-    def write(self, poses):
-        pass
+from config.config import Config
 
 
 class Controller:
 
-    def __init__(self, observer: Type[Observer]=Observer()):
+    def __init__(self, ui_send_queue: Queue):
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger("Controller")
 
         self.timestamp = None
-        self.observer = observer
+        self.ui_send_queue = ui_send_queue
 
         self.robots = [Robot(robot_id) for robot_id in range(PLAYER_PER_TEAM)]
 
@@ -55,9 +57,20 @@ class Controller:
             robot.path, robot.target_speed = path_smoother(robot)
 
             if robot.position_error.norm < 200 and robot.target_speed == 0:
-                commands[robot.robot_id] = robot.position_regulator.execute(robot)
+                cmd = robot.position_regulator.execute(robot)
             else:
-                commands[robot.robot_id] = robot.velocity_regulator.execute(robot)
+                cmd = robot.velocity_regulator.execute(robot)
+
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("m/s",
+                                                                         "robot {}".format(robot.robot_id),
+                                                                         [time.time()],
+                                                                         [cmd.norm]))
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("m",
+                                                                         "robot {}".format(robot.robot_id),
+                                                                         [time.time()],
+                                                                         [robot.position.y]))
+
+            commands[robot.robot_id] = self._put_in_robots_referencial(robot, cmd)
 
         return self.generate_packet(commands)
 
@@ -75,6 +88,16 @@ class Controller:
                             dribbler_active=self[robot_id].engine_cmd.dribbler_active,
                             charge_kick=self[robot_id].engine_cmd.charge_kick))
         return packet
+
+    @staticmethod
+    def _put_in_robots_referencial(robot, cmd):
+        if Config()["GAME"]["on_negative_side"]:
+            cmd.x *= -1
+            cmd.orientation *= -1
+            cmd.position = rotate(cmd.position, np.pi + robot.orientation)
+        else:
+            cmd.position = rotate(cmd.position, -robot.orientation)
+        return cmd
 
     def __iter__(self) -> Robot:
         for robot in self.robots:

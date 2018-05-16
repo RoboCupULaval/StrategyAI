@@ -1,7 +1,8 @@
 # Under MIT licence, see LICENCE.txt
-from Util import Pose, Position
+
 from Util.ai_command import MoveTo
-from Util.area import stayInsideCircle
+from Util import Pose, Position
+from Util.area import stay_inside_circle
 from Util.geometry import closest_point_on_segment
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
@@ -20,8 +21,8 @@ def ProtectGoal(game_state: GameState, player: Player, is_right_goal: bool=True,
         goal_position = Position(goal_x, 0)
 
         # Calcul des deux positions extremums entre la balle et le centre du but
-        inner_circle_position = stayInsideCircle(ball_position, goal_position, minimum_distance)
-        outer_circle_position = stayInsideCircle(ball_position, goal_position, maximum_distance)
+        inner_circle_position = stay_inside_circle(ball_position, goal_position, minimum_distance)
+        outer_circle_position = stay_inside_circle(ball_position, goal_position, maximum_distance)
 
         destination_position = closest_point_on_segment(goalkeeper_position,
                                                         inner_circle_position,
@@ -32,7 +33,7 @@ def ProtectGoal(game_state: GameState, player: Player, is_right_goal: bool=True,
             destination_position = game_state.game.field.stay_inside_goal_area(destination_position,
                                                                                our_goal=True)
         else:
-            destination_position = stayInsideCircle(destination_position, goal_position, maximum_distance)
+            destination_position = stay_inside_circle(destination_position, goal_position, maximum_distance)
 
         # Calcul de l'orientation de la pose de destination
         destination_orientation = (ball_position - destination_position).angle

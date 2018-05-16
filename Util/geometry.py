@@ -3,9 +3,51 @@
 import math as m
 import numpy as np
 
-from Util.pose import Pose
 from Util.position import Position
 from typing import cast, Sequence, List
+
+
+class Area:
+    def __init__(self, upper_left, lower_right):
+        self.a = upper_left  # -x, +y
+        self.b = lower_right # +x, -y
+
+    def point_inside(self, p: Position) -> bool:
+        return self.a.x <= p.x <= self.b.x and \
+               self.b.y <= p.y <= self.a.y
+
+
+def intersection_between_lines(a1, a2, b1, b2) -> Position:
+    s = np.vstack([a1.array, a2.array, b1.array, b2.array])
+    h = np.hstack((s, np.ones((4, 1))))
+    l1 = np.cross(h[0], h[1])  # first line
+    l2 = np.cross(h[2], h[3])  # second line
+    x, y, z = np.cross(l1, l2)  # point of intersection
+    if z == 0:
+        raise ValueError("Parallel lines")
+    return Position(x / z, y / z)
+
+
+def intersection_line_and_circle(cp: Position, cr: float, lp1: Position, lp2: Position) -> List[Position]:
+    # Based on http://mathworld.wolfram.com/Circle-LineIntersection.html
+    lp1 = lp1.copy() - cp
+    lp2 = lp2.copy() - cp
+    d = lp2 - lp1
+    det = lp1.x * lp2.y - lp2.x * lp1.y
+
+    delta = cr**2 * d.norm**2 - det**2
+    if delta < 0:
+        return []  # No intersection
+
+    x1 = (det * d.y + np.sign(d.y) * d.x * np.sqrt(delta)) / (d.norm**2)
+    y1 = (-det * d.x + abs(d.y) * np.sqrt(delta)) / (d.norm**2)
+    if delta == 0:
+        return [Position(x1, y1) + cp]
+
+    x2 = (det * d.y - np.sign(d.y) * d.x * np.sqrt(delta)) / (d.norm**2)
+    y2 = (-det * d.x - abs(d.y) * np.sqrt(delta)) / (d.norm**2)
+    return [Position(x1, y1) + cp, Position(x2, y2) + cp]
+
 
 
 def get_angle_between_three_points(start: Position, mid: Position, end: Position) -> float:

@@ -68,21 +68,26 @@ class Strategy(metaclass=ABCMeta):
     def clear_graph_of_role(self, r: Role):
         self.roles_graph[r] = Graph()
 
-    def exec(self) -> Dict[Player, AICommand]:
+    def exec(self) -> Tuple[Dict[Player, AICommand], List[Dict]]:
         """
         Appelle la méthode exec de chacune des Tactics assignées aux robots.
         :return: Un dict des 6 AICommand à envoyer aux robots. La commande située à l'indice i de la liste doit être
         envoyée au robot i.
         """
-        commands = {}
+        cmd_ai = {}
+        cmd_debug = []
 
         for r, player in self.assigned_roles.items():
-            try:
-                commands[player] = self.roles_graph[r].exec()
-            except EmptyGraphException:
-                continue
+            # TODO: Might break a lot of thing.
+            # Eventually the entering and leaving of player should be directly handle by the coach of something
+            if player in self.game_state.our_team.available_players.values():
+                try:
+                    cmd_ai[player] = self.roles_graph[r].exec()
+                    cmd_debug.extend(self.roles_graph[r].debug_cmd())
+                except EmptyGraphException:
+                    continue
 
-        return commands
+        return cmd_ai, cmd_debug
 
     def __str__(self):
         return self.__class__.__name__
