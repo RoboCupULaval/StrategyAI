@@ -22,11 +22,15 @@ class PassesWithDecisions(Strategy):
 
         their_goal = self.game_state.field.their_goal_pose
 
-        node_pass_to_second_attack = self.create_node(Role.FIRST_ATTACK, PassToPlayer(self.game_state, self.assigned_roles[Role.FIRST_ATTACK],
-                                                                                      target_id=self.assigned_roles[Role.SECOND_ATTACK].id))
+        node_pass_to_second_attack = self.create_node(Role.FIRST_ATTACK,
+                                                      PassToPlayer(self.game_state,
+                                                                   self.assigned_roles[Role.FIRST_ATTACK],
+                                                                   args=[self.assigned_roles[Role.SECOND_ATTACK].id]))
 
-        node_pass_to_middle = self.create_node(Role.FIRST_ATTACK, PassToPlayer(self.game_state, self.assigned_roles[Role.FIRST_ATTACK],
-                                                                               target_id=self.assigned_roles[Role.MIDDLE].id))
+        node_pass_to_middle = self.create_node(Role.FIRST_ATTACK,
+                                               PassToPlayer(self.game_state,
+                                                            self.assigned_roles[Role.FIRST_ATTACK],
+                                                            args=[self.assigned_roles[Role.MIDDLE].id]))
 
         node_go_kick = self.create_node(Role.FIRST_ATTACK, GoKick(self.game_state, self.assigned_roles[Role.FIRST_ATTACK], their_goal))
 
