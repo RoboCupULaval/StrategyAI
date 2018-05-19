@@ -17,6 +17,16 @@ class Area:
                self.b.y <= p.y <= self.a.y
 
 
+def find_bisector_of_triangle(c, a, b):
+    """
+    Where 'c' is the origin of the bisector and the intersection of the bissectrice 'i' is on the segment 'ab'.
+    The angle bae and aci is the same as icb
+    """
+    ab, cb, ca = a-b, c-b, c-a
+    ia = ab * ca.norm / (ca.norm + cb.norm)
+    return a - ia
+
+
 def intersection_between_lines(a1, a2, b1, b2) -> Position:
     s = np.vstack([a1.array, a2.array, b1.array, b2.array])
     h = np.hstack((s, np.ones((4, 1))))
@@ -49,9 +59,8 @@ def intersection_line_and_circle(cp: Position, cr: float, lp1: Position, lp2: Po
     return [Position(x1, y1) + cp, Position(x2, y2) + cp]
 
 
-
 def get_angle_between_three_points(start: Position, mid: Position, end: Position) -> float:
-    return abs(wrap_to_pi((mid - start).angle - (end - mid).angle))
+    return abs(wrap_to_pi((mid - start).angle - (mid - end).angle))
 
 
 def wrap_to_pi(angle: float) -> float:

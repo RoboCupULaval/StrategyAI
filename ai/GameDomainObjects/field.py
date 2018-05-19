@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Dict
 
 from Util import Position, Pose
-from Util.geometry import Area
+from Util.geometry import Area, normalize
 from ai.GameDomainObjects import Ball
 from config.config import Config
 
@@ -17,6 +17,10 @@ class Line:
     def __init__(self, p1, p2):
         self.p1 = p1
         self.p2 = p2
+
+    @property
+    def normalize(self):
+        return normalize(self.p2 - self.p1)
 
 
 # noinspection PyPep8

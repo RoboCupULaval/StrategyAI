@@ -118,7 +118,6 @@ class GoalKeeper(Tactic):
         else:
             return self.go_kick_tactic.exec()
 
-
     def _best_target_into_goal(self):
         # Find the bisection of the triangle made by the ball (a) and the two goals extremities(b, c)
         a = self.game_state.ball.position
@@ -128,20 +127,20 @@ class GoalKeeper(Tactic):
         ab = a-b
         ac = a-c
 
-        be = self.game_state.field.goal_width / (1 + ab.norm/ac.norm)
+        be = (b-c).norm / (1 + ab.norm/ac.norm)
 
         return b + Position(0, -be)
 
     def debug_cmd(self):
-        if self.current_state == self.defense:
-            return DebugCommandFactory().line(self.game_state.ball.position,
-                                                self._best_target_into_goal(),
-                                                timeout=0.1)
-        elif self.current_state == self.intercept and self.last_intersection is not None:
-            return DebugCommandFactory().line(self.game_state.ball.position,
-                                                self.last_intersection,
-                                                timeout=0.1)
-        else:
-            return []
+        # if self.current_state == self.defense:
+        #     return DebugCommandFactory().line(self.game_state.ball.position,
+        #                                         self._best_target_into_goal(),
+        #                                         timeout=0.1)
+        # elif self.current_state == self.intercept and self.last_intersection is not None:
+        #     return DebugCommandFactory().line(self.game_state.ball.position,
+        #                                         self.last_intersection,
+        #                                         timeout=0.1)
+        # else:
+        return []
 
 
