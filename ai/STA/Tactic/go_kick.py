@@ -52,7 +52,10 @@ class GoKick(Tactic):
 
     def kick_charge(self):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
-            self.next_state = self.go_behind_ball
+            if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10):
+                self.next_state = self.grab_ball
+            else:
+                self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
 
         return CmdBuilder().addChargeKicker().build()
@@ -63,7 +66,6 @@ class GoKick(Tactic):
         orientation = (self.target.position - self.player.pose.position).angle
         ball_speed = self.game_state.ball.velocity.norm
         ball_speed_modifier = (ball_speed/1000 + 1)
-
 
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3 * ball_speed_modifier)
 
