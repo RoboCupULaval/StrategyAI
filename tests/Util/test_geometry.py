@@ -7,7 +7,7 @@ import pytest
 
 from Util import Position
 from Util.geometry import closest_point_on_line, closest_point_on_segment, closest_point_to_points, \
-    intersection_between_lines, find_bisector_of_triangle, get_angle_between_three_points
+    intersection_between_lines, find_bisector_of_triangle, angle_between_three_points
 from Util.geometry import compare_angle, wrap_to_pi, perpendicular, normalize, are_close, rotate
 
 
@@ -222,6 +222,6 @@ def test_bisector_of_squared_triangle():
 def test_bisector_angle_between_the_intersection_is_the_same():
     A_RANDOM_POINT = Position(np.random.randn(1, 1), 1)
     inter = find_bisector_of_triangle(A_RANDOM_POINT, A_LINE[0], A_LINE[1])
-    angle1 = get_angle_between_three_points(A_LINE[0], A_RANDOM_POINT, inter)
-    angle2 = get_angle_between_three_points(inter,     A_RANDOM_POINT, A_LINE[1])
+    angle1 = angle_between_three_points(A_LINE[0], A_RANDOM_POINT, inter)
+    angle2 = angle_between_three_points(inter, A_RANDOM_POINT, A_LINE[1])
     assert compare_angle(angle1, angle2, abs_tol=0.01)

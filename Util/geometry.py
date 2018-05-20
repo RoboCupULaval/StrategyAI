@@ -59,7 +59,7 @@ def intersection_line_and_circle(cp: Position, cr: float, lp1: Position, lp2: Po
     return [Position(x1, y1) + cp, Position(x2, y2) + cp]
 
 
-def get_angle_between_three_points(start: Position, mid: Position, end: Position) -> float:
+def angle_between_three_points(start: Position, mid: Position, end: Position) -> float:
     return abs(wrap_to_pi((mid - start).angle - (mid - end).angle))
 
 

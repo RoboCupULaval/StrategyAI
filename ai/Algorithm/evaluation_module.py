@@ -24,7 +24,7 @@ def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
 
 
 # noinspection PyUnusedLocal
-def closest_players_to_point(point: Position, our_team=None, robots=None):
+def closest_players_to_point(point: Position, our_team=None):
     # Retourne une liste de tuples (player, distance) en ordre croissant de distance,
     # our_team pour obtenir une liste contenant une équipe en particulier
     list_player = []
@@ -42,10 +42,10 @@ def closest_players_to_point(point: Position, our_team=None, robots=None):
     return list_player
 
 
-def closest_player_to_point(point: Position, our_team=None, robots=None):
+def closest_player_to_point(point: Position, our_team=None):
     # Retourne le player le plus proche,
     # our_team pour obtenir une liste contenant une équipe en particulier
-    return closest_players_to_point(point, our_team, robots)[0]
+    return closest_players_to_point(point, our_team)[0]
 
 
 def is_ball_moving(min_speed=0.1):
