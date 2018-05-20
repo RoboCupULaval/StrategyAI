@@ -21,7 +21,7 @@ class DefenseWallNoKick(Strategy):
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
             else:
                 self.create_node(role, AlignToDefenseWall(self.game_state, player,
-                                                          self.robots_in_formation))
+                                                          robots_in_formation=self.robots_in_formation))
 
     @classmethod
     def required_roles(cls):

@@ -33,7 +33,7 @@ class DefenseWall_3v3(Strategy):
         self.robots = [player for _, player in role_by_robots if player is not None]
         for role, player in role_by_robots:
             if player:
-                node_align_to_defense_wall = self.create_node(role, AlignToDefenseWall(self.game_state, player, self.robots))
+                node_align_to_defense_wall = self.create_node(role, AlignToDefenseWall(self.game_state, player, robots_in_formation=self.robots))
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=self.their_goal))
 
                 player_is_closest = partial(self.is_closest, player)
