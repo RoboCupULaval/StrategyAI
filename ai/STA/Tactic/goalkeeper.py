@@ -71,11 +71,11 @@ class GoalKeeper(Tactic):
                 orientation_to_ball = (self.game_state.ball.position - self.player.position).angle
                 return MoveTo(Pose(solution, orientation_to_ball),
                               cruise_speed=3,
-                              end_speed=3)
+                              end_speed=0)
 
         return MoveTo(Pose(self.game_state.field.our_goal, np.pi),
                       cruise_speed=3,
-                      end_speed=3)
+                      end_speed=0)
 
     def intercept(self):
         # Find the point where the ball will go
@@ -85,16 +85,20 @@ class GoalKeeper(Tactic):
             self.next_state = self.clear
 
         ball = self.game_state.ball
-        pts = intersection_between_lines(self.GOAL_LINE.p1,
-                                         self.GOAL_LINE.p2,
-                                         ball.position,
-                                         ball.position + ball.velocity)
+        where_ball_enter_goal = intersection_between_lines(self.GOAL_LINE.p1,
+                                                           self.GOAL_LINE.p2,
+                                                           ball.position,
+                                                           ball.position + ball.velocity)
 
-        pts = closest_point_on_segment(pts, self.GOAL_LINE.p1, self.GOAL_LINE.p2)
-        self.last_intersection = pts
-        return MoveTo(Pose(pts, self.player.pose.orientation),  # It's a bit faster, to keep our orientation
+        # This is where the ball is going to enter the goal
+        where_ball_enter_goal = closest_point_on_segment(where_ball_enter_goal, self.GOAL_LINE.p1, self.GOAL_LINE.p2)
+
+        intersect_pts = closest_point_on_segment(self.player.position,
+                                                 ball.position, where_ball_enter_goal)
+        self.last_intersection = intersect_pts
+        return MoveTo(Pose(intersect_pts, self.player.pose.orientation),  # It's a bit faster, to keep our orientation
                            cruise_speed=3,
-                           end_speed=3,
+                           end_speed=0,
                            ball_collision=False)
 
     def _ball_going_toward_goal(self):
