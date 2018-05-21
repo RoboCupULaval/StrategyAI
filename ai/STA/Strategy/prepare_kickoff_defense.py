@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+import numpy as np
 from functools import partial
 
 from Util.pose import Pose
@@ -37,10 +37,8 @@ class PrepareKickOffDefense(Strategy):
         defense_bottom_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
                                        GameState().const["FIELD_Y_BOTTOM"] / 10, 0)
 
-        our_goal = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0, 0)
-
         goalkeeper = self.assigned_roles[Role.GOALKEEPER]
-        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, our_goal))
+        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper))
 
         role_to_positions = {Role.FIRST_ATTACK: attack_top_position,
                              Role.SECOND_ATTACK: attack_bottom_position,
@@ -49,12 +47,13 @@ class PrepareKickOffDefense(Strategy):
                              Role.SECOND_DEFENCE: defense_bottom_position}
 
         for role, position in role_to_positions.items():
-                player = self.assigned_roles[role]
-                node_go_to_position = self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))
-                node_stop = self.create_node(role, Stop(self.game_state, player))
-                player_arrived_to_position = partial(self.arrived_to_position, player)
+            position.orientation = np.pi
+            player = self.assigned_roles[role]
+            node_go_to_position = self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))
+            node_stop = self.create_node(role, Stop(self.game_state, player))
+            player_arrived_to_position = partial(self.arrived_to_position, player)
 
-                node_go_to_position.connect_to(node_stop, when=player_arrived_to_position)
+            node_go_to_position.connect_to(node_stop, when=player_arrived_to_position)
 
     @classmethod
     def required_roles(cls):

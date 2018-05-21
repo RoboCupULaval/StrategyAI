@@ -132,26 +132,30 @@ class DebugCommandFactory:
 
     @staticmethod
     def path(path: Path, path_id: int, color=BLUE):
-        cmds = [DebugCommandFactory.line(flip_position(start), flip_position(end), color=color, timeout=0.1) for start, end in zip(path, path[1:])]
+        cmds = [DebugCommandFactory._line(flip_position(start), flip_position(end), color=color, timeout=0.1) for start, end in zip(path, path[1:])]
         cmds += [DebugCommandFactory.multiple_points(path[1:], color=color, link=path_id, timeout=0)]
         return cmds
 
     @staticmethod
     def robot(pose: Pose, color=LIGHT_GREEN, color_angle=RED, radius=120, timeout=0.05):
         pose = flip_pose(pose)
-        cmd = [DebugCommandFactory.circle(pose.position, radius, color=color, timeout=timeout)]
+        cmd = [DebugCommandFactory._circle(pose.position, radius, color=color, timeout=timeout)]
         start = pose.position
         end = start + Position(radius * cos(pose.orientation), radius * sin(pose.orientation))
-        cmd += [DebugCommandFactory.line(start, end, color_angle, timeout)]
+        cmd += [DebugCommandFactory._line(start, end, color_angle, timeout)]
 
         return cmd
 
     @staticmethod
     def ball(position: Position, color=ORANGE, timeout=0.05):
-        return [DebugCommandFactory.circle(position, 150, color=color, timeout=timeout)]
+        return [DebugCommandFactory._circle(position, 150, color=color, timeout=timeout)]
 
     @staticmethod
     def line(start: Position, end: Position, color=MAGENTA, timeout=DEFAULT_DEBUG_TIMEOUT):
+        return DebugCommandFactory._line(flip_position(start), flip_position(end), color, timeout)
+
+    @staticmethod
+    def _line(start: Position, end: Position, color=MAGENTA, timeout=DEFAULT_DEBUG_TIMEOUT):
         return debug_command(3001, {'start': start.to_tuple(),
                                     'end': end.to_tuple(),
                                     'color': color.repr(),
@@ -159,6 +163,10 @@ class DebugCommandFactory:
 
     @staticmethod
     def circle(center: Position, radius, color=LIGHT_GREEN, is_fill=True, timeout=DEFAULT_DEBUG_TIMEOUT):
+        return DebugCommandFactory._circle(flip_position(center), radius, color, is_fill, timeout)
+
+    @staticmethod
+    def _circle(center: Position, radius, color=LIGHT_GREEN, is_fill=True, timeout=DEFAULT_DEBUG_TIMEOUT):
         return debug_command(3003, {'center': center.to_tuple(),
                                     'radius': radius,
                                     'color': color.repr(),

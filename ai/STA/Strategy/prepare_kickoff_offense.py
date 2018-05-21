@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+import numpy as np
 from functools import partial
 
 from Util.pose import Pose
@@ -29,10 +29,8 @@ class PrepareKickOffOffense(Strategy):
         defense_bottom_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
                                        GameState().const["FIELD_Y_BOTTOM"] / 3, 0)
 
-        our_goal = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0, 0)
-
         goalkeeper = self.assigned_roles[Role.GOALKEEPER]
-        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, our_goal))
+        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper))
 
         role_to_positions = {Role.FIRST_ATTACK: attack_top_position,
                              Role.SECOND_ATTACK: attack_bottom_position,
@@ -41,6 +39,7 @@ class PrepareKickOffOffense(Strategy):
                              Role.SECOND_DEFENCE: defense_bottom_position}
 
         for role, position in role_to_positions.items():
+            position.orientation = np.pi
             player = self.assigned_roles[role]
             node_go_to_position = self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))
             node_stop = self.create_node(role, Stop(self.game_state, player))

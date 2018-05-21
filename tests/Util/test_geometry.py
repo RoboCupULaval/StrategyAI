@@ -6,7 +6,8 @@ import math as m
 import pytest
 
 from Util import Position
-from Util.geometry import closest_point_on_line, closest_point_on_segment, closest_point_to_points
+from Util.geometry import closest_point_on_line, closest_point_on_segment, closest_point_to_points, \
+    intersection_between_lines
 from Util.geometry import compare_angle, wrap_to_pi, perpendicular, normalize, are_close, rotate
 
 
@@ -202,3 +203,12 @@ def test_are_close_tolerance_limit():
 
 def test_are_close_tolerance():
     assert are_close(A_POS, A_POS_OFFSET_BY_LESS_THAN_1, abs_tol=1)
+
+
+A_LINE = [Position(-1, 0), Position(1, 0)]
+A_LINE_PERP = [Position(0, -1), Position(0, 1)]
+def test_intersection_lines_perpendicular():
+    assert Position(0, 0) == intersection_between_lines(A_LINE[0],
+                                                        A_LINE[1],
+                                                        A_LINE_PERP[0],
+                                                        A_LINE_PERP[1])
