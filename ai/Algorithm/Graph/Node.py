@@ -62,6 +62,8 @@ class Node:
         next_ai_command = self.tactic.exec()
         for vertex in self.vertices:
             if vertex.evaluate_condition():
+                # The next node might has already been executed, thus it need a reset
+                vertex.next_node.set_flag(Flags.INIT)
                 return next_ai_command, vertex.next_node
         return next_ai_command, self
 
