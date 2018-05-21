@@ -1,22 +1,16 @@
 import copy
+import logging
 from enum import Enum
 from typing import Dict
 
 from Util import Position, Pose
-from Util.geometry import Area
+from Util.geometry import Area, Line
 from ai.GameDomainObjects import Ball
-from config.config import Config
 
 
 class FieldSide(Enum):
     POSITIVE = 0
     NEGATIVE = 1
-
-
-class Line:
-    def __init__(self, p1, p2):
-        self.p1 = p1
-        self.p2 = p2
 
 
 # noinspection PyPep8
@@ -63,6 +57,8 @@ class Field:
         #  |     |                              |                               |
         #  v     +------------------------------+-------------------------------+
         #
+        self.logger = logging.getLogger(self.__class__.__name__)
+
         self.our_goal = None  # Point A
         self.our_goal_pose = None
         self.their_goal = None  # Point B
@@ -114,6 +110,8 @@ class Field:
 
         if "RightFieldLeftPenaltyStretch" not in self.field_lines:
             # In Ulaval local the line are those of the 2017 version, so we need to patch and convert them
+            self.logger.warning("You are receiving geometry message from an older version of ssl-vision, \n"
+                                "which has a circular penality zone. Some positions might be incorrect.")
             self._fix_ulaval_field_line(field)
 
         self.field_length = field["field_length"]

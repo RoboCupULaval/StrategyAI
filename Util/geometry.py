@@ -7,6 +7,12 @@ from Util.position import Position
 from typing import cast, Sequence, List
 
 
+class Line:
+    def __init__(self, p1, p2):
+        self.p1 = p1
+        self.p2 = p2
+
+
 class Area:
     def __init__(self, upper_left, lower_right):
         self.a = upper_left  # -x, +y
