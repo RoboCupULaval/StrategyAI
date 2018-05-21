@@ -15,9 +15,12 @@ class Ball:
         self.position = new_dict['position']
         self.velocity = new_dict['velocity']
 
-    def is_immobile(self):
+    def is_mobile(self):
         IMMOBILE_SPEED = 20.0 # mm/s
-        return self.velocity.norm < IMMOBILE_SPEED
+        return IMMOBILE_SPEED < self.velocity.norm
+
+    def is_immobile(self):
+        return not self.is_immobile()
 
     @property
     def position(self) -> Position:
