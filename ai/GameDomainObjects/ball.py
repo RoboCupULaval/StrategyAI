@@ -20,7 +20,7 @@ class Ball:
         return IMMOBILE_SPEED < self.velocity.norm
 
     def is_immobile(self):
-        return not self.is_immobile()
+        return not self.is_mobile()
 
     @property
     def position(self) -> Position:

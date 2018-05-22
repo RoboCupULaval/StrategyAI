@@ -40,7 +40,9 @@ class RealVelocityController(RegulatorBaseClass):
             else:
                 next_speed = robot.current_speed - acc * self.dt * offset
 
-        return clamp(next_speed, 0, robot.cruise_speed)
+        print("speed_norm {:.2f} current_speed {:.2f}".format(robot.cruise_speed, robot.current_speed))
+        return robot.cruise_speed
+        #return clamp(next_speed, 0, robot.cruise_speed)
 
     @staticmethod
     def reach_acceleration_dist(robot, acc, offset=2) -> bool:
