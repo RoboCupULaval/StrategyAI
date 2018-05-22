@@ -98,7 +98,7 @@ class AlignToDefenseWall(Tactic):
         return self.wall_segment.p1 + self.wall_segment.normalize * length
 
     def debug_cmd(self):
-        if self.wall_segment is None:
+        if self.wall_segment is None or self.player_number_in_formation != 0:
             return []
         return [DebugCommandFactory().line(self.wall_segment.p1,
                                            self.wall_segment.p2,
