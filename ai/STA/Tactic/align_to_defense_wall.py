@@ -7,13 +7,12 @@ import numpy as np
 
 from Debug.debug_command_factory import DebugCommandFactory
 from Util import Pose, Position
-from Util.geometry import perpendicular, normalize, find_bisector_of_triangle, angle_between_three_points
+from Util.geometry import perpendicular, normalize, find_bisector_of_triangle, angle_between_three_points, Line
 
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS, ROBOT_DIAMETER
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
 from Util.ai_command import Idle, CmdBuilder, MoveTo
-from ai.GameDomainObjects.field import Line
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.tactic import Tactic

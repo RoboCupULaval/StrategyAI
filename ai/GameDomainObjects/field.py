@@ -1,26 +1,16 @@
 import copy
+import logging
 from enum import Enum
 from typing import Dict
 
 from Util import Position, Pose
-from Util.geometry import Area, normalize
+from Util.geometry import Area, Line
 from ai.GameDomainObjects import Ball
-from config.config import Config
 
 
 class FieldSide(Enum):
     POSITIVE = 0
     NEGATIVE = 1
-
-
-class Line:
-    def __init__(self, p1, p2):
-        self.p1 = p1
-        self.p2 = p2
-
-    @property
-    def normalize(self):
-        return normalize(self.p2 - self.p1)
 
 
 # noinspection PyPep8
@@ -29,7 +19,7 @@ class FieldCircularArc:
         self.center = Position.from_dict(arc["center"])
         self.radius = arc["radius"]
         self.angle_start = arc["a1"]  # Counter clockwise order
-        self.angle_ened = arc["a2"]
+        self.angle_end = arc["a2"]
         self.thickness = arc["thickness"]
 
 
@@ -67,6 +57,8 @@ class Field:
         #  |     |                              |                               |
         #  v     +------------------------------+-------------------------------+
         #
+        self.logger = logging.getLogger(self.__class__.__name__)
+
         self.our_goal = None  # Point A
         self.our_goal_pose = None
         self.their_goal = None  # Point B
@@ -112,6 +104,8 @@ class Field:
 
         if "RightFieldLeftPenaltyStretch" not in self.field_lines:
             # In Ulaval local the line are those of the 2017 version, so we need to patch and convert them
+            self.logger.warning("You are receiving geometry message from an older version of ssl-vision, \n"
+                                "which has a circular penality zone. Some positions might be incorrect.")
             self._fix_ulaval_field_line(field)
 
         self.field_length = field["field_length"]
@@ -190,7 +184,7 @@ class Field:
             = Line(p1=Position(goal_x, -penalty_y),
                    p2=Position(penalty_x, -penalty_y))
         self.field_lines["RightGoalDepthLine"] \
-            = Line(p1=Position(goal_x + field["goal_depth"], -field["goal_width"]/2),
+            = Line(p1=Position(goal_x + field["goal_depth"], -field["goal_width"] / 2),
                    p2=Position(goal_x + field["goal_depth"], +field["goal_width"]/2))
 
 
