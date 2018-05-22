@@ -21,15 +21,15 @@ class PrepareKickOffDefense(TeamGoToPosition):
         # FIXME: This is bad, the orientation of the player will always be the same,
         # independently of if we are in a positive or negative x
         attack_top_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
-                                               GameState().const["FIELD_Y_BOTTOM"] * 3 / 5, 0)
+                                               GameState().field.bottom * 3 / 5, 0)
         attack_bottom_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10,
-                                                  GameState().const["FIELD_Y_TOP"] * 3 / 5, 0)
+                                                  GameState().field.top * 3 / 5, 0)
         middle_position = Pose.from_values(center_offset + GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 10, 0, 0)
 
         defense_top_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                                GameState().const["FIELD_Y_TOP"] / 10, 0)
+                                                GameState().field.top / 10, 0)
         defense_bottom_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                                   GameState().const["FIELD_Y_BOTTOM"] / 10, 0)
+                                                   GameState().field.bottom / 10, 0)
 
         goalkeeper = self.assigned_roles[Role.GOALKEEPER]
         self.create_node(Role.GOALKEEPER, GoalKeeper(game_state, goalkeeper))

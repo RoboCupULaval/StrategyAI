@@ -45,7 +45,7 @@ class GoalKeeper(Tactic):
 
     def defense_dumb(self):
         dest_y = self.game_state.ball.position.y \
-                 * self.game_state.const["FIELD_GOAL_WIDTH"] / 2 / self.game_state.const["FIELD_Y_TOP"]
+                 * self.game_state.goal_width / 2 / self.game_state.field.top
         position = self.game_state.field.our_goal - Position(ROBOT_RADIUS + 10, -dest_y)
         return MoveTo(Pose(position, np.pi))
 
@@ -58,7 +58,7 @@ class GoalKeeper(Tactic):
             self.next_state = self.intercept
             return self.intercept()  # no time to loose
 
-        circle_radius = self.game_state.const["FIELD_GOAL_WIDTH"] / 2
+        circle_radius = self.game_state.field.goal_width / 2
         circle_center = self.game_state.field.our_goal - self.OFFSET_FROM_GOAL_LINE
         solutions = intersection_line_and_circle(circle_center,
                                                  circle_radius,

@@ -21,16 +21,20 @@ from ai.states.game_state import GameState
 class DefenseWall(Strategy):
     DEFENSIVE_ROLE = [Role.MIDDLE, Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
 
-    def __init__(self, game_state: GameState):
+    def __init__(self, game_state: GameState, can_kick=True):
         super().__init__(game_state)
 
         their_goal = self.game_state.field.their_goal_pose
 
+        # If we can not kick, the attackers are part of the defense wall
+        # TODO find a more useful thing to do for the attackers
+        if not can_kick:
+            self.DEFENSIVE_ROLE += [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
         self.robots_in_formation = [p for r, p in self.assigned_roles.items() if r in self.DEFENSIVE_ROLE]
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
-            elif role == Role.FIRST_ATTACK or role == Role.SECOND_ATTACK:
+            elif can_kick and (role == Role.FIRST_ATTACK or role == Role.SECOND_ATTACK):
                 node_stop = self.create_node(role, Stop(self.game_state, player))
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=their_goal))
 
@@ -58,9 +62,13 @@ class DefenseWall(Strategy):
     def required_roles(cls):
         return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
                                                                 Role.FIRST_ATTACK,
-                                                                Role.SECOND_ATTACK,
+                                                                Role.FIRST_DEFENCE]
+                }
+
+    @classmethod
+    def optional_roles(cls):
+        return {r: keep_prev_mapping_otherwise_random for r in [Role.SECOND_ATTACK,
                                                                 Role.MIDDLE,
-                                                                Role.FIRST_DEFENCE,
                                                                 Role.SECOND_DEFENCE]
                 }
 

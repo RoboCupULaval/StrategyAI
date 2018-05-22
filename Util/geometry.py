@@ -9,12 +9,29 @@ from typing import cast, Sequence, List
 
 class Area:
     def __init__(self, upper_left, lower_right):
-        self.a = upper_left  # -x, +y
-        self.b = lower_right # +x, -y
+        self.upper_left = upper_left   # -x, +y
+        self.lower_right = lower_right  # +x, -y
 
     def point_inside(self, p: Position) -> bool:
-        return self.a.x <= p.x <= self.b.x and \
-               self.b.y <= p.y <= self.a.y
+        return self.upper_left.x <= p.x <= self.lower_right.x and \
+               self.lower_right.y <= p.y <= self.upper_left.y
+
+    @property
+    def top(self):
+        return self.upper_left.y
+
+    @property
+    def bottom(self):
+        return self.lower_right.y
+
+    @property
+    def left(self):
+        return self.upper_left.x
+
+    @property
+    def right(self):
+        return self.lower_right.x
+
 
 
 def find_bisector_of_triangle(c, a, b):
