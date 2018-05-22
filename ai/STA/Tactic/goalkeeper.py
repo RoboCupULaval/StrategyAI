@@ -13,7 +13,7 @@ from Util import Pose, Position
 from Util.ai_command import MoveTo, Idle
 from Util.constant import ROBOT_RADIUS
 from Util.geometry import intersection_line_and_circle, intersection_between_lines, \
-    closest_point_on_segment
+    closest_point_on_segment, find_bisector_of_triangle
 from ai.GameDomainObjects import Player
 
 from ai.STA.Tactic.go_kick import GRAB_BALL_SPACING, GoKick
@@ -97,9 +97,9 @@ class GoalKeeper(Tactic):
                                                  ball.position, where_ball_enter_goal)
         self.last_intersection = intersect_pts
         return MoveTo(Pose(intersect_pts, self.player.pose.orientation),  # It's a bit faster, to keep our orientation
-                           cruise_speed=3,
-                           end_speed=0,
-                           ball_collision=False)
+                      cruise_speed=3,
+                      end_speed=0,
+                      ball_collision=False)
 
     def _ball_going_toward_goal(self):
         upper_angle = (self.game_state.ball.position - self.GOAL_LINE.p2).angle + 5 * np.pi / 180.0
@@ -123,17 +123,9 @@ class GoalKeeper(Tactic):
             return self.go_kick_tactic.exec()
 
     def _best_target_into_goal(self):
-        # Find the bisection of the triangle made by the ball (a) and the two goals extremities(b, c)
-        a = self.game_state.ball.position
-        b = self.GOAL_LINE.p2
-        c = self.GOAL_LINE.p1
-
-        ab = a-b
-        ac = a-c
-
-        be = (b-c).norm / (1 + ab.norm/ac.norm)
-
-        return b + Position(0, -be)
+        return find_bisector_of_triangle(self.game_state.ball.position,
+                                         self.GOAL_LINE.p2,
+                                         self.GOAL_LINE.p1)
 
     def debug_cmd(self):
         # if self.current_state == self.defense:
