@@ -5,6 +5,7 @@ from ai.Algorithm.IntelligentModule import IntelligentModule
 from ai.Algorithm.evaluation_module import *
 from ai.GameDomainObjects.referee_state import RefereeCommand, RefereeState
 from ai.states.play_state import PlayState
+from ai.states.game_state import GameState
 
 
 class AutoPlay(IntelligentModule, metaclass=ABCMeta):
@@ -71,6 +72,9 @@ class SimpleAutoPlay(AutoPlay):
     """
         Classe simple implémentant la sélection de stratégies.
     """
+    FREE_KICK_COMMANDS = [RefereeCommand.DIRECT_FREE_US, RefereeCommand.INDIRECT_FREE_US,
+                          RefereeCommand.DIRECT_FREE_THEM, RefereeCommand.INDIRECT_FREE_THEM]
+
     def __init__(self, play_state: PlayState):
         super().__init__(play_state)
         self.last_ref_state = RefereeCommand.HALT
@@ -100,7 +104,7 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
             SimpleAutoPlayState.INDIRECT_FREE_DEFENSE
         ]
-        if self.current_state in accepted_states and not is_ball_moving(300):
+        if self.current_state in accepted_states and GameState().ball.is_immobile():
             return self.current_state
         if is_ball_our_side():
             return SimpleAutoPlayState.NORMAL_DEFENSE
@@ -118,6 +122,7 @@ class SimpleAutoPlay(AutoPlay):
 
     def _select_next_state(self, ref_state: RefereeState):
         next_state = self.current_state
+
         # On command change
         if self.last_ref_state != ref_state.command:
             next_state = {
@@ -151,6 +156,8 @@ class SimpleAutoPlay(AutoPlay):
         # During the game
         elif ref_state.command == RefereeCommand.FORCE_START or ref_state.command == RefereeCommand.NORMAL_START:
             next_state = self._analyse_game()
+        elif GameState().ball.is_mobile() and ref_state.command in self.FREE_KICK_COMMANDS:
+            return SimpleAutoPlayState.NORMAL_OFFENSE
 
         self.last_ref_state = ref_state.command
         return next_state
