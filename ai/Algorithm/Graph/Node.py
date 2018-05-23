@@ -45,6 +45,13 @@ class Node:
     def connect_to(self, dst_node, *, when: Callable[..., bool]):
         self.add_vertex(Vertex(dst_node, when))
 
+    def debug_cmd(self):
+        cmd = self.tactic.debug_cmd()
+        if isinstance(cmd, dict):
+            return [cmd]
+        else:
+            return cmd
+
     def exec(self):
         """
         Fait avancer la machine d'état de la tactique d'une itération et évalue la condition de chacun des vertices du
@@ -55,6 +62,8 @@ class Node:
         next_ai_command = self.tactic.exec()
         for vertex in self.vertices:
             if vertex.evaluate_condition():
+                # The next node might has already been executed, thus it need a reset
+                vertex.next_node.set_flag(Flags.INIT)
                 return next_ai_command, vertex.next_node
         return next_ai_command, self
 

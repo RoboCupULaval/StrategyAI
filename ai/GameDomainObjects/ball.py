@@ -6,6 +6,7 @@ from Util import Position
 
 
 class Ball:
+
     def __init__(self, position=Position()):
         self._position = position
         self._velocity = Position()
@@ -13,6 +14,13 @@ class Ball:
     def update(self, new_dict: Dict):
         self.position = new_dict['position']
         self.velocity = new_dict['velocity']
+
+    def is_mobile(self):
+        IMMOBILE_SPEED = 20.0 # mm/s
+        return IMMOBILE_SPEED < self.velocity.norm
+
+    def is_immobile(self):
+        return not self.is_mobile()
 
     @property
     def position(self) -> Position:

@@ -73,6 +73,9 @@ class Graph:
         assert callable(condition)
         starting_node.add_vertex(Vertex(ending_node, condition))
 
+    def debug_cmd(self):
+        return self.current_node.debug_cmd()
+
     def exec(self):
         """
         Appelle la méthode exec du noeud courant et effectue la transition vers un noued suivant si une des conditions
