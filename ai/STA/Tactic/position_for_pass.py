@@ -68,15 +68,15 @@ class PositionForPass(Tactic):
         if self.auto_position:
 
             pad = 200
-            if self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"] > 0:
-                our_goal_field_limit = self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"] - pad
+            if self.game_state.field.our_goal_x > 0:
+                our_goal_field_limit = self.game_state.field.our_goal_x - pad
                 our_side_center_field_limit = pad
-                their_goal_field_limit = GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"] + pad
+                their_goal_field_limit = GameState().field.their_goal_x + pad
                 #  their_side_center_field_limit = -pad
             else:
-                our_goal_field_limit = self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"] + pad
+                our_goal_field_limit = self.game_state.field.our_goal_x + pad
                 our_side_center_field_limit = -pad
-                their_goal_field_limit = self.game_state.const["FIELD_THEIR_GOAL_X_EXTERNAL"] - pad
+                their_goal_field_limit = self.game_state.field.their_goal_x - pad
                 #  their_side_center_field_limit = pad
             field_width = self.game_state.field.top - self.game_state.field.bottom
 
@@ -112,7 +112,7 @@ class PositionForPass(Tactic):
             return self.target_position
 
     def compute_offence_offset(self):
-        if self.game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"] < 0:
+        if self.game_state.field.our_goal_x < 0:
             if self.game_state.ball_position[0] < 0:
                 offset = Position(self.game_state.ball_position[0] - 1000, 0)
             else:
@@ -127,7 +127,7 @@ class PositionForPass(Tactic):
         return offset
 
     def compute_defense_offset(self):
-        if GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] < 0:
+        if GameState().field.our_goal_x < 0:
             if self.game_state.ball_position[0] > 0:
                 offset = Position(self.game_state.ball_position[0] - 1000, 0)
             else:

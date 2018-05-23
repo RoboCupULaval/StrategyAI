@@ -18,6 +18,8 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 DEFENSIVE_ROLE = [Role.MIDDLE, Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
+
+
 # noinspection PyMethodMayBeStatic,
 class DefenseWall(Strategy):
 
@@ -27,7 +29,7 @@ class DefenseWall(Strategy):
         their_goal = self.game_state.field.their_goal_pose
 
         # If we can not kick, the attackers are part of the defense wall
-        # TODO find a more useful thing to do for the attackers
+        # TODO find a more useful thing to do for the attackers when we are in a no kick state
         self.defensive_role = DEFENSIVE_ROLE.copy()
         if not can_kick:
             self.defensive_role += [Role.FIRST_ATTACK, Role.SECOND_ATTACK]

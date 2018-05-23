@@ -66,7 +66,7 @@ def best_passing_option(passing_player, consider_goal=True):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si but est la meilleure possibilité
 
     score_min = float("inf")
-    goal = Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
+    goal = Position(GameState().field.their_goal_x, 0)
 
     receiver_id = None
     for p in GameState().our_team.available_players.values():
@@ -189,7 +189,7 @@ def best_position_in_region(player, A, B):
     positions = positions[dists_from_ball > 1000, :]
     dists_from_ball = dists_from_ball[dists_from_ball > 1000]
     scores = line_of_sight_clearance_ball(player, positions, dists_from_ball)
-    our_side = GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"]
+    our_side = GameState().field.our_goal_x
     if abs(A.x - our_side) < abs(B.x - our_side):
         x_closest_to_our_side = A.x
     else:
