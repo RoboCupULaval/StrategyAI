@@ -23,9 +23,8 @@ __author__ = 'RoboCupULaval'
 
 ORIENTATION_DEADZONE = 0.2
 
-
-GAB_IN_WALL = 40  # in mm, distance that prevent robots from touching each other
-FETCH_BALL_ZONE_RADIUS = 1000  # in mm, circle around the formation center, where the wall member can go kick the ball
+GAP_IN_WALL = 40  # in mm, distance that prevent robots from touching each other
+FETCH_BALL_ZONE_RADIUS = 1000  # in mm, circle around the wall's robot, where it can go kick the ball
 
 class AlignToDefenseWall(Tactic):
     def __init__(self, game_state: GameState,
@@ -68,7 +67,7 @@ class AlignToDefenseWall(Tactic):
         """
 
         nb_robots = len(self.robots_in_formation)
-        wall_segment_length = nb_robots * ROBOT_DIAMETER + GAB_IN_WALL * (nb_robots - 1)
+        wall_segment_length = nb_robots * ROBOT_DIAMETER + GAP_IN_WALL * (nb_robots - 1)
 
         ball_position = self.game_state.ball_position
         goal_line = self.game_state.field.goal_line
@@ -94,7 +93,7 @@ class AlignToDefenseWall(Tactic):
 
     def position_on_wall_segment(self):
         idx = self.player_number_in_formation
-        length = ROBOT_RADIUS + idx * (ROBOT_DIAMETER + GAB_IN_WALL)
+        length = ROBOT_RADIUS + idx * (ROBOT_DIAMETER + GAP_IN_WALL)
         return self.wall_segment.p1 + self.wall_segment.normalize * length
 
     def debug_cmd(self):
