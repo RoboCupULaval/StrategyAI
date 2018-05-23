@@ -13,7 +13,7 @@ from Util import Pose, Position
 from Util.ai_command import MoveTo, Idle
 from Util.constant import ROBOT_RADIUS
 from Util.geometry import intersection_line_and_circle, intersection_between_lines, \
-    closest_point_on_segment
+    closest_point_on_segment, find_bisector_of_triangle
 from ai.GameDomainObjects import Player
 
 from ai.STA.Tactic.go_kick import GRAB_BALL_SPACING, GoKick
@@ -45,7 +45,7 @@ class GoalKeeper(Tactic):
 
     def defense_dumb(self):
         dest_y = self.game_state.ball.position.y \
-                 * self.game_state.const["FIELD_GOAL_WIDTH"] / 2 / self.game_state.const["FIELD_Y_TOP"]
+                 * self.game_state.goal_width / 2 / self.game_state.field.top
         position = self.game_state.field.our_goal - Position(ROBOT_RADIUS + 10, -dest_y)
         return MoveTo(Pose(position, np.pi))
 
@@ -58,7 +58,7 @@ class GoalKeeper(Tactic):
             self.next_state = self.intercept
             return self.intercept()  # no time to loose
 
-        circle_radius = self.game_state.const["FIELD_GOAL_WIDTH"] / 2
+        circle_radius = self.game_state.field.goal_width / 2
         circle_center = self.game_state.field.our_goal - self.OFFSET_FROM_GOAL_LINE
         solutions = intersection_line_and_circle(circle_center,
                                                  circle_radius,
@@ -71,11 +71,11 @@ class GoalKeeper(Tactic):
                 orientation_to_ball = (self.game_state.ball.position - self.player.position).angle
                 return MoveTo(Pose(solution, orientation_to_ball),
                               cruise_speed=3,
-                              end_speed=3)
+                              end_speed=0)
 
         return MoveTo(Pose(self.game_state.field.our_goal, np.pi),
                       cruise_speed=3,
-                      end_speed=3)
+                      end_speed=0)
 
     def intercept(self):
         # Find the point where the ball will go
@@ -85,17 +85,21 @@ class GoalKeeper(Tactic):
             self.next_state = self.clear
 
         ball = self.game_state.ball
-        pts = intersection_between_lines(self.GOAL_LINE.p1,
-                                         self.GOAL_LINE.p2,
-                                         ball.position,
-                                         ball.position + ball.velocity)
+        where_ball_enter_goal = intersection_between_lines(self.GOAL_LINE.p1,
+                                                           self.GOAL_LINE.p2,
+                                                           ball.position,
+                                                           ball.position + ball.velocity)
 
-        pts = closest_point_on_segment(pts, self.GOAL_LINE.p1, self.GOAL_LINE.p2)
-        self.last_intersection = pts
-        return MoveTo(Pose(pts, self.player.pose.orientation),  # It's a bit faster, to keep our orientation
-                           cruise_speed=3,
-                           end_speed=3,
-                           ball_collision=False)
+        # This is where the ball is going to enter the goal
+        where_ball_enter_goal = closest_point_on_segment(where_ball_enter_goal, self.GOAL_LINE.p1, self.GOAL_LINE.p2)
+
+        intersect_pts = closest_point_on_segment(self.player.position,
+                                                 ball.position, where_ball_enter_goal)
+        self.last_intersection = intersect_pts
+        return MoveTo(Pose(intersect_pts, self.player.pose.orientation),  # It's a bit faster, to keep our orientation
+                      cruise_speed=3,
+                      end_speed=0,
+                      ball_collision=False)
 
     def _ball_going_toward_goal(self):
         upper_angle = (self.game_state.ball.position - self.GOAL_LINE.p2).angle + 5 * np.pi / 180.0
@@ -118,30 +122,21 @@ class GoalKeeper(Tactic):
         else:
             return self.go_kick_tactic.exec()
 
-
     def _best_target_into_goal(self):
-        # Find the bisection of the triangle made by the ball (a) and the two goals extremities(b, c)
-        a = self.game_state.ball.position
-        b = self.GOAL_LINE.p2
-        c = self.GOAL_LINE.p1
-
-        ab = a-b
-        ac = a-c
-
-        be = self.game_state.field.goal_width / (1 + ab.norm/ac.norm)
-
-        return b + Position(0, -be)
+        return find_bisector_of_triangle(self.game_state.ball.position,
+                                         self.GOAL_LINE.p2,
+                                         self.GOAL_LINE.p1)
 
     def debug_cmd(self):
-        if self.current_state == self.defense:
-            return DebugCommandFactory().line(self.game_state.ball.position,
-                                                self._best_target_into_goal(),
-                                                timeout=0.1)
-        elif self.current_state == self.intercept and self.last_intersection is not None:
-            return DebugCommandFactory().line(self.game_state.ball.position,
-                                                self.last_intersection,
-                                                timeout=0.1)
-        else:
-            return []
+        # if self.current_state == self.defense:
+        #     return DebugCommandFactory().line(self.game_state.ball.position,
+        #                                         self._best_target_into_goal(),
+        #                                         timeout=0.1)
+        # elif self.current_state == self.intercept and self.last_intersection is not None:
+        #     return DebugCommandFactory().line(self.game_state.ball.position,
+        #                                         self.last_intersection,
+        #                                         timeout=0.1)
+        # else:
+        return []
 
 
