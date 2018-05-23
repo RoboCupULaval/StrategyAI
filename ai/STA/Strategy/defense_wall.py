@@ -17,10 +17,9 @@ from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
-
+DEFENSIVE_ROLE = [Role.MIDDLE, Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
 # noinspection PyMethodMayBeStatic,
 class DefenseWall(Strategy):
-    DEFENSIVE_ROLE = [Role.MIDDLE, Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
 
     def __init__(self, game_state: GameState, can_kick=True):
         super().__init__(game_state)
@@ -29,10 +28,11 @@ class DefenseWall(Strategy):
 
         # If we can not kick, the attackers are part of the defense wall
         # TODO find a more useful thing to do for the attackers
+        self.defensive_role = DEFENSIVE_ROLE.copy()
         if not can_kick:
-            self.DEFENSIVE_ROLE += [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
-        self.robots_in_formation = [p for r, p in self.assigned_roles.items() if r in self.DEFENSIVE_ROLE]
-        self.attackers = [p for r, p in self.assigned_roles.items() if r not in self.DEFENSIVE_ROLE and r != Role.GOALKEEPER]
+            self.defensive_role += [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
+        self.robots_in_formation = [p for r, p in self.assigned_roles.items() if r in self.defensive_role]
+        self.attackers = [p for r, p in self.assigned_roles.items() if r not in self.defensive_role and r != Role.GOALKEEPER]
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
@@ -77,7 +77,7 @@ class DefenseWall(Strategy):
         if self.game_state.field.is_ball_in_our_goal():
             return False
         # If no defenser can exit wall to kick
-        for r in self.DEFENSIVE_ROLE:
+        for r in self.defensive_role:
             p = self.assigned_roles[r]
             if (p.position - self.game_state.ball.position).norm < FETCH_BALL_ZONE_RADIUS:
                 return False
