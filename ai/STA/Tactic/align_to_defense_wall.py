@@ -138,7 +138,7 @@ class AlignToDefenseWall(Tactic):
             return self.go_kick_tactic.exec()
 
     def _should_ball_be_kick_by_wall(self):
-        return (self.center_formation - self.game_state.ball.position).norm < FETCH_BALL_ZONE_RADIUS
+        return (self.position_on_wall_segment() - self.game_state.ball.position).norm < FETCH_BALL_ZONE_RADIUS
 
     def _is_closest(self, player):
         return player == closest_players_to_point(GameState().ball_position, our_team=True)[0].player

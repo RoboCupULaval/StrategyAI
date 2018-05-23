@@ -82,6 +82,10 @@ class Field:
     def is_ball_in_our_goal(self):
         return self.our_goal_area.point_inside(self.ball.position)
 
+    def is_ball_outside_our_goal(self):
+        # Use for strategy conditions
+        return not self.is_ball_in_our_goal()
+
     @property
     def ball(self):
         if not self._ball:
