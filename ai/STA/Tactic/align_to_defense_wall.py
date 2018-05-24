@@ -10,6 +10,7 @@ from Util import Pose, Position
 from Util.geometry import perpendicular, normalize, find_bisector_of_triangle, angle_between_three_points, Line
 
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS, ROBOT_DIAMETER
+from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
 from Util.ai_command import Idle, CmdBuilder, MoveTo
@@ -117,7 +118,7 @@ class AlignToDefenseWall(Tactic):
         self.compute_wall_segment()
         if self.game_state.field.is_ball_in_our_goal():
             return Idle  # We must not block the goalkeeper
-        elif self._should_ball_be_kick_by_wall() and self._is_closest(self.player):
+        elif self._should_ball_be_kick_by_wall() and self._is_closest_not_goaler(self.player):
             self.next_state = self.go_kick
         dest = self.position_on_wall_segment()
         dest_orientation = (self.game_state.ball_position - dest).angle
@@ -139,6 +140,11 @@ class AlignToDefenseWall(Tactic):
     def _should_ball_be_kick_by_wall(self):
         return (self.position_on_wall_segment() - self.game_state.ball.position).norm < FETCH_BALL_ZONE_RADIUS
 
-    def _is_closest(self, player):
-        return player == closest_players_to_point(GameState().ball_position, our_team=True)[0].player
+    def _is_closest_not_goaler(self, player):
+        closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
+        if player == closest_players[0].player:
+            return True
+        return closest_players[0].player == self.game_state.get_player_by_role(Role.GOALKEEPER) \
+               and player == closest_players[1].player
+
 
