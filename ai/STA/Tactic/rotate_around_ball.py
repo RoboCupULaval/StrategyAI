@@ -10,12 +10,13 @@ from Util.ai_command import Idle, CmdBuilder
 from Util.geometry import compare_angle, find_signed_delta_angle
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 DIFF_ANGLE = 0.2
 DISTANCE_FROM_BALL = 400
 VALID_DISTANCE = 250
-VALID_DIFF_ANGLE = 0.1
+VALID_DIFF_ANGLE = 0.15
 
 
 class RotateAroundBall(Tactic):
@@ -44,6 +45,7 @@ class RotateAroundBall(Tactic):
         if time.time() - self.start_time >= self.rotate_time:
             self.rotation = self.get_direction()
             if compare_angle(self.target_orientation, (self.ball_position - self.player.position).angle, VALID_DIFF_ANGLE):
+                # self.next_state = self.halt()
                 return Idle
         elif time.time() - self.iter_time >= self.switch_time:
             self.iter_time = time.time()
@@ -63,4 +65,5 @@ class RotateAroundBall(Tactic):
         return np.sign(find_signed_delta_angle(self.target_orientation, self.offset_orientation))
 
     def halt(self):
+        self.status_flag = Flags.SUCCESS
         return Idle
