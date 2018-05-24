@@ -45,7 +45,7 @@ class RotateAroundBall(Tactic):
         if time.time() - self.start_time >= self.rotate_time:
             self.rotation = self.get_direction()
             if compare_angle(self.target_orientation, (self.ball_position - self.player.position).angle, VALID_DIFF_ANGLE):
-                # self.next_state = self.halt()
+                self.next_state = self.halt
                 return Idle
         elif time.time() - self.iter_time >= self.switch_time:
             self.iter_time = time.time()
