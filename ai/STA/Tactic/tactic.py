@@ -63,6 +63,9 @@ class Tactic(object):
         self.current_state = self.next_state
         return next_ai_command
 
+    def debug_cmd(self):
+        return []
+
     def get_name(self):
         return self.__class__.__name__
 

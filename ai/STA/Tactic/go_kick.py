@@ -20,7 +20,7 @@ VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
 
 GO_BEHIND_SPACING = 200
-GRAB_BALL_SPACING = 85
+GRAB_BALL_SPACING = 100
 APPROACH_SPEED = 100
 KICK_DISTANCE = 130
 KICK_SUCCEED_THRESHOLD = 600
@@ -33,7 +33,8 @@ class GoKick(Tactic):
                  target: Pose=Pose(),
                  args: List[str]=None,
                  kick_force: KickForce=KickForce.MEDIUM,
-                 auto_update_target=False):
+                 auto_update_target=False,
+                 go_behind_distance=GRAB_BALL_SPACING*3):
 
         super().__init__(game_state, player, target, args)
         self.current_state = self.kick_charge
@@ -46,10 +47,9 @@ class GoKick(Tactic):
         if self.auto_update_target:
             self._find_best_passing_option()
         self.kick_force = kick_force
-        self.ball_spacing = GRAB_BALL_SPACING
+        self.go_behind_distance = go_behind_distance
         self.tries_flag = 0
         self.grab_ball_tries = 0
-        self.grab_ball_modifier = 1
 
     def kick_charge(self):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
@@ -59,13 +59,12 @@ class GoKick(Tactic):
         return CmdBuilder().addChargeKicker().build()
 
     def go_behind_ball(self):
-        self.ball_spacing = GRAB_BALL_SPACING
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.player.pose.position).angle
         ball_speed = self.game_state.ball.velocity.norm
-        ball_speed_modifier = (ball_speed/100 + 1)
+        ball_speed_modifier = (ball_speed/1000 + 1)
 
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3 * ball_speed_modifier)
+        distance_behind = self.get_destination_behind_ball(self.go_behind_distance * ball_speed_modifier)
 
         if (self.player.pose.position - distance_behind).norm < 50 \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
@@ -84,14 +83,13 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10):
             self.next_state = self.kick
 
-        orientation = (self.target.position - self.game_state.ball_position).angle
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * self.grab_ball_modifier)
+        orientation = (self.target.position - self.player.pose.position).angle
+        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=1,
                                       ball_collision=False).addChargeKicker().build()
 
     def kick(self):
-        self.ball_spacing = GRAB_BALL_SPACING
         self.next_state = self.validate_kick
         self.tries_flag += 1
 

@@ -23,6 +23,7 @@ from ai.STA.Strategy.prepare_penalty_offense import PreparePenaltyOffense
 from ai.STA.Strategy.robocup_choreography import RobocupChoreography
 from ai.STA.Strategy.bamba_follow import BambaFollow
 from ai.STA.Strategy.stay_away import StayAway
+from ai.STA.Strategy.test_goal_keeper import TestGoalKeeper
 
 __author__ = "Maxime Gagnon-Legault, and others"
 
@@ -59,6 +60,7 @@ class StrategyBook(object):
                               'PreparePenaltyOffense': PreparePenaltyOffense,
                               'OffenseKickOff': OffenseKickOff,
                               'DefenseWallNoKick': DefenseWallNoKick,
+                              'TestGoalKeeper': TestGoalKeeper,
                               }
         self.default_strategies = ['Offense',
                                    'DefenseWall']

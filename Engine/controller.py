@@ -20,6 +20,7 @@ from Util.geometry import rotate
 from Util.team_color_service import TeamColorService
 from config.config import Config
 
+
 class Controller:
 
     def __init__(self, ui_send_queue: Queue):
