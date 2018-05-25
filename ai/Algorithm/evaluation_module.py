@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from Util.position import Position
-from Util.constant import ROBOT_RADIUS
+from Util.constant import ROBOT_RADIUS, BALL_OUTSIDE_FIELD_BUFFER
 from ai.states.game_state import GameState
 from ai.GameDomainObjects.field import FieldSide
 
@@ -60,6 +60,23 @@ def is_ball_our_side():
     else:
         return GameState().ball_position.x < 0
 
+
+def is_ball_near_wall():
+
+    if abs(GameState().ball_position.y) > (GameState().const["FIELD_Y_TOP"] - BALL_OUTSIDE_FIELD_BUFFER):
+        return True
+    if abs(GameState().ball_position.x) > (GameState().const["FIELD_X_RIGHT"] - BALL_OUTSIDE_FIELD_BUFFER):
+        return True
+    return False
+
+
+def is_ball_outside_field():
+
+    if abs(GameState().ball_position.y) > (GameState().const["FIELD_Y_TOP"] + BALL_OUTSIDE_FIELD_BUFFER):
+        return True
+    if abs(GameState().ball_position.x) > (GameState().const["FIELD_X_RIGHT"] + BALL_OUTSIDE_FIELD_BUFFER):
+        return True
+    return False
 
 # noinspection PyUnresolvedReferences
 def best_passing_option(passing_player, consider_goal=True):
