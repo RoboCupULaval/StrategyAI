@@ -14,11 +14,9 @@ class OffenseKickOff(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-        their_goal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
-
         middle_player = self.assigned_roles[Role.MIDDLE]
 
-        self.create_node(Role.MIDDLE, GoKick(self.game_state, middle_player, their_goal))
+        self.create_node(Role.MIDDLE, GoKick(self.game_state, middle_player, self.game_state.field.their_goal_pose))
 
     @classmethod
     def required_roles(cls):

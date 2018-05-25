@@ -22,20 +22,19 @@ class DefenseWall_3v3(Strategy):
 
         self.number_of_players = number_of_players
         self.robots = []
-        ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
-        self.theirgoal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
+        their_goal = self.game_state.field.their_goal
 
         roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
-        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, target=ourgoal))
+        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper))
 
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
         self.robots = [player for _, player in role_by_robots if player is not None]
         for role, player in role_by_robots:
             if player:
                 node_align_to_defense_wall = self.create_node(role, AlignToDefenseWall(self.game_state, player, self.robots))
-                node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=self.theirgoal))
+                node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=self.their_goal))
 
                 player_is_closest = partial(self.is_closest, player)
                 player_is_not_closest = partial(self.is_not_closest, player)

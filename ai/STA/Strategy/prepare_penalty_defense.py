@@ -1,4 +1,5 @@
 # Under MIT license, see LICENSE.txt
+import numpy as np
 
 from Util.pose import Pose, Position
 from Util.role import Role
@@ -13,8 +14,7 @@ from ai.states.game_state import GameState
 class PreparePenaltyDefense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
-        our_goal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
-        their_goal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
+        their_goal = self.game_state.field.their_goal_pose
 
         role_to_positions = {Role.FIRST_ATTACK:   Pose.from_values(their_goal.position.x / 8, GameState().const["FIELD_Y_TOP"] * 2 / 3),
                              Role.SECOND_ATTACK:  Pose.from_values(their_goal.position.x / 8, GameState().const["FIELD_Y_TOP"] / 3),
@@ -23,9 +23,10 @@ class PreparePenaltyDefense(Strategy):
                              Role.SECOND_DEFENCE: Pose.from_values(their_goal.position.x / 8, GameState().const["FIELD_Y_BOTTOM"] * 2 / 3)}
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
-        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, our_goal, penalty_kick=True))
+        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, penalty_kick=True))
 
         for role, position in role_to_positions.items():
+            position.orientation = np.pi
             player = self.assigned_roles[role]
             self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))
 

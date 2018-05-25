@@ -20,15 +20,19 @@ class PassesWithDecisions(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-        goal = Pose(Position(self.game_state.const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
+        their_goal = self.game_state.field.their_goal_pose
 
-        node_pass_to_second_attack = self.create_node(Role.FIRST_ATTACK, PassToPlayer(self.game_state, self.assigned_roles[Role.FIRST_ATTACK],
-                                                                                      target_id=self.assigned_roles[Role.SECOND_ATTACK].id))
+        node_pass_to_second_attack = self.create_node(Role.FIRST_ATTACK,
+                                                      PassToPlayer(self.game_state,
+                                                                   self.assigned_roles[Role.FIRST_ATTACK],
+                                                                   args=[self.assigned_roles[Role.SECOND_ATTACK].id]))
 
-        node_pass_to_middle = self.create_node(Role.FIRST_ATTACK, PassToPlayer(self.game_state, self.assigned_roles[Role.FIRST_ATTACK],
-                                                                               target_id=self.assigned_roles[Role.MIDDLE].id))
+        node_pass_to_middle = self.create_node(Role.FIRST_ATTACK,
+                                               PassToPlayer(self.game_state,
+                                                            self.assigned_roles[Role.FIRST_ATTACK],
+                                                            args=[self.assigned_roles[Role.MIDDLE].id]))
 
-        node_go_kick = self.create_node(Role.FIRST_ATTACK, GoKick(self.game_state, self.assigned_roles[Role.FIRST_ATTACK], goal))
+        node_go_kick = self.create_node(Role.FIRST_ATTACK, GoKick(self.game_state, self.assigned_roles[Role.FIRST_ATTACK], their_goal))
 
         second_attack_is_best_receiver = partial(self.is_best_receiver, Role.SECOND_ATTACK)
         middle_is_best_receiver = partial(self.is_best_receiver, Role.MIDDLE)
@@ -40,7 +44,7 @@ class PassesWithDecisions(Strategy):
         node_pass_to_middle.connect_to(node_pass_to_second_attack, when=current_tactic_succeeded)
         node_go_kick.connect_to(node_pass_to_second_attack, when=current_tactic_succeeded)
 
-        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, self.assigned_roles[Role.GOALKEEPER], goal))
+        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, self.assigned_roles[Role.GOALKEEPER]))
 
 
     @classmethod
