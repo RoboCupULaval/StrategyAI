@@ -88,7 +88,6 @@ class RobotFilter(KalmanFilter):
         self._predict(input_command)
         self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
 
-
     @staticmethod
     def rotate(vec, angle):
         rotation = np.array([[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0], [0, 0, 1]])
