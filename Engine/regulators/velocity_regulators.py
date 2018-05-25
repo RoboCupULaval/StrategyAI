@@ -10,7 +10,7 @@ from Util.geometry import rotate, clamp
 
 class RealVelocityController(RegulatorBaseClass):
 
-    settings = {'kp': 0.5, 'ki': 0.4, 'kd': 0.0}
+    settings = {'kp': 1, 'ki': 0.4, 'kd': 0.0}
 
     def __init__(self):
         self.orientation_controller = PID(**self.settings, wrap_error=True)
@@ -26,7 +26,7 @@ class RealVelocityController(RegulatorBaseClass):
         velocity = robot.position_error * speed_norm / robot.position_error.norm
 
         cmd_orientation = self.orientation_controller.execute(robot.orientation_error)
-        cmd_orientation /= max(1, abs(cmd_orientation) / MAX_ANGULAR_SPEED)
+        cmd_orientation /= max(1, abs(cmd_orientation) / MAX_ANGULAR_SPEED/1.5)
 
         return Pose(velocity, cmd_orientation)
 
