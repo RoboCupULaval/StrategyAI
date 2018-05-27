@@ -1,7 +1,7 @@
 import copy
 import logging
 from enum import Enum
-from typing import Dict
+from typing import Dict, Union
 
 from Util import Position, Pose
 from Util.geometry import Area, Line
@@ -183,7 +183,7 @@ class Field:
     def their_goal_x(self):
         return self.left
 
-    def __contains__(self, item: [Pose, Position]):
+    def __contains__(self, item: Union[Pose, Position]):
         return self.left <= item.x <= self.right and \
                self.bottom <= item.y <= self.top
 

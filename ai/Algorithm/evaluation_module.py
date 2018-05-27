@@ -184,10 +184,10 @@ def best_position_in_region(player, A, B):
             positions += [Position(x_point, y_point).array]
     positions = np.stack(positions)
     # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
-    dists_from_ball = np.sqrt(((positions - ball_position.array) *
+    dists_from_ball_raw = np.sqrt(((positions - ball_position.array) *
                                (positions - ball_position.array)).sum(axis=1))
-    positions = positions[dists_from_ball > 1000, :]
-    dists_from_ball = dists_from_ball[dists_from_ball > 1000]
+    positions = positions[dists_from_ball_raw > 1000, :]
+    dists_from_ball = dists_from_ball_raw[dists_from_ball_raw > 1000]
     scores = line_of_sight_clearance_ball(player, positions, dists_from_ball)
     our_side = GameState().field.our_goal_x
     if abs(A.x - our_side) < abs(B.x - our_side):

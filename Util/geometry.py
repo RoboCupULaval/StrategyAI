@@ -4,7 +4,7 @@ import math as m
 import numpy as np
 
 from Util.position import Position
-from typing import cast, Sequence, List
+from typing import cast, Sequence, List, Union
 
 
 class Line:
@@ -28,7 +28,7 @@ class Area:
         return self.upper_left.x <= p.x <= self.lower_right.x and \
                self.lower_right.y <= p.y <= self.upper_left.y
 
-    def __contains__(self, item: ["Pose", Position]):
+    def __contains__(self, item: Union["Pose", Position]):
         if item.__class__.__name__ == "Pose":  # Prevent importing Pose
             return self.point_inside(item.position)
         elif isinstance(item, Position):
