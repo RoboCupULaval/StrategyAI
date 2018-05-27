@@ -95,7 +95,7 @@ class AlignToDefenseWall(Tactic):
     def position_on_wall_segment(self):
         idx = self.player_number_in_formation
         length = ROBOT_RADIUS + idx * (ROBOT_DIAMETER + GAB_IN_WALL)
-        return self.wall_segment.p1 + self.wall_segment.normalize * length
+        return self.wall_segment.p1 + self.wall_segment.direction * length
 
     def debug_cmd(self):
         if self.wall_segment is None or self.player_number_in_formation != 0:
