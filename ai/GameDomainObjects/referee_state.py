@@ -131,7 +131,7 @@ class RefereeState:
                 parsed_cmd = self._convert_raw_to_us(command)
             else:
                 parsed_cmd = self._convert_raw_to_them(command)
-        # None color wise commands
+        # Not color wise commands
         return RefereeCommand(parsed_cmd)
 
     def _parse_team_info(self, frame):
@@ -158,9 +158,9 @@ class RefereeState:
     @staticmethod
     def _convert_raw_to_them(command):
         if TeamColorService().our_team_color is TeamColor.YELLOW:
-            return command + 1
-        else:
             return command
+        else:
+            return command + 1
 
     @staticmethod
     def _is_our_team_command(command):
