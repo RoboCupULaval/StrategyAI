@@ -97,7 +97,6 @@ class PlaceBall(Tactic):
 
         if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10):
             self.next_state = self.move_ball
-        if self.time >
 
         orientation = (self.target.position - self.player.pose.position).angle
         if is_ball_near_wall():
