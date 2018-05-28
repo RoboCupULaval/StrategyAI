@@ -11,6 +11,7 @@ from Util.geometry import rotate, clamp
 class RealVelocityController(RegulatorBaseClass):
 
     settings = {'kp': 1, 'ki': 0.4, 'kd': 0.0}
+    offset = 20
 
     def __init__(self):
         self.orientation_controller = PID(**self.settings, wrap_error=True)
@@ -20,8 +21,7 @@ class RealVelocityController(RegulatorBaseClass):
         return self.orientation_controller.dt
 
     def execute(self, robot: Robot):
-
-        speed_norm = self.get_next_speed(robot)
+        speed_norm = self.get_next_speed(robot, offset=self.offset)
 
         velocity = robot.position_error * speed_norm / robot.position_error.norm
 
@@ -35,7 +35,7 @@ class RealVelocityController(RegulatorBaseClass):
         if robot.target_speed > robot.current_speed:
             next_speed = robot.current_speed + acc * self.dt * offset
         else:
-            if not self.reach_acceleration_dist(robot, acc):
+            if not self.reach_acceleration_dist(robot, acc, offset=self.offset):
                 next_speed = robot.current_speed + acc * self.dt * offset
             else:
                 next_speed = robot.current_speed - acc * self.dt * offset
@@ -45,16 +45,16 @@ class RealVelocityController(RegulatorBaseClass):
     @staticmethod
     def reach_acceleration_dist(robot, acc, offset=2) -> bool:
         distance = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc
-        return robot.position_error.norm < distance * offset
+        return robot.position_error.norm < distance * offset * 2
 
     def reset(self):
-        pass
+        self.orientation_controller.reset()
 
 
 class GrSimVelocityController(RealVelocityController):
 
     settings = {'kp': .75, 'ki': 0.05, 'kd': 0}
-
+    offset = 1
 
 def is_time_to_break(robot, destination, cruise_speed, acceleration, target_speed):
     # formule physique: v_finale ** 2 = v_init ** 2 - 2 * acceleration * distance_deplacement

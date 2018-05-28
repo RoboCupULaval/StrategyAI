@@ -58,6 +58,7 @@ class Controller:
 
             if robot.position_error.norm < 200 and robot.target_speed == 0:
                 cmd = robot.position_regulator.execute(robot)
+                robot.velocity_regulator.reset()
             else:
                 cmd = robot.velocity_regulator.execute(robot)
 
