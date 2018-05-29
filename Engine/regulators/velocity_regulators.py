@@ -6,6 +6,7 @@ from Engine.regulators.regulator_base_class import RegulatorBaseClass
 from Engine.robot import Robot, MAX_LINEAR_ACCELERATION, MAX_ANGULAR_SPEED
 from Util import Pose
 from Util.geometry import rotate, clamp
+from config.config import Config
 
 
 class RealVelocityController(RegulatorBaseClass):
@@ -18,7 +19,7 @@ class RealVelocityController(RegulatorBaseClass):
 
     @property
     def dt(self):
-        return self.orientation_controller.dt
+        return 1 / Config()['ENGINE']['engine_fps']
 
     def execute(self, robot: Robot):
         speed_norm = self.get_next_speed(robot, offset=self.offset)
