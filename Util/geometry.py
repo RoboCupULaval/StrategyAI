@@ -13,18 +13,28 @@ class Line:
         self.p2 = p2
 
     @property
-    def normalize(self):
+    def direction(self):
         return normalize(self.p2 - self.p1)
 
 
 class Area:
     def __init__(self, upper_left, lower_right):
+        assert lower_right.y <= upper_left.y
+        assert lower_right.x >= upper_left.x
         self.upper_left = upper_left   # -x, +y
         self.lower_right = lower_right  # +x, -y
 
     def point_inside(self, p: Position) -> bool:
         return self.upper_left.x <= p.x <= self.lower_right.x and \
                self.lower_right.y <= p.y <= self.upper_left.y
+
+    def __contains__(self, item: ["Pose", Position]):
+        if item.__class__.__name__ == "Pose":  # Prevent importing Pose
+            return self.point_inside(item.position)
+        elif isinstance(item, Position):
+            return self.point_inside(item)
+        else:
+            raise ValueError("You can only test if a position or a pose is contained inside the area.")
 
     @property
     def top(self):
@@ -41,7 +51,6 @@ class Area:
     @property
     def right(self):
         return self.lower_right.x
-
 
 
 def find_bisector_of_triangle(c, a, b):
@@ -79,7 +88,7 @@ def intersection_line_and_circle(cp: Position, cr: float, lp1: Position, lp2: Po
     x1 = (det * d.y + np.sign(d.y) * d.x * np.sqrt(delta)) / (d.norm**2)
     y1 = (-det * d.x + abs(d.y) * np.sqrt(delta)) / (d.norm**2)
     if delta == 0:
-        return [Position(x1, y1) + cp]
+        return [Position(x1, y1) + cp]  # Tangential
 
     x2 = (det * d.y - np.sign(d.y) * d.x * np.sqrt(delta)) / (d.norm**2)
     y2 = (-det * d.x - abs(d.y) * np.sqrt(delta)) / (d.norm**2)
