@@ -3,7 +3,11 @@ import logging
 from multiprocessing.managers import DictProxy
 from typing import Dict, List, Union, Any, Iterable
 import numpy as np
+from multiprocessing import Queue
 
+import time
+
+from Debug.debug_command_factory import DebugCommandFactory
 from Engine.Communication.robot_state import RobotState
 from Engine.filters.ball_kalman_filter import BallFilter
 from Engine.filters.robot_kalman_filter import RobotFilter
@@ -21,11 +25,11 @@ class Tracker:
     MAX_UNDETECTED_DELAY = 3
     NUMBER_OF_CAMERA = 4
 
-    def __init__(self, vision_state: DictProxy):
+    def __init__(self, vision_state: DictProxy, ui_send_queue: Queue):
 
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger('Tracker')
-
+        self.ui_send_queue = ui_send_queue
         self.on_negative_side = Config()["GAME"]["on_negative_side"]
 
         self.vision_state = vision_state
@@ -44,12 +48,12 @@ class Tracker:
 
         if any(camera_frames):
 
-            for frame in camera_frames:
+            for frame in sorted(camera_frames, key=lambda frame: frame['t_capture']):
                 if self.on_negative_side:
                     frame = Tracker.change_reference(frame)
 
                 self._camera_frame_number[frame['camera_id']] = frame['frame_number']
-                self._update(frame, frame['t_capture'])
+                self._update(frame, time.time())
 
             self._current_timestamp = max(frame['t_capture'] for frame in camera_frames)
             self.remove_undetected()
@@ -72,6 +76,11 @@ class Tracker:
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
             self._yellow_team[robot_obs['robot_id']].update(obs, timestamp)
 
+        if self._yellow_team[5]._dt < 0.1:
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("s", "robot 5 update time",
+                                                                         [time.time()],
+                                                                         [self._yellow_team[5]._dt]))
+
         for ball_obs in detection_frame.get('balls', ()):
             obs = np.array([ball_obs['x'], ball_obs['y']])
             self._ball.update(obs, timestamp)
@@ -83,14 +92,19 @@ class Tracker:
 
     def predict(self, robot_state: RobotState):
 
-        input_commands = [None for _ in range(12)]
+        velocity_commands = [None for _ in range(12)]
         for packet in robot_state.packet:
-            input_commands[packet.robot_id] = packet.command.to_array()
+            velocity_commands[packet.robot_id] = packet.command.to_array()
 
-        for robot, input_cmd in zip(self._our_team, input_commands):
-            robot.predict(input_cmd)
+        for robot, velocity_command in zip(self._our_team, velocity_commands):
+            robot.predict(velocity_command)
         for robot in self._their_team:
             robot.predict()
+
+        if self._yellow_team[5]._dt < 0.1:
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("s", "robot 5 predict time",
+                                                                         [time.time()],
+                                                                         [self._yellow_team[5]._dt]))
 
         self._ball.predict()
 

@@ -12,7 +12,7 @@ from config.config import Config
 class RealVelocityController(RegulatorBaseClass):
 
     settings = {'kp': 1, 'ki': 0.4, 'kd': 0.0}
-    offset = 20
+    offset = 1
 
     def __init__(self):
         self.orientation_controller = PID(**self.settings, wrap_error=True)
@@ -45,7 +45,7 @@ class RealVelocityController(RegulatorBaseClass):
 
     @staticmethod
     def reach_acceleration_dist(robot, acc, offset=2) -> bool:
-        distance = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc
+        distance = 0.5 * abs(min(robot.current_speed ** 2, robot.cruise_speed ** 2) - robot.target_speed ** 2) / acc
         return robot.position_error.norm < distance * offset * 2
 
     def reset(self):
