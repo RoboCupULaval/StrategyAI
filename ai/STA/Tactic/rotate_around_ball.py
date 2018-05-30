@@ -44,16 +44,20 @@ class RotateAroundBall(Tactic):
     def next_position(self):
         if time.time() - self.start_time >= self.rotate_time:
             self.rotation = self.get_direction()
-            if compare_angle(self.target_orientation, (self.ball_position - self.player.position).angle, VALID_DIFF_ANGLE):
+            if compare_angle(self.target_orientation, (self.ball_position - self.player.position).angle, VALID_DIFF_ANGLE) \
+                    and compare_angle(self.player.pose.orientation, self.target_orientation, abs_tol=VALID_DIFF_ANGLE):
                 self.next_state = self.halt
                 return Idle
         elif time.time() - self.iter_time >= self.switch_time:
             self.iter_time = time.time()
             self.switch_rotation()
+
         if (self.player.pose.position - self.position).norm < VALID_DISTANCE:
             self.offset_orientation += DIFF_ANGLE * self.rotation
             self.position = (self.game_state.ball_position - Position.from_angle(self.offset_orientation) * DISTANCE_FROM_BALL)
-        return CmdBuilder().addMoveTo(Pose(self.position, self.offset_orientation),
+
+        orientation = self.offset_orientation if time.time() - self.start_time < self.rotate_time-1.5 else self.target_orientation
+        return CmdBuilder().addMoveTo(Pose(self.position, orientation),
                                       cruise_speed=1, end_speed=1,
                                       ball_collision=False).build()
 
