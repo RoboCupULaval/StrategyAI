@@ -60,7 +60,7 @@ class GoKick(Tactic):
 
     def go_behind_ball(self):
         self.status_flag = Flags.WIP
-        orientation = (self.target.position - self.player.pose.position).angle
+        orientation = (self.target.position - self.game_state.ball_position).angle
         ball_speed = self.game_state.ball.velocity.norm
         ball_speed_modifier = (ball_speed/1000 + 1)
 
@@ -83,7 +83,7 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10):
             self.next_state = self.kick
 
-        orientation = (self.target.position - self.player.pose.position).angle
+        orientation = (self.target.position - self.game_state.ball_position).angle
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=1,
@@ -95,7 +95,7 @@ class GoKick(Tactic):
 
         player_to_target = (self.target.position - self.player.pose.position)
         behind_ball = self.game_state.ball_position - normalize(player_to_target) * (BALL_RADIUS + ROBOT_CENTER_TO_KICKER)
-        orientation = player_to_target.angle
+        orientation = (self.target.position - self.game_state.ball_position).angle
 
         return CmdBuilder().addMoveTo(Pose(behind_ball, orientation)).addKick(self.kick_force).build()
 
