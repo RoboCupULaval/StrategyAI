@@ -21,9 +21,9 @@ VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
 
 GO_BEHIND_SPACING = 200
-GRAB_BALL_SPACING = 80
+GRAB_BALL_SPACING = 20
 APPROACH_SPEED = 100
-KICK_DISTANCE = 90
+KICK_DISTANCE = 100
 KICK_SUCCEED_THRESHOLD = 600
 COMMAND_DELAY = 0.5
 SUCCESS_THRESHOLD = 300
@@ -47,6 +47,7 @@ class PlaceBall(Tactic):
         self.grab_ball_tries = 0
         self.steady_orrientation = self.player.pose.orientation
         self.time = time.time()
+        self.ball_position = self.game_state.ball_position
 
     def fetch_ball(self):
         if is_ball_outside_field():
@@ -58,6 +59,8 @@ class PlaceBall(Tactic):
                 self.next_state = self.go_behind_ball
 
     def go_behind_ball(self):
+        self.fetch_ball()
+        self.ball_position = self.game_state.ball_position
         self.status_flag = Flags.WIP
 
         orientation = (self.target.position - self.player.pose.position).angle
@@ -76,6 +79,8 @@ class PlaceBall(Tactic):
                                       ball_collision=True).build()
 
     def go_in_front_ball(self):
+        self.fetch_ball()
+        self.ball_position = self.game_state.ball_position
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.player.pose.position).angle - np.pi
 
@@ -95,7 +100,7 @@ class PlaceBall(Tactic):
 
     def grab_ball(self):
 
-        if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10):
+        if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10) or self.time - time.time() > 5:
             self.next_state = self.move_ball
 
         orientation = (self.target.position - self.player.pose.position).angle
@@ -110,11 +115,15 @@ class PlaceBall(Tactic):
                                       ball_collision=False).addChargeKicker().addForceDribbler().build()
 
     def move_ball(self):
+        self.ball_position = self.game_state.ball_position
         if self.check_success():
             self.next_state = self.halt
+        elif (self.player.pose.position - self.ball_position).norm > 300:
+            self.fetch_ball()
+            return CmdBuilder().build()
         else:
             return CmdBuilder().addMoveTo(Pose(self.target.position, self.steady_orrientation),
-                                          cruise_speed=0.2,
+                                          cruise_speed=0.5,
                                           ball_collision=False).addForceDribbler().build()
         return CmdBuilder().build()
 
@@ -129,7 +138,7 @@ class PlaceBall(Tactic):
         return Idle
 
     def _get_distance_from_ball(self):
-        return (self.player.pose.position - self.game_state.ball_position).norm
+        return (self.player.pose.position - self.ball_position).norm
 
     def _is_player_towards_ball_and_target(self, abs_tol=m.pi/30):
         ball_position = self.game_state.ball_position
@@ -142,12 +151,12 @@ class PlaceBall(Tactic):
             Calcule le point situé à  x pixels derrière la position 1 par rapport à la position 2
             :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
             """
-        delta_x = self.target.position.x - self.game_state.ball_position.x
-        delta_y = self.target.position.y - self.game_state.ball_position.y
+        delta_x = self.target.position.x - self.ball_position.x
+        delta_y = self.target.position.y - self.ball_position.y
         theta = np.math.atan2(delta_y, delta_x)
 
-        x = self.game_state.ball_position.x - ball_spacing * np.math.cos(theta)
-        y = self.game_state.ball_position.y - ball_spacing * np.math.sin(theta)
+        x = self.ball_position.x - ball_spacing * np.math.cos(theta)
+        y = self.ball_position.y - ball_spacing * np.math.sin(theta)
 
         player_x = self.player.pose.position.x
         player_y = self.player.pose.position.y

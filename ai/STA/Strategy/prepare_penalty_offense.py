@@ -16,11 +16,11 @@ class PreparePenaltyOffense(Strategy):
         super().__init__(p_game_state)
         our_goal = self.game_state.field.our_goal_pose
 
-        role_to_positions = {Role.FIRST_ATTACK:   Pose.from_values(our_goal.position.x / 8, GameState().const["FIELD_Y_TOP"] * 2 / 3),
-                             Role.SECOND_ATTACK:  Pose.from_values(our_goal.position.x / 8, GameState().const["FIELD_Y_TOP"] / 3),
+        role_to_positions = {Role.FIRST_ATTACK:   Pose.from_values(our_goal.position.x / 8, GameState().field.top * 2 / 3),
+                             Role.SECOND_ATTACK:  Pose.from_values(our_goal.position.x / 8, GameState().field.top / 3),
                              Role.MIDDLE:         Pose.from_values(our_goal.position.x / 8, 0),
-                             Role.FIRST_DEFENCE:  Pose.from_values(our_goal.position.x / 8, GameState().const["FIELD_Y_BOTTOM"] / 3),
-                             Role.SECOND_DEFENCE: Pose.from_values(our_goal.position.x / 8, GameState().const["FIELD_Y_BOTTOM"] * 2 / 3)}
+                             Role.FIRST_DEFENCE:  Pose.from_values(our_goal.position.x / 8, GameState().field.bottom / 3),
+                             Role.SECOND_DEFENCE: Pose.from_values(our_goal.position.x / 8, GameState().field.bottom * 2 / 3)}
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
         self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, penalty_kick=True))

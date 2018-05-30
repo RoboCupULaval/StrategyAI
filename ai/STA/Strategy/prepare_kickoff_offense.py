@@ -19,15 +19,15 @@ class PrepareKickOffOffense(Strategy):
         super().__init__(p_game_state)
 
         # Positions objectifs des joueurs
-        attack_top_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15,
-                                   GameState().const["FIELD_Y_BOTTOM"] * 3 / 5, 0)
-        attack_bottom_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15,
-                                      GameState().const["FIELD_Y_TOP"] * 3 / 5, 0)
-        middle_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 15, 0, 0)
-        defense_top_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                    GameState().const["FIELD_Y_TOP"] / 3, 0)
-        defense_bottom_position = Pose.from_values(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"] / 2,
-                                       GameState().const["FIELD_Y_BOTTOM"] / 3, 0)
+        attack_top_position = Pose.from_values(GameState().field.our_goal_x / 15,
+                                   GameState().field.bottom * 3 / 5, 0)
+        attack_bottom_position = Pose.from_values(GameState().field.our_goal_x / 15,
+                                      GameState().field.top * 3 / 5, 0)
+        middle_position = Pose.from_values(GameState().field.our_goal_x / 15, 0, 0)
+        defense_top_position = Pose.from_values(GameState().field.our_goal_x / 2,
+                                    GameState().field.top / 3, 0)
+        defense_bottom_position = Pose.from_values(GameState().field.our_goal_x / 2,
+                                       GameState().field.bottom / 3, 0)
 
         goalkeeper = self.assigned_roles[Role.GOALKEEPER]
         self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper))
