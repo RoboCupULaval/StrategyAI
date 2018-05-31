@@ -97,7 +97,8 @@ class GoKick(Tactic):
         behind_ball = self.game_state.ball_position - normalize(player_to_target) * (BALL_RADIUS + ROBOT_CENTER_TO_KICKER)
         orientation = (self.target.position - self.game_state.ball_position).angle
 
-        return CmdBuilder().addMoveTo(Pose(behind_ball, orientation)).addKick(self.kick_force).build()
+        return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
+                                      ball_collision=False).addKick(self.kick_force).build()
 
     def validate_kick(self):
         if self.game_state.ball_velocity.norm > 1000 or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
