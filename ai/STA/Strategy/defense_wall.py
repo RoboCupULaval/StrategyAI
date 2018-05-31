@@ -17,8 +17,8 @@ from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
-DEFENSIVE_ROLE = [Role.MIDDLE, Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
-
+DEFENSIVE_ROLE = [Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
+COVER_ROLE = [Role.MIDDLE]
 
 # noinspection PyMethodMayBeStatic,
 class DefenseWall(Strategy):
@@ -31,10 +31,16 @@ class DefenseWall(Strategy):
         # If we can not kick, the attackers are part of the defense wall
         # TODO find a more useful thing to do for the attackers when we are in a no kick state
         self.defensive_role = DEFENSIVE_ROLE.copy()
+        self.cover_role = COVER_ROLE.copy()
         if not can_kick:
-            self.defensive_role += [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
-        self.robots_in_formation = [p for r, p in self.assigned_roles.items() if r in self.defensive_role]
-        self.attackers = [p for r, p in self.assigned_roles.items() if r not in self.defensive_role and r != Role.GOALKEEPER]
+            self.defensive_role += [Role.FIRST_ATTACK]
+            self.cover_role += [Role.SECOND_ATTACK]
+        self.player_to_cover = self.get_player_to_cover()
+        self.robots_in_wall_formation = [p for r, p in self.assigned_roles.items() if r in self.defensive_role]
+        self.robots_in_cover_formation = [p for r, p in self.assigned_roles.items() if r in self.cover_role]
+        self.attackers = [p for r, p in self.assigned_roles.items() if r not in self.defensive_role and
+                          r not in self.cover_role and
+                          r != Role.GOALKEEPER]
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
@@ -49,17 +55,30 @@ class DefenseWall(Strategy):
                 node_position_pass.connect_to(node_go_kick, when=attacker_should_go_kick)
                 node_go_kick.connect_to(node_position_pass, when=attacker_should_not_go_kick)
                 node_go_kick.connect_to(node_go_kick, when=attacker_has_kicked)
+            elif role in self.cover_role:
+                node_align_to_covered_object = self.create_node(role,
+                                                                AlignToDefenseWall(self.game_state,
+                                                                                   player,
+                                                                                   robots_in_formation=self.robots_in_cover_formation,
+                                                                                   object_to_block=self.player_to_cover))
+                node_position_pass = self.create_node(role, PositionForPass(self.game_state,
+                                                                            player,
+                                                                            auto_position=True))
+                node_align_to_covered_object.connect_to(node_position_pass,
+                                                        when=self.game_state.field.is_ball_in_our_goal_area)
             else:
                 node_align_to_defense_wall = \
                     self.create_node(role, AlignToDefenseWall(self.game_state,
                                                               player,
-                                                              robots_in_formation=self.robots_in_formation))
+                                                              robots_in_formation=self.robots_in_wall_formation,
+                                                              object_to_block=GameState().ball))
                 node_position_pass = self.create_node(role, PositionForPass(self.game_state,
                                                                             player,
                                                                             auto_position=True))
 
-                node_align_to_defense_wall.connect_to(node_position_pass, when=self.game_state.field.is_ball_in_our_goal)
-                node_position_pass.connect_to(node_align_to_defense_wall, when=self.game_state.field.is_ball_outside_our_goal)
+                node_align_to_defense_wall.connect_to(node_position_pass, when=self.game_state.field.is_ball_in_our_goal_area)
+                node_position_pass.connect_to(node_align_to_defense_wall, when=self.game_state.field.is_ball_outside_our_goal_area)
+
 
     @classmethod
     def required_roles(cls):
@@ -76,10 +95,10 @@ class DefenseWall(Strategy):
                 }
 
     def should_go_kick(self, player):
-        if self.game_state.field.is_ball_in_our_goal():
+        if self.game_state.field.is_ball_in_our_goal_area():
             return False
         # If no defenser can exit wall to kick
-        for p in self.robots_in_formation:
+        for p in self.robots_in_wall_formation:
             if (p.position - self.game_state.ball.position).norm < FETCH_BALL_ZONE_RADIUS:
                 return False
         # And no attacker is closer
@@ -97,3 +116,11 @@ class DefenseWall(Strategy):
             return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
         else:
             return False
+
+    def get_player_to_cover(self):
+        closest_ennemy_to_ball = closest_players_to_point(GameState().ball_position, our_team=False)
+
+        closest_ennemy_to_our_goal = closest_players_to_point(self.game_state.field.our_goal, our_team=False)
+
+        return closest_ennemy_to_our_goal[0].player if closest_ennemy_to_ball is not closest_ennemy_to_our_goal[0] \
+            else closest_ennemy_to_our_goal[1].player
