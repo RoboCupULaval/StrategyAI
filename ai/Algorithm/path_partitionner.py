@@ -59,7 +59,7 @@ class PathPartitionner:
 
         return path
 
-    def path_planner(self, start, target, avoid_dir=None, depth=0) -> Path:
+    def path_planner(self, start, target, depth=0) -> Path:
 
         if start is target or depth >= RECURSION_LIMIT:
             return Path.from_array(start, target)
@@ -69,14 +69,10 @@ class PathPartitionner:
 
         if not self.is_path_colliding(start, target):
             return Path.from_array(start, target)
-        sub_target_1, avoid_dir_1 = self.next_sub_target(start, target, avoid_dir)
-        sub_target_2, avoid_dir_2 = self.next_sub_target(start, target, avoid_dir)
-        if np.linalg.norm((target-sub_target_1)) < np.linalg.norm(target-sub_target_2):
-            sub_target = sub_target_1
-        else:
-            sub_target = sub_target_2
-        path_1 = self.path_planner(start, sub_target, avoid_dir, depth=depth+1)
-        path_2 = self.path_planner(sub_target, target, avoid_dir, depth=depth+1)
+        sub_target = self.next_sub_target(start, target)
+
+        path_1 = self.path_planner(start, sub_target, depth=depth+1)
+        path_2 = self.path_planner(sub_target, target, depth=depth+1)
 
         return path_1 + path_2
 
@@ -93,7 +89,7 @@ class PathPartitionner:
         obstacles = np.array(self.obstacles)
         return obstacles[is_collision].tolist(), robot_to_obstacle_norm[is_collision]
 
-    def next_sub_target(self, start, target, avoid_dir=None):
+    def next_sub_target(self, start, target):
         collisions, distances = self.find_collisions(start, target)
 
         sub_target = target
@@ -104,6 +100,8 @@ class PathPartitionner:
             len_along_path = np.inner(closest_collision.position - start, segment_direction)
             if len_along_path > 0:
                 avoid_dir = perpendicular(segment_direction)
+                # if np.dot(avoid_dir, segment_direction) < np.dot(-avoid_dir, segment_direction):
+                #     avoid_dir *= -1
                 sub_target_1 = start + segment_direction * len_along_path + avoid_dir * SUB_TARGET_RESOLUTION_FACTOR
                 while not self.is_valid_sub_target(sub_target_1, self.obstacles_position):
                     sub_target_1 += avoid_dir * SUB_TARGET_RESOLUTION_FACTOR
@@ -111,15 +109,15 @@ class PathPartitionner:
                 while not self.is_valid_sub_target(sub_target_2, self.obstacles_position):
                     sub_target_2 -= avoid_dir * SUB_TARGET_RESOLUTION_FACTOR
                 #on maximise l'angle entre les segments pour avoir un path plus rectiligne
-                val_1 = np.dot(sub_target_1-start/np.linalg.norm(sub_target_1-start), (target - sub_target_1)/np.linalg.norm(target - sub_target_1))
-                val_2 = np.dot(sub_target_2 - start / np.linalg.norm(sub_target_2 - start),
+                val_1 = np.dot((sub_target_1-start)/np.linalg.norm(sub_target_1-start),
+                               (target - sub_target_1)/np.linalg.norm(target - sub_target_1))
+                val_2 = np.dot((sub_target_2 - start) / np.linalg.norm(sub_target_2 - start),
                                (target - sub_target_2) / np.linalg.norm(target - sub_target_2))
                 if val_1 > val_2: #le segment 1 est plus aligne avec le path precedant que le segment2
                     sub_target = sub_target_1
                 else:
                     sub_target = sub_target_2
-
-        return sub_target, avoid_dir
+        return sub_target
 
     def is_valid_sub_target(self, sub_target: Position, obstacles: np.ndarray) -> bool:
         dist_sub_2_obs = np.linalg.norm(obstacles - sub_target, axis=1)
