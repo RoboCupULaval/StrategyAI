@@ -118,9 +118,9 @@ class DefenseWall(Strategy):
             return False
 
     def get_player_to_cover(self):
-        closest_ennemy_to_ball = closest_players_to_point(GameState().ball_position, our_team=False)
+        closest_enemy_to_ball = closest_players_to_point(GameState().ball_position, our_team=False)
 
-        closest_ennemy_to_our_goal = closest_players_to_point(self.game_state.field.our_goal, our_team=False)
+        closest_enemy_to_our_goal = closest_players_to_point(self.game_state.field.our_goal, our_team=False)
 
-        return closest_ennemy_to_our_goal[0].player if closest_ennemy_to_ball is not closest_ennemy_to_our_goal[0] \
-            else closest_ennemy_to_our_goal[1].player
+        return closest_enemy_to_our_goal[0].player if closest_enemy_to_ball is not closest_enemy_to_our_goal[0] \
+            else closest_enemy_to_our_goal[1].player
