@@ -45,3 +45,8 @@ class KickForce(Enum):
 class KickType(Enum):
     DIRECT = 0
     CHIP = 1
+
+
+class DribbleSpeed(Enum):
+    STOPPED = 0
+    NORMAL =1

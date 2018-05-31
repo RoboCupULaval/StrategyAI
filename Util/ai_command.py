@@ -6,7 +6,7 @@ from typing import Union
 
 import numpy as np
 
-from Util.constant import KickForce, KickType
+from Util.constant import KickForce, KickType, DribbleSpeed
 from Util.position import Position
 from Util.pose import Pose
 from Util.geometry import closest_point_on_segment, normalize
@@ -16,6 +16,7 @@ AICommand = namedtuple('AICommand', 'target,'
                                     'kick_force,'
                                     'charge_kick,'
                                     'dribbler_active,'
+                                    'dribbler_speed,'
                                     'cruise_speed,'
                                     'end_speed,'
                                     'ball_collision')
@@ -30,6 +31,7 @@ class CmdBuilder:
         self._kick_force = KickForce.NONE
         self._charge_kick = False
         self._dribbler_active = False
+        self._dribbler_speed = DribbleSpeed.NORMAL
         self._cruise_speed = 0
         self._end_speed = 0
         self._ball_collision = True
@@ -59,6 +61,11 @@ class CmdBuilder:
         self._dribbler_active = True
         return self
 
+    def addStopDribbler(self):
+        self._dribbler_active = True
+        self._dribbler_speed = DribbleSpeed.STOPPED
+        return self
+
     def addChargeKicker(self):
         self._charge_kick = True
         return self
@@ -69,6 +76,7 @@ class CmdBuilder:
                          self._kick_force,
                          self._charge_kick,
                          self._dribbler_active,
+                         self._dribbler_speed,
                          self._cruise_speed,
                          self._end_speed,
                          self._ball_collision)

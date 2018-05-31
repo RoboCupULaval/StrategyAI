@@ -8,6 +8,7 @@ EngineCommand = namedtuple('EngineCommand',
                            'kick_type,'
                            'kick_force,'
                            'dribbler_active,'
+                           'dribbler_speed,'
                            'charge_kick,'
                            'target_orientation,'
                            'end_speed,')
