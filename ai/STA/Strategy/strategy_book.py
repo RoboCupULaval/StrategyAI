@@ -84,10 +84,11 @@ class StrategyBook(object):
         return list(self.strategy_book)
 
     @property
-    def strategies_required_roles(self) -> Dict[str, List[str]]:
+    def strategies_roles(self) -> Dict[str, Dict[str, List[str]]]:
         results = {}
         for name, strategy_class in self.strategy_book.items():
-            results[name] = list([r.name for r in strategy_class.required_roles().keys()])
+            results[name] = {"required_roles": list([r.name for r in strategy_class.required_roles().keys()]),
+                             "optional_roles": list([r.name for r in strategy_class.optional_roles().keys()])}
         return results
 
     def get_strategy(self, strategy_name: str):  # -> Strategy: Wrong return type

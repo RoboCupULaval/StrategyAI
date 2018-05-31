@@ -79,8 +79,7 @@ class DefenseWall(Strategy):
         if self.game_state.field.is_ball_in_our_goal():
             return False
         # If no defenser can exit wall to kick
-        for r in self.defensive_role:
-            p = self.assigned_roles[r]
+        for p in self.robots_in_formation:
             if (p.position - self.game_state.ball.position).norm < FETCH_BALL_ZONE_RADIUS:
                 return False
         # And no attacker is closer
