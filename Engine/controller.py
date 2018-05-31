@@ -20,6 +20,7 @@ from Util.geometry import rotate
 from Util.team_color_service import TeamColorService
 from config.config import Config
 
+
 class Controller:
 
     def __init__(self, ui_send_queue: Queue):
@@ -57,15 +58,16 @@ class Controller:
 
             if robot.position_error.norm < 200 and robot.target_speed == 0:
                 cmd = robot.position_regulator.execute(robot)
+                robot.velocity_regulator.reset()
             else:
                 cmd = robot.velocity_regulator.execute(robot)
 
             self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("mm/s",
-                                                                         "robot {}".format(robot.robot_id),
+                                                                         "robot {} cmd speed".format(robot.robot_id),
                                                                          [time.time()],
                                                                          [cmd.norm]))
             self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("mm/s",
-                                                                         "robot_real_s {}".format(robot.robot_id),
+                                                                         "robot {} kallman speed".format(robot.robot_id),
                                                                          [time.time()],
                                                                          [robot.velocity.norm]))
 

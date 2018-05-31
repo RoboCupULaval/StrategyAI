@@ -23,8 +23,7 @@ class Offense_3v3(Strategy):
         role_mapping = {Role.GOALKEEPER: 2, Role.MIDDLE: 4, Role.FIRST_ATTACK: 6}
         self.game_state.map_players_to_roles_by_player_id(role_mapping)
 
-        ourgoal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
-        self.theirgoal = Pose(Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0), 0)
+        their_goal = self.game_state.field.their_goal
 
         roles_to_consider = [Role.MIDDLE, Role.FIRST_ATTACK, Role.GOALKEEPER]
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
@@ -32,13 +31,13 @@ class Offense_3v3(Strategy):
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
 
-        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, ourgoal, penalty_kick=True))
+        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, penalty_kick=True))
 
         for index, player in role_by_robots:
             if player:
                 node_pass = self.create_node(index, PositionForPass(self.game_state, player, auto_position=True,
                                                        robots_in_formation=self.robots))
-                node_go_kick = self.create_node(index, GoKick(self.game_state, player, target=self.theirgoal))
+                node_go_kick = self.create_node(index, GoKick(self.game_state, player, target=their_goal))
 
                 player_is_closest = partial(self.is_closest, player)
                 player_is_not_closest = partial(self.is_not_closest, player)

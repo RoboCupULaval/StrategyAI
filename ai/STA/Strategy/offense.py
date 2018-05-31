@@ -19,11 +19,10 @@ from ai.states.game_state import GameState
 class Offense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
-        our_goal = Pose(Position(GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"], 0), 0)
 
         for role, player in self.assigned_roles.items():
             if role is Role.GOALKEEPER:
-                self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player, our_goal))
+                self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
             else:
                 node_pass = self.create_node(role, PositionForPass(self.game_state, player, auto_position=True))
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, auto_update_target=True))

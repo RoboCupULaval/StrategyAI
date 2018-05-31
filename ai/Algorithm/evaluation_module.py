@@ -24,7 +24,7 @@ def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
 
 
 # noinspection PyUnusedLocal
-def closest_players_to_point(point: Position, our_team=None, robots=None):
+def closest_players_to_point(point: Position, our_team=None):
     # Retourne une liste de tuples (player, distance) en ordre croissant de distance,
     # our_team pour obtenir une liste contenant une équipe en particulier
     list_player = []
@@ -42,10 +42,10 @@ def closest_players_to_point(point: Position, our_team=None, robots=None):
     return list_player
 
 
-def closest_player_to_point(point: Position, our_team=None, robots=None):
+def closest_player_to_point(point: Position, our_team=None):
     # Retourne le player le plus proche,
     # our_team pour obtenir une liste contenant une équipe en particulier
-    return closest_players_to_point(point, our_team, robots)[0]
+    return closest_players_to_point(point, our_team)[0]
 
 
 def is_ball_moving(min_speed=0.1):
@@ -66,7 +66,7 @@ def best_passing_option(passing_player, consider_goal=True):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si but est la meilleure possibilité
 
     score_min = float("inf")
-    goal = Position(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0)
+    goal = Position(GameState().field.their_goal_x, 0)
 
     receiver_id = None
     for p in GameState().our_team.available_players.values():
@@ -189,7 +189,7 @@ def best_position_in_region(player, A, B):
     positions = positions[dists_from_ball > 1000, :]
     dists_from_ball = dists_from_ball[dists_from_ball > 1000]
     scores = line_of_sight_clearance_ball(player, positions, dists_from_ball)
-    our_side = GameState().const["FIELD_OUR_GOAL_X_EXTERNAL"]
+    our_side = GameState().field.our_goal_x
     if abs(A.x - our_side) < abs(B.x - our_side):
         x_closest_to_our_side = A.x
     else:
@@ -206,4 +206,3 @@ def best_position_in_region(player, A, B):
         best_position = Position()
 
     return best_position
-

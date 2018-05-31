@@ -47,7 +47,6 @@ class GameState(metaclass=Singleton):
             raise RuntimeError("No player available with that player_id {}".format(player_id))
         return self.our_team.available_players[player_id].position
 
-
     def clear_roles(self):
         self._role_mapper.clear()
 
@@ -113,6 +112,10 @@ class GameState(metaclass=Singleton):
     @property
     def ball(self) -> Ball:
         return self._field.ball
+
+    @property
+    def field(self) -> Field:
+        return self._field
 
     @property
     def const(self):

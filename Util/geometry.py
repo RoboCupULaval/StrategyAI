@@ -7,8 +7,96 @@ from Util.position import Position
 from typing import cast, Sequence, List
 
 
-def get_angle_between_three_points(start: Position, mid: Position, end: Position) -> float:
-    return abs(wrap_to_pi((mid - start).angle - (end - mid).angle))
+class Line:
+    def __init__(self, p1, p2):
+        self.p1 = p1
+        self.p2 = p2
+
+    @property
+    def direction(self):
+        return normalize(self.p2 - self.p1)
+
+
+class Area:
+    def __init__(self, upper_left, lower_right):
+        assert lower_right.y <= upper_left.y
+        assert lower_right.x >= upper_left.x
+        self.upper_left = upper_left   # -x, +y
+        self.lower_right = lower_right  # +x, -y
+
+    def point_inside(self, p: Position) -> bool:
+        return self.upper_left.x <= p.x <= self.lower_right.x and \
+               self.lower_right.y <= p.y <= self.upper_left.y
+
+    def __contains__(self, item: ["Pose", Position]):
+        if item.__class__.__name__ == "Pose":  # Prevent importing Pose
+            return self.point_inside(item.position)
+        elif isinstance(item, Position):
+            return self.point_inside(item)
+        else:
+            raise ValueError("You can only test if a position or a pose is contained inside the area.")
+
+    @property
+    def top(self):
+        return self.upper_left.y
+
+    @property
+    def bottom(self):
+        return self.lower_right.y
+
+    @property
+    def left(self):
+        return self.upper_left.x
+
+    @property
+    def right(self):
+        return self.lower_right.x
+
+
+def find_bisector_of_triangle(c, a, b):
+    """
+    Where 'c' is the origin of the bisector and the intersection of the bissectrice 'i' is on the segment 'ab'.
+    The angle bae and aci is the same as icb
+    """
+    ab, cb, ca = a-b, c-b, c-a
+    ia = ab * ca.norm / (ca.norm + cb.norm)
+    return a - ia
+
+
+def intersection_between_lines(a1, a2, b1, b2) -> Position:
+    s = np.vstack([a1.array, a2.array, b1.array, b2.array])
+    h = np.hstack((s, np.ones((4, 1))))
+    l1 = np.cross(h[0], h[1])  # first line
+    l2 = np.cross(h[2], h[3])  # second line
+    x, y, z = np.cross(l1, l2)  # point of intersection
+    if z == 0:
+        raise ValueError("Parallel lines")
+    return Position(x / z, y / z)
+
+
+def intersection_line_and_circle(cp: Position, cr: float, lp1: Position, lp2: Position) -> List[Position]:
+    # Based on http://mathworld.wolfram.com/Circle-LineIntersection.html
+    lp1 = lp1.copy() - cp
+    lp2 = lp2.copy() - cp
+    d = lp2 - lp1
+    det = lp1.x * lp2.y - lp2.x * lp1.y
+
+    delta = cr**2 * d.norm**2 - det**2
+    if delta < 0:
+        return []  # No intersection
+
+    x1 = (det * d.y + np.sign(d.y) * d.x * np.sqrt(delta)) / (d.norm**2)
+    y1 = (-det * d.x + abs(d.y) * np.sqrt(delta)) / (d.norm**2)
+    if delta == 0:
+        return [Position(x1, y1) + cp]  # Tangential
+
+    x2 = (det * d.y - np.sign(d.y) * d.x * np.sqrt(delta)) / (d.norm**2)
+    y2 = (-det * d.x - abs(d.y) * np.sqrt(delta)) / (d.norm**2)
+    return [Position(x1, y1) + cp, Position(x2, y2) + cp]
+
+
+def angle_between_three_points(start: Position, mid: Position, end: Position) -> float:
+    return abs(wrap_to_pi((mid - start).angle - (mid - end).angle))
 
 
 def wrap_to_pi(angle: float) -> float:

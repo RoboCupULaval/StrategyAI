@@ -23,14 +23,15 @@ class IndianaJones(Strategy):
         obs_left_role = Role.SECOND_DEFENCE
 
         # Positions objectifs d'Indiana Jones
-        goal_left = (Pose(Position(self.game_state.const["FIELD_OUR_GOAL_X_INTERNAL"], 0), indiana.pose.orientation))
-        goal_right = (Pose(Position(self.game_state.const["FIELD_THEIR_GOAL_X_INTERNAL"], 0), indiana.pose.orientation))
+        FIELD_GOAL_INTERNAL_X = self.game_state.field.our_goal_area.left
+        goal_left  = (Pose(Position(+FIELD_GOAL_INTERNAL_X, 0), indiana.pose.orientation))
+        goal_right = (Pose(Position(-FIELD_GOAL_INTERNAL_X, 0), indiana.pose.orientation))
 
         # Positions objectifs des obstacles
-        y_bottom = self.game_state.const["FIELD_Y_BOTTOM"] + 500
-        y_top = self.game_state.const["FIELD_Y_TOP"] - 500
-        x_left = self.game_state.const["FIELD_X_LEFT"] + 500
-        x_right = self.game_state.const["FIELD_X_RIGHT"] - 500
+        y_bottom = self.game_state.field.bottom + 500
+        y_top = self.game_state.field.top - 500
+        x_left = self.game_state.field.left + 500
+        x_right = self.game_state.field.right - 500
 
         node_go_to_goal_left = self.create_node(indiana_role, GoToPositionPathfinder(self.game_state, indiana, goal_left, cruise_speed=2))
         node_go_to_goal_right = self.create_node(indiana_role, GoToPositionPathfinder(self.game_state, indiana, goal_right, cruise_speed=2))

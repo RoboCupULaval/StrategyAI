@@ -73,7 +73,6 @@ class Coach(Process):
         self.profiling_enabled = False
         self.profiler = None
 
-
     def wait_for_geometry(self):
         self.logger.debug('Waiting for geometry from the Engine.')
         start = time()
@@ -81,7 +80,6 @@ class Coach(Process):
             self.fps_sleep()
         self.game_state.const = self.field
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
-
 
     def run(self) -> None:
         self.wait_for_geometry()

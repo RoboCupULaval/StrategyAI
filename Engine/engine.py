@@ -65,7 +65,7 @@ class Engine(Process):
         self.robot_cmd_sender = RobotCommandSender()
 
         # main engine module
-        self.tracker = Tracker(self.vision_state)
+        self.tracker = Tracker(self.vision_state, self.ui_send_queue)
         self.controller = Controller(self.ui_send_queue)
 
         # fps and limitation

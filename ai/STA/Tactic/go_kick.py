@@ -20,7 +20,7 @@ VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
 
 GO_BEHIND_SPACING = 200
-GRAB_BALL_SPACING = 85
+GRAB_BALL_SPACING = 100
 APPROACH_SPEED = 100
 KICK_DISTANCE = 130
 KICK_SUCCEED_THRESHOLD = 600
@@ -33,7 +33,8 @@ class GoKick(Tactic):
                  target: Pose=Pose(),
                  args: List[str]=None,
                  kick_force: KickForce=KickForce.MEDIUM,
-                 auto_update_target=False):
+                 auto_update_target=False,
+                 go_behind_distance=GRAB_BALL_SPACING*3):
 
         super().__init__(game_state, player, target, args)
         self.current_state = self.kick_charge
@@ -46,10 +47,9 @@ class GoKick(Tactic):
         if self.auto_update_target:
             self._find_best_passing_option()
         self.kick_force = kick_force
-        self.ball_spacing = GRAB_BALL_SPACING
+        self.go_behind_distance = go_behind_distance
         self.tries_flag = 0
         self.grab_ball_tries = 0
-        self.grab_ball_modifier = 1
 
     def kick_charge(self):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
@@ -59,13 +59,12 @@ class GoKick(Tactic):
         return CmdBuilder().addChargeKicker().build()
 
     def go_behind_ball(self):
-        self.ball_spacing = GRAB_BALL_SPACING
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.player.pose.position).angle
         ball_speed = self.game_state.ball.velocity.norm
-        ball_speed_modifier = (ball_speed/100 + 1)
+        ball_speed_modifier = (ball_speed/1000 + 1)
 
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3 * ball_speed_modifier)
+        distance_behind = self.get_destination_behind_ball(self.go_behind_distance * ball_speed_modifier)
 
         if (self.player.pose.position - distance_behind).norm < 50 \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
@@ -84,14 +83,13 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10):
             self.next_state = self.kick
 
-        orientation = (self.target.position - self.game_state.ball_position).angle
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * self.grab_ball_modifier)
+        orientation = (self.target.position - self.player.pose.position).angle
+        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=1,
                                       ball_collision=False).addChargeKicker().build()
 
     def kick(self):
-        self.ball_spacing = GRAB_BALL_SPACING
         self.next_state = self.validate_kick
         self.tries_flag += 1
 
@@ -134,7 +132,7 @@ class GoKick(Tactic):
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
             tentative_target_id = best_passing_option(self.player)
             if tentative_target_id is None:
-                self.target = Pose.from_values(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0, 0)
+                self.target = Pose.from_values(GameState().field.their_goal_x, 0, 0)
             else:
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
 
@@ -142,22 +140,8 @@ class GoKick(Tactic):
 
     def get_destination_behind_ball(self, ball_spacing) -> Position:
         """
-            Calcule le point situé à  x pixels derrière la position 1 par rapport à la position 2
-            :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
-            """
-        delta_x = self.target.position.x - self.game_state.ball_position.x
-        delta_y = self.target.position.y - self.game_state.ball_position.y
-        theta = np.math.atan2(delta_y, delta_x)
+         Compute the point which is at ball_spacing mm behind the ball from the target.
+        """
+        dir_ball_to_target = normalize(self.target.position - self.game_state.ball.position)
 
-        x = self.game_state.ball_position.x - ball_spacing * np.math.cos(theta)
-        y = self.game_state.ball_position.y - ball_spacing * np.math.sin(theta)
-
-        player_x = self.player.pose.position.x
-        player_y = self.player.pose.position.y
-
-        if np.sqrt((player_x - x) ** 2 + (player_y - y) ** 2) < 50:
-            x -= np.math.cos(theta) * 2
-            y -= np.math.sin(theta) * 2
-        destination_position = Position(x, y)
-
-        return destination_position
+        return self.game_state.ball.position - dir_ball_to_target * ball_spacing
