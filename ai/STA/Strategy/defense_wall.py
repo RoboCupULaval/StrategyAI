@@ -35,12 +35,13 @@ class DefenseWall(Strategy):
         if not can_kick:
             self.defensive_role += [Role.FIRST_ATTACK]
             self.cover_role += [Role.SECOND_ATTACK]
-        self.player_to_cover = self.get_player_to_cover()
+
         self.robots_in_wall_formation = [p for r, p in self.assigned_roles.items() if r in self.defensive_role]
         self.robots_in_cover_formation = [p for r, p in self.assigned_roles.items() if r in self.cover_role]
         self.attackers = [p for r, p in self.assigned_roles.items() if r not in self.defensive_role and
                           r not in self.cover_role and
                           r != Role.GOALKEEPER]
+        self.player_to_cover = self.get_player_to_cover()
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
@@ -56,16 +57,20 @@ class DefenseWall(Strategy):
                 node_go_kick.connect_to(node_position_pass, when=attacker_should_not_go_kick)
                 node_go_kick.connect_to(node_go_kick, when=attacker_has_kicked)
             elif role in self.cover_role:
-                node_align_to_covered_object = self.create_node(role,
-                                                                AlignToDefenseWall(self.game_state,
-                                                                                   player,
-                                                                                   robots_in_formation=self.robots_in_cover_formation,
-                                                                                   object_to_block=self.player_to_cover))
-                node_position_pass = self.create_node(role, PositionForPass(self.game_state,
-                                                                            player,
-                                                                            auto_position=True))
-                node_align_to_covered_object.connect_to(node_position_pass,
-                                                        when=self.game_state.field.is_ball_in_our_goal_area)
+                for assignement in self.player_to_cover:
+                    if assignement[0] is player:
+                        node_align_to_covered_object = self.create_node(role,
+                                                                        AlignToDefenseWall(self.game_state,
+                                                                                           assignement[0],
+                                                                                           robots_in_formation=[assignement[0]],
+                                                                                           object_to_block=assignement[1]))
+                        node_position_pass = self.create_node(role, PositionForPass(self.game_state,
+                                                                                    assignement[0],
+                                                                                    auto_position=True))
+                        node_align_to_covered_object.connect_to(node_position_pass,
+                                                                when=self.game_state.field.is_ball_in_our_goal_area)
+                        node_position_pass.connect_to(node_align_to_covered_object,
+                                                      when=self.game_state.field.is_ball_outside_our_goal_area)
             else:
                 node_align_to_defense_wall = \
                     self.create_node(role, AlignToDefenseWall(self.game_state,
@@ -120,7 +125,17 @@ class DefenseWall(Strategy):
     def get_player_to_cover(self):
         closest_enemy_to_ball = closest_players_to_point(GameState().ball_position, our_team=False)
 
-        closest_enemy_to_our_goal = closest_players_to_point(self.game_state.field.our_goal, our_team=False)
+        closest_enemies_to_our_goal = closest_players_to_point(self.game_state.field.our_goal, our_team=False)
 
-        return closest_enemy_to_our_goal[0].player if closest_enemy_to_ball is not closest_enemy_to_our_goal[0] \
-            else closest_enemy_to_our_goal[1].player
+        number_of_covering_players = len(self.robots_in_cover_formation)
+
+        result = []
+        i = 0
+        for enemy in closest_enemies_to_our_goal:
+            if enemy is not closest_enemy_to_ball:
+                result += [(self.robots_in_cover_formation[i], enemy.player)]
+                i += 1
+            if len(result) == number_of_covering_players:
+                break
+
+        return result
