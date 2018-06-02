@@ -53,7 +53,6 @@ def compute_turn_radius(p1, p2, p3, speed, max_deviation=100, acc=MAX_LINEAR_ACC
     radius_at_const_speed = speed ** 2 / acc
     path_angle = wrap_to_pi((p3 - p2).angle - (p1 - p2).angle)
     const_speed_deviation = deviation(radius_at_const_speed, path_angle)
-    print(const_speed_deviation)
     if const_speed_deviation < max_deviation:
         deviation_from_path = const_speed_deviation
         turn_radius = radius_at_const_speed
