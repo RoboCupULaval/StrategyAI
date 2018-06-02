@@ -7,7 +7,7 @@ import pytest
 
 from Util import Position
 from Util.geometry import closest_point_on_line, closest_point_on_segment, closest_point_to_points, \
-    intersection_between_lines, find_bisector_of_triangle, angle_between_three_points, Area
+    intersection_between_lines, find_bisector_of_triangle, angle_between_three_points, Area, random_direction
 from Util.geometry import compare_angle, wrap_to_pi, perpendicular, normalize, are_close, rotate
 
 
@@ -229,4 +229,8 @@ def test_bisector_angle_between_the_intersection_is_the_same():
 
 def test_area_contain_point():
     assert Position(100, 300) in Area(Position(0, 500), Position(500, 0))
+
+
+def test_random_direction_is_random():
+    assert random_direction() != random_direction()
 
