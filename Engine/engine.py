@@ -38,7 +38,8 @@ class Engine(Process):
                  ai_queue: Queue,
                  referee_queue: Queue,
                  ui_send_queue: Queue,
-                 ui_recv_queue: Queue):
+                 ui_recv_queue: Queue,
+                 fps=DEFAULT_FPS):
 
         super().__init__(name=__name__)
 
@@ -64,11 +65,11 @@ class Engine(Process):
         self.robot_cmd_sender = RobotCommandSender()
 
         # main engine module
-        self.tracker = Tracker(self.vision_state)
+        self.tracker = Tracker(self.vision_state, self.ui_send_queue)
         self.controller = Controller(self.ui_send_queue)
 
         # fps and limitation
-        self._fps = Engine.DEFAULT_FPS
+        self._fps = fps
         self._is_fps_locked = Engine.DEFAULT_FPS_LOCK_STATE
         self.frame_count = 0
         self.last_frame_count = 0

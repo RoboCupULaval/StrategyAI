@@ -58,17 +58,18 @@ class Controller:
 
             if robot.position_error.norm < 200 and robot.target_speed == 0:
                 cmd = robot.position_regulator.execute(robot)
+                robot.velocity_regulator.reset()
             else:
                 cmd = robot.velocity_regulator.execute(robot)
 
-            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("m/s",
-                                                                         "robot {}".format(robot.robot_id),
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("mm/s",
+                                                                         "robot {} cmd speed".format(robot.robot_id),
                                                                          [time.time()],
                                                                          [cmd.norm]))
-            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("m",
-                                                                         "robot {}".format(robot.robot_id),
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("mm/s",
+                                                                         "robot {} kallman speed".format(robot.robot_id),
                                                                          [time.time()],
-                                                                         [robot.position.y]))
+                                                                         [robot.velocity.norm]))
 
             commands[robot.robot_id] = self._put_in_robots_referencial(robot, cmd)
 
