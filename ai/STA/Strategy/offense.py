@@ -44,9 +44,12 @@ class Offense(Strategy):
     def required_roles(cls):
         return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
                                                                 Role.FIRST_ATTACK,
-                                                                Role.SECOND_ATTACK,
-                                                                Role.MIDDLE,
-                                                                Role.FIRST_DEFENCE,
+                                                                Role.MIDDLE]
+                }
+
+    @classmethod
+    def optional_roles(cls):
+        return {r: keep_prev_mapping_otherwise_random for r in [Role.FIRST_DEFENCE,
                                                                 Role.SECOND_DEFENCE]
                 }
 

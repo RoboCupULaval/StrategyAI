@@ -39,7 +39,10 @@ class DefenseWall(Strategy):
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
             elif can_kick and player in self.attackers:
-                node_position_pass = self.create_node(role, PositionForPass(self.game_state, player, auto_position=True))
+                node_position_pass = self.create_node(role, PositionForPass(self.game_state,
+                                                                            player,
+                                                                            robots_in_formation=self.attackers,
+                                                                            auto_position=True))
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=their_goal))
 
                 attacker_should_go_kick = partial(self.should_go_kick, player)
@@ -56,6 +59,7 @@ class DefenseWall(Strategy):
                                                               robots_in_formation=self.robots_in_formation))
                 node_position_pass = self.create_node(role, PositionForPass(self.game_state,
                                                                             player,
+                                                                            robots_in_formation=self.robots_in_formation,
                                                                             auto_position=True))
 
                 node_align_to_defense_wall.connect_to(node_position_pass, when=self.game_state.field.is_ball_in_our_goal)
