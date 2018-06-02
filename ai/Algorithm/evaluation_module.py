@@ -2,6 +2,7 @@
 
 from Util.position import Position
 from Util.constant import ROBOT_RADIUS
+from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
 from ai.GameDomainObjects.field import FieldSide
 
@@ -21,6 +22,12 @@ def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
         return closest_player.player
     else:
         return None
+
+
+def player_pointing_towrd_point(player: Player, point: Position, angle_tolereance=90*np.pi/180):
+    if abs((player.pose.orientation - (point - player.position).angle)) < angle_tolereance / 2:
+        return True
+    return False
 
 
 # noinspection PyUnusedLocal

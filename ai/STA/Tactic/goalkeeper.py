@@ -4,6 +4,7 @@ from unittest.suite import _DebugResult
 import numpy as np
 
 from Debug.debug_command_factory import DebugCommandFactory
+from ai.Algorithm.evaluation_module import player_with_ball, player_pointing_towrd_point
 
 __author__ = 'RoboCupULaval'
 
@@ -123,20 +124,37 @@ class GoalKeeper(Tactic):
             return self.go_kick_tactic.exec()
 
     def _best_target_into_goal(self):
-        return find_bisector_of_triangle(self.game_state.ball.position,
-                                         self.GOAL_LINE.p2,
-                                         self.GOAL_LINE.p1)
+
+        enemy_player_with_ball = player_with_ball(min_dist_from_ball=200, our_team=False)
+        if enemy_player_with_ball is not None:
+            if player_pointing_towrd_point(enemy_player_with_ball, self.player.position, angle_tolereance=60*np.pi/180):
+                ball = self.game_state.ball
+                where_ball_enter_goal = intersection_between_lines(self.GOAL_LINE.p1 + Position(0, 100),
+                                                                   self.GOAL_LINE.p2 - Position(0, 100),
+                                                                   ball.position,
+                                                                   ball.position +
+                                                                   Position(1000 * np.cos(enemy_player_with_ball.pose.orientation),
+                                                                            1000 * np.sin(enemy_player_with_ball.pose.orientation)))
+                return where_ball_enter_goal
+            else:
+                return find_bisector_of_triangle(self.game_state.ball.position,
+                                                 self.GOAL_LINE.p2,
+                                                 self.GOAL_LINE.p1)
+        else:
+
+            return find_bisector_of_triangle(self.game_state.ball.position,
+                                             self.GOAL_LINE.p2,
+                                             self.GOAL_LINE.p1)
 
     def debug_cmd(self):
-        # if self.current_state == self.defense:
-        #     return DebugCommandFactory().line(self.game_state.ball.position,
-        #                                         self._best_target_into_goal(),
-        #                                         timeout=0.1)
-        # elif self.current_state == self.intercept and self.last_intersection is not None:
-        #     return DebugCommandFactory().line(self.game_state.ball.position,
-        #                                         self.last_intersection,
-        #                                         timeout=0.1)
-        # else:
-        return []
-
+        if self.current_state == self.defense:
+            return DebugCommandFactory().line(self.game_state.ball.position,
+                                                self._best_target_into_goal(),
+                                                timeout=0.1)
+        elif self.current_state == self.intercept and self.last_intersection is not None:
+            return DebugCommandFactory().line(self.game_state.ball.position,
+                                                self.last_intersection,
+                                                timeout=0.1)
+        else:
+            return []
 
