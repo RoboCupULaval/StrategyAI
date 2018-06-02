@@ -57,15 +57,15 @@ class DefenseWall(Strategy):
                 node_go_kick.connect_to(node_position_pass, when=attacker_should_not_go_kick)
                 node_go_kick.connect_to(node_go_kick, when=attacker_has_kicked)
             elif role in self.cover_role:
-                for assignement in self.player_to_cover:
-                    if assignement[0] is player:
+                for coverer, enemy_to_block in self.player_to_cover:
+                    if coverer is player:
                         node_align_to_covered_object = self.create_node(role,
                                                                         AlignToDefenseWall(self.game_state,
-                                                                                           assignement[0],
-                                                                                           robots_in_formation=[assignement[0]],
-                                                                                           object_to_block=assignement[1]))
+                                                                                           coverer,
+                                                                                           robots_in_formation=[coverer],
+                                                                                           object_to_block=enemy_to_block))
                         node_position_pass = self.create_node(role, PositionForPass(self.game_state,
-                                                                                    assignement[0],
+                                                                                    coverer,
                                                                                     auto_position=True))
                         node_align_to_covered_object.connect_to(node_position_pass,
                                                                 when=self.game_state.field.is_ball_in_our_goal_area)
