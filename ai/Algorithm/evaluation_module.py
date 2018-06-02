@@ -126,8 +126,6 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
         #print(scores_temp)
     return scores
 
-
-
 # noinspection PyPep8Naming
 def trajectory_score(pointA, pointsB, obstacle):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB

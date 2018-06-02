@@ -81,6 +81,7 @@ class Field:
 
         self.goal_line = None  # Point C to D
         self.our_goal_area = None  # Area define by Point E to F
+        self.their_goal_area = None
 
         # Default values, used only for UT
         self.field_length = 4500
@@ -158,6 +159,9 @@ class Field:
 
         self.our_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2,
                                   self.field_lines["RightFieldLeftPenaltyStretch"].p1)
+
+        self.their_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2.flip_x(),
+                                    self.field_lines["RightFieldLeftPenaltyStretch"].p1.flip_x())
 
         self.goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
                               p2=Position(self.our_goal_x, -self.goal_width / 2))
