@@ -1,6 +1,7 @@
 # Under MIT license, see LICENSE.txt
 import logging
 
+from Util import Pose
 from Util.role import Role
 from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
 from ai.STA.Strategy.strategy import Strategy
@@ -24,7 +25,7 @@ class BallPlacement(Strategy):
                                     "The AI does not know where to place the ball")
         for r, p in self.assigned_roles.items():
             if r == Role.FIRST_ATTACK and target is not None:
-                self.create_node(r, PlaceBall(self.game_state, p))
+                self.create_node(r, PlaceBall(self.game_state, p, target=Pose(target)))
             else:
                 self.create_node(r, StayAwayFromBall(self.game_state, p))
 
