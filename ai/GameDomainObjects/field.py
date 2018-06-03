@@ -108,10 +108,13 @@ class Field:
         # Use for strategy conditions
         return self.ball.position not in self.our_goal_area
 
-    def is_outside_wall_limit(self, pos: [Pose, Position]):
+    def is_inside_wall_limit(self, pos: [Pose, Position]):
         bound = self.boundary_width
         return self.left - bound <= pos.x <= self.right + bound and \
                self.bottom - bound <= pos.y <= self.top + bound
+
+    def is_outside_wall_limit(self, pos: [Pose, Position]):
+        return not self.is_inside_wall_limit(pos)
 
     @property
     def ball(self):

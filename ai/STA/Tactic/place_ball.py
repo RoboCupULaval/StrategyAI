@@ -3,7 +3,7 @@
 import time
 from typing import List
 
-from Util.constant import ROBOT_CENTER_TO_KICKER, ROBOT_DIAMETER
+from Util.constant import ROBOT_CENTER_TO_KICKER, ROBOT_DIAMETER, KEEPOUT_DISTANCE_FROM_BALL
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
 from Util.geometry import compare_angle, normalize, random_direction
@@ -11,17 +11,15 @@ from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
-from ai.Algorithm.evaluation_module import is_ball_outside_field
 from config.config import Config
 
 
 GRAB_BALL_SPACING = 20
 GO_BEHIND_SPACING = GRAB_BALL_SPACING * 10
-TOLERANCE_ON_BALL_FINAL_POSITION = 50
+TOLERANCE_ON_BALL_FINAL_POSITION = 50  # Rules only ask for 100mm
 
 BALL_DISPLACEMENT_TO_DETECT_GRABBING = 20
 TIME_TO_WAIT_FOR_BALL_STOP_MOVING = 2  # secondes
-SAFE_DISTANCE_FROM_BALL = ROBOT_DIAMETER * 2
 
 
 # noinspection PyArgumentList
@@ -46,7 +44,7 @@ class PlaceBall(Tactic):
         self.steady_orientation = None
 
     def _fetch_ball(self):
-        if is_ball_outside_field() or self._check_success():
+        if self.game_state.field.is_outside_wall_limit(self.game_state.ball_position) or self._check_success():
             self.next_state = self.halt
         else:
             self.next_state = self.go_behind_ball
@@ -113,12 +111,12 @@ class PlaceBall(Tactic):
                                       ball_collision=False).addStopDribbler().build()
 
     def get_away_from_ball(self):
-        if self._check_success() and self._get_distance_from_ball() > SAFE_DISTANCE_FROM_BALL:
+        if self._check_success() and self._get_distance_from_ball() > KEEPOUT_DISTANCE_FROM_BALL:
             self.next_state = self.halt
             self.status_flag = Flags.SUCCESS
 
         target_to_player = normalize(self.player.position - self.target.position)
-        pos_away_from_ball = 1.2 * SAFE_DISTANCE_FROM_BALL * target_to_player + self.target.position
+        pos_away_from_ball = 1.2 * KEEPOUT_DISTANCE_FROM_BALL * target_to_player + self.target.position
         # Move to a position away from ball
         return CmdBuilder().addMoveTo(Pose(pos_away_from_ball,
                                            self.player.orientation)).addStopDribbler().build()

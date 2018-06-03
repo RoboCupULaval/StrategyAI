@@ -69,15 +69,6 @@ def is_ball_near_wall():
         return True
     return False
 
-
-def is_ball_outside_field():
-
-    if abs(GameState().ball_position.y) > (GameState().field.top + BALL_OUTSIDE_FIELD_BUFFER):
-        return True
-    if abs(GameState().ball_position.x) > (GameState().field.right + BALL_OUTSIDE_FIELD_BUFFER):
-        return True
-    return False
-
 # noinspection PyUnresolvedReferences
 def best_passing_option(passing_player, consider_goal=True):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si but est la meilleure possibilité

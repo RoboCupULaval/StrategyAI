@@ -56,7 +56,8 @@ class PlayExecutor:
 
         self.ui_send_queue.put_nowait(debug_cmds)
 
-        paths = self.pathfinder_module.exec(self.game_state, ai_cmds)
+        strat_obstacles = self.play_state.current_strategy.obstacles()
+        paths = self.pathfinder_module.exec(self.game_state, ai_cmds, strat_obstacles)
 
         engine_cmds = []
         for player, ai_cmd in ai_cmds.items():

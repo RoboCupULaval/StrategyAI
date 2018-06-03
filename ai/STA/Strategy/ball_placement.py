@@ -2,6 +2,7 @@
 import logging
 
 from Util import Pose
+from Util.constant import KEEPOUT_DISTANCE_FROM_BALL
 from Util.role import Role
 from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
 from ai.STA.Strategy.strategy import Strategy
@@ -27,7 +28,7 @@ class BallPlacement(Strategy):
             if r == Role.FIRST_ATTACK and target is not None:
                 self.create_node(r, PlaceBall(self.game_state, p, target=Pose(target)))
             else:
-                self.create_node(r, StayAwayFromBall(self.game_state, p))
+                self.create_node(r, StayAwayFromBall(self.game_state, p, keepout_radius=2*KEEPOUT_DISTANCE_FROM_BALL))
 
     @classmethod
     def required_roles(cls):

@@ -18,13 +18,14 @@ class PathfinderModule:
         self.pathfinder = PathPartitionner()
         self.obstacles = []
 
-    def exec(self, game_state: GameState, ai_cmds: Dict[Player, AICommand]) -> Dict:
+    def exec(self, game_state: GameState, ai_cmds: Dict[Player, AICommand], strat_obstacles) -> Dict:
 
         self.updates_obstacles(game_state)
 
         for player, ai_cmd in ai_cmds.items():
             if ai_cmd.target is not None:
                 player_obstacles = self.player_optionnal_obstacles(game_state, ai_cmd)
+                player_obstacles += strat_obstacles
                 self.paths[player] = self.pathfinder.get_path(start=player.position,
                                                               target=ai_cmd.target.position,
                                                               obstacles=player_obstacles,
@@ -43,7 +44,6 @@ class PathfinderModule:
 
         for other in our_team + enemy_team:
             self.obstacles.append(Obstacle(other.position.array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
-
 
     def player_optionnal_obstacles(self, game_state: GameState, ai_cmd: AICommand) -> List[Obstacle]:
         path_obstacles = self.obstacles.copy()

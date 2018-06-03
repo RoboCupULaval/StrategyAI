@@ -28,6 +28,9 @@ class Strategy(metaclass=ABCMeta):
     def assigned_roles(self):
         return self.game_state.assigned_roles
 
+    def obstacles(self):
+        return []
+
     @classmethod
     def required_roles(cls) -> Dict[Role, Callable]:
         """

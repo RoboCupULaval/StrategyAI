@@ -1,3 +1,4 @@
+import logging
 from abc import abstractmethod, ABCMeta
 from enum import IntEnum
 
@@ -74,6 +75,7 @@ class SimpleAutoPlay(AutoPlay):
     """
     def __init__(self, play_state: PlayState):
         super().__init__(play_state)
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.last_ref_state = RefereeCommand.HALT
 
     # TODO: Check if role assignment works well enough, so we don't need available_players_changed
@@ -122,6 +124,7 @@ class SimpleAutoPlay(AutoPlay):
         next_state = self.current_state
         # On command change
         if self.last_ref_state != ref_state.command:
+            self.logger.info("Switching to referee state {}".format(ref_state.command.name))
             next_state = {
                 RefereeCommand.HALT: SimpleAutoPlayState.HALT,
 
