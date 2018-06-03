@@ -140,15 +140,10 @@ class GoalKeeper(Tactic):
                                                                  self.GOAL_LINE.p1 + Position(0, 100),
                                                                  self.GOAL_LINE.p2 - Position(0, 100))
                 return where_ball_enter_goal
-            else:
-                return find_bisector_of_triangle(self.game_state.ball.position,
-                                                 self.GOAL_LINE.p2,
-                                                 self.GOAL_LINE.p1)
-        else:
 
-            return find_bisector_of_triangle(self.game_state.ball.position,
-                                             self.GOAL_LINE.p2,
-                                             self.GOAL_LINE.p1)
+        return find_bisector_of_triangle(self.game_state.ball.position,
+                                         self.GOAL_LINE.p2,
+                                         self.GOAL_LINE.p1)
 
     def debug_cmd(self):
         if self.current_state == self.defense:
