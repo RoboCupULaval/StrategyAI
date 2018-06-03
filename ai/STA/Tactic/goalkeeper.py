@@ -137,8 +137,8 @@ class GoalKeeper(Tactic):
                                                                    Position(1000 * np.cos(enemy_player_with_ball.pose.orientation),
                                                                             1000 * np.sin(enemy_player_with_ball.pose.orientation)))
                 where_ball_enter_goal = closest_point_on_segment(where_ball_enter_goal,
-                                                                 self.GOAL_LINE.p1 + Position(0, 100),
-                                                                 self.GOAL_LINE.p2 - Position(0, 100))
+                                                                 self.GOAL_LINE.p1,
+                                                                 self.GOAL_LINE.p2)
                 return where_ball_enter_goal
 
         return find_bisector_of_triangle(self.game_state.ball.position,
