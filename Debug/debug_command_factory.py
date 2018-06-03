@@ -5,6 +5,7 @@ from typing import Dict, Tuple, List
 
 from Engine.robot import Robot
 from Util import Pose, Position
+from Util.geometry import Area
 from Util.path import Path
 from Util.role import Role
 from ai.GameDomainObjects.player import Player
@@ -33,7 +34,7 @@ CYAN = Color(42, 161, 152)
 GREEN = Color(133, 153, 0)
 LIGHT_GREEN = Color(0, 255, 0)
 
-DEFAULT_DEBUG_TIMEOUT = 1.0
+DEFAULT_DEBUG_TIMEOUT = 0.1
 
 
 def debug_command(data_type, data, link=None, version='1.0'):
@@ -179,6 +180,10 @@ class DebugCommandFactory:
                                     'color': color.repr(),
                                     'width': width,
                                     'timeout': timeout}, link=link)
+
+    @staticmethod
+    def area(area: Area, color=VIOLET):
+        return list([DebugCommandFactory.line(s.p1, s.p2, color=color) for s in area.segments])
 
     @staticmethod
     def plot_point(y_unit: str, y_label: str, x: List[float], y: List[float]):
