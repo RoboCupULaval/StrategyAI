@@ -86,7 +86,7 @@ class RefereeState:
         self.command = RawRefereeCommand.STOP
         self.stage = Stage.NORMAL_FIRST_HALF_PRE
         self.stage_time_left = 0
-        self.ball_placement_point = Position()
+        self.ball_placement_position = None
         self.team_info = {"ours": dict(new_team_info), "theirs": dict(new_team_info)}
 
         self.blue_team_is_positive = None
@@ -115,8 +115,8 @@ class RefereeState:
         if "designated_position" in referee_info:
             if self.command in [RefereeCommand.BALL_PLACEMENT_US,
                                 RefereeCommand.BALL_PLACEMENT_THEM]:
-                self.ball_placement_point = (referee_info["designated_position"]["x"],
-                                             referee_info["designated_position"]["y"])
+                self.ball_placement_position = Position(referee_info["designated_position"]["x"],
+                                                        referee_info["designated_position"]["y"])
 
         raw_command = RawRefereeCommand(referee_info["command"])
 
