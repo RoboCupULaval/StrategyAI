@@ -83,7 +83,7 @@ class RobotFilter(KalmanFilter):
 
     def predict(self, next_velocity=None):
         if next_velocity is not None:
-            delta_velocity = RobotFilter.rotate(next_velocity, self.orientation) - self.velocity
+            delta_velocity = next_velocity - self.velocity
             self._predict(input_command=delta_velocity)
         else:
             self._predict(input_command=None)
