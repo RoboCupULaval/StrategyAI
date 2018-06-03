@@ -25,7 +25,7 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
     @property
     def info(self):
         return {
-            "selected_strategy": str(self.selected_strategy),
+            "selected_strategy": str(self.play_state.current_strategy),
             "current_state": str(self.current_state)
         }
 

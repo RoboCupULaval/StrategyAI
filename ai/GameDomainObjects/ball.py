@@ -16,7 +16,7 @@ class Ball:
         self.velocity = new_dict['velocity']
 
     def is_mobile(self):
-        IMMOBILE_SPEED = 20.0 # mm/s
+        IMMOBILE_SPEED = 300.0 # mm/s
         return IMMOBILE_SPEED < self.velocity.norm
 
     def is_immobile(self):

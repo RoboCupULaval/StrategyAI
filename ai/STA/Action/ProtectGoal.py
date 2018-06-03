@@ -17,7 +17,7 @@ def ProtectGoal(game_state: GameState, player: Player, is_right_goal: bool=True,
         """
         goalkeeper_position = player.pose.position
         ball_position = game_state.ball_position
-        goal_x = game_state.const["FIELD_OUR_GOAL_X_EXTERNAL"]
+        goal_x = game_state.field.our_goal_x
         goal_position = Position(goal_x, 0)
 
         # Calcul des deux positions extremums entre la balle et le centre du but

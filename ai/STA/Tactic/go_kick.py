@@ -135,7 +135,7 @@ class GoKick(Tactic):
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
             tentative_target_id = best_passing_option(self.player)
             if tentative_target_id is None:
-                self.target = Pose.from_values(GameState().const["FIELD_THEIR_GOAL_X_EXTERNAL"], 0, 0)
+                self.target = Pose.from_values(GameState().field.their_goal_x, 0, 0)
             else:
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
 
@@ -143,22 +143,8 @@ class GoKick(Tactic):
 
     def get_destination_behind_ball(self, ball_spacing) -> Position:
         """
-            Calcule le point situé à  x pixels derrière la position 1 par rapport à la position 2
-            :return: Un tuple (Pose, kick) où Pose est la destination du joueur et kick est nul (on ne botte pas)
-            """
-        delta_x = self.target.position.x - self.game_state.ball_position.x
-        delta_y = self.target.position.y - self.game_state.ball_position.y
-        theta = np.math.atan2(delta_y, delta_x)
+         Compute the point which is at ball_spacing mm behind the ball from the target.
+        """
+        dir_ball_to_target = normalize(self.target.position - self.game_state.ball.position)
 
-        x = self.game_state.ball_position.x - ball_spacing * np.math.cos(theta)
-        y = self.game_state.ball_position.y - ball_spacing * np.math.sin(theta)
-
-        player_x = self.player.pose.position.x
-        player_y = self.player.pose.position.y
-
-        if np.sqrt((player_x - x) ** 2 + (player_y - y) ** 2) < 50:
-            x -= np.math.cos(theta) * 2
-            y -= np.math.sin(theta) * 2
-        destination_position = Position(x, y)
-
-        return destination_position
+        return self.game_state.ball.position - dir_ball_to_target * ball_spacing
