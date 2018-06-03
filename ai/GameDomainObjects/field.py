@@ -102,10 +102,10 @@ class Field:
 
         self._update_field_const()
 
-    def is_ball_in_our_goal(self):
+    def is_ball_in_our_goal_area(self):
         return self.ball.position in self.our_goal_area
 
-    def is_ball_outside_our_goal(self):
+    def is_ball_outside_our_goal_area(self):
         # Use for strategy conditions
         return self.ball.position not in self.our_goal_area
 
