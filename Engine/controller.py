@@ -71,7 +71,7 @@ class Controller:
                                                                          [time.time()],
                                                                          [robot.velocity.norm]))
 
-            commands[robot.robot_id] = self._put_in_robots_referencial(robot, cmd)
+            commands[robot.robot_id] = self._put_in_robots_referential(robot, cmd)
 
         return self.generate_packet(commands)
 
@@ -91,7 +91,7 @@ class Controller:
         return packet
 
     @staticmethod
-    def _put_in_robots_referencial(robot, cmd):
+    def _put_in_robots_referential(robot, cmd):
         if Config()["GAME"]["on_negative_side"]:
             cmd.x *= -1
             cmd.orientation *= -1

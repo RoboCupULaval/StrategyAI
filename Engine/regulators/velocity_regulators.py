@@ -32,7 +32,6 @@ class RealVelocityController(RegulatorBaseClass):
         return Pose(velocity, cmd_orientation)
 
     def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION, offset=20):
-
         if robot.target_speed > robot.current_speed:
             next_speed = robot.current_speed + acc * self.dt * offset
         else:
@@ -56,6 +55,7 @@ class GrSimVelocityController(RealVelocityController):
 
     settings = {'kp': .75, 'ki': 0.05, 'kd': 0}
     offset = 1
+
 
 def is_time_to_break(robot, destination, cruise_speed, acceleration, target_speed):
     # formule physique: v_finale ** 2 = v_init ** 2 - 2 * acceleration * distance_deplacement

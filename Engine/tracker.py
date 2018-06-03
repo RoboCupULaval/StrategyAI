@@ -12,7 +12,7 @@ from Engine.Communication.robot_state import RobotState
 from Engine.filters.ball_kalman_filter import BallFilter
 from Engine.filters.robot_kalman_filter import RobotFilter
 
-from Util.geometry import wrap_to_pi
+from Util.geometry import wrap_to_pi, rotate
 from Util import Pose, Position
 from Util.team_color_service import TeamColorService
 from config.config import Config
@@ -94,17 +94,19 @@ class Tracker:
 
         velocity_commands = [None for _ in range(12)]
         for packet in robot_state.packet:
-            velocity_commands[packet.robot_id] = packet.command.to_array()
+            velocity_commands[packet.robot_id] = packet.command
 
         for robot, velocity_command in zip(self._our_team, velocity_commands):
+            if velocity_command is not None:
+                velocity_command = self._put_in_world_referential(robot, velocity_command).to_array()
             robot.predict(velocity_command)
         for robot in self._their_team:
             robot.predict()
 
-        if self._yellow_team[5]._dt < 0.1:
-            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("s", "robot 5 predict time",
-                                                                         [time.time()],
-                                                                         [self._yellow_team[5]._dt]))
+        # if self._yellow_team[5]._dt < 0.1:
+        #     self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("s", "robot 5 predict time",
+        #                                                                  [time.time()],
+        #                                                                  [self._yellow_team[5]._dt]))
 
         self._ball.predict()
 
@@ -122,6 +124,17 @@ class Tracker:
                 self._ball.reset()
                 self.logger.debug('The ball was undetected for more than %d seconds.',
                                  Tracker.MAX_UNDETECTED_DELAY)
+
+    @staticmethod
+    def _put_in_world_referential(robot, cmd):
+        if Config()["GAME"]["on_negative_side"]:
+            cmd.position = rotate(cmd.position, -np.pi - robot.orientation)
+            cmd.x *= -1
+            cmd.orientation *= -1
+        else:
+            cmd.position = rotate(cmd.position, robot.orientation)
+        return cmd
+
 
     @staticmethod
     def change_reference(detection_frame: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
