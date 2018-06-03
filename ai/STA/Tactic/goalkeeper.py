@@ -51,7 +51,7 @@ class GoalKeeper(Tactic):
 
     def defense(self):
         # Prepare to block the ball
-        if self.game_state.field.is_ball_in_our_goal() and self.game_state.ball.is_immobile():
+        if self.game_state.field.is_ball_in_our_goal_area() and self.game_state.ball.is_immobile():
             self.next_state = self.clear
 
         if self._ball_going_toward_goal():
@@ -79,9 +79,9 @@ class GoalKeeper(Tactic):
 
     def intercept(self):
         # Find the point where the ball will go
-        if not self._ball_going_toward_goal() and not self.game_state.field.is_ball_in_our_goal():
+        if not self._ball_going_toward_goal() and not self.game_state.field.is_ball_in_our_goal_area():
             self.next_state = self.defense
-        elif self.game_state.field.is_ball_in_our_goal() and self.game_state.ball.is_immobile():
+        elif self.game_state.field.is_ball_in_our_goal_area() and self.game_state.ball.is_immobile():
             self.next_state = self.clear
 
         ball = self.game_state.ball
@@ -115,7 +115,7 @@ class GoalKeeper(Tactic):
                                          self.player,
                                          auto_update_target=True,
                                          go_behind_distance=1.2*GRAB_BALL_SPACING) # make it easier
-        if not self.game_state.field.is_ball_in_our_goal():
+        if not self.game_state.field.is_ball_in_our_goal_area():
             self.next_state = self.defense
             self.go_kick_tactic = None
             return Idle
