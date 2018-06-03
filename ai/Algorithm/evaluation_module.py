@@ -1,7 +1,9 @@
 # Under MIT License, see LICENSE.txt
-
+from Util.geometry import Line, angle_between_three_points
 from Util.position import Position
 from Util.constant import ROBOT_RADIUS, BALL_OUTSIDE_FIELD_BUFFER
+from Util.constant import ROBOT_RADIUS
+from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
 from ai.GameDomainObjects.field import FieldSide
 
@@ -21,6 +23,16 @@ def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
         return closest_player.player
     else:
         return None
+
+
+def player_pointing_toward_point(player: Player, point: Position, angle_tolereance=90 * np.pi / 180):
+    return abs((player.pose.orientation - (point - player.position).angle)) < angle_tolereance / 2
+
+
+def player_pointing_toward_segment(player: Player, segment: Line):
+    angle_biscetion = angle_between_three_points(segment.p1, player.position, segment.p2) / 2
+    angle_reference = angle_biscetion + (segment.p2 - player.position).angle
+    return abs(player.pose.orientation - angle_reference) < angle_biscetion
 
 
 # noinspection PyUnusedLocal
@@ -59,15 +71,6 @@ def is_ball_our_side():
         return GameState().ball_position.x > 0
     else:
         return GameState().ball_position.x < 0
-
-
-def is_ball_near_wall():
-
-    if abs(GameState().ball_position.y) > (GameState().field.top - BALL_OUTSIDE_FIELD_BUFFER):
-        return True
-    if abs(GameState().ball_position.x) > (GameState().field.right - BALL_OUTSIDE_FIELD_BUFFER):
-        return True
-    return False
 
 # noinspection PyUnresolvedReferences
 def best_passing_option(passing_player, consider_goal=True):
