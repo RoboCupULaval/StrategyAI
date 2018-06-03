@@ -86,8 +86,7 @@ class Controller:
                             command=cmd,
                             kick_type=self[robot_id].engine_cmd.kick_type,
                             kick_force=self[robot_id].engine_cmd.kick_force,
-                            dribbler_active=self[robot_id].engine_cmd.dribbler_active,
-                            dribbler_speed=self[robot_id].engine_cmd.dribbler_speed,
+                            dribbler_state=self[robot_id].engine_cmd.dribbler_state,
                             charge_kick=self[robot_id].engine_cmd.charge_kick))
         return packet
 

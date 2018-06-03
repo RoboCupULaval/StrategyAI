@@ -6,7 +6,7 @@ from typing import Union
 
 import numpy as np
 
-from Util.constant import KickForce, KickType, DribbleSpeed
+from Util.constant import KickForce, KickType, DribbleState
 from Util.position import Position
 from Util.pose import Pose
 from Util.geometry import closest_point_on_segment, normalize
@@ -15,8 +15,7 @@ AICommand = namedtuple('AICommand', 'target,'
                                     'kick_type,'
                                     'kick_force,'
                                     'charge_kick,'
-                                    'dribbler_active,'
-                                    'dribbler_speed,'
+                                    'dribbler_state,'
                                     'cruise_speed,'
                                     'end_speed,'
                                     'ball_collision')
@@ -30,8 +29,7 @@ class CmdBuilder:
         self._kick_type = None
         self._kick_force = KickForce.NONE
         self._charge_kick = False
-        self._dribbler_active = False
-        self._dribbler_speed = DribbleSpeed.NORMAL
+        self._dribbler_state = DribbleState.AUTOMATIC
         self._cruise_speed = 0
         self._end_speed = 0
         self._ball_collision = True
@@ -58,12 +56,11 @@ class CmdBuilder:
         return self
 
     def addForceDribbler(self):
-        self._dribbler_active = True
+        self._dribbler_state = DribbleState.FORCE_SPIN
         return self
 
     def addStopDribbler(self):
-        self._dribbler_active = True
-        self._dribbler_speed = DribbleSpeed.STOPPED
+        self._dribbler_state = DribbleState.FORCE_STOP
         return self
 
     def addChargeKicker(self):
@@ -75,8 +72,7 @@ class CmdBuilder:
                          self._kick_type,
                          self._kick_force,
                          self._charge_kick,
-                         self._dribbler_active,
-                         self._dribbler_speed,
+                         self._dribbler_state,
                          self._cruise_speed,
                          self._end_speed,
                          self._ball_collision)

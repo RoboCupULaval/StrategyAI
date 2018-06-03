@@ -47,6 +47,7 @@ class KickType(Enum):
     CHIP = 1
 
 
-class DribbleSpeed(Enum):
-    STOPPED = 0
-    NORMAL =1
+class DribbleState(Enum):
+    AUTOMATIC = 0
+    FORCE_STOP = 1
+    FORCE_SPIN = 2

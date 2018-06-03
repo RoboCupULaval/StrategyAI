@@ -119,8 +119,9 @@ class PlaceBall(Tactic):
 
         target_to_player = normalize(self.player.position - self.target.position)
         pos_away_from_ball = 1.2 * SAFE_DISTANCE_FROM_BALL * target_to_player + self.target.position
+        # Move to a position away from ball
         return CmdBuilder().addMoveTo(Pose(pos_away_from_ball,
-                                           self.player.orientation)).build()  # Move to a position away from ball
+                                           self.player.orientation)).addStopDribbler().build()
 
     def _has_ball_quit_dribbler(self):
         return (self.player.pose.position - self.game_state.ball.position).norm > 300
