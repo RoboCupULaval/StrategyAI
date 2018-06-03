@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from Util.geometry import Line, angle_between_three_points
 from Util.position import Position
 from Util.constant import ROBOT_RADIUS
 from ai.GameDomainObjects import Player
@@ -24,10 +24,14 @@ def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
         return None
 
 
-def player_pointing_towrd_point(player: Player, point: Position, angle_tolereance=90*np.pi/180):
-    if abs((player.pose.orientation - (point - player.position).angle)) < angle_tolereance / 2:
-        return True
-    return False
+def player_pointing_toward_point(player: Player, point: Position, angle_tolereance=90 * np.pi / 180):
+    return abs((player.pose.orientation - (point - player.position).angle)) < angle_tolereance / 2
+
+
+def player_pointing_toward_segment(player: Player, segment: Line):
+    angle_biscetion = angle_between_three_points(segment.p1, player.position, segment.p2) / 2
+    angle_reference = angle_biscetion + (segment.p2 - player.position).angle
+    return abs(player.pose.orientation - angle_reference) < angle_biscetion
 
 
 # noinspection PyUnusedLocal
