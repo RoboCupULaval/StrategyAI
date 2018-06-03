@@ -6,7 +6,7 @@ from collections import deque
 
 
 class PID(object):
-    def __init__(self, kp: float, ki: float, kd: float, *, wrap_error=False):
+    def __init__(self, kp: float, ki: float, kd: float, *, wrap_error=False, anti_windup=True):
 
         self.kp = kp
         self.ki = ki
@@ -18,7 +18,7 @@ class PID(object):
 
         self.wrap_error = wrap_error
 
-        self.anti_windup = True
+        self.anti_windup = anti_windup
         self.error_deque = deque()
         self.anti_windup_time = 0.0
         self.anti_windup_max_time = 0.50
