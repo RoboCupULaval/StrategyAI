@@ -73,7 +73,7 @@ class AlignToDefenseWall(Tactic):
         nb_robots = len(self.robots_in_formation)
         wall_segment_length = nb_robots * ROBOT_DIAMETER + GAP_IN_WALL * (nb_robots - 1)
 
-        goal_line = self.game_state.field.goal_line
+        goal_line = self.game_state.field.our_goal_line
         bisection_angle = angle_between_three_points(goal_line.p2, self.object_to_block.position, goal_line.p1)
 
         #  On calcule la distance la plus grande pour les robots du wall, bloque complètement le champs de vision
@@ -109,10 +109,10 @@ class AlignToDefenseWall(Tactic):
                                            self.bisect_inter,
                                            timeout=0.1),
                 DebugCommandFactory().line(self.game_state.ball_position,
-                                           self.game_state.field.goal_line.p1,
+                                           self.game_state.field.our_goal_line.p1,
                                            timeout=0.1),
                 DebugCommandFactory().line(self.game_state.ball_position,
-                                           self.game_state.field.goal_line.p2,
+                                           self.game_state.field.our_goal_line.p2,
                                            timeout=0.1)
                 ]
 
