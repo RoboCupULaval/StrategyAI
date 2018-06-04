@@ -29,8 +29,8 @@ class RotateAroundBall(Tactic):
         self.next_state = self.next_position
         self.target = target
 
-        self.start_time = time.time()
-        self.iter_time = time.time()
+        self.start_time = None
+        self.iter_time = None
 
         self.ball_position = self.game_state.ball_position
         self.target_orientation = (self.target.position - self.ball_position).angle
@@ -39,11 +39,14 @@ class RotateAroundBall(Tactic):
         self.offset_orientation = self.start_orientation
 
         self.position = (self.game_state.ball_position - Position.from_angle(self.offset_orientation) * DISTANCE_FROM_BALL)
-        self.rotation = self.get_direction()
+        self.rotation_sign = self.get_direction()
 
     def next_position(self):
+        if self.start_time is None:
+            self.start_time = time.time()
+            self.iter_time = time.time()
         if time.time() - self.start_time >= self.rotate_time:
-            self.rotation = self.get_direction()
+            self.rotation_sign = self.get_direction()
             if compare_angle(self.target_orientation, (self.ball_position - self.player.position).angle, VALID_DIFF_ANGLE) \
                     and compare_angle(self.player.pose.orientation, self.target_orientation, abs_tol=VALID_DIFF_ANGLE):
                 self.next_state = self.halt
@@ -53,7 +56,7 @@ class RotateAroundBall(Tactic):
             self.switch_rotation()
 
         if (self.player.pose.position - self.position).norm < VALID_DISTANCE:
-            self.offset_orientation += DIFF_ANGLE * self.rotation
+            self.offset_orientation += DIFF_ANGLE * self.rotation_sign
             self.position = (self.game_state.ball_position - Position.from_angle(self.offset_orientation) * DISTANCE_FROM_BALL)
 
         orientation = self.offset_orientation if time.time() - self.start_time < self.rotate_time-1.5 else self.target_orientation
@@ -62,8 +65,8 @@ class RotateAroundBall(Tactic):
                                       ball_collision=False).build()
 
     def switch_rotation(self):
-        self.rotation *= -1
-        self.offset_orientation += 2 * DIFF_ANGLE * self.rotation
+        self.rotation_sign *= -1
+        self.offset_orientation += 2 * DIFF_ANGLE * self.rotation_sign
 
     def get_direction(self):
         return np.sign(find_signed_delta_angle(self.target_orientation, self.offset_orientation))
