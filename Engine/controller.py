@@ -40,7 +40,12 @@ class Controller:
         self.timestamp = track_frame['timestamp']
         our_team_color = str(TeamColorService().our_team_color)
 
+        for robot in self:
+            robot.is_active = False
+
         for robot in track_frame[our_team_color]:
+
+            self[robot['id']].is_active = True
             self[robot['id']].pose = robot['pose']
             self[robot['id']].velocity = robot['velocity']
 
@@ -51,9 +56,11 @@ class Controller:
 
     def execute(self) -> RobotState:
         commands = {}
-        active_robots = [robot for robot in self if robot.pose is not None and robot.raw_path is not None]
+        active_robots = [robot for robot in self if robot.is_active]
 
         for robot in active_robots:
+            if robot.raw_path is None:
+                continue
             robot.path, robot.target_speed = path_smoother(robot)
 
             if robot.position_error.norm < 200 and robot.target_speed == 0:
