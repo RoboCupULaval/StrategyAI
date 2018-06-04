@@ -69,6 +69,7 @@ class DefenseWall(Strategy):
                                                                                            object_to_block=enemy_to_block))
                         node_position_pass = self.create_node(role, PositionForPass(self.game_state,
                                                                                     coverer,
+                                                                                    robots_in_formation=self.robots_in_cover_formation,
                                                                                     auto_position=True))
                         node_align_to_covered_object.connect_to(node_position_pass,
                                                                 when=self.game_state.field.is_ball_in_our_goal_area)
@@ -82,7 +83,7 @@ class DefenseWall(Strategy):
                                                               object_to_block=GameState().ball))
                 node_position_pass = self.create_node(role, PositionForPass(self.game_state,
                                                                             player,
-                                                                            robots_in_formation=self.robots_in_formation,
+                                                                            robots_in_formation=self.robots_in_wall_formation,
                                                                             auto_position=True))
 
                 node_align_to_defense_wall.connect_to(node_position_pass, when=self.game_state.field.is_ball_in_our_goal_area)
