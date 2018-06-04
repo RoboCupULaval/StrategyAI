@@ -11,7 +11,7 @@ from Util.path import Path
 
 MIN_PATH_LENGTH = 250  # mm
 RECURSION_LIMIT = 3
-SUB_TARGET_RESOLUTION_FACTOR = 100
+SUB_TARGET_RESOLUTION_FACTOR = 30
 ELLIPSE_HALF_WIDTH = 1000
 
 
@@ -164,8 +164,6 @@ class PathPartitionner:
             self.old_path.target = target
             self.old_path.points[-1] = target
             return self.old_path
-        elif distance_from_old_target < 200:
-            return self.old_path + self.path_planner(self.old_path.target.array, target.array)
         else:
             return self.path_planner(start.array, target.array)
 

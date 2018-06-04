@@ -11,7 +11,7 @@ from config.config import Config
 
 class RealVelocityController(RegulatorBaseClass):
 
-    settings = {'kp': 1, 'ki': 0.4, 'kd': 0.0}
+    settings = {'kp': 2, 'ki': 0.4, 'kd': 0.0}
     offset = 1
 
     def __init__(self):
