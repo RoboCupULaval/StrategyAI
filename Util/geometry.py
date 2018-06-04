@@ -16,6 +16,9 @@ class Line:
     def direction(self):
         return normalize(self.p2 - self.p1)
 
+    @property
+    def length(self):
+        return (self.p2 - self.p1).norm
 
 class Area:
     def __init__(self, upper_left, lower_right):

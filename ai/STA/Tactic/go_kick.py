@@ -128,11 +128,13 @@ class GoKick(Tactic):
 
     def _find_best_passing_option(self):
         assignation_delay = (time.time() - self.target_assignation_last_time)
-        print('end', player_covered_from_goal(self.player))
+        scoring_target = player_covered_from_goal(self.player)
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
             tentative_target_id = best_passing_option(self.player)
-            if tentative_target_id is None:
-                self.target = Pose.from_values(GameState().field.their_goal_x, 0, 0)
+            if scoring_target is not None:
+                self.target = Pose(scoring_target, 0)
+            elif tentative_target_id is None:
+                self.target = Pose(self.game_state.field.their_goal, 0)
             else:
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
 

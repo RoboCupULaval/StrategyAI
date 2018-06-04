@@ -27,7 +27,6 @@ class FieldLineSegment(Line):
     def __init__(self, line: Dict):
         self.p1 = Position.from_dict(line["p1"])
         self.p2 = Position.from_dict(line["p2"])
-        self.length = (self.p2 - self.p1).norm
         self.thickness = line["thickness"]
 
 

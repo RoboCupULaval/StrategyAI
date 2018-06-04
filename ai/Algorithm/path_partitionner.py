@@ -61,8 +61,6 @@ class PathPartitionner:
         else:
             path = Path(start, target)
 
-
-
         return path
 
     def path_planner(self, start, target, depth=0) -> Path:
