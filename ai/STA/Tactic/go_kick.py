@@ -49,12 +49,24 @@ class GoKick(Tactic):
         self.kick_force = kick_force
         self.go_behind_distance = go_behind_distance
         self.tries_flag = 0
-        self.grab_ball_tries = 0
 
     def kick_charge(self):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
-            if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10):
+            ball_speed = self.game_state.ball.velocity.norm
+            ball_speed_modifier = (ball_speed / 1000 + 1)
+            effective_ball_spacing = GRAB_BALL_SPACING * 3 * ball_speed_modifier
+            distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3 * ball_speed_modifier)
+            orientation = (self.target.position - self.game_state.ball_position).angle
+
+            vec_dist_behind_to_ball = -normalize(self.target.position - self.game_state.ball.position)
+            alignement_behind = np.dot(vec_dist_behind_to_ball.array,
+                                       (self.player.position - self.game_state.ball_position).array)
+            if effective_ball_spacing/4 < alignement_behind < effective_ball_spacing \
+                    and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
                 self.next_state = self.grab_ball
+                if self._get_distance_from_ball() < KICK_DISTANCE:
+                    self.next_state = self.kick
+
             else:
                 self.next_state = self.go_behind_ball
             self.cmd_last_time = time.time()
@@ -66,10 +78,15 @@ class GoKick(Tactic):
         orientation = (self.target.position - self.game_state.ball_position).angle
         ball_speed = self.game_state.ball.velocity.norm
         ball_speed_modifier = (ball_speed/1000 + 1)
+        effective_ball_spacing = GRAB_BALL_SPACING * 3 * ball_speed_modifier
 
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3 * ball_speed_modifier)
+        distance_behind = self.get_destination_behind_ball(effective_ball_spacing)
+        vec_dist_behind_to_ball = -normalize(self.target.position - self.game_state.ball.position)
+        alignement_behind = np.dot(vec_dist_behind_to_ball.array,
+                                   (self.player.position - self.game_state.ball_position).array)
 
-        if (self.player.pose.position - distance_behind).norm < 50 \
+
+        if effective_ball_spacing/4 < alignement_behind < effective_ball_spacing \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
             self.next_state = self.grab_ball
         else:
@@ -83,7 +100,7 @@ class GoKick(Tactic):
                                       ball_collision=True).build()
 
     def grab_ball(self):
-        if self._get_distance_from_ball() < (KICK_DISTANCE + self.grab_ball_tries * 10):
+        if self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
 
         orientation = (self.target.position - self.game_state.ball_position).angle
