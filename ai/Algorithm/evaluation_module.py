@@ -1,7 +1,8 @@
 # Under MIT License, see LICENSE.txt
-
+from Util.geometry import Line, angle_between_three_points
 from Util.position import Position
 from Util.constant import ROBOT_RADIUS
+from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
 from ai.GameDomainObjects.field import FieldSide
 
@@ -21,6 +22,16 @@ def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
         return closest_player.player
     else:
         return None
+
+
+def player_pointing_toward_point(player: Player, point: Position, angle_tolereance=90 * np.pi / 180):
+    return abs((player.pose.orientation - (point - player.position).angle)) < angle_tolereance / 2
+
+
+def player_pointing_toward_segment(player: Player, segment: Line):
+    angle_biscetion = angle_between_three_points(segment.p1, player.position, segment.p2) / 2
+    angle_reference = angle_biscetion + (segment.p2 - player.position).angle
+    return abs(player.pose.orientation - angle_reference) < angle_biscetion
 
 
 # noinspection PyUnusedLocal
@@ -46,6 +57,10 @@ def closest_player_to_point(point: Position, our_team=None):
     # Retourne le player le plus proche,
     # our_team pour obtenir une liste contenant une équipe en particulier
     return closest_players_to_point(point, our_team)[0]
+
+
+def is_ball_moving(min_speed=0.1):
+    return GameState().ball_velocity.norm > min_speed
 
 
 # noinspection PyUnresolvedReferences
@@ -122,8 +137,6 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
         #print(scores_temp)
     return scores
 
-
-
 # noinspection PyPep8Naming
 def trajectory_score(pointA, pointsB, obstacle):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
@@ -180,10 +193,10 @@ def best_position_in_region(player, A, B):
             positions += [Position(x_point, y_point).array]
     positions = np.stack(positions)
     # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
-    dists_from_ball = np.sqrt(((positions - ball_position.array) *
+    dists_from_ball_raw = np.sqrt(((positions - ball_position.array) *
                                (positions - ball_position.array)).sum(axis=1))
-    positions = positions[dists_from_ball > 1000, :]
-    dists_from_ball = dists_from_ball[dists_from_ball > 1000]
+    positions = positions[dists_from_ball_raw > 1000, :]
+    dists_from_ball = dists_from_ball_raw[dists_from_ball_raw > 1000]
     scores = line_of_sight_clearance_ball(player, positions, dists_from_ball)
     our_side = GameState().field.our_goal_x
     if abs(A.x - our_side) < abs(B.x - our_side):
