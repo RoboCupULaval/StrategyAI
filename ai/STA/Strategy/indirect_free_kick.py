@@ -20,11 +20,15 @@ class IndirectFreeKick(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
+        formation = [p for r, p in self.assigned_roles.items() if p != Role.GOALKEEPER]
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
             else:
-                node_pass = self.create_node(role, PositionForPass(self.game_state, player, auto_position=True))
+                node_pass = self.create_node(role, PositionForPass(self.game_state,
+                                                                   player,
+                                                                   robots_in_formation=formation,
+                                                                   auto_position=True))
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, auto_update_target=True))
 
                 player_is_closest = partial(self.is_closest, player)
