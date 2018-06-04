@@ -14,7 +14,6 @@ from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
 class BallPlacement(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
-        self.logger = logging.getLogger(self.__class__.__name__)
 
         target = None
         if self.game_state.last_ref_state is None:
