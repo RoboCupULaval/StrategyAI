@@ -56,7 +56,7 @@ class Controller:
         for robot in active_robots:
             robot.path, robot.target_speed = path_smoother(robot)
 
-            if robot.position_error.norm < 200 and robot.target_speed == 0:
+            if robot.position_error.norm < 100 and robot.target_speed == 0:
                 cmd = robot.position_regulator.execute(robot)
                 robot.velocity_regulator.reset()
             else:

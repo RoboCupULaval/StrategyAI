@@ -54,15 +54,16 @@ class GoKick(Tactic):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:
             ball_speed = self.game_state.ball.velocity.norm
             ball_speed_modifier = (ball_speed / 1000 + 1)
-            effective_ball_spacing = GRAB_BALL_SPACING * 3 * ball_speed_modifier
-            distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * 3 * ball_speed_modifier)
+
             orientation = (self.target.position - self.game_state.ball_position).angle
 
             vec_dist_behind_to_ball = -normalize(self.target.position - self.game_state.ball.position)
             alignement_behind = np.dot(vec_dist_behind_to_ball.array,
-                                       (self.player.position - self.game_state.ball_position).array)
-            if effective_ball_spacing/4 < alignement_behind < effective_ball_spacing \
-                    and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
+                                       (normalize(self.player.position - self.game_state.ball_position)).array)
+            dist_from_ball = (self.player.position - self.game_state.ball_position).norm
+
+            if 0.1 < alignement_behind \
+                    and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1 * dist_from_ball/1000):
                 self.next_state = self.grab_ball
                 if self._get_distance_from_ball() < KICK_DISTANCE:
                     self.next_state = self.kick
@@ -81,19 +82,14 @@ class GoKick(Tactic):
         effective_ball_spacing = GRAB_BALL_SPACING * 3 * ball_speed_modifier
 
         distance_behind = self.get_destination_behind_ball(effective_ball_spacing)
-        vec_dist_behind_to_ball = -normalize(self.target.position - self.game_state.ball.position)
-        alignement_behind = np.dot(vec_dist_behind_to_ball.array,
-                                   (self.player.position - self.game_state.ball_position).array)
 
-
-        if effective_ball_spacing/4 < alignement_behind < effective_ball_spacing \
+        if (self.player.pose.position - distance_behind).norm < 50 \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
             if self.auto_update_target:
                 self._find_best_passing_option()
-        # ball_collision = self.tries_flag == 0
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=2,
                                       end_speed=0,
