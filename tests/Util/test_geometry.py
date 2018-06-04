@@ -7,7 +7,8 @@ import pytest
 
 from Util import Position
 from Util.geometry import closest_point_on_line, closest_point_on_segment, closest_point_to_points, \
-    intersection_between_lines, find_bisector_of_triangle, angle_between_three_points, Area, random_direction
+    intersection_between_lines, find_bisector_of_triangle, angle_between_three_points, Area, \
+    random_direction, intersection_between_segments
 from Util.geometry import compare_angle, wrap_to_pi, perpendicular, normalize, are_close, rotate
 
 
@@ -234,3 +235,16 @@ def test_area_contain_point():
 def test_random_direction_is_random():
     assert random_direction() != random_direction()
 
+
+ANOTHER_LINE = [Position(0, 2), Position(0, 4)]
+def test_intersection_segment_when_a_line_does_not_touch_another_line():
+    assert intersection_between_segments(A_LINE[0], A_LINE[1], ANOTHER_LINE[0], ANOTHER_LINE[1]) is None
+
+
+def test_intersection_segment_when_a_line_intersect_a_perpendicular_line():
+    assert Position(0, 0) == intersection_between_segments(A_LINE[0], A_LINE[1], A_LINE_PERP[0], A_LINE_PERP[1])
+
+A_PARA_LINE = [Position(-1, 0), Position(1, 0)]
+ANOTHER_PARA_LINE = [Position(-1, 1), Position(1, 1)]
+def test_intersection_segment_when_two_paralle_lines():
+    assert intersection_between_segments(A_PARA_LINE[0], A_PARA_LINE[1], ANOTHER_PARA_LINE[0], ANOTHER_PARA_LINE[1]) is None

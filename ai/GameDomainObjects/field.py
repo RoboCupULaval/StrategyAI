@@ -1,7 +1,7 @@
 import copy
 import logging
 from enum import Enum
-from typing import Dict
+from typing import Dict, Union
 
 from Util import Position, Pose
 from Util.geometry import Area, Line
@@ -81,6 +81,7 @@ class Field:
 
         self.goal_line = None  # Point C to D
         self.our_goal_area = None  # Area define by Point E to F
+        self.their_goal_area = None
 
         # Default values, used only for UT
         self.field_length = 4500
@@ -162,6 +163,9 @@ class Field:
         self.our_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2,
                                   self.field_lines["RightFieldLeftPenaltyStretch"].p1)
 
+        self.their_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2.flip_x(),
+                                    self.field_lines["RightFieldLeftPenaltyStretch"].p1.flip_x())
+
         self.goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
                               p2=Position(self.our_goal_x, -self.goal_width / 2))
 
@@ -186,7 +190,7 @@ class Field:
     def their_goal_x(self):
         return self.left
 
-    def __contains__(self, item: [Pose, Position]):
+    def __contains__(self, item: Union[Pose, Position]):
         return self.left <= item.x <= self.right and \
                self.bottom <= item.y <= self.top
 
