@@ -44,6 +44,7 @@ class Controller:
             robot.is_active = False
 
         for robot in track_frame[our_team_color]:
+
             self[robot['id']].is_active = True
             self[robot['id']].pose = robot['pose']
             self[robot['id']].velocity = robot['velocity']
