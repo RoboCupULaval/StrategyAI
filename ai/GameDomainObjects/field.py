@@ -79,7 +79,7 @@ class Field:
         self.their_goal = None  # Point B
         self.their_goal_pose = None
 
-        self.goal_line = None  # Point C to D
+        self.our_goal_line = None  # Point C to D
         self.our_goal_area = None  # Area define by Point E to F
 
         # Default values, used only for UT
@@ -159,8 +159,10 @@ class Field:
         self.our_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2,
                                   self.field_lines["RightFieldLeftPenaltyStretch"].p1)
 
-        self.goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
-                              p2=Position(self.our_goal_x, -self.goal_width / 2))
+        self.our_goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
+                                  p2=Position(self.our_goal_x, -self.goal_width / 2))
+        self.their_goal_line = Line(p1=Position(self.their_goal_x, +self.goal_width / 2),
+                                    p2=Position(self.their_goal_x, -self.goal_width / 2))
 
     def _fix_ulaval_field_line(self, field):
         # The penalty x y is point E in the sketch

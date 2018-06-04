@@ -170,3 +170,12 @@ def closest_points_from_points(point: Position, points: Sequence[Position]) -> L
 def distance_from_points(point: Position, points: Sequence[Position]) -> List[float]:
     points_array = np.array([p.array for p in points])
     return cast(List, np.linalg.norm(points_array - point.array).tolist())
+
+
+def find_gaps_between_angles(angles: List[tuple], previous_angles=None, current_step=0):
+
+    if angles[current_step][1]>angles[1][1] and angles[0][0] < angles[1][0]:
+        del angles[1]
+        find_gaps_between_angles(angles)
+
+    return 0
