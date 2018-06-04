@@ -42,10 +42,9 @@ class GameState(metaclass=Singleton):
                 self._ball.update(game_state['balls'][0])
 
     # FIXME
-    def get_player_position(self, player_id):
-        if player_id not in self.our_team.available_players:
-            raise RuntimeError("No player available with that player_id {}".format(player_id))
-        return self.our_team.available_players[player_id].position
+    def get_player_position(self, player_id, our_team=True):
+        player = self.get_player_by_id(player_id, our_team)
+        return player.position
 
     def clear_roles(self):
         self._role_mapper.clear()
@@ -66,6 +65,16 @@ class GameState(metaclass=Singleton):
         for r, p in self._role_mapper.roles_translation.items():
             if p is not None and p.id == player_id:
                 return r
+
+    def get_player_by_id(self, player_id, our_team=True):
+        if our_team:
+            if player_id not in self.our_team.available_players:
+                raise RuntimeError("No player available with that player_id {}".format(player_id))
+            return self.our_team.available_players[player_id]
+        else:
+            if player_id not in self.enemy_team.available_players:
+                raise RuntimeError("No player available with that player_id {}".format(player_id))
+            return self.enemy_team.available_players[player_id]
 
     def map_players_to_roles_by_player_id(self, mapping_by_player_id):
         try:

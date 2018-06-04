@@ -10,6 +10,7 @@ from Util import Pose, Position
 from Util.geometry import perpendicular, normalize, find_bisector_of_triangle, angle_between_three_points, Line
 
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS, ROBOT_DIAMETER
+from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
 from Util.ai_command import Idle, CmdBuilder, MoveTo
@@ -30,9 +31,12 @@ class AlignToDefenseWall(Tactic):
     def __init__(self, game_state: GameState,
                  player: Player,
                  args: Optional[List[str]]=None,
-                 robots_in_formation: Optional[List[Player]]=None):
+                 robots_in_formation: Optional[List[Player]]=None,
+                 object_to_block=None):
         super().__init__(game_state, player, args=args)
-
+        if object_to_block is None:
+            object_to_block = GameState().ball
+        self.object_to_block = object_to_block
         if robots_in_formation is None:
             self.robots_in_formation = [player]
         else:
@@ -69,32 +73,31 @@ class AlignToDefenseWall(Tactic):
         nb_robots = len(self.robots_in_formation)
         wall_segment_length = nb_robots * ROBOT_DIAMETER + GAP_IN_WALL * (nb_robots - 1)
 
-        ball_position = self.game_state.ball_position
         goal_line = self.game_state.field.goal_line
-        bisection_angle = angle_between_three_points(goal_line.p2, ball_position, goal_line.p1)
+        bisection_angle = angle_between_three_points(goal_line.p2, self.object_to_block.position, goal_line.p1)
 
         #  On calcule la distance la plus grande pour les robots du wall, bloque complètement le champs de vision
-        ball_to_center_formation_dist = wall_segment_length / tan(bisection_angle)
+        object_to_center_formation_dist = wall_segment_length / tan(bisection_angle)
 
-        self.bisect_inter = find_bisector_of_triangle(ball_position, goal_line.p1, goal_line.p2)
-        vec_ball_to_goal_line_bisect = self.bisect_inter - ball_position
+        self.bisect_inter = find_bisector_of_triangle(self.object_to_block.position, goal_line.p1, goal_line.p2)
+        vec_object_to_goal_line_bisect = self.bisect_inter - self.object_to_block.position
 
         # The penalty zone used to be a circle and thus really easy to handle, but now it's a rectangle...
         # It easier to first create the smallest circle that fit the rectangle.
         min_radius_over_penality_zone = ROBOT_RADIUS + (self.game_state.field.our_goal_area.upper_left - self.game_state.field.our_goal).norm
-        ball_to_center_formation_dist = min(vec_ball_to_goal_line_bisect.norm - min_radius_over_penality_zone,
-                                            ball_to_center_formation_dist)
+        object_to_block_to_center_formation_dist = min(vec_object_to_goal_line_bisect.norm - min_radius_over_penality_zone,
+                                                       object_to_center_formation_dist)
 
-        self.center_formation = ball_to_center_formation_dist * normalize(vec_ball_to_goal_line_bisect) + ball_position
+        self.center_formation = object_to_block_to_center_formation_dist * normalize(vec_object_to_goal_line_bisect) + self.object_to_block.position
 
-        half_wall_segment = 0.5 * wall_segment_length * perpendicular(normalize(vec_ball_to_goal_line_bisect))
+        half_wall_segment = 0.5 * wall_segment_length * perpendicular(normalize(vec_object_to_goal_line_bisect))
         self.wall_segment = Line(self.center_formation + half_wall_segment,
                                  self.center_formation - half_wall_segment)
 
     def position_on_wall_segment(self):
         idx = self.player_number_in_formation
         length = ROBOT_RADIUS + idx * (ROBOT_DIAMETER + GAP_IN_WALL)
-        return self.wall_segment.p1 + self.wall_segment.normalize * length
+        return self.wall_segment.p1 + self.wall_segment.direction * length
 
     def debug_cmd(self):
         if self.wall_segment is None or self.player_number_in_formation != 0:
@@ -115,12 +118,12 @@ class AlignToDefenseWall(Tactic):
 
     def main_state(self):
         self.compute_wall_segment()
-        if self.game_state.field.is_ball_in_our_goal():
+        if self.game_state.field.is_ball_in_our_goal_area():
             return Idle  # We must not block the goalkeeper
-        elif self._should_ball_be_kick_by_wall() and self._is_closest(self.player):
+        elif self._should_ball_be_kick_by_wall() and self._is_closest_not_goaler(self.player):
             self.next_state = self.go_kick
         dest = self.position_on_wall_segment()
-        dest_orientation = (self.game_state.ball_position - dest).angle
+        dest_orientation = (self.object_to_block.position - dest).angle
         return MoveTo(Pose(dest,
                            dest_orientation))
 
@@ -129,7 +132,7 @@ class AlignToDefenseWall(Tactic):
         if self.go_kick_tactic is None:
             self.go_kick_tactic = GoKick(self.game_state, self.player, target=self.game_state.field.their_goal_pose)
 
-        if not self._should_ball_be_kick_by_wall() or self.game_state.field.is_ball_in_our_goal():
+        if not self._should_ball_be_kick_by_wall() or self.game_state.field.is_ball_in_our_goal_area():
             self.go_kick_tactic = None
             self.next_state = self.main_state
             return Idle
@@ -139,6 +142,11 @@ class AlignToDefenseWall(Tactic):
     def _should_ball_be_kick_by_wall(self):
         return (self.position_on_wall_segment() - self.game_state.ball.position).norm < FETCH_BALL_ZONE_RADIUS
 
-    def _is_closest(self, player):
-        return player == closest_players_to_point(GameState().ball_position, our_team=True)[0].player
+    def _is_closest_not_goaler(self, player):
+        closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
+        if player == closest_players[0].player:
+            return True
+        return closest_players[0].player == self.game_state.get_player_by_role(Role.GOALKEEPER) \
+               and player == closest_players[1].player
+
 

@@ -4,7 +4,7 @@ import math as m
 import numpy as np
 
 from Util.position import Position
-from typing import cast, Sequence, List
+from typing import cast, Sequence, List, Union
 
 
 class Line:
@@ -13,18 +13,61 @@ class Line:
         self.p2 = p2
 
     @property
-    def normalize(self):
+    def direction(self):
         return normalize(self.p2 - self.p1)
 
 
 class Area:
-    def __init__(self, upper_left, lower_right):
-        self.upper_left = upper_left   # -x, +y
-        self.lower_right = lower_right  # +x, -y
+    def __init__(self, a, b):
+        neg_x, pos_x = min(a.x, b.x), max(a.x, b.x)
+        neg_y, pos_y = min(a.y, b.y), max(a.y, b.y)
+        self.upper_left = Position(neg_x, pos_y)
+        self.upper_right = Position(pos_x, pos_y)
+        self.lower_right = Position(pos_x, neg_y)
+        self.lower_left = Position(neg_x, neg_y)
 
     def point_inside(self, p: Position) -> bool:
-        return self.upper_left.x <= p.x <= self.lower_right.x and \
-               self.lower_right.y <= p.y <= self.upper_left.y
+        return self.left <= p.x <= self.right and \
+               self.bottom <= p.y <= self.top
+
+    def __contains__(self, item: Union["Pose", Position]):
+        if item.__class__.__name__ == "Pose":  # Prevent importing Pose
+            return self.point_inside(item.position)
+        elif isinstance(item, Position):
+            return self.point_inside(item)
+        else:
+            raise ValueError("You can only test if a position or a pose is contained inside the area.")
+
+    def intersect(self, line: Line):
+        assert isinstance(line, Line)
+        if self.point_inside(line.p1) and self.point_inside(line.p2):
+            return []
+
+        inters = []
+        for segment in self.segments:
+            inter = intersection_between_segments(segment.p1, segment.p2, line.p1, line.p2)
+            if inter is not None:
+                inters.append(inter)
+        return inters
+
+    @property
+    def segments(self):
+        return [Line(self.upper_left,  self.upper_right),
+                Line(self.upper_right, self.lower_right),
+                Line(self.lower_right, self.lower_left),
+                Line(self.lower_left,  self.upper_left)]
+
+    @property
+    def center(self):
+        return self.lower_left + Position(self.width / 2, self.height / 2)
+
+    @property
+    def width(self):
+        return self.right - self.left
+
+    @property
+    def height(self):
+        return self.top - self.bottom
 
     @property
     def top(self):
@@ -42,6 +85,9 @@ class Area:
     def right(self):
         return self.lower_right.x
 
+    @classmethod
+    def from_limit(cls, top, bottom, left, right):
+        return cls(Position(left, top), Position(right, bottom))
 
 
 def find_bisector_of_triangle(c, a, b):
@@ -53,6 +99,16 @@ def find_bisector_of_triangle(c, a, b):
     ia = ab * ca.norm / (ca.norm + cb.norm)
     return a - ia
 
+
+def intersection_between_segments(a1, a2, b1, b2) -> Position:
+    try:
+        inter = intersection_between_lines(a1, a2, b1, b2)
+    except ValueError:
+        return None
+
+    if inter == closest_point_on_segment(inter, a1, a2) == closest_point_on_segment(inter, b1, b2):
+        return inter
+    return None
 
 def intersection_between_lines(a1, a2, b1, b2) -> Position:
     s = np.vstack([a1.array, a2.array, b1.array, b2.array])
@@ -79,7 +135,7 @@ def intersection_line_and_circle(cp: Position, cr: float, lp1: Position, lp2: Po
     x1 = (det * d.y + np.sign(d.y) * d.x * np.sqrt(delta)) / (d.norm**2)
     y1 = (-det * d.x + abs(d.y) * np.sqrt(delta)) / (d.norm**2)
     if delta == 0:
-        return [Position(x1, y1) + cp]
+        return [Position(x1, y1) + cp]  # Tangential
 
     x2 = (det * d.y - np.sign(d.y) * d.x * np.sqrt(delta)) / (d.norm**2)
     y2 = (-det * d.x - abs(d.y) * np.sqrt(delta)) / (d.norm**2)
