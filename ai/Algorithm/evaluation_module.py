@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-from Util.geometry import Line, angle_between_three_points, perpendicular
+from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi
 from Util.position import Position
 from Util.constant import ROBOT_RADIUS
 from ai.GameDomainObjects import Player
@@ -42,48 +42,79 @@ def player_covered_from_goal(player: Player):
     shooting_angle = angle_between_three_points(GameState().field.their_goal_line.p1,
                                                 player.position, GameState().field.their_goal_line.p2)
     vec_player_to_goal = GameState().field.their_goal - player.position
-    dist_from_center_goal = vec_player_to_goal.norm
-    shooting_angle_1 = (GameState().field.their_goal - player.position).angle + shooting_angle / 2
-    shooting_angle_2 = (GameState().field.their_goal - player.position).angle - shooting_angle / 2
+    shooting_angle_1 = wrap_to_pi((GameState().field.their_goal - player.position).angle + shooting_angle / 2)
+    shooting_angle_2 = wrap_to_pi((GameState().field.their_goal - player.position).angle - shooting_angle / 2)
     blocked_angles = []
-    for player_in_team in GameState().our_team.players:
+    for player_in_team in GameState().our_team.available_players.values():
         if player is player_in_team:
             pass
         else:
-            if object_pointing_toward_point(vec_player_to_goal.angle,
-                                            player.position, player_in_team, shooting_angle + 5 * np.pi / 180):
-                vec_perp_to_player_in_team = perpendicular(player_in_team.position - player) * ROBOT_RADIUS
-                angle_1 = angle_between_three_points(vec_perp_to_player_in_team+player_in_team.position,
+            if object_pointing_toward_point(player.position,
+                                            vec_player_to_goal.angle,
+                                            player_in_team.position,
+                                            wrap_to_pi(shooting_angle + 5 * np.pi / 180)):
+                vec_perp_to_player_in_team = perpendicular(player_in_team.position - player.position) * ROBOT_RADIUS
+                angle_1 = wrap_to_pi(angle_between_three_points(vec_perp_to_player_in_team+player_in_team.position,
                                                      player.position,
-                                                     -vec_perp_to_player_in_team+player_in_team.position) / 2 + \
-                          (player_in_team.position - player.position).angle
-                angle_2 = -angle_between_three_points(vec_perp_to_player_in_team+player_in_team.position,
+                                                     -vec_perp_to_player_in_team+player_in_team.position) / 2 +
+                                     (player_in_team.position - player.position).angle)
+                angle_2 = wrap_to_pi(-angle_between_three_points(vec_perp_to_player_in_team+player_in_team.position,
                                                       player.position,
-                                                      -vec_perp_to_player_in_team+player_in_team.position) / 2 + \
-                          (player_in_team.position - player.position).angle
-                blocked_angles += [(angle_1, angle_2)]
-    for player_in_their_team in GameState().enemy_team.players:
-        if object_pointing_toward_point(vec_player_to_goal.angle,
-                                        player.position, player_in_their_team, shooting_angle + 5 * np.pi / 180):
-            vec_perp_to_player_in_team = perpendicular(player_in_their_team.position - player) * ROBOT_RADIUS
-            angle_1 = angle_between_three_points(vec_perp_to_player_in_team+player_in_their_team.position,
+                                                      -vec_perp_to_player_in_team+player_in_team.position) / 2 +
+                                     (player_in_team.position - player.position).angle)
+                blocked_angles += [[angle_1, angle_2]]
+    for player_in_their_team in GameState().enemy_team.available_players.values():
+        if object_pointing_toward_point(player.position,
+                                        vec_player_to_goal.angle, player_in_their_team.position,
+                                        shooting_angle + 5 * np.pi / 180):
+            vec_perp_to_player_in_team = perpendicular(player_in_their_team.position - player.position) * ROBOT_RADIUS
+            angle_1 = wrap_to_pi(angle_between_three_points(vec_perp_to_player_in_team+player_in_their_team.position,
                                                  player.position,
-                                                 -vec_perp_to_player_in_team+player_in_their_team.position) / 2 + \
-                      (player_in_their_team.position - player.position).angle
-            angle_2 = -angle_between_three_points(vec_perp_to_player_in_team+player_in_their_team.position,
+                                                 -vec_perp_to_player_in_team+player_in_their_team.position) / 2 +
+                                 (player_in_their_team.position - player.position).angle)
+            angle_2 = wrap_to_pi(-angle_between_three_points(vec_perp_to_player_in_team+player_in_their_team.position,
                                                   player.position,
-                                                  -vec_perp_to_player_in_team+player_in_their_team.position) / 2 + \
-                      (player_in_their_team.position - player.position).angle
-            blocked_angles += [(angle_1, angle_2)]
+                                                  -vec_perp_to_player_in_team+player_in_their_team.position) / 2 +
+                                 (player_in_their_team.position - player.position).angle)
+            blocked_angles += [[angle_1, angle_2]]
 
-    inside_angles = []
-    for angles in blocked_angles:
-        if angles[0] > shooting_angle_1:
-            shooting_angle_1 = angles[0]
-            continue
-        if angles[1] < shooting_angle_2:
-            shooting_angle_2 = angles[1]
-            continue
+    shooting_angle = [[shooting_angle_1, shooting_angle_2]]
+    blocked_angles_sorted = sorted(blocked_angles, key=lambda x: x[0])
+    #print('start', shooting_angle, blocked_angles_sorted)
+    return filter_shooting_angles(shooting_angle, blocked_angles_sorted)
+
+
+def filter_shooting_angles(shooting_angle, blocking_angles):
+    if len(blocking_angles) == 0:
+        return shooting_angle
+    shooting_angles = find_remaining_shooting_angles(shooting_angle[0], blocking_angles[0])
+    if shooting_angle is None:
+        return None
+    if any(shooting_angles) is None:
+        return None
+    if len(shooting_angles) == 1:
+        print(shooting_angles)
+        shooting_angles += filter_shooting_angles(shooting_angles[0], blocking_angles[1:])
+        print(shooting_angles)
+    else:
+        print('2_0', shooting_angles)
+        shooting_angles += filter_shooting_angles(shooting_angles[0], blocking_angles[1:])
+        print('2_1', shooting_angles)
+        shooting_angles += filter_shooting_angles(shooting_angles[1], blocking_angles[1:])
+        print('2_2', shooting_angles)
+    return shooting_angles
+
+
+def find_remaining_shooting_angles(shooting_angle, blocking_angle):
+    if blocking_angle[0] > shooting_angle[0] and blocking_angle[1] < shooting_angle[1]:
+        return None
+    if blocking_angle[0] > shooting_angle[0]:
+        shooting_angle[0] = blocking_angle[1]
+    elif blocking_angle[1] < shooting_angle[1]:
+        shooting_angle[1] = blocking_angle[0]
+    else:
+        return [[shooting_angle[0], blocking_angle[0]], [blocking_angle[1], shooting_angle[1]]]
+    return [shooting_angle]
         
 
 
