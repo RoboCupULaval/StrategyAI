@@ -33,8 +33,6 @@ class DefenseWall(Strategy):
         self.can_kick = can_kick
         self.defensive_role = DEFENSIVE_ROLE.copy()
         self.cover_role = COVER_ROLE.copy()
-        self.defensive_role += [Role.FIRST_ATTACK]
-        self.cover_role += [Role.SECOND_ATTACK]
 
         self.robots_in_wall_formation = []
         self.robots_in_cover_formation = []
