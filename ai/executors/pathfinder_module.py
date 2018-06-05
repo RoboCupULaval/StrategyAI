@@ -24,13 +24,14 @@ class PathfinderModule:
 
         for player, ai_cmd in ai_cmds.items():
             if ai_cmd.target is not None:
-                player_obstacles = self.player_optionnal_obstacles(game_state, ai_cmd)
+                player_obstacles = self.obstacles.copy()
                 player_obstacles += strat_obstacles
                 self.paths[player] = self.pathfinder.get_path(start=player.position,
                                                               target=ai_cmd.target.position,
                                                               obstacles=player_obstacles,
                                                               last_path=self.paths[player],
-                                                              points_to_pass_by=ai_cmd.points_to_pass_by)
+                                                              points_to_pass_by=ai_cmd.points_to_pass_by,
+                                                              ball_collision=ai_cmd.ball_collision)
             else:
                 self.paths[player] = None
 
@@ -45,11 +46,7 @@ class PathfinderModule:
 
         for other in our_team + enemy_team:
             self.obstacles.append(Obstacle(other.position.array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
+        if game_state.is_ball_on_field:
+            self.obstacles.append(Obstacle(game_state.ball_position.array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE,
+                                           object_type='ball'))
 
-    def player_optionnal_obstacles(self, game_state: GameState, ai_cmd: AICommand) -> List[Obstacle]:
-        path_obstacles = self.obstacles.copy()
-
-        if ai_cmd.ball_collision and game_state.is_ball_on_field:
-            path_obstacles.append(Obstacle(game_state.ball_position.array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
-
-        return path_obstacles

@@ -26,7 +26,7 @@ def path_smoother(robot: Robot):
         point_list = [path.start, p4, p5]
     turn_radius, _ = compute_turn_radius(*point_list, speed=robot.cruise_speed, acc=MAX_LINEAR_ACCELERATION)
     next_speed = speed_in_corner(turn_radius, acc=MAX_LINEAR_ACCELERATION)
-    #print(next_speed)
+    #print(next_speed, turn_radius)
     return Path.from_sequence(point_list), next_speed
 
 
@@ -46,7 +46,7 @@ def speed_in_corner(radius, acc):
     return speed
 
 
-def compute_turn_radius(p1, p2, p3, speed, max_deviation=100, acc=MAX_LINEAR_ACCELERATION):
+def compute_turn_radius(p1, p2, p3, speed, max_deviation=50, acc=MAX_LINEAR_ACCELERATION):
     """Assume the raw path is p1->p2->p3.
        Deviation is compute from p2 to the circle with a line passing by the center of the circle."""
 

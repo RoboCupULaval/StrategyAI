@@ -40,8 +40,8 @@ class CmdBuilder:
                   target: Union[Pose, Position],
                   cruise_speed: float=1,
                   end_speed: float=0,
-                  ball_collision: bool=True,
-                  points_to_pass_by = None):
+                  ball_collision=True,
+                  points_to_pass_by=None):
         assert isinstance(target, (Pose, Position))
         if isinstance(target, Pose) and isinstance(target.position, np.ndarray):
             raise ValueError("The pose field must not have ndarray has position")

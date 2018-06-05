@@ -31,7 +31,6 @@ class GoToPositionPathfinder(Tactic):
             self.status_flag = Flags.SUCCESS
         else:
             self.status_flag = Flags.WIP
-
         return CmdBuilder().addMoveTo(self.target,
                                       cruise_speed=self.cruise_speed,
                                       end_speed=self.end_speed,
