@@ -22,7 +22,7 @@ MIN_DIST_FROM_CENTER = 200  # An enemy player closer than this distance from the
 
 class PositionForPass(Tactic):
     """
-    This tactic automagicly positions players at strategic emplacements
+    This tactic automagically positions players at strategic emplacements
     """
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: Optional[List[str]]=None,
                  auto_position=False, robots_in_formation: Optional[List[Player]] = None):

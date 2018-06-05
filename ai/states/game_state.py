@@ -28,6 +28,8 @@ class GameState(metaclass=Singleton):
         self._our_team = self._yellow_team if TeamColorService().is_our_team_yellow else self._blue_team
         self._enemy_team = self._blue_team if TeamColorService().is_our_team_yellow else self._yellow_team
 
+        self.last_ref_state = None
+
     def reset(self):
         self.__init__()
 
