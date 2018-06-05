@@ -221,3 +221,7 @@ def closest_points_from_points(point: Position, points: Sequence[Position]) -> L
 def distance_from_points(point: Position, points: Sequence[Position]) -> List[float]:
     points_array = np.array([p.array for p in points])
     return cast(List, np.linalg.norm(points_array - point.array).tolist())
+
+
+def random_direction():
+    return normalize(Position.from_array(np.random.randn(2)))

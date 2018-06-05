@@ -4,6 +4,7 @@ from typing import List, Optional
 from Util import Pose
 from Util.ai_command import MoveTo
 from Util.area import stay_outside_circle
+from Util.constant import KEEPOUT_DISTANCE_FROM_BALL
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
@@ -11,7 +12,7 @@ from ai.states.game_state import GameState
 
 class StayAwayFromBall(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose = Pose(),
-                 args: Optional[List[str]]=None, keepout_radius: int = 500):
+                 args: Optional[List[str]]=None, keepout_radius: int = KEEPOUT_DISTANCE_FROM_BALL):
         super().__init__(game_state, player, target, args)
         self.current_state = self.stay_out_of_circle
         self.next_state = self.stay_out_of_circle

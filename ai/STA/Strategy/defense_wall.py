@@ -23,7 +23,7 @@ COVER_ROLE = [Role.MIDDLE]
 # noinspection PyMethodMayBeStatic,
 class DefenseWall(Strategy):
 
-    def __init__(self, game_state: GameState, can_kick=True):
+    def __init__(self, game_state: GameState, can_kick=True, stay_away_from_ball=False):
         super().__init__(game_state)
 
         their_goal = self.game_state.field.their_goal_pose
@@ -67,7 +67,8 @@ class DefenseWall(Strategy):
                                                                         AlignToDefenseWall(self.game_state,
                                                                                            coverer,
                                                                                            robots_in_formation=[coverer],
-                                                                                           object_to_block=enemy_to_block))
+                                                                                           object_to_block=enemy_to_block,
+                                                                                           stay_away_from_ball=stay_away_from_ball))
                         node_position_pass = self.create_node(role, PositionForPass(self.game_state,
                                                                                     coverer,
                                                                                     robots_in_formation=self.robots_in_cover_formation,
@@ -81,7 +82,8 @@ class DefenseWall(Strategy):
                     self.create_node(role, AlignToDefenseWall(self.game_state,
                                                               player,
                                                               robots_in_formation=self.robots_in_wall_formation,
-                                                              object_to_block=GameState().ball))
+                                                              object_to_block=GameState().ball,
+                                                              stay_away_from_ball=stay_away_from_ball))
                 node_position_pass = self.create_node(role, PositionForPass(self.game_state,
                                                                             player,
                                                                             robots_in_formation=self.robots_in_wall_formation,
