@@ -146,6 +146,10 @@ def angle_between_three_points(start: Position, mid: Position, end: Position) ->
     return abs(wrap_to_pi((mid - start).angle - (mid - end).angle))
 
 
+def find_signed_delta_angle(target_angle, source_angle) -> float:
+    return m.atan2(np.sin(target_angle - source_angle), np.cos(target_angle - source_angle))
+
+
 def wrap_to_pi(angle: float) -> float:
     return (angle + m.pi) % (2 * m.pi) - m.pi
 
@@ -217,3 +221,7 @@ def closest_points_from_points(point: Position, points: Sequence[Position]) -> L
 def distance_from_points(point: Position, points: Sequence[Position]) -> List[float]:
     points_array = np.array([p.array for p in points])
     return cast(List, np.linalg.norm(points_array - point.array).tolist())
+
+
+def random_direction():
+    return normalize(Position.from_array(np.random.randn(2)))

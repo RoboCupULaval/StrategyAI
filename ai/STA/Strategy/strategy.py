@@ -3,6 +3,8 @@
 from abc import ABCMeta
 from typing import List, Tuple, Callable, Dict
 
+import logging
+
 from Util import AICommand, Pose
 from Util.role import Role
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
@@ -20,6 +22,7 @@ class Strategy(metaclass=ABCMeta):
         :param p_game_state: L'état courant du jeu.
         """
         assert isinstance(p_game_state, GameState)
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.game_state = p_game_state
 
         self.roles_graph = {role: Graph() for role in self.assigned_roles}
@@ -27,6 +30,9 @@ class Strategy(metaclass=ABCMeta):
     @property
     def assigned_roles(self):
         return self.game_state.assigned_roles
+
+    def obstacles(self):
+        return []
 
     @classmethod
     def required_roles(cls) -> Dict[Role, Callable]:
