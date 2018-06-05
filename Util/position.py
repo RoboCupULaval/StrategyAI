@@ -27,6 +27,10 @@ class Position:
     def from_dict(cls, new_dict: Dict[str, float]) -> 'Position':
         return cls(new_dict['x'], new_dict['y'])
 
+    @classmethod
+    def from_angle(cls, angle, norm=1) -> 'Position':
+        return cls(norm * m.cos(angle), norm * m.sin(angle))
+
     @property
     def x(self) -> float:
         return self.array[0]

@@ -3,6 +3,7 @@
 import logging
 from typing import List, Dict
 
+from ai.STA.Strategy.ball_placement import BallPlacement
 from ai.STA.Strategy.defense_wall_no_kick import DefenseWallNoKick
 from ai.STA.Strategy.defense_wall import DefenseWall
 from ai.STA.Strategy.direct_free_kick import DirectFreeKick
@@ -60,6 +61,7 @@ class StrategyBook(object):
                               'PreparePenaltyOffense': PreparePenaltyOffense,
                               'OffenseKickOff': OffenseKickOff,
                               'DefenseWallNoKick': DefenseWallNoKick,
+                              'BallPlacement': BallPlacement,
                               'TestGoalKeeper': TestGoalKeeper,
                               }
         self.default_strategies = ['Offense',

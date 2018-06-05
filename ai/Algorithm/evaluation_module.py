@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 from Util.geometry import Line, angle_between_three_points
 from Util.position import Position
+from Util.constant import ROBOT_RADIUS, BALL_OUTSIDE_FIELD_BUFFER
 from Util.constant import ROBOT_RADIUS
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
@@ -59,10 +60,6 @@ def closest_player_to_point(point: Position, our_team=None):
     return closest_players_to_point(point, our_team)[0]
 
 
-def is_ball_moving(min_speed=0.1):
-    return GameState().ball_velocity.norm > min_speed
-
-
 # noinspection PyUnresolvedReferences
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
@@ -70,7 +67,6 @@ def is_ball_our_side():
         return GameState().ball_position.x > 0
     else:
         return GameState().ball_position.x < 0
-
 
 # noinspection PyUnresolvedReferences
 def best_passing_option(passing_player, consider_goal=True):

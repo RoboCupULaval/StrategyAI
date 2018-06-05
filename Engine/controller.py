@@ -40,7 +40,12 @@ class Controller:
         self.timestamp = track_frame['timestamp']
         our_team_color = str(TeamColorService().our_team_color)
 
+        for robot in self:
+            robot.is_active = False
+
         for robot in track_frame[our_team_color]:
+
+            self[robot['id']].is_active = True
             self[robot['id']].pose = robot['pose']
             self[robot['id']].velocity = robot['velocity']
 
@@ -51,26 +56,29 @@ class Controller:
 
     def execute(self) -> RobotState:
         commands = {}
-        active_robots = [robot for robot in self if robot.pose is not None and robot.raw_path is not None]
+        active_robots = [robot for robot in self if robot.is_active]
 
         for robot in active_robots:
+            if robot.raw_path is None:
+                continue
             robot.path, robot.target_speed = path_smoother(robot)
 
             if robot.position_error.norm < 200 and robot.target_speed == 0:
                 cmd = robot.position_regulator.execute(robot)
+                robot.velocity_regulator.reset()
             else:
                 cmd = robot.velocity_regulator.execute(robot)
 
-            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("m/s",
-                                                                         "robot {}".format(robot.robot_id),
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("mm/s",
+                                                                         "robot {} cmd speed".format(robot.robot_id),
                                                                          [time.time()],
                                                                          [cmd.norm]))
-            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("m",
-                                                                         "robot {}".format(robot.robot_id),
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("mm/s",
+                                                                         "robot {} kallman speed".format(robot.robot_id),
                                                                          [time.time()],
-                                                                         [robot.position.y]))
+                                                                         [robot.velocity.norm]))
 
-            commands[robot.robot_id] = self._put_in_robots_referencial(robot, cmd)
+            commands[robot.robot_id] = self._put_in_robots_referential(robot, cmd)
 
         return self.generate_packet(commands)
 
@@ -85,12 +93,12 @@ class Controller:
                             command=cmd,
                             kick_type=self[robot_id].engine_cmd.kick_type,
                             kick_force=self[robot_id].engine_cmd.kick_force,
-                            dribbler_active=self[robot_id].engine_cmd.dribbler_active,
+                            dribbler_state=self[robot_id].engine_cmd.dribbler_state,
                             charge_kick=self[robot_id].engine_cmd.charge_kick))
         return packet
 
     @staticmethod
-    def _put_in_robots_referencial(robot, cmd):
+    def _put_in_robots_referential(robot, cmd):
         if Config()["GAME"]["on_negative_side"]:
             cmd.x *= -1
             cmd.orientation *= -1

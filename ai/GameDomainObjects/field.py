@@ -1,7 +1,7 @@
 import copy
 import logging
 from enum import Enum
-from typing import Dict
+from typing import Dict, Union
 
 from Util import Position, Pose
 from Util.geometry import Area, Line
@@ -81,6 +81,7 @@ class Field:
 
         self.goal_line = None  # Point C to D
         self.our_goal_area = None  # Area define by Point E to F
+        self.their_goal_area = None
 
         # Default values, used only for UT
         self.field_length = 4500
@@ -88,7 +89,7 @@ class Field:
         self.goal_width = 1000
         self.goal_depth = 200
         self.center_circle_radius = 1000
-        self.boundary_width = 300  # Is the empty zone around the outside of the field
+        self.boundary_width = 300  # Is the distance between the field and the outside wall
 
 
         self.field_lines = {
@@ -101,12 +102,20 @@ class Field:
 
         self._update_field_const()
 
-    def is_ball_in_our_goal(self):
-        return self.our_goal_area.point_inside(self.ball.position)
+    def is_ball_in_our_goal_area(self):
+        return self.ball.position in self.our_goal_area
 
-    def is_ball_outside_our_goal(self):
+    def is_ball_outside_our_goal_area(self):
         # Use for strategy conditions
-        return not self.is_ball_in_our_goal()
+        return self.ball.position not in self.our_goal_area
+
+    def is_inside_wall_limit(self, pos: [Pose, Position]):
+        bound = self.boundary_width
+        return self.left - bound <= pos.x <= self.right + bound and \
+               self.bottom - bound <= pos.y <= self.top + bound
+
+    def is_outside_wall_limit(self, pos: [Pose, Position]):
+        return not self.is_inside_wall_limit(pos)
 
     @property
     def ball(self):
@@ -122,8 +131,8 @@ class Field:
     def constant(self, field: Dict):
         field = field["field"]
         if len(field["field_lines"]) == 0:
-            raise RuntimeError(
-                "Receiving legacy geometry message instead of the new geometry message. Update your grsim or check your vision port.")
+            raise RuntimeError("Receiving legacy geometry message instead of the new geometry message. \n"
+                               "Update your grsim or check your vision port.")
 
         self.field_lines = convert_field_line_segments(field["field_lines"])
         self.field_arcs = convert_field_circular_arc(field["field_arcs"])
@@ -131,7 +140,7 @@ class Field:
         if "RightFieldLeftPenaltyStretch" not in self.field_lines:
             # In Ulaval local the line are those of the 2017 version, so we need to patch and convert them
             self.logger.warning("You are receiving geometry message from an older version of ssl-vision, \n"
-                                "which has a circular penality zone. Some positions might be incorrect.")
+                                "which has a circular penalty zone. Some positions might be incorrect.")
             self._fix_ulaval_field_line(field)
 
         self.field_length = field["field_length"]
@@ -154,10 +163,11 @@ class Field:
         self.our_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2,
                                   self.field_lines["RightFieldLeftPenaltyStretch"].p1)
 
+        self.their_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2.flip_x(),
+                                    self.field_lines["RightFieldLeftPenaltyStretch"].p1.flip_x())
+
         self.goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
                               p2=Position(self.our_goal_x, -self.goal_width / 2))
-
-
 
     def _fix_ulaval_field_line(self, field):
         # The penalty x y is point E in the sketch
@@ -179,6 +189,10 @@ class Field:
     @property
     def their_goal_x(self):
         return self.left
+
+    def __contains__(self, item: Union[Pose, Position]):
+        return self.left <= item.x <= self.right and \
+               self.bottom <= item.y <= self.top
 
     @property
     def top(self):
