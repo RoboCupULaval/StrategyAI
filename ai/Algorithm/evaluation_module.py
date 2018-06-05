@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 from Util.geometry import Line, angle_between_three_points
 from Util.position import Position
+from Util.constant import ROBOT_RADIUS, BALL_OUTSIDE_FIELD_BUFFER
 from Util.constant import ROBOT_RADIUS
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
@@ -70,7 +71,6 @@ def is_ball_our_side():
         return GameState().ball_position.x > 0
     else:
         return GameState().ball_position.x < 0
-
 
 # noinspection PyUnresolvedReferences
 def best_passing_option(passing_player, consider_goal=True):
