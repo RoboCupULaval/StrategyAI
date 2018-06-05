@@ -228,12 +228,3 @@ def distance_from_points(point: Position, points: Sequence[Position]) -> List[fl
 
 def random_direction():
     return normalize(Position.from_array(np.random.randn(2)))
-
-
-def find_gaps_between_angles(angles: List[tuple], previous_angles=None, current_step=0):
-
-    if angles[current_step][1] > angles[1][1] and angles[0][0] < angles[1][0]:
-        del angles[1]
-        find_gaps_between_angles(angles)
-
-    return 0
