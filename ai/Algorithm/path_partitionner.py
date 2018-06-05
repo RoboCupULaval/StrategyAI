@@ -31,6 +31,7 @@ class PathPartitionner:
     def __init__(self):
         self.obstacles = []
         self.old_path = None
+        self.points_to_pass_by = None
     @property
     def obstacles_position(self):
         return np.array([obs.position for obs in self.obstacles])
@@ -45,12 +46,13 @@ class PathPartitionner:
         target_to_obs = np.linalg.norm(target - self.obstacles_position, axis=1)
         is_inside_ellipse = (start_to_obs + target_to_obs) <= np.sqrt(np.linalg.norm(start - target) ** 2 + ELLIPSE_HALF_WIDTH ** 2)
         is_not_self = start_to_obs > 0  # remove self if present
-        self.obstacles = obstacles[is_inside_ellipse & is_not_self].tolist()
+        is_not_target = start_to_obs < 1 # remove target if present
+        self.obstacles = obstacles[is_inside_ellipse & is_not_self & is_not_target].tolist()
 
-    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], last_path: Optional[Path]=None):
-
+    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], last_path: Optional[Path]=None,
+                 points_to_pass_by=None):
+        self.points_to_pass_by = points_to_pass_by
         self.obstacles = obstacles
-        self.filter_obstacles(start.array, target.array)
         self.old_path = last_path
 
         if any(self.obstacles):
@@ -58,7 +60,11 @@ class PathPartitionner:
                 path = self.update_last_path(start, target)
                 path.filter(threshold=50)
             else:
-                path = self.path_planner(start.array, target.array)
+                self.filter_obstacles(start.array, target.array)
+                if self.points_to_pass_by is None:
+                    path = self.path_planner(start.array, target.array)
+                else:
+                    path = self.generate_path_through_way_points(start, target)
                 path.filter(threshold=10)
         else:
             path = Path(start, target)
@@ -156,6 +162,11 @@ class PathPartitionner:
         return False
 
     def update_last_path(self, start, target):
+        if self.points_to_pass_by is not self.old_path.points_to_pass_by:
+            if self.points_to_pass_by is None:
+                return self.path_planner(start.array, target.array)
+            else:
+                return self.generate_path_through_way_points(start, target)
         distance_from_old_target = (self.old_path.target - target).norm
         self.old_path.start = start
         self.old_path.points[0] = start
@@ -165,7 +176,10 @@ class PathPartitionner:
             self.old_path.points[-1] = target
             return self.old_path
         else:
-            return self.path_planner(start.array, target.array)
+            if self.points_to_pass_by is None:
+                return self.path_planner(start.array, target.array)
+            else:
+                return self.generate_path_through_way_points(start, target)
 
     def verify_first_points_of_path(self, path):
         if len(path.points) > 2:
@@ -173,6 +187,17 @@ class PathPartitionner:
                 del path.points[1]
         return path
 
+    def generate_path_through_way_points(self, start, target):
+        start = start
+        point = self.points_to_pass_by[0]
+        sub_paths = PathPartitionner().get_path(start, point, self.obstacles)
+        start = point
+        if len(self.points_to_pass_by) > 1:
+            for point in self.points_to_pass_by[1:]:
+                sub_paths += PathPartitionner().get_path(start, point, self.obstacles)
+                start = point
+        sub_paths += PathPartitionner().get_path(self.points_to_pass_by[-1], target, self.obstacles)
+        return sub_paths
 
 def normalize(vec: np.ndarray) -> np.ndarray:
     return vec.copy() / np.linalg.norm(vec)

@@ -2,7 +2,7 @@
 
 from typing import List
 
-from Util import Pose
+from Util import Pose, Position
 from Util.ai_command import CmdBuilder
 from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 from Util.geometry import compare_angle
@@ -14,7 +14,8 @@ from ai.states.game_state import GameState
 
 class GoToPositionPathfinder(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
-                 args: List[str]=None, ball_collision=True, cruise_speed=1, charge_kick=False, end_speed=0):
+                 args: List[str]=None, ball_collision=True, cruise_speed=1, charge_kick=False, end_speed=0,
+                 points_to_pass_by=None):
         super().__init__(game_state, player, target, args)
         self.target = target
         self.status_flag = Flags.INIT
@@ -22,6 +23,7 @@ class GoToPositionPathfinder(Tactic):
         self.charge_kick = charge_kick
         self.end_speed = end_speed
         self.cruise_speed = float(args[0]) if len(self.args) > 0 else cruise_speed
+        self.points_to_pass_by = points_to_pass_by
         #print("Assign move to position to robot id {}".format(self.player.id))
 
     def exec(self):
@@ -33,7 +35,8 @@ class GoToPositionPathfinder(Tactic):
         return CmdBuilder().addMoveTo(self.target,
                                       cruise_speed=self.cruise_speed,
                                       end_speed=self.end_speed,
-                                      ball_collision=self.ball_collision).build()
+                                      ball_collision=self.ball_collision,
+                                      points_to_pass_by=self.points_to_pass_by).build()
 
     def check_success(self):
         distance = (self.player.pose - self.target.position).norm

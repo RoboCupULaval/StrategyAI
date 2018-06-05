@@ -18,7 +18,8 @@ AICommand = namedtuple('AICommand', 'target,'
                                     'dribbler_state,'
                                     'cruise_speed,'
                                     'end_speed,'
-                                    'ball_collision')
+                                    'ball_collision,'
+                                    'points_to_pass_by')
 
 class CmdBuilder:
 
@@ -33,12 +34,14 @@ class CmdBuilder:
         self._cruise_speed = 0
         self._end_speed = 0
         self._ball_collision = True
+        self._points_to_pass_by = None
 
     def addMoveTo(self,
                   target: Union[Pose, Position],
                   cruise_speed: float=1,
                   end_speed: float=0,
-                  ball_collision: bool=True):
+                  ball_collision: bool=True,
+                  points_to_pass_by = None):
         assert isinstance(target, (Pose, Position))
         if isinstance(target, Pose) and isinstance(target.position, np.ndarray):
             raise ValueError("The pose field must not have ndarray has position")
@@ -47,6 +50,7 @@ class CmdBuilder:
         self._cruise_speed = cruise_speed
         self._end_speed = end_speed
         self._ball_collision = ball_collision
+        self._points_to_pass_by = points_to_pass_by
         return self
 
     def addKick(self, kick_force: KickForce=KickForce.LOW):
@@ -75,7 +79,8 @@ class CmdBuilder:
                          self._dribbler_state,
                          self._cruise_speed,
                          self._end_speed,
-                         self._ball_collision)
+                         self._ball_collision,
+                         self._points_to_pass_by)
 
 
 def Kick(kick_force: KickForce=KickForce.LOW):

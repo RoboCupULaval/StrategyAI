@@ -29,7 +29,8 @@ class PathfinderModule:
                 self.paths[player] = self.pathfinder.get_path(start=player.position,
                                                               target=ai_cmd.target.position,
                                                               obstacles=player_obstacles,
-                                                              last_path=self.paths[player])
+                                                              last_path=self.paths[player],
+                                                              points_to_pass_by=ai_cmd.points_to_pass_by)
             else:
                 self.paths[player] = None
 
