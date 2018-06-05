@@ -60,10 +60,6 @@ def closest_player_to_point(point: Position, our_team=None):
     return closest_players_to_point(point, our_team)[0]
 
 
-def is_ball_moving(min_speed=0.1):
-    return GameState().ball_velocity.norm > min_speed
-
-
 # noinspection PyUnresolvedReferences
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
