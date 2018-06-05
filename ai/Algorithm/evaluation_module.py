@@ -61,15 +61,15 @@ def player_covered_from_goal(player: Player):
     result = []
     for i in range(1, 20):  # discretisation de la ligne de but
         goal_point = GameState().field.their_goal_line.p1 + GameState().field.their_goal_line.direction * \
-                     (GameState().field.their_goal_line.length / i)
+                     (GameState().field.their_goal_line.length * i / 20)
         is_colliding = is_path_colliding(pertinent_collisions, pertinent_collisions_positions,
                                          pertinent_collisions_avoid_radius, player.position.array, goal_point.array)
         result.append([is_colliding, goal_point])
     count = 0
     prev = 0 #longueur du segment
     indexend = 0
-    for i in range(0, len(result)):
-        if result[i][0] == 0:
+    for i, is_colliding, goal_point in enumerate(result):
+        if not is_colliding:
             count += 1
             if count > prev:
                 prev = count
