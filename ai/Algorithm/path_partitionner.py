@@ -17,9 +17,11 @@ ELLIPSE_HALF_WIDTH = 1000
 
 class Obstacle:
     BASE_AVOID_DISTANCE = 100  # in mm
+
     def __init__(self, position: np.ndarray, *, avoid_distance: Optional[float] = None):
         self.position = position
         self.avoid_distance = avoid_distance if avoid_distance is not None else self.BASE_AVOID_DISTANCE
+
     def __repr__(self):
         return self.__class__.__name__ + '({})'.format(self.position)
 
@@ -60,8 +62,6 @@ class PathPartitionner:
                 path.filter(threshold=10)
         else:
             path = Path(start, target)
-
-
 
         return path
 
@@ -181,3 +181,4 @@ def normalize(vec: np.ndarray) -> np.ndarray:
 def perpendicular(vec: np.ndarray) -> np.ndarray:
     """Return the orthonormal vector to the np.array([0,0,1]) with right hand rule."""
     return normalize(np.array([-vec[1], vec[0]]))
+

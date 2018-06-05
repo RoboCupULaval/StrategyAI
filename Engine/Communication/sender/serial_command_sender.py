@@ -3,7 +3,7 @@
 from pyhermes import McuCommunicator
 
 from Engine.Communication.sender.sender_base_class import Sender
-from Util.constant import KickForce
+from Util.constant import KickForce, DribbleState
 
 
 class SerialCommandSender(Sender):
@@ -22,7 +22,9 @@ class SerialCommandSender(Sender):
             if packet.kick_force is not KickForce.NONE:
                 self.connection.kick(packet.robot_id, self.translate_kick_force(packet.kick_force))
 
-            if packet.dribbler_active:
+            if packet.dribbler_state == DribbleState.FORCE_STOP:
+                self.connection.turnOffDribbler(packet.robot_id)
+            elif packet.dribbler_state == DribbleState.FORCE_SPIN:
                 self.connection.turnOnDribbler(packet.robot_id)
 
             if packet.charge_kick:

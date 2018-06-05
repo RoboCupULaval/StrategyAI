@@ -75,7 +75,7 @@ class Config(metaclass=Singleton):
         self['COMMUNICATION']['referee_info'] = (self['COMMUNICATION']['referee_udp_address'],
                                                  int(self['COMMUNICATION']['referee_port']))
 
-        if self['COMMUNICATION']['type'] == 'sim':
+        if self.is_simulation():
             self['COMMUNICATION']['grsim_info'] = (self['COMMUNICATION']['grsim_udp_address'],
                                                    int(self['COMMUNICATION']['grsim_port']))
 
@@ -99,9 +99,15 @@ class Config(metaclass=Singleton):
         if do_exit:
             exit(1)
 
+    def is_simulation(self):
+        return self['COMMUNICATION']['type'] == 'sim'
+
     @staticmethod
     def default_config():
         return {
+            'COMMUNICATION': {
+                'type': 'sim'
+            },
             'GAME': {
                 'our_color': 'yellow',
                 'their_color': 'blue',
