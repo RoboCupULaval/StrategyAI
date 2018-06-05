@@ -39,6 +39,7 @@ class PlayState:
         if roles is None:
             self.game_state.map_players_for_strategy(strategy_class)
         elif not self._is_mapping_valid(roles):
+            self.logger.error("Invalid mapping from UI-debug")
             return
         else: # Use roles mapping from UI-debug
             self.game_state.map_players_to_roles_by_player_id(roles)
@@ -47,7 +48,8 @@ class PlayState:
 
     def _is_mapping_valid(self, roles):
         for player_id in roles.values():
-            if player_id not in self.game_state.our_team.available_players.values():
+            if player_id not in self.game_state.our_team.available_players.keys():
+                self.logger.error("is not in available".format(player_id))
                 return False
         return True
 
