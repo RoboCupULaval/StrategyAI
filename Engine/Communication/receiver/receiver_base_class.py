@@ -1,4 +1,5 @@
-
+import os
+import traceback
 from abc import ABCMeta, abstractmethod
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
@@ -36,14 +37,21 @@ class ReceiverProcess(Process, ReceiverBaseClass, metaclass=ABCMeta):
 
     def run(self):
 
-        self.logger.debug('Running')
+        self.logger.debug('Running with process ID {}.'.format(os.getpid()))
 
         try:
             while True:
                 self.receive_packet()
         except KeyboardInterrupt:
             pass
+        except:
+            # If we have an exception that cause a crash we want to print it
+            traceback.print_exc()
         finally:
             self.connection.close()
             self.logger.debug('Killed')
             exit(0)
+
+    def terminate(self):
+        self.connection.close()
+        super().terminate()

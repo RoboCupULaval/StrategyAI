@@ -1,10 +1,12 @@
+import logging
 from abc import abstractmethod, ABCMeta
 from enum import IntEnum
 
 from ai.Algorithm.IntelligentModule import IntelligentModule
 from ai.Algorithm.evaluation_module import *
-from ai.GameDomainObjects.referee import RefereeCommand, InternalRefereeCommand
+from ai.GameDomainObjects.referee_state import RefereeCommand, RefereeState
 from ai.states.play_state import PlayState
+from ai.states.game_state import GameState
 
 
 class AutoPlay(IntelligentModule, metaclass=ABCMeta):
@@ -22,13 +24,10 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
         self.next_state = None
         self.last_state = None
 
-    def get_selected_strategy(self):
-        return self.selected_strategy
-
     @property
     def info(self):
         return {
-            "selected_strategy": str(self.selected_strategy),
+            "selected_strategy": str(self.play_state.current_strategy),
             "current_state": str(self.current_state)
         }
 
@@ -70,16 +69,24 @@ class SimpleAutoPlayState(IntEnum):
     INDIRECT_FREE_DEFENSE = 20
 
 
+
 class SimpleAutoPlay(AutoPlay):
     """
         Classe simple implémentant la sélection de stratégies.
     """
+
+    FREE_KICK_COMMANDS = [RefereeCommand.DIRECT_FREE_US, RefereeCommand.INDIRECT_FREE_US,
+                          RefereeCommand.DIRECT_FREE_THEM, RefereeCommand.INDIRECT_FREE_THEM]
+
     def __init__(self, play_state: PlayState):
         super().__init__(play_state)
-        self.last_ref_command = RefereeCommand.HALT
-        
-    def update(self, available_players_changed: bool):
-        self.next_state = self._select_next_state()
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.last_ref_state = RefereeCommand.HALT
+
+    # TODO: Check if role assignment works well enough, so we don't need available_players_changed
+    def update(self, ref_state: RefereeState, available_players_changed=False):
+        self.play_state.game_state.last_ref_state = ref_state
+        self.next_state = self._select_next_state(ref_state)
 
         if self.next_state is None:
             self.next_state = SimpleAutoPlayState.HALT
@@ -102,7 +109,7 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
             SimpleAutoPlayState.INDIRECT_FREE_DEFENSE
         ]
-        if self.current_state in accepted_states and not is_ball_moving(300):
+        if self.current_state in accepted_states and not GameState().ball.is_immobile():
             return self.current_state
         if is_ball_our_side():
             return SimpleAutoPlayState.NORMAL_DEFENSE
@@ -111,51 +118,54 @@ class SimpleAutoPlay(AutoPlay):
 
     def _normal_start(self):
         return {
-            InternalRefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.OFFENSE_KICKOFF,
-            InternalRefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.DEFENSE_KICKOFF,
-            InternalRefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.OFFENSE_PENALTY,
-            InternalRefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.DEFENSE_PENALTY,
+            RefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.OFFENSE_KICKOFF,
+            RefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.DEFENSE_KICKOFF,
+            RefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.OFFENSE_PENALTY,
+            RefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.DEFENSE_PENALTY,
             RefereeCommand.NORMAL_START: self._analyse_game()
-        }.get(self.last_ref_command, RefereeCommand.NORMAL_START)
+        }.get(self.last_ref_state, RefereeCommand.NORMAL_START)
 
-    def _select_next_state(self):
-        referee = GameState().referee
+    def _select_next_state(self, ref_state: RefereeState):
         next_state = self.current_state
+
         # On command change
-        if self.last_ref_command != referee.command:
+        if self.last_ref_state != ref_state.command:
+            self.logger.info("Switching to referee state {}".format(ref_state.command.name))
             next_state = {
                 RefereeCommand.HALT: SimpleAutoPlayState.HALT,
 
                 RefereeCommand.STOP: SimpleAutoPlayState.STOP,
-                InternalRefereeCommand.GOAL_US: self.current_state,
-                InternalRefereeCommand.GOAL_THEM: self.current_state,
-                InternalRefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
-
-                InternalRefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.HALT,
+                RefereeCommand.GOAL_US: self.current_state,
+                RefereeCommand.GOAL_THEM: self.current_state,
 
                 RefereeCommand.FORCE_START: self._analyse_game(),
                 RefereeCommand.NORMAL_START: self._normal_start(),
 
-                InternalRefereeCommand.TIMEOUT_THEM: SimpleAutoPlayState.TIMEOUT,
-                InternalRefereeCommand.TIMEOUT_US: SimpleAutoPlayState.TIMEOUT,
+                RefereeCommand.TIMEOUT_THEM: SimpleAutoPlayState.TIMEOUT,
+                RefereeCommand.TIMEOUT_US: SimpleAutoPlayState.TIMEOUT,
 
-                InternalRefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE,
-                InternalRefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE,
-                InternalRefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE,
-                InternalRefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE,
+                RefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE,
+                RefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE,
+                RefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE,
+                RefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE,
 
-                InternalRefereeCommand.DIRECT_FREE_US: SimpleAutoPlayState.DIRECT_FREE_OFFENSE,
-                InternalRefereeCommand.DIRECT_FREE_THEM: SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
-                InternalRefereeCommand.INDIRECT_FREE_US: SimpleAutoPlayState.INDIRECT_FREE_OFFENSE,
-                InternalRefereeCommand.INDIRECT_FREE_THEM: SimpleAutoPlayState.INDIRECT_FREE_DEFENSE
+                RefereeCommand.DIRECT_FREE_US: SimpleAutoPlayState.DIRECT_FREE_OFFENSE,
+                RefereeCommand.DIRECT_FREE_THEM: SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
+                RefereeCommand.INDIRECT_FREE_US: SimpleAutoPlayState.INDIRECT_FREE_OFFENSE,
+                RefereeCommand.INDIRECT_FREE_THEM: SimpleAutoPlayState.INDIRECT_FREE_DEFENSE,
 
-            }.get(referee.command, RefereeCommand.HALT)
+                RefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
+                RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.BALL_PLACEMENT_US,
+
+            }.get(ref_state.command, RefereeCommand.HALT)
 
         # During the game
-        elif referee.command == RefereeCommand.FORCE_START or referee.command == RefereeCommand.NORMAL_START:
+        elif ref_state.command == RefereeCommand.FORCE_START or ref_state.command == RefereeCommand.NORMAL_START:
             next_state = self._analyse_game()
+        elif GameState().ball.is_mobile() and ref_state.command in self.FREE_KICK_COMMANDS:
+            return SimpleAutoPlayState.NORMAL_OFFENSE
 
-        self.last_ref_command = referee.command
+        self.last_ref_state = ref_state.command
         return next_state
 
     @staticmethod
@@ -168,10 +178,6 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.STOP: 'StayAway',
             SimpleAutoPlayState.GOAL_US: 'StayAway',
             SimpleAutoPlayState.GOAL_THEM: 'StayAway',
-            SimpleAutoPlayState.BALL_PLACEMENT_THEM: 'StayAway',
-
-            # Place the ball to the designated position
-            SimpleAutoPlayState.BALL_PLACEMENT_US: 'DoNothing',
 
             SimpleAutoPlayState.NORMAL_OFFENSE: 'Offense',
             SimpleAutoPlayState.NORMAL_DEFENSE: 'DefenseWall',
@@ -194,6 +200,9 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.DIRECT_FREE_DEFENSE: 'DefenseWallNoKick',
             SimpleAutoPlayState.DIRECT_FREE_OFFENSE: 'DirectFreeKick',
             SimpleAutoPlayState.INDIRECT_FREE_DEFENSE: 'DefenseWallNoKick',
-            SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'IndirectFreeKick'
+            SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'IndirectFreeKick',
+
+            # Place the ball to the designated position
+            SimpleAutoPlayState.BALL_PLACEMENT_US: 'BallPlacement'
 
         }.get(state, SimpleAutoPlayState.HALT)

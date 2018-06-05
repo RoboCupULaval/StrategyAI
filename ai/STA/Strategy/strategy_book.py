@@ -1,8 +1,9 @@
 # Under MIT license, see LICENSE.txt
 
 import logging
-from typing import List
+from typing import List, Dict
 
+from ai.STA.Strategy.ball_placement import BallPlacement
 from ai.STA.Strategy.defense_wall_no_kick import DefenseWallNoKick
 from ai.STA.Strategy.defense_wall import DefenseWall
 from ai.STA.Strategy.direct_free_kick import DirectFreeKick
@@ -14,7 +15,7 @@ from ai.STA.Strategy.human_control import HumanControl
 from ai.STA.Strategy.do_nothing import DoNothing
 from ai.STA.Strategy.offense_kickoff import OffenseKickOff
 from ai.STA.Strategy.passes_with_decisions import PassesWithDecisions
-from ai.STA.Strategy.pathfinderbenchmark import PathfinderBenchmark
+from ai.STA.Strategy.pathfinder_benchmark import PathfinderBenchmark
 from ai.STA.Strategy.penalty_defense import PenaltyDefense
 from ai.STA.Strategy.penalty_offense import PenaltyOffense
 from ai.STA.Strategy.prepare_kickoff_defense import PrepareKickOffDefense
@@ -24,6 +25,7 @@ from ai.STA.Strategy.prepare_penalty_offense import PreparePenaltyOffense
 from ai.STA.Strategy.robocup_choreography import RobocupChoreography
 from ai.STA.Strategy.bamba_follow import BambaFollow
 from ai.STA.Strategy.stay_away import StayAway
+from ai.STA.Strategy.test_goal_keeper import TestGoalKeeper
 
 __author__ = "Maxime Gagnon-Legault, and others"
 
@@ -60,6 +62,8 @@ class StrategyBook(object):
                               'PreparePenaltyOffense': PreparePenaltyOffense,
                               'OffenseKickOff': OffenseKickOff,
                               'DefenseWallNoKick': DefenseWallNoKick,
+                              'BallPlacement': BallPlacement,
+                              'TestGoalKeeper': TestGoalKeeper,
                               'LineUp': LineUp,
                               }
         self.default_strategies = ['Offense',
@@ -81,7 +85,15 @@ class StrategyBook(object):
 
         :return: (List[str]) une liste de string, les noms des stratégies disponibles.
         """
-        return list(self.strategy_book.keys())
+        return list(self.strategy_book)
+
+    @property
+    def strategies_roles(self) -> Dict[str, Dict[str, List[str]]]:
+        results = {}
+        for name, strategy_class in self.strategy_book.items():
+            results[name] = {"required_roles": list([r.name for r in strategy_class.required_roles().keys()]),
+                             "optional_roles": list([r.name for r in strategy_class.optional_roles().keys()])}
+        return results
 
     def get_strategy(self, strategy_name: str):  # -> Strategy: Wrong return type
         """

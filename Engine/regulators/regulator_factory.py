@@ -1,13 +1,13 @@
 from Engine.regulators.position_regulators import GrSimPositionRegulator, RealPositionRegulator
 from Engine.regulators.velocity_regulators import GrSimVelocityController, RealVelocityController
-from config.config_service import ConfigService
+from config.config import Config
 
 
 class RegulatorFactory:
     available_regulators = None
 
     def __new__(cls):
-        regulator_type = ConfigService().config_dict['COMMUNICATION']['type']
+        regulator_type = Config()['COMMUNICATION']['type']
         regulator_class = cls.available_regulators.get(regulator_type, None)
 
         if not regulator_class:

@@ -10,7 +10,7 @@ class RealPositionRegulator(RegulatorBaseClass):
 
     settings = {
         'translation': {'kp': 2, 'ki': 0.1, 'kd': 0},
-        'rotation': {'kp': 2, 'ki': 0.5, 'kd': 0}
+        'rotation': {'kp': 3, 'ki': 0.5, 'kd': 0}
     }
 
     def __init__(self):
@@ -29,8 +29,6 @@ class RealPositionRegulator(RegulatorBaseClass):
                                    self.controllers['y'].execute(pos_error.y),
                                    self.controllers['orientation'].execute(orientation_error))
 
-        command.position = rotate(command.position, -pose.orientation)
-
         # Limit max linear speed
         command.position /= max(1, command.norm / MAX_LINEAR_SPEED)
         command.orientation /= max(1, abs(command.orientation) / MAX_ANGULAR_SPEED)
@@ -44,6 +42,6 @@ class RealPositionRegulator(RegulatorBaseClass):
 class GrSimPositionRegulator(RealPositionRegulator):
 
     settings = {
-        'translation': {'kp': 2, 'ki': 0, 'kd': 0.01},
+        'translation': {'kp': 1, 'ki': 0.1, 'kd': 0.01},
         'rotation': {'kp': 1, 'ki': 0.02, 'kd': 0.0}
     }

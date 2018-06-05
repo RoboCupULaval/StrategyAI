@@ -6,7 +6,7 @@ from collections import deque
 
 
 class PID(object):
-    def __init__(self, kp: float, ki: float, kd: float, *, wrap_error=False):
+    def __init__(self, kp: float, ki: float, kd: float, *, wrap_error=False, anti_windup=True):
 
         self.kp = kp
         self.ki = ki
@@ -18,13 +18,14 @@ class PID(object):
 
         self.wrap_error = wrap_error
 
-        self.anti_windup = True
+        self.anti_windup = anti_windup
         self.error_deque = deque()
         self.anti_windup_time = 0.0
         self.anti_windup_max_time = 0.50
-        self.dt = 0
+        self.dt = None
 
     def execute(self, err) -> float:
+        self.dt = time() if self.dt is None else self.dt
         self.dt, self.last_time = time() - self.last_time, time()
 
         if self.wrap_error:
@@ -48,6 +49,7 @@ class PID(object):
         return (err * self.kp) + (self.err_sum * self.ki * self.dt) + (d_err * self.kd / self.dt)
 
     def reset(self):
+        self.dt = None
         self.err_sum = 0.0
         self.last_err = 0.0
         self.anti_windup_time = 0.0

@@ -4,7 +4,6 @@ from typing import List
 from Util import Pose
 from Util.ai_command import AICommand
 from ai.GameDomainObjects import Player
-from ai.STA.Action import Action
 from Util.ai_command import Idle
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -16,8 +15,6 @@ class Tactic(object):
     """
         Classe mère de toutes les tactiques
     """
-    # IM SORRY MGL 2017/06/16
-    initialized = False
 
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List=None):
         """
@@ -28,7 +25,7 @@ class Tactic(object):
         :param target: Pose général pouvant être utilisé par les classes enfants comme elles veulent
         """
         assert isinstance(game_state, GameState), "Le game_state doit être un GameState"
-        assert isinstance(player, Player), "Le player doit être un Player {}".format(player)
+        assert isinstance(player, Player), "Le player doit être un Player, non un '{}'".format(player)
         assert isinstance(target, Pose), "La target devrait être une Pose"
 
         self.game_state = game_state
@@ -43,7 +40,6 @@ class Tactic(object):
         self.next_state = self.halt
         self.status_flag = Flags.INIT
         self.target = target
-        self.initialized = True
 
     def halt(self) -> Idle:
         """
@@ -62,12 +58,13 @@ class Tactic(object):
             :return: un AICommand
         """
         next_ai_command = self.current_state()
-        if isinstance(next_ai_command, Action):
-            raise RuntimeError("Action are deprecaded use CmdBuilder")
         if not isinstance(next_ai_command, AICommand):
-            raise RuntimeError("A tactic MUST return an AICommand, not a {}".format(type(next_ai_command)))
+            raise RuntimeError("A tactic MUST return an AICommand, not a {}. {} is the culprit.".format(type(next_ai_command), self.current_state))
         self.current_state = self.next_state
         return next_ai_command
+
+    def debug_cmd(self):
+        return []
 
     def get_name(self):
         return self.__class__.__name__

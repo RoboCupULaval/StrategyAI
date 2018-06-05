@@ -1,6 +1,9 @@
 from collections import Counter
+from typing import Dict
 
 from Util.role import Role
+from Util.role_mapping_rule import ImpossibleToMap
+from ai.GameDomainObjects import Player
 
 
 class NoRoleAvailable(RuntimeError):
@@ -14,7 +17,10 @@ class RoleMapper(object):
     def __init__(self):
         self.roles_translation = {r: None for r in Role.as_list()}
 
-    def map_by_player(self, desired_map):
+    def clear(self):
+        self.roles_translation = {r: None for r in Role.as_list()}
+
+    def map_by_player(self, desired_map: Dict[Role, Player]):
         saved_roles = self._save_locked_roles(self.roles_translation)
         base_map = self._remove_undesired_roles(self.roles_translation, desired_map)
 
@@ -27,6 +33,7 @@ class RoleMapper(object):
             raise ValueError("Tried to assign a locked robot to another role, {}".format(Counter(results.values())))
         self.roles_translation = results
 
+    # pylint: disable=invalid-name
     def map_player_to_first_available_role(self, player):
         try:
             role = self.available_roles[0]
@@ -42,8 +49,8 @@ class RoleMapper(object):
     @staticmethod
     def _remove_undesired_roles(base_map, new_map):
         keys = [key for key in base_map.keys()]
-        for key in keys :
-            if key not in new_map :
+        for key in keys:
+            if key not in new_map:
                 base_map[key] = None
         return base_map
 
@@ -66,3 +73,20 @@ class RoleMapper(object):
                 self.roles_translation[key] = old_locked_player
                 break
         self.roles_translation[role] = player
+
+    def map_with_rules(self, available_players, required_rules, optional_rules):
+        nbr_unique_role = len(set(required_rules.keys()) | set(optional_rules.keys()))
+        nbr_role = len(required_rules) + len(optional_rules)
+        assert nbr_unique_role == nbr_role, "The same role can not be in the required rules and the optional rules"
+
+        for role, rule in required_rules.items():
+            player = rule(available_players, role, self.roles_translation)
+            if not isinstance(player, Player):
+                raise TypeError("A rule must return a player, not a '{}'".format(player))
+            self.roles_translation[role] = player
+        try:
+            for role, rule in optional_rules.items():
+                self.roles_translation[role] = rule(available_players, role, self.roles_translation)
+        except ImpossibleToMap:
+            pass
+

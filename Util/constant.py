@@ -5,10 +5,12 @@ from enum import Enum
 
 
 ROBOT_RADIUS = 90
+ROBOT_DIAMETER = ROBOT_RADIUS * 2
+ROBOT_CENTER_TO_KICKER = 60
 BALL_RADIUS = 21
 PLAYER_PER_TEAM = 12
 MAX_PLAYER_ON_FIELD_PER_TEAM = 6
-
+BALL_OUTSIDE_FIELD_BUFFER = 200
 
 # Radius and angles for tactics
 DISTANCE_BEHIND = ROBOT_RADIUS + 30  # in millimeters
@@ -16,6 +18,9 @@ ANGLE_TO_GRAB_BALL = 1  # in radians; must be large in case ball moves fast
 RADIUS_TO_GRAB_BALL = ROBOT_RADIUS + 30
 ANGLE_TO_HALT = 0.05  # 3 degrees
 RADIUS_TO_HALT = ROBOT_RADIUS + BALL_RADIUS
+
+# Rules
+KEEPOUT_DISTANCE_FROM_BALL = 500 + ROBOT_RADIUS + 50
 
 # Deadzones
 POSITION_DEADZONE = ROBOT_RADIUS * 0.1
@@ -32,3 +37,20 @@ class TeamColor(Enum):
     YELLOW = 0
     BLUE = 1
 
+    
+class KickForce(Enum):
+    NONE = 0
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
+
+    
+class KickType(Enum):
+    DIRECT = 0
+    CHIP = 1
+
+
+class DribbleState(Enum):
+    AUTOMATIC = 0
+    FORCE_STOP = 1
+    FORCE_SPIN = 2

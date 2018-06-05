@@ -4,30 +4,29 @@ __author__ = "Maxime Gagnon-Legault"
 
 import math
 import time
-from typing import List
+
 import numpy as np
+from typing import List
 
-from Engine.Debug.uidebug_command_factory import UIDebugCommandFactory
-from Util import Pose, Position, AICommand
+from Debug.debug_command_factory import DebugCommandFactory
+from Util import Pose, Position
 from Util.constant import ROBOT_RADIUS
-
 from ai.GameDomainObjects.player import Player
 from ai.STA.Action.GoBehind import GoBehind
-from Util.ai_command import Idle
+from Util.ai_command import Idle, MoveTo
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
-# noinspection PyTypeChecker,PyUnresolvedReferences
+# noinspection PyTypeChecker
 class Bump(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None):
         super().__init__(game_state, player, target, args)
         self.current_state = self.get_behind_ball
         self.next_state = self.get_behind_ball
-        self.debug_interface = UIDebugCommandFactory()
+        self.debug_interface = DebugCommandFactory()
         self.move_action = self._generate_move_to()
-        self.move_action.status_flag = Flags.SUCCESS
         self.last_ball_position = self.game_state.ball_position
         self.charge_time = 0
         self.last_time = time.time()
@@ -72,12 +71,12 @@ class Bump(Tactic):
         player_to_target = target - player
         player_to_target = 0.5 * player_to_target / np.linalg.norm(player_to_target)
         speed_pose = Pose(Position.from_array(player_to_target))
-        return Move(self.game_state, self.player, speed_pose)
+        return MoveTo(speed_pose)
 
     def halt(self):
         self.next_state = self.halt
         self.status_flag = Flags.SUCCESS
-        return Idle(self.game_state, self.player)
+        return Idle
 
     def _get_distance_from_ball(self):
         return (self.player.pose.position - self.game_state.ball_position).norm
@@ -111,7 +110,7 @@ class Bump(Tactic):
         dest_position = self.get_behind_ball_position(ball_position)
         destination_pose = Pose(dest_position, player_pose.orientation)
 
-        return AICommand(self.player.id, destination_pose.to_dict())
+        return MoveTo(destination_pose)
 
     def get_behind_ball_position(self, ball_position):
         vec_dir = self.target.position - ball_position
