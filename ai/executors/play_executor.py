@@ -56,7 +56,8 @@ class PlayExecutor:
 
         self.ui_send_queue.put_nowait(debug_cmds)
 
-        paths = self.pathfinder_module.exec(self.game_state, ai_cmds)
+        strat_obstacles = self.play_state.current_strategy.obstacles()
+        paths = self.pathfinder_module.exec(self.game_state, ai_cmds, strat_obstacles)
 
         engine_cmds = []
         for player, ai_cmd in ai_cmds.items():
@@ -156,7 +157,7 @@ def generate_engine_cmd(player: Player, ai_cmd: AICommand, path):
                          path=path,
                          kick_type=ai_cmd.kick_type,
                          kick_force=ai_cmd.kick_force,
-                         dribbler_active=ai_cmd.dribbler_active,
+                         dribbler_state=ai_cmd.dribbler_state,
                          target_orientation=ai_cmd.target.orientation if ai_cmd.target else None,
                          end_speed=ai_cmd.end_speed,
                          charge_kick=ai_cmd.charge_kick)

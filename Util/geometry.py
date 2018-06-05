@@ -149,6 +149,10 @@ def angle_between_three_points(start: Position, mid: Position, end: Position) ->
     return abs(wrap_to_pi((mid - start).angle - (mid - end).angle))
 
 
+def find_signed_delta_angle(target_angle, source_angle) -> float:
+    return m.atan2(np.sin(target_angle - source_angle), np.cos(target_angle - source_angle))
+
+
 def wrap_to_pi(angle: float) -> float:
     return (angle + m.pi) % (2 * m.pi) - m.pi
 
@@ -222,9 +226,13 @@ def distance_from_points(point: Position, points: Sequence[Position]) -> List[fl
     return cast(List, np.linalg.norm(points_array - point.array).tolist())
 
 
+def random_direction():
+    return normalize(Position.from_array(np.random.randn(2)))
+
+
 def find_gaps_between_angles(angles: List[tuple], previous_angles=None, current_step=0):
 
-    if angles[current_step][1]>angles[1][1] and angles[0][0] < angles[1][0]:
+    if angles[current_step][1] > angles[1][1] and angles[0][0] < angles[1][0]:
         del angles[1]
         find_gaps_between_angles(angles)
 

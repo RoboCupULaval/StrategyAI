@@ -3,9 +3,11 @@ from typing import List
 
 import logging
 
+from ai.STA.Tactic.place_ball import PlaceBall
 from ai.STA.Tactic.face_target import FaceTarget
 from ai.STA.Tactic.pass_to_player import PassToPlayer
 from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot
+from ai.STA.Tactic.rotate_around_ball import RotateAroundBall
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
@@ -30,6 +32,7 @@ class TacticBook(object):
         self.logger = logging.getLogger('TacticBook')
 
         self.tactic_book = {
+            'PlaceBall' : PlaceBall,
             'FaceTarget': FaceTarget,
             'DemoFollowBall': DemoFollowBall,
             'DemoFollowRobot': DemoFollowRobot,
@@ -41,6 +44,7 @@ class TacticBook(object):
             'ProtectZone': ProtectZone,
             'StayAwayFromBall': StayAwayFromBall,
             'Stop': Stop,
+            'RotateAroundBall': RotateAroundBall,
         }
         self.default_tactics = ['GoToPositionPathfinder',
                                'GoKick']

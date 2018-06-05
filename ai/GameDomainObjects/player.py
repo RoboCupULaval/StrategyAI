@@ -40,6 +40,10 @@ class Player:
     def pose(self):
         return self._pose
 
+    @property
+    def orientation(self):
+        return self._pose.orientation
+
     @pose.setter
     def pose(self, value: Pose):
         assert isinstance(value, Pose)

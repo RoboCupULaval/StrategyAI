@@ -11,15 +11,17 @@ from Util.path import Path
 
 MIN_PATH_LENGTH = 250  # mm
 RECURSION_LIMIT = 3
-SUB_TARGET_RESOLUTION_FACTOR = 100
+SUB_TARGET_RESOLUTION_FACTOR = 30
 ELLIPSE_HALF_WIDTH = 1000
 
 
 class Obstacle:
     BASE_AVOID_DISTANCE = 100  # in mm
+
     def __init__(self, position: np.ndarray, *, avoid_distance: Optional[float] = None):
         self.position = position
         self.avoid_distance = avoid_distance if avoid_distance is not None else self.BASE_AVOID_DISTANCE
+
     def __repr__(self):
         return self.__class__.__name__ + '({})'.format(self.position)
 
@@ -162,8 +164,6 @@ class PathPartitionner:
             self.old_path.target = target
             self.old_path.points[-1] = target
             return self.old_path
-        elif distance_from_old_target < 200:
-            return self.old_path + self.path_planner(self.old_path.target.array, target.array)
         else:
             return self.path_planner(start.array, target.array)
 
@@ -181,3 +181,4 @@ def normalize(vec: np.ndarray) -> np.ndarray:
 def perpendicular(vec: np.ndarray) -> np.ndarray:
     """Return the orthonormal vector to the np.array([0,0,1]) with right hand rule."""
     return normalize(np.array([-vec[1], vec[0]]))
+

@@ -7,9 +7,10 @@ import numpy as np
 
 from Debug.debug_command_factory import DebugCommandFactory
 from Util import Pose, Position
-from Util.geometry import perpendicular, normalize, find_bisector_of_triangle, angle_between_three_points, Line
+from Util.geometry import perpendicular, normalize, find_bisector_of_triangle, angle_between_three_points, Line, \
+    intersection_line_and_circle
 
-from Util.constant import BALL_RADIUS, ROBOT_RADIUS, ROBOT_DIAMETER
+from Util.constant import BALL_RADIUS, ROBOT_RADIUS, ROBOT_DIAMETER, KEEPOUT_DISTANCE_FROM_BALL
 from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
@@ -32,7 +33,8 @@ class AlignToDefenseWall(Tactic):
                  player: Player,
                  args: Optional[List[str]]=None,
                  robots_in_formation: Optional[List[Player]]=None,
-                 object_to_block=None):
+                 object_to_block=None,
+                 stay_away_from_ball=False):
         super().__init__(game_state, player, args=args)
         if object_to_block is None:
             object_to_block = GameState().ball
@@ -43,6 +45,7 @@ class AlignToDefenseWall(Tactic):
             self.robots_in_formation = robots_in_formation
         assert isinstance(self.robots_in_formation[0], Player)
 
+        self.stay_away_from_ball = stay_away_from_ball
         self.go_kick_tactic = None
         self.player_number_in_formation = None
         self.wall_segment = None
@@ -89,6 +92,10 @@ class AlignToDefenseWall(Tactic):
                                                        object_to_center_formation_dist)
 
         self.center_formation = object_to_block_to_center_formation_dist * normalize(vec_object_to_goal_line_bisect) + self.object_to_block.position
+
+        if self.stay_away_from_ball:
+            if (self.game_state.ball_position - self.center_formation).norm < KEEPOUT_DISTANCE_FROM_BALL:
+                self.center_formation = self._closest_point_away_from_ball()
 
         half_wall_segment = 0.5 * wall_segment_length * perpendicular(normalize(vec_object_to_goal_line_bisect))
         self.wall_segment = Line(self.center_formation + half_wall_segment,
@@ -140,7 +147,8 @@ class AlignToDefenseWall(Tactic):
             return self.go_kick_tactic.exec()
 
     def _should_ball_be_kick_by_wall(self):
-        return (self.position_on_wall_segment() - self.game_state.ball.position).norm < FETCH_BALL_ZONE_RADIUS
+        return not self.stay_away_from_ball and \
+               (self.position_on_wall_segment() - self.game_state.ball.position).norm < FETCH_BALL_ZONE_RADIUS
 
     def _is_closest_not_goaler(self, player):
         closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
@@ -148,5 +156,16 @@ class AlignToDefenseWall(Tactic):
             return True
         return closest_players[0].player == self.game_state.get_player_by_role(Role.GOALKEEPER) \
                and player == closest_players[1].player
+
+    def _closest_point_away_from_ball(self):
+        inters = intersection_line_and_circle(self.game_state.ball_position, KEEPOUT_DISTANCE_FROM_BALL,
+                                              self.object_to_block.position, self.bisect_inter)
+        if len(inters) == 1:
+            return inters[0]
+        if (inters[0] - self.bisect_inter).norm < (inters[1] - self.bisect_inter).norm:
+            return inters[0]
+        else:
+            return inters[1]
+
 
 

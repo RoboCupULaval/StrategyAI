@@ -4,7 +4,7 @@ from Engine.Communication.protobuf import grSim_Packet_pb2 as grSim_Packet
 from Engine.Communication.sender.sender_base_class import Sender
 from Engine.Communication.sender.udp_socket import udp_socket
 
-from Util.constant import KickForce
+from Util.constant import KickForce, DribbleState
 
 __author__ = "Maxime Gagnon-Legault"
 
@@ -31,7 +31,7 @@ class GrSimCommandSender(Sender):
             grsim_command.veltangent = packet.command.x/1000
             grsim_command.velnormal = packet.command.y/1000
             grsim_command.velangular = packet.command.orientation
-            grsim_command.spinner = packet.dribbler_active
+            grsim_command.spinner = packet.dribbler_state != DribbleState.FORCE_STOP
             grsim_command.kickspeedx = self.translate_kick_force(packet.kick_force)
             grsim_command.kickspeedz = 0
 

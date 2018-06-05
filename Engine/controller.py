@@ -40,7 +40,12 @@ class Controller:
         self.timestamp = track_frame['timestamp']
         our_team_color = str(TeamColorService().our_team_color)
 
+        for robot in self:
+            robot.is_active = False
+
         for robot in track_frame[our_team_color]:
+
+            self[robot['id']].is_active = True
             self[robot['id']].pose = robot['pose']
             self[robot['id']].velocity = robot['velocity']
 
@@ -51,9 +56,11 @@ class Controller:
 
     def execute(self) -> RobotState:
         commands = {}
-        active_robots = [robot for robot in self if robot.pose is not None and robot.raw_path is not None]
+        active_robots = [robot for robot in self if robot.is_active]
 
         for robot in active_robots:
+            if robot.raw_path is None:
+                continue
             robot.path, robot.target_speed = path_smoother(robot)
 
             if robot.position_error.norm < 200 and robot.target_speed == 0:
@@ -86,7 +93,7 @@ class Controller:
                             command=cmd,
                             kick_type=self[robot_id].engine_cmd.kick_type,
                             kick_force=self[robot_id].engine_cmd.kick_force,
-                            dribbler_active=self[robot_id].engine_cmd.dribbler_active,
+                            dribbler_state=self[robot_id].engine_cmd.dribbler_state,
                             charge_kick=self[robot_id].engine_cmd.charge_kick))
         return packet
 
