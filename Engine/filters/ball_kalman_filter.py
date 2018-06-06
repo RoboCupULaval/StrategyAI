@@ -7,10 +7,6 @@ from Engine.filters.kalman_filter import KalmanFilter
 class BallFilter(KalmanFilter):
 
     @property
-    def confidence(self):
-        return int(sum(np.diag(self.P)))
-
-    @property
     def position(self):
         if self.is_active:
             return self.x[0::2]

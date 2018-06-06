@@ -186,7 +186,7 @@ class Tracker:
 
     @property
     def balls(self) -> List[Dict[str, Any]]:
-        return Tracker._format_entities(sorted(self.active_balls, key=lambda b: b.confidence, reverse=True))
+        return Tracker._format_entities(sorted(self.active_balls, key=lambda b: b.first_update_time))
 
     @property
     def blue_team(self) -> List[Dict[str, Any]]:
@@ -207,7 +207,6 @@ class Tracker:
             elif type(entity) is BallFilter:
                 fields['position'] = Position(*entity.position)
                 fields['velocity'] = Position(*entity.velocity)
-                fields['confidence'] = entity.confidence
             else:
                 raise TypeError('Invalid type provided: {}'.format(type(entity)))
 
