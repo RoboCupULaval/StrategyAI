@@ -26,24 +26,16 @@ class LineUp(Strategy):
         role_by_robots = [(i, self.game_state.get_player_by_role(i)) for i in roles_to_consider]
 
         self.robots = [player for player in role_by_robots if player is not None]
-        i = 0
+        i = 1
         for role, player in role_by_robots:
 
             destination_orientation = 0
             self.position_offset = Position(i * ROBOT_RADIUS * 3, 0)
             self.positions_in_formations = self.target_position + self.position_offset
             i += 1
-            always = partial(self.always)
-            node_move_to = self.create_node(role, GoToPositionPathfinder(self.game_state, player,
-                                                                         Pose(self.positions_in_formations,
-                                                                              destination_orientation)))
-            node_move_to.connect_to(node_move_to, when=always)
-
-            # self.add_condition(idx, 0, 0, partial(self.is_closest, player))
-    @staticmethod
-    def always():
-
-        return True
+            self.create_node(role, GoToPositionPathfinder(self.game_state, player,
+                                                          Pose(self.positions_in_formations,
+                                                               destination_orientation)))
 
     @classmethod
     def required_roles(cls):
