@@ -15,10 +15,17 @@ def set_arg_parser():
     arg_parser = argparse.ArgumentParser(prog='ULtron\'s AI of the RoboCup ULaval group.', description=prog_desc)
 
     arg_parser.add_argument('config_file',
-                            nargs='?',
                             action='store',
                             help='Load a configuration file(.ini/cfg style).',
                             default='config/sim.cfg')
+
+    arg_parser.add_argument('color',
+                            help='Select team color',
+                            choices=['blue', 'yellow'])
+
+    arg_parser.add_argument('side',
+                            help='Select if the team is playing on the positive of negative side',
+                            choices=['positive', 'negative'])
 
     arg_parser.add_argument('--engine_fps',
                             action='store',
@@ -29,11 +36,6 @@ def set_arg_parser():
     arg_parser.add_argument('--unlock_engine_fps',
                             action='store_true',
                             help='Flag to unlock the engine FPS.',
-                            default=False)
-
-    arg_parser.add_argument('--on_negative_side',
-                            action='store_true',
-                            help='Flag when we are on the negative x side of the field.',
                             default=False)
 
     arg_parser.add_argument('--enable_profiling',
@@ -59,14 +61,14 @@ if __name__ == '__main__':
     Config().load_parameters(cli_args)
     logging = logging.getLogger('Main')
 
-    logging.info("Color: {}, Field side: {}, Mode: {}".format(Config()["GAME"]["our_color"].upper(),
-                                                    "NEGATIVE" if Config()["GAME"]["on_negative_side"] else "POSITIVE",
-                                                    "COMPETITION" if cli_args.competition_mode else "NORMAL"))
+    logging.info('Color: {}, Field side: {}, Mode: {}'.format(Config()['GAME']['our_color'].upper(),
+                                                    'NEGATIVE' if Config()['GAME']['on_negative_side'] else 'POSITIVE',
+                                                    'COMPETITION' if cli_args.competition_mode else 'NORMAL'))
 
     stop_framework = False
     while not stop_framework:
         try:
-            Framework(cli_args).start()
+            Framework(profiling=cli_args.enable_profiling).start()
         except SystemExit:
             logging.debug('Framework stopped.')
         finally:

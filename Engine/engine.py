@@ -28,10 +28,7 @@ config = Config()
 
 class Engine(Process):
 
-    DEFAULT_CAMERA_NUMBER = 4
     MAX_EXCESS_TIME = 0.050
-    PROFILE_DUMP_TIME = 10
-    PROFILE_DATA_FILENAME = 'profile_data_engine.prof'
 
     def __init__(self,
                  game_state: DictProxy,
@@ -106,9 +103,8 @@ class Engine(Process):
             while True:
                 self.frame_count += 1
                 self.main_loop()
-                self.dump_profiling_stats()
-                if self.is_fps_locked:
-                    self.fps_sleep()
+                if self.profiling_enabled: self.dump_profiling_stats()
+                if self.is_fps_locked: self.fps_sleep()
         except KeyboardInterrupt:
             pass
         finally:
@@ -119,7 +115,7 @@ class Engine(Process):
 
     def wait_for_vision(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
-        sleep_vision = create_fps_timer(10)
+        sleep_vision = create_fps_timer(1)
         while not any(self.vision_state):
             sleep_vision()
 
@@ -145,29 +141,29 @@ class Engine(Process):
 
     def get_engine_commands(self):
         try:
-            engine_cmds = self.ai_queue.get(block=False)
+            engine_cmds = self.ai_queue.get_nowait()
         except Empty:
             engine_cmds = []
         return engine_cmds
 
     def dump_profiling_stats(self):
-        if self.profiling_enabled:
-            if self.frame_count % (self.fps * Engine.PROFILE_DUMP_TIME) == 0:
-                self.profiler.dump_stats(Engine.PROFILE_DATA_FILENAME)
-                self.logger.debug('Profile data written to {}.'.format(Engine.PROFILE_DATA_FILENAME))
+        if self.frame_count % (self.fps * config['ENGINE']['profiling_dump_time']) == 0:
+            self.profiler.dump_stats(config['ENGINE']['profiling_filename'])
+            self.logger.debug('Profiling data written to {}.'.format(config['ENGINE']['profiling_filename']))
 
-    def is_any_subprocess_borked(self):
-        borked_process_found = not all((self.vision_receiver.is_alive(),
+    def is_alive(self):
+        borked_process_not_found = all((self.vision_receiver.is_alive(),
                                         self.ui_sender.is_alive(),
                                         self.ui_recver.is_alive(),
                                         self.referee_recver.is_alive()))
-        return borked_process_found
+        return borked_process_not_found and super().is_alive()
 
-    def terminate_subprocesses(self):
+    def terminate(self):
         self.vision_receiver.terminate()
         self.ui_sender.terminate()
         self.ui_recver.terminate()
         self.referee_recver.terminate()
+        super().terminate()
 
     def enable_profiling(self):
         self.profiling_enabled = True

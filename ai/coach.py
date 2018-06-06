@@ -15,13 +15,11 @@ from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 
 from config.config import Config
-
+config = Config()
 
 class Coach(Process):
 
     MAX_EXCESS_TIME = 0.1
-    PROFILE_DUMP_TIME = 10
-    PROFILE_DATA_FILENAME = 'profile_data_ai.prof'
 
     def __init__(self,
                  engine_game_state: DictProxy,
@@ -59,7 +57,7 @@ class Coach(Process):
                                             self.ui_recv_queue)
 
         # fps and limitation
-        self.fps = Config()['GAME']['coach_fps']
+        self.fps = config['GAME']['coach_fps']
         self.frame_count = 0
         self.last_frame_count = 0
 
@@ -86,7 +84,7 @@ class Coach(Process):
 
         # FIXME: At startup it takes a few seconds to have the player's positions,
         # to prevent role assigment crash, let's sleep for a few secs.
-        if Config()["GAME"]["is_autonomous_play_at_startup"]:
+        if config['GAME']['is_autonomous_play_at_startup']:
             sleep(3)
 
         self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
@@ -113,7 +111,7 @@ class Coach(Process):
 
     def dump_profiling_stats(self):
         if self.profiling_enabled:
-            if self.frame_count % (self.fps * Coach.PROFILE_DUMP_TIME) == 0:
-                self.profiler.dump_stats(Coach.PROFILE_DATA_FILENAME)
-                self.logger.debug('Profile data written to {}.'.format(Coach.PROFILE_DATA_FILENAME))
+            if self.frame_count % (self.fps * config['GAME']['profiling_dump_time']) == 0:
+                self.profiler.dump_stats(config['game']['profiling_filename'])
+                self.logger.debug('Profiling data written to {}.'.format(config['game']['profiling_filename']))
 

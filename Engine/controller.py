@@ -24,7 +24,6 @@ from config.config import Config
 class Controller:
 
     def __init__(self, ui_send_queue: Queue):
-        logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger("Controller")
 
         self.timestamp = None
