@@ -89,7 +89,8 @@ def is_path_colliding(obstacles, obstacles_position, obstacles_avoid_radius, sta
 
 
 def find_collisions(obstacles, obstacles_position, obstacles_avoid_radius, start, target):
-
+    # fonction prend en argument des positions converties en array!
+    # Position().array par exemple.
     robot_to_obstacles = obstacles_position - start
     robot_to_obstacle_norm = np.linalg.norm(robot_to_obstacles, axis=1)
     obstacles_avoid_distance = obstacles_avoid_radius
