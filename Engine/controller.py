@@ -37,12 +37,13 @@ class Controller:
 
         self.timestamp = track_frame['timestamp']
 
+        for robot in self.robots:
+            robot.is_on_field = False
+
         for robot in track_frame[config['GAME']['our_color']]:
+            self[robot['id']].is_on_field = True
             self[robot['id']].pose = robot['pose']
             self[robot['id']].velocity = robot['velocity']
-
-        for robot in self.robots:
-            robot.engine_cmd = None
 
         for cmd in engine_cmds:
             self[cmd.robot_id].engine_cmd = cmd
@@ -88,7 +89,10 @@ class Controller:
         if not commands:
             return
 
-        robot_id = 5
+        robot_id = 0
+
+        if robot_id not in commands:
+            return
         self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point('mm/s',
                                                                      'robot {} cmd speed'.format(robot_id),
                                                                      [time.time()],

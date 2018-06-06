@@ -10,6 +10,7 @@ from Util.path import Path
 from Util.role import Role
 from ai.GameDomainObjects.player import Player
 from config.config import Config
+config = Config()
 
 __author__ = "Maxime Gagnon-Legault, Philippe Babin, Simon Bouchard, and others"
 
@@ -52,14 +53,14 @@ def flip_position(position: Position):
     The AI is side independent, so every position send to the UI-Debug must be flip around the y axis
     """
     assert isinstance(position, Position)
-    if not Config()["GAME"]["on_negative_side"]:
+    if not config["GAME"]["on_negative_side"]:
         return position
     return position.flip_x()
 
 
 def flip_pose(pose: Pose):
     assert isinstance(pose, Pose)
-    if not Config()["GAME"]["on_negative_side"]:
+    if not config["GAME"]["on_negative_side"]:
         return pose
     return pose.mirror_x()
 
@@ -114,7 +115,7 @@ class DebugCommandFactory:
             if robot.raw_path:
                 raw_path_cmds += DebugCommandFactory.path(robot.raw_path, robot.id, color=BLUE)
             if robot.path:
-                path_cmds += DebugCommandFactory.path(robot.path, robot.id+12, color=RED) # allow multiple point with same function
+                path_cmds += DebugCommandFactory.path(robot.path, robot.id+config['ENGINE']['max_robot_id'], color=RED) # allow multiple point with same function
         return raw_path_cmds + path_cmds
 
     @staticmethod

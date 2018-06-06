@@ -58,7 +58,7 @@ class KalmanFilter:
         if update_time == self.last_update_time:
             return
 
-        self._dt = time() - self.last_update_time
+        self._dt = update_time - self.last_update_time
         self.last_update_time = update_time
 
         # Compute Kalman gain from states covariance and observation model
@@ -71,13 +71,11 @@ class KalmanFilter:
         # Update the states covariance matrix
         self.P = self.P - gain @ self.observation_model() @ self.P
 
-    def _predict(self, input_command=None, predict_time=time()):
+    def _predict(self, input_command=None):
         if not self.is_active:
             return
 
-        if predict_time == self.last_predict_time:
-            return
-
+        predict_time = time()
         self._dt = predict_time - self.last_predict_time
         self.last_predict_time = predict_time
 
