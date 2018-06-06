@@ -141,7 +141,7 @@ class Config(metaclass=Singleton):
 
     def load_parameters(self, cli_args):
         self._config['ENGINE']['fps'] = cli_args.engine_fps
-        self._config['ENGINE']['is_fps_locked'] = cli_args.unlock_engine_fps
+        self._config['ENGINE']['is_fps_locked'] = not cli_args.unlock_engine_fps
         self._config['ENGINE']['enable_profiling'] = cli_args.enable_profiling
 
         self._config['GAME']['on_negative_side'] = cli_args.on_negative_side
