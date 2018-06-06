@@ -49,7 +49,7 @@ class PlayState:
     def _is_mapping_valid(self, roles):
         for player_id in roles.values():
             if player_id not in self.game_state.our_team.available_players.keys():
-                self.logger.error("is not in available".format(player_id))
+                self.logger.error("Robot id {} is not available".format(player_id))
                 return False
         return True
 
