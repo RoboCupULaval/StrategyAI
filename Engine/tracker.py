@@ -63,7 +63,6 @@ class Tracker:
     def _update(self, detection_frame: Dict[str, List[Dict[str, Any]]], timestamp: int):
 
         new_robots = {'blue': set(), 'yellow': set()}
-        print(timestamp)
         for robot_obs in detection_frame.get('robots_blue', ()):
             if not self._blue_team[robot_obs['robot_id']].is_active:
                 new_robots['blue'].add(robot_obs['robot_id'])
