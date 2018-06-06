@@ -60,9 +60,9 @@ class Config(metaclass=Singleton):
         self['ENGINE']['profiling_dump_time'] = 10
         self['ENGINE']['number_of_camera'] = int(self['ENGINE']['number_of_camera'])
         self['ENGINE']['max_robot_id'] = 12
-        self['ENGINE']['max_undetected_robot_time'] = 3
-        self['ENGINE']['max_undetected_ball_time'] = 3
-        self['ENGINE']['max_ball_on_field'] = 1
+        self['ENGINE']['max_undetected_robot_time'] = 1
+        self['ENGINE']['max_undetected_ball_time'] = 0.25
+        self['ENGINE']['max_ball_on_field'] = 2
 
 
         if self.is_simulation():
