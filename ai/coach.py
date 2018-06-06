@@ -57,7 +57,7 @@ class Coach(Process):
                                             self.ui_recv_queue)
 
         # fps and limitation
-        self.fps = config['GAME']['coach_fps']
+        self.fps = config['GAME']['fps']
         self.frame_count = 0
         self.last_frame_count = 0
 

@@ -19,10 +19,6 @@ config = Config()
 
 class Tracker:
 
-    MAX_ROBOT_ID = 12
-    MAX_BALL_ON_FIELD = 1
-    MAX_UNDETECTED_DELAY = 3
-
     def __init__(self, vision_state: DictProxy, ui_send_queue: Queue):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.ui_send_queue = ui_send_queue
@@ -40,6 +36,7 @@ class Tracker:
 
         for frame in self.camera_frames:
             if config['GAME']['on_negative_side']: frame = Tracker._change_frame_side(frame)
+            self._log_new_robots_on_field(frame)
             self._camera_frame_number[frame['camera_id']] = frame['frame_number']
             self._update(frame, frame['timestamp'])
             self.current_timestamp = max(self.current_timestamp, frame['timestamp'])
@@ -49,8 +46,6 @@ class Tracker:
         return self.game_state
 
     def _update(self, detection_frame: Dict[str, List[Dict[str, Any]]], timestamp: float):
-
-        self._log_new_robots_on_field(detection_frame)
 
         for robot_obs in detection_frame.get('robots_blue', ()):
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
@@ -70,8 +65,8 @@ class Tracker:
         for packet in robot_state.packet:
             velocity_commands[packet.robot_id] = packet.command
 
-        for robot, velocity_command in zip(self._our_team, velocity_commands):
-            robot.predict(self._put_in_world_referential(robot, velocity_command).to_array())
+        for robot in self._our_team:
+            robot.predict(self._put_in_world_referential(robot, velocity_commands[robot.id]).to_array())
 
         for robot in self._their_team:
             robot.predict()
@@ -106,7 +101,6 @@ class Tracker:
         else:
             cmd.position = rotate(cmd.position, robot.orientation)
         return cmd
-
 
     @staticmethod
     def _change_frame_side(detection_frame: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:

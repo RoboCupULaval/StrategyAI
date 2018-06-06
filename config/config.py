@@ -51,7 +51,7 @@ class Config(metaclass=Singleton):
         return config_dict
 
     def update_content(self):
-        self['GAME']['coach_fps'] = int(self['GAME']['coach_fps'])
+        self['GAME']['fps'] = int(self['GAME']['coach_fps'])
         self['GAME']['is_autonomous_play_at_startup'] = self['GAME']['is_autonomous_play_at_startup'] == 'true'
         self['Game']['profiling_filename'] = 'profile_data_ai.prof'
         self['Game']['profiling_dump_time'] = 10
@@ -144,7 +144,6 @@ class Config(metaclass=Singleton):
         self._config['ENGINE']['is_fps_locked'] = not cli_args.unlock_engine_fps
         self._config['ENGINE']['enable_profiling'] = cli_args.enable_profiling
 
-        self._config['GAME']['on_negative_side'] = cli_args.on_negative_side
         self._config['GAME']['our_color'] = cli_args.color
         self._config['GAME']['on_negative_side'] = cli_args.side == 'negative'
         self._config['GAME']['competition_mode'] = cli_args.competition_mode
