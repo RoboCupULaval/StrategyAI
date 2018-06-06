@@ -31,6 +31,7 @@ class Config(metaclass=Singleton):
 
         self.validate_user_input()
         self.update_content()
+        self.update_ports()
 
         self._config_was_set = True
 
@@ -55,6 +56,11 @@ class Config(metaclass=Singleton):
         self['GAME']['coach_fps'] = int(self['GAME']['coach_fps'])
         self['GAME']['is_autonomous_play_at_startup'] = self['GAME']['is_autonomous_play_at_startup'] == 'true'
 
+        if self.is_simulation():
+            self['COMMUNICATION']['grsim_info'] = (self['COMMUNICATION']['grsim_udp_address'],
+                                                   int(self['COMMUNICATION']['grsim_port']))
+
+    def update_ports(self):
         # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
         if self['GAME']['our_color'] == 'blue':
             self['COMMUNICATION']['ui_cmd_sender_port'] = 14444    # DO NOT TOUCH
@@ -74,10 +80,6 @@ class Config(metaclass=Singleton):
 
         self['COMMUNICATION']['referee_info'] = (self['COMMUNICATION']['referee_udp_address'],
                                                  int(self['COMMUNICATION']['referee_port']))
-
-        if self.is_simulation():
-            self['COMMUNICATION']['grsim_info'] = (self['COMMUNICATION']['grsim_udp_address'],
-                                                   int(self['COMMUNICATION']['grsim_port']))
 
     def validate_user_input(self):
         do_exit = False
@@ -125,9 +127,14 @@ class Config(metaclass=Singleton):
         self._config[key] = value
 
     def load_parameters(self, cli_args):
+        self._config['GAME']['our_color'] = cli_args.color
+        self._config['GAME']['on_negative_side'] = cli_args.side == "negative"
         self._config['ENGINE']['engine_fps'] = cli_args.engine_fps
         self._config['ENGINE']['unlock_engine_fps'] = cli_args.unlock_engine_fps
-        self._config['GAME']['on_negative_side'] = cli_args.on_negative_side
         self._config['ENGINE']['enable_profiling'] = cli_args.enable_profiling
         self._config['GAME']['competition_mode'] = cli_args.competition_mode
         self._config['GAME']['is_autonomous_play_at_startup'] = cli_args.start_in_auto
+
+        self._config_was_set = False
+        self.update_ports()
+        self._config_was_set = True

@@ -6,6 +6,7 @@ from typing import Dict
 from Util.constant import TeamColor
 from Util.position import Position
 from Util.team_color_service import TeamColorService
+from ai.GameDomainObjects.field import FieldSide
 from config.config import Config
 
 
@@ -120,6 +121,9 @@ class RefereeState:
 
         raw_command = RawRefereeCommand(referee_info["command"])
 
+        if "blueTeamOnPositiveHalf" in referee_info and Config()['GAME']['competition_mode']:
+            self._validate_field_side(referee_info["blueTeamOnPositiveHalf"])
+
         self.command = self._parse_command(raw_command)
         self._parse_team_info(referee_info)
 
@@ -178,3 +182,22 @@ class RefereeState:
     @staticmethod
     def _is_blue_command(command):
         return not RefereeState._is_yellow_command(command)
+
+    def _validate_field_side(self, is_blue_positive):
+        truth_table = {
+            True: {
+                TeamColor.BLUE: FieldSide.POSITIVE,
+                TeamColor.YELLOW: FieldSide.NEGATIVE
+            },
+            False: {
+                TeamColor.BLUE: FieldSide.NEGATIVE,
+                TeamColor.YELLOW: FieldSide.POSITIVE
+            }
+        }
+        expected = truth_table[is_blue_positive][TeamColorService().our_team_color]
+        current = FieldSide.NEGATIVE if Config()["GAME"]["on_negative_side"] else FieldSide.POSITIVE
+        assert expected == current, \
+            "The referee is expecting that team {our_team} is {expected}, but currently it's {current}, CHANGE IT!!!"\
+                .format(our_team=TeamColorService().our_team_color.name,
+                        expected=expected.name,
+                        current=current.name)
