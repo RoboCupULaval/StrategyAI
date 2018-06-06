@@ -22,7 +22,7 @@ TARGET_ASSIGNATION_DELAY = 1
 GO_BEHIND_SPACING = 300
 GRAB_BALL_SPACING = 200
 APPROACH_SPEED = 100
-KICK_DISTANCE = 130
+KICK_DISTANCE = 100
 KICK_SUCCEED_THRESHOLD = 600
 COMMAND_DELAY = 0.5
 
@@ -65,22 +65,22 @@ class GoKickExperimental(Tactic):
         effective_ball_spacing = GO_BEHIND_SPACING * ball_speed_modifier
 
         position_behind_ball_for_approach = self.get_destination_behind_ball(effective_ball_spacing)
-        position_behind_ball_for_kick = self.game_state.ball_position - normalize(player_to_target) * \
-                                        (BALL_RADIUS + ROBOT_CENTER_TO_KICKER)
+        position_behind_ball_for_grab = self.game_state.ball_position - normalize(player_to_target) * GRAB_BALL_SPACING
+        position_behind_ball_for_kick = self.game_state.ball_position + normalize(player_to_target) * KICK_DISTANCE
         if self.is_able_to_grab_ball_directly(0.5):
             if compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.1, 0.1 * dist_from_ball/100)) and \
-                    (self._get_distance_from_ball() < KICK_DISTANCE):
+                    (self._get_distance_from_ball() < GRAB_BALL_SPACING * 1.25):
                 self.next_state = self.validate_kick
                 return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
-                                              ball_collision=False).addKick(self.kick_force).build()
-            return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
-                                          ball_collision=False).build()
+                                              ball_collision=False, cruise_speed=2).addKick(self.kick_force).build()
+            return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_grab, orientation),
+                                          ball_collision=False, cruise_speed=2).build()
         else:
             self.points_sequence = [position_behind_ball_for_approach]
-        #print(self.points_sequence)
         return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
                                       ball_collision=[True, False],
-                                      points_to_pass_by=self.points_sequence).build()
+                                      points_to_pass_by=self.points_sequence,
+                                      cruise_speed=2).build()
 
     def kick_charge(self):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:

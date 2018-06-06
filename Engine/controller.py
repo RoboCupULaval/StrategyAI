@@ -63,7 +63,11 @@ class Controller:
                 continue
             robot.path, robot.target_speed = path_smoother(robot)
 
-            if robot.position_error.norm < 100 and robot.target_speed == 0:
+            if robot.position_error.norm < 100 and robot.target_speed == 0 and False: # valider si tout le modne est
+                                                                                      # dacord pour rendre le controleur
+                                                                                      # en position obsolete, tests
+                                                                                      # real_life me disent que oui
+                                                                                      # philippe lebel
                 cmd = robot.position_regulator.execute(robot)
                 robot.velocity_regulator.reset()
             else:
@@ -77,7 +81,7 @@ class Controller:
                                                                          "robot {} kallman speed".format(robot.robot_id),
                                                                          [time.time()],
                                                                          [robot.velocity.norm]))
-
+            print(cmd.orientation)
             commands[robot.robot_id] = self._put_in_robots_referential(robot, cmd)
 
         return self.generate_packet(commands)

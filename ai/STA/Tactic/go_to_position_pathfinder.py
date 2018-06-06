@@ -39,4 +39,5 @@ class GoToPositionPathfinder(Tactic):
 
     def check_success(self):
         distance = (self.player.pose - self.target.position).norm
-        return distance < POSITION_DEADZONE and compare_angle(self.player.pose.orientation, self.target.orientation, abs_tol=ANGLE_TO_HALT)
+        return (distance < POSITION_DEADZONE) and compare_angle(self.player.pose.orientation,
+                                                                self.target.orientation, abs_tol=ANGLE_TO_HALT)
