@@ -15,10 +15,17 @@ def set_arg_parser():
     arg_parser = argparse.ArgumentParser(prog='ULtron\'s AI of the RoboCup ULaval group.', description=prog_desc)
 
     arg_parser.add_argument('config_file',
-                            nargs='?',
                             action='store',
                             help='Load a configuration file(.ini/cfg style).',
                             default='config/sim.cfg')
+
+    arg_parser.add_argument('color',
+                            help='Select team color',
+                            choices=["blue", "yellow"])
+
+    arg_parser.add_argument('side',
+                            help='Select if the team is playing on the positive of negative side',
+                            choices=["positive", "negative"])
 
     arg_parser.add_argument('--engine_fps',
                             action='store',
@@ -29,11 +36,6 @@ def set_arg_parser():
     arg_parser.add_argument('--unlock_engine_fps',
                             action='store_true',
                             help='Flag to unlock the engine FPS.',
-                            default=False)
-
-    arg_parser.add_argument('--on_negative_side',
-                            action='store_true',
-                            help='Flag when we are on the negative x side of the field.',
                             default=False)
 
     arg_parser.add_argument('--enable_profiling',
