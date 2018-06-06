@@ -32,8 +32,7 @@ class Framework:
                              self.ai_queue,
                              self.referee_queue,
                              self.ui_send_queue,
-                             self.ui_recv_queue,
-                             fps=cli_args.engine_fps)
+                             self.ui_recv_queue)
 
         self.coach = Coach(self.game_state,
                            self.field,
@@ -44,9 +43,6 @@ class Framework:
 
         if cli_args.on_negative_side:
             self.engine.on_negative_side = True
-
-        if cli_args.unlock_engine_fps:
-            self.engine.unlock_fps()
 
         if cli_args.enable_profiling:
             self.coach.enable_profiling()

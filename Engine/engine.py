@@ -3,11 +3,10 @@ import cProfile
 import logging
 import os
 import sys
-from math import sqrt
+
 from multiprocessing import Process, Queue, Manager
 from multiprocessing.managers import DictProxy
 from queue import Empty
-from time import time
 
 from Debug.debug_command_factory import DebugCommandFactory
 
@@ -16,18 +15,20 @@ from Engine.Communication.receiver.uidebug_command_receiver import UIDebugComman
 from Engine.Communication.receiver.vision_receiver import VisionReceiver
 from Engine.Communication.sender.robot_command_sender import RobotCommandSender
 from Engine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
+
 from Engine.controller import Controller
 from Engine.tracker import Tracker
+
 from Util.timing import create_fps_timer
 
 from config.config import Config
+
+config = Config()
 
 
 class Engine(Process):
 
     DEFAULT_CAMERA_NUMBER = 4
-    DEFAULT_FPS_LOCK_STATE = True
-    DEFAULT_FPS = 30  # Please don't change this constant, instead run 'python main.py --engine_fps desired_fps'
     MAX_EXCESS_TIME = 0.050
     PROFILE_DUMP_TIME = 10
     PROFILE_DATA_FILENAME = 'profile_data_engine.prof'
@@ -38,8 +39,7 @@ class Engine(Process):
                  ai_queue: Queue,
                  referee_queue: Queue,
                  ui_send_queue: Queue,
-                 ui_recv_queue: Queue,
-                 fps=DEFAULT_FPS):
+                 ui_recv_queue: Queue):
 
         super().__init__(name=__name__)
 
@@ -47,7 +47,7 @@ class Engine(Process):
 
         # Managers for shared memory between process
         manager = Manager()
-        self.vision_state = manager.list([manager.dict() for _ in range(Config()['IMAGE']['number_of_camera'])])
+        self.vision_state = manager.list([manager.dict() for _ in range(config['IMAGE']['number_of_camera'])])
         self.game_state = game_state
         self.field = field
 
@@ -58,10 +58,10 @@ class Engine(Process):
         self.referee_queue = referee_queue
 
         # External communication
-        self.vision_receiver = VisionReceiver(Config()['COMMUNICATION']['vision_info'], self.vision_state, self.field)
-        self.ui_sender = UIDebugCommandSender(Config()['COMMUNICATION']['ui_sender_info'], self.ui_send_queue)
-        self.ui_recver = UIDebugCommandReceiver(Config()['COMMUNICATION']['ui_recver_info'], self.ui_recv_queue)
-        self.referee_recver = RefereeReceiver(Config()['COMMUNICATION']['referee_info'], self.referee_queue)
+        self.vision_receiver = VisionReceiver(config['COMMUNICATION']['vision_info'], self.vision_state, self.field)
+        self.ui_sender = UIDebugCommandSender(config['COMMUNICATION']['ui_sender_info'], self.ui_send_queue)
+        self.ui_recver = UIDebugCommandReceiver(config['COMMUNICATION']['ui_recver_info'], self.ui_recv_queue)
+        self.referee_recver = RefereeReceiver(config['COMMUNICATION']['referee_info'], self.referee_queue)
         self.robot_cmd_sender = RobotCommandSender()
 
         # main engine module
@@ -69,8 +69,8 @@ class Engine(Process):
         self.controller = Controller(self.ui_send_queue)
 
         # fps and limitation
-        self._fps = fps
-        self._is_fps_locked = Engine.DEFAULT_FPS_LOCK_STATE
+        self.fps = config['Engine']['fps']
+        self.is_fps_locked = config['Engine']['is_fps_locked']
         self.frame_count = 0
         self.last_frame_count = 0
 
@@ -175,26 +175,3 @@ class Engine(Process):
         self.profiler.enable()
         self.logger.debug('Profiling mode activate.')
 
-    def unlock_fps(self):
-        self.is_fps_locked = False
-
-    @property
-    def fps(self):
-        return self._fps
-
-    @fps.setter
-    def fps(self, engine_fps):
-        if not engine_fps > 0:
-            raise ValueError('FPS must be greater than zero.')
-        self._fps = engine_fps
-
-    @property
-    def is_fps_locked(self):
-        if not self.fps:
-            return False
-        else:
-            return self._is_fps_locked
-
-    @is_fps_locked.setter
-    def is_fps_locked(self, is_lock):
-        self._is_fps_locked = is_lock
