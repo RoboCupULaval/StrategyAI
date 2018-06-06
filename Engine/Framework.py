@@ -42,9 +42,6 @@ class Framework:
                            self.ui_send_queue,
                            self.ui_recv_queue)
 
-        if cli_args.on_negative_side:
-            self.engine.on_negative_side = True
-
         if cli_args.unlock_engine_fps:
             self.engine.unlock_fps()
 
