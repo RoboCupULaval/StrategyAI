@@ -27,6 +27,8 @@ class PID(object):
     def execute(self, err) -> float:
         self.dt = time() if self.dt is None else self.dt
         self.dt, self.last_time = time() - self.last_time, time()
+        if self.dt > 1/10:
+            self.dt = 1/10
 
         if self.wrap_error:
             err = wrap_to_pi(err)

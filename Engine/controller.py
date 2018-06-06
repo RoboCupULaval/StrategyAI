@@ -16,7 +16,7 @@ from Util import Pose
 
 from Util.engine_command import EngineCommand
 from Util.constant import PLAYER_PER_TEAM
-from Util.geometry import rotate
+from Util.geometry import rotate, wrap_to_pi
 from Util.team_color_service import TeamColorService
 from config.config import Config
 
@@ -73,14 +73,10 @@ class Controller:
             else:
                 cmd = robot.velocity_regulator.execute(robot)
 
-            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("mm/s",
-                                                                         "robot {} cmd speed".format(robot.robot_id),
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("rad",
+                                                                         "robot {} cmd theta".format(robot.robot_id),
                                                                          [time.time()],
-                                                                         [cmd.norm]))
-            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("mm/s",
-                                                                         "robot {} kallman speed".format(robot.robot_id),
-                                                                         [time.time()],
-                                                                         [robot.velocity.norm]))
+                                                                         [cmd.orientation]))
 
             commands[robot.robot_id] = self._put_in_robots_referential(robot, cmd)
 

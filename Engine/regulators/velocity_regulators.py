@@ -11,18 +11,18 @@ from config.config import Config
 
 class RealVelocityController(RegulatorBaseClass):
 
-    settings = {'kp': 2, 'ki': 0.4, 'kd': 0.0}
+    settings = {'kp': 10, 'ki': 0, 'kd': 1}
     offset = 1
 
     def __init__(self):
-        self.orientation_controller = PID(**self.settings, wrap_error=True)
+        self.orientation_controller = PID(**self.settings)
 
     @property
     def dt(self):
         return 1 / Config()['ENGINE']['engine_fps']
 
     def execute(self, robot: Robot):
-        speed_norm = self.get_next_speed(robot, offset=self.offset)
+        speed_norm = self.get_next_speed(robot)
 
         velocity = robot.position_error * speed_norm / robot.position_error.norm
 
@@ -31,16 +31,16 @@ class RealVelocityController(RegulatorBaseClass):
 
         return Pose(velocity, cmd_orientation)
 
-    def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION, offset=20):
+    def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION):
         if robot.target_speed > robot.current_speed:
-            next_speed = robot.current_speed + acc * self.dt * offset
+            next_speed = robot.current_speed + acc * self.dt
         else:
             if not self.reach_acceleration_dist(robot, acc, offset=self.offset):
-                next_speed = robot.current_speed + acc * self.dt * offset
+                next_speed = robot.current_speed + acc * self.dt
             else:
-                next_speed = robot.current_speed - acc * self.dt * offset
+                next_speed = robot.current_speed - acc * self.dt
 
-        return clamp(next_speed, 0, robot.cruise_speed)
+        return clamp(next_speed, -1 * robot.cruise_speed, robot.cruise_speed)
 
     @staticmethod
     def reach_acceleration_dist(robot, acc, offset=2) -> bool:

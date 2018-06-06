@@ -54,9 +54,9 @@ class RobotFilter(KalmanFilter):
     def process_covariance(self):
         dt = self._dt
 
-        sigma_acc_x = 1000
-        sigma_acc_y = 1000
-        sigma_acc_o = 100 * np.pi/180
+        sigma_acc_x = 200
+        sigma_acc_y = 200
+        sigma_acc_o = 1000 * np.pi/180
 
         process_covariance = \
             np.array([

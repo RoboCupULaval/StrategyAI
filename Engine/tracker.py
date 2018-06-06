@@ -63,7 +63,7 @@ class Tracker:
     def _update(self, detection_frame: Dict[str, List[Dict[str, Any]]], timestamp: int):
 
         new_robots = {'blue': set(), 'yellow': set()}
-
+        print(timestamp)
         for robot_obs in detection_frame.get('robots_blue', ()):
             if not self._blue_team[robot_obs['robot_id']].is_active:
                 new_robots['blue'].add(robot_obs['robot_id'])
@@ -75,11 +75,6 @@ class Tracker:
                 new_robots['yellow'].add(robot_obs['robot_id'])
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
             self._yellow_team[robot_obs['robot_id']].update(obs, timestamp)
-
-        if self._yellow_team[5]._dt < 0.1:
-            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point("s", "robot 5 update time",
-                                                                         [time.time()],
-                                                                         [self._yellow_team[5]._dt]))
 
         for ball_obs in detection_frame.get('balls', ()):
             obs = np.array([ball_obs['x'], ball_obs['y']])
