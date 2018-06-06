@@ -67,21 +67,19 @@ def player_covered_from_goal(player: Player):
                                          pertinent_collisions_avoid_radius, player.position.array, goal_point.array)
         result.append([is_colliding, goal_point])
     count = 0
-    prev = 0 #longueur du segment
+    max_len_seg = 0 #longueur du segment
     indexend = 0
     for i, is_colliding, goal_point in enumerate(result):
         if not is_colliding:
             count += 1
-            if count > prev:
-                prev = count
         else:
-            if count > prev:
-                prev = count
+            if count > max_len_seg:
+                max_len_seg = count
                 indexend = i
             count = 0
-    if prev == 0 and indexend == 0:
+    if max_len_seg == 0 and indexend == 0:
         return None
-    return result[int(indexend-1 - np.math.ceil(prev / 2))][1]
+    return result[int(indexend-1 - np.math.ceil(max_len_seg / 2))][1]
 
 
 def is_path_colliding(obstacles, obstacles_position, obstacles_avoid_radius, start, target) -> bool:
