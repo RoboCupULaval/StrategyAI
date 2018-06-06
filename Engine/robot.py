@@ -98,6 +98,6 @@ class Robot:
     @property
     def raw_path(self) -> Optional[Path]:
         if self.engine_cmd is not None and self.engine_cmd.path is not None:
-                self.engine_cmd.path.start = self.position
-                return self.engine_cmd.path
+            self.engine_cmd.path.start = self.position
+            return self.engine_cmd.path
 
