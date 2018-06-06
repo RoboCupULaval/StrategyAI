@@ -11,7 +11,7 @@ from Engine.filters.ball_kalman_filter import BallFilter
 from Engine.filters.robot_kalman_filter import RobotFilter
 
 from Util.geometry import rotate
-from Util import Pose
+from Util import Pose, Position
 
 from config.config import Config
 config = Config()
@@ -66,7 +66,10 @@ class Tracker:
             velocity_commands[packet.robot_id] = packet.command
 
         for robot in self._our_team:
-            robot.predict(self._put_in_world_referential(robot, velocity_commands[robot.id]).to_array())
+            if robot.is_active:
+                robot.predict(self._put_in_world_referential(robot, velocity_commands[robot.id]).to_array())
+            else:
+                robot.predict()
 
         for robot in self._their_team:
             robot.predict()
@@ -191,11 +194,13 @@ class Tracker:
             fields = dict()
             if type(entity) is RobotFilter:
                 fields['pose'] = Pose.from_values(*entity.pose)
+                fields['velocity'] = Pose.from_values(*entity.velocity)
             elif type(entity) is BallFilter:
-                fields['position'] = Pose.from_values(*entity.position)
+                fields['position'] = Position(*entity.position)
+                fields['velocity'] = Position(*entity.velocity)
             else:
                 raise TypeError('Invalid type provided: {}'.format(type(entity)))
-            fields['velocity'] = Pose.from_values(*entity.velocity)
+
             fields['id'] = entity.id
             formatted_list.append(fields)
         return formatted_list

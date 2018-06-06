@@ -78,5 +78,6 @@ class VisionReceiver(ReceiverProcess):
         detection_packet = wrapper_packet.get('detection', None)
 
         if detection_packet:
+            detection_packet['timestamp'] = time.time()
             self._link[detection_packet['camera_id']] = detection_packet
-            self._link[detection_packet['timestamp']] = time.time()
+

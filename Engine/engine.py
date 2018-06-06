@@ -44,7 +44,7 @@ class Engine(Process):
 
         # Managers for shared memory between process
         manager = Manager()
-        self.vision_state = manager.list([manager.dict() for _ in range(config['IMAGE']['number_of_camera'])])
+        self.vision_state = manager.list([manager.dict() for _ in range(config['ENGINE']['number_of_camera'])])
         self.game_state = game_state
         self.field = field
 
@@ -66,8 +66,8 @@ class Engine(Process):
         self.controller = Controller(self.ui_send_queue)
 
         # fps and limitation
-        self.fps = config['Engine']['fps']
-        self.is_fps_locked = config['Engine']['is_fps_locked']
+        self.fps = config['ENGINE']['fps']
+        self.is_fps_locked = config['ENGINE']['is_fps_locked']
         self.frame_count = 0
         self.last_frame_count = 0
 

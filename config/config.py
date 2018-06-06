@@ -53,8 +53,8 @@ class Config(metaclass=Singleton):
     def update_content(self):
         self['GAME']['fps'] = int(self['GAME']['coach_fps'])
         self['GAME']['is_autonomous_play_at_startup'] = self['GAME']['is_autonomous_play_at_startup'] == 'true'
-        self['Game']['profiling_filename'] = 'profile_data_ai.prof'
-        self['Game']['profiling_dump_time'] = 10
+        self['GAME']['profiling_filename'] = 'profile_data_ai.prof'
+        self['GAME']['profiling_dump_time'] = 10
 
         self['ENGINE']['profiling_filename'] = 'profile_data_engine.prof'
         self['ENGINE']['profiling_dump_time'] = 10

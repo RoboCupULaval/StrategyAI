@@ -74,6 +74,7 @@ class RobotFilter(KalmanFilter):
         self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
 
     def predict(self, next_velocity=None):
+
         if next_velocity is not None:
             input_command = next_velocity - self.velocity
         else:

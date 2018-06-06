@@ -1,6 +1,5 @@
 from typing import Optional
 
-from Engine.regulators import VelocityRegulator
 from Util import Pose, Position, Path
 from Util.geometry import wrap_to_pi
 
@@ -18,7 +17,7 @@ class Robot:
 
     def __init__(self, _id: int):
         self._id = _id
-        self.velocity_regulator = VelocityRegulator()
+        self.velocity_regulator = None
         self.pose = None
         self.velocity = None
         self.path = None
