@@ -1,6 +1,6 @@
 from typing import Optional
 
-from Engine.regulators import PositionRegulator, VelocityRegulator
+from Engine.regulators import VelocityRegulator
 from Util import Pose, Position, Path
 from Util.geometry import wrap_to_pi
 
@@ -14,14 +14,11 @@ MIN_LINEAR_SPEED = 200  # mm/s Speed near zero, but still move the robot
 
 class Robot:
 
-    __slots__ = ('_id', 'position_regulator', 'velocity_regulator',
-                 'pose', 'velocity', 'path', 'engine_cmd', 'target_speed', 'is_active')
+    __slots__ = ('_id', 'velocity_regulator', 'pose', 'velocity', 'path', 'engine_cmd', 'target_speed')
 
     def __init__(self, _id: int):
         self._id = _id
-        self.position_regulator = PositionRegulator()
         self.velocity_regulator = VelocityRegulator()
-        self.is_active = False
         self.pose = None
         self.velocity = None
         self.path = None
