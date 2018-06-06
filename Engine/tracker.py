@@ -30,7 +30,7 @@ class Tracker:
         self._balls = [BallFilter(ball_id) for ball_id in range(config['ENGINE']['max_ball_on_field'])]
 
         self._camera_frame_number = [-1 for _ in range(config['ENGINE']['number_of_camera'])]
-        self.current_timestamp = -1
+        self.timestamp = -1
 
     def update(self) -> Dict[str, List[Dict[str, Any]]]:
 
@@ -39,7 +39,7 @@ class Tracker:
             self._log_new_robots_on_field(frame)
             self._camera_frame_number[frame['camera_id']] = frame['frame_number']
             self._update(frame, frame['timestamp'])
-            self.current_timestamp = max(self.current_timestamp, frame['timestamp'])
+            self.timestamp = max(self.timestamp, frame['timestamp'])
 
         self.remove_undetected()
 
@@ -78,7 +78,7 @@ class Tracker:
 
         for team_color, robots in self.active_robots.items():
             for robot in robots:
-                if self.current_timestamp - robot.last_update_time > config['ENGINE']['max_undetected_robot_time']:
+                if self.timestamp - robot.last_update_time > config['ENGINE']['max_undetected_robot_time']:
                     robot.reset()
                     self.logger.debug('Robot %d of %s team was undetected for more than %d seconds.',
                                       robot.id,
@@ -86,7 +86,7 @@ class Tracker:
                                       config['ENGINE']['max_undetected_robot_time'])
 
         for ball in self.active_balls:
-            if self.current_timestamp - ball.last_update_time > config['ENGINE']['max_undetected_ball_time']:
+            if self.timestamp - ball.last_update_time > config['ENGINE']['max_undetected_ball_time']:
                 ball.reset()
                 self.logger.debug('Ball %d was undetected for more than %d seconds.',
                                   ball.id,
@@ -166,7 +166,7 @@ class Tracker:
     @property
     def game_state(self) -> Dict[str, Union[float, List[Dict[str, Any]]]]:
         game_fields = dict()
-        game_fields['timestamp'] = self.current_timestamp
+        game_fields['timestamp'] = self.timestamp
         game_fields['blue'] = self.blue_team
         game_fields['yellow'] = self.yellow_team
         game_fields['balls'] = self.balls

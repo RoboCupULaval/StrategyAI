@@ -112,9 +112,9 @@ class DebugCommandFactory:
         raw_path_cmds, path_cmds = [], []
         for robot in robots:
             if robot.raw_path:
-                raw_path_cmds += DebugCommandFactory.path(robot.raw_path, robot.robot_id, color=BLUE)
+                raw_path_cmds += DebugCommandFactory.path(robot.raw_path, robot.id, color=BLUE)
             if robot.path:
-                path_cmds += DebugCommandFactory.path(robot.path, robot.robot_id+12, color=RED) # allow multiple point with same function
+                path_cmds += DebugCommandFactory.path(robot.path, robot.id+12, color=RED) # allow multiple point with same function
         return raw_path_cmds + path_cmds
 
     @staticmethod
