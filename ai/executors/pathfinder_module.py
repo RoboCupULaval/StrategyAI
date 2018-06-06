@@ -8,7 +8,7 @@ from ai.Algorithm.path_partitionner import PathPartitionner, Obstacle
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
 
-MIN_DISTANCE_FROM_OBSTACLE = 250
+MIN_DISTANCE_FROM_OBSTACLE = 200
 
 
 class PathfinderModule:

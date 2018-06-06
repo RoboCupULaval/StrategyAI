@@ -23,13 +23,11 @@ class TestGoKick(unittest.TestCase):
         self.sim.move_ball(START_BALL_POSITION)
         self.sim.start(A_ROBOT_ID, target=GOAL_POSE)
 
-        sleep(COMMAND_DELAY)
-        self.sim.tick() # Charge
+        self.sim.tick() # initialize
 
         for _ in range(0, MAX_TICK_UNTIL_KICK):
             self.sim.tick()
             if self.sim.has_kick():
-                assert self.sim.has_charge_kick
                 assert self.sim.has_hit_ball
                 return
         assert False, "Reach max number of tick and no kick"

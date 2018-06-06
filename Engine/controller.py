@@ -81,7 +81,7 @@ class Controller:
                                                                          "robot {} kallman speed".format(robot.robot_id),
                                                                          [time.time()],
                                                                          [robot.velocity.norm]))
-            print(cmd.orientation)
+
             commands[robot.robot_id] = self._put_in_robots_referential(robot, cmd)
 
         return self.generate_packet(commands)

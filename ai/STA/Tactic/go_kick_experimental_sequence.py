@@ -68,8 +68,9 @@ class GoKickExperimental(Tactic):
         position_behind_ball_for_grab = self.game_state.ball_position - normalize(player_to_target) * GRAB_BALL_SPACING
         position_behind_ball_for_kick = self.game_state.ball_position + normalize(player_to_target) * KICK_DISTANCE
         if self.is_able_to_grab_ball_directly(0.5):
+            self.points_sequence = []
             if compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.1, 0.1 * dist_from_ball/100)) and \
-                    (self._get_distance_from_ball() < GRAB_BALL_SPACING * 1.25):
+                    (dist_from_ball < GRAB_BALL_SPACING * 1.25):
                 self.next_state = self.validate_kick
                 return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
                                               ball_collision=False, cruise_speed=2).addKick(self.kick_force).build()
@@ -139,7 +140,7 @@ class GoKickExperimental(Tactic):
                                       ball_collision=False).addKick(self.kick_force).build()
 
     def validate_kick(self):
-        if (self.game_state.ball_velocity.norm > 600) and (self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD):
+        if (self.game_state.ball_velocity.norm > 600) or (self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD):
             self.next_state = self.halt
         else:
             self.next_state = self.main_state
