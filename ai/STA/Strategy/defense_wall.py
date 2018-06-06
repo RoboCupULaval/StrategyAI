@@ -30,18 +30,17 @@ class DefenseWall(Strategy):
 
         # If we can not kick, the attackers are part of the defense wall
         # TODO find a more useful thing to do for the attackers when we are in a no kick state
+        self.can_kick = can_kick
         self.defensive_role = DEFENSIVE_ROLE.copy()
         self.cover_role = COVER_ROLE.copy()
-        if not can_kick:
-            self.defensive_role += [Role.FIRST_ATTACK]
-            self.cover_role += [Role.SECOND_ATTACK]
 
-        self.robots_in_wall_formation = [p for r, p in self.assigned_roles.items() if r in self.defensive_role]
-        self.robots_in_cover_formation = [p for r, p in self.assigned_roles.items() if r in self.cover_role]
-        self.attackers = [p for r, p in self.assigned_roles.items() if r not in self.defensive_role and
-                          r not in self.cover_role and
-                          r != Role.GOALKEEPER]
-        self.player_to_cover = self.get_player_to_cover()
+        self.robots_in_wall_formation = []
+        self.robots_in_cover_formation = []
+        self.attackers = []
+        self.player_to_cover = []
+
+        self.dispatch_player()
+
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
@@ -134,3 +133,22 @@ class DefenseWall(Strategy):
         enemy_not_with_ball = [enemy.player for enemy in closest_enemies_to_our_goal if enemy.player is not closest_enemy_to_ball]
 
         return dict(zip(self.robots_in_cover_formation, enemy_not_with_ball))
+
+    def dispatch_player(self):
+
+        if not self.can_kick:
+            self.defensive_role += [Role.FIRST_ATTACK]
+            self.cover_role += [Role.SECOND_ATTACK]
+
+        self.robots_in_wall_formation = [p for r, p in self.assigned_roles.items() if r in self.defensive_role]
+        self.robots_in_cover_formation = [p for r, p in self.assigned_roles.items() if r in self.cover_role]
+        self.attackers = [p for r, p in self.assigned_roles.items() if r not in self.defensive_role and
+                          r not in self.cover_role and
+                          r != Role.GOALKEEPER]
+        if len(self.game_state.enemy_team.players.values()) < len(self.robots_in_cover_formation):
+            self.robots_in_wall_formation += self.robots_in_cover_formation
+            self.defensive_role += self.cover_role
+            self.cover_role = []
+            self.robots_in_cover_formation = []
+        else:
+            self.player_to_cover = self.get_player_to_cover()
