@@ -59,17 +59,18 @@ def player_covered_from_goal(player: Player):
         return GameState().field.their_goal
     pertinent_collisions_positions = np.array([obs.position for obs in pertinent_collisions])
     pertinent_collisions_avoid_radius = np.array([obs.avoid_distance for obs in pertinent_collisions])
-    result = []
+    results = []
     for i in range(1, 20):  # discretisation de la ligne de but
         goal_point = GameState().field.their_goal_line.p1 + GameState().field.their_goal_line.direction * \
                      (GameState().field.their_goal_line.length * i / 20)
         is_colliding = is_path_colliding(pertinent_collisions, pertinent_collisions_positions,
                                          pertinent_collisions_avoid_radius, player.position.array, goal_point.array)
-        result.append([is_colliding, goal_point])
+        results.append([is_colliding, goal_point])
     count = 0
     max_len_seg = 0 #longueur du segment
     indexend = 0
-    for i, is_colliding, goal_point in enumerate(result):
+    for i, result in enumerate(results):
+        is_colliding = result[0]
         if not is_colliding:
             count += 1
         else:
@@ -79,7 +80,7 @@ def player_covered_from_goal(player: Player):
             count = 0
     if max_len_seg == 0 and indexend == 0:
         return None
-    return result[int(indexend-1 - np.math.ceil(max_len_seg / 2))][1]
+    return results[int(indexend-1 - np.math.ceil(max_len_seg / 2))][1]
 
 
 def is_path_colliding(obstacles, obstacles_position, obstacles_avoid_radius, start, target) -> bool:

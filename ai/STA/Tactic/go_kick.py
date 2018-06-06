@@ -17,7 +17,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 VALIDATE_KICK_DELAY = 0.5
-TARGET_ASSIGNATION_DELAY = 1
+TARGET_ASSIGNATION_DELAY = 0.5
 
 GO_BEHIND_SPACING = 200
 GRAB_BALL_SPACING = 100
