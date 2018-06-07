@@ -56,8 +56,8 @@ class Config(metaclass=Singleton):
 
         self['ENGINE']['number_of_camera'] = int(self['ENGINE']['number_of_camera'])
 
-        if type(self['ENGINE']['disabled_camera']) is str:
-            exec("self['ENGINE']['disabled_camera'] = " + self['ENGINE']['disabled_camera']) # SB: Sorry, it works.
+        if type(self['ENGINE']['disabled_camera_id']) is str:
+            exec("self['ENGINE']['disabled_camera_id'] = " + self['ENGINE']['disabled_camera_id']) # SB: Sorry, it works.
 
     def update_ports(self):
         # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
@@ -98,11 +98,11 @@ class Config(metaclass=Singleton):
         if self['COMMUNICATION']['type'] not in ['grsim', 'serial', 'disabled']:
             self.logger.critical('Invalid type in COMMUNICATION. Received: %s. Expected sim, serial or disabled.', self['COMMUNICATION']['type'])
 
-        if type(self['ENGINE']['disabled_camera']) is str:
+        if type(self['ENGINE']['disabled_camera_id']) is str:
             try:
-                exec(self['ENGINE']['disabled_camera'])
+                exec(self['ENGINE']['disabled_camera_id'])
             except SyntaxError:
-                self.logger.critical('disabled_camera argument in ENGINE is invalid: %s. Expected a list.', self['ENGINE']['disabled_camera'])
+                self.logger.critical('disabled_camera_id argument in ENGINE is invalid: %s. Expected a list.', self['ENGINE']['disabled_camera_id'])
                 do_exit = True
 
         if 0 > int(self['ENGINE']['number_of_camera']) > 4:
@@ -139,7 +139,7 @@ class Config(metaclass=Singleton):
                 'max_undetected_ball_time': 0.25,
                 'max_ball_on_field': 2,
                 'max_ball_separation': 2000,
-                'disabled_camera': []
+                'disabled_camera_id': []
             }
         }
 

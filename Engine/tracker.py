@@ -148,10 +148,10 @@ class Tracker:
 
     def _is_valid_frame(self, frame):
         if frame:
-            disabled_camera = config['ENGINE']['disabled_camera']
+            disabled_camera_id = config['ENGINE']['disabled_camera_id']
             cam_id = frame['camera_id']
             last_frame_number = self._camera_frame_number[cam_id]
-            return frame['frame_number'] > last_frame_number and cam_id not in disabled_camera
+            return frame['frame_number'] > last_frame_number and cam_id not in disabled_camera_id
 
     @property
     def _our_team(self):
