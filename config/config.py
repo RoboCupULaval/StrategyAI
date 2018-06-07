@@ -6,7 +6,7 @@ from Util import Singleton
 MANDATORY_FIELDS = {
     'COMMUNICATION': ['type', 'field_port_file', 'vision_port', 'ui_debug_address'],
     'GAME': ['our_color', 'type', 'is_autonomous_play_at_startup'],
-    'IMAGE': ['number_of_camera']
+    'ENGINE': ['number_of_camera']
 }
 
 
@@ -51,10 +51,19 @@ class Config(metaclass=Singleton):
         return config_dict
 
     def update_content(self):
-        self['ENGINE'] = dict()
-        self['IMAGE']['number_of_camera'] = int(self['IMAGE']['number_of_camera'])
-        self['GAME']['coach_fps'] = int(self['GAME']['coach_fps'])
+        self['GAME']['fps'] = int(self['GAME']['coach_fps'])
         self['GAME']['is_autonomous_play_at_startup'] = self['GAME']['is_autonomous_play_at_startup'] == 'true'
+        self['GAME']['profiling_filename'] = 'profile_data_ai.prof'
+        self['GAME']['profiling_dump_time'] = 10
+
+        self['ENGINE']['profiling_filename'] = 'profile_data_engine.prof'
+        self['ENGINE']['profiling_dump_time'] = 10
+        self['ENGINE']['number_of_camera'] = int(self['ENGINE']['number_of_camera'])
+        self['ENGINE']['max_robot_id'] = 12
+        self['ENGINE']['max_undetected_robot_time'] = 3
+        self['ENGINE']['max_undetected_ball_time'] = 3
+        self['ENGINE']['max_ball_on_field'] = 1
+
 
         if self.is_simulation():
             self['COMMUNICATION']['grsim_info'] = (self['COMMUNICATION']['grsim_udp_address'],
@@ -98,6 +107,10 @@ class Config(metaclass=Singleton):
             self.logger.critical('our_color should be either blue or yellow, not %s.', self['GAME']['our_color'])
             do_exit = True
 
+        if 0 > int(self['ENGINE']['number_of_camera']) > 4:
+            self.logger.critical('The number of camera should be between 1 and 4, not %s', int(self['ENGINE']['number_of_camera']))
+            do_exit = True
+
         if do_exit:
             exit(1)
 
@@ -127,11 +140,12 @@ class Config(metaclass=Singleton):
         self._config[key] = value
 
     def load_parameters(self, cli_args):
-        self._config['GAME']['our_color'] = cli_args.color
-        self._config['GAME']['on_negative_side'] = cli_args.side == "negative"
-        self._config['ENGINE']['engine_fps'] = cli_args.engine_fps
-        self._config['ENGINE']['unlock_engine_fps'] = cli_args.unlock_engine_fps
+        self._config['ENGINE']['fps'] = cli_args.engine_fps
+        self._config['ENGINE']['is_fps_locked'] = not cli_args.unlock_engine_fps
         self._config['ENGINE']['enable_profiling'] = cli_args.enable_profiling
+
+        self._config['GAME']['our_color'] = cli_args.color
+        self._config['GAME']['on_negative_side'] = cli_args.side == 'negative'
         self._config['GAME']['competition_mode'] = cli_args.competition_mode
         self._config['GAME']['is_autonomous_play_at_startup'] = cli_args.start_in_auto
 
