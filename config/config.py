@@ -63,6 +63,12 @@ class Config(metaclass=Singleton):
         self['ENGINE']['max_undetected_robot_time'] = 1
         self['ENGINE']['max_undetected_ball_time'] = 0.25
         self['ENGINE']['max_ball_on_field'] = 2
+        self['ENGINE']['max_ball_separation'] = 2000
+
+        if 'disabled_camera' not in self['ENGINE']:
+            self['ENGINE']['disabled_camera'] = []
+        else:
+            exec("self['ENGINE']['disabled_camera'] = " + self['ENGINE']['disabled_camera']) # SB: Sorry, it works.
 
 
         if self.is_simulation():
@@ -110,6 +116,8 @@ class Config(metaclass=Singleton):
         if 0 > int(self['ENGINE']['number_of_camera']) > 4:
             self.logger.critical('The number of camera should be between 1 and 4, not %s', int(self['ENGINE']['number_of_camera']))
             do_exit = True
+
+
 
         if do_exit:
             exit(1)

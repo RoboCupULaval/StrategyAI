@@ -43,28 +43,30 @@ class Tracker:
             self._update(frame)
             self.timestamp = max(self.timestamp, frame['timestamp'])
 
-        self.remove_undetected()
+        self._remove_undetected()
 
         return self.game_state
 
     def _update(self, detection_frame: Dict[str, List[Dict[str, Any]]]):
 
+        timestamp = detection_frame['timestamp']
+
         for robot_obs in detection_frame.get('robots_blue', ()):
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
-            self._blue_team[robot_obs['robot_id']].update(obs, detection_frame['timestamp'])
+            self._blue_team[robot_obs['robot_id']].update(obs, timestamp)
 
         for robot_obs in detection_frame.get('robots_yellow', ()):
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
-            self._yellow_team[robot_obs['robot_id']].update(obs, detection_frame['timestamp'])
+            self._yellow_team[robot_obs['robot_id']].update(obs, timestamp)
 
         for ball_obs in detection_frame.get('balls', ()):
             obs = np.array([ball_obs['x'], ball_obs['y']])
             closest_ball = self.find_closest_ball_to_observation(obs)
-            if closest_ball is not None:
-                closest_ball.update(obs, detection_frame['timestamp'])
+            if closest_ball:
+                closest_ball.update(obs, timestamp)
             else:
                 self.logger.debug('The tracker is not able to assign some observations to a ball. '
-                                  'Try to increase the maximal number of ball on the field or recalibrated the vision.')
+                                  'Try to increase the maximal number of ball on the field or recalibrate the vision.')
 
     def predict(self, robot_state: RobotState):
 
@@ -82,7 +84,7 @@ class Tracker:
         for ball in self._balls:
             ball.predict()
 
-    def remove_undetected(self):
+    def _remove_undetected(self):
 
         for team_color, robots in self.active_robots.items():
             for robot in robots:
@@ -137,14 +139,20 @@ class Tracker:
 
     @property
     def camera_frames(self) -> List[Dict[str, Any]]:
+
+        valid_frames = [frame for frame in self.vision_state if self._is_valid_frame(frame)]
+
         if config['GAME']['on_negative_side']:
-            camera_frames = [Tracker._change_frame_side(frame) for frame in self.vision_state if self._is_valid_frame(frame)]
-        else:
-            camera_frames = [frame for frame in self.vision_state if self._is_valid_frame(frame)]
-        return sorted(camera_frames, key=lambda frame: frame['t_capture'])
+            valid_frames = [Tracker._change_frame_side(frame) for frame in valid_frames]
+
+        return sorted(valid_frames, key=lambda frame: frame['t_capture'])
 
     def _is_valid_frame(self, frame):
-        return frame and frame['frame_number'] > self._camera_frame_number[frame['camera_id']]
+        if frame:
+            disabled_camera = config['ENGINE']['disabled_camera']
+            cam_id = frame['camera_id']
+            last_frame_number = self._camera_frame_number[cam_id]
+            return frame['frame_number'] > last_frame_number and cam_id not in disabled_camera
 
     @property
     def _our_team(self):
@@ -220,7 +228,7 @@ class Tracker:
             balls_position = np.array([ball.position for ball in self.active_balls])
             idx = np.argmin(np.linalg.norm(balls_position - obs, axis=1)).view(int)
             closest_ball = self.active_balls[idx]
-            if np.linalg.norm(closest_ball.position - obs) > Tracker.MAX_BALLS_SEPARATION:
+            if np.linalg.norm(closest_ball.position - obs) > config['ENGINE']['max_ball_separation']:
                 if len(self.inactive_balls) > 0:
                     closest_ball = self.inactive_balls[0]
                     self.logger.debug('New ball detected: ID %d.', len(self.active_balls))
