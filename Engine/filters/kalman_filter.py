@@ -2,8 +2,6 @@ from abc import abstractmethod
 import numpy as np
 from time import time
 
-MAX_DT = 1
-
 
 class KalmanFilter:
 
@@ -13,6 +11,8 @@ class KalmanFilter:
         self.is_active = False
         self.last_update_time = time()
         self.last_predict_time = time()
+        self.first_update_time = None
+
         self._dt = 0
 
         self.state_number = int(np.size(self.transition_model(), 0))
@@ -27,7 +27,6 @@ class KalmanFilter:
     @property
     def id(self):
         return self._id
-
 
     @abstractmethod
     def transition_model(self):
@@ -54,6 +53,7 @@ class KalmanFilter:
 
     def _update(self, error, update_time):
         self.is_active = True
+        if self.first_update_time is None: self.first_update_time = time()
 
         self._dt = update_time - self.last_update_time
         self.last_update_time = update_time
@@ -96,3 +96,4 @@ class KalmanFilter:
         self.x = np.zeros(self.state_number)
         self.last_update_time = time()
         self.last_predict_time = time()
+        self.first_update_time = None

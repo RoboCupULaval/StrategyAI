@@ -10,13 +10,13 @@ class RobotCommandSender:
 
         sender_type = Config()['COMMUNICATION']['type']
 
-        if sender_type == 'sim':
+        if sender_type == 'grsim':
             connection_info = Config()['COMMUNICATION']['grsim_info']
         else:
             connection_info = None
 
         available_sender = {'disabled': FakeSender,
-                            'sim':      GrSimCommandSender,
+                            'grsim':    GrSimCommandSender,
                             'serial':   SerialCommandSender}
 
         sender_class = available_sender.get(sender_type, None)
