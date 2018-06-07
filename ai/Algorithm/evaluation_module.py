@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, normalize
+from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, normalize, closest_point_on_line
 from Util.position import Position
 from Util.constant import ROBOT_RADIUS, BALL_OUTSIDE_FIELD_BUFFER
 from Util.constant import ROBOT_RADIUS
@@ -278,3 +278,16 @@ def best_position_in_region(player, A, B):
         best_position = Position()
 
     return best_position
+
+
+def get_away_from_trajectory(position, start, end, min_distance):
+    try:
+        point = closest_point_on_line(position, start, end)
+        dist = position - point
+    except ZeroDivisionError:
+        point = position
+        dist = perpendicular(end - start) * min_distance/2
+    if dist.norm < min_distance:
+        return point - dist.norm * min_distance
+    else:
+        return position
