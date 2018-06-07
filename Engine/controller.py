@@ -57,7 +57,7 @@ class Controller:
         for robot in self.active_robots:
             robot.path, robot.target_speed = path_smoother(robot.raw_path, robot.cruise_speed, robot.end_speed)
 
-            if robot.distance_to_target < ROBOT_RADIUS and robot.end_speed == 0:
+            if robot.distance_to_path_end < ROBOT_RADIUS and robot.end_speed == 0:
                 robot.velocity_regulator.reset()
                 commands[robot.id] = robot.position_regulator.execute(robot)
             else:

@@ -103,7 +103,7 @@ class Robot:
             return self.engine_cmd.path
 
     @property
-    def distance_to_target(self) ->Optional[float]:
+    def distance_to_path_end(self) ->Optional[float]:
         if self.path:
             return (self.position - self.path.target).norm
 
