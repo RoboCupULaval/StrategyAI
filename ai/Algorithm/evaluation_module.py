@@ -1,4 +1,6 @@
 # Under MIT License, see LICENSE.txt
+from typing import List
+
 from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, normalize, closest_point_on_line
 from Util.position import Position
 from Util.constant import ROBOT_RADIUS, BALL_OUTSIDE_FIELD_BUFFER
@@ -88,7 +90,8 @@ def is_path_colliding(obstacles, obstacles_position, obstacles_avoid_radius, sta
     return any(collisions)
 
 
-def find_collisions(obstacles, obstacles_position, obstacles_avoid_radius, start, target):
+def find_collisions(obstacles: List[Obstacle], obstacles_position: np.ndarray, obstacles_avoid_radius: np.ndarray,
+                    start: np.ndarray, target: np.ndarray):
     # fonction prend en argument des positions converties en array!
     # Position().array par exemple.
     robot_to_obstacles = obstacles_position - start
