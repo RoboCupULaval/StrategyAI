@@ -13,23 +13,26 @@ MIN_LINEAR_SPEED = 200  # mm/s Speed near zero, but still move the robot
 
 class Robot:
 
-    __slots__ = ('_robot_id', 'position_regulator', 'velocity_regulator',
-                 'pose', 'velocity', 'path', 'engine_cmd', 'target_speed', 'is_active')
+    __slots__ = ('_id', 'is_on_field', 'velocity_regulator', 'position_regulator', 'pose', 'velocity', 'path', 'engine_cmd', 'target_speed')
 
-    def __init__(self, robot_id: int):
-        self._robot_id = robot_id
-        self.position_regulator = None
+    def __init__(self, _id: int):
+        self._id = _id
         self.velocity_regulator = None
-        self.is_active = False
+        self.position_regulator = None
         self.pose = None
         self.velocity = None
         self.path = None
         self.engine_cmd = None
         self.target_speed = None
+        self.is_on_field = False
 
     @property
-    def robot_id(self) -> int:
-        return self._robot_id
+    def id(self) -> int:
+        return self._id
+
+    @property
+    def is_active(self):
+        return self.is_on_field and self.raw_path is not None
 
     @property
     def target_pose(self) -> Pose:
@@ -95,6 +98,12 @@ class Robot:
 
     @property
     def raw_path(self) -> Optional[Path]:
-        if self.engine_cmd is not None:
+        if self.engine_cmd is not None and self.engine_cmd.path is not None:
+            self.engine_cmd.path.start = self.position
             return self.engine_cmd.path
+
+    @property
+    def distance_to_path_end(self) ->Optional[float]:
+        if self.path:
+            return (self.position - self.path.target).norm
 
