@@ -119,9 +119,10 @@ class Config(metaclass=Singleton):
     def default_config():
         return {
             'COMMUNICATION': {
-                'type': 'sim'
+                'type': 'grsim'
             },
             'GAME': {
+                'type': 'sim',
                 'our_color': 'yellow',
                 'is_autonomous_play_at_startup': False,
                 'on_negative_side': True,
