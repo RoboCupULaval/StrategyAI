@@ -99,4 +99,4 @@ class KalmanFilter:
         self.x = np.zeros(self.state_number)
         self.last_update_time = time()
         self.last_predict_time = time()
-        self.first_seen_time = None
+        self.first_update_time = None
