@@ -6,10 +6,6 @@ from Engine.filters.kalman_filter import KalmanFilter
 
 class RobotFilter(KalmanFilter):
 
-    def __init__(self, robot_id):
-        self._id = robot_id
-        super().__init__()
-
     @property
     def pose(self):
         if self.is_active:
@@ -24,10 +20,6 @@ class RobotFilter(KalmanFilter):
     def orientation(self):
         if self.is_active:
             return self.x[4]
-
-    @property
-    def id(self):
-        return self._id
 
     def transition_model(self):
         dt = self._dt
@@ -82,12 +74,13 @@ class RobotFilter(KalmanFilter):
         self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
 
     def predict(self, next_velocity=None):
-        if next_velocity is not None:
-            delta_velocity = next_velocity - self.velocity
-            self._predict(input_command=delta_velocity)
-        else:
-            self._predict(input_command=None)
 
+        if next_velocity is not None:
+            input_command = next_velocity - self.velocity
+        else:
+            input_command = None
+
+        self._predict(input_command)
         self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
 
     @staticmethod
