@@ -1,11 +1,14 @@
 
 from configparser import ConfigParser, ParsingError
 import logging
+
 from Util import Singleton
 
+
 MANDATORY_FIELDS = {
-    'COMMUNICATION': ['type', 'field_port_file', 'vision_port', 'ui_debug_address'],
-    'GAME': ['our_color', 'type', 'is_autonomous_play_at_startup'],
+    'COMMUNICATION': ['type', 'field_port_file', 'ui_debug_address', 'vision_port',
+                      'vision_address', 'referee_port', 'referee_address'],
+    'GAME': ['type'],
     'ENGINE': ['number_of_camera']
 }
 
@@ -15,21 +18,20 @@ class Config(metaclass=Singleton):
     def __init__(self):
         self._config = Config.default_config()
         self._config_was_set = False
-        self.logger = logging.getLogger('Config')
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def load_file(self, filename: str):
 
-        self._config = self.read_config_file(filename)
+        config = self.read_config_file(filename)
+        self._config['ENGINE'].update(config['ENGINE'])
+        self._config['COMMUNICATION'].update(config['COMMUNICATION'])
+        self._config['GAME'].update(config['GAME'])
 
-        field_config_filename = self['COMMUNICATION']['field_port_file']
-        if 'field_port_file' in self['COMMUNICATION']:
-            field_config = self.read_config_file(field_config_filename)
-            self._config['COMMUNICATION'].update(field_config['COMMUNICATION'])
-        else:
-            self.logger.critical('Cannot find the field_port_file field in %s.', field_config_filename)
-            exit(1)
+        field_config = self.read_config_file(self['COMMUNICATION']['field_port_file'])
+        self._config['COMMUNICATION'].update(field_config['COMMUNICATION'])
 
         self.validate_user_input()
+
         self.update_content()
         self.update_ports()
 
@@ -51,29 +53,11 @@ class Config(metaclass=Singleton):
         return config_dict
 
     def update_content(self):
-        self['GAME']['fps'] = int(self['GAME']['coach_fps'])
-        self['GAME']['is_autonomous_play_at_startup'] = self['GAME']['is_autonomous_play_at_startup'] == 'true'
-        self['GAME']['profiling_filename'] = 'profile_data_ai.prof'
-        self['GAME']['profiling_dump_time'] = 10
 
-        self['ENGINE']['profiling_filename'] = 'profile_data_engine.prof'
-        self['ENGINE']['profiling_dump_time'] = 10
         self['ENGINE']['number_of_camera'] = int(self['ENGINE']['number_of_camera'])
-        self['ENGINE']['max_robot_id'] = 12
-        self['ENGINE']['max_undetected_robot_time'] = 1
-        self['ENGINE']['max_undetected_ball_time'] = 0.25
-        self['ENGINE']['max_ball_on_field'] = 2
-        self['ENGINE']['max_ball_separation'] = 2000
 
-        if 'disabled_camera' not in self['ENGINE']:
-            self['ENGINE']['disabled_camera'] = []
-        else:
+        if type(self['ENGINE']['disabled_camera']) is str:
             exec("self['ENGINE']['disabled_camera'] = " + self['ENGINE']['disabled_camera']) # SB: Sorry, it works.
-
-
-        if self.is_simulation():
-            self['COMMUNICATION']['grsim_info'] = (self['COMMUNICATION']['grsim_udp_address'],
-                                                   int(self['COMMUNICATION']['grsim_port']))
 
     def update_ports(self):
         # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
@@ -84,16 +68,20 @@ class Config(metaclass=Singleton):
             self['COMMUNICATION']['ui_cmd_sender_port'] = 16666    # DO NOT TOUCH
             self['COMMUNICATION']['ui_cmd_receiver_port'] = 17777  # DO NOT TOUCH
 
+        if self.is_simulation():
+            self['COMMUNICATION']['grsim_info'] = (self['COMMUNICATION']['grsim_address'],
+                                                   int(self['COMMUNICATION']['grsim_port']))
+
         self['COMMUNICATION']['ui_sender_info'] = (self['COMMUNICATION']['ui_debug_address'],
                                                    int(self['COMMUNICATION']['ui_cmd_sender_port']))
 
         self['COMMUNICATION']['ui_recver_info'] = (self['COMMUNICATION']['ui_debug_address'],
                                                    int(self['COMMUNICATION']['ui_cmd_receiver_port']))
 
-        self['COMMUNICATION']['vision_info'] = (self['COMMUNICATION']['vision_udp_address'],
+        self['COMMUNICATION']['vision_info'] = (self['COMMUNICATION']['vision_address'],
                                                 int(self['COMMUNICATION']['vision_port']))
 
-        self['COMMUNICATION']['referee_info'] = (self['COMMUNICATION']['referee_udp_address'],
+        self['COMMUNICATION']['referee_info'] = (self['COMMUNICATION']['referee_address'],
                                                  int(self['COMMUNICATION']['referee_port']))
 
     def validate_user_input(self):
@@ -104,26 +92,28 @@ class Config(metaclass=Singleton):
                     self.logger.critical('Mandatory field \'%s\' is missing from section \'%s\'', field, section)
                     do_exit = True
 
-        if 'play_zone' in self['GAME']:
-            if self['GAME']['play_zone'] not in ['full', 'positive', 'negative']:
-                self.logger.critical('play_zone is either full, positive or negative.')
+        if self['GAME']['type'] not in ['sim', 'real']:
+            self.logger.critical('Invalid type in GAME. Received: %s. Expected sim or real.', self['GAME']['type'])
+
+        if self['COMMUNICATION']['type'] not in ['grsim', 'serial', 'disabled']:
+            self.logger.critical('Invalid type in COMMUNICATION. Received: %s. Expected sim, serial or disabled.', self['COMMUNICATION']['type'])
+
+        if type(self['ENGINE']['disabled_camera']) is str:
+            try:
+                exec(self['ENGINE']['disabled_camera'])
+            except SyntaxError:
+                self.logger.critical('disabled_camera argument in ENGINE is invalid: %s. Expected a list.', self['ENGINE']['disabled_camera'])
                 do_exit = True
 
-        if self['GAME']['our_color'] not in ['yellow', 'blue']:
-            self.logger.critical('our_color should be either blue or yellow, not %s.', self['GAME']['our_color'])
-            do_exit = True
-
         if 0 > int(self['ENGINE']['number_of_camera']) > 4:
-            self.logger.critical('The number of camera should be between 1 and 4, not %s', int(self['ENGINE']['number_of_camera']))
+            self.logger.critical('The number of camera in ENGINE should be between 1 and 4, not %s', int(self['ENGINE']['number_of_camera']))
             do_exit = True
-
-
 
         if do_exit:
             exit(1)
 
     def is_simulation(self):
-        return self['COMMUNICATION']['type'] == 'sim'
+        return self['GAME']['type'] == 'sim'
 
     @staticmethod
     def default_config():
@@ -133,9 +123,22 @@ class Config(metaclass=Singleton):
             },
             'GAME': {
                 'our_color': 'yellow',
-                'their_color': 'blue',
                 'is_autonomous_play_at_startup': False,
-                'on_negative_side': True
+                'on_negative_side': True,
+                'fps': 10,
+                'profiling_filename': 'profile_data_ai.prof',
+                'profiling_dump_time': 10
+            },
+            'ENGINE': {
+                'profiling_filename': 'profile_data_engine.prof',
+                'profiling_dump_time': 10,
+                'number_of_camera': 4,
+                'max_robot_id': 12,
+                'max_undetected_robot_time': 1,
+                'max_undetected_ball_time': 0.25,
+                'max_ball_on_field': 2,
+                'max_ball_separation': 2000,
+                'disabled_camera': []
             }
         }
 
