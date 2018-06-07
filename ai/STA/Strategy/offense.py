@@ -50,6 +50,7 @@ class Offense(Strategy):
     @classmethod
     def optional_roles(cls):
         return {r: keep_prev_mapping_otherwise_random for r in [Role.FIRST_DEFENCE,
+                                                                Role.SECOND_ATTACK,
                                                                 Role.SECOND_DEFENCE]
                 }
 

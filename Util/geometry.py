@@ -4,7 +4,7 @@ import math as m
 import numpy as np
 
 from Util.position import Position
-from typing import cast, Sequence, List, Union
+from typing import cast, Sequence, List, Union, Optional
 
 
 class Line:
@@ -100,7 +100,7 @@ def find_bisector_of_triangle(c, a, b):
     return a - ia
 
 
-def intersection_between_segments(a1, a2, b1, b2) -> Position:
+def intersection_between_segments(a1, a2, b1, b2) -> Optional[Position]:
     try:
         inter = intersection_between_lines(a1, a2, b1, b2)
     except ValueError:
