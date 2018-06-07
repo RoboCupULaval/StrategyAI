@@ -27,7 +27,7 @@ class PathfinderModule:
         self.strategy_obstacles = []
         self.game_state = GameState()
 
-    def exec(self, game_state: GameState, ai_cmds: Dict[Player, AICommand], strategy_obstacles) -> Dict:
+    def exec(self, ai_cmds: Dict[Player, AICommand], strategy_obstacles) -> Dict:
 
         self.updates_obstacles()
         self.strategy_obstacles = strategy_obstacles
@@ -111,4 +111,3 @@ class PathfinderModule:
 
 def remove_ball_collision(obstacles):
     return [obs for obs in obstacles if obs.object_type is None]
-
