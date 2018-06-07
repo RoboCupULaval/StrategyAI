@@ -10,11 +10,12 @@ from typing import Dict, List, Any
 from Debug.debug_command_factory import DebugCommandFactory
 
 from Engine.filters.path_smoother import path_smoother
-from Engine.regulators import VelocityRegulator
+from Engine.regulators import VelocityRegulator, PositionRegulator
 from Engine.robot import Robot
 from Engine.Communication.robot_state import RobotPacket, RobotState
 
 from Util import Pose
+from Util.constant import ROBOT_RADIUS
 from Util.engine_command import EngineCommand
 from Util.geometry import rotate
 
@@ -30,7 +31,9 @@ class Controller:
 
         self.timestamp = -1
         self.robots = [Robot(robot_id) for robot_id in range(config['ENGINE']['max_robot_id'])]
-        for robot in self.robots: robot.velocity_regulator = VelocityRegulator()
+        for robot in self.robots:
+            robot.velocity_regulator = VelocityRegulator()
+            robot.position_regulator = PositionRegulator()
 
 
     def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand]):
@@ -53,7 +56,13 @@ class Controller:
 
         for robot in self.active_robots:
             robot.path, robot.target_speed = path_smoother(robot.raw_path, robot.cruise_speed, robot.end_speed)
-            commands[robot.id] = robot.velocity_regulator.execute(robot)
+
+            if robot.distance_to_path_end < ROBOT_RADIUS and robot.end_speed == 0:
+                robot.velocity_regulator.reset()
+                commands[robot.id] = robot.position_regulator.execute(robot)
+            else:
+                robot.position_regulator.reset()
+                commands[robot.id] = robot.velocity_regulator.execute(robot)
 
         self.send_debug(commands)
 

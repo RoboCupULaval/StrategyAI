@@ -54,7 +54,6 @@ class KalmanFilter:
     def _update(self, error, update_time):
         self.is_active = True
         if self.first_update_time is None: self.first_update_time = time()
-        if update_time == self.last_update_time: return
 
         self._dt = update_time - self.last_update_time
         self.last_update_time = update_time
@@ -70,8 +69,6 @@ class KalmanFilter:
         self.P = self.P - gain @ self.observation_model() @ self.P
 
     def _predict(self, input_command=None):
-        if not self.is_active:
-            return
 
         predict_time = time()
         self._dt = predict_time - self.last_predict_time

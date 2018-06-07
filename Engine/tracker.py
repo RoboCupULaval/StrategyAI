@@ -37,7 +37,6 @@ class Tracker:
     def update(self) -> Dict[str, List[Dict[str, Any]]]:
 
         for frame in self.camera_frames:
-            if config['GAME']['on_negative_side']: frame = Tracker._change_frame_side(frame)
             self._log_new_robots_on_field(frame)
             self._camera_frame_number[frame['camera_id']] = frame['frame_number']
             self._update(frame)
@@ -112,18 +111,6 @@ class Tracker:
             cmd.position = rotate(cmd.position, orientation)
         return cmd
 
-    @staticmethod
-    def _change_frame_side(detection_frame: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
-
-        for robot_obs in detection_frame.get('robots_blue', []) + detection_frame.get('robots_yellow', []):
-            robot_obs['x'] *= -1
-            robot_obs['orientation'] = wrap_to_pi(np.pi - robot_obs['orientation'])
-
-        for ball_obs in detection_frame.get('balls', ()):
-            ball_obs['x'] *= -1
-
-        return detection_frame
-
     def _log_new_robots_on_field(self, detection_frame: Dict[str, List[Dict[str, Any]]]):
         new_robots = {'blue': set(), 'yellow': set()}
 
@@ -146,6 +133,18 @@ class Tracker:
             valid_frames = [Tracker._change_frame_side(frame) for frame in valid_frames]
 
         return sorted(valid_frames, key=lambda frame: frame['t_capture'])
+
+    @staticmethod
+    def _change_frame_side(detection_frame: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
+
+        for robot_obs in detection_frame.get('robots_blue', []) + detection_frame.get('robots_yellow', []):
+            robot_obs['x'] *= -1
+            robot_obs['orientation'] = wrap_to_pi(np.pi - robot_obs['orientation'])
+
+        for ball_obs in detection_frame.get('balls', ()):
+            ball_obs['x'] *= -1
+
+        return detection_frame
 
     def _is_valid_frame(self, frame):
         if frame:
