@@ -18,8 +18,7 @@ ELLIPSE_HALF_WIDTH = 1000
 class Obstacle:
     BASE_AVOID_DISTANCE = 100  # in mm
 
-    def __init__(self, position: np.ndarray, *, avoid_distance: Optional[float] = None, object_type=None):
-        self.object_type = object_type
+    def __init__(self, position: np.ndarray, *, avoid_distance: Optional[float] = None):
         self.position = position
         self.avoid_distance = avoid_distance if avoid_distance is not None else self.BASE_AVOID_DISTANCE
 
@@ -32,8 +31,6 @@ class PathPartitionner:
     def __init__(self):
         self.obstacles = []
         self.old_path = None
-        self.points_to_pass_by = None
-        self.ball_collision = True
 
     @property
     def obstacles_position(self):
@@ -51,29 +48,18 @@ class PathPartitionner:
         is_not_self = start_to_obs > 0  # remove self if present
         self.obstacles = obstacles[is_inside_ellipse & is_not_self].tolist()
 
-    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], last_path: Optional[Path]=None,
-                 points_to_pass_by=None, ball_collision=True):
+    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], last_path: Optional[Path]=None):
 
-        self.points_to_pass_by = points_to_pass_by
         self.obstacles = obstacles
         self.old_path = last_path
         self.filter_obstacles(start.array, target.array)
-        if type(ball_collision) is bool:
-            self.ball_collision = ball_collision
-            if not self.ball_collision:
-                self.obstacles = self.remove_ball_collision()
-        else:
-            self.ball_collision = ball_collision
 
         if any(self.obstacles):
             if last_path and not self.is_full_path_colliding(last_path):
                 path = self.update_last_path(start, target)
                 path.filter(threshold=50)
             else:
-                if self.points_to_pass_by is None:
-                    path = self.path_planner(start.array, target.array)
-                else:
-                    path = self.generate_path_through_way_points(start, target)
+                path = self.path_planner(start.array, target.array)
                 path.filter(threshold=10)
         else:
             path = Path(start, target)
@@ -181,10 +167,7 @@ class PathPartitionner:
             self.old_path.points[-1] = target
             return self.old_path
         else:
-            if self.points_to_pass_by is None:
-                return self.path_planner(start.array, target.array)
-            else:
-                return self.generate_path_through_way_points(start, target)
+            return self.path_planner(start.array, target.array)
 
     def verify_first_points_of_path(self, path):
         if len(path.points) > 2:
@@ -192,21 +175,6 @@ class PathPartitionner:
                 del path.points[1]
         return path
 
-    def generate_path_through_way_points(self, start, target):
-        start = start
-        point = self.points_to_pass_by[0]
-        sub_paths = PathPartitionner().get_path(start, point, self.obstacles, ball_collision=self.ball_collision[0])
-        start = point
-        if len(self.points_to_pass_by) > 1:
-            for point, ball_collision in zip(self.points_to_pass_by[1:], self.ball_collision[1:]):
-                sub_paths += PathPartitionner().get_path(start, point, self.obstacles, ball_collision=ball_collision)
-                start = point
-        sub_paths += PathPartitionner().get_path(self.points_to_pass_by[-1], target, self.obstacles,
-                                                 ball_collision=self.ball_collision[-1])
-        return sub_paths
-
-    def remove_ball_collision(self):
-        return np.array([obs for obs in self.obstacles if obs.object_type is None])
 
 
 def normalize(vec: np.ndarray) -> np.ndarray:
