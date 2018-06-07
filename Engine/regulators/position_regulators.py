@@ -9,14 +9,14 @@ from Util.geometry import wrap_to_pi, rotate
 class RealPositionRegulator(RegulatorBaseClass):
 
     settings = {
-        'translation': {'kp': 1, 'ki': 0.1, 'kd': 0},
-        'rotation': {'kp': 3, 'ki': 0.5, 'kd': 0}
+        'translation': {'kp': 2, 'ki': 0.1, 'kd': 0},
+        'rotation': {'kp': 10, 'ki': 0, 'kd': 0}
     }
 
     def __init__(self):
         self.controllers = {'x': PID(**self.settings['translation']),
                             'y': PID(**self.settings['translation']),
-                            'orientation': PID(**self.settings['rotation'], wrap_error=True)}
+                            'orientation': PID(**self.settings['rotation'])}
 
     def execute(self, robot: Robot):
         pose = robot.pose

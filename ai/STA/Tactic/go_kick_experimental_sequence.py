@@ -15,12 +15,13 @@ from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
+from ai.executors.pathfinder_module import WayPoint
 
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
 
 GO_BEHIND_SPACING = 300
-GRAB_BALL_SPACING = 250
+GRAB_BALL_SPACING = 200
 APPROACH_SPEED = 100
 KICK_DISTANCE = 100
 KICK_SUCCEED_THRESHOLD = 600
@@ -74,14 +75,15 @@ class GoKickExperimental(Tactic):
                     (dist_from_ball < GRAB_BALL_SPACING * 1.25):
                 self.next_state = self.validate_kick
                 return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
-                                              ball_collision=False, cruise_speed=1).addKick(self.kick_force).build()
+                                              ball_collision=False, cruise_speed=2).addKick(self.kick_force).build()
             return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_grab, orientation),
                                           ball_collision=False, cruise_speed=2).build()
         else:
-            self.points_sequence = [position_behind_ball_for_approach]
+            self.points_sequence = [WayPoint(position_behind_ball_for_approach, ball_collision=True)]
+
         return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
-                                      ball_collision=[True, False],
-                                      points_to_pass_by=self.points_sequence,
+                                      ball_collision=False,
+                                      way_points=self.points_sequence,
                                       cruise_speed=2).build()
 
     def kick_charge(self):

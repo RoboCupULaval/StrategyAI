@@ -33,19 +33,23 @@ class RealVelocityController(RegulatorBaseClass):
 
     def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION):
         if robot.target_speed > robot.current_speed:
-            next_speed = robot.current_speed + acc * self.dt
+            next_speed = robot.current_speed + acc * self.dt * 1.5
         else:
-            if not self.reach_acceleration_dist(robot, acc, offset=self.offset):
-                next_speed = robot.current_speed + acc * self.dt
+            if self.distance_for_break(robot, acc, offset=self.offset):
+                next_speed = robot.current_speed + acc * self.dt * 1.5
             else:
-                next_speed = robot.current_speed - acc * self.dt
+                distance = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc
+                if robot.position_error.norm < (distance / 0.5):
+                    next_speed = robot.current_speed - acc * self.dt * 30
+                else:
+                    next_speed = robot.current_speed - acc * self.dt
 
         return clamp(next_speed, -1 * robot.cruise_speed, robot.cruise_speed)
 
     @staticmethod
-    def reach_acceleration_dist(robot, acc, offset=2) -> bool:
-        distance = 0.5 * abs(min(robot.current_speed ** 2, robot.cruise_speed ** 2) - robot.target_speed ** 2) / acc
-        return robot.position_error.norm < distance * offset * 2
+    def distance_for_break(robot, acc, offset=2) -> bool:
+        distance = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc
+        return robot.position_error.norm > (distance * offset)
 
     def reset(self):
         self.orientation_controller.reset()
