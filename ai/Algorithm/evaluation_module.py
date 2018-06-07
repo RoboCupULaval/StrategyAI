@@ -68,21 +68,21 @@ def player_covered_from_goal(player: Player):
         is_colliding = is_path_colliding(pertinent_collisions, pertinent_collisions_positions,
                                          pertinent_collisions_avoid_radius, player.position.array, goal_point.array)
         results.append([is_colliding, goal_point])
-
-    max_len_seg, indexend = find_max_consecutive_bool(results[:][0])
+    max_len_seg, indexend = find_max_consecutive_bool(results)
 
     if max_len_seg == 0 and indexend == 0:
         return None
     return results[int(indexend-1 - np.math.ceil(max_len_seg / 2))][1]
 
 
-def find_max_consecutive_bool(bools: List[bool]):
-    
+def find_max_consecutive_bool(results):
+
     count = 0
     max_len_seg = 0  # longueur du segment
     indexend = 0
 
-    for i, is_colliding in enumerate(bools):
+    for i, result in enumerate(results):
+        is_colliding = result[0]
         if not is_colliding:
             count += 1
         else:
