@@ -110,7 +110,7 @@ class Tracker:
 
         for robot_obs in detection_frame.get('robots_blue', []) + detection_frame.get('robots_yellow', []):
             robot_obs['x'] *= -1
-            robot_obs['orientation'] *= -1
+            robot_obs['orientation'] = wrap_to_pi(np.pi - robot_obs['orientation'])
 
         for ball_obs in detection_frame.get('balls', ()):
             ball_obs['x'] *= -1
