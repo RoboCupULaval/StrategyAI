@@ -3,11 +3,9 @@
 import argparse
 import logging
 from time import sleep
-
+from sys import stdout
 from Engine.Framework import Framework
 from config.config import Config
-
-logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
 
 
 def set_arg_parser():
@@ -59,9 +57,23 @@ if __name__ == '__main__':
     cli_args = set_arg_parser().parse_args()
     Config().load_file(cli_args.config_file)
     Config().load_parameters(cli_args)
-    logging = logging.getLogger('Main')
 
-    logging.info('Color: {}, Field side: {}, Mode: {}'.format(Config()['GAME']['our_color'].upper(),
+    fileFormatter = logging.Formatter('(%(asctime)s) - [%(levelname)-5.5s]  %(name)-22.22s: %(message)s')
+    fileHandler = logging.FileHandler('./Logs/StrategyAI.log', 'a')
+    fileHandler.setFormatter(fileFormatter)
+
+    # logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
+
+
+    consoleFormatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
+    consoleHandler = logging.StreamHandler(stream=stdout)
+    consoleHandler.setFormatter(consoleFormatter)
+
+    logging.basicConfig(level=logging.NOTSET, handlers=[fileHandler, consoleHandler])
+
+    logger = logging.getLogger('Main')
+
+    logger.info('Color: {}, Field side: {}, Mode: {}'.format(Config()['GAME']['our_color'].upper(),
                                                     'NEGATIVE' if Config()['GAME']['on_negative_side'] else 'POSITIVE',
                                                     'COMPETITION' if cli_args.competition_mode else 'NORMAL'))
 

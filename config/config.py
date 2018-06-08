@@ -161,6 +161,9 @@ class Config(metaclass=Singleton):
         self._config['GAME']['competition_mode'] = cli_args.competition_mode
         self._config['GAME']['is_autonomous_play_at_startup'] = cli_args.start_in_auto
 
+        if cli_args.competition_mode:
+            self._config['GAME']['is_autonomous_play_at_startup'] = True
+
         self._config_was_set = False
         self.update_ports()
         self._config_was_set = True
