@@ -15,7 +15,7 @@ from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.protect_zone import ProtectZone
 from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.go_kick import GoKick
 
 # try:
@@ -38,7 +38,7 @@ class TacticBook(object):
             'DemoFollowRobot': DemoFollowRobot,
             'GoalKeeper': GoalKeeper,
             'GoKick': GoKick,
-            'GoToPositionPathfinder': GoToPositionPathfinder,
+            'GoToPosition': GoToPosition,
             'GoToRandomPosition': GoToRandomPosition,
             'PassToPlayer': PassToPlayer,
             'ProtectZone': ProtectZone,
@@ -46,7 +46,7 @@ class TacticBook(object):
             'Stop': Stop,
             'RotateAroundBall': RotateAroundBall,
         }
-        self.default_tactics = ['GoToPositionPathfinder',
+        self.default_tactics = ['GoToPosition',
                                'GoKick']
 
         for name, tactic_class in self.tactic_book.items():

@@ -10,7 +10,7 @@ from Util.geometry import Area, Line, clamp, normalize
 from Util.role import Role
 from ai.Algorithm.evaluation_module import best_position_in_region
 from ai.GameDomainObjects import Player
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
 

@@ -8,7 +8,7 @@ from Util.pose import Pose, Position
 from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
 
 from ai.STA.Strategy.strategy import Strategy
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 from Util.role import Role
@@ -39,22 +39,22 @@ class RobocupChoreography(Strategy):
                               Pose(Position(0, 3 * dist_inter_robot), 0)]
         shuffle(positions_on_yaxis)
 
-        node_robot1_go_to_x = self.create_node(robot1, GoToPositionPathfinder(self.game_state, self.assigned_roles[robot1], positions_on_xaxis[1], cruise_speed=2))
-        node_robot1_go_to_y = self.create_node(robot1, GoToPositionPathfinder(self.game_state, self.assigned_roles[robot1], positions_on_yaxis[2], cruise_speed=2))
+        node_robot1_go_to_x = self.create_node(robot1, GoToPosition(self.game_state, self.assigned_roles[robot1], positions_on_xaxis[1], cruise_speed=2))
+        node_robot1_go_to_y = self.create_node(robot1, GoToPosition(self.game_state, self.assigned_roles[robot1], positions_on_yaxis[2], cruise_speed=2))
         robot_1_succeeded = partial(self.current_tactic_succeed, robot1)
 
         node_robot1_go_to_x.connect_to(node_robot1_go_to_y, when=robot_1_succeeded)
         node_robot1_go_to_y.connect_to(node_robot1_go_to_x, when=robot_1_succeeded)
 
-        node_robot_2_go_to_x = self.create_node(robot2, GoToPositionPathfinder(self.game_state, self.assigned_roles[robot2], positions_on_xaxis[3], cruise_speed=2))
-        node_robot_2_go_to_y = self.create_node(robot2, GoToPositionPathfinder(self.game_state, self.assigned_roles[robot2], positions_on_yaxis[4], cruise_speed=2))
+        node_robot_2_go_to_x = self.create_node(robot2, GoToPosition(self.game_state, self.assigned_roles[robot2], positions_on_xaxis[3], cruise_speed=2))
+        node_robot_2_go_to_y = self.create_node(robot2, GoToPosition(self.game_state, self.assigned_roles[robot2], positions_on_yaxis[4], cruise_speed=2))
         robot2_succeeded = partial(self.current_tactic_succeed, robot2)
 
         node_robot_2_go_to_x.connect_to(node_robot_2_go_to_y, when=robot2_succeeded)
         node_robot_2_go_to_y.connect_to(node_robot_2_go_to_x, when=robot2_succeeded)
 
-        node_robot3_go_to_x = self.create_node(robot3, GoToPositionPathfinder(self.game_state, self.assigned_roles[robot3], positions_on_xaxis[5], cruise_speed=2))
-        node_robot3_go_to_y = self.create_node(robot3, GoToPositionPathfinder(self.game_state, self.assigned_roles[robot3], positions_on_yaxis[0], cruise_speed=2))
+        node_robot3_go_to_x = self.create_node(robot3, GoToPosition(self.game_state, self.assigned_roles[robot3], positions_on_xaxis[5], cruise_speed=2))
+        node_robot3_go_to_y = self.create_node(robot3, GoToPosition(self.game_state, self.assigned_roles[robot3], positions_on_yaxis[0], cruise_speed=2))
         robot3_succeeded = partial(self.current_tactic_succeed, robot3)
 
         node_robot3_go_to_x.connect_to(node_robot3_go_to_y, when=robot3_succeeded)

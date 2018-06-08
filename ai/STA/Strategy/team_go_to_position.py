@@ -6,7 +6,7 @@ import numpy as np
 from Util.role import Role
 from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
 from ai.STA.Strategy.strategy import Strategy
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -20,7 +20,7 @@ class TeamGoToPosition(Strategy):
         for role, position in role_to_positions.items():
             position.orientation = np.pi
             player = self.assigned_roles[role]
-            node_go_to_position = self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))
+            node_go_to_position = self.create_node(role, GoToPosition(self.game_state, player, position))
             node_stop = self.create_node(role, Stop(self.game_state, player))
             player_arrived_to_position = partial(self.arrived_to_position, player)
 
