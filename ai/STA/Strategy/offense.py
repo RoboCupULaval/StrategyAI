@@ -1,6 +1,8 @@
 # Under MIT license, see LICENSE.txt
 from functools import partial
 
+from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL
+from Util.geometry import padded_area
 from Util.role import Role
 from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
 from ai.Algorithm.evaluation_module import closest_players_to_point
@@ -16,7 +18,9 @@ class Offense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-        forbidden_areas = [self.game_state.field.our_goal_area, self.game_state.field.their_goal_area]
+        forbidden_areas = [padded_area(self.game_state.field.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL),
+                           self.game_state.field.our_goal_area]
+
         robots_in_formation = [p for r, p in self.assigned_roles.items() if r != Role.GOALKEEPER]
 
         for role, player in self.assigned_roles.items():

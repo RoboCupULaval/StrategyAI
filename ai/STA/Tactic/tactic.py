@@ -3,7 +3,7 @@ from typing import List, Optional, Any, Iterable
 
 from Util import Pose
 from Util.ai_command import AICommand
-from Util.geometry import Area, position_outside_area
+from Util.geometry import Area, position_outside_area, Line
 from ai.GameDomainObjects import Player
 from Util.ai_command import Idle
 from ai.STA.Tactic.tactic_constants import Flags
@@ -43,14 +43,18 @@ class Tactic:
 
         if next_ai_command.target:
             target_position = next_ai_command.target.position
+            target_to_position = Line(self.player.position, next_ai_command.target.position)
             for area in self.forbidden_areas:
                 if target_position in area:
-                    target_position = position_outside_area(target_position, area)
-                    print(target_position)
+                    intersections = area.intersect(target_to_position)
+                    if intersections:
+                        target_position = intersections[0]
+                    else:
+                        target_position = position_outside_area(target_position, area)
+                    new_target = Pose(target_position, next_ai_command.target.orientation)
+                    # This trailing _ is not for protected access, it was add to avoid a name conflict with the function replace ;)
+                    next_ai_command = next_ai_command._replace(target=new_target)
                     break
-            # This trailing _ is not for protected access, it was add to avoid a name conflict with the function replace ;)
-            new_target = Pose(target_position, next_ai_command.target.orientation)
-            next_ai_command = next_ai_command._replace(target=new_target)
 
         return next_ai_command
 

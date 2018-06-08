@@ -78,7 +78,7 @@ class PositionForPass(Tactic):
         individual_area_size = area_height / len_formation
         top = idx * individual_area_size - area_height / 2
         bot = top + individual_area_size
-        self.area = Area.from_limit(top, bot, left, right)
+        self.area = Area.from_limits(top, bot, right, left)
 
         center = self.area.center
         # Act as if each enemy robot was creating a repulsive force

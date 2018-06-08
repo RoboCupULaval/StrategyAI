@@ -89,9 +89,13 @@ class Area:
         return self.lower_right.x
 
     @classmethod
-    def from_limit(cls, top, bottom, left, right):
+    def from_limits(cls, top, bottom, right, left):
         return cls(Position(left, top), Position(right, bottom))
 
+
+def padded_area(area, padding=0):
+    return Area.from_limits(area.top + padding, area.bottom - padding,
+                            area.right + padding, area.left - padding)
 
 def position_outside_area(position: Position, area: Area):
 
