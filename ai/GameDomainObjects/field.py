@@ -27,7 +27,6 @@ class FieldLineSegment(Line):
     def __init__(self, line: Dict):
         self.p1 = Position.from_dict(line["p1"])
         self.p2 = Position.from_dict(line["p2"])
-        self.length = (self.p2 - self.p1).norm
         self.thickness = line["thickness"]
 
 
@@ -78,6 +77,8 @@ class Field:
         self.our_goal_pose = None
         self.their_goal = None  # Point B
         self.their_goal_pose = None
+        self.our_goal_line = None
+        self.their_goal_line = None
 
         self.goal_line = None  # Point C to D
         self.our_goal_area = None  # Area define by Point E to F
@@ -167,7 +168,12 @@ class Field:
                                     self.field_lines["RightFieldLeftPenaltyStretch"].p1.flip_x())
 
         self.goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
-                              p2=Position(self.our_goal_x, -self.goal_width / 2))
+                                  p2=Position(self.our_goal_x, -self.goal_width / 2))
+
+        self.our_goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
+                                  p2=Position(self.our_goal_x, -self.goal_width / 2))
+        self.their_goal_line = Line(p1=Position(self.their_goal_x, +self.goal_width / 2),
+                                    p2=Position(self.their_goal_x, -self.goal_width / 2))
 
     def _fix_ulaval_field_line(self, field):
         # The penalty x y is point E in the sketch

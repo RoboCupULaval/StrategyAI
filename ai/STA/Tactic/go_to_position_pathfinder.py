@@ -14,28 +14,18 @@ from ai.states.game_state import GameState
 
 class GoToPositionPathfinder(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
-                 args: List[str]=None, ball_collision=True, cruise_speed=1, charge_kick=False, end_speed=0,
-                 way_points=None):
+                 args: List[str]=None, cruise_speed=1):
         super().__init__(game_state, player, target, args)
         self.target = target
         self.status_flag = Flags.INIT
-        self.ball_collision = ball_collision
-        self.charge_kick = charge_kick
-        self.end_speed = end_speed
         self.cruise_speed = float(args[0]) if len(self.args) > 0 else cruise_speed
-        self.way_points = way_points
-        #print("Assign move to position to robot id {}".format(self.player.id))
 
     def exec(self):
         if self.check_success():
             self.status_flag = Flags.SUCCESS
         else:
             self.status_flag = Flags.WIP
-        return CmdBuilder().addMoveTo(self.target,
-                                      cruise_speed=self.cruise_speed,
-                                      end_speed=self.end_speed,
-                                      ball_collision=self.ball_collision,
-                                      way_points=self.way_points).build()
+        return CmdBuilder().addMoveTo(self.target, cruise_speed=self.cruise_speed).build()
 
     def check_success(self):
         distance = (self.player.pose - self.target.position).norm
