@@ -7,7 +7,7 @@ from Util import Pose
 class RegulatorBaseClass(metaclass=ABCMeta):
 
     @abstractmethod
-    def execute(self, robot: Robot) -> Pose:
+    def execute(self, robot) -> Pose:
         pass
 
     @abstractmethod

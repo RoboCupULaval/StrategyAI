@@ -9,6 +9,7 @@ from struct import pack
 
 from multiprocessing.managers import DictProxy
 
+import time
 from google.protobuf.message import DecodeError
 from protobuf_to_dict import protobuf_to_dict
 
@@ -77,4 +78,6 @@ class VisionReceiver(ReceiverProcess):
         detection_packet = wrapper_packet.get('detection', None)
 
         if detection_packet:
+            detection_packet['timestamp'] = time.time()
             self._link[detection_packet['camera_id']] = detection_packet
+

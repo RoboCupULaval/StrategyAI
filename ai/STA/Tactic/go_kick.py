@@ -10,14 +10,14 @@ from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
 from Util.geometry import compare_angle, normalize
-from ai.Algorithm.evaluation_module import best_passing_option
+from ai.Algorithm.evaluation_module import best_passing_option, player_covered_from_goal
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 VALIDATE_KICK_DELAY = 0.5
-TARGET_ASSIGNATION_DELAY = 1
+TARGET_ASSIGNATION_DELAY = 0.5
 
 GO_BEHIND_SPACING = 200
 GRAB_BALL_SPACING = 100
@@ -33,7 +33,7 @@ class GoKick(Tactic):
                  target: Pose=Pose(),
                  args: List[str]=None,
                  kick_force: KickForce=KickForce.MEDIUM,
-                 auto_update_target=False,
+                 auto_update_target=True,
                  go_behind_distance=GRAB_BALL_SPACING*3):
 
         super().__init__(game_state, player, target, args)
@@ -141,11 +141,13 @@ class GoKick(Tactic):
 
     def _find_best_passing_option(self):
         assignation_delay = (time.time() - self.target_assignation_last_time)
-
+        scoring_target = player_covered_from_goal(self.player)
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
             tentative_target_id = best_passing_option(self.player)
-            if tentative_target_id is None:
-                self.target = Pose.from_values(GameState().field.their_goal_x, 0, 0)
+            if scoring_target is not None:
+                self.target = Pose(scoring_target, 0)
+            elif tentative_target_id is None:
+                self.target = Pose(self.game_state.field.their_goal, 0)
             else:
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
 

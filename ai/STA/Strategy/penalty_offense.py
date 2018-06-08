@@ -1,5 +1,5 @@
 # Under MIT license, see LICENSE.txt
-
+from Util.constant import KickForce
 from Util.pose import Pose
 from Util.role import Role
 
@@ -22,7 +22,7 @@ class PenaltyOffense(TeamGoToPosition):
                              Role.SECOND_DEFENCE: Pose.from_values(our_goal.position.x / 8, GameState().field.bottom * 2 / 3)}
 
         kicker = self.assigned_roles[Role.FIRST_ATTACK]
-        self.create_node(Role.FIRST_ATTACK, GoKick(game_state, kicker, their_goal))
+        self.create_node(Role.FIRST_ATTACK, GoKick(game_state, kicker, their_goal, kick_force=KickForce.HIGH))
 
         goalkeeper = self.assigned_roles[Role.GOALKEEPER]
         self.create_node(Role.GOALKEEPER, GoalKeeper(game_state, goalkeeper, penalty_kick=True))

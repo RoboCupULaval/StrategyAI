@@ -43,7 +43,7 @@ class GoalKeeper(Tactic):
         self.last_intersection = None # For debug
 
         self.OFFSET_FROM_GOAL_LINE = Position(ROBOT_RADIUS + 10, 0)
-        self.GOAL_LINE = self.game_state.field.goal_line
+        self.GOAL_LINE = self.game_state.field.our_goal_line
 
     def defense_dumb(self):
         dest_y = self.game_state.ball.position.y \

@@ -14,8 +14,9 @@ from Util.timing import create_fps_timer
 class Framework:
 
     QUEUE_SIZE = 100
+    CHECK_SUBPROCESS_STATE_IN_SECONDS = 2
 
-    def __init__(self, cli_args):
+    def __init__(self, profiling=False):
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
@@ -32,8 +33,7 @@ class Framework:
                              self.ai_queue,
                              self.referee_queue,
                              self.ui_send_queue,
-                             self.ui_recv_queue,
-                             fps=cli_args.engine_fps)
+                             self.ui_recv_queue)
 
         self.coach = Coach(self.game_state,
                            self.field,
@@ -42,10 +42,7 @@ class Framework:
                            self.ui_send_queue,
                            self.ui_recv_queue)
 
-        if cli_args.unlock_engine_fps:
-            self.engine.unlock_fps()
-
-        if cli_args.enable_profiling:
+        if profiling:
             self.coach.enable_profiling()
             self.engine.enable_profiling()
 
@@ -54,26 +51,16 @@ class Framework:
         self.engine.start()
         self.coach.start()
 
-        # end signal - do you like to stop gracefully? DO NOT MOVE! MUST BE PLACED AFTER PROCESSES
         signal.signal(signal.SIGINT, lambda *args: self.stop_game())
+        sleep = create_fps_timer(Framework.CHECK_SUBPROCESS_STATE_IN_SECONDS)
 
-        # stop until someone manually stop us / we receive interrupt signal from os
-        # also check if one of the subprocess died
-        every_process_is_alright = True
-        sleep = create_fps_timer(2)  # 2 is a somewhat sane value for occasional checks
-        while every_process_is_alright:
-            every_process_is_alright = self.engine.is_alive() and \
-                                       self.coach.is_alive() and \
-                                       not self.engine.is_any_subprocess_borked()
-            if not every_process_is_alright:
-                self.logger.critical('One of the engine subprocesses died! Shutting down...')
-                self.engine.terminate_subprocesses()
-                self.engine.terminate()
-                self.coach.terminate()
-
-            sleep()
-
-        self.stop_game()
+        try:
+            while self.engine.is_alive() and self.coach.is_alive():
+                sleep()
+        except SystemExit:
+            self.logger.debug('One of the framework\'s subprocesses stopped. Shutting down...')
+        finally:
+            self.stop_game()
 
     def stop_game(self):
         self.engine.terminate()
