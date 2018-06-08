@@ -3,7 +3,7 @@ from math import sqrt
 
 from Engine.regulators.PID import PID
 from Engine.regulators.regulator_base_class import RegulatorBaseClass
-from Engine.robot import Robot, MAX_LINEAR_ACCELERATION, MAX_ANGULAR_COMMAND
+from Engine.robot import Robot, MAX_LINEAR_ACCELERATION, MAX_ANGULAR_SPEED
 from Util import Pose
 from Util.geometry import clamp
 from config.config import Config
@@ -16,7 +16,7 @@ class RealVelocityController(RegulatorBaseClass):
     offset = 1
 
     def __init__(self):
-        self.orientation_controller = PID(**self.settings, signed_error=True, deadzone=0)
+        self.orientation_controller = PID(**self.settings, signed_error=True, deadzone=0.05)
 
     @property
     def dt(self):
@@ -28,27 +28,34 @@ class RealVelocityController(RegulatorBaseClass):
         velocity = robot.position_error * speed_norm / robot.position_error.norm
 
         cmd_orientation = self.orientation_controller.execute(robot.orientation_error)
-        cmd_orientation /= max(1, abs(cmd_orientation) / MAX_ANGULAR_COMMAND)
+        cmd_orientation /= max(1, abs(cmd_orientation) / MAX_ANGULAR_SPEED)
 
         return Pose(velocity, cmd_orientation)
 
     def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION):
+        acceleration_offset = 1.5  # on veut que le robot soit plus aggressif en début de trajet
+        emergency_break_offset = 30  # on veut que le robot break le plus
+                                     # qu'il peut si on s'approche trop vite de la target
+
         if robot.target_speed > robot.current_speed:
-            next_speed = robot.current_speed + acc * self.dt * 1.5
+            next_speed = robot.current_speed + acc * self.dt * acceleration_offset
         else:
-            if self.distance_for_break(robot, acc, offset=self.offset):
-                next_speed = robot.current_speed + acc * self.dt * 1.5
+            if self.is_distance_for_break(robot, acc, offset=self.offset):
+                next_speed = robot.current_speed + acc * self.dt * acceleration_offset
             else:
                 distance = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc
                 if robot.position_error.norm < (distance / 0.5):
-                    next_speed = robot.current_speed - acc * self.dt * 30
+                    next_speed = robot.current_speed - acc * self.dt * emergency_break_offset
                 else:
                     next_speed = robot.current_speed - acc * self.dt
 
         return clamp(next_speed, -1 * robot.cruise_speed, robot.cruise_speed)
+        # Un nami m'a demander: "but why the negative speed?", à ce, je répond: si le robot veut tellement
+        # breaker qu'il donne une vitesse négative, on est qui pour le juger?
+        # Also, le controleur handle pas de rétroaction pour la vitesse alors on l'handle ici.
 
     @staticmethod
-    def distance_for_break(robot, acc, offset=2) -> bool:
+    def is_distance_for_break(robot, acc, offset=2) -> bool:
         distance = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc
         return robot.position_error.norm > (distance * offset)
 

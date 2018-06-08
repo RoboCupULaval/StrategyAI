@@ -18,10 +18,6 @@ from Util import Pose
 from Util.constant import ROBOT_RADIUS
 from Util.engine_command import EngineCommand
 from Util.geometry import rotate
-
-from Util.constant import PLAYER_PER_TEAM
-from Util.geometry import rotate, wrap_to_pi
-from Util.team_color_service import TeamColorService
 from config.config import Config
 config = Config()
 
@@ -66,10 +62,7 @@ class Controller:
             else:
                 robot.position_regulator.reset()
                 commands[robot.id] = robot.velocity_regulator.execute(robot)
-            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point('mm/s',
-                                                                         'robot {} cmd speed'.format(robot.id),
-                                                                         [time.time()],
-                                                                         [robot.velocity.norm]))
+
         self.send_debug(commands)
 
         return self.generate_packet(commands)
