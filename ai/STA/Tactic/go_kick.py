@@ -88,7 +88,7 @@ class GoKick(Tactic):
                            .addChargeKicker().build()
 
     def grab_ball(self):
-
+        print(self.target)
         vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
         if not self.is_able_to_grab_ball_directly(0.5):
             self.next_state = self.go_behind_ball

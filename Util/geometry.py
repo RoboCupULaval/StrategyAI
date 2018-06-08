@@ -98,7 +98,7 @@ def position_outside_area(position: Position, area: Area):
     if position not in area:
         return position
     return Position(
-        area.top if position.y > area.top - (area.top - area.bottom) / 2 else area.bottom,
+        position.y,
         area.right if position.x > area.right - (area.right - area.left) / 2 else area.left
     )
 

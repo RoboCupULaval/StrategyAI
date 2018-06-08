@@ -45,7 +45,6 @@ class Tactic:
             target_position = next_ai_command.target.position
             for area in self.forbidden_areas:
                 if target_position in area:
-                    print(area.left)
                     target_position = position_outside_area(target_position, area)
                     print(target_position)
                     break
