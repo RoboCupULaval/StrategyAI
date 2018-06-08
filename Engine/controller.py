@@ -18,7 +18,6 @@ from Util import Pose
 from Util.constant import ROBOT_RADIUS
 from Util.engine_command import EngineCommand
 from Util.geometry import rotate
-
 from config.config import Config
 config = Config()
 
@@ -35,7 +34,6 @@ class Controller:
             robot.velocity_regulator = VelocityRegulator()
             robot.position_regulator = PositionRegulator()
 
-
     def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand]):
 
         self.timestamp = track_frame['timestamp']
@@ -50,6 +48,7 @@ class Controller:
 
         for cmd in engine_cmds:
             self[cmd.robot_id].engine_cmd = cmd
+            self[cmd.robot_id].path = None
 
     def execute(self) -> RobotState:
         commands = {}
