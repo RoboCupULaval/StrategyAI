@@ -2,6 +2,7 @@
 
 from functools import partial
 
+from Util.constant import KickForce
 from Util.pose import Position, Pose
 from Util.role import Role
 from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
@@ -20,6 +21,8 @@ class DirectFreeKick(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
+        their_goal = p_game_state.field.their_goal_pose
+
         formation = [p for r, p in self.assigned_roles.items() if p != Role.GOALKEEPER]
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
@@ -29,7 +32,7 @@ class DirectFreeKick(Strategy):
                                                                                 player,
                                                                                 robots_in_formation=formation,
                                                                                 auto_position=True))
-                node_go_kick = self.create_node(role, GoKick(self.game_state, player, auto_update_target=True))
+                node_go_kick = self.create_node(role, GoKick(self.game_state, player, their_goal, auto_update_target=False, kick_force=KickForce.HIGH))
 
                 player_is_closest = partial(self.is_closest, player)
                 player_is_not_closest = partial(self.is_not_closest, player)
