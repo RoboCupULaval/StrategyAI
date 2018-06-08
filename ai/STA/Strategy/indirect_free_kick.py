@@ -39,17 +39,19 @@ class IndirectFreeKick(Strategy):
                 node_go_kick.connect_to(node_pass, when=player_is_not_closest)
                 node_go_kick.connect_to(node_go_kick, when=player_has_kicked)
 
-
     @classmethod
     def required_roles(cls):
         return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
                                                                 Role.FIRST_ATTACK,
-                                                                Role.SECOND_ATTACK,
-                                                                Role.MIDDLE,
+                                                                Role.MIDDLE]
+                }
+
+    @classmethod
+    def optional_roles(cls):
+        return {r: keep_prev_mapping_otherwise_random for r in [Role.SECOND_ATTACK,
                                                                 Role.FIRST_DEFENCE,
                                                                 Role.SECOND_DEFENCE]
                 }
-
 
     def is_closest(self, player):
         return player == closest_player_to_point(GameState().ball_position, True).player

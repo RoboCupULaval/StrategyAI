@@ -88,7 +88,6 @@ class DefenseWall(Strategy):
                 node_align_to_defense_wall.connect_to(node_position_pass, when=self.game_state.field.is_ball_in_our_goal_area)
                 node_position_pass.connect_to(node_align_to_defense_wall, when=self.game_state.field.is_ball_outside_our_goal_area)
 
-
     @classmethod
     def required_roles(cls):
         return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
