@@ -82,13 +82,15 @@ class Coach(Process):
     def wait_for_referee(self):
         self.logger.debug('Waiting for commands from the referee')
         while self.referee_queue.qsize() == 0:
-            self.logger.debug('Referee is not active or port is set incorrectly (should be 20011)')
+            self.logger.debug('Referee is not active or port is set incorrectly, current port is {})'.format(
+                Config()['COMMUNICATION']['referee_port']))
             sleep(1)
         self.logger.debug('Referee command detected')
 
     def run(self) -> None:
         self.wait_for_geometry()
-        self.wait_for_referee()
+        if Config()['GAME']['competition_mode']:
+            self.wait_for_referee()
 
         # FIXME: At startup it takes a few seconds to have the player's positions,
         # to prevent role assigment crash, let's sleep for a few secs.
