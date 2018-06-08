@@ -13,10 +13,6 @@ from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 class LineUp(Strategy):
     def __init__(self, game_state: GameState):
         super().__init__(game_state)
-        self.robots = []
-        self.robots_in_lineup = []
-        self.position_offset = Position(0, 0)
-        self.positions_in_formations = 0
         self.target_position = Position(0, 0)
         roles_to_consider = [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE,
                              Role.FIRST_DEFENCE, Role.SECOND_DEFENCE, Role.GOALKEEPER]
@@ -30,11 +26,11 @@ class LineUp(Strategy):
         for role, player in role_by_robots:
 
             destination_orientation = 0
-            self.position_offset = Position(i * ROBOT_RADIUS * 3, 0)
-            self.positions_in_formations = self.target_position + self.position_offset
+            position_offset = Position(i * ROBOT_RADIUS * 3, 0)
+            positions_in_formations = self.target_position + position_offset
             i += 1
             self.create_node(role, GoToPositionPathfinder(self.game_state, player,
-                                                          Pose(self.positions_in_formations,
+                                                          Pose(positions_in_formations,
                                                                destination_orientation)))
 
     @classmethod
