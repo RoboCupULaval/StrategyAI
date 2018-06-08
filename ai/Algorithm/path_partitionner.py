@@ -31,6 +31,7 @@ class PathPartitionner:
     def __init__(self):
         self.obstacles = []
         self.old_path = None
+
     @property
     def obstacles_position(self):
         return np.array([obs.position for obs in self.obstacles])
@@ -50,8 +51,8 @@ class PathPartitionner:
     def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], last_path: Optional[Path]=None):
 
         self.obstacles = obstacles
-        self.filter_obstacles(start.array, target.array)
         self.old_path = last_path
+        self.filter_obstacles(start.array, target.array)
 
         if any(self.obstacles):
             if last_path and not self.is_full_path_colliding(last_path):
@@ -156,6 +157,7 @@ class PathPartitionner:
         return False
 
     def update_last_path(self, start, target):
+
         distance_from_old_target = (self.old_path.target - target).norm
         self.old_path.start = start
         self.old_path.points[0] = start
@@ -172,6 +174,7 @@ class PathPartitionner:
             if not self.is_path_colliding(path.start.array, path.points[2].array):
                 del path.points[1]
         return path
+
 
 
 def normalize(vec: np.ndarray) -> np.ndarray:
