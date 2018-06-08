@@ -66,6 +66,10 @@ class Controller:
             else:
                 robot.position_regulator.reset()
                 commands[robot.id] = robot.velocity_regulator.execute(robot)
+            self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point('mm/s',
+                                                                         'robot {} cmd speed'.format(robot.id),
+                                                                         [time.time()],
+                                                                         [robot.velocity.norm]))
         self.send_debug(commands)
 
         return self.generate_packet(commands)
