@@ -34,9 +34,10 @@ class GoKick(Tactic):
                  args: List[str]=None,
                  kick_force: KickForce=KickForce.MEDIUM,
                  auto_update_target=True,
-                 go_behind_distance=GRAB_BALL_SPACING*3):
+                 go_behind_distance=GRAB_BALL_SPACING*3,
+                 forbidden_areas=None):
 
-        super().__init__(game_state, player, target, args)
+        super().__init__(game_state, player, target, args=args, forbidden_areas=forbidden_areas)
         self.current_state = self.initialize
         self.next_state = self.initialize
         self.kick_last_time = time.time()

@@ -79,7 +79,7 @@ class CmdBuilder:
 
 
 def Kick(kick_force: KickForce=KickForce.LOW):
-    return CmdBuilder.addKick(kick_force).build()
+    return CmdBuilder().addKick(kick_force).build()
 
 
 def MoveTo(target: Union[Pose, Position],

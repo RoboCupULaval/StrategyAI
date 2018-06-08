@@ -25,8 +25,9 @@ class PositionForPass(Tactic):
     This tactic automagically positions players at strategic emplacements
     """
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: Optional[List[str]]=None,
-                 auto_position=False, robots_in_formation: Optional[List[Player]] = None):
-        super().__init__(game_state, player, target, args)
+                 auto_position=False, robots_in_formation: Optional[List[Player]] = None,
+                 forbidden_areas=None):
+        super().__init__(game_state, player, target, args=args, forbidden_areas=forbidden_areas)
         self.current_state = self.move_to_pass_position
         self.next_state = self.move_to_pass_position
         self.target = target

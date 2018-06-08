@@ -93,6 +93,16 @@ class Area:
         return cls(Position(left, top), Position(right, bottom))
 
 
+def position_outside_area(position: Position, area: Area):
+
+    if position not in area:
+        return position
+    return Position(
+        area.top if position.y > area.top - (area.top - area.bottom) / 2 else area.bottom,
+        area.right if position.x > area.right - (area.right - area.left) / 2 else area.left
+    )
+
+
 def find_bisector_of_triangle(c, a, b):
     """
     Where 'c' is the origin of the bisector and the intersection of the bissectrice 'i' is on the segment 'ab'.
