@@ -49,7 +49,7 @@ class PathfinderModule:
         for other in our_team + enemy_team:
             self.obstacles.append(Obstacle(other.position.array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
 
-    def player_optionnal_obstacles(self, ball_collision: bool) -> List[Obstacle]:
+    def player_optional_obstacles(self, ball_collision: bool) -> List[Obstacle]:
         path_obstacles = self.obstacles.copy()
 
         if ball_collision and self.game_state.is_ball_on_field:
@@ -100,7 +100,7 @@ class PathfinderModule:
 
         player_obstacles = self.obstacles.copy()
         player_obstacles += self.strategy_obstacles
-        player_obstacles += self.player_optionnal_obstacles(way_point.ball_collision)
+        player_obstacles += self.player_optional_obstacles(way_point.ball_collision)
 
         path = PathPartitionner().get_path(start=start,
                                            target=way_point.position,
