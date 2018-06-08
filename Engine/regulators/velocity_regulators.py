@@ -53,7 +53,7 @@ class RealVelocityController(RegulatorBaseClass):
 
 class GrSimVelocityController(RealVelocityController):
 
-    settings = {'kp': .75, 'ki': 0.05, 'kd': 0}
+    settings = {'kp': 2, 'ki': 0.3, 'kd': 0}
     offset = 1
 
 
