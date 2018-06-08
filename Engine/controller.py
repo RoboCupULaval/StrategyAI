@@ -38,7 +38,6 @@ class Controller:
             robot.velocity_regulator = VelocityRegulator()
             robot.position_regulator = PositionRegulator()
 
-
     def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand]):
 
         self.timestamp = track_frame['timestamp']
@@ -53,6 +52,7 @@ class Controller:
 
         for cmd in engine_cmds:
             self[cmd.robot_id].engine_cmd = cmd
+            self[cmd.robot_id].path = None
 
     def execute(self) -> RobotState:
         commands = {}
@@ -66,7 +66,6 @@ class Controller:
             else:
                 robot.position_regulator.reset()
                 commands[robot.id] = robot.velocity_regulator.execute(robot)
-            print(commands[robot.id])
         self.send_debug(commands)
 
         return self.generate_packet(commands)
