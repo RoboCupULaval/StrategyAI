@@ -77,18 +77,26 @@ class SimpleAutoPlay(AutoPlay):
 
     FREE_KICK_COMMANDS = [RefereeCommand.DIRECT_FREE_US, RefereeCommand.INDIRECT_FREE_US,
                           RefereeCommand.DIRECT_FREE_THEM, RefereeCommand.INDIRECT_FREE_THEM]
+    MINIMUM_NB_PLAYER = 3
 
     def __init__(self, play_state: PlayState):
         super().__init__(play_state)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.last_ref_state = RefereeCommand.HALT
+        self.prev_nb_player = None
 
     # TODO: Check if role assignment works well enough, so we don't need available_players_changed
     def update(self, ref_state: RefereeState, available_players_changed=False):
         self.play_state.game_state.last_ref_state = ref_state
         self.next_state = self._select_next_state(ref_state)
 
-        if self.next_state is None:
+        nb_player = len(GameState().our_team.available_players)
+        if nb_player < self.MINIMUM_NB_PLAYER:
+            if self.prev_nb_player or nb_player != self.prev_nb_player:
+                self.logger.warning("Not enough player to play. We have {} players and the minimum is {} "
+                                    .format(nb_player, self.MINIMUM_NB_PLAYER))
+            self.play_state.current_strategy = "LastChance" if nb_player > 0 else 'Stop'
+        elif self.next_state is None:
             self.next_state = SimpleAutoPlayState.HALT
             self.play_state.current_strategy = SimpleAutoPlay._state_to_strategy_name(self.next_state)
 
@@ -96,6 +104,7 @@ class SimpleAutoPlay(AutoPlay):
             self.play_state.current_strategy = SimpleAutoPlay._state_to_strategy_name(self.next_state)
 
         self.current_state = self.next_state
+        self.prev_nb_player = nb_player
     
     def str(self):
         pass

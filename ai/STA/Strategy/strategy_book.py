@@ -8,6 +8,7 @@ from ai.STA.Strategy.defense_wall_no_kick import DefenseWallNoKick
 from ai.STA.Strategy.defense_wall import DefenseWall
 from ai.STA.Strategy.direct_free_kick import DirectFreeKick
 from ai.STA.Strategy.indirect_free_kick import IndirectFreeKick
+from ai.STA.Strategy.last_chance import LastChance
 from ai.STA.Strategy.offense import Offense
 from ai.STA.Strategy.indiana_jones import IndianaJones
 from ai.STA.Strategy.human_control import HumanControl
@@ -63,6 +64,7 @@ class StrategyBook(object):
                               'DefenseWallNoKick': DefenseWallNoKick,
                               'BallPlacement': BallPlacement,
                               'TestGoalKeeper': TestGoalKeeper,
+                              'LastChance': LastChance
                               }
         self.default_strategies = ['Offense',
                                    'DefenseWall']
