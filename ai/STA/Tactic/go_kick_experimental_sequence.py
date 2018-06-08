@@ -56,7 +56,8 @@ class GoKickExperimental(Tactic):
     def main_state(self):
         self.status_flag = Flags.WIP
         self.next_state = self.main_state
-
+        if self.auto_update_target:
+            self._find_best_passing_option()
         orientation = (self.target.position - self.game_state.ball_position).angle
         player_to_target = (self.target.position - self.player.pose.position)
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
@@ -69,9 +70,9 @@ class GoKickExperimental(Tactic):
         position_behind_ball_for_grab = self.game_state.ball_position - normalize(player_to_target) * GRAB_BALL_SPACING
         position_behind_ball_for_kick = self.game_state.ball_position + normalize(player_to_target) * KICK_DISTANCE
 
-        if self.is_able_to_grab_ball_directly(0.5):
+        if self.is_able_to_grab_ball_directly(0.7):
             self.points_sequence = []
-            if compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.1, 0.1 * dist_from_ball/100)) and \
+            if compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1) and \
                     (dist_from_ball < GRAB_BALL_SPACING * 1.25):
                 self.next_state = self.validate_kick
                 return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
@@ -94,42 +95,6 @@ class GoKickExperimental(Tactic):
             self.cmd_last_time = time.time()
 
         return CmdBuilder().addChargeKicker().build()
-
-    def go_behind_ball(self):
-        self.status_flag = Flags.WIP
-        orientation = (self.target.position - self.game_state.ball_position).angle
-        ball_speed = self.game_state.ball.velocity.norm
-        ball_speed_modifier = (ball_speed/1000 + 1)
-        effective_ball_spacing = GRAB_BALL_SPACING * 3 * ball_speed_modifier
-        distance_behind = self.get_destination_behind_ball(effective_ball_spacing)
-        dist_from_ball = (self.player.position - self.game_state.ball_position).norm
-
-        if self.is_able_to_grab_ball_directly(0.5) \
-                and compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.1, 0.1 * dist_from_ball/100)):
-            self.next_state = self.grab_ball
-        else:
-            self.next_state = self.go_behind_ball
-            if self.auto_update_target:
-                self._find_best_passing_option()
-        return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=2,
-                                      end_speed=0,
-                                      ball_collision=True).build()
-
-    def grab_ball(self):
-
-        vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
-        if not self.is_able_to_grab_ball_directly(0.5):
-            self.next_state = self.go_behind_ball
-
-        if self._get_distance_from_ball() < KICK_DISTANCE:
-            self.next_state = self.kick
-
-        orientation = (self.target.position - self.game_state.ball_position).angle
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
-        return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=1,
-                                      ball_collision=False).addChargeKicker().build()
 
     def kick(self):
         self.next_state = self.validate_kick
@@ -160,12 +125,6 @@ class GoKickExperimental(Tactic):
     def _get_distance_from_ball(self):
         return (self.player.pose.position - self.game_state.ball_position).norm
 
-    def _is_player_towards_ball_and_target(self, abs_tol=m.pi/30):
-        ball_position = self.game_state.ball_position
-        target_to_ball = ball_position - self.target.position
-        ball_to_player = self.player.pose.position - ball_position
-        return compare_angle(target_to_ball.angle, ball_to_player.angle, abs_tol=abs_tol)
-
     def _find_best_passing_option(self):
         assignation_delay = (time.time() - self.target_assignation_last_time)
 
@@ -193,3 +152,4 @@ class GoKickExperimental(Tactic):
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
 
         return threshold < alignement_behind
+

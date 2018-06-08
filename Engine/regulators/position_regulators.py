@@ -9,21 +9,19 @@ from Util.geometry import wrap_to_pi, rotate
 class RealPositionRegulator(RegulatorBaseClass):
 
     settings = {
-        'translation': {'kp': 1, 'ki': 0.1, 'kd': 0},
-        'rotation': {'kp': 3, 'ki': 0.5, 'kd': 0}
+        'translation': {'kp': 2, 'ki': 0.1, 'kd': 0},
+        'rotation': {'kp': 8, 'ki': 0, 'kd': 1}
     }
 
     def __init__(self):
         self.controllers = {'x': PID(**self.settings['translation']),
                             'y': PID(**self.settings['translation']),
-                            'orientation': PID(**self.settings['rotation'], wrap_error=True)}
+                            'orientation': PID(**self.settings['rotation'], signed_error=True, deadzone=0.10)}
 
     def execute(self, robot: Robot):
-        pose = robot.pose
-        target = Pose(robot.path.points[1], robot.target_orientation)
 
-        pos_error = target.position - pose.position
-        orientation_error = wrap_to_pi(target.orientation - pose.orientation)
+        pos_error = robot.position_error
+        orientation_error = robot.orientation_error
 
         command = Pose.from_values(self.controllers['x'].execute(pos_error.x),
                                    self.controllers['y'].execute(pos_error.y),
