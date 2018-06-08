@@ -10,7 +10,7 @@ class RealPositionRegulator(RegulatorBaseClass):
 
     settings = {
         'translation': {'kp': 2, 'ki': 0.1, 'kd': 0},
-        'rotation': {'kp': 10, 'ki': 0, 'kd': 0}
+        'rotation': {'kp': 10, 'ki': 0, 'kd': 0.5}
     }
 
     def __init__(self):

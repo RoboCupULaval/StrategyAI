@@ -66,7 +66,7 @@ class Controller:
             else:
                 robot.position_regulator.reset()
                 commands[robot.id] = robot.velocity_regulator.execute(robot)
-
+            print(commands[robot.id])
         self.send_debug(commands)
 
         return self.generate_packet(commands)
