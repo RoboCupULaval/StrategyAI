@@ -95,7 +95,7 @@ class SimpleAutoPlay(AutoPlay):
             if self.prev_nb_player or nb_player != self.prev_nb_player:
                 self.logger.warning("Not enough player to play. We have {} players and the minimum is {} "
                                     .format(nb_player, self.MINIMUM_NB_PLAYER))
-            self.play_state.current_strategy = 'Stop'
+            self.play_state.current_strategy = 'DoNothing'
         elif self.next_state is None:
             self.next_state = SimpleAutoPlayState.HALT
             self.play_state.current_strategy = SimpleAutoPlay._state_to_strategy_name(self.next_state)

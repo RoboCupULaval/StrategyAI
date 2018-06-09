@@ -57,7 +57,7 @@ class PositionForPass(Tactic):
 
     def _find_best_player_position(self):
         if not self.auto_position:
-            return self.target_position
+            return self.target.position
 
         if self.is_offense:
             ball_offset = clamp(self.game_state.ball.position.x, 0, 1000)
