@@ -48,7 +48,7 @@ class RobotFilter(KalmanFilter):
 
         sigma_acc_x = 400
         sigma_acc_y = 400
-        sigma_acc_o = 20000 * np.pi/180
+        sigma_acc_o = 10000 * np.pi/180
 
         process_covariance = \
             np.array([

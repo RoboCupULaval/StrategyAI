@@ -98,8 +98,8 @@ class RefereeState:
     @property
     def info(self) -> Dict:
         return {
-            "command": str(self.command),
-            "stage": str(self.stage),
+            "command": self.command.name,
+            "stage": self.stage.name,
             "stage_time_left": self.stage_time_left
         }
 

@@ -28,7 +28,7 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
     def info(self):
         return {
             "selected_strategy": str(self.play_state.current_strategy),
-            "current_state": str(self.current_state)
+            "current_state": self.current_state.name
         }
 
     @abstractmethod
