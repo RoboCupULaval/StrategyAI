@@ -20,7 +20,7 @@ VALID_DIFF_ANGLE = 0.15
 
 
 class RotateAroundBall(Tactic):
-    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(),
+    def __init__(self, game_state: GameState, player: Player, target: Pose,
                  args: Optional[List[str]] = None, rotate_time=2, switch_time=0.75):
         super().__init__(game_state, player, target, args)
         self.rotate_time = rotate_time
@@ -40,21 +40,22 @@ class RotateAroundBall(Tactic):
         self.start_orientation = (Position(0, 0) - self.ball_position).angle
 
         self.offset_orientation = self.start_orientation
+        self.rotation_sign = self._get_direction()
 
-        self.position = (self.game_state.ball_position - Position.from_angle(self.offset_orientation) * DISTANCE_FROM_BALL)
-        self.rotation_sign = self.get_direction()
+        self.position = Position
 
     def next_position(self):
+        self.position = (self.game_state.ball_position - Position.from_angle(self.offset_orientation) * DISTANCE_FROM_BALL)
         if self.start_time is not None:
             if time.time() - self.start_time >= self.rotate_time:
-                self.rotation_sign = self.get_direction()
+                self.rotation_sign = self._get_direction()
                 if compare_angle(self.target_orientation, (self.ball_position - self.player.position).angle, VALID_DIFF_ANGLE) \
                         and compare_angle(self.player.pose.orientation, self.target_orientation, abs_tol=VALID_DIFF_ANGLE):
                     self.next_state = self.halt
                     return Idle
             elif time.time() - self.iter_time >= self.switch_time:
                 self.iter_time = time.time()
-                self.switch_rotation()
+                self._switch_rotation()
 
         if (self.player.pose.position - self.position).norm < VALID_DISTANCE:
             if self.start_time is None:
@@ -74,11 +75,11 @@ class RotateAroundBall(Tactic):
                                       cruise_speed=self.speed, end_speed=self.end_speed,
                                       ball_collision=self.ball_collision).build()
 
-    def switch_rotation(self):
+    def _switch_rotation(self):
         self.rotation_sign *= -1
         self.offset_orientation += 2 * DIFF_ANGLE * self.rotation_sign
 
-    def get_direction(self):
+    def _get_direction(self):
         return np.sign(find_signed_delta_angle(self.target_orientation, self.offset_orientation))
 
     def halt(self):

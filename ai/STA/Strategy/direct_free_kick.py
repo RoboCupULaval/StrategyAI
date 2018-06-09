@@ -66,7 +66,7 @@ class DirectFreeKick(Strategy):
         if player == closest_players[0].player:
             return True
         return closest_players[0].player == self.game_state.get_player_by_role(Role.GOALKEEPER) \
-               and player == closest_players[1].player
+            and player == closest_players[1].player
 
     def is_not_closest(self, player):
         return not self.is_closest_not_goalkeeper(player)

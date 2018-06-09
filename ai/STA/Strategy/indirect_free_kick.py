@@ -30,7 +30,7 @@ class IndirectFreeKick(Strategy):
                                                                    player,
                                                                    robots_in_formation=formation,
                                                                    auto_position=True))
-                node_rotate_around_ball = self.create_node(role, RotateAroundBall(self.game_state, player))
+                node_rotate_around_ball = self.create_node(role, RotateAroundBall(self.game_state, player, p_game_state.field.their_goal_pose))
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, auto_update_target=True))
 
                 player_is_closest = partial(self.is_closest_not_goalkeeper, player)
@@ -63,7 +63,7 @@ class IndirectFreeKick(Strategy):
         if player == closest_players[0].player:
             return True
         return closest_players[0].player == self.game_state.get_player_by_role(Role.GOALKEEPER) \
-               and player == closest_players[1].player
+            and player == closest_players[1].player
 
     def is_not_closest(self, player):
         return not self.is_closest_not_goalkeeper(player)
