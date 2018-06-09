@@ -91,7 +91,7 @@ class SimpleAutoPlay(AutoPlay):
         self.next_state = self._select_next_state(ref_state)
 
         nb_player = len(GameState().our_team.available_players)
-        if nb_player < self.MINIMUM_NB_PLAYER:
+        if nb_player < self.MINIMUM_NB_PLAYER and ref_state.command != RefereeCommand.HALT:
             if self.prev_nb_player or nb_player != self.prev_nb_player:
                 self.logger.warning("Not enough player to play. We have {} players and the minimum is {} "
                                     .format(nb_player, self.MINIMUM_NB_PLAYER))

@@ -33,7 +33,7 @@ class GoKick(Tactic):
                  target: Pose=Pose(),
                  args: List[str]=None,
                  kick_force: KickForce=KickForce.MEDIUM,
-                 auto_update_target=True,
+                 auto_update_target=False,
                  go_behind_distance=GRAB_BALL_SPACING*3):
 
         super().__init__(game_state, player, target, args)

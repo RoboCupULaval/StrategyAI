@@ -6,7 +6,7 @@ from Util.constant import KickForce
 from Util.pose import Position, Pose
 from Util.role import Role
 from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
-from ai.Algorithm.evaluation_module import closest_player_to_point
+from ai.Algorithm.evaluation_module import closest_player_to_point, closest_players_to_point
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
@@ -34,7 +34,7 @@ class DirectFreeKick(Strategy):
                                                                                 auto_position=True))
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, their_goal, auto_update_target=False, kick_force=KickForce.HIGH))
 
-                player_is_closest = partial(self.is_closest, player)
+                player_is_closest = partial(self.is_closest_not_goalkeeper, player)
                 player_is_not_closest = partial(self.is_not_closest, player)
                 player_has_kicked = partial(self.has_kicked, player)
 
@@ -56,11 +56,15 @@ class DirectFreeKick(Strategy):
                                                                 Role.SECOND_DEFENCE]
                 }
 
-    def is_closest(self, player):
-        return player == closest_player_to_point(GameState().ball_position, True).player
+    def is_closest_not_goalkeeper(self, player):
+        closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
+        if player == closest_players[0].player:
+            return True
+        return closest_players[0].player == self.game_state.get_player_by_role(Role.GOALKEEPER) \
+               and player == closest_players[1].player
 
     def is_not_closest(self, player):
-        return player != closest_player_to_point(GameState().ball_position, True).player
+        return not self.is_closest_not_goalkeeper(player)
 
     def has_kicked(self, player):
         role = GameState().get_role_by_player_id(player.id)
