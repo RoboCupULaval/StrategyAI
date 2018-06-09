@@ -62,7 +62,7 @@ class StrategyBook(object):
                               'OffenseKickOff': OffenseKickOff,
                               'DefenseWallNoKick': DefenseWallNoKick,
                               'BallPlacement': BallPlacement,
-                              'TestGoalKeeper': TestGoalKeeper,
+                              'TestGoalKeeper': TestGoalKeeper
                               }
         self.default_strategies = ['Offense',
                                    'DefenseWall']
