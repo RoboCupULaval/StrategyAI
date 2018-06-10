@@ -58,18 +58,11 @@ if __name__ == '__main__':
     Config().load_file(cli_args.config_file)
     Config().load_parameters(cli_args)
 
-    fileFormatter = logging.Formatter('(%(asctime)s) - [%(levelname)-5.5s]  %(name)-22.22s: %(message)s')
-    fileHandler = logging.FileHandler('./Logs/StrategyAI.log', 'a')
-    fileHandler.setFormatter(fileFormatter)
-
-    # logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.DEBUG)
-
-
     consoleFormatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
     consoleHandler = logging.StreamHandler(stream=stdout)
     consoleHandler.setFormatter(consoleFormatter)
 
-    logging.basicConfig(level=logging.NOTSET, handlers=[fileHandler, consoleHandler])
+    logging.basicConfig(level=logging.NOTSET, handlers=[consoleHandler])
 
     logger = logging.getLogger('Main')
 
