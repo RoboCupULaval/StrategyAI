@@ -51,7 +51,7 @@ class RotateAroundBall(Tactic):
                 if compare_angle(self.target_orientation, (self.ball_position - self.player.position).angle, VALID_DIFF_ANGLE) \
                         and compare_angle(self.player.pose.orientation, self.target_orientation, abs_tol=VALID_DIFF_ANGLE):
                     self.next_state = self.halt
-                    return Idle
+                    return self._go_to_final_position()
             elif time.time() - self.iter_time >= self.switch_time:
                 self.iter_time = time.time()
                 self._switch_rotation()
@@ -66,7 +66,7 @@ class RotateAroundBall(Tactic):
             self.position = (self.game_state.ball_position - Position.from_angle(self.offset_orientation) * DISTANCE_FROM_BALL)
 
         if self.start_time is not None:
-            orientation = self.offset_orientation if time.time() - self.start_time < self.rotate_time-1.5 else self.target_orientation
+            orientation = self.offset_orientation if time.time() - self.start_time < self.rotate_time else self.target_orientation
         else:
             orientation = self.target_orientation
         return CmdBuilder().addMoveTo(Pose(self.position, orientation),
@@ -80,6 +80,12 @@ class RotateAroundBall(Tactic):
     def _get_direction(self):
         return np.sign(find_signed_delta_angle(self.target_orientation, self.offset_orientation))
 
+    def _go_to_final_position(self):
+        position = self.game_state.ball_position - Position.from_angle(self.target_orientation) * DISTANCE_FROM_BALL
+        return CmdBuilder().addMoveTo(Pose(position, self.target_orientation),
+                               cruise_speed=self.speed,
+                               ball_collision=self.ball_collision).build()
+
     def halt(self):
         self.status_flag = Flags.SUCCESS
-        return Idle
+        return self._go_to_final_position()
