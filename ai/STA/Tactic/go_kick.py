@@ -81,7 +81,7 @@ class GoKick(Tactic):
             if self.auto_update_target:
                 self._find_best_passing_option()
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=2,
+                                      cruise_speed=3,
                                       end_speed=0,
                                       ball_collision=True)\
                            .addChargeKicker().build()
@@ -99,7 +99,7 @@ class GoKick(Tactic):
         orientation = (self.target.position - self.game_state.ball_position).angle
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=1,
+                                      cruise_speed=3,
                                       ball_collision=False).addChargeKicker().addKick(self.kick_force).build()
 
     def kick(self):
