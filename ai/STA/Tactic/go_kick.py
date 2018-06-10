@@ -19,7 +19,7 @@ from ai.states.game_state import GameState
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 0.5
 
-GO_BEHIND_SPACING = 200
+GO_BEHIND_SPACING = 250
 GRAB_BALL_SPACING = 100
 APPROACH_SPEED = 100
 KICK_DISTANCE = 130
@@ -33,7 +33,7 @@ class GoKick(Tactic):
                  target: Pose=Pose(),
                  args: List[str]=None,
                  kick_force: KickForce=KickForce.MEDIUM,
-                 auto_update_target=True,
+                 auto_update_target=False,
                  go_behind_distance=GRAB_BALL_SPACING*3):
 
         super().__init__(game_state, player, target, args)
@@ -53,7 +53,7 @@ class GoKick(Tactic):
 
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
 
-        if self.is_able_to_grab_ball_directly(0.3) \
+        if self.is_able_to_grab_ball_directly(0.5) \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.1, 0.1 * dist_from_ball/100)):
             self.next_state = self.grab_ball
             if self._get_distance_from_ball() < KICK_DISTANCE:
@@ -73,7 +73,7 @@ class GoKick(Tactic):
         distance_behind = self.get_destination_behind_ball(effective_ball_spacing)
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
 
-        if self.is_able_to_grab_ball_directly(0.7) \
+        if self.is_able_to_grab_ball_directly(0.8) \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.1, 0.1 * dist_from_ball/100)):
             self.next_state = self.grab_ball
         else:
@@ -89,7 +89,7 @@ class GoKick(Tactic):
     def grab_ball(self):
 
         vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
-        if not self.is_able_to_grab_ball_directly(0.7):
+        if not self.is_able_to_grab_ball_directly(0.8):
             self.next_state = self.go_behind_ball
 
         if self._get_distance_from_ball() < KICK_DISTANCE:
@@ -100,7 +100,7 @@ class GoKick(Tactic):
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=1,
-                                      ball_collision=False).addChargeKicker().build()
+                                      ball_collision=False).addChargeKicker().addKick(self.kick_force).build()
 
     def kick(self):
         self.next_state = self.validate_kick
