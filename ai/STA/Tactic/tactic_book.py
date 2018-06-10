@@ -9,6 +9,7 @@ from ai.STA.Tactic.face_target import FaceTarget
 from ai.STA.Tactic.pass_to_player import PassToPlayer
 from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot
 from ai.STA.Tactic.rotate_around_ball import RotateAroundBall
+from ai.STA.Tactic.stress_test_robot import StressTestRobot
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
@@ -47,6 +48,7 @@ class TacticBook(object):
             'Stop': Stop,
             'RotateAroundBall': RotateAroundBall,
             'GoKickExperimental': GoKickExperimental,
+            'StressTestRobot': StressTestRobot,
         }
         self.default_tactics = ['GoToPositionPathfinder',
                                 'GoKick']
