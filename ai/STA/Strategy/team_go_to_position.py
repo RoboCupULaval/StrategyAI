@@ -4,7 +4,7 @@ from functools import partial
 import numpy as np
 
 from Util.role import Role
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.stop import Stop
@@ -30,17 +30,16 @@ class TeamGoToPosition(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return {}
+        return []
 
     @classmethod
     def optional_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
-                                                                Role.FIRST_ATTACK,
-                                                                Role.SECOND_ATTACK,
-                                                                Role.MIDDLE,
-                                                                Role.FIRST_DEFENCE,
-                                                                Role.SECOND_DEFENCE]
-                }
+        return [Role.GOALKEEPER,
+                Role.FIRST_ATTACK,
+                Role.SECOND_ATTACK,
+                Role.MIDDLE,
+                Role.FIRST_DEFENCE,
+                Role.SECOND_DEFENCE]
 
     def arrived_to_position(self, player):
         role = GameState().get_role_by_player_id(player.id)

@@ -5,7 +5,7 @@ from random import shuffle
 
 from Util.constant import PLAYER_PER_TEAM
 from Util.pose import Pose, Position
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
@@ -60,7 +60,6 @@ class RobocupChoreography(Strategy):
         node_robot3_go_to_x.connect_to(node_robot3_go_to_y, when=robot3_succeeded)
         node_robot3_go_to_y.connect_to(node_robot3_go_to_x, when=robot3_succeeded)
 
-
     def current_tactic_succeed(self, role):
         try:
             tactic = self.roles_graph[role].current_tactic
@@ -70,7 +69,6 @@ class RobocupChoreography(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.FIRST_ATTACK,
-                                                                Role.SECOND_ATTACK,
-                                                                Role.MIDDLE]
-                }
+        return [Role.FIRST_ATTACK,
+                Role.SECOND_ATTACK,
+                Role.MIDDLE]

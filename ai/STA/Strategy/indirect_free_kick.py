@@ -4,7 +4,7 @@ from functools import partial
 
 from Util.pose import Position, Pose
 from Util.role import Role
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 from ai.Algorithm.evaluation_module import closest_player_to_point, closest_players_to_point
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
@@ -41,17 +41,15 @@ class IndirectFreeKick(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
-                                                                Role.FIRST_ATTACK,
-                                                                Role.MIDDLE]
-                }
+        return [Role.GOALKEEPER,
+                Role.FIRST_ATTACK,
+                Role.MIDDLE]
 
     @classmethod
     def optional_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.SECOND_ATTACK,
-                                                                Role.FIRST_DEFENCE,
-                                                                Role.SECOND_DEFENCE]
-                }
+        return [Role.SECOND_ATTACK,
+                Role.FIRST_DEFENCE,
+                Role.SECOND_DEFENCE]
 
     def is_closest_not_goalkeeper(self, player):
         closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
