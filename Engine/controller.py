@@ -46,9 +46,13 @@ class Controller:
             self[robot['id']].pose = robot['pose']
             self[robot['id']].velocity = robot['velocity']
 
-        for cmd in engine_cmds:
-            self[cmd.robot_id].engine_cmd = cmd
-            self[cmd.robot_id].path = None
+        if engine_cmds:
+            for robot in self.robots:
+                robot.engine_cmd = None
+
+            for cmd in engine_cmds:
+                self[cmd.robot_id].engine_cmd = cmd
+                self[cmd.robot_id].path = None
 
     def execute(self) -> RobotState:
         commands = {}

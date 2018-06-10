@@ -92,11 +92,6 @@ class Coach(Process):
         if Config()['GAME']['competition_mode']:
             self.wait_for_referee()
 
-        # FIXME: At startup it takes a few seconds to have the player's positions,
-        # to prevent role assigment crash, let's sleep for a few secs.
-        if config['GAME']['is_autonomous_play_at_startup']:
-            sleep(3)
-
         self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
         try:
             while True:
