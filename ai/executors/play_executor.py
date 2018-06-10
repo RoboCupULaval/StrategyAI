@@ -36,7 +36,7 @@ class PlayExecutor:
         # self.last_available_players = {}
         # self.goalie_id = -1
 
-        self.pathfinder_module = PathfinderModule()
+        self.pathfinder_module = PathfinderModule(self.ui_send_queue)
 
     def exec(self) -> List[EngineCommand]:
         """

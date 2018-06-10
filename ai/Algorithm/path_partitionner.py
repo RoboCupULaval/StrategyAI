@@ -1,13 +1,12 @@
-
-
-from typing import Optional, List
-
+from queue import Queue
+from typing import Optional, List, Dict
 
 import numpy as np
 
-from Util import Position
+from Debug.debug_command_factory import DebugCommandFactory, LIGHT_GREEN, DEFAULT_DEBUG_TIMEOUT
+from Util import Position, Pose
 from Util.path import Path
-
+from ai.GameDomainObjects import Player
 
 MIN_PATH_LENGTH = 250  # mm
 RECURSION_LIMIT = 3
@@ -18,8 +17,10 @@ ELLIPSE_HALF_WIDTH = 1000
 class Obstacle:
     BASE_AVOID_DISTANCE = 100  # in mm
 
-    def __init__(self, position: np.ndarray, *, avoid_distance: Optional[float] = None):
+    def __init__(self, position: np.ndarray, *, velocity: np.ndarray = np.ndarray([0, 0]),
+                 avoid_distance: Optional[float] = None):
         self.position = position
+        self.velocity = velocity
         self.avoid_distance = avoid_distance if avoid_distance is not None else self.BASE_AVOID_DISTANCE
 
     def __repr__(self):
@@ -28,32 +29,53 @@ class Obstacle:
 
 class PathPartitionner:
 
-    def __init__(self):
+    def __init__(self, ui_send_queue: Queue):
+        self.ui_send_queue = ui_send_queue
         self.obstacles = []
         self.old_path = None
+        self.player = None
 
     @property
-    def obstacles_position(self):
+    def obstacles_position_old(self):
         return np.array([obs.position for obs in self.obstacles])
 
     @property
-    def obstacles_avoid_distance(self):
+    def obstacles_position(self):
+        if self.player is not None:
+            return np.array([(obs.position + obs.velocity *
+                              (self.player.position.array / self.player.velocity.position.array)) for obs in self.obstacles])
+        return np.array([])
+
+    @property
+    def obstacles_velocity(self):
+        return np.array([obs.velocity for obs in self.obstacles])
+
+    @property
+    def obstacles_avoid_distance_old(self):
         return np.array([obs.avoid_distance for obs in self.obstacles])
 
+    @property
+    def obstacles_avoid_distance(self):
+        return np.array([obs.avoid_distance * (1 + np.linalg.norm(obs.velocity) / 1000) for obs in self.obstacles])
+
     def filter_obstacles(self, start, target):
+
         obstacles = np.array(self.obstacles)
         start_to_obs = np.linalg.norm(start - self.obstacles_position, axis=1)
         target_to_obs = np.linalg.norm(target - self.obstacles_position, axis=1)
-        is_inside_ellipse = (start_to_obs + target_to_obs) <= np.sqrt(np.linalg.norm(start - target) ** 2 + ELLIPSE_HALF_WIDTH ** 2)
+        is_inside_ellipse = (start_to_obs + target_to_obs) <= np.sqrt(np.linalg.norm(start - target) ** 2 +
+                                                                      ELLIPSE_HALF_WIDTH ** 2)
         is_not_self = start_to_obs > 0  # remove self if present
         self.obstacles = obstacles[is_inside_ellipse & is_not_self].tolist()
 
-    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], last_path: Optional[Path]=None):
-
+    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], player: Player,
+                 last_path: Optional[Path]=None):
+        self.player = player
         self.obstacles = obstacles
         self.old_path = last_path
-        self.filter_obstacles(start.array, target.array)
 
+        self.filter_obstacles(start.array, target.array)
+        self.send_debug()
         if any(self.obstacles):
             if last_path and not self.is_full_path_colliding(last_path):
                 path = self.update_last_path(start, target)
@@ -174,6 +196,15 @@ class PathPartitionner:
             if not self.is_path_colliding(path.start.array, path.points[2].array):
                 del path.points[1]
         return path
+
+    def send_debug(self):
+
+        for pos, radius in zip(self.obstacles_position, self.obstacles_avoid_distance):
+            self.ui_send_queue.put_nowait(DebugCommandFactory.circle(center=Position.from_array(pos),
+                                                                     radius=radius,
+                                                                     color=LIGHT_GREEN,
+                                                                     is_fill=True,
+                                                                     timeout=DEFAULT_DEBUG_TIMEOUT))
 
 
 
