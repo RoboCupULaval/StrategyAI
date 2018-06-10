@@ -168,7 +168,8 @@ class Config(metaclass=Singleton):
             self._config['GAME']['is_autonomous_play_at_startup'] = True
 
             file_formatter = logging.Formatter('(%(asctime)s) - [%(levelname)-5.5s]  %(name)-22.22s: %(message)s')
-            file_handler = logging.FileHandler('./Logs/log_from_' + str(datetime.date.today()) + '.log', 'a')
+            file_handler = logging.FileHandler('./Logs/log_' + str(datetime.date.today()) + '_at_'
+                                                                  + str(datetime.datetime.now().hour) + 'h.log', 'a')
             file_handler.setFormatter(file_formatter)
 
             console_formatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
