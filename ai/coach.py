@@ -79,8 +79,18 @@ class Coach(Process):
         self.game_state.const = self.field
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
+    def wait_for_referee(self):
+        self.logger.debug('Waiting for commands from the referee')
+        while self.referee_queue.qsize() == 0:
+            self.logger.debug('Referee is not active or port is set incorrectly, current port is {})'.format(
+                Config()['COMMUNICATION']['referee_port']))
+            sleep(1)
+        self.logger.debug('Referee command detected')
+
     def run(self) -> None:
         self.wait_for_geometry()
+        if Config()['GAME']['competition_mode']:
+            self.wait_for_referee()
 
         self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
         try:
