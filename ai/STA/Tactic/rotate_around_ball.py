@@ -21,7 +21,7 @@ VALID_DIFF_ANGLE = 0.15
 
 class RotateAroundBall(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
-                 args: Optional[List[str]] = None, rotate_time=2, switch_time=0.75):
+                 args: Optional[List[str]] = None, rotate_time=4, switch_time=1.5):
         super().__init__(game_state, player, target, args)
         self.rotate_time = rotate_time
         self.switch_time = switch_time
@@ -30,7 +30,6 @@ class RotateAroundBall(Tactic):
         self.target = target
         self.ball_collision = True
         self.speed = 2
-        self.end_speed = 0
 
         self.start_time = None
         self.iter_time = None
@@ -63,7 +62,6 @@ class RotateAroundBall(Tactic):
                 self.iter_time = time.time()
                 self.ball_collision = True
                 self.speed = 1
-                self.end_speed = 1
             self.offset_orientation += DIFF_ANGLE * self.rotation_sign
             self.position = (self.game_state.ball_position - Position.from_angle(self.offset_orientation) * DISTANCE_FROM_BALL)
 
@@ -72,7 +70,7 @@ class RotateAroundBall(Tactic):
         else:
             orientation = self.target_orientation
         return CmdBuilder().addMoveTo(Pose(self.position, orientation),
-                                      cruise_speed=self.speed, end_speed=self.end_speed,
+                                      cruise_speed=self.speed,
                                       ball_collision=self.ball_collision).build()
 
     def _switch_rotation(self):
