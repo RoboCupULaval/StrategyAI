@@ -15,6 +15,10 @@ class Ball:
         self.position = new_dict['position']
         self.velocity = new_dict['velocity']
 
+    def is_moving_fast(self):
+        FAST_SPEED = 600.0 # mm/s
+        return FAST_SPEED < self.velocity.norm
+
     def is_mobile(self):
         IMMOBILE_SPEED = 300.0 # mm/s
         return IMMOBILE_SPEED < self.velocity.norm

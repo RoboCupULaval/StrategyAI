@@ -53,7 +53,7 @@ class PositionForPass(Tactic):
         destination_orientation = (self.game_state.ball_position - self.player.pose.position).angle
 
         self.best_position = self._find_best_player_position() if self.auto_position else self.target
-        return MoveTo(Pose(self.best_position, destination_orientation))
+        return MoveTo(Pose(self.best_position, destination_orientation), ball_collision=False)
 
     def _find_best_player_position(self):
         if not self.auto_position:

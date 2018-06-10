@@ -28,6 +28,8 @@ class Path(MutableSequence):  # pylint: disable=too-many-ancestors
                 kept_points.pop(-2)
 
             self.points = kept_points
+            if len(self.points) < 2:
+                self.points = [self.start, self.target]
 
     @classmethod
     def from_array(cls, start: ndarray, target: ndarray) -> 'Path':

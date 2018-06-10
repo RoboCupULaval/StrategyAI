@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 import logging
-from typing import List, Tuple, Callable, Optional
+from typing import List, Tuple, Callable, Optional, Dict
 
 from Util import Pose
 from Util.role import Role
@@ -28,7 +28,7 @@ class PlayState:
     def current_strategy(self, strategy_name: str):
         self.change_strategy(strategy_name)
 
-    def change_strategy(self, strategy_name: str, role: Optional[Role]=None):
+    def change_strategy(self, strategy_name: str, roles: Optional[Dict[Role, int]]=None):
         assert isinstance(strategy_name, str)
 
         self.logger.debug("Switching to strategy '{}'".format(strategy_name))
@@ -36,12 +36,22 @@ class PlayState:
         strategy_class = self.strategy_book.get_strategy(strategy_name)
 
         # Use default rule of the strategy
-        if role is None:
+        if roles is None:
             self.game_state.map_players_for_strategy(strategy_class)
-        else: # Use role mapping from UI-debug
-            self.game_state.map_players_to_roles_by_player_id(role)
+        elif not self._is_mapping_valid(roles):
+            self.logger.error("Invalid mapping from UI-debug")
+            return
+        else: # Use roles mapping from UI-debug
+            self.game_state.map_players_to_roles_by_player_id(roles)
             
         self._current_strategy = strategy_class(self.game_state)
+
+    def _is_mapping_valid(self, roles):
+        for player_id in roles.values():
+            if player_id not in self.game_state.our_team.available_players.keys():
+                self.logger.error("Robot id {} is not available".format(player_id))
+                return False
+        return True
 
     @property
     def current_tactical_state(self) -> List[Tuple[Player, str, str, Role]]:

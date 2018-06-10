@@ -2,16 +2,17 @@ from abc import abstractmethod
 import numpy as np
 from time import time
 
-MAX_DT = 1
-
 
 class KalmanFilter:
 
-    def __init__(self):
+    def __init__(self, _id=None):
 
+        self._id = _id
         self.is_active = False
-        self.last_update_time = 0
+        self.last_update_time = time()
         self.last_predict_time = time()
+        self.first_update_time = None
+
         self._dt = 0
 
         self.state_number = int(np.size(self.transition_model(), 0))
@@ -22,6 +23,10 @@ class KalmanFilter:
         self.R = self.observation_covariance
         self.Q = self.process_covariance
         self.P = self.initial_state_covariance()
+
+    @property
+    def id(self):
+        return self._id
 
     @abstractmethod
     def transition_model(self):
@@ -46,14 +51,12 @@ class KalmanFilter:
     def observation_covariance(self):
         return np.zeros(0)
 
-    def _update(self, error, t_capture):
+    def _update(self, error, update_time):
         self.is_active = True
+        if self.first_update_time is None: self.first_update_time = time()
 
-        if t_capture == self.last_update_time:
-            return
-
-        self._dt = time() - self.last_update_time
-        self.last_capture_time = t_capture
+        self._dt = update_time - self.last_update_time
+        self.last_update_time = update_time
 
         # Compute Kalman gain from states covariance and observation model
         gain = self.P @ self.observation_model().T \
@@ -65,12 +68,14 @@ class KalmanFilter:
         # Update the states covariance matrix
         self.P = self.P - gain @ self.observation_model() @ self.P
 
-    def _predict(self, input_command):
-        self._dt = time() - self.last_predict_time
-        self.last_predict_time = time()
+    def _predict(self, input_command=None):
+
+        predict_time = time()
+        self._dt = predict_time - self.last_predict_time
+        self.last_predict_time = predict_time
 
         # Predict the next state from states vector and input commands
-        if np.any(input_command):
+        if input_command is not None:
             self.x = self.transition_model() @ self.x + self.control_input_model() @ input_command
         else:
             self.x = self.transition_model() @ self.x
@@ -78,7 +83,7 @@ class KalmanFilter:
         # Update the state covariance matrix from the transition model
         self.P = self.transition_model() @ self.P @ self.transition_model().T + self.Q()
 
-    def update(self, observation, t_capture) -> None:
+    def update(self, observation, t_capture):
         error = observation - self.observation_model() @ self.x
         self._update(error, t_capture)
 
@@ -89,3 +94,6 @@ class KalmanFilter:
         self.is_active = False
         self.P = self.initial_state_covariance()
         self.x = np.zeros(self.state_number)
+        self.last_update_time = time()
+        self.last_predict_time = time()
+        self.first_update_time = None

@@ -3,6 +3,7 @@ from typing import List
 
 import logging
 
+from ai.STA.Tactic.go_kick_experimental_sequence import GoKickExperimental
 from ai.STA.Tactic.place_ball import PlaceBall
 from ai.STA.Tactic.face_target import FaceTarget
 from ai.STA.Tactic.leeroy_jenkins import LeeroyJenkins
@@ -47,9 +48,10 @@ class TacticBook(object):
             'LeeroyJenkins': LeeroyJenkins,
             'Stop': Stop,
             'RotateAroundBall': RotateAroundBall,
+            'GoKickExperimental': GoKickExperimental,
         }
         self.default_tactics = ['GoToPositionPathfinder',
-                               'GoKick']
+                                'GoKick']
 
         for name, tactic_class in self.tactic_book.items():
             if name != tactic_class.__name__:

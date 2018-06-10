@@ -7,7 +7,7 @@ class RegulatorFactory:
     available_regulators = None
 
     def __new__(cls):
-        regulator_type = Config()['COMMUNICATION']['type']
+        regulator_type = Config()['GAME']['type']
         regulator_class = cls.available_regulators.get(regulator_type, None)
 
         if not regulator_class:
@@ -18,9 +18,9 @@ class RegulatorFactory:
 
 class PositionRegulator(RegulatorFactory):
     available_regulators = {'sim': GrSimPositionRegulator,
-                            'serial': RealPositionRegulator}
+                            'real': RealPositionRegulator}
 
 
 class VelocityRegulator(RegulatorFactory):
     available_regulators = {'sim': GrSimVelocityController,
-                            'serial': RealVelocityController}
+                            'real': RealVelocityController}

@@ -5,6 +5,7 @@ from Util.ai_command import Idle
 from Util.constant import KickForce
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_kick import GoKick
+from ai.STA.Tactic.go_kick_experimental_sequence import GoKickExperimental
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -26,8 +27,8 @@ class LeeroyJenkins(Tactic):
             self.next_state = self.go_kick_high
             return Idle
         if self.go_kick_tactic is None:
-            self.go_kick_tactic = GoKick(self.game_state, self.player, kick_force=KickForce.LOW,
-                                         target=self.game_state.field.their_goal_pose)
+            self.go_kick_tactic = GoKickExperimental(self.game_state, self.player, kick_force=KickForce.LOW,
+                                                     target=self.game_state.field.their_goal_pose)
         if self.go_kick_tactic.status_flag == Flags.SUCCESS:
             self.go_kick_tactic.status_flag = Flags.INIT
         return self.go_kick_tactic.exec()
@@ -38,8 +39,8 @@ class LeeroyJenkins(Tactic):
             self.next_state = self.go_kick_low
             return Idle
         if self.go_kick_tactic is None:
-            self.go_kick_tactic = GoKick(self.game_state, self.player, kick_force=KickForce.HIGH,
-                                         target=self.game_state.field.their_goal_pose)
+            self.go_kick_tactic = GoKickExperimental(self.game_state, self.player, kick_force=KickForce.HIGH,
+                                                     target=self.game_state.field.their_goal_pose)
         if self.go_kick_tactic.status_flag == Flags.SUCCESS:
             self.go_kick_tactic.status_flag = Flags.INIT
         return self.go_kick_tactic.exec()
