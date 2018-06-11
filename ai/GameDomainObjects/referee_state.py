@@ -139,6 +139,7 @@ class RefereeState:
         return RefereeCommand(parsed_cmd)
 
     def _parse_team_info(self, frame):
+
         if TeamColorService().our_team_color is TeamColor.YELLOW:
             self.team_info['ours'] = frame['yellow']
             self.team_info['theirs'] = frame['blue']
@@ -151,7 +152,8 @@ class RefereeState:
         for team in self.team_info:
             self.team_info[team]["yellow_card_times"] = []
 
-    def _convert_vision_position_to_ai_position(self, designated_position: Position):
+    @staticmethod
+    def _convert_vision_position_to_ai_position(designated_position: Position):
         if Config()["GAME"]["on_negative_side"]:
             designated_position.x *= -1
         return designated_position
@@ -183,7 +185,8 @@ class RefereeState:
     def _is_blue_command(command):
         return not RefereeState._is_yellow_command(command)
 
-    def _validate_field_side(self, is_blue_positive):
+    @staticmethod
+    def _validate_field_side(is_blue_positive):
         truth_table = {
             True: {
                 TeamColor.BLUE: FieldSide.POSITIVE,

@@ -76,7 +76,6 @@ if __name__ == '__main__':
     stop_framework = False
     while not stop_framework:
         try:
-            1/0
             Framework(profiling=cli_args.enable_profiling).start()
         except SystemExit:
             logger.debug('Framework stopped.')
