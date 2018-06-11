@@ -34,8 +34,8 @@ class RealVelocityController(RegulatorBaseClass):
 
     def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION):
         acceleration_offset = 1.5  # on veut que le robot soit plus aggressif en début de trajet
-        emergency_break_offset = 30  # on veut que le robot break le plus
-                                     # qu'il peut si on s'approche trop vite de la target
+        emergency_break_offset = 0  # on veut que le robot break le plus
+                                    # qu'il peut si on s'approche trop vite de la target
 
         if robot.target_speed > robot.current_speed:
             next_speed = robot.current_speed + acc * self.dt * acceleration_offset

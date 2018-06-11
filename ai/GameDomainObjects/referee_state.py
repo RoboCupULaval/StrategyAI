@@ -106,8 +106,8 @@ class RefereeState:
     @property
     def info(self) -> Dict:
         return {
-            "command": str(self.command),
-            "stage": str(self.stage),
+            "command": self.command.name,
+            "stage": self.stage.name,
             "stage_time_left": self.stage_time_left
         }
 
@@ -217,7 +217,7 @@ class RefereeState:
     def log_change(cls, packet: SSL_Referee):
 
         if cls.last_packet:
-            last_team_names = (cls.last_packet['blue']['name'], cls.last_packet['yellow']['name'])
+            last_team_names = [cls.last_packet['blue']['name'], cls.last_packet['yellow']['name']]
             last_stage = cls.last_packet['stage']
             last_blue_team_info = cls.last_packet['blue']
             last_yellow_team_info = cls.last_packet['yellow']
@@ -229,7 +229,7 @@ class RefereeState:
 
         cls.last_packet = packet
 
-        new_team_names = (packet['blue']['name'], packet['yellow']['name'])
+        new_team_names = [packet['blue']['name'], packet['yellow']['name']]
         new_blue_team_info = packet['blue']
         new_yellow_team_info = packet['yellow']
         new_stage = packet['stage']
@@ -280,11 +280,22 @@ class RefereeState:
             timeout_change['yellow'] = new_yellow_team_info['timeouts'] - new_yellow_team_info['timeouts']
 
         if is_name_change:
+            new_team_names[0] = 'unknown' if new_team_names[0] == '' else new_team_names[0]
+            new_team_names[1] = 'unknown' if new_team_names[1] == '' else new_team_names[1]
+
             cls.logger.info('Team change detected.\n\n' + '-' * 40 + '\n' +
                              '  {} (BLUE) vs. {} (YELLOW)'.format(*new_team_names) + '\n' + '-' * 40 + '\n\n')
 
         if is_state_change:
-            cls.logger.info('Stage change detected. Now at {}.'.format(Stage(new_stage).name))
+            stage = Stage(new_stage)
+            cls.logger.info('Stage change detected. Now at {}.'.format(stage.name))
+            if stage is Stage.NORMAL_FIRST_HALF:
+                cls.logger.info('A new game is starting!')
+            elif stage is Stage.POST_GAME:
+                cls.logger.info('The game has ended. Final score: ({}: {} - {}: {})'.format(new_blue_team_info['name'],
+                                                                                            new_blue_team_info['score'],
+                                                                                            new_yellow_team_info['name'],
+                                                                                            new_yellow_team_info['score']))
 
         for team_color in ('blue', 'yellow'):
             if scoring_team[team_color] is not None:

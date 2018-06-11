@@ -30,5 +30,5 @@ class HumanControl(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return {}
+        return []
 
