@@ -146,10 +146,13 @@ class GoKick(Tactic):
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
             tentative_target_id = best_passing_option(self.player)
             if scoring_target is not None:
+                self.kick_force = KickForce.HIGH
                 self.target = Pose(scoring_target, 0)
             elif tentative_target_id is None:
+                self.kick_force = KickForce.HIGH
                 self.target = Pose(self.game_state.field.their_goal, 0)
             else:
+                self.kick_force = KickForce.LOW
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
 
             self.target_assignation_last_time = time.time()

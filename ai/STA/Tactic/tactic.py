@@ -58,24 +58,25 @@ class Tactic:
         target_to_position = Line(self.player.position, next_ai_command.target.position)
         for area in self.forbidden_areas:
             if old_target_position in area:
-                target_position = self._find_best_next_target(area, self.player.position, target_to_position)
+                target_position = self._find_best_next_target(area, old_target_position, self.player.position, target_to_position)
                 new_target = Pose(target_position, next_ai_command.target.orientation)
 
                 # This trailing _ is not for protected access, it was add to avoid a name conflict with the function replace ;)
                 return next_ai_command._replace(target=new_target)
         return next_ai_command
 
-    def _find_best_next_target(self, area: Area, player_position: Position, target_to_position: Line):
+    def _find_best_next_target(self, area: Area, old_target_position, player_position: Position, target_to_position: Line):
         intersections = area.intersect(target_to_position)
         if intersections:
             return intersections[0]
+        elif old_target_position == player_position:
+            return area.closest_border_point(old_target_position)
         else:  # The player is already in the forbidden area, so it must go in the opposite direction than the target
             intersections = area.intersect_with_line(target_to_position)
             if (intersections[0] - self.player.position).norm < (intersections[1] - self.player.position).norm:
                 return intersections[0]
             else:
                 return intersections[1]
-            #target_position = area.closest_border_point(old_target_position)
 
     def debug_cmd(self):
         return []

@@ -12,6 +12,9 @@ class Line:
         self.p1 = p1
         self.p2 = p2
 
+    def __str__(self):
+        return "Line(p1={}, p2={})".format(self.p1, self.p2)
+
     @property
     def direction(self):
         return normalize(self.p2 - self.p1)
@@ -32,6 +35,9 @@ class Area:
     def point_inside(self, p: Position) -> bool:
         return self.left <= p.x <= self.right and \
                self.bottom <= p.y <= self.top
+
+    def __str__(self):
+        return "Area(top={}, bottom={}, right={}, left={})".format(self.top, self.bottom, self.right, self.left)
 
     def __contains__(self, item: Union["Pose", Position]):
         if item.__class__.__name__ == "Pose":  # Prevent importing Pose

@@ -111,8 +111,11 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
             SimpleAutoPlayState.INDIRECT_FREE_DEFENSE
         ]
-        if self.current_state in accepted_states and not GameState().ball.is_immobile():
+        if self.current_state in accepted_states and GameState().ball.is_mobile():
             return self.current_state
+        return self._decide_between_normal_play()
+
+    def _decide_between_normal_play(self):
         if is_ball_our_side():
             return SimpleAutoPlayState.NORMAL_DEFENSE
         else:
@@ -172,7 +175,7 @@ class SimpleAutoPlay(AutoPlay):
         elif ref_state.command == RefereeCommand.FORCE_START or ref_state.command == RefereeCommand.NORMAL_START:
             next_state = self._analyse_game()
         elif GameState().ball.is_mobile() and ref_state.command in self.FREE_KICK_COMMANDS:
-            return SimpleAutoPlayState.NORMAL_OFFENSE
+            next_state = self._decide_between_normal_play()
 
         self.prev_nb_player = nb_player
 
