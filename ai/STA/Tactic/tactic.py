@@ -16,7 +16,8 @@ class Tactic:
 
     def __init__(self, game_state: GameState, player: Player, target: Optional[Pose]=None,
                  forbidden_areas: Optional[List[Area]]=None, args: Optional[List[Any]]=None):
-
+        assert isinstance(player, Player), "Le player doit être un Player, non un '{}'".format(player)
+        assert isinstance(target, Pose), "La target devrait être une Pose"
         self.game_state = game_state
         self.player = player
         self.player_id = player.id
@@ -42,20 +43,26 @@ class Tactic:
         self.current_state = self.next_state
 
         if next_ai_command.target:
-            target_position = next_ai_command.target.position
-            target_to_position = Line(self.player.position, next_ai_command.target.position)
-            for area in self.forbidden_areas:
-                if target_position in area:
-                    intersections = area.intersect(target_to_position)
-                    if intersections:
-                        target_position = intersections[0]
-                    else:
-                        target_position = position_outside_area(target_position, area)
-                    new_target = Pose(target_position, next_ai_command.target.orientation)
-                    # This trailing _ is not for protected access, it was add to avoid a name conflict with the function replace ;)
-                    next_ai_command = next_ai_command._replace(target=new_target)
-                    break
+            next_ai_command = self._check_for_forbidden_area(next_ai_command)
 
+        return next_ai_command
+
+    def _check_for_forbidden_area(self, next_ai_command):
+        old_target_position = next_ai_command.target.position
+        target_to_position = Line(self.player.position, next_ai_command.target.position)
+        for area in self.forbidden_areas:
+            if old_target_position in area:
+                intersections = area.intersect(target_to_position)
+                if intersections:
+                    target_position = intersections[0]
+                else:
+                    target_position = position_outside_area(old_target_position, area)
+                new_target = Pose(target_position, next_ai_command.target.orientation)
+                if (target_position - old_target_position).norm > 1000:
+                    print(target_position, old_target_position, "inter" if intersections else "no inter")
+
+                # This trailing _ is not for protected access, it was add to avoid a name conflict with the function replace ;)
+                return next_ai_command._replace(target=new_target)
         return next_ai_command
 
     def debug_cmd(self):

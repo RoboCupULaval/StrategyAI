@@ -1,7 +1,7 @@
 # Under MIT license, see LICENSE.txt
 from Util.position import Position
 from Util.role import Role
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 from ai.Algorithm.Graph.Graph import Graph
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
@@ -19,9 +19,9 @@ class PathfinderBenchmark(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return {}
+        return []
 
     @classmethod
     def optional_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in Role}
+        return [r for r in Role]
 

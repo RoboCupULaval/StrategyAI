@@ -4,7 +4,7 @@ from functools import partial
 from Util.role import Role
 from Util.position import Position
 from Util.pose import Pose
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.STA.Strategy.strategy import Strategy
@@ -88,20 +88,17 @@ class DefenseWall(Strategy):
                 node_align_to_defense_wall.connect_to(node_position_pass, when=self.game_state.field.is_ball_in_our_goal_area)
                 node_position_pass.connect_to(node_align_to_defense_wall, when=self.game_state.field.is_ball_outside_our_goal_area)
 
-
     @classmethod
     def required_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
-                                                                Role.FIRST_ATTACK,
-                                                                Role.FIRST_DEFENCE]
-                }
+        return [Role.GOALKEEPER,
+                Role.FIRST_ATTACK,
+                Role.FIRST_DEFENCE]
 
     @classmethod
     def optional_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.SECOND_ATTACK,
-                                                                Role.MIDDLE,
-                                                                Role.SECOND_DEFENCE]
-                }
+        return [Role.SECOND_ATTACK,
+                Role.MIDDLE,
+                Role.SECOND_DEFENCE]
 
     def should_go_kick(self, player):
         if self.game_state.field.is_ball_in_our_goal_area():
