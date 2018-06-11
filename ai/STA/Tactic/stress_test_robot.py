@@ -13,7 +13,7 @@ VALID_DISTANCE = ROBOT_RADIUS * 0.5
 DEFAULT_SPEED = 2
 
 
-class StressTestRobot(Tactic):
+class StressTestRobotWaypoint(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose,
                  args: List[str]=None, speed=DEFAULT_SPEED):
         super().__init__(game_state, player, target, args)
@@ -39,4 +39,15 @@ class StressTestRobot(Tactic):
 
         return CmdBuilder().addMoveTo(Pose(self.points[0].position, orientation),
                                       way_points=list(self.points),
+                                      cruise_speed=self.speed).build()
+
+
+class StressTestRobot(StressTestRobotWaypoint):
+    def next_corner(self):
+        orientation = (self.points[0].position - self.player.position).angle
+
+        if (self.player.position - self.points[0].position).norm < 500:
+            self.points.rotate()
+
+        return CmdBuilder().addMoveTo(Pose(self.points[0].position, orientation),
                                       cruise_speed=self.speed).build()
