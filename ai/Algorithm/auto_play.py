@@ -28,7 +28,7 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
     def info(self):
         return {
             "selected_strategy": str(self.play_state.current_strategy),
-            "current_state": str(self.current_state)
+            "current_state": self.current_state.name if self.current_state is not None else str(self.current_state)
         }
 
     @abstractmethod
@@ -67,7 +67,7 @@ class SimpleAutoPlayState(IntEnum):
     DIRECT_FREE_DEFENSE = 18
     INDIRECT_FREE_OFFENSE = 19
     INDIRECT_FREE_DEFENSE = 20
-
+    NOT_ENOUGH_PLAYER = 21
 
 
 class SimpleAutoPlay(AutoPlay):
@@ -77,11 +77,13 @@ class SimpleAutoPlay(AutoPlay):
 
     FREE_KICK_COMMANDS = [RefereeCommand.DIRECT_FREE_US, RefereeCommand.INDIRECT_FREE_US,
                           RefereeCommand.DIRECT_FREE_THEM, RefereeCommand.INDIRECT_FREE_THEM]
+    MINIMUM_NB_PLAYER = 3
 
     def __init__(self, play_state: PlayState):
         super().__init__(play_state)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.last_ref_state = RefereeCommand.HALT
+        self.prev_nb_player = None
 
     # TODO: Check if role assignment works well enough, so we don't need available_players_changed
     def update(self, ref_state: RefereeState, available_players_changed=False):
@@ -128,8 +130,15 @@ class SimpleAutoPlay(AutoPlay):
     def _select_next_state(self, ref_state: RefereeState):
         next_state = self.current_state
 
-        # On command change
-        if self.last_ref_state != ref_state.command:
+        nb_player = len(GameState().our_team.available_players)
+        if nb_player < self.MINIMUM_NB_PLAYER and ref_state.command != RefereeCommand.HALT:
+            if self.prev_nb_player is None or nb_player != self.prev_nb_player:
+                self.logger.warning("Not enough player to play. We have {} players and the minimum is {} "
+                                    .format(nb_player, self.MINIMUM_NB_PLAYER))
+            next_state = SimpleAutoPlayState.NOT_ENOUGH_PLAYER
+        # Number of player change or On command change
+        elif (self.prev_nb_player is not None and self.prev_nb_player < self.MINIMUM_NB_PLAYER <= nb_player)\
+                or self.last_ref_state != ref_state.command:
             self.logger.info("Switching to referee state {}".format(ref_state.command.name))
             next_state = {
                 RefereeCommand.HALT: SimpleAutoPlayState.HALT,
@@ -164,6 +173,8 @@ class SimpleAutoPlay(AutoPlay):
             next_state = self._analyse_game()
         elif GameState().ball.is_mobile() and ref_state.command in self.FREE_KICK_COMMANDS:
             return SimpleAutoPlayState.NORMAL_OFFENSE
+
+        self.prev_nb_player = nb_player
 
         self.last_ref_state = ref_state.command
         return next_state
@@ -203,6 +214,9 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'IndirectFreeKick',
 
             # Place the ball to the designated position
-            SimpleAutoPlayState.BALL_PLACEMENT_US: 'BallPlacement'
+            SimpleAutoPlayState.BALL_PLACEMENT_US: 'BallPlacement',
+
+            # When not enough player:
+            SimpleAutoPlayState.NOT_ENOUGH_PLAYER: 'DoNothing'
 
         }.get(state, SimpleAutoPlayState.HALT)

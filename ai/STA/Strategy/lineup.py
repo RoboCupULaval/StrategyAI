@@ -4,7 +4,6 @@
 from Util import Position, Pose
 from Util.constant import ROBOT_RADIUS
 from Util.role import Role
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
 from ai.STA.Strategy.team_go_to_position import TeamGoToPosition
 from ai.states.game_state import GameState
 
@@ -26,8 +25,8 @@ class LineUp(TeamGoToPosition):
 
     @classmethod
     def required_roles(cls):
-        return {}
+        return []
 
     @classmethod
     def optional_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in Role.as_list()}
+        return Role.as_list()

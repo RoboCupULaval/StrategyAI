@@ -135,7 +135,7 @@ class Config(metaclass=Singleton):
                 'profiling_dump_time': 10,
                 'number_of_camera': 4,
                 'max_robot_id': 12,
-                'max_undetected_robot_time': 1,
+                'max_undetected_robot_time': 5,
                 'max_undetected_ball_time': 0.25,
                 'max_ball_on_field': 2,
                 'max_ball_separation': 2000,

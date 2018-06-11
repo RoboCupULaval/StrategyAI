@@ -79,7 +79,7 @@ class Tracker:
 
         for robot in self._their_team:
             robot.predict()
-            
+
         for ball in self._balls:
             ball.predict()
 

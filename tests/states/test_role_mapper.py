@@ -9,10 +9,6 @@ from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
 
 
-def always_take_a_player_rule(available_players, target_role, role_mapping):
-    return available_players[0]
-
-
 class RoleMapperTests(TestCase):
 
     def setUp(self):
@@ -34,37 +30,29 @@ class RoleMapperTests(TestCase):
         self.assertDictEqual(self.state.role_mapping, missing_middle_expected)
 
     def test_whenMapRuleWithDuplicateRole_thenAssertError(self):
-        A_ROLE_RULE = {Role.GOALKEEPER: always_take_a_player_rule}
+        A_ROLE_RULE = {Role.GOALKEEPER: None}
 
         with pytest.raises(AssertionError):
             self.role_mapper.map_with_rules([], A_ROLE_RULE, A_ROLE_RULE)
 
-    def test_whenMappingWithARuleForAPlayer_thenFirstPlayerIsMapped(self):
-        FIRST_PLAY_ID = 0
-        available_players = [Player(FIRST_PLAY_ID, TeamColorService.BLUE)]
-        A_ROLE_RULE = {Role.GOALKEEPER: always_take_a_player_rule}
+    def test_whenMappingWithMoreOptionalRoleThenPlayers_thenOnlyMapTheNumberOfPlayer(self):
+        A_SET_AVAILABLE_PLAYER = {1: Player(1, TeamColorService.BLUE),
+                                  2: Player(2, TeamColorService.BLUE)}
+        LESS_ROLE_THEN_PLAYER = [Role.GOALKEEPER,
+                                 Role.MIDDLE,
+                                 Role.SECOND_ATTACK]
+        mapping = self.role_mapper.map_with_rules(A_SET_AVAILABLE_PLAYER, {}, LESS_ROLE_THEN_PLAYER)
 
-        self.role_mapper.map_with_rules(available_players, A_ROLE_RULE, {})
+        assert len(A_SET_AVAILABLE_PLAYER) == len(mapping)
 
-        assert self.role_mapper.roles_translation[Role.GOALKEEPER].id == FIRST_PLAY_ID
-
-    # def test_givenBasicMapping_whenMapMissingLockedRole_thenKeepsLockedRole(self):
-    #     self.state = Gameself.state()
-    #     self.state.map_players_to_roles_by_player(basic_roles)
-    #     self.state.map_players_to_roles_by_player(missing_required)
-    #     self.assertDictEqual(self.state.get_role_mapping(), missing_required_expected)
-
-    # def test_givenBasicMapping_whenRemapLockedRole_thenThrowsValueError(self):
-    #     self.state = Gameself.state()
-    #     self.state.map_players_to_roles_by_player(basic_roles)
-    #     with self.assertRaises(ValueError):
-    #         self.state.map_players_to_roles_by_player(inverted_roles)
-
-    # def test_givenLockedRole_whenUpdateLockedRole_thenSwapsRobots(self):
-    #     self.state = Gameself.state()
-    #     self.state.map_players_to_roles_by_player(basic_roles)
-    #     self.state.update_id_for_locked_role(1, Role.GOALKEEPER)
-    #     self.assertDictEqual(self.state.get_role_mapping(), goalkeeper_swapped)
+    def test_whenMappingWithMoreRequiredRoleThenPlayers_thenAssert(self):
+        A_SET_AVAILABLE_PLAYER = {1: Player(1, TeamColorService.BLUE),
+                                  2: Player(2, TeamColorService.BLUE)}
+        LESS_ROLE_THEN_PLAYER = [Role.GOALKEEPER,
+                                 Role.MIDDLE,
+                                 Role.SECOND_ATTACK]
+        with self.assertRaises(AssertionError):
+            self.role_mapper.map_with_rules(A_SET_AVAILABLE_PLAYER, LESS_ROLE_THEN_PLAYER, {})
 
 
 basic_roles = {

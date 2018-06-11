@@ -91,8 +91,12 @@ class StrategyBook(object):
     def strategies_roles(self) -> Dict[str, Dict[str, List[str]]]:
         results = {}
         for name, strategy_class in self.strategy_book.items():
-            results[name] = {"required_roles": list([r.name for r in strategy_class.required_roles().keys()]),
-                             "optional_roles": list([r.name for r in strategy_class.optional_roles().keys()])}
+            assert isinstance(strategy_class.required_roles(), list), \
+                "Strategy {} does not provide a list in it's required_roles()".format(name)
+            assert isinstance(strategy_class.optional_roles(), list), \
+                "Strategy {} does not provide a list in it's optional_roles()".format(name)
+            results[name] = {"required_roles": list([r.name for r in strategy_class.required_roles()]),
+                             "optional_roles": list([r.name for r in strategy_class.optional_roles()])}
         return results
 
     def get_strategy(self, strategy_name: str):  # -> Strategy: Wrong return type

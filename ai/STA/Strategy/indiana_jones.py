@@ -4,7 +4,7 @@ from functools import partial
 
 from Util.pose import Position, Pose
 from Util.role import Role
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.tactic_constants import Flags
@@ -65,7 +65,6 @@ class IndianaJones(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.MIDDLE,
-                                                                Role.FIRST_DEFENCE,
-                                                                Role.SECOND_DEFENCE]
-                }
+        return [Role.MIDDLE,
+                Role.FIRST_DEFENCE,
+                Role.SECOND_DEFENCE]

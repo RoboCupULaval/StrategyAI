@@ -57,7 +57,7 @@ class PlayExecutor:
         self.ui_send_queue.put_nowait(debug_cmds)
 
         strat_obstacles = self.play_state.current_strategy.obstacles()
-        paths = self.pathfinder_module.exec(self.game_state, ai_cmds, strat_obstacles)
+        paths = self.pathfinder_module.exec(ai_cmds, strat_obstacles)
 
         engine_cmds = []
         for player, ai_cmd in ai_cmds.items():
@@ -117,8 +117,8 @@ class PlayExecutor:
         try:
             this_player = GameState().our_team.available_players[cmd.data['id']]
         except KeyError:
-            self.logger.debug("Invalid player id: {}".format(cmd.data['id']))
-            return
+            self.logger.info("You are assigning a tactic to not visible player (id={}).".format(cmd.data['id']))
+            this_player = GameState().our_team.players[cmd.data['id']]
         player_id = this_player.id
         tactic_name = cmd.data['tactic']
         target = Position.from_list(cmd.data['target'])
@@ -127,7 +127,7 @@ class PlayExecutor:
         target = Pose(target, this_player.pose.orientation)
         args = cmd.data.get('args', "")
         try:
-            tactic = self.play_state.get_new_tactic(tactic_name)(GameState(), this_player, target, args)
+            tactic = self.play_state.get_new_tactic(tactic_name)(self.game_state, this_player, target, args)
         except Exception as e:
             self.logger.debug(e)
             self.logger.debug("La tactique n'a pas été appliquée par cause de mauvais arguments.")
