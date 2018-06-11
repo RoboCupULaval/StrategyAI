@@ -4,6 +4,9 @@ import argparse
 import logging
 from time import sleep
 from sys import stdout
+
+import sys
+
 from Engine.Framework import Framework
 from config.config import Config
 
@@ -73,12 +76,15 @@ if __name__ == '__main__':
     stop_framework = False
     while not stop_framework:
         try:
+            1/0
             Framework(profiling=cli_args.enable_profiling).start()
         except SystemExit:
-            logging.debug('Framework stopped.')
+            logger.debug('Framework stopped.')
+        except:
+            logger.exception('message')
         finally:
             if not cli_args.competition_mode:
                 stop_framework = True
             else:
-                logging.debug('Restarting Framework.')
+                logger.debug('Restarting Framework.')
                 sleep(0.5)
