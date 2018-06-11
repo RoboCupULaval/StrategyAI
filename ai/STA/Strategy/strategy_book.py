@@ -3,7 +3,7 @@
 import logging
 from typing import List, Dict, Type
 
-from ai.STA import Strategy
+from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.ball_placement import BallPlacement
 from ai.STA.Strategy.defense_wall_no_kick import DefenseWallNoKick
 from ai.STA.Strategy.defense_wall import DefenseWall
