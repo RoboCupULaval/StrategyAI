@@ -213,21 +213,21 @@ class RefereeState:
                         expected=expected.name,
                         current=current.name)
 
-    @staticmethod
-    def log_change(packet: SSL_Referee):
+    @classmethod
+    def log_change(cls, packet: SSL_Referee):
 
-        if RefereeState.last_packet:
-            last_team_names = (RefereeState.last_packet['blue']['name'], RefereeState.last_packet['yellow']['name'])
-            last_stage = RefereeState.last_packet['stage']
-            last_blue_team_info = RefereeState.last_packet['blue']
-            last_yellow_team_info = RefereeState.last_packet['yellow']
+        if cls.last_packet:
+            last_team_names = (cls.last_packet['blue']['name'], cls.last_packet['yellow']['name'])
+            last_stage = cls.last_packet['stage']
+            last_blue_team_info = cls.last_packet['blue']
+            last_yellow_team_info = cls.last_packet['yellow']
         else:
             last_team_names = None
             last_stage = None
             last_blue_team_info = {'score': 0, 'red_cards': 0, 'yellow_cards': 0, 'timeouts': 4}
             last_yellow_team_info = {'score': 0, 'red_cards': 0, 'yellow_cards': 0, 'timeouts': 4}
 
-        RefereeState.last_packet = packet
+        cls.last_packet = packet
 
         new_team_names = (packet['blue']['name'], packet['yellow']['name'])
         new_blue_team_info = packet['blue']
@@ -280,48 +280,48 @@ class RefereeState:
             timeout_change['yellow'] = new_yellow_team_info['timeouts'] - new_yellow_team_info['timeouts']
 
         if is_name_change:
-            RefereeState.logger.info('Team change detected.\n\n' + '-' * 40 + '\n' +
+            cls.logger.info('Team change detected.\n\n' + '-' * 40 + '\n' +
                              '  {} (BLUE) vs. {} (YELLOW)'.format(*new_team_names) + '\n' + '-' * 40 + '\n\n')
 
         if is_state_change:
-            RefereeState.logger.info('Stage change detected. Now at {}.'.format(Stage(new_stage).name))
+            cls.logger.info('Stage change detected. Now at {}.'.format(Stage(new_stage).name))
 
         for team_color in ('blue', 'yellow'):
             if scoring_team[team_color] is not None:
                 if score_change[team_color] == 1:
-                    RefereeState.logger.info('A goal was score by {}'.format(scoring_team[team_color]))
+                    cls.logger.info('A goal was score by {}'.format(scoring_team[team_color]))
                 elif score_change[team_color] > 1:
-                    RefereeState.logger.info('{} goals were score by {}.'.format(score_change[team_color], scoring_team[team_color]))
+                    cls.logger.info('{} goals were score by {}.'.format(score_change[team_color], scoring_team[team_color]))
                 else:
-                    RefereeState.logger.info('A goal was remove to {}'.format(scoring_team[team_color]))
+                    cls.logger.info('A goal was remove to {}'.format(scoring_team[team_color]))
 
-                RefereeState.logger.info('Current score: ({}: {} - {}: {})'.format(new_blue_team_info['name'],
+                cls.logger.info('Current score: ({}: {} - {}: {})'.format(new_blue_team_info['name'],
                                                                       new_blue_team_info['score'],
                                                                       new_yellow_team_info['name'],
                                                                       new_yellow_team_info['score']))
 
             if red_card_team[team_color] is not None:
                 if red_card_change[team_color] == 1:
-                    RefereeState.logger.info('A red card was taken by {}.'.format(red_card_team[team_color]))
+                    cls.logger.info('A red card was taken by {}.'.format(red_card_team[team_color]))
                 elif red_card_change[team_color] > 1:
-                    RefereeState.logger.info('{} red cards were taken by {}.'.format(red_card_change[team_color], red_card_team[team_color]))
+                    cls.logger.info('{} red cards were taken by {}.'.format(red_card_change[team_color], red_card_team[team_color]))
                 else:
-                    RefereeState.logger.info('A red card was remove to {}'.format(red_card_team[team_color]))
+                    cls.logger.info('A red card was remove to {}'.format(red_card_team[team_color]))
 
             if yellow_card_team[team_color] is not None:
                 if yellow_card_change[team_color] == 1:
-                    RefereeState.logger.info('A yellow card was taken by {}.'.format(yellow_card_team[team_color]))
+                    cls.logger.info('A yellow card was taken by {}.'.format(yellow_card_team[team_color]))
                 elif yellow_card_change[team_color] > 1:
-                    RefereeState.logger.info('{} yellow cards were taken by {}.'.format(yellow_card_change[team_color], yellow_card_team[team_color]))
+                    cls.logger.info('{} yellow cards were taken by {}.'.format(yellow_card_change[team_color], yellow_card_team[team_color]))
                 else:
-                    RefereeState.logger.info('A yellow card was remove to {}'.format(yellow_card_team[team_color]))
+                    cls.logger.info('A yellow card was remove to {}'.format(yellow_card_team[team_color]))
 
             if timeout_team[team_color] is not None:
                 if timeout_change[team_color] == -1:
-                    RefereeState.logger.info('A timeout was ask by {}.'.format(timeout_team[team_color]))
+                    cls.logger.info('A timeout was ask by {}.'.format(timeout_team[team_color]))
                 elif timeout_change[team_color] < -1:
-                    RefereeState.logger.info('{} timeout calls were given to {}'.format(timeout_change[team_color], timeout_team[team_color]))
+                    cls.logger.info('{} timeout calls were given to {}'.format(timeout_change[team_color], timeout_team[team_color]))
                 else:
-                    RefereeState.logger.info('A timeout call was given to {}'.format(timeout_team[team_color]))
-                RefereeState.logger.info('Timeout left: {}. Time left: {:.1f} seconds'.format(timeout_left[team_color],
+                    cls.logger.info('A timeout call was given to {}'.format(timeout_team[team_color]))
+                cls.logger.info('Timeout left: {}. Time left: {:.1f} seconds'.format(timeout_left[team_color],
                                                                                       timeout_time[team_color]/1000000))
