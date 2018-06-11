@@ -1,8 +1,9 @@
 # Under MIT license, see LICENSE.txt
 
 import logging
-from typing import List, Dict
+from typing import List, Dict, Type
 
+from ai.STA import Strategy
 from ai.STA.Strategy.ball_placement import BallPlacement
 from ai.STA.Strategy.defense_wall_no_kick import DefenseWallNoKick
 from ai.STA.Strategy.defense_wall import DefenseWall
@@ -30,61 +31,45 @@ from ai.STA.Strategy.test_goal_keeper import TestGoalKeeper
 __author__ = "Maxime Gagnon-Legault, and others"
 
 
-class StrategyBook(object):
-    """
-        Cette classe est capable de récupérer les stratégies enregistrés dans
-        la configuration des stratégies et de les exposer au Behavior Tree en
-        charge de sélectionner la stratégie courante.
-    """
+class StrategyBook:
 
     def __init__(self):
-        """
-        Initialise le dictionnaire des stratégies présentées au reste de l'IA.
-        """
+
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.strategy_book = {'Offense': Offense,
-                              'HumanControl': HumanControl,
-                              'DoNothing': DoNothing,
-                              "IndianaJones": IndianaJones,
-                              'RobocupChoreography': RobocupChoreography,
-                              'BambaFollow': BambaFollow,
-                              'PassesWithDecisions': PassesWithDecisions,
-                              'DefenseWall': DefenseWall,
-                              'PathfinderBenchmark': PathfinderBenchmark,
-                              'PrepareKickOffOffense': PrepareKickOffOffense,
-                              'StayAway': StayAway,
-                              'PrepareKickOffDefense': PrepareKickOffDefense,
-                              'PenaltyDefense': PenaltyDefense,
-                              'PenaltyOffense': PenaltyOffense,
-                              'DirectFreeKick': DirectFreeKick,
-                              'IndirectFreeKick': IndirectFreeKick,
-                              'PreparePenaltyDefense': PreparePenaltyDefense,
-                              'PreparePenaltyOffense': PreparePenaltyOffense,
-                              'OffenseKickOff': OffenseKickOff,
-                              'DefenseWallNoKick': DefenseWallNoKick,
-                              'BallPlacement': BallPlacement,
-                              'TestGoalKeeper': TestGoalKeeper,
-                              'LineUp': LineUp,
-                              }
-        self.default_strategies = ['Offense',
-                                   'DefenseWall']
 
-        for name, strategy_class in self.strategy_book.items():
-            if name != strategy_class.__name__:
-                raise TypeError("You give the wrong name to a strategy in strategy book: {} != {}"
-                                .format(name, strategy_class.__name__))
+        self.stop_strategy = DoNothing
 
-        for name in self.default_strategies:
-            if name not in self.strategy_book:
-                raise TypeError("Default strategy ({}) is not in strategy book".format(name))
+        default_strategies = {Offense, DefenseWall}
+
+        strategy_book = {HumanControl,
+                         IndianaJones,
+                         RobocupChoreography,
+                         BambaFollow,
+                         PassesWithDecisions,
+                         PathfinderBenchmark,
+                         PrepareKickOffOffense,
+                         StayAway,
+                         PrepareKickOffDefense,
+                         PenaltyDefense,
+                         PenaltyOffense,
+                         DirectFreeKick,
+                         IndirectFreeKick,
+                         PreparePenaltyDefense,
+                         PreparePenaltyOffense,
+                         OffenseKickOff,
+                         DefenseWallNoKick,
+                         BallPlacement,
+                         TestGoalKeeper,
+                         LineUp,
+                         self.stop_strategy,
+                         *default_strategies,
+                         }
+
+        self.default_strategies = [strategy.name() for strategy in default_strategies]
+        self.strategy_book = {strategy.name(): strategy for strategy in strategy_book}
 
     @property
     def strategies_name(self) -> List[str]:
-        """
-        Retourne une liste des noms des stratégies disponibles à l'IA.
-
-        :return: (List[str]) une liste de string, les noms des stratégies disponibles.
-        """
         return list(self.strategy_book)
 
     @property
@@ -99,19 +84,14 @@ class StrategyBook(object):
                              "optional_roles": list([r.name for r in strategy_class.optional_roles()])}
         return results
 
-    def get_strategy(self, strategy_name: str):  # -> Strategy: Wrong return type
-        """
-        Retourne une instance nouvelle de la stratégie correspondant au nom passé.
+    def get_strategy(self, strategy_name: str) -> Type[Strategy]:
 
-        :param strategy_name: (str) le nom de la stratégie à retourner
-        :return: (Tactic) une nouvelle instance de la stratégie demandé.
-        """
         assert isinstance(strategy_name, str)
 
         if self.check_existance_strategy(strategy_name):
             return self.strategy_book[strategy_name]
-        self.logger.error("Something asked for this non-existing strategy: {}".format(strategy_name))
-        return self.strategy_book['DoNothing']
+        self.logger.error('A non-existing strategy was asked: {}'.format(strategy_name))
+        return self.stop_strategy
 
     def check_existance_strategy(self, strategy_name: str) -> bool:
         """

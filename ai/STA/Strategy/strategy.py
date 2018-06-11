@@ -95,6 +95,10 @@ class Strategy(metaclass=ABCMeta):
 
         return cmd_ai, cmd_debug
 
+    @classmethod
+    def name(cls):
+        return cls.__name__
+
     def __str__(self):
         return self.__class__.__name__
 
