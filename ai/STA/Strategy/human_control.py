@@ -22,8 +22,10 @@ class HumanControl(Strategy):
                 role = self.game_state.map_player_to_first_available_role(robot_id)
             except NoRoleAvailable:
                 # When all else fail, just force it
+                # TODO: This crash with Stop all:
                 role = Role.FIRST_ATTACK
-                self.game_state.map_players_to_roles_by_player_id({role: robot_id})
+                # self.game_state.map_players_to_roles_by_player_id({role: robot_id})
+                pass
 
         self.clear_graph_of_role(role)
         self.create_node(role, tactic)

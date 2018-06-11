@@ -119,19 +119,20 @@ class PlayExecutor:
         except KeyError:
             self.logger.info("You are assigning a tactic to not visible player (id={}).".format(cmd.data['id']))
             this_player = GameState().our_team.players[cmd.data['id']]
+
         player_id = this_player.id
         tactic_name = cmd.data['tactic']
         target = Position.from_list(cmd.data['target'])
         if Config()["GAME"]["on_negative_side"]:
             target = target.flip_x()
-        target = Pose(target, this_player.pose.orientation)
-        args = cmd.data.get('args', "")
+        target = Pose(target, this_player.orientation)
+        args = cmd.data.get('args', '')
         try:
             tactic = self.play_state.get_new_tactic(tactic_name)(self.game_state, this_player, target, args)
-        except Exception as e:
-            self.logger.debug(e)
-            self.logger.debug("La tactique n'a pas été appliquée par cause de mauvais arguments.")
-            raise e
+        except:
+            self.logger.exception('message')
+            self.logger.debug('The tactic was call with wrong arguments')
+            raise
 
         if not isinstance(self.play_state.current_strategy, HumanControl):
             self.play_state.current_strategy = "HumanControl"
