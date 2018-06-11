@@ -4,7 +4,7 @@ import logging
 from Util import Pose
 from Util.constant import KEEPOUT_DISTANCE_FROM_BALL
 from Util.role import Role
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.place_ball import PlaceBall
 from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
@@ -31,8 +31,8 @@ class BallPlacement(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return {Role.FIRST_ATTACK: keep_prev_mapping_otherwise_random}
+        return [Role.FIRST_ATTACK]
 
     @classmethod
     def optional_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in Role if r != Role.FIRST_ATTACK}
+        return [r for r in Role if r != Role.FIRST_ATTACK]
