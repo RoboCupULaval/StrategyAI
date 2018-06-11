@@ -4,7 +4,7 @@ from functools import partial
 from Util.constant import KickForce
 
 from Util.role import Role
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
@@ -36,9 +36,8 @@ class TestGoalKeeper(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
-                                                                Role.FIRST_ATTACK]
-                }
+        return [Role.GOALKEEPER,
+                Role.FIRST_ATTACK]
 
     def has_kicked(self, role):
         return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS

@@ -88,24 +88,25 @@ class Coach(Process):
         self.logger.debug('Referee command detected')
 
     def run(self) -> None:
-        self.wait_for_geometry()
-        if Config()['GAME']['competition_mode']:
-            self.wait_for_referee()
-
-        # FIXME: At startup it takes a few seconds to have the player's positions,
-        # to prevent role assigment crash, let's sleep for a few secs.
-        if config['GAME']['is_autonomous_play_at_startup']:
-            sleep(3)
-
-        self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
         try:
+            self.wait_for_geometry()
+            if Config()['GAME']['competition_mode']:
+                self.wait_for_referee()
+
+            self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
+
             while True:
                 self.frame_count += 1
                 self.main_loop()
                 self.dump_profiling_stats()
                 self.fps_sleep()
         except KeyboardInterrupt:
-            pass
+            self.logger.info('A keyboard interrupt was raise.')
+        except:
+            self.logger.exception('message')
+            raise
+        finally:
+            self.logger.info('Killed')
 
     def main_loop(self) -> None:
         self.game_state.update(self.engine_game_state)

@@ -77,3 +77,4 @@ unfiltered.txt
 
 # Config custom
 *.custom.cfg
+Logs/*.log
