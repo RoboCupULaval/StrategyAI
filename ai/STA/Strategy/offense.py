@@ -2,7 +2,7 @@
 from functools import partial
 
 from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL
-from Util.geometry import padded_area
+from Util.geometry import Area
 from Util.role import Role
 
 from ai.Algorithm.evaluation_module import closest_player_to_point, closest_players_to_point
@@ -18,7 +18,7 @@ class Offense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-        forbidden_areas = [padded_area(self.game_state.field.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL),
+        forbidden_areas = [Area.pad(self.game_state.field.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL),
                            self.game_state.field.our_goal_area]
 
         robots_in_formation = [p for r, p in self.assigned_roles.items() if r != Role.GOALKEEPER]

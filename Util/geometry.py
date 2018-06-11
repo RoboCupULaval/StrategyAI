@@ -41,17 +41,36 @@ class Area:
         else:
             raise ValueError("You can only test if a position or a pose is contained inside the area.")
 
-    def intersect(self, line: Line):
-        assert isinstance(line, Line)
-        if self.point_inside(line.p1) and self.point_inside(line.p2):
+    def intersect(self, seg: Line):
+        assert isinstance(seg, Line)
+        if self.point_inside(seg.p1) and self.point_inside(seg.p2):
             return []
 
         inters = []
         for segment in self.segments:
-            inter = intersection_between_segments(segment.p1, segment.p2, line.p1, line.p2)
+            inter = intersection_between_segments(segment.p1, segment.p2, seg.p1, seg.p2)
             if inter is not None:
                 inters.append(inter)
         return inters
+
+
+    def intersect_with_line(self, line: Line):
+        assert isinstance(line, Line)
+
+        inters = []
+        for segment in self.segments:
+            inter = intersection_between_line_and_segment(segment.p1, segment.p2, line.p1, line.p2)
+            if inter is not None:
+                inters.append(inter)
+        return inters
+
+    def closest_border_point(self, p: Position):
+        closest = None
+        for segment in self.segments:
+            dist = closest_point_on_segment(p, segment.p1, segment.p2)
+            if closest is None or (dist - p).norm < (closest - p).norm:
+                closest = dist
+        return closest
 
     @property
     def segments(self):
@@ -89,22 +108,16 @@ class Area:
         return self.lower_right.x
 
     @classmethod
+    def pad(cls, area, padding=0):
+        return Area.from_limits(area.top + padding, area.bottom - padding,
+                                area.right + padding, area.left - padding)
+
+    @classmethod
     def from_limits(cls, top, bottom, right, left):
         return cls(Position(left, top), Position(right, bottom))
 
 
-def padded_area(area, padding=0):
-    return Area.from_limits(area.top + padding, area.bottom - padding,
-                            area.right + padding, area.left - padding)
 
-def position_outside_area(position: Position, area: Area):
-
-    if position not in area:
-        return position
-    return Position(
-        area.right if position.x > area.right - (area.right - area.left) / 2 else area.left,
-        position.y
-    )
 
 
 def find_bisector_of_triangle(c, a, b):
@@ -124,6 +137,17 @@ def intersection_between_segments(a1, a2, b1, b2) -> Optional[Position]:
         return None
 
     if inter == closest_point_on_segment(inter, a1, a2) == closest_point_on_segment(inter, b1, b2):
+        return inter
+    return None
+
+
+def intersection_between_line_and_segment(s1, s2, l1, l2) -> Optional[Position]:
+    try:
+        inter = intersection_between_lines(s1, s2, l1, l2)
+    except ValueError:
+        return None
+
+    if inter == closest_point_on_segment(inter, s1, s2):
         return inter
     return None
 
