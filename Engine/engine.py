@@ -89,24 +89,28 @@ class Engine(Process):
         self.referee_recver.start()
 
     def run(self):
-        self.wait_for_vision()
-
-        logged_string = 'Running with process ID {}'.format(os.getpid())
-        if self.is_fps_locked:
-            logged_string += ' at {} fps.'.format(self.fps)
-        else:
-            logged_string += ' without fps limitation.'
-
-        self.logger.debug(logged_string)
-
         try:
+            self.wait_for_vision()
+
+            logged_string = 'Running with process ID {}'.format(os.getpid())
+            if self.is_fps_locked:
+                logged_string += ' at {} fps.'.format(self.fps)
+            else:
+                logged_string += ' without fps limitation.'
+
+            self.logger.debug(logged_string)
+
+
             while True:
                 self.frame_count += 1
                 self.main_loop()
                 if self.profiling_enabled: self.dump_profiling_stats()
                 if self.is_fps_locked: self.fps_sleep()
         except KeyboardInterrupt:
-            pass
+            self.logger.info('A keyboard interrupt was raise.')
+        except:
+            self.logger.exception('message')
+            raise
         finally:
             self.logger.info('Killed')
 
