@@ -125,19 +125,3 @@ class RoleMapper(object):
                     return {Role.GOALKEEPER: p}
         return {}
 
-    def map_with_rules_old(self, available_players, required_rules, optional_rules):
-        nbr_unique_role = len(set(required_rules.keys()) | set(optional_rules.keys()))
-        nbr_role = len(required_rules) + len(optional_rules)
-        assert nbr_unique_role == nbr_role, "The same role can not be in the required rules and the optional rules"
-
-        for role, rule in required_rules.items():
-            player = rule(available_players, role, self.roles_translation)
-            if not isinstance(player, Player):
-                raise TypeError("A rule must return a player, not a '{}'".format(player))
-            self.roles_translation[role] = player
-        try:
-            for role, rule in optional_rules.items():
-                self.roles_translation[role] = rule(available_players, role, self.roles_translation)
-        except ImpossibleToMap:
-            pass
-
