@@ -5,8 +5,6 @@ import logging
 from time import sleep
 from sys import stdout
 
-import sys
-
 from Engine.Framework import Framework
 from config.config import Config
 
