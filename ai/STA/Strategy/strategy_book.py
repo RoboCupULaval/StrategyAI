@@ -94,12 +94,5 @@ class StrategyBook:
         return self.stop_strategy
 
     def check_existance_strategy(self, strategy_name: str) -> bool:
-        """
-        Regarde que la stratégie existe dans le livre des stratégies.
-
-        :param strategy_name: (str) le nom de la stratégie à évaluer l'existance.
-        :return: (bool) true si la stratégie existe dans le livre, false sinon.
-        """
         assert isinstance(strategy_name, str)
-
         return strategy_name in self.strategy_book
