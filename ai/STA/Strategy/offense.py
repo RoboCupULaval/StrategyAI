@@ -18,9 +18,6 @@ class Offense(Strategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-        forbidden_areas = [Area.pad(self.game_state.field.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL),
-                           self.game_state.field.our_goal_area]
-
         robots_in_formation = [p for r, p in self.assigned_roles.items() if r != Role.GOALKEEPER]
 
         for role, player in self.assigned_roles.items():
@@ -30,12 +27,10 @@ class Offense(Strategy):
                 node_pass = self.create_node(role, PositionForPass(self.game_state,
                                                                    player,
                                                                    auto_position=True,
-                                                                   robots_in_formation=robots_in_formation,
-                                                                   forbidden_areas=forbidden_areas))
+                                                                   robots_in_formation=robots_in_formation))
                 node_go_kick = self.create_node(role, GoKick(self.game_state,
                                                              player,
-                                                             auto_update_target=True,
-                                                             forbidden_areas=forbidden_areas))
+                                                             auto_update_target=True))
 
                 player_is_closest = partial(self.is_closest_not_goalkeeper, player)
                 player_is_not_closest = partial(self.is_not_closest, player)

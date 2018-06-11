@@ -3,7 +3,7 @@ from typing import List, Optional, Any, Iterable
 
 from Util import Pose, Position
 from Util.ai_command import AICommand
-from Util.constant import ROBOT_RADIUS
+from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL
 from Util.geometry import Area, Line
 from ai.GameDomainObjects import Player
 from Util.ai_command import Idle
@@ -16,9 +16,9 @@ __author__ = 'RobocupULaval'
 class Tactic:
 
     def __init__(self, game_state: GameState, player: Player, target: Optional[Pose]=None,
-                 forbidden_areas: Optional[List[Area]]=None, args: Optional[List[Any]]=None):
+                 args: Optional[List[Any]]=None, forbidden_areas: Optional[List[Area]]=None):
         assert isinstance(player, Player), "Le player doit être un Player, non un '{}'".format(player)
-        assert isinstance(target, Pose), "La target devrait être une Pose"
+        assert target is None or isinstance(target, Pose), "La target devrait être une Pose"
         self.game_state = game_state
         self.player = player
         self.player_id = player.id
@@ -31,7 +31,12 @@ class Tactic:
         self.next_state = self.halt
         self.status_flag = Flags.INIT
         self.target = target
-        self.forbidden_areas = forbidden_areas if forbidden_areas is not None else []
+
+        if forbidden_areas is None:
+            self.forbidden_areas = [Area.pad(self.game_state.field.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL),
+                                    Area.pad(self.game_state.field.our_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)]
+        else:
+            self.forbidden_areas = forbidden_areas
 
     def halt(self) -> Idle:
         self.next_state = self.halt
