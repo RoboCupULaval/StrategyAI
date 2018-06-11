@@ -80,3 +80,5 @@ unfiltered.txt
 
 # own files
 venv/
+Logs/*.log
+
