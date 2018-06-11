@@ -11,7 +11,7 @@ from ai.states.game_state import GameState
 __author__ = 'RobocupULaval'
 
 
-class Tactic(object):
+class Tactic:
     """
         Classe mère de toutes les tactiques
     """
@@ -66,8 +66,9 @@ class Tactic(object):
     def debug_cmd(self):
         return []
 
-    def get_name(self):
-        return self.__class__.__name__
+    @classmethod
+    def name(cls):
+        return cls.__name__
 
     def __str__(self):
         return self.__class__.__name__

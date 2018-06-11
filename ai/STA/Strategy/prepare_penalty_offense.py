@@ -6,7 +6,7 @@ from Util.role import Role
 from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
 
 from ai.STA.Strategy.strategy import Strategy
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.states.game_state import GameState
 
@@ -28,7 +28,7 @@ class PreparePenaltyOffense(Strategy):
         for role, position in role_to_positions.items():
             position.orientation = np.pi
             player = self.assigned_roles[role]
-            self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))
+            self.create_node(role, GoToPosition(self.game_state, player, position))
 
     @classmethod
     def required_roles(cls):

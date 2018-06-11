@@ -12,7 +12,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
-class GoToPositionPathfinder(Tactic):
+class GoToPosition(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
                  args: List[str]=None, ball_collision=True, cruise_speed=1, charge_kick=False, end_speed=0):
         super().__init__(game_state, player, target, args)
@@ -24,7 +24,7 @@ class GoToPositionPathfinder(Tactic):
         self.cruise_speed = float(args[0]) if len(self.args) > 0 else cruise_speed
         #print("Assign move to position to robot id {}".format(self.player.id))
 
-    def exec(self) -> object:
+    def exec(self):
         if self.check_success():
             self.status_flag = Flags.SUCCESS
         else:
