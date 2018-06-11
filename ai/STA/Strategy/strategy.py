@@ -43,7 +43,7 @@ class Strategy(metaclass=ABCMeta):
 
     @classmethod
     def optional_roles(cls) -> Dict[Role, Callable]:
-        return {}
+        return []
 
     def create_node(self, role: Role, tactic: Tactic) -> Node:
         """

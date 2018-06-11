@@ -2,6 +2,7 @@
 
 from Util.pose import Pose
 from Util.role import Role
+
 from ai.STA.Strategy.team_go_to_position import TeamGoToPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.states.game_state import GameState
@@ -40,3 +41,15 @@ class PrepareKickOffDefense(TeamGoToPosition):
                              Role.SECOND_DEFENCE: defense_bottom_position}
 
         self.assign_tactics(role_to_positions)
+
+    @classmethod
+    def required_roles(cls):
+        return [Role.GOALKEEPER,
+                Role.MIDDLE]
+
+    @classmethod
+    def optional_roles(cls):
+        return [Role.FIRST_ATTACK,
+                Role.SECOND_ATTACK,
+                Role.FIRST_DEFENCE,
+                Role.SECOND_DEFENCE]

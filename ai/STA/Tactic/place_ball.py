@@ -66,7 +66,7 @@ class PlaceBall(Tactic):
             self.next_state = self.grab_ball
 
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=2,
+                                      cruise_speed=1,
                                       ball_collision=True).build()
 
     def grab_ball(self):
@@ -82,7 +82,7 @@ class PlaceBall(Tactic):
             self.steady_orientation = orientation
 
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=0.4,
+                                      cruise_speed=0.2,
                                       ball_collision=False).addForceDribbler().build()
 
     def move_ball(self):
