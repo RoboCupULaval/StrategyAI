@@ -6,7 +6,7 @@ import numpy as np
 from Util.role import Role
 
 from ai.STA.Strategy.strategy import Strategy
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -22,7 +22,7 @@ class TeamGoToPosition(Strategy):
                 continue
             position = role_to_positions[role]
             position.orientation = np.pi
-            node_go_to_position = self.create_node(role, GoToPositionPathfinder(self.game_state, player, position))
+            node_go_to_position = self.create_node(role, GoToPosition(self.game_state, player, position))
             node_stop = self.create_node(role, Stop(self.game_state, player))
             player_arrived_to_position = partial(self.arrived_to_position, player)
 

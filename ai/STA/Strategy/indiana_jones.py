@@ -6,7 +6,7 @@ from Util.pose import Position, Pose
 from Util.role import Role
 
 from ai.STA.Strategy.strategy import Strategy
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.tactic_constants import Flags
 
 
@@ -33,28 +33,28 @@ class IndianaJones(Strategy):
         x_left = self.game_state.field.left + 500
         x_right = self.game_state.field.right - 500
 
-        node_go_to_goal_left = self.create_node(indiana_role, GoToPositionPathfinder(self.game_state, indiana, goal_left, cruise_speed=2))
-        node_go_to_goal_right = self.create_node(indiana_role, GoToPositionPathfinder(self.game_state, indiana, goal_right, cruise_speed=2))
+        node_go_to_goal_left = self.create_node(indiana_role, GoToPosition(self.game_state, indiana, goal_left, cruise_speed=2))
+        node_go_to_goal_right = self.create_node(indiana_role, GoToPosition(self.game_state, indiana, goal_right, cruise_speed=2))
 
         indiana_succeeded = partial(self.current_tactic_succeed, indiana_role)
 
         node_go_to_goal_left.connect_to(node_go_to_goal_right, when=indiana_succeeded)
         node_go_to_goal_right.connect_to(node_go_to_goal_left, when=indiana_succeeded)
 
-        node_go_to_top_left = self.create_node(obs_left_role, GoToPositionPathfinder(self.game_state, obs_left,
-                                                            Pose(Position(x_left/2, y_top),
+        node_go_to_top_left = self.create_node(obs_left_role, GoToPosition(self.game_state, obs_left,
+                                                                           Pose(Position(x_left/2, y_top),
                                                                  obs_left.pose.orientation), cruise_speed=2))
-        node_go_to_bottom_left = self.create_node(obs_left_role, GoToPositionPathfinder(self.game_state, obs_left,
-                                                            Pose(Position(x_left/2, y_bottom), obs_left.pose.orientation)))
+        node_go_to_bottom_left = self.create_node(obs_left_role, GoToPosition(self.game_state, obs_left,
+                                                                              Pose(Position(x_left/2, y_bottom), obs_left.pose.orientation)))
         obs_left_role_succeeded = partial(self.current_tactic_succeed, obs_left_role)
 
         node_go_to_top_left.connect_to(node_go_to_bottom_left, when=obs_left_role_succeeded)
         node_go_to_bottom_left.connect_to(node_go_to_top_left, when=obs_left_role_succeeded)
 
-        node_go_to_top_right = self.create_node(obs_right_role, GoToPositionPathfinder(self.game_state,
-                                                             obs_right, Pose(Position(x_right/2, y_top), obs_right.pose.orientation), cruise_speed=2))
-        node_go_to_bottom_right = self.create_node(obs_right_role, GoToPositionPathfinder(self.game_state,
-                                                             obs_right, Pose(Position(x_right/2, y_bottom), obs_right.pose.orientation), cruise_speed=2))
+        node_go_to_top_right = self.create_node(obs_right_role, GoToPosition(self.game_state,
+                                                                             obs_right, Pose(Position(x_right/2, y_top), obs_right.pose.orientation), cruise_speed=2))
+        node_go_to_bottom_right = self.create_node(obs_right_role, GoToPosition(self.game_state,
+                                                                                obs_right, Pose(Position(x_right/2, y_bottom), obs_right.pose.orientation), cruise_speed=2))
         obs_right_role_succeeded = partial(self.current_tactic_succeed, obs_right_role)
 
         node_go_to_top_right.connect_to(node_go_to_bottom_right, when=obs_right_role_succeeded)

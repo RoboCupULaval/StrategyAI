@@ -1,17 +1,10 @@
 # Under MIT License, see LICENSE.txt
-import numpy as np
-from functools import partial
 
 from Util.pose import Pose
 from Util.role import Role
 
-from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.team_go_to_position import TeamGoToPosition
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.goalkeeper import GoalKeeper
-from ai.STA.Tactic.stop import Stop
-from ai.STA.Tactic.tactic_constants import Flags
-from ai.states.game_state import GameState
 
 
 class PrepareKickOffOffense(TeamGoToPosition):
