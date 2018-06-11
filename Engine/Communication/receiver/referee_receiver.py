@@ -11,17 +11,12 @@ from Engine.Communication.protobuf.referee_pb2 import SSL_Referee
 from Engine.Communication.receiver.receiver_base_class import ReceiverProcess
 from Engine.Communication.monitor import monitor_queue
 from ai.GameDomainObjects import RefereeState
-from ai.GameDomainObjects.referee_state import Stage
 
 __author__ = "Simon Bouchard"
 
 
 @monitor_queue
 class RefereeReceiver(ReceiverProcess):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.last_packet = None
 
     def connect(self, connection_info):
         connection = socket(AF_INET, SOCK_DGRAM)
