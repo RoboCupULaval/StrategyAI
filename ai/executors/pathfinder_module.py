@@ -17,7 +17,7 @@ class WayPoint:
         self.ball_collision = ball_collision
 
     def __repr__(self) -> str:
-        return 'Position' + str(self.position)
+        return 'WayPoint' + str(self.position)
 
 
 class PathfinderModule:

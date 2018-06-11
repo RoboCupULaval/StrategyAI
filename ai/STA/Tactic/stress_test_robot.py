@@ -1,3 +1,4 @@
+from queue import deque
 from typing import List
 
 from Util import Position, Pose
@@ -28,13 +29,14 @@ class StressTestRobot(Tactic):
                        WayPoint(Position(-self.coord_x, self.coord_y)),
                        WayPoint(Position(-self.coord_x, -self.coord_y)),
                        WayPoint(Position(self.coord_x, -self.coord_y))]
+        self.points = deque(self.points)
 
     def next_corner(self):
         orientation = (self.points[0].position - self.player.position).angle
 
         if (self.player.position-self.points[0].position).norm < 500:
-            first_ele = self.points.pop(-1)
-            self.points = [first_ele] + self.points
+            self.points.rotate()
+
         return CmdBuilder().addMoveTo(Pose(self.points[0].position, orientation),
-                                      way_points=self.points,
+                                      way_points=list(self.points),
                                       cruise_speed=self.speed).build()
