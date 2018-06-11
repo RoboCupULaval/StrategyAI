@@ -216,25 +216,27 @@ class RefereeState:
     @classmethod
     def log_change(cls, packet: SSL_Referee):
 
+        if packet['blue']['name'] == '': packet['blue']['name'] = 'unknown'
+        if packet['yellow']['name'] == '': packet['yellow']['name'] = 'unknown'
+
         if cls.last_packet:
-            last_team_names = [cls.last_packet['blue']['name'], cls.last_packet['yellow']['name']]
             last_stage = cls.last_packet['stage']
             last_blue_team_info = cls.last_packet['blue']
             last_yellow_team_info = cls.last_packet['yellow']
         else:
-            last_team_names = None
             last_stage = None
-            last_blue_team_info = {'score': 0, 'red_cards': 0, 'yellow_cards': 0, 'timeouts': 4}
-            last_yellow_team_info = {'score': 0, 'red_cards': 0, 'yellow_cards': 0, 'timeouts': 4}
+            last_blue_team_info = {'name': None, 'score': 0, 'red_cards': 0, 'yellow_cards': 0, 'timeouts': 4}
+            last_yellow_team_info = {'name': None, 'score': 0, 'red_cards': 0, 'yellow_cards': 0, 'timeouts': 4}
 
         cls.last_packet = packet
 
-        new_team_names = [packet['blue']['name'], packet['yellow']['name']]
         new_blue_team_info = packet['blue']
         new_yellow_team_info = packet['yellow']
         new_stage = packet['stage']
 
-        is_name_change = last_team_names != new_team_names
+        is_name_change = last_blue_team_info['name'] != new_blue_team_info['name'] or \
+                         last_yellow_team_info['name'] != new_yellow_team_info['name']
+
         is_state_change = last_stage != new_stage
 
         scoring_team = {'blue': None, 'yellow': None}
@@ -280,22 +282,9 @@ class RefereeState:
             timeout_change['yellow'] = new_yellow_team_info['timeouts'] - new_yellow_team_info['timeouts']
 
         if is_name_change:
-            new_team_names[0] = 'unknown' if new_team_names[0] == '' else new_team_names[0]
-            new_team_names[1] = 'unknown' if new_team_names[1] == '' else new_team_names[1]
-
             cls.logger.info('Team change detected.\n\n' + '-' * 40 + '\n' +
-                             '  {} (BLUE) vs. {} (YELLOW)'.format(*new_team_names) + '\n' + '-' * 40 + '\n\n')
-
-        if is_state_change:
-            stage = Stage(new_stage)
-            cls.logger.info('Stage change detected. Now at {}.'.format(stage.name))
-            if stage is Stage.NORMAL_FIRST_HALF:
-                cls.logger.info('A new game is starting!')
-            elif stage is Stage.POST_GAME:
-                cls.logger.info('The game has ended. Final score: ({}: {} - {}: {})'.format(new_blue_team_info['name'],
-                                                                                            new_blue_team_info['score'],
-                                                                                            new_yellow_team_info['name'],
-                                                                                            new_yellow_team_info['score']))
+                            '  {} (BLUE) vs. {} (YELLOW)'.format(new_blue_team_info['name'], new_yellow_team_info['name'])
+                            + '\n' + '-' * 40 + '\n\n')
 
         for team_color in ('blue', 'yellow'):
             if scoring_team[team_color] is not None:
@@ -336,3 +325,13 @@ class RefereeState:
                     cls.logger.info('A timeout call was given to {}'.format(timeout_team[team_color]))
                 cls.logger.info('Timeout left: {}. Time left: {:.1f} seconds'.format(timeout_left[team_color],
                                                                                       timeout_time[team_color]/1000000))
+
+        if is_state_change:
+            stage = Stage(new_stage)
+            cls.logger.info('Stage change detected. Now at {}.'.format(stage.name))
+            if stage is Stage.POST_GAME:
+                cls.logger.info(
+                    'The game has ended. Final score: ({}: {} - {}: {})'.format(new_blue_team_info['name'],
+                                                                                new_blue_team_info['score'],
+                                                                                new_yellow_team_info['name'],
+                                                                                new_yellow_team_info['score']))
