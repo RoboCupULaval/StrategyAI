@@ -136,8 +136,9 @@ class SimpleAutoPlay(AutoPlay):
                 self.logger.warning("Not enough player to play. We have {} players and the minimum is {} "
                                     .format(nb_player, self.MINIMUM_NB_PLAYER))
             next_state = SimpleAutoPlayState.NOT_ENOUGH_PLAYER
-        # On command change
-        elif self.prev_nb_player < self.MINIMUM_NB_PLAYER <= nb_player or self.last_ref_state != ref_state.command:
+        # Number of player change or On command change
+        elif (self.prev_nb_player is not None and self.prev_nb_player < self.MINIMUM_NB_PLAYER <= nb_player)\
+                or self.last_ref_state != ref_state.command:
             self.logger.info("Switching to referee state {}".format(ref_state.command.name))
             next_state = {
                 RefereeCommand.HALT: SimpleAutoPlayState.HALT,
