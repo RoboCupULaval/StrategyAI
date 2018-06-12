@@ -114,11 +114,6 @@ class Engine(Process):
         except:
             self.logger.exception('message')
             raise
-        finally:
-            self.logger.info('Killed')
-
-        sys.stdout.flush()
-        exit(0)
 
     def wait_for_vision(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
@@ -173,6 +168,7 @@ class Engine(Process):
         self.ui_sender.terminate()
         self.ui_recver.terminate()
         self.referee_recver.terminate()
+        self.logger.info('Terminated')
         super().terminate()
 
     def enable_profiling(self):

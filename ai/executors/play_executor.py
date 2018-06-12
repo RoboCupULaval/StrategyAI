@@ -3,6 +3,7 @@
 import logging
 from multiprocessing import Queue
 from queue import Empty
+from time import sleep
 
 from typing import List, Dict
 
@@ -38,7 +39,6 @@ class PlayExecutor:
         self.pathfinder_module = PathfinderModule()
 
     def exec(self) -> List[EngineCommand]:
-
         self._fetch_referee_state()
 
         if self.autonomous_flag:
@@ -58,6 +58,7 @@ class PlayExecutor:
         self._send_robots_status()
 
         return engine_cmds
+        #return []
 
     def order_change_of_sta(self, cmd: STAChangeCommand):
         if cmd.is_strategy_change_command():

@@ -46,11 +46,8 @@ class ReceiverProcess(Process, ReceiverBaseClass, metaclass=ABCMeta):
         except:
             self.logger.exception('message')
             raise
-        finally:
-            self.connection.close()
-            self.logger.debug('Killed')
-            exit(0)
 
     def terminate(self):
         self.connection.close()
+        self.logger.debug('Terminated')
         super().terminate()
