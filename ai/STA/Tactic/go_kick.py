@@ -100,7 +100,7 @@ class GoKick(Tactic):
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=1,
-                                      ball_collision=False).addChargeKicker().build()
+                                      ball_collision=False).addChargeKicker().addForceDribbler().build()
 
     def kick(self):
         self.next_state = self.validate_kick
@@ -110,7 +110,7 @@ class GoKick(Tactic):
         orientation = (self.target.position - self.game_state.ball_position).angle
 
         return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
-                                      ball_collision=False).addKick(self.kick_force).build()
+                                      ball_collision=False).addKick(self.kick_force).addForceDribbler().build()
 
     def validate_kick(self):
         if self.game_state.ball.is_moving_fast() or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:

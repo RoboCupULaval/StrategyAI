@@ -52,7 +52,7 @@ class GoToRandomPosition(Tactic):
             #self.current_angle_to_go = random.randint(-1, 1) * np.pi / 100.
             self.next_pose = Pose(self.current_position_to_go, self.current_angle_to_go)
 
-        return MoveTo(self.next_pose)
+        return MoveTo(self.next_pose, cruise_speed=2)
 
     def check_success(self):
         distance = (self.player.pose.position - self.next_pose.position).norm
