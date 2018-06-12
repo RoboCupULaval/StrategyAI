@@ -23,6 +23,7 @@ class Line:
     def length(self):
         return (self.p2 - self.p1).norm
 
+
 class Area:
     def __init__(self, a, b):
         neg_x, pos_x = min(a.x, b.x), max(a.x, b.x)
@@ -59,7 +60,6 @@ class Area:
                 inters.append(inter)
         return inters
 
-
     def intersect_with_line(self, line: Line):
         assert isinstance(line, Line)
 
@@ -71,12 +71,12 @@ class Area:
         return inters
 
     def closest_border_point(self, p: Position):
-        closest = None
+        closest_on_borders = None
         for segment in self.segments:
-            dist = closest_point_on_segment(p, segment.p1, segment.p2)
-            if closest is None or (dist - p).norm < (closest - p).norm:
-                closest = dist
-        return closest
+            closest_on_segment = closest_point_on_segment(p, segment.p1, segment.p2)
+            if closest_on_borders is None or (closest_on_segment - p).norm < (closest_on_borders - p).norm:
+                closest_on_borders = closest_on_segment
+        return closest_on_borders
 
     @property
     def segments(self):
@@ -123,9 +123,6 @@ class Area:
         return cls(Position(left, top), Position(right, bottom))
 
 
-
-
-
 def find_bisector_of_triangle(c, a, b):
     """
     Where 'c' is the origin of the bisector and the intersection of the bissectrice 'i' is on the segment 'ab'.
@@ -136,7 +133,7 @@ def find_bisector_of_triangle(c, a, b):
     return a - ia
 
 
-def intersection_between_segments(a1, a2, b1, b2) -> Optional[Position]:
+def intersection_between_segments(a1: Position, a2: Position, b1: Position, b2: Position) -> Optional[Position]:
     try:
         inter = intersection_between_lines(a1, a2, b1, b2)
     except ValueError:
@@ -147,17 +144,18 @@ def intersection_between_segments(a1, a2, b1, b2) -> Optional[Position]:
     return None
 
 
-def intersection_between_line_and_segment(s1, s2, l1, l2) -> Optional[Position]:
+def intersection_between_line_and_segment(seg1: Position, seg2: Position, line1: Position, line2: Position) -> Optional[Position]:
     try:
-        inter = intersection_between_lines(s1, s2, l1, l2)
+        inter = intersection_between_lines(seg1, seg2, line1, line2)
     except ValueError:
         return None
 
-    if inter == closest_point_on_segment(inter, s1, s2):
+    if inter == closest_point_on_segment(inter, seg1, seg2):
         return inter
     return None
 
-def intersection_between_lines(a1, a2, b1, b2) -> Position:
+
+def intersection_between_lines(a1: Position, a2: Position, b1: Position, b2: Position) -> Position:
     s = np.vstack([a1.array, a2.array, b1.array, b2.array])
     h = np.hstack((s, np.ones((4, 1))))
     l1 = np.cross(h[0], h[1])  # first line
