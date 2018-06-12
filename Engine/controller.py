@@ -27,15 +27,15 @@ class Controller:
     def __init__(self, ui_send_queue: Queue):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.ui_send_queue = ui_send_queue
-
+        self.dt = 0
         self.timestamp = -1
         self.robots = [Robot(robot_id) for robot_id in range(config['ENGINE']['max_robot_id'])]
         for robot in self.robots:
             robot.velocity_regulator = VelocityRegulator()
             robot.position_regulator = PositionRegulator()
 
-    def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand]):
-
+    def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand], dt):
+        self.dt = dt
         self.timestamp = track_frame['timestamp']
 
         for robot in self.robots:
@@ -62,10 +62,10 @@ class Controller:
 
             if robot.distance_to_path_end < ROBOT_RADIUS and robot.end_speed == 0:
                 robot.velocity_regulator.reset()
-                commands[robot.id] = robot.position_regulator.execute(robot)
+                commands[robot.id] = robot.position_regulator.execute(robot, self.dt)
             else:
                 robot.position_regulator.reset()
-                commands[robot.id] = robot.velocity_regulator.execute(robot)
+                commands[robot.id] = robot.velocity_regulator.execute(robot, self.dt)
 
         self.send_debug(commands)
 

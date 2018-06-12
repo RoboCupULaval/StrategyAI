@@ -17,12 +17,10 @@ class RealVelocityController(RegulatorBaseClass):
 
     def __init__(self):
         self.orientation_controller = PID(**self.settings, signed_error=True, deadzone=0.05)
+        self.dt = 0
 
-    @property
-    def dt(self):
-        return 1 / config['ENGINE']['fps']
-
-    def execute(self, robot: Robot):
+    def execute(self, robot: Robot, dt):
+        self.dt = dt
         speed_norm = self.get_next_speed(robot)
 
         velocity = robot.position_error * speed_norm / robot.position_error.norm
@@ -34,8 +32,7 @@ class RealVelocityController(RegulatorBaseClass):
 
     def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION):
         acceleration_offset = 1.5  # on veut que le robot soit plus aggressif en début de trajet
-        emergency_break_offset = 0  # on veut que le robot break le plus
-                                    # qu'il peut si on s'approche trop vite de la target
+        emergency_break_offset = 0.4 / self.dt * (robot.velocity.norm / 1000)  # on veut que le robot break le plus qu'il peut si on s'approche trop vite de la target
 
         if robot.target_speed > robot.current_speed:
             next_speed = robot.current_speed + acc * self.dt * acceleration_offset
@@ -44,7 +41,8 @@ class RealVelocityController(RegulatorBaseClass):
                 next_speed = robot.current_speed + acc * self.dt * acceleration_offset
             else:
                 distance = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc
-                if robot.position_error.norm < (distance / 0.5):
+                if robot.position_error.norm < (distance/0.5):
+                    print(emergency_break_offset)
                     next_speed = robot.current_speed - acc * self.dt * emergency_break_offset
                 else:
                     next_speed = robot.current_speed - acc * self.dt

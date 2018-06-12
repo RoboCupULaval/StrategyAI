@@ -8,6 +8,8 @@ from multiprocessing import Process, Queue, Manager
 from multiprocessing.managers import DictProxy
 from queue import Empty
 
+import time
+
 from Debug.debug_command_factory import DebugCommandFactory
 
 from Engine.Communication.receiver.referee_receiver import RefereeReceiver
@@ -70,6 +72,7 @@ class Engine(Process):
         self.is_fps_locked = config['ENGINE']['is_fps_locked']
         self.frame_count = 0
         self.last_frame_count = 0
+        self.time = 0
 
         def callback(excess_time):
             if excess_time > Engine.MAX_EXCESS_TIME:
@@ -120,17 +123,20 @@ class Engine(Process):
     def wait_for_vision(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
         sleep_vision = create_fps_timer(1)
+        self.time = time.time()
         while not any(self.vision_state):
             sleep_vision()
+            self.time = time.time()
 
     def main_loop(self):
-
+        dt = time.time() - self.time
+        self.time = time.time()
         engine_cmds = self.get_engine_commands()
 
         game_state = self.tracker.update()
         self.game_state.update(game_state)
 
-        self.controller.update(self.game_state, engine_cmds)
+        self.controller.update(self.game_state, engine_cmds, dt)
         robot_state = self.controller.execute()
 
         self.robot_cmd_sender.send_packet(robot_state)
