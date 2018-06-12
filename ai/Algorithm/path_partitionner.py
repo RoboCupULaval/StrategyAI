@@ -75,7 +75,7 @@ class PathPartitionner:
         self.old_path = last_path
 
         self.filter_obstacles(start.array, target.array)
-        self.send_debug()
+        # self.send_debug()
         if any(self.obstacles):
             if last_path and not self.is_full_path_colliding(last_path):
                 path = self.update_last_path(start, target)
