@@ -27,7 +27,7 @@ class TacticBook:
 
         self.stop_tactic = Stop
 
-        defaults_tactics = {GoToPosition, GoKick}
+        defaults_tactics = [GoToPosition, GoKick]
 
         tactics = {PlaceBall,
                    FaceTarget,

@@ -28,8 +28,11 @@ class IndirectFreeKick(Strategy):
                 node_pass = self.create_node(role, PositionForPass(self.game_state,
                                                                    player,
                                                                    robots_in_formation=formation,
-                                                                   auto_position=True))
-                node_go_kick = self.create_node(role, GoKick(self.game_state, player, auto_update_target=True))
+                                                                   auto_position=True,
+                                                                   forbidden_areas=[self.game_state.field.indirect_avoid_area]))
+                node_go_kick = self.create_node(role, GoKick(self.game_state,
+                                                             player,
+                                                             auto_update_target=True))
 
                 player_is_closest = partial(self.is_closest_not_goalkeeper, player)
                 player_is_not_closest = partial(self.is_not_closest, player)

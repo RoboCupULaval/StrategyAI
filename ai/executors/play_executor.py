@@ -85,9 +85,6 @@ class PlayExecutor:
                 self.ref_states.append(referee_state)
         except Empty:
             pass
-        # if GameState().game.referee.team_info['ours']['goalie'] != self.goalie_id:
-        #     self.goalie_id = GameState().game.referee.team_info['ours']['goalie']
-        #     GameState().update_player_for_locked_role(self.goalie_id, Role.GOALKEEPER)
 
     def _exec_auto_play(self):
         for state in self.ref_states:

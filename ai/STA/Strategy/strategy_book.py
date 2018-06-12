@@ -39,7 +39,7 @@ class StrategyBook:
 
         self.stop_strategy = DoNothing
 
-        default_strategies = {Offense, DefenseWall}
+        default_strategies = [Offense, DefenseWall]
 
         strategy_book = {HumanControl,
                          IndianaJones,

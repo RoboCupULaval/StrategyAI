@@ -167,6 +167,9 @@ class Field:
         self.their_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2.flip_x(),
                                     self.field_lines["RightFieldLeftPenaltyStretch"].p1.flip_x())
 
+        self.indirect_avoid_area = Area.from_limits(self.top, self.bottom,
+                                                    self.their_goal_area.left,  self.their_goal_area.left+500)
+
         self.goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
                                   p2=Position(self.our_goal_x, -self.goal_width / 2))
 

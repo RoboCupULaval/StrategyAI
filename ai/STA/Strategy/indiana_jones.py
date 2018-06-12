@@ -2,6 +2,7 @@
 
 from functools import partial
 
+from Util.constant import ROBOT_DIAMETER
 from Util.pose import Position, Pose
 from Util.role import Role
 
@@ -23,7 +24,7 @@ class IndianaJones(Strategy):
         obs_left_role = Role.SECOND_DEFENCE
 
         # Positions objectifs d'Indiana Jones
-        FIELD_GOAL_INTERNAL_X = self.game_state.field.our_goal_area.left
+        FIELD_GOAL_INTERNAL_X = self.game_state.field.our_goal_area.left - ROBOT_DIAMETER
         goal_left  = (Pose(Position(+FIELD_GOAL_INTERNAL_X, 0), indiana.pose.orientation))
         goal_right = (Pose(Position(-FIELD_GOAL_INTERNAL_X, 0), indiana.pose.orientation))
 

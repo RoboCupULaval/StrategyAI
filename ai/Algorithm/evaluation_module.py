@@ -62,12 +62,12 @@ def player_covered_from_goal(player: Player):
     pertinent_collisions_positions = np.array([obs.position for obs in pertinent_collisions])
     pertinent_collisions_avoid_radius = np.array([obs.avoid_distance for obs in pertinent_collisions])
     results = []
-    for i in range(1, 20):  # discretisation de la ligne de but
+    for i in range(0, 15 + 1):  # discretisation de la ligne de but
         goal_point = GameState().field.their_goal_line.p1 + GameState().field.their_goal_line.direction * \
-                     (GameState().field.their_goal_line.length * i / 20)
+                     (GameState().field.their_goal_line.length * i / 15)
         is_colliding = is_path_colliding(pertinent_collisions, pertinent_collisions_positions,
                                          pertinent_collisions_avoid_radius, player.position.array, goal_point.array)
-        results.append([is_colliding, goal_point])
+        results.append((is_colliding, goal_point))
     max_len_seg, indexend = find_max_consecutive_bool(results)
 
     if max_len_seg == 0 and indexend == 0:
@@ -81,8 +81,7 @@ def find_max_consecutive_bool(results):
     max_len_seg = 0  # longueur du segment
     indexend = 0
 
-    for i, result in enumerate(results):
-        is_colliding = result[0]
+    for i, (is_colliding, _) in enumerate(results):
         if not is_colliding:
             count += 1
         else:
@@ -90,6 +89,9 @@ def find_max_consecutive_bool(results):
                 max_len_seg = count
                 indexend = i
             count = 0
+    if count > max_len_seg:
+        max_len_seg = count
+        indexend = i
     return [max_len_seg, indexend]
 
 
@@ -151,7 +153,7 @@ def best_passing_option(passing_player, consider_goal=True):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si but est la meilleure possibilité
 
     score_min = float("inf")
-    goal = Position(GameState().field.their_goal_x, 0)
+    goal = GameState().field.their_goal
 
     receiver_id = None
     for p in GameState().our_team.available_players.values():
