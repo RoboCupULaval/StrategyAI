@@ -7,7 +7,7 @@ from Util.ai_command import CmdBuilder, MoveTo
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
 from Util.geometry import compare_angle
 from ai.GameDomainObjects.player import Player
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
 

@@ -1,13 +1,10 @@
 # Under MIT license, see LICENSE.txt
 import numpy as np
 
-from Util.pose import Pose, Position
+from Util.pose import Pose
 from Util.role import Role
 
-
-from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.team_go_to_position import TeamGoToPosition
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.states.game_state import GameState
 

@@ -81,5 +81,9 @@ class Tactic:
     def debug_cmd(self):
         return []
 
+    @classmethod
+    def name(cls):
+        return cls.__name__
+
     def __str__(self):
         return self.__class__.__name__
