@@ -34,7 +34,7 @@ class RotateAroundBall(Tactic):
         self.start_time = None
         self.iter_time = None
 
-        self.target_orientation = None
+        self.target_orientation = (self.target.position - self.game_state.ball_position).angle
         self.offset_orientation = (self.game_state.ball_position - self.player.position).angle
         self.rotation_sign = self._get_direction()
 
