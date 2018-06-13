@@ -84,7 +84,7 @@ class RoleMapper(object):
         prev_assign = self.roles_translation
         remaining_player = list(available_players.values())
 
-        goal_assign = self._map_goalie_with_ref(remaining_player, required_roles, goalie_id)
+        goal_assign = self._map_goalie_with_ref(remaining_player, required_roles, prev_assign, goalie_id)
         remaining_required_roles = [r for r in required_roles if r not in goal_assign]
         remaining_player = [p for p in remaining_player if p not in goal_assign.values()]
 
@@ -117,11 +117,12 @@ class RoleMapper(object):
         random_assignment = dict(zip(remaining_roles, remaining_player))
         return {**roles_stay_same, **random_assignment}
 
-    def _map_goalie_with_ref(self, remaining_player, required_roles, goalie_id):
+    def _map_goalie_with_ref(self, remaining_player, required_roles, prev_assign, goalie_id):
         if Role.GOALKEEPER in required_roles:
             for p in remaining_player:
                 if p.id == goalie_id:
-                    self.logger.info("The referee force goalie to be {}".format(p))
+                    if Role.GOALKEEPER not in prev_assign or prev_assign[Role.GOALKEEPER].id != goalie_id:
+                        self.logger.info("The referee force goalie to be {}".format(p))
                     return {Role.GOALKEEPER: p}
         return {}
 

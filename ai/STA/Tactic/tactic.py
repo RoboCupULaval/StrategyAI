@@ -1,8 +1,10 @@
 # Under MIT licence, see LICENCE.txt
-from typing import List
+from typing import List, Optional, Any, Iterable
 
-from Util import Pose
+from Util import Pose, Position
 from Util.ai_command import AICommand
+from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL
+from Util.geometry import Area, Line
 from ai.GameDomainObjects import Player
 from Util.ai_command import Idle
 from ai.STA.Tactic.tactic_constants import Flags
@@ -12,22 +14,11 @@ __author__ = 'RobocupULaval'
 
 
 class Tactic:
-    """
-        Classe mère de toutes les tactiques
-    """
 
-    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List=None):
-        """
-        Initialise la tactic avec des valeurs
-
-        :param game_state: L'état du monde pour le jeu en cours
-        :param player: Le joueur executant la tactic
-        :param target: Pose général pouvant être utilisé par les classes enfants comme elles veulent
-        """
-        assert isinstance(game_state, GameState), "Le game_state doit être un GameState"
+    def __init__(self, game_state: GameState, player: Player, target: Optional[Pose]=None,
+                 args: Optional[List[Any]]=None, forbidden_areas: Optional[List[Area]]=None):
         assert isinstance(player, Player), "Le player doit être un Player, non un '{}'".format(player)
-        assert isinstance(target, Pose), "La target devrait être une Pose"
-
+        assert target is None or isinstance(target, Pose), "La target devrait être une Pose"
         self.game_state = game_state
         self.player = player
         self.player_id = player.id
@@ -41,27 +32,51 @@ class Tactic:
         self.status_flag = Flags.INIT
         self.target = target
 
-    def halt(self) -> Idle:
-        """
-            S'exécute lorsque l'état courant est *Halt*. Générique pour arrêter n
-            'importe quelles tactiques enfants
+        if forbidden_areas is None:
+            self.forbidden_areas = [Area.pad(self.game_state.field.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL),
+                                    Area.pad(self.game_state.field.our_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)]
+        else:
+            self.forbidden_areas = forbidden_areas
 
-            :return: un nouvelle instance de l'action Idle pour le robot
-        """
+    def halt(self) -> Idle:
         self.next_state = self.halt
         return Idle
 
     def exec(self) -> AICommand:
-        """
-            Exécute une *Action* selon l'état courant
-
-            :return: un AICommand
-        """
         next_ai_command = self.current_state()
         if not isinstance(next_ai_command, AICommand):
             raise RuntimeError("A tactic MUST return an AICommand, not a {}. {} is the culprit.".format(type(next_ai_command), self.current_state))
         self.current_state = self.next_state
+
+        if next_ai_command.target:
+            next_ai_command = self._check_for_forbidden_area(next_ai_command)
+
         return next_ai_command
+
+    def _check_for_forbidden_area(self, next_ai_command):
+        old_target_position = next_ai_command.target.position
+        target_to_position = Line(self.player.position, next_ai_command.target.position)
+        for area in self.forbidden_areas:
+            if old_target_position in area:
+                target_position = self._find_best_next_target(area, old_target_position, self.player.position, target_to_position)
+                new_target = Pose(target_position, next_ai_command.target.orientation)
+
+                # This trailing _ is not for protected access, it was add to avoid a name conflict with the function replace ;)
+                return next_ai_command._replace(target=new_target)
+        return next_ai_command
+
+    def _find_best_next_target(self, area: Area, old_target_position, player_position: Position, target_to_position: Line):
+        intersections = area.intersect(target_to_position)
+        if intersections:
+            return intersections[0]
+        elif old_target_position == player_position:
+            return area.closest_border_point(old_target_position)
+        else:  # The player is already in the forbidden area, so it must go in the opposite direction than the target
+            intersections = area.intersect_with_line(target_to_position)
+            if (intersections[0] - self.player.position).norm < (intersections[1] - self.player.position).norm:
+                return intersections[0]
+            else:
+                return intersections[1]
 
     def debug_cmd(self):
         return []

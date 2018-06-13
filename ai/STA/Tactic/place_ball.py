@@ -29,7 +29,7 @@ class PlaceBall(Tactic):
                  args: List[str]=None,
                  go_behind_distance=GO_BEHIND_SPACING):
 
-        super().__init__(game_state, player, target, args)
+        super().__init__(game_state, player, target, args, forbidden_areas=[])
         self.target = target
         self.go_behind_distance = go_behind_distance
 

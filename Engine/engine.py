@@ -103,7 +103,6 @@ class Engine(Process):
 
             self.logger.debug(logged_string)
 
-
             while True:
                 self.frame_count += 1
                 self.main_loop()
