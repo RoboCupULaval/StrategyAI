@@ -81,20 +81,21 @@ class Coach(Process):
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
     def wait_for_referee(self):
-        self.logger.debug('Waiting for commands from the referee')
-        while self.referee_queue.qsize() == 0:
-            self.logger.debug('Referee is not active or port is set incorrectly, current port is {})'.format(
-                Config()['COMMUNICATION']['referee_port']))
-            sleep(1)
-        self.logger.debug('Referee command detected')
+        if Config()['GAME']['competition_mode']:
+            self.logger.debug('Waiting for commands from the referee')
+            while self.referee_queue.qsize() == 0:
+                self.logger.debug('Referee is not active or port is set incorrectly, current port is {})'.format(
+                    Config()['COMMUNICATION']['referee_port']))
+                sleep(1)
+            self.logger.debug('Referee command detected')
 
-    def run(self) -> None:
+    def run(self):
+
+        self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
+
         try:
             self.wait_for_geometry()
-            if Config()['GAME']['competition_mode']:
-                self.wait_for_referee()
-
-            self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
+            self.wait_for_referee()
 
             while True:
                 self.frame_count += 1
@@ -106,10 +107,13 @@ class Coach(Process):
         except:
             self.logger.exception('message')
             raise
-        finally:
-            self.logger.info('Killed')
 
-    def main_loop(self) -> None:
+    def terminate(self):
+        self.dump_profiling_stats()
+        self.logger.info('Terminated')
+        super().terminate()
+
+    def main_loop(self):
         self.game_state.update(self.engine_game_state)
         self.debug_executor.exec()
         engine_commands = self.play_executor.exec()
@@ -121,12 +125,12 @@ class Coach(Process):
     def enable_profiling(self):
         self.profiling_enabled = True
         self.profiler = cProfile.Profile()
-        self.profiler.enable()
+        self.profiler.enable(subcalls=True)
         self.logger.debug('Profiling mode activate.')
 
     def dump_profiling_stats(self):
         if self.profiling_enabled:
             if self.frame_count % (self.fps * config['GAME']['profiling_dump_time']) == 0:
-                self.profiler.dump_stats(config['game']['profiling_filename'])
-                self.logger.debug('Profiling data written to {}.'.format(config['game']['profiling_filename']))
+                self.profiler.dump_stats(config['GAME']['profiling_filename'])
+                self.logger.debug('Profiling data written to {}.'.format(config['GAME']['profiling_filename']))
 

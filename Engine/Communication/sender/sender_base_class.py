@@ -44,11 +44,9 @@ class SenderProcess(Process, SenderBaseClass, metaclass=ABCMeta):
         except:
             self.logger.exception('message')
             raise
-        finally:
-            self.logger.debug('Killed')
-            self._queue.close()
-            exit(0)
 
     def terminate(self):
+        self.logger.debug('Terminated')
+        self._queue.close()
         self.connection.close()
         super().terminate()
