@@ -78,7 +78,7 @@ if __name__ == '__main__':
         except SystemExit:
             logger.debug('Framework stopped.')
         except:
-            logger.exception('message')
+            logger.exception('An error occurred.')
         finally:
             if not cli_args.competition_mode:
                 stop_framework = True

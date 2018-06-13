@@ -1,4 +1,3 @@
-
 from math import sqrt
 
 from Engine.regulators.PID import PID
@@ -13,16 +12,13 @@ config = Config()
 class RealVelocityController(RegulatorBaseClass):
 
     settings = {'kp': 10, 'ki': 0, 'kd': 1}
-    offset = 1
 
     def __init__(self):
         self.orientation_controller = PID(**self.settings, signed_error=True, deadzone=0.05)
+        self.dt = 0
 
-    @property
-    def dt(self):
-        return 1 / config['ENGINE']['fps']
-
-    def execute(self, robot: Robot):
+    def execute(self, robot: Robot, dt: float):
+        self.dt = dt
         speed_norm = self.get_next_speed(robot)
 
         velocity = robot.position_error * speed_norm / robot.position_error.norm
@@ -40,7 +36,7 @@ class RealVelocityController(RegulatorBaseClass):
         if robot.target_speed > robot.current_speed:
             next_speed = robot.current_speed + acc * self.dt * acceleration_offset
         else:
-            if self.is_distance_for_break(robot, acc, offset=self.offset):
+            if self.is_distance_for_break(robot, acc, offset=1):
                 next_speed = robot.current_speed + acc * self.dt * acceleration_offset
             else:
                 distance = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc
@@ -66,7 +62,6 @@ class RealVelocityController(RegulatorBaseClass):
 class GrSimVelocityController(RealVelocityController):
 
     settings = {'kp': 2, 'ki': 0.3, 'kd': 0}
-    offset = 1
 
 
 def is_time_to_break(robot, destination, cruise_speed, acceleration, target_speed):
