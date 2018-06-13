@@ -105,8 +105,11 @@ class Coach(Process):
         except:
             self.logger.exception('message')
             raise
-        finally:
-            self.logger.info('Killed')
+
+    def terminate(self):
+        self.dump_profiling_stats()
+        self.logger.info('Terminated')
+        super().terminate()
 
     def main_loop(self) -> None:
         self.game_state.update(self.engine_game_state)
@@ -117,12 +120,12 @@ class Coach(Process):
     def enable_profiling(self):
         self.profiling_enabled = True
         self.profiler = cProfile.Profile()
-        self.profiler.enable()
+        self.profiler.enable(subcalls=True)
         self.logger.debug('Profiling mode activate.')
 
     def dump_profiling_stats(self):
         if self.profiling_enabled:
             if self.frame_count % (self.fps * config['GAME']['profiling_dump_time']) == 0:
-                self.profiler.dump_stats(config['game']['profiling_filename'])
-                self.logger.debug('Profiling data written to {}.'.format(config['game']['profiling_filename']))
+                self.profiler.dump_stats(config['GAME']['profiling_filename'])
+                self.logger.debug('Profiling data written to {}.'.format(config['GAME']['profiling_filename']))
 

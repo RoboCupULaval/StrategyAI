@@ -3,6 +3,7 @@
 import logging
 from multiprocessing import Queue
 from queue import Empty
+from time import sleep
 
 from typing import List, Dict
 
