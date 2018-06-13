@@ -44,13 +44,10 @@ class ReceiverProcess(Process, ReceiverBaseClass, metaclass=ABCMeta):
         except KeyboardInterrupt:
             pass
         except:
-            self.logger.exception('message')
+            self.logger.exception('An error occurred.')
             raise
-        finally:
-            self.connection.close()
-            self.logger.debug('Killed')
-            exit(0)
 
     def terminate(self):
         self.connection.close()
+        self.logger.debug('Terminated')
         super().terminate()
