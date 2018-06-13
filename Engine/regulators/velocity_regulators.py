@@ -36,7 +36,7 @@ class RealVelocityController(RegulatorBaseClass):
         if robot.target_speed > robot.current_speed:
             next_speed = robot.current_speed + acc * self.dt * acceleration_offset
         else:
-            if self.is_distance_for_break(robot, acc, offset=self.offset):
+            if self.is_distance_for_break(robot, acc, offset=1):
                 next_speed = robot.current_speed + acc * self.dt * acceleration_offset
             else:
                 distance = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc

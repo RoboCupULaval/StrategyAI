@@ -76,8 +76,8 @@ class Engine(Process):
         self.last_time = 0
 
         def callback(excess_time):
-            if excess_time > Engine.MAX_EXCESS_TIME:
-                self.logger.debug('Overloaded (%.1f ms behind schedule)', 1000*excess_time)
+            if excess_time > self.dt:
+                self.logger.debug('Overloaded (%d cycles behind schedule)', excess_time//self.dt)
 
         self.fps_sleep = create_fps_timer(self.fps, on_miss_callback=callback)
 
@@ -121,7 +121,7 @@ class Engine(Process):
         sleep_vision = create_fps_timer(1)
         while not any(self.vision_state):
             sleep_vision()
-    
+
     def update_dt(self):
         current_time = time.time()
         self.dt = current_time - self.last_time
