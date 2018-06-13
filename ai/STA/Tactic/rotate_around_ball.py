@@ -34,9 +34,8 @@ class RotateAroundBall(Tactic):
         self.start_time = None
         self.iter_time = None
 
-        self.ball_position = self.game_state.ball_position
-        self.target_orientation = (self.target.position - self.ball_position).angle
-        self.start_orientation = (Position(0, 0) - self.ball_position).angle
+        self.target_orientation = (self.target.position - self.game_state.ball_position).angle
+        self.start_orientation = (self.game_state.ball_position - self.player.position).angle
 
         self.offset_orientation = self.start_orientation
         self.rotation_sign = self._get_direction()
@@ -44,12 +43,12 @@ class RotateAroundBall(Tactic):
         self.position = Position
 
     def next_position(self):
+        self.target_orientation = (self.target.position - self.game_state.ball_position).angle
         self.position = (self.game_state.ball_position - Position.from_angle(self.offset_orientation) * DISTANCE_FROM_BALL)
         if self.start_time is not None:
             if time.time() - self.start_time >= self.rotate_time:
                 self.rotation_sign = self._get_direction()
-                if compare_angle(self.target_orientation, (self.ball_position - self.player.position).angle, VALID_DIFF_ANGLE) \
-                        and compare_angle(self.player.pose.orientation, self.target_orientation, abs_tol=VALID_DIFF_ANGLE):
+                if compare_angle(self.target_orientation, (self.game_state.ball_position - self.player.position).angle, VALID_DIFF_ANGLE):
                     self.next_state = self.halt
                     return self._go_to_final_position()
             elif time.time() - self.iter_time >= self.switch_time:
