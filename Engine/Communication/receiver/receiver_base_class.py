@@ -44,7 +44,7 @@ class ReceiverProcess(Process, ReceiverBaseClass, metaclass=ABCMeta):
         except KeyboardInterrupt:
             pass
         except:
-            self.logger.exception('message')
+            self.logger.exception('An error occurred.')
             raise
 
     def terminate(self):

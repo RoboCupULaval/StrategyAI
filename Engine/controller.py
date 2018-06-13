@@ -27,7 +27,6 @@ class Controller:
     def __init__(self, ui_send_queue: Queue):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.ui_send_queue = ui_send_queue
-        self.dt = 0
         self.timestamp = -1
         self.robots = [Robot(robot_id) for robot_id in range(config['ENGINE']['max_robot_id'])]
         for robot in self.robots:

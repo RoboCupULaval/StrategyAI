@@ -2,10 +2,8 @@
 import cProfile
 import logging
 import os
-import sys
 
-from multiprocessing import Process, Queue, Manager
-from multiprocessing.managers import DictProxy
+from multiprocessing import Process, Manager
 from queue import Empty
 
 import time
@@ -30,31 +28,26 @@ config = Config()
 
 class Engine(Process):
 
-    MAX_EXCESS_TIME = 0.050
+    MAX_EXCESS_TIME = 0.05
 
-    def __init__(self,
-                 game_state: DictProxy,
-                 field: DictProxy,
-                 ai_queue: Queue,
-                 referee_queue: Queue,
-                 ui_send_queue: Queue,
-                 ui_recv_queue: Queue):
+    def __init__(self, framework):
 
-        super().__init__(name=__name__)
+        super().__init__(name=self.__class__.__name__)
 
+        self.framework = framework
         self.logger = logging.getLogger(self.__class__.__name__)
 
         # Managers for shared memory between process
         manager = Manager()
         self.vision_state = manager.list([manager.dict() for _ in range(config['ENGINE']['number_of_camera'])])
-        self.game_state = game_state
-        self.field = field
+        self.game_state = self.framework.game_state
+        self.field = self.framework.field
 
         # Queues for process communication
-        self.ui_send_queue = ui_send_queue
-        self.ui_recv_queue = ui_recv_queue
-        self.ai_queue = ai_queue
-        self.referee_queue = referee_queue
+        self.ui_send_queue = self.framework.ui_send_queue
+        self.ui_recv_queue = self.framework.ui_recv_queue
+        self.ai_queue = self.framework.ai_queue
+        self.referee_queue = self.framework.referee_queue
 
         # External communication
         self.vision_receiver = VisionReceiver(config['COMMUNICATION']['vision_info'], self.vision_state, self.field)
@@ -72,18 +65,19 @@ class Engine(Process):
         self.is_fps_locked = config['ENGINE']['is_fps_locked']
         self.frame_count = 0
         self.last_frame_count = 0
-        self.dt = 0
-        self.last_time = 0
+        self.dt = 0.0
+        self.last_time = 0.0
 
         def callback(excess_time):
-            if excess_time > self.dt:
-                self.logger.debug('Overloaded (%d cycles behind schedule)', excess_time//self.dt)
+            if excess_time > Engine.MAX_EXCESS_TIME:
+                self.logger.debug('Overloaded (%.1f ms behind schedule)', 1000*excess_time)
 
         self.fps_sleep = create_fps_timer(self.fps, on_miss_callback=callback)
 
         # profiling
-        self.profiling_enabled = False
-        self.profiler = None
+        self.profiler = cProfile.Profile()
+        if self.framework.profiling:
+            self.profiler.enable()
 
     def start(self):
         super().start()
@@ -106,15 +100,19 @@ class Engine(Process):
             self.wait_for_vision()
             self.last_time = time.time()
             while True:
-                self.update_dt()
                 self.frame_count += 1
+                self.update_time()
                 self.main_loop()
                 if self.is_fps_locked: self.fps_sleep()
+                self.framework.engine_watchdog.value = time.time()
         except KeyboardInterrupt:
-            self.logger.info('A keyboard interrupt was raise.')
+            pass
+        except BrokenPipeError:
+            self.logger.info('A connection was broken.')
         except:
-            self.logger.exception('message')
-            raise
+            self.logger.exception('An error occurred.')
+        finally:
+            self.dump_profiling_stats()
 
     def wait_for_vision(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
@@ -122,7 +120,7 @@ class Engine(Process):
         while not any(self.vision_state):
             sleep_vision()
 
-    def update_dt(self):
+    def update_time(self):
         current_time = time.time()
         self.dt = current_time - self.last_time
         self.last_time = current_time
@@ -154,12 +152,17 @@ class Engine(Process):
         return engine_cmds
 
     def dump_profiling_stats(self):
-        if self.profiling_enabled:
+        if self.framework.profiling:
             if self.frame_count % (self.fps * config['ENGINE']['profiling_dump_time']) == 0:
                 self.profiler.dump_stats(config['ENGINE']['profiling_filename'])
                 self.logger.debug('Profiling data written to {}.'.format(config['ENGINE']['profiling_filename']))
 
     def is_alive(self):
+
+        if time.time() - self.framework.engine_watchdog.value > self.framework.MAX_HANGING_TIME:
+            self.logger.critical('Process is hanging. Shutting down.')
+            return False
+
         borked_process_not_found = all((self.vision_receiver.is_alive(),
                                         self.ui_sender.is_alive(),
                                         self.ui_recver.is_alive(),
@@ -174,10 +177,3 @@ class Engine(Process):
         self.referee_recver.terminate()
         self.logger.debug('Terminated')
         super().terminate()
-
-    def enable_profiling(self):
-        self.profiling_enabled = True
-        self.profiler = cProfile.Profile()
-        self.profiler.enable()
-        self.logger.debug('Profiling mode activate.')
-
