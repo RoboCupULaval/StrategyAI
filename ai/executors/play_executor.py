@@ -40,28 +40,22 @@ class PlayExecutor:
 
     def exec(self) -> List[EngineCommand]:
 
-        self.logger.debug('A')
         self._fetch_referee_state()
 
-        self.logger.debug('B')
         if self.autonomous_flag:
             self._exec_auto_play()
 
-        self.logger.debug('C')
         ai_cmds, debug_cmds = self._execute_strategy()
 
         self.ui_send_queue.put_nowait(debug_cmds)
-        strategy_obstacles = self.play_state.current_strategy.obstacles()
 
-        self.logger.debug('D')
+        strategy_obstacles = self.play_state.current_strategy.obstacles()
         paths = self.pathfinder_module.exec(ai_cmds, strategy_obstacles)
 
-        self.logger.debug('E')
         engine_cmds = []
         for player, ai_cmd in ai_cmds.items():
             engine_cmds.append(generate_engine_cmd(player, ai_cmd, paths[player]))
 
-        self.logger.debug('F')
         self._send_robots_status()
 
         return engine_cmds
@@ -92,6 +86,9 @@ class PlayExecutor:
                 self.ref_states.append(referee_state)
         except Empty:
             pass
+        # if GameState().game.referee.team_info['ours']['goalie'] != self.goalie_id:
+        #     self.goalie_id = GameState().game.referee.team_info['ours']['goalie']
+        #     GameState().update_player_for_locked_role(self.goalie_id, Role.GOALKEEPER)
 
     def _exec_auto_play(self):
         for state in self.ref_states:

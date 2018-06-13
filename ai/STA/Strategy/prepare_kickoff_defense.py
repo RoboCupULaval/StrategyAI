@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from Util.constant import ROBOT_RADIUS
 from Util.pose import Pose
 from Util.role import Role
 
@@ -24,7 +24,7 @@ class PrepareKickOffDefense(TeamGoToPosition):
                                                GameState().field.bottom * 3 / 5, 0)
         attack_bottom_position = Pose.from_values(GameState().field.our_goal_x / 10,
                                                   GameState().field.top * 3 / 5, 0)
-        middle_position = Pose.from_values(center_offset + GameState().field.our_goal_x / 10, 0, 0)
+        middle_position = Pose.from_values(center_offset + ROBOT_RADIUS + GameState().field.our_goal_x / 10, 0, 0)
 
         defense_top_position = Pose.from_values(GameState().field.our_goal_x / 2,
                                                 GameState().field.top / 10, 0)

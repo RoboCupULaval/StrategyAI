@@ -103,6 +103,7 @@ class Engine(Process):
 
             self.logger.debug(logged_string)
 
+
             while True:
                 self.frame_count += 1
                 self.main_loop()
@@ -130,25 +131,15 @@ class Engine(Process):
     def main_loop(self):
         dt = time.time() - self.time
         self.time = time.time()
-
-        self.logger.debug('A')
         engine_cmds = self.get_engine_commands()
 
-
-        self.logger.debug('B')
         game_state = self.tracker.update()
-        self.logger.debug('C')
         self.game_state.update(game_state)
 
-        self.logger.debug('D')
         self.controller.update(self.game_state, engine_cmds, dt)
-
         robot_state = self.controller.execute()
 
-        self.logger.debug('E')
         self.robot_cmd_sender.send_packet(robot_state)
-
-        self.logger.debug('F')
         self.tracker.predict(robot_state)
 
         if any(robot.path for robot in self.controller.robots):
@@ -182,7 +173,6 @@ class Engine(Process):
         self.ui_sender.terminate()
         self.ui_recver.terminate()
         self.referee_recver.terminate()
-        self.logger.info('Terminated')
         super().terminate()
 
     def enable_profiling(self):
