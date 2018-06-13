@@ -35,13 +35,15 @@ class GoKick(Tactic):
                  kick_force: KickForce=KickForce.MEDIUM,
                  auto_update_target=False,
                  go_behind_distance=GRAB_BALL_SPACING*3,
-                 forbidden_areas=None):
+                 forbidden_areas=None,
+                 can_kick_in_goal=True):
 
         super().__init__(game_state, player, target, args=args, forbidden_areas=forbidden_areas)
         self.current_state = self.initialize
         self.next_state = self.initialize
         self.kick_last_time = time.time()
         self.auto_update_target = auto_update_target
+        self.can_kick_in_goal = can_kick_in_goal
         self.target_assignation_last_time = 0
         self.target = target
         if self.auto_update_target:
@@ -146,18 +148,21 @@ class GoKick(Tactic):
 
     def _find_best_passing_option(self):
         assignation_delay = (time.time() - self.target_assignation_last_time)
-        scoring_target = player_covered_from_goal(self.player)
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
-            tentative_target_id = best_passing_option(self.player)
-            if scoring_target is not None:
+            scoring_target = player_covered_from_goal(self.player)
+            tentative_target = best_passing_option(self.player, passer_can_kick_in_goal=self.can_kick_in_goal)
+            if self.can_kick_in_goal and scoring_target is not None:
                 self.kick_force = KickForce.HIGH
                 self.target = Pose(scoring_target, 0)
-            elif tentative_target_id is None:
+            elif tentative_target is None:
+                if not self.can_kick_in_goal:
+                    self.logger.warning("The kicker {} can not find an ally to pass to and can_kick_in_goal is False"
+                                        ". So it kicks directly in the goal, sorry".format(self.player))
                 self.kick_force = KickForce.HIGH
                 self.target = Pose(self.game_state.field.their_goal, 0)
             else:
                 self.kick_force = KickForce.LOW
-                self.target = Pose(GameState().get_player_position(tentative_target_id))
+                self.target = Pose(tentative_target.position)
 
             self.target_assignation_last_time = time.time()
 

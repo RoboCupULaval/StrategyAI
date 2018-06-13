@@ -32,7 +32,8 @@ class IndirectFreeKick(Strategy):
                                                                    forbidden_areas=[self.game_state.field.indirect_avoid_area]))
                 node_go_kick = self.create_node(role, GoKick(self.game_state,
                                                              player,
-                                                             auto_update_target=True))
+                                                             auto_update_target=True,
+                                                             can_kick_in_goal=False))
 
                 player_is_closest = partial(self.is_closest_not_goalkeeper, player)
                 player_is_not_closest = partial(self.is_not_closest, player)

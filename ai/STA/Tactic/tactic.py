@@ -1,6 +1,8 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List, Optional, Any, Iterable
 
+import logging
+
 from Util import Pose, Position
 from Util.ai_command import AICommand
 from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL
@@ -17,6 +19,8 @@ class Tactic:
 
     def __init__(self, game_state: GameState, player: Player, target: Optional[Pose]=None,
                  args: Optional[List[Any]]=None, forbidden_areas: Optional[List[Area]]=None):
+        self.logger = logging.getLogger(self.__class__.__name__)
+
         assert isinstance(player, Player), "Le player doit être un Player, non un '{}'".format(player)
         assert target is None or isinstance(target, Pose), "La target devrait être une Pose"
         self.game_state = game_state
