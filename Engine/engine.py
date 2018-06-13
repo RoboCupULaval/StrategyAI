@@ -124,15 +124,24 @@ class Engine(Process):
 
     def main_loop(self):
 
+
+        self.logger.debug('A')
         engine_cmds = self.get_engine_commands()
 
+
+        self.logger.debug('B')
         game_state = self.tracker.update()
+        self.logger.debug('C')
         self.game_state.update(game_state)
 
+        self.logger.debug('D')
         self.controller.update(self.game_state, engine_cmds)
         robot_state = self.controller.execute()
 
+        self.logger.debug('E')
         self.robot_cmd_sender.send_packet(robot_state)
+
+        self.logger.debug('F')
         self.tracker.predict(robot_state)
 
         if any(robot.path for robot in self.controller.robots):
