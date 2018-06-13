@@ -38,9 +38,9 @@ class RoleMapperTests(TestCase):
     def test_whenMappingWithMoreOptionalRoleThenPlayers_thenOnlyMapTheNumberOfPlayer(self):
         A_SET_AVAILABLE_PLAYER = {1: Player(1, TeamColorService.BLUE),
                                   2: Player(2, TeamColorService.BLUE)}
-        LESS_ROLE_THEN_PLAYER = {Role.GOALKEEPER: None,
-                                 Role.MIDDLE: None,
-                                 Role.SECOND_ATTACK: None}
+        LESS_ROLE_THEN_PLAYER = [Role.GOALKEEPER,
+                                 Role.MIDDLE,
+                                 Role.SECOND_ATTACK]
         mapping = self.role_mapper.map_with_rules(A_SET_AVAILABLE_PLAYER, {}, LESS_ROLE_THEN_PLAYER)
 
         assert len(A_SET_AVAILABLE_PLAYER) == len(mapping)
@@ -48,9 +48,9 @@ class RoleMapperTests(TestCase):
     def test_whenMappingWithMoreRequiredRoleThenPlayers_thenAssert(self):
         A_SET_AVAILABLE_PLAYER = {1: Player(1, TeamColorService.BLUE),
                                   2: Player(2, TeamColorService.BLUE)}
-        LESS_ROLE_THEN_PLAYER = {Role.GOALKEEPER: None,
-                                 Role.MIDDLE: None,
-                                 Role.SECOND_ATTACK: None}
+        LESS_ROLE_THEN_PLAYER = [Role.GOALKEEPER,
+                                 Role.MIDDLE,
+                                 Role.SECOND_ATTACK]
         with self.assertRaises(AssertionError):
             self.role_mapper.map_with_rules(A_SET_AVAILABLE_PLAYER, LESS_ROLE_THEN_PLAYER, {})
 

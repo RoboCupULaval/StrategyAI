@@ -28,7 +28,7 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
     def info(self):
         return {
             "selected_strategy": str(self.play_state.current_strategy),
-            "current_state": str(self.current_state)
+            "current_state": self.current_state.name if self.current_state is not None else str(self.current_state)
         }
 
     @abstractmethod
@@ -67,7 +67,7 @@ class SimpleAutoPlayState(IntEnum):
     DIRECT_FREE_DEFENSE = 18
     INDIRECT_FREE_OFFENSE = 19
     INDIRECT_FREE_DEFENSE = 20
-
+    NOT_ENOUGH_PLAYER = 21
 
 
 class SimpleAutoPlay(AutoPlay):
@@ -90,13 +90,7 @@ class SimpleAutoPlay(AutoPlay):
         self.play_state.game_state.last_ref_state = ref_state
         self.next_state = self._select_next_state(ref_state)
 
-        nb_player = len(GameState().our_team.available_players)
-        if nb_player < self.MINIMUM_NB_PLAYER and ref_state.command != RefereeCommand.HALT:
-            if self.prev_nb_player or nb_player != self.prev_nb_player:
-                self.logger.warning("Not enough player to play. We have {} players and the minimum is {} "
-                                    .format(nb_player, self.MINIMUM_NB_PLAYER))
-            self.play_state.current_strategy = 'Stop'
-        elif self.next_state is None:
+        if self.next_state is None:
             self.next_state = SimpleAutoPlayState.HALT
             self.play_state.current_strategy = SimpleAutoPlay._state_to_strategy_name(self.next_state)
 
@@ -104,7 +98,6 @@ class SimpleAutoPlay(AutoPlay):
             self.play_state.current_strategy = SimpleAutoPlay._state_to_strategy_name(self.next_state)
 
         self.current_state = self.next_state
-        self.prev_nb_player = nb_player
     
     def str(self):
         pass
@@ -118,8 +111,11 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
             SimpleAutoPlayState.INDIRECT_FREE_DEFENSE
         ]
-        if self.current_state in accepted_states and not GameState().ball.is_immobile():
+        if self.current_state in accepted_states and GameState().ball.is_mobile():
             return self.current_state
+        return self._decide_between_normal_play()
+
+    def _decide_between_normal_play(self):
         if is_ball_our_side():
             return SimpleAutoPlayState.NORMAL_DEFENSE
         else:
@@ -137,8 +133,15 @@ class SimpleAutoPlay(AutoPlay):
     def _select_next_state(self, ref_state: RefereeState):
         next_state = self.current_state
 
-        # On command change
-        if self.last_ref_state != ref_state.command:
+        nb_player = len(GameState().our_team.available_players)
+        if nb_player < self.MINIMUM_NB_PLAYER and ref_state.command != RefereeCommand.HALT:
+            if self.prev_nb_player is None or nb_player != self.prev_nb_player:
+                self.logger.warning("Not enough player to play. We have {} players and the minimum is {} "
+                                    .format(nb_player, self.MINIMUM_NB_PLAYER))
+            next_state = SimpleAutoPlayState.NOT_ENOUGH_PLAYER
+        # Number of player change or On command change
+        elif (self.prev_nb_player is not None and self.prev_nb_player < self.MINIMUM_NB_PLAYER <= nb_player)\
+                or self.last_ref_state != ref_state.command:
             self.logger.info("Switching to referee state {}".format(ref_state.command.name))
             next_state = {
                 RefereeCommand.HALT: SimpleAutoPlayState.HALT,
@@ -172,7 +175,9 @@ class SimpleAutoPlay(AutoPlay):
         elif ref_state.command == RefereeCommand.FORCE_START or ref_state.command == RefereeCommand.NORMAL_START:
             next_state = self._analyse_game()
         elif GameState().ball.is_mobile() and ref_state.command in self.FREE_KICK_COMMANDS:
-            return SimpleAutoPlayState.NORMAL_OFFENSE
+            next_state = self._decide_between_normal_play()
+
+        self.prev_nb_player = nb_player
 
         self.last_ref_state = ref_state.command
         return next_state
@@ -212,6 +217,9 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'IndirectFreeKick',
 
             # Place the ball to the designated position
-            SimpleAutoPlayState.BALL_PLACEMENT_US: 'BallPlacement'
+            SimpleAutoPlayState.BALL_PLACEMENT_US: 'BallPlacement',
+
+            # When not enough player:
+            SimpleAutoPlayState.NOT_ENOUGH_PLAYER: 'DoNothing'
 
         }.get(state, SimpleAutoPlayState.HALT)

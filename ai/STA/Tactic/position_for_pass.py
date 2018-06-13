@@ -10,7 +10,7 @@ from Util.geometry import Area, Line, clamp, normalize
 from Util.role import Role
 from ai.Algorithm.evaluation_module import best_position_in_region
 from ai.GameDomainObjects import Player
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
 
@@ -25,8 +25,9 @@ class PositionForPass(Tactic):
     This tactic automagically positions players at strategic emplacements
     """
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: Optional[List[str]]=None,
-                 auto_position=False, robots_in_formation: Optional[List[Player]] = None):
-        super().__init__(game_state, player, target, args)
+                 auto_position=False, robots_in_formation: Optional[List[Player]] = None,
+                 forbidden_areas=None):
+        super().__init__(game_state, player, target, args=args, forbidden_areas=forbidden_areas)
         self.current_state = self.move_to_pass_position
         self.next_state = self.move_to_pass_position
         self.target = target
@@ -57,7 +58,7 @@ class PositionForPass(Tactic):
 
     def _find_best_player_position(self):
         if not self.auto_position:
-            return self.target_position
+            return self.target.position
 
         if self.is_offense:
             ball_offset = clamp(self.game_state.ball.position.x, 0, 1000)
@@ -77,7 +78,7 @@ class PositionForPass(Tactic):
         individual_area_size = area_height / len_formation
         top = idx * individual_area_size - area_height / 2
         bot = top + individual_area_size
-        self.area = Area.from_limit(top, bot, left, right)
+        self.area = Area.from_limits(top, bot, right, left)
 
         center = self.area.center
         # Act as if each enemy robot was creating a repulsive force

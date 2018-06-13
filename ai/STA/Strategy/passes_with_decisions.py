@@ -3,7 +3,7 @@
 from functools import partial
 
 from Util.pose import Position, Pose
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
@@ -49,11 +49,10 @@ class PassesWithDecisions(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
-                                                                Role.FIRST_ATTACK,
-                                                                Role.SECOND_ATTACK,
-                                                                Role.MIDDLE]
-                }
+        return [Role.GOALKEEPER,
+                Role.FIRST_ATTACK,
+                Role.SECOND_ATTACK,
+                Role.MIDDLE]
 
     def current_tactic_succeed(self, role):
         if self.roles_graph[role].current_tactic_name == 'PassToPlayer':

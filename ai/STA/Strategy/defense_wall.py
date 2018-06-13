@@ -1,16 +1,17 @@
 # Under MIT license, see LICENSE.txt
 from functools import partial
+from itertools import zip_longest, cycle
 
 from Util.role import Role
 from Util.position import Position
 from Util.pose import Pose
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall, FETCH_BALL_ZONE_RADIUS
 from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.stop import Stop
@@ -19,6 +20,7 @@ from ai.states.game_state import GameState
 
 DEFENSIVE_ROLE = [Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
 COVER_ROLE = [Role.MIDDLE]
+
 
 # noinspection PyMethodMayBeStatic,
 class DefenseWall(Strategy):
@@ -37,9 +39,10 @@ class DefenseWall(Strategy):
         self.robots_in_wall_formation = []
         self.robots_in_cover_formation = []
         self.attackers = []
-        self.player_to_cover = []
+        self.cover_to_coveree = {}
+        self.cover_to_formation = {}
 
-        self.dispatch_player()
+        self._dispatch_player()
 
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
@@ -59,10 +62,12 @@ class DefenseWall(Strategy):
                 node_go_kick.connect_to(node_position_pass, when=attacker_should_not_go_kick)
                 node_go_kick.connect_to(node_go_kick, when=attacker_has_kicked)
             elif role in self.cover_role:
-                enemy_to_block = self.player_to_cover[player]
+                enemy_to_block = self.cover_to_coveree[player]
+                formation = self.cover_to_formation[player]
                 node_align_to_covered_object = self.create_node(role,
                                                                 AlignToDefenseWall(self.game_state,
                                                                                    player,
+                                                                                   robots_in_formation=formation,
                                                                                    object_to_block=enemy_to_block,
                                                                                    stay_away_from_ball=stay_away_from_ball))
                 node_position_pass = self.create_node(role, PositionForPass(self.game_state,
@@ -90,17 +95,15 @@ class DefenseWall(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
-                                                                Role.FIRST_ATTACK,
-                                                                Role.FIRST_DEFENCE]
-                }
+        return [Role.GOALKEEPER,
+                Role.FIRST_ATTACK,
+                Role.FIRST_DEFENCE]
 
     @classmethod
     def optional_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.SECOND_ATTACK,
-                                                                Role.MIDDLE,
-                                                                Role.SECOND_DEFENCE]
-                }
+        return [Role.SECOND_ATTACK,
+                Role.MIDDLE,
+                Role.SECOND_DEFENCE]
 
     def should_go_kick(self, player):
         if self.game_state.field.is_ball_in_our_goal_area():
@@ -125,15 +128,7 @@ class DefenseWall(Strategy):
         else:
             return False
 
-    def get_player_to_cover(self):
-        closest_enemy_to_ball = closest_players_to_point(self.game_state.ball_position, our_team=False)[0].player
-
-        closest_enemies_to_our_goal = closest_players_to_point(self.game_state.field.our_goal, our_team=False)
-        enemy_not_with_ball = [enemy.player for enemy in closest_enemies_to_our_goal if enemy.player is not closest_enemy_to_ball]
-
-        return dict(zip(self.robots_in_cover_formation, enemy_not_with_ball))
-
-    def dispatch_player(self):
+    def _dispatch_player(self):
 
         if not self.can_kick:
             self.defensive_role += [Role.FIRST_ATTACK]
@@ -150,4 +145,29 @@ class DefenseWall(Strategy):
             self.cover_role = []
             self.robots_in_cover_formation = []
         else:
-            self.player_to_cover = self.get_player_to_cover()
+            self.cover_to_coveree, self.cover_to_formation = self._generate_cover_to_coveree_mapping()
+
+    def _generate_cover_to_coveree_mapping(self):
+        # We want to assign a coveree(enemy) to every cover(ally)
+        # We also want to know for each cover(ally), the other covers that share the same target(enemy)
+        closest_enemy_to_ball = closest_players_to_point(self.game_state.ball_position, our_team=False)[0].player
+
+        closest_enemies_to_our_goal = closest_players_to_point(self.game_state.field.our_goal, our_team=False)
+        enemy_not_with_ball = [enemy.player for enemy in closest_enemies_to_our_goal if enemy.player is not closest_enemy_to_ball]
+
+        # If we don't have enough player we cover the ball
+        if len(enemy_not_with_ball) == 0:
+            cover_to_coveree = dict(zip(self.robots_in_cover_formation, cycle([self.game_state.ball])))
+            cover_to_formation = {cover: self.robots_in_cover_formation for cover in self.robots_in_cover_formation}
+            # If we don't have enough enemy to cover, we group the player in formation
+        elif len(self.robots_in_cover_formation) > len(enemy_not_with_ball):
+            cover_to_coveree = dict(zip(self.robots_in_cover_formation, cycle(enemy_not_with_ball)))
+            cover_to_formation = {}
+            for cover, coveree in cover_to_coveree.items():
+                formation = [teamate for teamate, teamate_coveree in cover_to_coveree.items() if teamate_coveree == coveree]
+                cover_to_formation[cover] = formation
+        else:
+            cover_to_coveree = dict(zip(self.robots_in_cover_formation, enemy_not_with_ball))
+            cover_to_formation = {cover: [cover] for cover in self.robots_in_cover_formation}
+
+        return cover_to_coveree, cover_to_formation

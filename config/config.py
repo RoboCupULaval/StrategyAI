@@ -1,6 +1,9 @@
 
 from configparser import ConfigParser, ParsingError
 import logging
+from sys import stdout
+
+import datetime
 
 from Util import Singleton
 
@@ -160,6 +163,20 @@ class Config(metaclass=Singleton):
         self._config['GAME']['on_negative_side'] = cli_args.side == 'negative'
         self._config['GAME']['competition_mode'] = cli_args.competition_mode
         self._config['GAME']['is_autonomous_play_at_startup'] = cli_args.start_in_auto
+
+        if cli_args.competition_mode:
+            self._config['GAME']['is_autonomous_play_at_startup'] = True
+
+            file_formatter = logging.Formatter('(%(asctime)s) - [%(levelname)-5.5s]  %(name)-22.22s: %(message)s')
+            file_handler = logging.FileHandler('./Logs/log_' + str(datetime.date.today()) + '_at_'
+                                                                  + str(datetime.datetime.now().hour) + 'h.log', 'a')
+            file_handler.setFormatter(file_formatter)
+
+            console_formatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
+            console_handler = logging.StreamHandler(stream=stdout)
+            console_handler.setFormatter(console_formatter)
+
+            logging.basicConfig(level=logging.NOTSET, handlers=[file_handler, console_handler])
 
         self._config_was_set = False
         self.update_ports()

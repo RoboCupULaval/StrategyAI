@@ -13,9 +13,9 @@ from typing import List
 
 from Util import Pose, Position
 from Util.ai_command import MoveTo, Idle
-from Util.constant import ROBOT_RADIUS
+from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL
 from Util.geometry import intersection_line_and_circle, intersection_between_lines, \
-    closest_point_on_segment, find_bisector_of_triangle
+    closest_point_on_segment, find_bisector_of_triangle, Area
 from ai.GameDomainObjects import Player
 
 from ai.STA.Tactic.go_kick import GRAB_BALL_SPACING, GoKick
@@ -32,7 +32,8 @@ class GoalKeeper(Tactic):
 
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(),
                  penalty_kick=False, args: List[str]=None,):
-        super().__init__(game_state, player, target, args)
+        forbidden_area = [Area.pad(game_state.field.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)]
+        super().__init__(game_state, player, target, args, forbidden_areas=forbidden_area)
 
         self.current_state = self.defense
         self.next_state = self.defense
@@ -116,7 +117,8 @@ class GoalKeeper(Tactic):
             self.go_kick_tactic = GoKick(self.game_state,
                                          self.player,
                                          auto_update_target=True,
-                                         go_behind_distance=1.2*GRAB_BALL_SPACING) # make it easier
+                                         go_behind_distance=1.2*GRAB_BALL_SPACING,
+                                         forbidden_areas=self.forbidden_areas) # make it easier
         if not self.game_state.field.is_ball_in_our_goal_area():
             self.next_state = self.defense
             self.go_kick_tactic = None

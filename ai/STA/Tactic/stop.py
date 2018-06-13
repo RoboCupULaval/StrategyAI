@@ -8,5 +8,5 @@ from ai.states.game_state import GameState
 
 class Stop(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args=None):
-        super().__init__(game_state, player, target, args)
+        super().__init__(game_state, player, target, args, forbidden_areas=[])
         self.status_flag = Flags.SUCCESS

@@ -4,8 +4,8 @@ from Util import Pose, Position, Path
 from Util.geometry import wrap_to_pi
 
 
-MAX_LINEAR_SPEED = 4000  # mm/s
-MAX_LINEAR_ACCELERATION = 4000  # mm/s^2
+MAX_LINEAR_SPEED = 2000  # mm/s
+MAX_LINEAR_ACCELERATION = 1000  # mm/s^2
 MAX_ANGULAR_SPEED = 100  # rad/s
 MAX_ANGULAR_ACC = 3  # rad/s^2
 MIN_LINEAR_SPEED = 200  # mm/s Speed near zero, but still move the robot

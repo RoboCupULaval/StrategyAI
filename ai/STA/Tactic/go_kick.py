@@ -34,9 +34,10 @@ class GoKick(Tactic):
                  args: List[str]=None,
                  kick_force: KickForce=KickForce.MEDIUM,
                  auto_update_target=False,
-                 go_behind_distance=GRAB_BALL_SPACING*3):
+                 go_behind_distance=GRAB_BALL_SPACING*3,
+                 forbidden_areas=None):
 
-        super().__init__(game_state, player, target, args)
+        super().__init__(game_state, player, target, args=args, forbidden_areas=forbidden_areas)
         self.current_state = self.initialize
         self.next_state = self.initialize
         self.kick_last_time = time.time()
@@ -49,6 +50,8 @@ class GoKick(Tactic):
         self.go_behind_distance = go_behind_distance
 
     def initialize(self):
+        if self.auto_update_target:
+            self._find_best_passing_option()
         orientation = (self.target.position - self.game_state.ball_position).angle
 
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
@@ -65,6 +68,8 @@ class GoKick(Tactic):
         return Idle
 
     def go_behind_ball(self):
+        if self.auto_update_target:
+            self._find_best_passing_option()
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.game_state.ball_position).angle
         ball_speed = self.game_state.ball.velocity.norm
@@ -78,8 +83,6 @@ class GoKick(Tactic):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
-            if self.auto_update_target:
-                self._find_best_passing_option()
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=2,
                                       end_speed=0,
@@ -87,8 +90,8 @@ class GoKick(Tactic):
                            .addChargeKicker().build()
 
     def grab_ball(self):
-
-        vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
+        if self.auto_update_target:
+            self._find_best_passing_option()
         if not self.is_able_to_grab_ball_directly(0.7):
             self.next_state = self.go_behind_ball
 
@@ -103,6 +106,8 @@ class GoKick(Tactic):
                                       ball_collision=False).addChargeKicker().build()
 
     def kick(self):
+        if self.auto_update_target:
+            self._find_best_passing_option()
         self.next_state = self.validate_kick
 
         player_to_target = (self.target.position - self.player.pose.position)
@@ -145,10 +150,13 @@ class GoKick(Tactic):
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
             tentative_target_id = best_passing_option(self.player)
             if scoring_target is not None:
+                self.kick_force = KickForce.HIGH
                 self.target = Pose(scoring_target, 0)
             elif tentative_target_id is None:
+                self.kick_force = KickForce.HIGH
                 self.target = Pose(self.game_state.field.their_goal, 0)
             else:
+                self.kick_force = KickForce.LOW
                 self.target = Pose(GameState().get_player_position(tentative_target_id))
 
             self.target_assignation_last_time = time.time()
