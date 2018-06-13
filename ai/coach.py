@@ -5,6 +5,7 @@ import cProfile
 
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
+from queue import Full
 from time import time, sleep
 
 from Util.timing import create_fps_timer
@@ -112,7 +113,10 @@ class Coach(Process):
         self.game_state.update(self.engine_game_state)
         self.debug_executor.exec()
         engine_commands = self.play_executor.exec()
-        self.ai_queue.put(engine_commands)
+        try:
+            self.ai_queue.put_nowait(engine_commands)
+        except Full:
+            self.logger.critical('The Engine queue is full.')
 
     def enable_profiling(self):
         self.profiling_enabled = True
