@@ -2,7 +2,7 @@
 
 from Util.pose import Pose
 from Util.role import Role
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 from ai.STA.Strategy.team_go_to_position import TeamGoToPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.states.game_state import GameState
@@ -44,14 +44,12 @@ class PrepareKickOffDefense(TeamGoToPosition):
 
     @classmethod
     def required_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.GOALKEEPER,
-                                                                Role.MIDDLE]
-                }
+        return [Role.GOALKEEPER,
+                Role.MIDDLE]
 
     @classmethod
     def optional_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.FIRST_ATTACK,
-                                                                Role.SECOND_ATTACK,
-                                                                Role.FIRST_DEFENCE,
-                                                                Role.SECOND_DEFENCE]
-                }
+        return [Role.FIRST_ATTACK,
+                Role.SECOND_ATTACK,
+                Role.FIRST_DEFENCE,
+                Role.SECOND_DEFENCE]

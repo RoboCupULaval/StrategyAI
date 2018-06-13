@@ -1,5 +1,4 @@
 import os
-import traceback
 from abc import ABCMeta, abstractmethod
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
@@ -45,13 +44,10 @@ class ReceiverProcess(Process, ReceiverBaseClass, metaclass=ABCMeta):
         except KeyboardInterrupt:
             pass
         except:
-            # If we have an exception that cause a crash we want to print it
-            traceback.print_exc()
-        finally:
-            self.connection.close()
-            self.logger.debug('Killed')
-            exit(0)
+            self.logger.exception('message')
+            raise
 
     def terminate(self):
         self.connection.close()
+        self.logger.debug('Terminated')
         super().terminate()

@@ -27,15 +27,15 @@ class Controller:
     def __init__(self, ui_send_queue: Queue):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.ui_send_queue = ui_send_queue
-
+        self.dt = 0
         self.timestamp = -1
         self.robots = [Robot(robot_id) for robot_id in range(config['ENGINE']['max_robot_id'])]
         for robot in self.robots:
             robot.velocity_regulator = VelocityRegulator()
             robot.position_regulator = PositionRegulator()
 
-    def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand]):
-
+    def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand], dt):
+        self.dt = dt
         self.timestamp = track_frame['timestamp']
 
         for robot in self.robots:
@@ -62,10 +62,10 @@ class Controller:
 
             if robot.distance_to_path_end < ROBOT_RADIUS and robot.end_speed == 0:
                 robot.velocity_regulator.reset()
-                commands[robot.id] = robot.position_regulator.execute(robot)
+                commands[robot.id] = robot.position_regulator.execute(robot, self.dt)
             else:
                 robot.position_regulator.reset()
-                commands[robot.id] = robot.velocity_regulator.execute(robot)
+                commands[robot.id] = robot.velocity_regulator.execute(robot, self.dt)
 
         self.send_debug(commands)
 
@@ -98,10 +98,10 @@ class Controller:
         return cmd
 
     def send_debug(self, commands: Dict[int, Pose]):
-        if not commands:
-            return
+        #if not commands:
+        #    return
 
-        robot_id = 0
+        robot_id = 3
 
         if robot_id not in commands:
             return
@@ -109,6 +109,11 @@ class Controller:
                                                                      'robot {} cmd speed'.format(robot_id),
                                                                      [time.time()],
                                                                      [commands[robot_id].norm]))
+
+        self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point('rad/s',
+                                                                     'robot {} cmd rotation speed'.format(robot_id),
+                                                                     [time.time()],
+                                                                     [commands[robot_id].orientation]))
 
         self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point('mm/s',
                                                                      'robot {} Kalman speed'.format(robot_id),

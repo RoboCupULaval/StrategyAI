@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from Util.role import Role
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
@@ -23,7 +23,6 @@ class BambaFollow(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.FIRST_ATTACK,
-                                                                Role.SECOND_ATTACK,
-                                                                Role.MIDDLE]
-                }
+        return [Role.FIRST_ATTACK,
+                Role.SECOND_ATTACK,
+                Role.MIDDLE]

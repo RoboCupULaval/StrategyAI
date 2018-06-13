@@ -16,9 +16,9 @@ class RealPositionRegulator(RegulatorBaseClass):
     def __init__(self):
         self.controllers = {'x': PID(**self.settings['translation']),
                             'y': PID(**self.settings['translation']),
-                            'orientation': PID(**self.settings['rotation'], signed_error=True, deadzone=0.10)}
+                            'orientation': PID(**self.settings['rotation'], signed_error=True, deadzone=0.05)}
 
-    def execute(self, robot: Robot):
+    def execute(self, robot: Robot, dt):
 
         pos_error = robot.position_error
         orientation_error = robot.orientation_error

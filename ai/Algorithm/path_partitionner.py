@@ -7,7 +7,7 @@ import numpy as np
 
 from Util import Position
 from Util.path import Path
-
+from ai.GameDomainObjects import Player
 
 MIN_PATH_LENGTH = 250  # mm
 RECURSION_LIMIT = 3
@@ -31,6 +31,7 @@ class PathPartitionner:
     def __init__(self):
         self.obstacles = []
         self.old_path = None
+        self.player = None
 
     @property
     def obstacles_position(self):
@@ -48,8 +49,9 @@ class PathPartitionner:
         is_not_self = start_to_obs > 0  # remove self if present
         self.obstacles = obstacles[is_inside_ellipse & is_not_self].tolist()
 
-    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], last_path: Optional[Path]=None):
+    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], player:Player, last_path: Optional[Path]=None):
 
+        self.player = player
         self.obstacles = obstacles
         self.old_path = last_path
         self.filter_obstacles(start.array, target.array)
@@ -109,8 +111,6 @@ class PathPartitionner:
             len_along_path = np.inner(closest_collision.position - start, segment_direction)
             if len_along_path > 0:
                 avoid_dir = perpendicular(segment_direction)
-                # if np.dot(avoid_dir, segment_direction) < np.dot(-avoid_dir, segment_direction):
-                #     avoid_dir *= -1
                 sub_target_1 = start + segment_direction * len_along_path + avoid_dir * resolution_sub_target
                 while not self.is_valid_sub_target(sub_target_1, self.obstacles_position):
                     sub_target_1 += avoid_dir * resolution_sub_target
@@ -119,9 +119,10 @@ class PathPartitionner:
                     sub_target_2 -= avoid_dir * resolution_sub_target
                 #on maximise l'angle entre les segments pour avoir un path plus rectiligne
                 val_1 = np.dot((sub_target_1-start)/np.linalg.norm(sub_target_1-start),
-                               (target - sub_target_1)/np.linalg.norm(target - sub_target_1))
+                               self.player.velocity.position.array)
                 val_2 = np.dot((sub_target_2 - start) / np.linalg.norm(sub_target_2 - start),
-                               (target - sub_target_2) / np.linalg.norm(target - sub_target_2))
+                               self.player.velocity.position.array)
+
                 if val_1 > val_2: #le segment 1 est plus aligne avec le path precedant que le segment2
                     sub_target = sub_target_1.copy()
                     sub_target_potential = sub_target_1.copy()

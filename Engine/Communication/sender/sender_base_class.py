@@ -40,11 +40,12 @@ class SenderProcess(Process, SenderBaseClass, metaclass=ABCMeta):
                 self.send_packet()
         except KeyboardInterrupt:
             pass
-        finally:
-            self.logger.debug('Killed')
-            self._queue.close()
-            exit(0)
+        except:
+            self.logger.exception('message')
+            raise
 
     def terminate(self):
+        self.logger.debug('Terminated')
+        self._queue.close()
         self.connection.close()
         super().terminate()

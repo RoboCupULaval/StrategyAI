@@ -58,9 +58,10 @@ class Framework:
             while self.engine.is_alive() and self.coach.is_alive():
                 sleep()
         except SystemExit:
-            self.logger.debug('One of the framework\'s subprocesses stopped. Shutting down...')
-        finally:
-            self.stop_game()
+            self.logger.debug('Terminated')
+        except:
+            self.logger.info('JESUSSSS')
+            self.logger.exception('message')
 
     def stop_game(self):
         self.engine.terminate()

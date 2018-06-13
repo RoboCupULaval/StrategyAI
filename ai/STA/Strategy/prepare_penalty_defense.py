@@ -1,13 +1,10 @@
 # Under MIT license, see LICENSE.txt
 import numpy as np
 
-from Util.pose import Pose, Position
+from Util.pose import Pose
 from Util.role import Role
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
 
-from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.team_go_to_position import TeamGoToPosition
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.states.game_state import GameState
 
@@ -30,13 +27,12 @@ class PreparePenaltyDefense(TeamGoToPosition):
 
     @classmethod
     def required_roles(cls):
-        return {Role.GOALKEEPER: keep_prev_mapping_otherwise_random}
+        return [Role.GOALKEEPER]
 
     @classmethod
     def optional_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in [Role.FIRST_ATTACK,
-                                                                Role.SECOND_ATTACK,
-                                                                Role.MIDDLE,
-                                                                Role.FIRST_DEFENCE,
-                                                                Role.SECOND_DEFENCE]
-                }
+        return [Role.FIRST_ATTACK,
+                Role.SECOND_ATTACK,
+                Role.MIDDLE,
+                Role.FIRST_DEFENCE,
+                Role.SECOND_DEFENCE]

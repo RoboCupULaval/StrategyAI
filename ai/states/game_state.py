@@ -56,9 +56,11 @@ class GameState(metaclass=Singleton):
         return {r: p for r, p in self._role_mapper.roles_translation.items() if p is not None}
 
     def map_players_for_strategy(self, strategy_class):
+        goalie_id = self.last_ref_state.team_info['ours']['goalie'] if self.last_ref_state is not None else None
         self._role_mapper.map_with_rules(self.our_team.available_players,
                                          strategy_class.required_roles(),
-                                         strategy_class.optional_roles())
+                                         strategy_class.optional_roles(),
+                                         goalie_id)
 
     def get_player_by_role(self, role):
         return self._role_mapper.roles_translation[role]
@@ -80,11 +82,11 @@ class GameState(metaclass=Singleton):
 
     def map_players_to_roles_by_player_id(self, mapping_by_player_id):
         try:
-            mapping_by_player = {role: self.our_team.available_players[player_id]
+            mapping_by_player = {role: self.our_team.players[player_id]
                                  for role, player_id in mapping_by_player_id.items()}
             self._role_mapper.map_by_player(mapping_by_player)
         except IndexError as e:
-            self.logger.debug("Try to map to a unavailable player ({})".format(e))
+            self.logger.debug('Try to map to a unavailable player ({})'.format(e))
 
     def map_players_to_roles_by_player(self, mapping):
         self._role_mapper.map_by_player(mapping)
