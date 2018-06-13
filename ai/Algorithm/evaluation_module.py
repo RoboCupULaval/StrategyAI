@@ -217,7 +217,7 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
 # noinspection PyPep8Naming
 def trajectory_score(pointA, pointsB, obstacle):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
-    l = 15  # Proportion du triangle rectancle derrière les robots obstacles
+    proportion_max = 15  # Proportion du triangle rectancle derrière les robots obstacles
 
     # FIXME: HACK SALE, je ne comprends pas le fonctionnement de cette partie du code, analyser plus tard!
     if isinstance(pointA, Position):
