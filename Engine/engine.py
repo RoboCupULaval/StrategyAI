@@ -6,7 +6,7 @@ import os
 from multiprocessing import Process, Manager
 from queue import Empty
 
-import time
+from time import time
 
 from Debug.debug_command_factory import DebugCommandFactory
 
@@ -98,13 +98,13 @@ class Engine(Process):
 
         try:
             self.wait_for_vision()
-            self.last_time = time.time()
+            self.last_time = time()
             while True:
                 self.frame_count += 1
                 self.update_time()
                 self.main_loop()
                 if self.is_fps_locked: self.fps_sleep()
-                self.framework.engine_watchdog.value = time.time()
+                self.framework.engine_watchdog.value = time()
         except KeyboardInterrupt:
             pass
         except BrokenPipeError:
@@ -121,7 +121,7 @@ class Engine(Process):
             sleep_vision()
 
     def update_time(self):
-        current_time = time.time()
+        current_time = time()
         self.dt = current_time - self.last_time
         self.last_time = current_time
 
@@ -159,7 +159,7 @@ class Engine(Process):
 
     def is_alive(self):
 
-        if time.time() - self.framework.engine_watchdog.value > self.framework.MAX_HANGING_TIME:
+        if time() - self.framework.engine_watchdog.value > self.framework.MAX_HANGING_TIME:
             self.logger.critical('Process is hanging. Shutting down.')
             return False
 
