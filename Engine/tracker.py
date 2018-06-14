@@ -1,6 +1,7 @@
 
 import logging
 from multiprocessing.managers import DictProxy
+from time import time
 
 from typing import Dict, List, Union, Any, Iterable
 import numpy as np
@@ -33,7 +34,6 @@ class Tracker:
         self._balls = [BallFilter(ball_id) for ball_id in range(config['ENGINE']['max_ball_on_field'])]
 
         self._camera_frame_number = [-1 for _ in range(config['ENGINE']['number_of_camera'])]
-        self.timestamp = -1
 
     def update(self) -> Dict[str, List[Dict[str, Any]]]:
 
@@ -41,7 +41,6 @@ class Tracker:
             self._log_new_robots_on_field(frame)
             self._camera_frame_number[frame['camera_id']] = frame['frame_number']
             self._update(frame)
-            self.timestamp = max(self.timestamp, frame['timestamp'])
 
         self._remove_undetected()
 
@@ -87,16 +86,21 @@ class Tracker:
     def _remove_undetected(self):
 
         for team_color, robots in self.active_robots.items():
+            undetected_robots = set()
             for robot in robots:
-                if self.timestamp - robot.last_update_time > config['ENGINE']['max_undetected_robot_time']:
+                if time() - robot.last_update_time > config['ENGINE']['max_undetected_robot_time']:
+                    undetected_robots.add(robot.id)
                     robot.reset()
-                    self.logger.debug('Robot %d of %s team was undetected for more than %.2f seconds.',
-                                      robot.id,
-                                      team_color,
-                                      config['ENGINE']['max_undetected_robot_time'])
+
+            if undetected_robots:
+                self.logger.debug('%s robot(s) undetected for more than %.2f seconds: %r',
+                                  team_color.capitalize(),
+                                  config['ENGINE']['max_undetected_robot_time'],
+                                  undetected_robots)
+
 
         for ball in self.active_balls:
-            if self.timestamp - ball.last_update_time > config['ENGINE']['max_undetected_ball_time']:
+            if time() - ball.last_update_time > config['ENGINE']['max_undetected_ball_time']:
                 ball.reset()
                 self.logger.debug('Ball %d was undetected for more than %.2f seconds.',
                                   ball.id,
@@ -118,12 +122,12 @@ class Tracker:
         for robot_obs in detection_frame.get('robots_blue', ()):
             if not self._blue_team[robot_obs['robot_id']].is_active: new_robots['blue'].add(robot_obs['robot_id'])
         if new_robots['blue']:
-            self.logger.debug('New blue robot(s) detected: %r', new_robots['blue'])
+            self.logger.debug('Blue robot(s) detected: %r', new_robots['blue'])
 
         for robot_obs in detection_frame.get('robots_yellow', ()):
             if not self._yellow_team[robot_obs['robot_id']].is_active: new_robots['yellow'].add(robot_obs['robot_id'])
         if new_robots['yellow']:
-            self.logger.debug('New yellow robot(s) detected: %r', new_robots['yellow'])
+            self.logger.debug('Yellow robot(s) detected: %r', new_robots['yellow'])
 
     @property
     def camera_frames(self) -> List[Dict[str, Any]]:
@@ -186,7 +190,7 @@ class Tracker:
     @property
     def game_state(self) -> Dict[str, Union[float, List[Dict[str, Any]]]]:
         game_fields = dict()
-        game_fields['timestamp'] = self.timestamp
+        game_fields['timestamp'] = time()
         game_fields['blue'] = self.blue_team
         game_fields['yellow'] = self.yellow_team
         game_fields['balls'] = self.balls

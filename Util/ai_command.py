@@ -4,8 +4,6 @@ from collections import namedtuple
 
 from typing import Union
 
-import numpy as np
-
 from Util.constant import KickForce, KickType, DribbleState
 from Util.position import Position
 from Util.pose import Pose
@@ -19,7 +17,8 @@ AICommand = namedtuple('AICommand', 'target,'
                                     'cruise_speed,'
                                     'end_speed,'
                                     'ball_collision,'
-                                    'way_points')
+                                    'way_points,'
+                                    'enable_pathfinder')
 
 class CmdBuilder:
 
@@ -35,23 +34,23 @@ class CmdBuilder:
         self._end_speed = 0
         self._ball_collision = True
         self._way_points = []
+        self._enable_pathfinder = True
 
     def addMoveTo(self,
                   target: Union[Pose, Position],
                   cruise_speed: float=1,
                   end_speed: float=0,
                   ball_collision=True,
-                  way_points=None):
+                  way_points=None,
+                  enable_pathfinder=True):
         assert isinstance(target, (Pose, Position))
-        if isinstance(target, Pose) and isinstance(target.position, np.ndarray):
-            raise ValueError("The pose field must not have ndarray has position")
 
         self._target = Pose(target) if isinstance(target, Position) else target
         self._cruise_speed = cruise_speed
         self._end_speed = end_speed
         self._ball_collision = ball_collision
-        if way_points is not None:
-            self._way_points = way_points
+        self._enable_pathfinder = enable_pathfinder
+        if way_points is not None: self._way_points = way_points
         return self
 
     def addKick(self, kick_force: KickForce=KickForce.LOW):
@@ -73,15 +72,16 @@ class CmdBuilder:
         return self
 
     def build(self) -> AICommand:
-        return AICommand(self._target,
-                         self._kick_type,
-                         self._kick_force,
-                         self._charge_kick,
-                         self._dribbler_state,
-                         self._cruise_speed,
-                         self._end_speed,
-                         self._ball_collision,
-                         self._way_points)
+        return AICommand(target=self._target,
+                         kick_type=self._kick_type,
+                         kick_force=self._kick_force,
+                         charge_kick=self._charge_kick,
+                         dribbler_state=self._dribbler_state,
+                         cruise_speed=self._cruise_speed,
+                         end_speed=self._end_speed,
+                         ball_collision=self._ball_collision,
+                         way_points=self._way_points,
+                         enable_pathfinder=self._enable_pathfinder)
 
 
 def Kick(kick_force: KickForce=KickForce.LOW):
@@ -91,9 +91,11 @@ def Kick(kick_force: KickForce=KickForce.LOW):
 def MoveTo(target: Union[Pose, Position],
            cruise_speed: float=1,
            end_speed: float=0,
-           ball_collision:
-           bool=True) -> AICommand:
-    return CmdBuilder().addMoveTo(target, cruise_speed, end_speed, ball_collision).build()
+           ball_collision: bool=True,
+           enable_pathfinder: bool=True) -> AICommand:
+    return CmdBuilder().addMoveTo(target, cruise_speed, end_speed,
+                                  ball_collision=ball_collision,
+                                  enable_pathfinder=enable_pathfinder).build()
 
 
 def GoBetween(position1: Position, position2: Position, target: Position, minimum_distance: float=0):
