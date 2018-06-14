@@ -3,7 +3,6 @@ from typing import Optional
 from Util import Pose, Position, Path
 from Util.geometry import wrap_to_pi
 
-
 MAX_LINEAR_SPEED = 4000  # mm/s
 MAX_LINEAR_ACCELERATION = 4000  # mm/s^2
 MAX_ANGULAR_SPEED = 100  # rad/s
@@ -13,8 +12,7 @@ MIN_LINEAR_SPEED = 200  # mm/s Speed near zero, but still move the robot
 
 class Robot:
 
-    __slots__ = ('_id', 'is_on_field', 'velocity_regulator', 'position_regulator', 'pose', 'velocity',
-                 'path', 'engine_cmd', 'target_speed', 'last_commanded_velocity')
+    __slots__ = ('_id', 'is_on_field', 'velocity_regulator', 'position_regulator', 'pose', 'velocity', 'path', 'engine_cmd', 'target_speed')
 
     def __init__(self, _id: int):
         self._id = _id
@@ -26,7 +24,6 @@ class Robot:
         self.engine_cmd = None
         self.target_speed = None
         self.is_on_field = False
-        self.last_commanded_velocity = None
 
     @property
     def id(self) -> int:

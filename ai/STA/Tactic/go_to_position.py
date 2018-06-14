@@ -14,7 +14,7 @@ from ai.states.game_state import GameState
 
 class GoToPosition(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
-                 args: List[str]=None, cruise_speed=2):
+                 args: List[str]=None, cruise_speed=1):
         super().__init__(game_state, player, target, args)
         self.target = target
         self.status_flag = Flags.INIT
@@ -25,7 +25,7 @@ class GoToPosition(Tactic):
             self.status_flag = Flags.SUCCESS
         else:
             self.status_flag = Flags.WIP
-        return CmdBuilder().addMoveTo(self.target, cruise_speed=3).build()
+        return CmdBuilder().addMoveTo(self.target, cruise_speed=self.cruise_speed).build()
 
     def check_success(self):
         distance = (self.player.pose - self.target.position).norm
