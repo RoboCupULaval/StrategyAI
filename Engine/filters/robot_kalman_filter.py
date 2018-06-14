@@ -21,8 +21,7 @@ class RobotFilter(KalmanFilter):
         if self.is_active:
             return self.x[4]
 
-    def transition_model(self):
-        dt = self._dt
+    def transition_model(self, dt):
         return np.array([[1, dt, 0, 0,  0, 0],   # Position x
                          [0, 1,  0, 0,  0, 0],   # Speed x
                          [0, 0,  1, dt, 0, 0],   # Position y
@@ -35,20 +34,18 @@ class RobotFilter(KalmanFilter):
                          [0, 0, 1, 0, 0, 0],   # Position y
                          [0, 0, 0, 0, 1, 0]])  # Orientation
 
-    def control_input_model(self):
-        return np.array([[0, 0, 0],  # Position x
-                         [1, 0, 0],  # Speed x
-                         [0, 0, 0],  # Position y
-                         [0, 1, 0],  # Speed y
-                         [0, 0, 0],  # Position Theta
-                         [0, 0, 1]])  # Speed Theta
+    def control_input_model(self, dt):
+        return np.array([[0,  0,  0],  # Position x
+                         [dt, 0,  0],  # Speed x
+                         [0,  0,  0],  # Position y
+                         [0,  dt, 0],  # Speed y
+                         [0,  0,  0],  # Position Theta
+                         [0,  0, dt]])  # Speed Theta
 
-    def process_covariance(self):
-        dt = self._dt
-
-        sigma_acc_x = 400
-        sigma_acc_y = 400
-        sigma_acc_o = 20000 * np.pi/180
+    def process_covariance(self, dt):
+        sigma_acc_x = 50
+        sigma_acc_y = 50
+        sigma_acc_o = 10 * np.pi/180
 
         process_covariance = \
             np.array([
@@ -65,7 +62,7 @@ class RobotFilter(KalmanFilter):
         return np.diag([100, 100, 0.1 * np.pi/180])
 
     def initial_state_covariance(self):
-        return np.diag([10000, 10, 10000, 10, 90 * np.pi/180, 10 * np.pi/180])
+        return np.diag([10000, 10, 10000, 10, 90 * np.pi/180, 1 * np.pi/180])
 
     def update(self, observation, t_capture):
         error = observation - self.observation_model() @ self.x
@@ -73,14 +70,14 @@ class RobotFilter(KalmanFilter):
         self._update(error, t_capture)
         self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
 
-    def predict(self, next_velocity=None):
+    def predict(self, dt, next_velocity=None):
 
         if next_velocity is not None:
-            input_command = next_velocity - self.velocity
+            acceleration = (next_velocity - self.velocity)/dt
         else:
-            input_command = None
+            acceleration = None
 
-        self._predict(input_command)
+        self._predict(dt, acceleration)
         self.x[4] = RobotFilter.wrap_to_pi(self.x[4])
 
     @staticmethod

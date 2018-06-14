@@ -33,8 +33,8 @@ class Controller:
             robot.velocity_regulator = VelocityRegulator()
             robot.position_regulator = PositionRegulator()
 
-    def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand], dt):
-        self.dt = dt
+    def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand]):
+
         self.timestamp = track_frame['timestamp']
 
         for robot in self.robots:
@@ -53,7 +53,7 @@ class Controller:
                 self[cmd.robot_id].engine_cmd = cmd
                 self[cmd.robot_id].path = None
 
-    def execute(self) -> RobotState:
+    def execute(self, dt: float) -> RobotState:
         commands = {}
 
         for robot in self.active_robots:
@@ -61,10 +61,10 @@ class Controller:
 
             if robot.distance_to_path_end < ROBOT_RADIUS and robot.end_speed == 0:
                 robot.velocity_regulator.reset()
-                commands[robot.id] = robot.position_regulator.execute(robot, self.dt)
+                commands[robot.id] = robot.position_regulator.execute(robot, dt)
             else:
                 robot.position_regulator.reset()
-                commands[robot.id] = robot.velocity_regulator.execute(robot, self.dt)
+                commands[robot.id] = robot.velocity_regulator.execute(robot, dt)
 
         self.send_debug(commands)
 

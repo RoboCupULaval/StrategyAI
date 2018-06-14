@@ -48,26 +48,24 @@ class Tracker:
 
     def _update(self, detection_frame: Dict[str, List[Dict[str, Any]]]):
 
-        timestamp = detection_frame['timestamp']
-
         for robot_obs in detection_frame.get('robots_blue', ()):
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
-            self._blue_team[robot_obs['robot_id']].update(obs, timestamp)
+            self._blue_team[robot_obs['robot_id']].update(obs, detection_frame['t_capture'])
 
         for robot_obs in detection_frame.get('robots_yellow', ()):
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
-            self._yellow_team[robot_obs['robot_id']].update(obs, timestamp)
+            self._yellow_team[robot_obs['robot_id']].update(obs, detection_frame['t_capture'])
 
         for ball_obs in detection_frame.get('balls', ()):
             obs = np.array([ball_obs['x'], ball_obs['y']])
             closest_ball = self.find_closest_ball_to_observation(obs)
             if closest_ball:
-                closest_ball.update(obs, timestamp)
+                closest_ball.update(obs, detection_frame['t_capture'])
             else:
                 self.logger.debug('The tracker is not able to assign some observations to a ball. '
                                   'Try to increase the maximal number of ball on the field or recalibrate the vision.')
 
-    def predict(self, robot_state: RobotState):
+    def predict(self, robot_state: RobotState, dt: float):
 
         velocity_commands = [Pose() for _ in range(len(self._our_team))]
         for packet in robot_state.packet:
@@ -75,13 +73,14 @@ class Tracker:
 
         for robot in self._our_team:
             if robot.orientation is not None:
-                robot.predict(self._put_in_world_referential(robot.orientation, velocity_commands[robot.id]).to_array())
+                velocity = self._put_in_world_referential(robot.orientation, velocity_commands[robot.id])
+                robot.predict(dt, next_velocity=velocity.to_array())
 
         for robot in self._their_team:
-            robot.predict()
+            robot.predict(dt)
 
         for ball in self._balls:
-            ball.predict()
+            ball.predict(dt)
 
     def _remove_undetected(self):
 

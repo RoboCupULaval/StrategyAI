@@ -1,6 +1,5 @@
 from abc import abstractmethod
 import numpy as np
-from time import time
 
 
 class KalmanFilter:
@@ -9,13 +8,10 @@ class KalmanFilter:
 
         self._id = _id
         self.is_active = False
-        self.last_update_time = time()
-        self.last_predict_time = time()
-        self.first_update_time = None
+        self.last_update_time = 0
+        self.first_update_time = 0
 
-        self._dt = 0
-
-        self.state_number = int(np.size(self.transition_model(), 0))
+        self.state_number = int(np.size(self.transition_model(0), 0))
         self.observable_state = int(np.size(self.observation_model(), 0))
 
         self.x = np.zeros(self.state_number)
@@ -29,10 +25,10 @@ class KalmanFilter:
         return self._id
 
     @abstractmethod
-    def transition_model(self):
+    def transition_model(self, dt):
         return np.zeros(0)
 
-    def control_input_model(self):
+    def control_input_model(self, dt):
         return np.zeros(0)
 
     @abstractmethod
@@ -44,7 +40,7 @@ class KalmanFilter:
         return 10 ** 6 * np.eye(self.state_number)
 
     @abstractmethod
-    def process_covariance(self):
+    def process_covariance(self, dt):
         return np.zeros(0)
 
     @abstractmethod
@@ -53,9 +49,12 @@ class KalmanFilter:
 
     def _update(self, error, update_time):
         self.is_active = True
-        if self.first_update_time is None: self.first_update_time = time()
 
-        self._dt = update_time - self.last_update_time
+        if not self.first_update_time: self.first_update_time = update_time
+
+        if self.last_update_time > update_time:
+            return
+
         self.last_update_time = update_time
 
         # Compute Kalman gain from states covariance and observation model
@@ -68,32 +67,27 @@ class KalmanFilter:
         # Update the states covariance matrix
         self.P = self.P - gain @ self.observation_model() @ self.P
 
-    def _predict(self, input_command=None):
-
-        predict_time = time()
-        self._dt = predict_time - self.last_predict_time
-        self.last_predict_time = predict_time
+    def _predict(self, dt, input_command=None):
 
         # Predict the next state from states vector and input commands
         if input_command is not None:
-            self.x = self.transition_model() @ self.x + self.control_input_model() @ input_command
+            self.x = self.transition_model(dt) @ self.x + self.control_input_model(dt) @ input_command
         else:
-            self.x = self.transition_model() @ self.x
+            self.x = self.transition_model(dt) @ self.x
 
         # Update the state covariance matrix from the transition model
-        self.P = self.transition_model() @ self.P @ self.transition_model().T + self.Q()
+        self.P = self.transition_model(dt) @ self.P @ self.transition_model(dt).T + self.Q(dt)
 
     def update(self, observation, t_capture):
         error = observation - self.observation_model() @ self.x
         self._update(error, t_capture)
 
-    def predict(self, input_command=None):
-        self._predict(input_command)
+    def predict(self, dt, input_command=None):
+        self._predict(dt, input_command)
 
     def reset(self):
         self.is_active = False
         self.P = self.initial_state_covariance()
         self.x = np.zeros(self.state_number)
-        self.last_update_time = time()
-        self.last_predict_time = time()
-        self.first_update_time = None
+        self.last_update_time = 0
+        self.first_update_time = 0

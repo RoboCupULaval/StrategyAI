@@ -16,11 +16,13 @@ from protobuf_to_dict import protobuf_to_dict
 from Engine.Communication.protobuf.messages_robocup_ssl_wrapper_pb2 import SSL_WrapperPacket
 from Engine.Communication.receiver.receiver_base_class import ReceiverProcess
 
-__author__ = "Maxime Gagnon-Legault"
+__author__ = 'Simon Bouchard'
 
 
 class VisionReceiver(ReceiverProcess):
-    TIME_OUT = 1
+    TIME_OUT = 1.0
+    TIME_OFFSET = None
+    MAX_TIME_OFFSET_DIFFERENCE = 1.0
 
     def __init__(self, connection_info, link: DictProxy, field: DictProxy):
         self.field = field
@@ -78,6 +80,19 @@ class VisionReceiver(ReceiverProcess):
         detection_packet = wrapper_packet.get('detection', None)
 
         if detection_packet:
-            detection_packet['timestamp'] = time.time()
+
+            current_time_offset = time.time() - detection_packet['t_capture']
+
+            if VisionReceiver.TIME_OFFSET is None:
+                self.logger.debug('Offset time between system is {:.0f} sec.'.format(current_time_offset))
+                VisionReceiver.TIME_OFFSET = current_time_offset
+
+            if abs(VisionReceiver.TIME_OFFSET - current_time_offset) > VisionReceiver.MAX_TIME_OFFSET_DIFFERENCE:
+                self.logger.debug('Offset time between system was reset to {:.0f} sec (was {:.0f} sec)'.format(current_time_offset,
+                                                                                                            VisionReceiver.TIME_OFFSET))
+                self.logger.warning('You might be receiving vision frame from more then one source.')
+                VisionReceiver.TIME_OFFSET = current_time_offset
+
+            detection_packet['t_capture'] = VisionReceiver.TIME_OFFSET + detection_packet['t_capture']
             self._link[detection_packet['camera_id']] = detection_packet
 
