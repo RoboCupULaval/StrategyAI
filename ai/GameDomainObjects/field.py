@@ -92,7 +92,6 @@ class Field:
         self.center_circle_radius = 1000
         self.boundary_width = 300  # Is the distance between the field and the outside wall
 
-
         self.field_lines = {
             "RightPenaltyStretch": Line(p1=Position(3495, -1000),  # H to E
                                         p2=Position(3495, +1000)),

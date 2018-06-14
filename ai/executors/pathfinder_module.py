@@ -21,7 +21,7 @@ class PathfinderModule:
     def __init__(self):
         self.paths = defaultdict(lambda: None)
         self.sub_paths = defaultdict(lambda: [None])
-        self.logger = logging.getLogger("PathfinderModule")
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.pathfinder = PathPartitionner()
         self.obstacles = []
         self.strategy_obstacles = []
@@ -73,30 +73,37 @@ class PathfinderModule:
                 last_paths = [None for _ in way_points]
 
             way_point = way_points[0]
-            path_temp = self.generate_simple_path(start, way_point, last_paths[0])
+            path_temp = self.generate_simple_path(start, way_point, player.velocity.position, last_paths[0])
             path = path_temp
             sub_paths += [path_temp]
             start = way_point.position
 
             if len(way_points) > 1:
                 for way_point, last_path in zip(way_points[1:], last_paths[1:]):
-                    sub_paths += [self.generate_simple_path(start, way_point, last_path)]
+                    sub_paths += [self.generate_simple_path(start,
+                                                            way_point,
+                                                            player.velocity.position,
+                                                            last_path)]
                     start = way_point.position
 
             # path reliant le dernier way_point à la target
             path_temp = self.generate_simple_path(way_points[-1].position,
                                                   WayPoint(target, ai_cmd.ball_collision),
+                                                  player.velocity.position,
                                                   path_to_target)
             path += path_temp
             sub_paths += [path_temp]
         else:
-            path = self.generate_simple_path(start, WayPoint(target, ai_cmd.ball_collision), path_to_target)
+            path = self.generate_simple_path(start,
+                                             WayPoint(target, ai_cmd.ball_collision),
+                                             player.velocity.position,
+                                             path_to_target)
             sub_paths += [path]
         self.sub_paths[player] = sub_paths
         path.filter(threshold=10)
         return path
 
-    def generate_simple_path(self, start: Position, way_point: WayPoint, last_path=None):
+    def generate_simple_path(self, start: Position, way_point: WayPoint, velocity: Position, last_path=None):
 
         player_obstacles = self.obstacles.copy()
         player_obstacles += self.strategy_obstacles
@@ -105,6 +112,7 @@ class PathfinderModule:
         path = PathPartitionner().get_path(start=start,
                                            target=way_point.position,
                                            obstacles=player_obstacles,
+                                           velocity=velocity,
                                            last_path=last_path)
         return path
 
