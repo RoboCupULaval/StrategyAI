@@ -87,7 +87,7 @@ class GoKick(Tactic):
             self.next_state = self.go_behind_ball
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=3,
-                                      end_speed=0.2,
+                                      end_speed=0,
                                       ball_collision=True)\
                            .addChargeKicker().build()
 
