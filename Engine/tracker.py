@@ -33,13 +33,13 @@ class Tracker:
         self._yellow_team = [RobotFilter(robot_id) for robot_id in range(config['ENGINE']['max_robot_id'])]
         self._balls = [BallFilter(ball_id) for ball_id in range(config['ENGINE']['max_ball_on_field'])]
 
-        self._camera_frame_number = [-1 for _ in range(config['ENGINE']['number_of_camera'])]
+        self._camera_capture_time = [-1 for _ in range(config['ENGINE']['number_of_camera'])]
 
     def update(self) -> Dict[str, List[Dict[str, Any]]]:
 
         for frame in self.camera_frames:
             self._log_new_robots_on_field(frame)
-            self._camera_frame_number[frame['camera_id']] = frame['frame_number']
+            self._camera_capture_time[frame['camera_id']] = frame['t_capture']
             self._update(frame)
 
         self._remove_undetected()
@@ -154,8 +154,8 @@ class Tracker:
         if frame:
             disabled_camera_id = config['ENGINE']['disabled_camera_id']
             cam_id = frame['camera_id']
-            last_frame_number = self._camera_frame_number[cam_id]
-            return frame['frame_number'] > last_frame_number and cam_id not in disabled_camera_id
+            last_capture_time = self._camera_capture_time[cam_id]
+            return frame['t_capture'] > last_capture_time and cam_id not in disabled_camera_id
 
     @property
     def _our_team(self):
