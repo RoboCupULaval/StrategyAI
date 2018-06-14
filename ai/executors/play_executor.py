@@ -115,7 +115,7 @@ class PlayExecutor:
         try:
             tactic = self.play_state.get_new_tactic(tactic_name)(self.game_state, this_player, target, args)
         except:
-            self.logger.exception('message')
+            self.logger.exception('An error occurred.')
             self.logger.debug('The tactic was call with wrong arguments')
             raise
 
