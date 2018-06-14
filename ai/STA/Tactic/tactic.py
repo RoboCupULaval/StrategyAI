@@ -37,8 +37,32 @@ class Tactic:
         self.target = target
 
         if forbidden_areas is None:
-            self.forbidden_areas = [Area.pad(self.game_state.field.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL),
-                                    Area.pad(self.game_state.field.our_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)]
+            field = self.game_state.field
+
+            top_area = Area.from_limits(field.top + 100 * field.boundary_width,
+                                        field.top + field.boundary_width,
+                                        field.right,
+                                        field.left)
+            bottom_area = Area.from_limits(field.bottom - field.boundary_width,
+                                           field.bottom - 100 * field.boundary_width,
+                                           field.right,
+                                           field.left)
+            right_area = Area.from_limits(field.top,
+                                           field.bottom,
+                                           field.right + 100 * field.boundary_width,
+                                           field.right + field.boundary_width)
+            left_area = Area.from_limits(field.top,
+                                         field.bottom,
+                                         field.left - field.boundary_width,
+                                         field.left - 100 * field.boundary_width)
+            areas = [
+                top_area,
+                bottom_area,
+                right_area,
+                left_area,
+                self.game_state.field.their_goal_area,
+                self.game_state.field.our_goal_area]
+            self.forbidden_areas = [Area.pad(area, KEEPOUT_DISTANCE_FROM_GOAL) for area in areas]
         else:
             self.forbidden_areas = forbidden_areas
 
