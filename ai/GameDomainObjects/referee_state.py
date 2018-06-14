@@ -3,9 +3,13 @@
 from enum import IntEnum
 from typing import Dict
 
+import logging
+
+from Engine.Communication.protobuf.referee_pb2 import SSL_Referee
 from Util.constant import TeamColor
 from Util.position import Position
 from Util.team_color_service import TeamColorService
+from ai.GameDomainObjects.field import FieldSide
 from config.config import Config
 
 
@@ -82,7 +86,10 @@ new_team_info = {"name": "",
 
 
 class RefereeState:
-
+    
+    last_packet = None
+    logger = logging.getLogger('RefereeState')
+    
     def __init__(self, referee_info: Dict):
         self.command = RawRefereeCommand.STOP
         self.stage = Stage.NORMAL_FIRST_HALF_PRE
@@ -94,11 +101,13 @@ class RefereeState:
 
         self._update(referee_info)
 
+        RefereeState.log_change(referee_info)
+
     @property
     def info(self) -> Dict:
         return {
-            "command": str(self.command),
-            "stage": str(self.stage),
+            "command": self.command.name,
+            "stage": self.stage.name,
             "stage_time_left": self.stage_time_left
         }
 
@@ -120,6 +129,9 @@ class RefereeState:
 
         raw_command = RawRefereeCommand(referee_info["command"])
 
+        if "blueTeamOnPositiveHalf" in referee_info and Config()['GAME']['competition_mode']:
+            self._validate_field_side(referee_info["blueTeamOnPositiveHalf"])
+
         self.command = self._parse_command(raw_command)
         self._parse_team_info(referee_info)
 
@@ -135,6 +147,7 @@ class RefereeState:
         return RefereeCommand(parsed_cmd)
 
     def _parse_team_info(self, frame):
+
         if TeamColorService().our_team_color is TeamColor.YELLOW:
             self.team_info['ours'] = frame['yellow']
             self.team_info['theirs'] = frame['blue']
@@ -147,7 +160,8 @@ class RefereeState:
         for team in self.team_info:
             self.team_info[team]["yellow_card_times"] = []
 
-    def _convert_vision_position_to_ai_position(self, designated_position: Position):
+    @staticmethod
+    def _convert_vision_position_to_ai_position(designated_position: Position):
         if Config()["GAME"]["on_negative_side"]:
             designated_position.x *= -1
         return designated_position
@@ -178,3 +192,146 @@ class RefereeState:
     @staticmethod
     def _is_blue_command(command):
         return not RefereeState._is_yellow_command(command)
+
+    @staticmethod
+    def _validate_field_side(is_blue_positive):
+        truth_table = {
+            True: {
+                TeamColor.BLUE: FieldSide.POSITIVE,
+                TeamColor.YELLOW: FieldSide.NEGATIVE
+            },
+            False: {
+                TeamColor.BLUE: FieldSide.NEGATIVE,
+                TeamColor.YELLOW: FieldSide.POSITIVE
+            }
+        }
+        expected = truth_table[is_blue_positive][TeamColorService().our_team_color]
+        current = FieldSide.NEGATIVE if Config()["GAME"]["on_negative_side"] else FieldSide.POSITIVE
+        assert expected == current, \
+            "The referee is expecting that team {our_team} is {expected}, but currently it's {current}, CHANGE IT!!!"\
+                .format(our_team=TeamColorService().our_team_color.name,
+                        expected=expected.name,
+                        current=current.name)
+
+    @classmethod
+    def log_change(cls, packet: SSL_Referee):
+
+        if packet['blue']['name'] == '': packet['blue']['name'] = 'unknown'
+        if packet['yellow']['name'] == '': packet['yellow']['name'] = 'unknown'
+
+        if cls.last_packet:
+            last_stage = cls.last_packet['stage']
+            last_blue_team_info = cls.last_packet['blue']
+            last_yellow_team_info = cls.last_packet['yellow']
+        else:
+            last_stage = None
+            last_blue_team_info = {'name': None, 'score': 0, 'red_cards': 0, 'yellow_cards': 0, 'timeouts': 4}
+            last_yellow_team_info = {'name': None, 'score': 0, 'red_cards': 0, 'yellow_cards': 0, 'timeouts': 4}
+
+        cls.last_packet = packet
+
+        new_blue_team_info = packet['blue']
+        new_yellow_team_info = packet['yellow']
+        new_stage = packet['stage']
+
+        is_name_change = last_blue_team_info['name'] != new_blue_team_info['name'] or \
+                         last_yellow_team_info['name'] != new_yellow_team_info['name']
+
+        is_state_change = last_stage != new_stage
+
+        scoring_team = {'blue': None, 'yellow': None}
+        score_change = {'blue': 0, 'yellow': 0}
+        if last_blue_team_info['score'] != new_blue_team_info['score']:
+            scoring_team['blue'] = new_blue_team_info['name']
+            score_change['blue'] = new_blue_team_info['score'] - last_blue_team_info['score']
+        if last_yellow_team_info['score'] != new_yellow_team_info['score']:
+            scoring_team['yellow'] = new_yellow_team_info['name']
+            score_change['yellow'] = new_yellow_team_info['score'] - last_yellow_team_info['score']
+
+        red_card_team = {'blue': None, 'yellow': None}
+        red_card_change = {'blue': 0, 'yellow': 0}
+        if last_blue_team_info['red_cards'] != new_blue_team_info['red_cards']:
+            red_card_team['blue'] = new_blue_team_info['name']
+            red_card_change['blue'] = new_blue_team_info['red_cards'] - last_blue_team_info['red_cards']
+        if last_yellow_team_info['red_cards'] != new_yellow_team_info['red_cards']:
+            red_card_team['yellow'] = new_yellow_team_info['name']
+            red_card_change['yellow'] = new_yellow_team_info['red_cards'] - last_yellow_team_info['red_cards']
+
+        yellow_card_team = {'blue': None, 'yellow': None}
+        yellow_card_change = {'blue': 0, 'yellow': 0}
+        if last_blue_team_info['yellow_cards'] != new_blue_team_info['yellow_cards']:
+            yellow_card_team['blue'] = new_blue_team_info['name']
+            yellow_card_change['blue'] = new_blue_team_info['yellow_cards'] - last_blue_team_info['yellow_cards']
+        if last_yellow_team_info['yellow_cards'] != new_yellow_team_info['yellow_cards']:
+            yellow_card_team['yellow'] = new_yellow_team_info['name']
+            yellow_card_change['yellow'] = new_yellow_team_info['yellow_cards'] - last_yellow_team_info['yellow_cards']
+
+        timeout_team = {'blue': None, 'yellow': None}
+        timeout_time = {'blue': 0, 'yellow': 0}
+        timeout_left = {'blue': 0, 'yellow': 0}
+        timeout_change = {'blue': 0, 'yellow': 0}
+        if last_blue_team_info['timeouts'] != new_blue_team_info['timeouts']:
+            timeout_team['blue'] = new_blue_team_info['name']
+            timeout_time['blue'] = new_blue_team_info['timeout_time']
+            timeout_left['blue'] = new_blue_team_info['timeouts']
+            timeout_change['blue'] = new_blue_team_info['timeouts'] - last_blue_team_info['timeouts']
+        if last_yellow_team_info['timeouts'] != new_yellow_team_info['timeouts']:
+            timeout_team['yellow'] = new_yellow_team_info['name']
+            timeout_time['yellow'] = new_yellow_team_info['timeout_time']
+            timeout_left['yellow'] = new_yellow_team_info['timeouts']
+            timeout_change['yellow'] = new_yellow_team_info['timeouts'] - new_yellow_team_info['timeouts']
+
+        if is_name_change:
+            cls.logger.info('Team change detected.\n\n' + '-' * 40 + '\n' +
+                            '  {} (BLUE) vs. {} (YELLOW)'.format(new_blue_team_info['name'], new_yellow_team_info['name'])
+                            + '\n' + '-' * 40 + '\n\n')
+
+        for team_color in ('blue', 'yellow'):
+            if scoring_team[team_color] is not None:
+                if score_change[team_color] == 1:
+                    cls.logger.info('A goal was score by {}'.format(scoring_team[team_color]))
+                elif score_change[team_color] > 1:
+                    cls.logger.info('{} goals were score by {}.'.format(score_change[team_color], scoring_team[team_color]))
+                else:
+                    cls.logger.info('A goal was remove to {}'.format(scoring_team[team_color]))
+
+                cls.logger.info('Current score: ({}: {} - {}: {})'.format(new_blue_team_info['name'],
+                                                                      new_blue_team_info['score'],
+                                                                      new_yellow_team_info['name'],
+                                                                      new_yellow_team_info['score']))
+
+            if red_card_team[team_color] is not None:
+                if red_card_change[team_color] == 1:
+                    cls.logger.info('A red card was taken by {}.'.format(red_card_team[team_color]))
+                elif red_card_change[team_color] > 1:
+                    cls.logger.info('{} red cards were taken by {}.'.format(red_card_change[team_color], red_card_team[team_color]))
+                else:
+                    cls.logger.info('A red card was remove to {}'.format(red_card_team[team_color]))
+
+            if yellow_card_team[team_color] is not None:
+                if yellow_card_change[team_color] == 1:
+                    cls.logger.info('A yellow card was taken by {}.'.format(yellow_card_team[team_color]))
+                elif yellow_card_change[team_color] > 1:
+                    cls.logger.info('{} yellow cards were taken by {}.'.format(yellow_card_change[team_color], yellow_card_team[team_color]))
+                else:
+                    cls.logger.info('A yellow card was remove to {}'.format(yellow_card_team[team_color]))
+
+            if timeout_team[team_color] is not None:
+                if timeout_change[team_color] == -1:
+                    cls.logger.info('A timeout was ask by {}.'.format(timeout_team[team_color]))
+                elif timeout_change[team_color] < -1:
+                    cls.logger.info('{} timeout calls were given to {}'.format(timeout_change[team_color], timeout_team[team_color]))
+                else:
+                    cls.logger.info('A timeout call was given to {}'.format(timeout_team[team_color]))
+                cls.logger.info('Timeout left: {}. Time left: {:.1f} seconds'.format(timeout_left[team_color],
+                                                                                      timeout_time[team_color]/1000000))
+
+        if is_state_change:
+            stage = Stage(new_stage)
+            cls.logger.info('Stage change detected. Now at {}.'.format(stage.name))
+            if stage is Stage.POST_GAME:
+                cls.logger.info(
+                    'The game has ended. Final score: ({}: {} - {}: {})'.format(new_blue_team_info['name'],
+                                                                                new_blue_team_info['score'],
+                                                                                new_yellow_team_info['name'],
+                                                                                new_yellow_team_info['score']))

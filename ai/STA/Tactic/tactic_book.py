@@ -1,14 +1,17 @@
 # Under MIT License, see LICENSE.txt
-from typing import List
+from typing import List, Type
 
 import logging
 
+
 from ai.STA.Tactic.align_around_the_ball import AlignAroundTheBall
+from ai.STA.Tactic.go_kick_experimental_sequence import GoKickExperimental
 from ai.STA.Tactic.place_ball import PlaceBall
 from ai.STA.Tactic.face_target import FaceTarget
 from ai.STA.Tactic.pass_to_player import PassToPlayer
 from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot
 from ai.STA.Tactic.rotate_around_ball import RotateAroundBall
+from ai.STA.Tactic.stress_test_robot import StressTestRobotWaypoint, StressTestRobot
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
@@ -19,76 +22,47 @@ from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
 from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.go_kick import GoKick
 
-# try:
-#     from ai.STA.Tactic.joystick import Joystick
-# except ImportError as e:
-#     import warnings
-#     warnings.warn(str(e), stacklevel=1)
-#     warnings.warn('Pygame is not installed, disabling Joystick tactic.', stacklevel=1)
 
-
-class TacticBook(object):
+class TacticBook:
     def __init__(self):
 
-        self.logger = logging.getLogger('TacticBook')
+        self.logger = logging.getLogger(self.__class__.__name__)
 
-        self.tactic_book = {
-            'PlaceBall' : PlaceBall,
-            'FaceTarget': FaceTarget,
-            'DemoFollowBall': DemoFollowBall,
-            'DemoFollowRobot': DemoFollowRobot,
-            'GoalKeeper': GoalKeeper,
-            'GoKick': GoKick,
-            'GoToPosition': GoToPosition,
-            'GoToRandomPosition': GoToRandomPosition,
-            'PassToPlayer': PassToPlayer,
-            'ProtectZone': ProtectZone,
-            'StayAwayFromBall': StayAwayFromBall,
-            'Stop': Stop,
-            'RotateAroundBall': RotateAroundBall,
-            'AlignAroundTheBall': AlignAroundTheBall
-        }
-        self.default_tactics = ['GoToPosition',
-                               'GoKick']
+        self.stop_tactic = Stop
 
-        for name, tactic_class in self.tactic_book.items():
-            if name != tactic_class.__name__:
-                raise TypeError("You give the wrong name to a tactic in tactic book: {} != {}".format(name, tactic_class.__name__))
+        defaults_tactics = [GoToPosition, GoKick]
 
-        for name in self.default_tactics:
-            if not name in self.tactic_book:
-                raise TypeError("Default tactic ({}) is not in tactic book".format(name))
+        tactics = {PlaceBall,
+                   FaceTarget,
+                   DemoFollowBall,
+                   DemoFollowRobot,
+                   GoalKeeper,
+                   GoToRandomPosition,
+                   PassToPlayer,
+                   ProtectZone,
+                   StayAwayFromBall,
+                   RotateAroundBall,
+                   GoKickExperimental,
+                   RotateAroundBall,
+                   StressTestRobot,
+                   StressTestRobotWaypoint,
+                   AlignAroundTheBall,
+                   *defaults_tactics,
+                   self.stop_tactic}
 
-        # if 'Joystick' in sys.modules:
-        #     self.tactic_book['Joystick'] = Joystick
+        self.tactic_book = {tactic.name(): tactic for tactic in tactics}
+        self.default_tactics = [tactic.name() for tactic in defaults_tactics]
 
     @property
     def tactics_name(self) -> List[str]:
-        """
-        Retourne une liste des nomd des tactiques disponibles à l'IA.
-
-        :return: (List[str]) une liste de string, les noms des tactiques disponibles.
-        """
         return list(self.tactic_book.keys())
 
     def check_existance_tactic(self, tactic_name: str) -> bool:
-        """
-        Regarde que la tactique existe dans le livre des tactiques.
-
-        :param tactic_name: (str) le nom de la tactique à évaluer l'existance.
-        :return: (bool) true si la tactique existe dans le livre, false sinon.
-        """
         assert isinstance(tactic_name, str)
         return tactic_name in self.tactic_book
 
-    def get_tactic(self, tactic_name: str) -> Tactic:
-        """
-        Retourne une instance nouvelle de la tactique correspondant au nom passé.
-
-        :param tactic_name: (str) le nom de la tactique à retourner
-        :return: (Tactic) une nouvelle instance de la tactique demandé.
-        """
+    def get_tactic(self, tactic_name: str) -> Type[Tactic]:
         if self.check_existance_tactic(tactic_name):
             return self.tactic_book[tactic_name]
-        self.logger.error("Something asked for this non-existing tactic: {}".format(tactic_name))
-        return self.tactic_book['Stop']
+        self.logger.error('A non-existing tactic was asked: {}'.format(tactic_name))
+        return self.stop_tactic

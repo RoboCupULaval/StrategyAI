@@ -49,3 +49,14 @@ def test_initialize_tactic(tactic_class):
         simulator.start(mock_id, mock_pose)
     except AssertionError:
         pass  # This is done to pass snowflake tactic that require additional arguments
+
+# TODO: Fix tactics so they pass that test
+# def test_few_ticks_tactic(tactic_class):
+#     FEW_TICKS = 10
+#     simulator = PerfectSim(tactic_class)
+#     mock_id = 1
+#     mock_pose = Pose(Position(3, 5))
+#     simulator.start(mock_id, mock_pose)
+#
+#     for _ in range(0, FEW_TICKS):
+#         simulator.tick()

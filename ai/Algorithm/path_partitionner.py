@@ -31,6 +31,8 @@ class PathPartitionner:
     def __init__(self):
         self.obstacles = []
         self.old_path = None
+        self.velocity = None
+
     @property
     def obstacles_position(self):
         return np.array([obs.position for obs in self.obstacles])
@@ -47,11 +49,11 @@ class PathPartitionner:
         is_not_self = start_to_obs > 0  # remove self if present
         self.obstacles = obstacles[is_inside_ellipse & is_not_self].tolist()
 
-    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], last_path: Optional[Path]=None):
-
+    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], velocity: Position, last_path: Optional[Path]=None):
+        self.velocity = velocity.array
         self.obstacles = obstacles
-        self.filter_obstacles(start.array, target.array)
         self.old_path = last_path
+        self.filter_obstacles(start.array, target.array)
 
         if any(self.obstacles):
             if last_path and not self.is_full_path_colliding(last_path):
@@ -87,6 +89,8 @@ class PathPartitionner:
         return any(collisions)
 
     def find_collisions(self, start, target):
+        if np.array_equal(start, target): return [], 0
+
         robot_to_obstacles = self.obstacles_position - start
         robot_to_obstacle_norm = np.linalg.norm(robot_to_obstacles, axis=1)
         obstacles = self.obstacles
@@ -117,10 +121,8 @@ class PathPartitionner:
                 while not self.is_valid_sub_target(sub_target_2, self.obstacles_position):
                     sub_target_2 -= avoid_dir * resolution_sub_target
                 #on maximise l'angle entre les segments pour avoir un path plus rectiligne
-                val_1 = np.dot((sub_target_1-start)/np.linalg.norm(sub_target_1-start),
-                               (target - sub_target_1)/np.linalg.norm(target - sub_target_1))
-                val_2 = np.dot((sub_target_2 - start) / np.linalg.norm(sub_target_2 - start),
-                               (target - sub_target_2) / np.linalg.norm(target - sub_target_2))
+                val_1 = np.dot((sub_target_1-start)/np.linalg.norm(sub_target_1-start), self.velocity)
+                val_2 = np.dot((sub_target_2 - start) / np.linalg.norm(sub_target_2 - start), self.velocity)
                 if val_1 > val_2: #le segment 1 est plus aligne avec le path precedant que le segment2
                     sub_target = sub_target_1.copy()
                     sub_target_potential = sub_target_1.copy()
@@ -156,6 +158,7 @@ class PathPartitionner:
         return False
 
     def update_last_path(self, start, target):
+
         distance_from_old_target = (self.old_path.target - target).norm
         self.old_path.start = start
         self.old_path.points[0] = start
@@ -172,6 +175,7 @@ class PathPartitionner:
             if not self.is_path_colliding(path.start.array, path.points[2].array):
                 del path.points[1]
         return path
+
 
 
 def normalize(vec: np.ndarray) -> np.ndarray:

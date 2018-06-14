@@ -1,9 +1,10 @@
-import copy
+
 import logging
 from enum import Enum
 from typing import Dict, Union
 
 from Util import Position, Pose
+from Util.constant import ROBOT_RADIUS, REASONABLE_OFFSET, KEEPOUT_DISTANCE_FROM_GOAL, INDIRECT_KICK_OFFSET
 from Util.geometry import Area, Line
 from ai.GameDomainObjects import Ball
 
@@ -27,7 +28,6 @@ class FieldLineSegment(Line):
     def __init__(self, line: Dict):
         self.p1 = Position.from_dict(line["p1"])
         self.p2 = Position.from_dict(line["p2"])
-        self.length = (self.p2 - self.p1).norm
         self.thickness = line["thickness"]
 
 
@@ -78,6 +78,8 @@ class Field:
         self.our_goal_pose = None
         self.their_goal = None  # Point B
         self.their_goal_pose = None
+        self.our_goal_line = None
+        self.their_goal_line = None
 
         self.goal_line = None  # Point C to D
         self.our_goal_area = None  # Area define by Point E to F
@@ -90,7 +92,6 @@ class Field:
         self.goal_depth = 200
         self.center_circle_radius = 1000
         self.boundary_width = 300  # Is the distance between the field and the outside wall
-
 
         self.field_lines = {
             "RightPenaltyStretch": Line(p1=Position(3495, -1000),  # H to E
@@ -167,7 +168,19 @@ class Field:
                                     self.field_lines["RightFieldLeftPenaltyStretch"].p1.flip_x())
 
         self.goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
-                              p2=Position(self.our_goal_x, -self.goal_width / 2))
+                                  p2=Position(self.our_goal_x, -self.goal_width / 2))
+
+        self.our_goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
+                                  p2=Position(self.our_goal_x, -self.goal_width / 2))
+        self.their_goal_line = Line(p1=Position(self.their_goal_x, +self.goal_width / 2),
+                                    p2=Position(self.their_goal_x, -self.goal_width / 2))
+
+        self.indirect_avoid_area = Area.pad(self.their_goal_area,
+                                            INDIRECT_KICK_OFFSET + KEEPOUT_DISTANCE_FROM_GOAL)
+        self.our_goal_forbidden_area = Area.pad(self.our_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
+        self.their_goal_forbidden_area = Area.pad(self.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
+
+        self.center = Position(0, 0)
 
     def _fix_ulaval_field_line(self, field):
         # The penalty x y is point E in the sketch

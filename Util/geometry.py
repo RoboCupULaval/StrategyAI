@@ -4,7 +4,7 @@ import math as m
 import numpy as np
 
 from Util.position import Position
-from typing import cast, Sequence, List, Union
+from typing import cast, Sequence, List, Union, Optional
 
 
 class Line:
@@ -12,9 +12,16 @@ class Line:
         self.p1 = p1
         self.p2 = p2
 
+    def __str__(self):
+        return "Line(p1={}, p2={})".format(self.p1, self.p2)
+
     @property
     def direction(self):
         return normalize(self.p2 - self.p1)
+
+    @property
+    def length(self):
+        return (self.p2 - self.p1).norm
 
 
 class Area:
@@ -30,6 +37,9 @@ class Area:
         return self.left <= p.x <= self.right and \
                self.bottom <= p.y <= self.top
 
+    def __str__(self):
+        return "Area(top={}, bottom={}, right={}, left={})".format(self.top, self.bottom, self.right, self.left)
+
     def __contains__(self, item: Union["Pose", Position]):
         if item.__class__.__name__ == "Pose":  # Prevent importing Pose
             return self.point_inside(item.position)
@@ -38,17 +48,35 @@ class Area:
         else:
             raise ValueError("You can only test if a position or a pose is contained inside the area.")
 
-    def intersect(self, line: Line):
-        assert isinstance(line, Line)
-        if self.point_inside(line.p1) and self.point_inside(line.p2):
+    def intersect(self, seg: Line):
+        assert isinstance(seg, Line)
+        if self.point_inside(seg.p1) and self.point_inside(seg.p2):
             return []
 
         inters = []
         for segment in self.segments:
-            inter = intersection_between_segments(segment.p1, segment.p2, line.p1, line.p2)
+            inter = intersection_between_segments(segment.p1, segment.p2, seg.p1, seg.p2)
             if inter is not None:
                 inters.append(inter)
         return inters
+
+    def intersect_with_line(self, line: Line):
+        assert isinstance(line, Line)
+
+        inters = []
+        for segment in self.segments:
+            inter = intersection_between_line_and_segment(segment.p1, segment.p2, line.p1, line.p2)
+            if inter is not None:
+                inters.append(inter)
+        return inters
+
+    def closest_border_point(self, p: Position):
+        closest_on_borders = None
+        for segment in self.segments:
+            closest_on_segment = closest_point_on_segment(p, segment.p1, segment.p2)
+            if closest_on_borders is None or (closest_on_segment - p).norm < (closest_on_borders - p).norm:
+                closest_on_borders = closest_on_segment
+        return closest_on_borders
 
     @property
     def segments(self):
@@ -86,7 +114,12 @@ class Area:
         return self.lower_right.x
 
     @classmethod
-    def from_limit(cls, top, bottom, left, right):
+    def pad(cls, area, padding=0):
+        return Area.from_limits(area.top + padding, area.bottom - padding,
+                                area.right + padding, area.left - padding)
+
+    @classmethod
+    def from_limits(cls, top, bottom, right, left):
         return cls(Position(left, top), Position(right, bottom))
 
 
@@ -100,7 +133,7 @@ def find_bisector_of_triangle(c, a, b):
     return a - ia
 
 
-def intersection_between_segments(a1, a2, b1, b2) -> Position:
+def intersection_between_segments(a1: Position, a2: Position, b1: Position, b2: Position) -> Optional[Position]:
     try:
         inter = intersection_between_lines(a1, a2, b1, b2)
     except ValueError:
@@ -110,7 +143,19 @@ def intersection_between_segments(a1, a2, b1, b2) -> Position:
         return inter
     return None
 
-def intersection_between_lines(a1, a2, b1, b2) -> Position:
+
+def intersection_between_line_and_segment(seg1: Position, seg2: Position, line1: Position, line2: Position) -> Optional[Position]:
+    try:
+        inter = intersection_between_lines(seg1, seg2, line1, line2)
+    except ValueError:
+        return None
+
+    if inter == closest_point_on_segment(inter, seg1, seg2):
+        return inter
+    return None
+
+
+def intersection_between_lines(a1: Position, a2: Position, b1: Position, b2: Position) -> Position:
     s = np.vstack([a1.array, a2.array, b1.array, b2.array])
     h = np.hstack((s, np.ones((4, 1))))
     l1 = np.cross(h[0], h[1])  # first line

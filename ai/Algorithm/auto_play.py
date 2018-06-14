@@ -28,7 +28,7 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
     def info(self):
         return {
             "selected_strategy": str(self.play_state.current_strategy),
-            "current_state": str(self.current_state)
+            "current_state": self.current_state.name if self.current_state is not None else str(self.current_state)
         }
 
     @abstractmethod
@@ -67,7 +67,7 @@ class SimpleAutoPlayState(IntEnum):
     DIRECT_FREE_DEFENSE = 18
     INDIRECT_FREE_OFFENSE = 19
     INDIRECT_FREE_DEFENSE = 20
-
+    NOT_ENOUGH_PLAYER = 21
 
 
 class SimpleAutoPlay(AutoPlay):
@@ -75,13 +75,26 @@ class SimpleAutoPlay(AutoPlay):
         Classe simple implémentant la sélection de stratégies.
     """
 
-    FREE_KICK_COMMANDS = [RefereeCommand.DIRECT_FREE_US, RefereeCommand.INDIRECT_FREE_US,
-                          RefereeCommand.DIRECT_FREE_THEM, RefereeCommand.INDIRECT_FREE_THEM]
+    NORMAL_STATE = [
+        SimpleAutoPlayState.NORMAL_OFFENSE,
+        SimpleAutoPlayState.NORMAL_DEFENSE
+    ]
+
+    FREE_KICK_STATE = [SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
+                       SimpleAutoPlayState.DIRECT_FREE_OFFENSE,
+                       SimpleAutoPlayState.INDIRECT_FREE_DEFENSE,
+                       SimpleAutoPlayState.INDIRECT_FREE_OFFENSE]
+
+    KICKOFF_STATE = [SimpleAutoPlayState.OFFENSE_KICKOFF,
+                       SimpleAutoPlayState.DEFENSE_KICKOFF]
+
+    MINIMUM_NB_PLAYER = 3
 
     def __init__(self, play_state: PlayState):
         super().__init__(play_state)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.last_ref_state = RefereeCommand.HALT
+        self.prev_nb_player = None
 
     # TODO: Check if role assignment works well enough, so we don't need available_players_changed
     def update(self, ref_state: RefereeState, available_players_changed=False):
@@ -93,6 +106,7 @@ class SimpleAutoPlay(AutoPlay):
             self.play_state.current_strategy = SimpleAutoPlay._state_to_strategy_name(self.next_state)
 
         elif self.next_state != self.current_state or available_players_changed:
+            self.logger.info("Switching to auto play state {}".format(self.next_state.name))
             self.play_state.current_strategy = SimpleAutoPlay._state_to_strategy_name(self.next_state)
 
         self.current_state = self.next_state
@@ -100,70 +114,28 @@ class SimpleAutoPlay(AutoPlay):
     def str(self):
         pass
 
-    def _analyse_game(self):
-        accepted_states = [
-            SimpleAutoPlayState.OFFENSE_KICKOFF,
-            SimpleAutoPlayState.DEFENSE_KICKOFF,
-            SimpleAutoPlayState.OFFENSE_PENALTY,
-            SimpleAutoPlayState.DEFENSE_PENALTY,
-            SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
-            SimpleAutoPlayState.INDIRECT_FREE_DEFENSE
-        ]
-        if self.current_state in accepted_states and not GameState().ball.is_immobile():
-            return self.current_state
-        if is_ball_our_side():
-            return SimpleAutoPlayState.NORMAL_DEFENSE
-        else:
-            return SimpleAutoPlayState.NORMAL_OFFENSE
-
-    def _normal_start(self):
-        return {
-            RefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.OFFENSE_KICKOFF,
-            RefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.DEFENSE_KICKOFF,
-            RefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.OFFENSE_PENALTY,
-            RefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.DEFENSE_PENALTY,
-            RefereeCommand.NORMAL_START: self._analyse_game()
-        }.get(self.last_ref_state, RefereeCommand.NORMAL_START)
 
     def _select_next_state(self, ref_state: RefereeState):
-        next_state = self.current_state
-
-        # On command change
-        if self.last_ref_state != ref_state.command:
-            self.logger.info("Switching to referee state {}".format(ref_state.command.name))
-            next_state = {
-                RefereeCommand.HALT: SimpleAutoPlayState.HALT,
-
-                RefereeCommand.STOP: SimpleAutoPlayState.STOP,
-                RefereeCommand.GOAL_US: self.current_state,
-                RefereeCommand.GOAL_THEM: self.current_state,
-
-                RefereeCommand.FORCE_START: self._analyse_game(),
-                RefereeCommand.NORMAL_START: self._normal_start(),
-
-                RefereeCommand.TIMEOUT_THEM: SimpleAutoPlayState.TIMEOUT,
-                RefereeCommand.TIMEOUT_US: SimpleAutoPlayState.TIMEOUT,
-
-                RefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE,
-                RefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE,
-                RefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE,
-                RefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE,
-
-                RefereeCommand.DIRECT_FREE_US: SimpleAutoPlayState.DIRECT_FREE_OFFENSE,
-                RefereeCommand.DIRECT_FREE_THEM: SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
-                RefereeCommand.INDIRECT_FREE_US: SimpleAutoPlayState.INDIRECT_FREE_OFFENSE,
-                RefereeCommand.INDIRECT_FREE_THEM: SimpleAutoPlayState.INDIRECT_FREE_DEFENSE,
-
-                RefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
-                RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.BALL_PLACEMENT_US,
-
-            }.get(ref_state.command, RefereeCommand.HALT)
 
         # During the game
-        elif ref_state.command == RefereeCommand.FORCE_START or ref_state.command == RefereeCommand.NORMAL_START:
-            next_state = self._analyse_game()
-        elif GameState().ball.is_mobile() and ref_state.command in self.FREE_KICK_COMMANDS:
-            return SimpleAutoPlayState.NORMAL_OFFENSE
+        next_state = self._exec_state()
+
+        nb_player = len(GameState().our_team.available_players)
+        if nb_player < self.MINIMUM_NB_PLAYER and ref_state.command != RefereeCommand.HALT:
+            if self.prev_nb_player is None or nb_player != self.prev_nb_player:
+                self.logger.warning("Not enough player to play. We have {} players and the minimum is {} "
+                                    .format(nb_player, self.MINIMUM_NB_PLAYER))
+            next_state = SimpleAutoPlayState.NOT_ENOUGH_PLAYER
+        # Number of player change or On command change
+        elif (self.prev_nb_player is not None and self.prev_nb_player < self.MINIMUM_NB_PLAYER <= nb_player)\
+                or self.last_ref_state != ref_state.command:
+            self.logger.info("Received referee state {}".format(ref_state.command.name))
+
+            next_state = self._on_ref_state_change(ref_state.command)
+
+
+
+        self.prev_nb_player = nb_player
 
         self.last_ref_state = ref_state.command
         return next_state
@@ -188,7 +160,7 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE: 'PrepareKickOffOffense',
             SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE: 'PrepareKickOffDefense',
             SimpleAutoPlayState.OFFENSE_KICKOFF: 'OffenseKickOff',
-            SimpleAutoPlayState.DEFENSE_KICKOFF: 'DoNothing',
+            SimpleAutoPlayState.DEFENSE_KICKOFF: 'PrepareKickOffDefense',
 
             # Penalty
             SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE: 'PreparePenaltyOffense',
@@ -203,6 +175,65 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'IndirectFreeKick',
 
             # Place the ball to the designated position
-            SimpleAutoPlayState.BALL_PLACEMENT_US: 'BallPlacement'
+            SimpleAutoPlayState.BALL_PLACEMENT_US: 'BallPlacement',
+
+            # When not enough player:
+            SimpleAutoPlayState.NOT_ENOUGH_PLAYER: 'DoNothing'
 
         }.get(state, SimpleAutoPlayState.HALT)
+
+    def _on_ref_state_change(self, ref_cmd: RefereeCommand):
+        return {
+            RefereeCommand.HALT: SimpleAutoPlayState.HALT,
+
+            RefereeCommand.STOP: SimpleAutoPlayState.STOP,
+            RefereeCommand.GOAL_US: self.current_state,
+            RefereeCommand.GOAL_THEM: self.current_state,
+
+            RefereeCommand.FORCE_START: self._decide_between_normal_play(),
+            RefereeCommand.NORMAL_START: self._normal_start(),
+
+            RefereeCommand.TIMEOUT_THEM: SimpleAutoPlayState.TIMEOUT,
+            RefereeCommand.TIMEOUT_US: SimpleAutoPlayState.TIMEOUT,
+
+            RefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE,
+            RefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE,
+            RefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE,
+            RefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE,
+
+            RefereeCommand.DIRECT_FREE_US: SimpleAutoPlayState.DIRECT_FREE_OFFENSE,
+            RefereeCommand.DIRECT_FREE_THEM: SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
+            RefereeCommand.INDIRECT_FREE_US: SimpleAutoPlayState.INDIRECT_FREE_OFFENSE,
+            RefereeCommand.INDIRECT_FREE_THEM: SimpleAutoPlayState.INDIRECT_FREE_DEFENSE,
+
+            RefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
+            RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.BALL_PLACEMENT_US,
+
+        }.get(ref_cmd, RefereeCommand.HALT)
+
+
+    def _normal_start(self):
+        return {
+            RefereeCommand.PREPARE_KICKOFF_US: SimpleAutoPlayState.OFFENSE_KICKOFF,
+            RefereeCommand.PREPARE_KICKOFF_THEM: SimpleAutoPlayState.DEFENSE_KICKOFF,
+            RefereeCommand.PREPARE_PENALTY_US: SimpleAutoPlayState.OFFENSE_PENALTY,
+            RefereeCommand.PREPARE_PENALTY_THEM: SimpleAutoPlayState.DEFENSE_PENALTY,
+            RefereeCommand.NORMAL_START: self._decide_between_normal_play()
+        }.get(self.last_ref_state, SimpleAutoPlayState.NORMAL_DEFENSE)
+
+    def _decide_between_normal_play(self):
+        if is_ball_our_side():
+            return SimpleAutoPlayState.NORMAL_DEFENSE
+        else:
+            return SimpleAutoPlayState.NORMAL_OFFENSE
+
+    def _exec_state(self):
+        # We use the ball's mobility for detecting a kick and change state
+        if self.current_state in self.NORMAL_STATE and GameState().ball.is_immobile():
+            return self._decide_between_normal_play()
+        elif self.current_state in self.FREE_KICK_STATE and GameState().ball.is_mobile():
+            return self._decide_between_normal_play()
+        elif self.current_state in self.KICKOFF_STATE and GameState().ball.is_mobile():
+            return self._decide_between_normal_play()
+
+        return self.current_state

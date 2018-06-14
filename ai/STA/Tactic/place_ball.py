@@ -3,10 +3,10 @@
 import time
 from typing import List
 
-from Util.constant import ROBOT_CENTER_TO_KICKER, ROBOT_DIAMETER, KEEPOUT_DISTANCE_FROM_BALL
+from Util.constant import ROBOT_CENTER_TO_KICKER, KEEPOUT_DISTANCE_FROM_BALL
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
-from Util.geometry import compare_angle, normalize, random_direction
+from Util.geometry import compare_angle, normalize
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -16,7 +16,7 @@ from config.config import Config
 
 GRAB_BALL_SPACING = 20
 GO_BEHIND_SPACING = GRAB_BALL_SPACING * 10
-TOLERANCE_ON_BALL_FINAL_POSITION = 50  # Rules only ask for 100mm
+TOLERANCE_ON_BALL_FINAL_POSITION = 100
 
 BALL_DISPLACEMENT_TO_DETECT_GRABBING = 20
 TIME_TO_WAIT_FOR_BALL_STOP_MOVING = 2  # secondes
@@ -29,7 +29,7 @@ class PlaceBall(Tactic):
                  args: List[str]=None,
                  go_behind_distance=GO_BEHIND_SPACING):
 
-        super().__init__(game_state, player, target, args)
+        super().__init__(game_state, player, target, args, forbidden_areas=[])
         self.target = target
         self.go_behind_distance = go_behind_distance
 
@@ -61,12 +61,12 @@ class PlaceBall(Tactic):
 
         distance_behind = self._get_destination_behind_ball(self.go_behind_distance)
 
-        if (self.player.pose.position - distance_behind).norm < 20 \
+        if (self.player.pose.position - distance_behind).norm < 200 \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
             self.next_state = self.grab_ball
 
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=2,
+                                      cruise_speed=1,
                                       ball_collision=True).build()
 
     def grab_ball(self):
@@ -82,8 +82,9 @@ class PlaceBall(Tactic):
             self.steady_orientation = orientation
 
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=0.4,
-                                      ball_collision=False).addForceDribbler().build()
+                                      cruise_speed=0.2,
+                                      ball_collision=False
+                                      ).addForceDribbler().build()
 
     def move_ball(self):
         if self._check_success():
@@ -96,7 +97,9 @@ class PlaceBall(Tactic):
 
         return CmdBuilder().addMoveTo(Pose(self.player_target_position, self.steady_orientation),
                                       cruise_speed=self.move_ball_cruise_speed,
-                                      ball_collision=False).addForceDribbler().build()
+                                      ball_collision=False,
+                                      enable_pathfinder=False
+                                      ).addForceDribbler().build()
 
     def wait_for_ball_stop_spinning(self):
         if self.wait_timer is None:
@@ -108,7 +111,9 @@ class PlaceBall(Tactic):
         if self._has_ball_quit_dribbler():
             self._fetch_ball()
         return CmdBuilder().addMoveTo(Pose(self.player_target_position, self.steady_orientation),
-                                      ball_collision=False).addStopDribbler().build()
+                                      ball_collision=False,
+                                      enable_pathfinder=False
+                                      ).addStopDribbler().build()
 
     def get_away_from_ball(self):
         if self._check_success() and self._get_distance_from_ball() > KEEPOUT_DISTANCE_FROM_BALL:

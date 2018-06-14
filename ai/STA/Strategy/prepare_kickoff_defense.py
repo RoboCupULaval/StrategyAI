@@ -1,7 +1,9 @@
 # Under MIT License, see LICENSE.txt
-
+from Util.constant import REASONABLE_OFFSET, ROBOT_RADIUS
 from Util.pose import Pose
 from Util.role import Role
+from ai.Algorithm.path_partitionner import Obstacle
+
 from ai.STA.Strategy.team_go_to_position import TeamGoToPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.states.game_state import GameState
@@ -40,3 +42,20 @@ class PrepareKickOffDefense(TeamGoToPosition):
                              Role.SECOND_DEFENCE: defense_bottom_position}
 
         self.assign_tactics(role_to_positions)
+
+    @classmethod
+    def required_roles(cls):
+        return [Role.GOALKEEPER,
+                Role.MIDDLE]
+
+    @classmethod
+    def optional_roles(cls):
+        return [Role.FIRST_ATTACK,
+                Role.SECOND_ATTACK,
+                Role.FIRST_DEFENCE,
+                Role.SECOND_DEFENCE]
+
+
+    def obstacles(self):
+        min_distance = REASONABLE_OFFSET + ROBOT_RADIUS + self.game_state.field.center_circle_radius
+        return [Obstacle(self.game_state.field.center.array, avoid_distance=min_distance)]

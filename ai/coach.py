@@ -3,8 +3,8 @@ import logging
 import os
 import cProfile
 
-from multiprocessing import Process, Queue
-from multiprocessing.managers import DictProxy
+from multiprocessing import Process
+from queue import Full
 from time import time, sleep
 
 from Util.timing import create_fps_timer
@@ -15,35 +15,28 @@ from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 
 from config.config import Config
-
+config = Config()
 
 class Coach(Process):
 
-    MAX_EXCESS_TIME = 0.1
-    PROFILE_DUMP_TIME = 10
-    PROFILE_DATA_FILENAME = 'profile_data_ai.prof'
+    MAX_EXCESS_TIME = 0.05
 
-    def __init__(self,
-                 engine_game_state: DictProxy,
-                 field: DictProxy,
-                 ai_queue: Queue,
-                 referee_queue: Queue,
-                 ui_send_queue: Queue,
-                 ui_recv_queue: Queue):
+    def __init__(self, framework):
 
         super().__init__(name=__name__)
 
+        self.framework = framework
         self.logger = logging.getLogger(self.__class__.__name__)
 
         # Managers for shared memory between process
-        self.engine_game_state = engine_game_state
-        self.field = field
+        self.engine_game_state = self.framework.game_state
+        self.field = self.framework.field
 
         # Queues for process communication
-        self.ai_queue = ai_queue
-        self.referee_queue = referee_queue
-        self.ui_send_queue = ui_send_queue
-        self.ui_recv_queue = ui_recv_queue
+        self.ai_queue = self.framework.ai_queue
+        self.referee_queue = self.framework.referee_queue
+        self.ui_send_queue = self.framework.ui_send_queue
+        self.ui_recv_queue = self.framework.ui_recv_queue
 
         # States
         self.game_state = GameState()
@@ -59,9 +52,11 @@ class Coach(Process):
                                             self.ui_recv_queue)
 
         # fps and limitation
-        self.fps = Config()['GAME']['coach_fps']
+        self.fps = config['GAME']['fps']
         self.frame_count = 0
         self.last_frame_count = 0
+        self.dt = 0.0
+        self.last_time = 0.0
 
         def callback(excess_time):
             if excess_time > Coach.MAX_EXCESS_TIME:
@@ -70,50 +65,76 @@ class Coach(Process):
         self.fps_sleep = create_fps_timer(self.fps, on_miss_callback=callback)
 
         # profiling
-        self.profiling_enabled = False
-        self.profiler = None
+        self.profiler = cProfile.Profile()
+        if self.framework.profiling:
+            self.profiler.enable()
 
     def wait_for_geometry(self):
-        self.logger.debug('Waiting for geometry from the Engine.')
+        self.logger.debug('Waiting for field\'s geometry from the Engine.')
         start = time()
         while not self.field:
             self.fps_sleep()
         self.game_state.const = self.field
         self.logger.debug('Geometry received from the Engine in {:0.2f} seconds.'.format(time() - start))
 
-    def run(self) -> None:
-        self.wait_for_geometry()
+    def wait_for_referee(self):
+        if Config()['GAME']['competition_mode']:
+            self.logger.debug('Waiting for commands from the referee')
+            while self.referee_queue.qsize() == 0:
+                self.logger.debug('Referee is not active or port is set incorrectly, current port is {})'.format(
+                    Config()['COMMUNICATION']['referee_port']))
+                sleep(1)
+            self.logger.debug('Referee command detected')
 
-        # FIXME: At startup it takes a few seconds to have the player's positions,
-        # to prevent role assigment crash, let's sleep for a few secs.
-        if Config()["GAME"]["is_autonomous_play_at_startup"]:
-            sleep(3)
+    def run(self):
 
         self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
+
         try:
+            self.wait_for_geometry()
+            self.wait_for_referee()
             while True:
                 self.frame_count += 1
+                self.update_time()
                 self.main_loop()
-                self.dump_profiling_stats()
                 self.fps_sleep()
+                self.framework.coach_watchdog.value = time()
+
         except KeyboardInterrupt:
             pass
+        except BrokenPipeError:
+            self.logger.info('A connection was broken.')
+        except:
+            self.logger.exception('An error occurred.')
 
-    def main_loop(self) -> None:
+    def terminate(self):
+        self.dump_profiling_stats()
+        self.logger.info('Terminated')
+        super().terminate()
+
+    def main_loop(self):
         self.game_state.update(self.engine_game_state)
         self.debug_executor.exec()
         engine_commands = self.play_executor.exec()
-        self.ai_queue.put(engine_commands)
+        try:
+            self.ai_queue.put_nowait(engine_commands)
+        except Full:
+            self.logger.critical('The Engine queue is full.')
 
-    def enable_profiling(self):
-        self.profiling_enabled = True
-        self.profiler = cProfile.Profile()
-        self.profiler.enable()
-        self.logger.debug('Profiling mode activate.')
+    def update_time(self):
+        current_time = time()
+        self.dt = current_time - self.last_time
+        self.last_time = current_time
 
     def dump_profiling_stats(self):
-        if self.profiling_enabled:
-            if self.frame_count % (self.fps * Coach.PROFILE_DUMP_TIME) == 0:
-                self.profiler.dump_stats(Coach.PROFILE_DATA_FILENAME)
-                self.logger.debug('Profile data written to {}.'.format(Coach.PROFILE_DATA_FILENAME))
+        if self.framework.profiling:
+            if self.frame_count % (self.fps * config['GAME']['profiling_dump_time']) == 0:
+                self.profiler.dump_stats(config['GAME']['profiling_filename'])
+                self.logger.debug('Profiling data written to {}.'.format(config['GAME']['profiling_filename']))
 
+    def is_alive(self):
+        if config['GAME']['competition_mode']:
+            if time() - self.framework.ai_watchdog.value > self.framework.MAX_HANGING_TIME:
+                self.logger.critical('Process is hanging. Shutting down.')
+                return False
+        return super().is_alive()
