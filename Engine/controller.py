@@ -15,7 +15,6 @@ from Engine.robot import Robot
 from Engine.Communication.robot_state import RobotPacket, RobotState
 
 from Util import Pose
-from Util.constant import ROBOT_RADIUS
 from Util.engine_command import EngineCommand
 from Util.geometry import rotate
 from config.config import Config
