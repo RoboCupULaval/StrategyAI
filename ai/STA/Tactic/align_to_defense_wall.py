@@ -60,12 +60,7 @@ class AlignToDefenseWall(Tactic):
         self.next_state = self.main_state
 
     def init_players_in_formation(self):
-        for idx, player in enumerate(self.robots_in_formation):
-            if self.player == player:
-                self.player_number_in_formation = idx
-                break
-        else:
-            raise RuntimeError("The current player is not in the formation")
+        self.player_number_in_formation = self.robots_in_formation.index(self.player)
 
     def compute_wall_segment(self):
         """

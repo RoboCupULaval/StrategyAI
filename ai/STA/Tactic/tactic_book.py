@@ -3,6 +3,7 @@ from typing import List
 
 import logging
 
+from ai.STA.Tactic.align_around_the_ball import AlignAroundTheBall
 from ai.STA.Tactic.place_ball import PlaceBall
 from ai.STA.Tactic.face_target import FaceTarget
 from ai.STA.Tactic.pass_to_player import PassToPlayer
@@ -45,6 +46,7 @@ class TacticBook(object):
             'StayAwayFromBall': StayAwayFromBall,
             'Stop': Stop,
             'RotateAroundBall': RotateAroundBall,
+            'AlignAroundTheBall': AlignAroundTheBall
         }
         self.default_tactics = ['GoToPosition',
                                'GoKick']
