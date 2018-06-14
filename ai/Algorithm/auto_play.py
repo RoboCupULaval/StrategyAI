@@ -147,8 +147,8 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.HALT: 'DoNothing',
 
             # Robots must stay 50 cm from the ball
-            SimpleAutoPlayState.STOP: 'StayAway',
-            SimpleAutoPlayState.GOAL_US: 'StayAway',
+            SimpleAutoPlayState.STOP: 'SmartStop',
+            SimpleAutoPlayState.GOAL_US: 'IndianaJones',
             SimpleAutoPlayState.GOAL_THEM: 'StayAway',
 
             SimpleAutoPlayState.NORMAL_OFFENSE: 'Offense',
