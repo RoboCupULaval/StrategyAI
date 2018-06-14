@@ -19,7 +19,6 @@ from ai.STA.Tactic.protect_zone import ProtectZone
 from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
 from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.stress_test_robot.py import StressTestRobot, StressTestRobotWaypoint
 
 
 class TacticBook:
