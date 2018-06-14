@@ -40,6 +40,7 @@ class TacticBook:
                    StayAwayFromBall,
                    RotateAroundBall,
                    GoKickExperimental,
+                   RotateAroundBall,
                    *defaults_tactics,
                    self.stop_tactic}
 
