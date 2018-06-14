@@ -3,6 +3,7 @@ from typing import List
 
 from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, normalize, closest_point_on_line
 from Util.position import Position
+from Util.role import Role
 from Util.constant import ROBOT_RADIUS, BALL_OUTSIDE_FIELD_BUFFER
 from Util.constant import ROBOT_RADIUS
 from ai.Algorithm.path_partitionner import Obstacle
@@ -159,7 +160,7 @@ def best_passing_option(passing_player, passer_can_kick_in_goal=True):
     receiver = None
     for p in GameState().our_team.available_players.values():
 
-        if p != passing_player:
+        if p != passing_player and p != GameState().get_player_by_role(Role.GOALKEEPER):
             # Calcul du score pour passeur vers receveur
             score = line_of_sight_clearance(passing_player, p.pose.position)
 
