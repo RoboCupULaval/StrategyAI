@@ -111,8 +111,6 @@ class Engine(Process):
             self.logger.info('A connection was broken.')
         except:
             self.logger.exception('An error occurred.')
-        finally:
-            self.dump_profiling_stats()
 
     def wait_for_vision(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
