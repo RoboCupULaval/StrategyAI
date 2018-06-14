@@ -26,13 +26,19 @@ class BallPlacement(Strategy):
         for r, p in self.assigned_roles.items():
             if r == Role.FIRST_ATTACK and target is not None:
                 self.create_node(r, PlaceBall(self.game_state, p, target=Pose(target)))
+            elif r == Role.GOALKEEPER:
+                self.create_node(r, StayAwayFromBall(self.game_state,
+                                                     p,
+                                                     forbidden_areas=[],
+                                                     keepout_radius=2*KEEPOUT_DISTANCE_FROM_BALL))
             else:
                 self.create_node(r, StayAwayFromBall(self.game_state, p, keepout_radius=2*KEEPOUT_DISTANCE_FROM_BALL))
 
     @classmethod
     def required_roles(cls):
-        return [Role.FIRST_ATTACK]
+        return [Role.GOALKEEPER,
+                Role.FIRST_ATTACK]
 
     @classmethod
     def optional_roles(cls):
-        return [r for r in Role if r != Role.FIRST_ATTACK]
+        return [r for r in Role if r not in [Role.GOALKEEPER, Role.FIRST_ATTACK]]

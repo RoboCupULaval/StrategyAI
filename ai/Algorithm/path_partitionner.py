@@ -89,6 +89,8 @@ class PathPartitionner:
         return any(collisions)
 
     def find_collisions(self, start, target):
+        if np.array_equal(start, target): return [], 0
+
         robot_to_obstacles = self.obstacles_position - start
         robot_to_obstacle_norm = np.linalg.norm(robot_to_obstacles, axis=1)
         obstacles = self.obstacles
