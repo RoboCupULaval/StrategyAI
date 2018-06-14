@@ -28,8 +28,8 @@ class SerialCommandSender(Sender):
     def translate_kick_force(kick_force: KickForce) -> int:
         kick_translation = {KickForce.NONE: 0,
                             KickForce.LOW: 10,
-                            KickForce.MEDIUM: 30,
-                            KickForce.HIGH: 50}
+                            KickForce.MEDIUM: 40,
+                            KickForce.HIGH: 60}
         return kick_translation[kick_force]
 
     @staticmethod
