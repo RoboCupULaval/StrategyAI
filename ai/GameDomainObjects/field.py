@@ -175,8 +175,8 @@ class Field:
         self.their_goal_line = Line(p1=Position(self.their_goal_x, +self.goal_width / 2),
                                     p2=Position(self.their_goal_x, -self.goal_width / 2))
 
-        self.indirect_avoid_area = Area.pad(self.their_goal_area,
-                                            INDIRECT_KICK_OFFSET + KEEPOUT_DISTANCE_FROM_GOAL)
+        self.free_kick_avoid_area = Area.pad(self.their_goal_area,
+                                             INDIRECT_KICK_OFFSET + KEEPOUT_DISTANCE_FROM_GOAL)
         self.our_goal_forbidden_area = Area.pad(self.our_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
         self.their_goal_forbidden_area = Area.pad(self.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
 
