@@ -14,7 +14,7 @@ from ai.states.game_state import GameState
 
 class GoToPosition(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
-                 args: List[str]=None, cruise_speed=1):
+                 args: List[str]=None, cruise_speed=2):
         super().__init__(game_state, player, target, args)
         self.target = target
         self.status_flag = Flags.INIT

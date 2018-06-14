@@ -32,7 +32,9 @@ class RealVelocityController(RegulatorBaseClass):
         velocity = robot.position_error * speed_norm / robot.position_error.norm + path_correction * speed_norm / self.v_d
         velocity /= max(1.0, abs(velocity.norm) / speed_norm)
         cmd_orientation = self.orientation_controller.execute(robot.orientation_error)
-        cmd_orientation /= max(1, abs(cmd_orientation) / MAX_ANGULAR_SPEED)
+        cmd_orientation /= max(1.0, abs(cmd_orientation) / MAX_ANGULAR_SPEED)
+
+        self.last_commanded_velocity = velocity
 
         return Pose(velocity, cmd_orientation)
 
