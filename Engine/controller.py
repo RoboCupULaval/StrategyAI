@@ -59,9 +59,12 @@ class Controller:
         for robot in self.active_robots:
             robot.path, robot.target_speed = path_smoother(robot.raw_path, robot.cruise_speed, robot.end_speed)
 
-            commands[robot.id] = min(robot.velocity_regulator.execute(robot, dt),
-                                     robot.position_regulator.execute(robot, dt),
-                                     key=lambda cmd: cmd.norm)
+            if robot.target_speed < 10:
+                commands[robot.id] = min(robot.velocity_regulator.execute(robot, dt),
+                                         robot.position_regulator.execute(robot, dt),
+                                         key=lambda cmd: cmd.norm)
+            else:
+                commands[robot.id] = robot.velocity_regulator.execute(robot, dt)
 
         self.send_debug(commands)
 
