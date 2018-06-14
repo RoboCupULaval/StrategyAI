@@ -83,7 +83,8 @@ class PlaceBall(Tactic):
 
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=0.2,
-                                      ball_collision=False).addForceDribbler().build()
+                                      ball_collision=False
+                                      ).addForceDribbler().build()
 
     def move_ball(self):
         if self._check_success():
@@ -96,7 +97,9 @@ class PlaceBall(Tactic):
 
         return CmdBuilder().addMoveTo(Pose(self.player_target_position, self.steady_orientation),
                                       cruise_speed=self.move_ball_cruise_speed,
-                                      ball_collision=False).addForceDribbler().build()
+                                      ball_collision=False,
+                                      pathfinder=False
+                                      ).addForceDribbler().build()
 
     def wait_for_ball_stop_spinning(self):
         if self.wait_timer is None:
@@ -108,7 +111,9 @@ class PlaceBall(Tactic):
         if self._has_ball_quit_dribbler():
             self._fetch_ball()
         return CmdBuilder().addMoveTo(Pose(self.player_target_position, self.steady_orientation),
-                                      ball_collision=False).addStopDribbler().build()
+                                      ball_collision=False,
+                                      pathfinder=False
+                                      ).addStopDribbler().build()
 
     def get_away_from_ball(self):
         if self._check_success() and self._get_distance_from_ball() > KEEPOUT_DISTANCE_FROM_BALL:

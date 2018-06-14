@@ -3,7 +3,7 @@ import logging
 from collections import defaultdict
 from typing import Dict, List
 
-from Util import AICommand, Position
+from Util import AICommand, Position, Path
 from ai.Algorithm.path_partitionner import PathPartitionner, Obstacle
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
@@ -33,7 +33,10 @@ class PathfinderModule:
         self.strategy_obstacles = strategy_obstacles
         for player, ai_cmd in ai_cmds.items():
             if ai_cmd.target is not None:
-                self.paths[player] = self.generate_path(player, ai_cmd)
+                if ai_cmd.pathfinder:
+                    self.paths[player] = self.generate_path(player, ai_cmd)
+                else:
+                    self.paths[player] = Path(start=player.position, target=ai_cmd.target.position)
             else:
                 self.paths[player] = None
 
