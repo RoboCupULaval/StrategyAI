@@ -89,7 +89,7 @@ class VisionReceiver(ReceiverProcess):
 
             if abs(VisionReceiver.TIME_OFFSET - current_time_offset) > VisionReceiver.MAX_TIME_OFFSET_DIFFERENCE:
                 self.logger.debug('Offset time between system was reset to {:.0f} sec (was {:.0f} sec)'.format(current_time_offset,
-                                                                                                            VisionReceiver.TIME_OFFSET))
+                                                                                                               VisionReceiver.TIME_OFFSET))
                 self.logger.warning('You might be receiving vision frame from more then one source.')
                 VisionReceiver.TIME_OFFSET = current_time_offset
 

@@ -43,9 +43,9 @@ class RobotFilter(KalmanFilter):
                          [0,  0, dt]])  # Speed Theta
 
     def process_covariance(self, dt):
-        sigma_acc_x = 50
-        sigma_acc_y = 50
-        sigma_acc_o = 10 * np.pi/180
+        sigma_acc_x = 500
+        sigma_acc_y = 500
+        sigma_acc_o = 20 * np.pi/180
 
         process_covariance = \
             np.array([
