@@ -3,6 +3,7 @@ from typing import List
 
 from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, normalize, closest_point_on_line
 from Util.position import Position
+from Util.role import Role
 from Util.constant import ROBOT_RADIUS, BALL_OUTSIDE_FIELD_BUFFER
 from Util.constant import ROBOT_RADIUS
 from ai.Algorithm.path_partitionner import Obstacle
@@ -62,12 +63,12 @@ def player_covered_from_goal(player: Player):
     pertinent_collisions_positions = np.array([obs.position for obs in pertinent_collisions])
     pertinent_collisions_avoid_radius = np.array([obs.avoid_distance for obs in pertinent_collisions])
     results = []
-    for i in range(1, 20):  # discretisation de la ligne de but
+    for i in range(0, 15 + 1):  # discretisation de la ligne de but
         goal_point = GameState().field.their_goal_line.p1 + GameState().field.their_goal_line.direction * \
-                     (GameState().field.their_goal_line.length * i / 20)
+                     (GameState().field.their_goal_line.length * i / 15)
         is_colliding = is_path_colliding(pertinent_collisions, pertinent_collisions_positions,
                                          pertinent_collisions_avoid_radius, player.position.array, goal_point.array)
-        results.append([is_colliding, goal_point])
+        results.append((is_colliding, goal_point))
     max_len_seg, indexend = find_max_consecutive_bool(results)
 
     if max_len_seg == 0 and indexend == 0:
@@ -81,8 +82,7 @@ def find_max_consecutive_bool(results):
     max_len_seg = 0  # longueur du segment
     indexend = 0
 
-    for i, result in enumerate(results):
-        is_colliding = result[0]
+    for i, (is_colliding, _) in enumerate(results):
         if not is_colliding:
             count += 1
         else:
@@ -90,6 +90,9 @@ def find_max_consecutive_bool(results):
                 max_len_seg = count
                 indexend = i
             count = 0
+    if count > max_len_seg:
+        max_len_seg = count
+        indexend = i
     return [max_len_seg, indexend]
 
 
@@ -146,17 +149,18 @@ def is_ball_our_side():
     else:
         return GameState().ball_position.x < 0
 
+
 # noinspection PyUnresolvedReferences
-def best_passing_option(passing_player, consider_goal=True):
+def best_passing_option(passing_player, passer_can_kick_in_goal=True):
     # Retourne l'ID du player ou le but le mieux placé pour une passe, NONE si but est la meilleure possibilité
 
     score_min = float("inf")
-    goal = Position(GameState().field.their_goal_x, 0)
+    goal = GameState().field.their_goal
 
-    receiver_id = None
+    receiver = None
     for p in GameState().our_team.available_players.values():
 
-        if p.id != passing_player.id:
+        if p != passing_player and p != GameState().get_player_by_role(Role.GOALKEEPER):
             # Calcul du score pour passeur vers receveur
             score = line_of_sight_clearance(passing_player, p.pose.position)
 
@@ -164,30 +168,29 @@ def best_passing_option(passing_player, consider_goal=True):
             score += line_of_sight_clearance(p, goal)
             if score_min > score:
                 score_min = score
-                receiver_id = p.id
+                receiver = p
 
-    if consider_goal and not is_ball_our_side():
+    if passer_can_kick_in_goal and not is_ball_our_side():
         score = (line_of_sight_clearance(passing_player, goal))
         if score_min > score:
-            receiver_id = None
+            receiver = None
 
-    return receiver_id
+    return receiver
 
 
-def line_of_sight_clearance(player, targets):
+def line_of_sight_clearance(player, target):
     # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est petit)
-    score = (player.pose.position - targets).norm
-    for j in GameState().our_team.available_players.values():
+    score = (player.pose.position - target).norm
+    for p in GameState().our_team.available_players.values():
         # Obstacle : les players friends
-        condition = []
-        if not (j.id == player.id):
-            condition += [target is not j.pose.position for target in targets]
-            if any(condition):
-                score *= trajectory_score(player.pose.position, Position.from_array(targets[condition]), j.pose.position)
-    for j in GameState().enemy_team.available_players.values():
+        if not (p.id == player.id):
+            if target is not p.pose.position:
+                score *= trajectory_score(player.pose.position, target, p.pose.position)
+    for p in GameState().enemy_team.available_players.values():
         # Obstacle : les players ennemis
-        score *= trajectory_score(player.pose.position, targets, j.pose.position)
+        score *= trajectory_score(player.pose.position, target, p.pose.position)
     return score
+
 
 # noinspection PyUnusedLocal
 def line_of_sight_clearance_ball(player, targets, distances=None):
@@ -210,6 +213,7 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
         #print(scores)
         #print(scores_temp)
     return scores
+
 
 # noinspection PyPep8Naming
 def trajectory_score(pointA, pointsB, obstacle):

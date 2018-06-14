@@ -7,7 +7,7 @@ from queue import Empty
 from typing import List, Dict
 
 from Debug.debug_command_factory import DebugCommandFactory
-from Util import Pose, Position, AICommand, EngineCommand
+from Util import Pose, Position, AICommand, EngineCommand, Path
 from Util.role import Role
 from ai.Algorithm.auto_play import SimpleAutoPlay
 from ai.GameDomainObjects import Player
@@ -17,38 +17,30 @@ from ai.executors.pathfinder_module import PathfinderModule
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 from config.config import Config
+config = Config()
 
 
 class PlayExecutor:
 
     def __init__(self, play_state: PlayState, ui_send_queue: Queue, referee_queue: Queue):
+
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        cfg = Config()
         self.auto_play = SimpleAutoPlay(play_state)
         self.play_state = play_state
         self.game_state = GameState()
         self.ui_send_queue = ui_send_queue
         self.referee_queue = referee_queue
 
-        self.autonomous_flag = cfg["GAME"]["is_autonomous_play_at_startup"]
-        self._ref_states = []
-        # self.last_available_players = {}
-        # self.goalie_id = -1
+        self.autonomous_flag = config['GAME']['is_autonomous_play_at_startup']
+        self.ref_states = []
 
         self.pathfinder_module = PathfinderModule()
 
     def exec(self) -> List[EngineCommand]:
-        """
-        Execute la stratégie courante et envoie le status des robots et les livres de tactiques et stratégies
-
-        :return: None
-        """
 
         self._fetch_referee_state()
 
-        # TODO: Add a warning when no ref has been received since the start
-        # It will indicate that the wrong referee port has been used
         if self.autonomous_flag:
             self._exec_auto_play()
 
@@ -56,8 +48,8 @@ class PlayExecutor:
 
         self.ui_send_queue.put_nowait(debug_cmds)
 
-        strat_obstacles = self.play_state.current_strategy.obstacles()
-        paths = self.pathfinder_module.exec(ai_cmds, strat_obstacles)
+        strategy_obstacles = self.play_state.current_strategy.obstacles()
+        paths = self.pathfinder_module.exec(ai_cmds, strategy_obstacles)
 
         engine_cmds = []
         for player, ai_cmd in ai_cmds.items():
@@ -75,83 +67,77 @@ class PlayExecutor:
         elif cmd.is_autoplay_change_command():
             self.order_change_of_autonomous_play(cmd.data['status'])
 
-    def order_change_of_autonomous_play(self, is_autonomous):
+    def order_change_of_autonomous_play(self, is_autonomous: bool):
         # If we switch from manual to autonomous we clear previous referee's command
         if not self.autonomous_flag and is_autonomous:
-            self.logger.debug("Switching to autonomous mode")
+            self.logger.debug('Switching to autonomous mode')
         elif self.autonomous_flag and not is_autonomous:
-            self.logger.debug("Switching to manual mode")
-            self.play_state.current_strategy = "DoNothing"
+            self.logger.debug('Switching to manual mode')
+            self.play_state.current_strategy = 'DoNothing'
 
         self.autonomous_flag = is_autonomous
 
-    @property
-    def ref_states(self):
-        return self._ref_states
-
     def _fetch_referee_state(self):
-        self._ref_states = []
+        self.ref_states = []
         try:
             while not self.referee_queue.empty():
                 referee_state = self.referee_queue.get(block=False)
-                self._ref_states.append(referee_state)
+                self.ref_states.append(referee_state)
         except Empty:
             pass
-        # if GameState().game.referee.team_info['ours']['goalie'] != self.goalie_id:
-        #     self.goalie_id = GameState().game.referee.team_info['ours']['goalie']
-        #     GameState().update_player_for_locked_role(self.goalie_id, Role.GOALKEEPER)
 
     def _exec_auto_play(self):
-        for state in self._ref_states:
+        for state in self.ref_states:
             self.auto_play.update(state)
 
     def _change_strategy(self, cmd: STAChangeCommand):
         # Convert string role to their enum equivalent
-        roles = cmd.data["roles"]
+        roles = cmd.data['roles']
         if roles is not None:
-            roles = {Role[r]: i for r, i in cmd.data["roles"].items()}
-        self.play_state.change_strategy(cmd.data["strategy"], roles)
+            roles = {Role[r]: i for r, i in cmd.data['roles'].items()}
+        self.play_state.change_strategy(cmd.data['strategy'], roles)
 
     def _change_tactic(self, cmd: STAChangeCommand):
 
         try:
             this_player = GameState().our_team.available_players[cmd.data['id']]
         except KeyError:
-            self.logger.info("You are assigning a tactic to not visible player (id={}).".format(cmd.data['id']))
+            self.logger.info('A tactic was assign to a player which is not on the field (id={}).'.format(cmd.data['id']))
             this_player = GameState().our_team.players[cmd.data['id']]
+
         player_id = this_player.id
         tactic_name = cmd.data['tactic']
         target = Position.from_list(cmd.data['target'])
-        if Config()["GAME"]["on_negative_side"]:
+        if config['GAME']['on_negative_side']:
             target = target.flip_x()
-        target = Pose(target, this_player.pose.orientation)
-        args = cmd.data.get('args', "")
+        target = Pose(target, this_player.orientation)
+        args = cmd.data.get('args', '')
         try:
             tactic = self.play_state.get_new_tactic(tactic_name)(self.game_state, this_player, target, args)
-        except Exception as e:
-            self.logger.debug(e)
-            self.logger.debug("La tactique n'a pas été appliquée par cause de mauvais arguments.")
-            raise e
+        except:
+            self.logger.exception('An error occurred.')
+            self.logger.debug('The tactic was call with wrong arguments')
+            raise
 
         if not isinstance(self.play_state.current_strategy, HumanControl):
-            self.play_state.current_strategy = "HumanControl"
+            self.play_state.current_strategy = 'HumanControl'
         self.play_state.current_strategy.assign_tactic(tactic, player_id)
 
     def _execute_strategy(self) -> Dict[Player, AICommand]:
         # Applique un stratégie par défault s'il n'en a pas (lors du démarage par exemple)
         # Apply the default strategy if there is none (for example at startup)
         if self.play_state.current_strategy is None:
-            self.play_state.current_strategy = "DoNothing"
+            self.play_state.current_strategy = 'DoNothing'
         return self.play_state.current_strategy.exec()
 
-    def _send_robots_status(self) -> None:
+    def _send_robots_status(self):
         states = self.play_state.current_tactical_state
         if len(states) > 0:
             cmd = DebugCommandFactory.robots_strategic_state(states)
             self.ui_send_queue.put(cmd)
 
 
-def generate_engine_cmd(player: Player, ai_cmd: AICommand, path):
+def generate_engine_cmd(player: Player, ai_cmd: AICommand, path: Path) -> EngineCommand:
     return EngineCommand(player.id,
                          cruise_speed=ai_cmd.cruise_speed * 1000,
                          path=path,

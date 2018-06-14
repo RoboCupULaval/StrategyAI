@@ -16,7 +16,7 @@ from config.config import Config
 
 GRAB_BALL_SPACING = 20
 GO_BEHIND_SPACING = GRAB_BALL_SPACING * 10
-TOLERANCE_ON_BALL_FINAL_POSITION = 50  # Rules only ask for 100mm
+TOLERANCE_ON_BALL_FINAL_POSITION = 100
 
 BALL_DISPLACEMENT_TO_DETECT_GRABBING = 20
 TIME_TO_WAIT_FOR_BALL_STOP_MOVING = 2  # secondes
@@ -29,7 +29,7 @@ class PlaceBall(Tactic):
                  args: List[str]=None,
                  go_behind_distance=GO_BEHIND_SPACING):
 
-        super().__init__(game_state, player, target, args)
+        super().__init__(game_state, player, target, args, forbidden_areas=[])
         self.target = target
         self.go_behind_distance = go_behind_distance
 
@@ -61,7 +61,7 @@ class PlaceBall(Tactic):
 
         distance_behind = self._get_destination_behind_ball(self.go_behind_distance)
 
-        if (self.player.pose.position - distance_behind).norm < 20 \
+        if (self.player.pose.position - distance_behind).norm < 200 \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
             self.next_state = self.grab_ball
 

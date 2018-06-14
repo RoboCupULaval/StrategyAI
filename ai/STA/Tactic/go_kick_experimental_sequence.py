@@ -70,22 +70,22 @@ class GoKickExperimental(Tactic):
         position_behind_ball_for_grab = self.game_state.ball_position - normalize(player_to_target) * GRAB_BALL_SPACING
         position_behind_ball_for_kick = self.game_state.ball_position + normalize(player_to_target) * KICK_DISTANCE
 
-        if self.is_able_to_grab_ball_directly(0.7):
+        if self.is_able_to_grab_ball_directly(0.8):
             self.points_sequence = []
             if compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1) and \
                     (dist_from_ball < GRAB_BALL_SPACING * 1.25):
                 self.next_state = self.validate_kick
                 return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
-                                              ball_collision=False, cruise_speed=2).addKick(self.kick_force).build()
+                                              ball_collision=False, cruise_speed=3).addKick(self.kick_force).build()
             return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_grab, orientation),
-                                          ball_collision=False, cruise_speed=2).build()
+                                          ball_collision=False, cruise_speed=3).build()
         else:
             self.points_sequence = [WayPoint(position_behind_ball_for_approach, ball_collision=True)]
 
         return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
                                       ball_collision=False,
                                       way_points=self.points_sequence,
-                                      cruise_speed=2).build()
+                                      cruise_speed=3).build()
 
     def kick_charge(self):
         if time.time() - self.cmd_last_time > COMMAND_DELAY:

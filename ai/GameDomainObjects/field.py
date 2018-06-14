@@ -1,4 +1,4 @@
-import copy
+
 import logging
 from enum import Enum
 from typing import Dict, Union
@@ -92,7 +92,6 @@ class Field:
         self.center_circle_radius = 1000
         self.boundary_width = 300  # Is the distance between the field and the outside wall
 
-
         self.field_lines = {
             "RightPenaltyStretch": Line(p1=Position(3495, -1000),  # H to E
                                         p2=Position(3495, +1000)),
@@ -166,6 +165,9 @@ class Field:
 
         self.their_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2.flip_x(),
                                     self.field_lines["RightFieldLeftPenaltyStretch"].p1.flip_x())
+
+        self.indirect_avoid_area = Area.from_limits(self.top, self.bottom,
+                                                    self.their_goal_area.left,  self.their_goal_area.left+500)
 
         self.goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
                                   p2=Position(self.our_goal_x, -self.goal_width / 2))
