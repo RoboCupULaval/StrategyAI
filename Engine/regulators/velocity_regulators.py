@@ -13,7 +13,6 @@ config = Config()
 class RealVelocityController(RegulatorBaseClass):
 
     settings = {'kp': 10, 'ki': 0, 'kd': 1}
-    offset = 1
     v_d = 2
     emergency_break_constant = 0.4
     emergency_break_safety_factor = 0.5
@@ -66,7 +65,7 @@ class RealVelocityController(RegulatorBaseClass):
         return clamp(next_speed, -1 * robot.cruise_speed, robot.cruise_speed)
 
     @staticmethod
-    def is_distance_for_break(robot, acc, offset=2) -> bool:
+    def is_distance_for_break(robot, acc, offset=1) -> bool:
         distance = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc
         return robot.position_error.norm > (distance * offset)
 
@@ -77,7 +76,6 @@ class RealVelocityController(RegulatorBaseClass):
 class GrSimVelocityController(RealVelocityController):
 
     settings = {'kp': 2, 'ki': 0.3, 'kd': 0}
-    offset = 1
     v_d = 15
     emergency_break_constant = 0
     emergency_break_safety_factor = 1
