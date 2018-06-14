@@ -159,9 +159,10 @@ class Engine(Process):
 
     def is_alive(self):
 
-        if time() - self.framework.engine_watchdog.value > self.framework.MAX_HANGING_TIME:
-            self.logger.critical('Process is hanging. Shutting down.')
-            return False
+        if config['GAME']['competition_mode']:
+            if time() - self.framework.engine_watchdog.value > self.framework.MAX_HANGING_TIME:
+                self.logger.critical('Process is hanging. Shutting down.')
+                return False
 
         borked_process_not_found = all((self.vision_receiver.is_alive(),
                                         self.ui_sender.is_alive(),

@@ -97,7 +97,6 @@ class Coach(Process):
                 self.frame_count += 1
                 self.update_time()
                 self.main_loop()
-                self.dump_profiling_stats()
                 self.fps_sleep()
                 self.framework.coach_watchdog.value = time()
 
@@ -134,7 +133,8 @@ class Coach(Process):
                 self.logger.debug('Profiling data written to {}.'.format(config['GAME']['profiling_filename']))
 
     def is_alive(self):
-        if time() - self.framework.coach_watchdog.value > self.framework.MAX_HANGING_TIME:
-            self.logger.critical('Process is hanging. Shutting down.')
-            return False
+        if config['GAME']['competition_mode']:
+            if time() - self.framework.ai_watchdog.value > self.framework.MAX_HANGING_TIME:
+                self.logger.critical('Process is hanging. Shutting down.')
+                return False
         return super().is_alive()
