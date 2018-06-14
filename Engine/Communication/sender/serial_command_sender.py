@@ -23,7 +23,7 @@ class SerialCommandSender(Sender):
                                                  self.translate_dribbler_speed(packet.dribbler_state))
         except AttributeError:
             raise RuntimeError("You should update your pyhermes, by reinstalling the requirement:"
-                               "'pip install -r requirement.txt --upgrade'")
+                               "'pip install -r requirements.txt --upgrade'")
     @staticmethod
     def translate_kick_force(kick_force: KickForce) -> int:
         kick_translation = {KickForce.NONE: 0,
