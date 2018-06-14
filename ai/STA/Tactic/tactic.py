@@ -60,6 +60,7 @@ class Tactic:
                 bottom_area,
                 right_area,
                 left_area]
+            areas = []
             self.forbidden_areas = [Area.pad(area, KEEPOUT_DISTANCE_FROM_GOAL) for area in areas]
             self.forbidden_areas += [self.game_state.field.their_goal_forbidden_area,
                                      self.game_state.field.our_goal_forbidden_area]
