@@ -31,6 +31,7 @@ class IndirectFreeKick(Strategy):
                                                                    robots_in_formation=formation,
                                                                    auto_position=True,
                                                                    forbidden_areas=[self.game_state.field.indirect_avoid_area]))
+
                 node_go_kick = self.create_node(role, GoKick(self.game_state,
                                                              player,
                                                              auto_update_target=True,
