@@ -3,10 +3,10 @@
 import time
 from typing import List
 
-from Util.constant import ROBOT_CENTER_TO_KICKER, ROBOT_DIAMETER, KEEPOUT_DISTANCE_FROM_BALL
+from Util.constant import ROBOT_CENTER_TO_KICKER, KEEPOUT_DISTANCE_FROM_BALL
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
-from Util.geometry import compare_angle, normalize, random_direction
+from Util.geometry import compare_angle, normalize
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -98,7 +98,7 @@ class PlaceBall(Tactic):
         return CmdBuilder().addMoveTo(Pose(self.player_target_position, self.steady_orientation),
                                       cruise_speed=self.move_ball_cruise_speed,
                                       ball_collision=False,
-                                      pathfinder=False
+                                      enable_pathfinder=False
                                       ).addForceDribbler().build()
 
     def wait_for_ball_stop_spinning(self):
@@ -112,7 +112,7 @@ class PlaceBall(Tactic):
             self._fetch_ball()
         return CmdBuilder().addMoveTo(Pose(self.player_target_position, self.steady_orientation),
                                       ball_collision=False,
-                                      pathfinder=False
+                                      enable_pathfinder=False
                                       ).addStopDribbler().build()
 
     def get_away_from_ball(self):

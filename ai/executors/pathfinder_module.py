@@ -36,7 +36,7 @@ class PathfinderModule:
         self.strategy_obstacles = strategy_obstacles
         for player, ai_cmd in ai_cmds.items():
             if ai_cmd.target is not None:
-                if ai_cmd.pathfinder:
+                if ai_cmd.enable_pathfinder:
                     self.paths[player] = self.generate_path(player, ai_cmd)
                 else:
                     self.paths[player] = Path(start=player.position, target=ai_cmd.target.position)
