@@ -10,6 +10,7 @@ from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
+from ai.STA.Tactic.rotate_around_ball import RotateAroundBall
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
@@ -34,6 +35,7 @@ class IndirectFreeKick(Strategy):
                                                              player,
                                                              auto_update_target=True,
                                                              can_kick_in_goal=False))
+
                 node_rotate_around_ball = self.create_node(role, RotateAroundBall(self.game_state, player, p_game_state.field.their_goal_pose))
 
                 player_is_closest = partial(self.is_closest_not_goalkeeper, player)
