@@ -13,7 +13,7 @@ from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
 
-GAP_ANGLE = pi / 60  # in rad, distance that prevent robots from touching each other
+GAP_ANGLE = 10 * pi / 180  # in rad, distance that prevent robots from touching each other
 
 
 class AlignAroundTheBall(Tactic):
@@ -36,15 +36,16 @@ class AlignAroundTheBall(Tactic):
         self.current_state = self.main_state
         self.next_state = self.main_state
 
+        self.dist_from_ball = KEEPOUT_DISTANCE_FROM_BALL * 1.1
+
     def init_players_in_formation(self):
         self.player_number_in_formation = self.robots_in_formation.index(self.player)
 
     def compute_wall_arc(self):
-        # nb_robots = len(self.robots_in_formation)
-        nb_robots = 4
+        nb_robots = len(self.robots_in_formation)
 
-        # Angle d'un robot sur le cercle de rayon KEEPOUT_DISTANCE_FROM_BALL
-        self.robot_angle = 2 * atan(ROBOT_RADIUS / KEEPOUT_DISTANCE_FROM_BALL)
+        # Angle d'un robot sur le cercle de rayon self.dist_from_ball
+        self.robot_angle = 2 * atan(ROBOT_RADIUS / self.dist_from_ball)
 
         # Angle totale couvert par le wall
         self.wall_angle = nb_robots * self.robot_angle + GAP_ANGLE * (nb_robots - 1)
@@ -56,30 +57,19 @@ class AlignAroundTheBall(Tactic):
         self.center_of_goal = find_bisector_of_triangle(self.game_state.ball_position, goal_line.p1, goal_line.p2)
         vec_ball_to_center_of_goal = self.center_of_goal - self.game_state.ball_position
 
-        # Centre de la formation sur le cercle de rayon KEEPOUT_DISTANCE_FROM_BALL
-        self.center_formation = KEEPOUT_DISTANCE_FROM_BALL * normalize(
+        # Centre de la formation sur le cercle de rayon self.dist_from_ball
+        self.center_formation = self.dist_from_ball * normalize(
             vec_ball_to_center_of_goal) + self.game_state.ball_position
 
         # J'ajoute robot_angle / 2, sinon, avec 1 seul robot, il ne se positionne pas dans le centre de la formation
         self.first_robot_angle = vec_ball_to_center_of_goal.angle - self.wall_angle / 2 + self.robot_angle / 2
 
         self.first_robot_position = Position(cos(self.first_robot_angle),
-                                             sin(self.first_robot_angle)) * KEEPOUT_DISTANCE_FROM_BALL + \
+                                             sin(self.first_robot_angle)) * self.dist_from_ball + \
                                     self.game_state.ball_position
 
         self.last_robot_angle = self.first_robot_angle + self.wall_angle
 
-
-
-
-
-
-
-
-        # @@@@@@@@@@@@@@@ Ce robot n'est pas a la bonne position @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
-
-        self.last_robot_position = Position(sin(self.last_robot_angle), cos(
-            self.last_robot_angle)) * KEEPOUT_DISTANCE_FROM_BALL + self.game_state.ball_position
 
     def angle_on_wall_arc(self):
         idx = self.player_number_in_formation
@@ -89,26 +79,27 @@ class AlignAroundTheBall(Tactic):
     def debug_cmd(self):
         if self.player_number_in_formation != 0:
             return []
-        return [DebugCommandFactory().line(self.center_formation,
-                                           self.center_of_goal,
-                                           color=RED,
-                                           timeout=0.1),
-                DebugCommandFactory().line(self.game_state.ball_position,
-                                           self.game_state.field.goal_line.p1,
-                                           timeout=0.1),
-                DebugCommandFactory().line(self.game_state.ball_position,
-                                           self.game_state.field.goal_line.p2,
-                                           timeout=0.1),
-                DebugCommandFactory().circle(self.game_state.ball_position, KEEPOUT_DISTANCE_FROM_BALL, is_fill=False,
-                                             timeout=0.1),
-                DebugCommandFactory().circle(self.first_robot_position, 100,
-                                             color=RED,
-                                             is_fill=True,
-                                             timeout=0.1),
-                DebugCommandFactory().circle(self.last_robot_position, 100,
-                                             color=RED,
-                                             is_fill=True,
-                                             timeout=0.1)
+        return [
+                # DebugCommandFactory().line(self.center_formation,
+                #                            self.center_of_goal,
+                #                            color=RED,
+                #                            timeout=0.1),
+                # DebugCommandFactory().line(self.game_state.ball_position,
+                #                            self.game_state.field.goal_line.p1,
+                #                            timeout=0.1),
+                # DebugCommandFactory().line(self.game_state.ball_position,
+                #                            self.game_state.field.goal_line.p2,
+                #                            timeout=0.1),
+                # DebugCommandFactory().circle(self.game_state.ball_position, self.dist_from_ball, is_fill=False,
+                #                              timeout=0.1),
+                # DebugCommandFactory().circle(self.first_robot_position, 100,
+                #                              color=RED,
+                #                              is_fill=True,
+                #                              timeout=0.1),
+                # DebugCommandFactory().circle(self.last_robot_position, 100,
+                #                              color=RED,
+                #                              is_fill=True,
+                #                              timeout=0.1)
                 ]
 
     def main_state(self):
@@ -116,6 +107,6 @@ class AlignAroundTheBall(Tactic):
         if self.game_state.field.is_ball_in_our_goal_area():
             return Idle  # We must not block the goalkeeper
         angle = self.angle_on_wall_arc()
-        dest = Position(cos(angle), sin(angle)) * KEEPOUT_DISTANCE_FROM_BALL + self.game_state.ball_position
+        dest = Position(cos(angle), sin(angle)) * self.dist_from_ball + self.game_state.ball_position
         dest_orientation = (self.game_state.ball_position - dest).angle
-        return MoveTo(Pose(dest, dest_orientation))
+        return MoveTo(Pose(dest, dest_orientation), cruise_speed=0.8)
