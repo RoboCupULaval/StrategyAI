@@ -3,7 +3,7 @@ from typing import List, Optional, Any, Iterable
 
 import logging
 
-from Debug.debug_command_factory import DebugCommandFactory
+from Debug.debug_command_factory import DebugCommandFactory, VIOLET
 from Util import Pose, Position
 from Util.ai_command import AICommand
 from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL
@@ -56,11 +56,14 @@ class Tactic:
                                          field.bottom,
                                          field.left - field.boundary_width,
                                          field.left - 100 * field.boundary_width)
+            # Those limits are for ulaval local only
             areas = [
                 top_area,
                 bottom_area,
                 right_area,
-                left_area]
+                left_area,
+                self.field.behind_our_goal_line,
+                self.field.behind_their_goal_line]
             #areas = []
             self.forbidden_areas = [Area.pad(area, KEEPOUT_DISTANCE_FROM_GOAL) for area in areas]
             self.forbidden_areas += [self.game_state.field.their_goal_forbidden_area,
@@ -86,13 +89,19 @@ class Tactic:
     def _check_for_forbidden_area(self, next_ai_command):
         old_target_position = next_ai_command.target.position
         target_to_position = Line(self.player.position, next_ai_command.target.position)
+        closest_new_target = None
         for area in self.forbidden_areas:
             if old_target_position in area:
                 target_position = self._find_best_next_target(area, old_target_position, self.player.position, target_to_position)
                 new_target = Pose(target_position, next_ai_command.target.orientation)
 
-                # This trailing _ is not for protected access, it was add to avoid a name conflict with the function replace ;)
-                return next_ai_command._replace(target=new_target)
+                if closest_new_target is None \
+                        or (closest_new_target - self.player.position).norm > (new_target - self.player.position).norm:
+                    closest_new_target = new_target
+
+        if closest_new_target is not None:
+            # This trailing _ is not for protected access, it was add to avoid a name conflict with the function replace
+            return next_ai_command._replace(target=closest_new_target )
         return next_ai_command
 
     def _find_best_next_target(self, area: Area, old_target_position, player_position: Position, target_to_position: Line):
@@ -109,12 +118,18 @@ class Tactic:
                 return intersections[1]
 
     def debug_cmd(self):
-        #return [DebugCommandFactory().area(area) for area in self.forbidden_areas]
-        return []
+        cmds = []
+        [cmds.extend(DebugCommandFactory().area(area, color=VIOLET)) for area in self.forbidden_areas]
+        return cmds
+        #return []
 
     @classmethod
     def name(cls):
         return cls.__name__
+
+    @property
+    def field(self):
+        return self.game_state.field
 
     def __str__(self):
         return self.__class__.__name__

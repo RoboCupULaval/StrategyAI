@@ -134,7 +134,9 @@ class AlignToDefenseWall(Tactic):
         if self.go_kick_tactic is None:
             self.go_kick_tactic = GoKick(self.game_state, self.player, target=self.game_state.field.their_goal_pose)
 
-        if not self._should_ball_be_kick_by_wall() or self.game_state.field.is_ball_in_our_goal_area():
+        if not self._should_ball_be_kick_by_wall() \
+                or self.game_state.field.is_ball_in_our_goal_area() \
+                or not self._is_closest_not_goaler(self.player):
             self.go_kick_tactic = None
             self.next_state = self.main_state
             return Idle
