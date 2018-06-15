@@ -25,7 +25,7 @@ COVER_ROLE = [Role.MIDDLE]
 # noinspection PyMethodMayBeStatic,
 class DefenseWall(Strategy):
 
-    def __init__(self, game_state: GameState, can_kick=True, stay_away_from_ball=False):
+    def __init__(self, game_state: GameState, can_kick=True, multiple_cover=True, stay_away_from_ball=False):
         super().__init__(game_state)
 
         their_goal = self.game_state.field.their_goal_pose
@@ -33,6 +33,7 @@ class DefenseWall(Strategy):
         # If we can not kick, the attackers are part of the defense wall
         # TODO find a more useful thing to do for the attackers when we are in a no kick state
         self.can_kick = can_kick
+        self.multiple_cover = multiple_cover
         self.defensive_role = DEFENSIVE_ROLE.copy()
         self.cover_role = COVER_ROLE.copy()
 
@@ -47,7 +48,7 @@ class DefenseWall(Strategy):
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
-            elif can_kick and player in self.attackers:
+            elif player in self.attackers:
                 node_position_pass = self.create_node(role, PositionForPass(self.game_state,
                                                                             player,
                                                                             robots_in_formation=self.attackers,
@@ -130,9 +131,11 @@ class DefenseWall(Strategy):
 
     def _dispatch_player(self):
 
-        if not self.can_kick:
+        if not self.can_kick and self.multiple_cover:
             self.defensive_role += [Role.FIRST_ATTACK]
             self.cover_role += [Role.SECOND_ATTACK]
+        if not self.can_kick and not self.multiple_cover:
+            self.defensive_role += [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
 
         self.robots_in_wall_formation = [p for r, p in self.assigned_roles.items() if r in self.defensive_role]
         self.robots_in_cover_formation = [p for r, p in self.assigned_roles.items() if r in self.cover_role]
