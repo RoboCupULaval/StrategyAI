@@ -17,7 +17,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 VALIDATE_KICK_DELAY = 0.5
-TARGET_ASSIGNATION_DELAY = 0.5
+TARGET_ASSIGNATION_DELAY = 1.0
 
 GO_BEHIND_SPACING = 250
 GRAB_BALL_SPACING = 100
@@ -105,7 +105,11 @@ class GoKick(Tactic):
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=3,
-                                      ball_collision=False).addChargeKicker().addKick(self.kick_force).build()
+                                      ball_collision=False)\
+                           .addForceDribbler()\
+                           .addChargeKicker()\
+                           .addKick(self.kick_force)\
+                           .build()
 
     def kick(self):
         if self.auto_update_target:
@@ -117,7 +121,9 @@ class GoKick(Tactic):
         orientation = (self.target.position - self.game_state.ball_position).angle
 
         return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
-                                      ball_collision=False).addKick(self.kick_force).build()
+                                      ball_collision=False)\
+                                        .addKick(self.kick_force)\
+                                        .addForceDribbler().build()
 
     def validate_kick(self):
         if self.game_state.ball.is_moving_fast() or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
@@ -128,7 +134,7 @@ class GoKick(Tactic):
             self.status_flag = Flags.INIT
             self.next_state = self.go_behind_ball
 
-        return CmdBuilder().build()
+        return CmdBuilder().addForceDribbler().build()
 
     def halt(self):
         if self.status_flag == Flags.INIT:
@@ -151,18 +157,20 @@ class GoKick(Tactic):
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
             scoring_target = player_covered_from_goal(self.player)
             tentative_target = best_passing_option(self.player, passer_can_kick_in_goal=self.can_kick_in_goal)
+            # Kick in the goal where it's the easiest
             if self.can_kick_in_goal and scoring_target is not None:
-                self.kick_force = KickForce.HIGH
                 self.target = Pose(scoring_target, 0)
+                self.kick_force = KickForce.HIGH
+                # Kick in the goal center
             elif tentative_target is None:
                 if not self.can_kick_in_goal:
                     self.logger.warning("The kicker {} can not find an ally to pass to and can_kick_in_goal is False"
                                         ". So it kicks directly in the goal, sorry".format(self.player))
-                self.kick_force = KickForce.HIGH
                 self.target = Pose(self.game_state.field.their_goal, 0)
-            else:
-                self.kick_force = KickForce.LOW
+                self.kick_force = KickForce.HIGH
+            else:  # Pass the ball to another player
                 self.target = Pose(tentative_target.position)
+                self.kick_force = KickForce.for_dist((self.target.position - self.game_state.ball.position).norm)
 
             self.target_assignation_last_time = time.time()
 
