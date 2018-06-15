@@ -95,7 +95,6 @@ class GoKick(Tactic):
         if self.auto_update_target:
             self._find_best_passing_option()
         if not self.is_able_to_grab_ball_directly(0.8):
-            print("?")
             self.next_state = self.go_behind_ball
 
         if self._get_distance_from_ball() < KICK_DISTANCE:
@@ -112,7 +111,7 @@ class GoKick(Tactic):
         if self.auto_update_target:
             self._find_best_passing_option()
         if not self.is_able_to_grab_ball_directly(0.8):
-            self.next_state = self.go_behind_ball
+            self.next_state = self.grab_ball
         self.next_state = self.validate_kick
 
         player_to_target = (self.target.position - self.player.pose.position)
