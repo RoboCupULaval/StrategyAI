@@ -16,8 +16,7 @@ class BallFilter(KalmanFilter):
         if self.is_active:
             return self.x[1::2]
 
-    def transition_model(self):
-        dt = self._dt
+    def transition_model(self, dt):
         return np.array([[1, dt, 0,  0],   # Position x
                          [0,  1, 0,  0],   # Speed x
                          [0,  0, 1, dt],   # Position y
@@ -27,8 +26,7 @@ class BallFilter(KalmanFilter):
         return np.array([[1, 0, 0, 0],   # Position x
                          [0, 0, 1, 0]])  # Position y
 
-    def process_covariance(self):
-        dt = self._dt
+    def process_covariance(self, dt):
         sigma_acc_x = 10
         sigma_acc_y = sigma_acc_x
         process_covariance = \
