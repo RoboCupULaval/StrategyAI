@@ -2,6 +2,7 @@
 
 from typing import List
 
+from Debug.debug_command_factory import DebugCommandFactory, VIOLET
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder
 from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
@@ -34,3 +35,4 @@ class GoToPosition(Tactic):
         distance = (self.player.pose - self.target.position).norm
         return (distance < POSITION_DEADZONE) and compare_angle(self.player.pose.orientation,
                                                                 self.target.orientation, abs_tol=ANGLE_TO_HALT)
+
