@@ -49,6 +49,16 @@ class KickForce(Enum):
     MEDIUM = 2
     HIGH = 3
 
+    @classmethod
+    def for_dist(cls, dist):
+        if dist < 2000:
+            return KickForce.LOW
+        elif dist < 5000:
+            return KickForce.MEDIUM
+        else:
+            return KickForce.HIGH
+
+
     
 class KickType(Enum):
     DIRECT = 0
