@@ -115,7 +115,7 @@ class GoKick(Tactic):
             self._find_best_passing_option()
         if not self.is_able_to_grab_ball_directly(0.8):
             self.next_state = self.go_behind_ball
-            return CmdBuilder().build()
+            return self.go_behind_ball()
         self.next_state = self.validate_kick
 
         player_to_target = (self.target.position - self.player.pose.position)
