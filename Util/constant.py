@@ -24,6 +24,9 @@ REASONABLE_OFFSET = 50  # To take into account the camera precision and other th
 KEEPOUT_DISTANCE_FROM_BALL = 500 + ROBOT_RADIUS + REASONABLE_OFFSET
 KEEPOUT_DISTANCE_FROM_GOAL = ROBOT_RADIUS + REASONABLE_OFFSET
 
+# Rule 9.4
+INDIRECT_KICK_OFFSET = 200
+
 # Deadzones
 POSITION_DEADZONE = ROBOT_RADIUS * 0.1
 
@@ -45,6 +48,16 @@ class KickForce(Enum):
     LOW = 1
     MEDIUM = 2
     HIGH = 3
+
+    @classmethod
+    def for_dist(cls, dist):
+        if dist < 2000:
+            return KickForce.LOW
+        elif dist < 5000:
+            return KickForce.MEDIUM
+        else:
+            return KickForce.HIGH
+
 
     
 class KickType(Enum):

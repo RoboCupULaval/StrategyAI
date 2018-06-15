@@ -16,11 +16,14 @@ class GoToPosition(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
                  args: List[str]=None, cruise_speed=2):
         super().__init__(game_state, player, target, args)
+
+        self.current_state = self.move
+        self.next_state = self.move
         self.target = target
         self.status_flag = Flags.INIT
         self.cruise_speed = float(args[0]) if len(self.args) > 0 else cruise_speed
 
-    def exec(self):
+    def move(self):
         if self.check_success():
             self.status_flag = Flags.SUCCESS
         else:

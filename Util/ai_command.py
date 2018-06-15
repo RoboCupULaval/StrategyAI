@@ -89,7 +89,7 @@ def Kick(kick_force: KickForce=KickForce.LOW):
 
 
 def MoveTo(target: Union[Pose, Position],
-           cruise_speed: float=1,
+           cruise_speed: float=1,  # 1 m/s
            end_speed: float=0,
            ball_collision: bool=True,
            enable_pathfinder: bool=True) -> AICommand:

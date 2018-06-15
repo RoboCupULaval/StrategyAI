@@ -3,6 +3,7 @@ from typing import List, Optional, Any, Iterable
 
 import logging
 
+from Debug.debug_command_factory import DebugCommandFactory
 from Util import Pose, Position
 from Util.ai_command import AICommand
 from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL
@@ -59,10 +60,11 @@ class Tactic:
                 top_area,
                 bottom_area,
                 right_area,
-                left_area,
-                self.game_state.field.their_goal_area,
-                self.game_state.field.our_goal_area]
+                left_area]
+            #areas = []
             self.forbidden_areas = [Area.pad(area, KEEPOUT_DISTANCE_FROM_GOAL) for area in areas]
+            self.forbidden_areas += [self.game_state.field.their_goal_forbidden_area,
+                                     self.game_state.field.our_goal_forbidden_area]
         else:
             self.forbidden_areas = forbidden_areas
 
@@ -107,6 +109,7 @@ class Tactic:
                 return intersections[1]
 
     def debug_cmd(self):
+        #return [DebugCommandFactory().area(area) for area in self.forbidden_areas]
         return []
 
     @classmethod

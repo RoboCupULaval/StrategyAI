@@ -3,7 +3,10 @@ from typing import List, Type
 
 import logging
 
+
+from ai.STA.Tactic.align_around_the_ball import AlignAroundTheBall
 from ai.STA.Tactic.go_kick_experimental_sequence import GoKickExperimental
+from ai.STA.Tactic.leeroy_jenkins import LeeroyJenkins
 from ai.STA.Tactic.place_ball import PlaceBall
 from ai.STA.Tactic.face_target import FaceTarget
 from ai.STA.Tactic.pass_to_player import PassToPlayer
@@ -44,6 +47,8 @@ class TacticBook:
                    RotateAroundBall,
                    StressTestRobot,
                    StressTestRobotWaypoint,
+                   AlignAroundTheBall,
+                   LeeroyJenkins,
                    *defaults_tactics,
                    self.stop_tactic}
 
