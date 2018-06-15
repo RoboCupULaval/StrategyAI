@@ -234,7 +234,7 @@ class Tracker:
             if np.linalg.norm(closest_ball.position - obs) > config['ENGINE']['max_ball_separation']:
                 if len(self.inactive_balls) > 0:
                     closest_ball = self.inactive_balls[0]
-                    self.logger.debug('New ball detected: ID %d.', len(self.active_balls))
+                    self.logger.debug('New ball detected: ID %d.', closest_ball.id)
                 else:
                     closest_ball = None
         else:
