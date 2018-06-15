@@ -129,11 +129,11 @@ class Engine(Process):
         game_state = self.tracker.update()
         self.game_state.update(game_state)
 
-        self.controller.update(self.game_state, engine_cmds, self.dt)
-        robot_state = self.controller.execute()
+        self.controller.update(self.game_state, engine_cmds)
+        robot_state = self.controller.execute(self.dt)
 
         self.robot_cmd_sender.send_packet(robot_state)
-        self.tracker.predict(robot_state)
+        self.tracker.predict(robot_state, self.dt)
 
         if any(robot.path for robot in self.controller.robots):
             self.ui_send_queue.put_nowait(DebugCommandFactory.paths(self.controller.robots))
