@@ -13,9 +13,9 @@ config = Config()
 class RealVelocityController(RegulatorBaseClass):
 
     settings = {'kp': 10, 'ki': 0, 'kd': 1}
-    v_d = 2
-    emergency_break_constant = 0.4
-    emergency_break_safety_factor = 0.5
+    v_d = 5  # lower = bigger path correction
+    emergency_break_constant = 0.4  # Higher = higher correction of trajectory
+    emergency_break_safety_factor = 1  # lower = bigger break distance
 
     def __init__(self):
         self.orientation_controller = PID(**self.settings, signed_error=True, deadzone=0.05)
