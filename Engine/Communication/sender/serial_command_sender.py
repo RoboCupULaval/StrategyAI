@@ -27,9 +27,9 @@ class SerialCommandSender(Sender):
     @staticmethod
     def translate_kick_force(kick_force: KickForce) -> int:
         kick_translation = {KickForce.NONE: 0,
-                            KickForce.LOW: 10,
-                            KickForce.MEDIUM: 30,
-                            KickForce.HIGH: 50}
+                            KickForce.LOW: 10,     # 1   m/s
+                            KickForce.MEDIUM: 18,  # 2   m/s
+                            KickForce.HIGH: 60}    # 5.5 m/s
         return kick_translation[kick_force]
 
     @staticmethod

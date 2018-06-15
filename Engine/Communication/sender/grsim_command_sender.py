@@ -54,7 +54,7 @@ class GrSimCommandSender(Sender):
     @staticmethod
     def translate_kick_force(kick_force: KickForce) -> int:
         kick_translation = {KickForce.NONE: 0,
-                            KickForce.LOW: 1,
+                            KickForce.LOW: 2,
                             KickForce.MEDIUM: 3,
                             KickForce.HIGH: 5}
         return kick_translation[kick_force]
