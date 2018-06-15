@@ -105,13 +105,14 @@ class GoKick(Tactic):
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * (1 + ball_speed / 1000))
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=3,
-                                      ball_collision=False).addChargeKicker().addKick(self.kick_force).build()
+                                      ball_collision=False).addChargeKicker().build()
 
     def kick(self):
         if self.auto_update_target:
             self._find_best_passing_option()
         if not self.is_able_to_grab_ball_directly(0.8):
-            self.next_state = self.grab_ball
+            self.next_state = self.go_behind_ball
+            return CmdBuilder().build()
         self.next_state = self.validate_kick
 
         player_to_target = (self.target.position - self.player.pose.position)
@@ -181,5 +182,4 @@ class GoKick(Tactic):
         vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
         alignement_behind = np.dot(vec_target_to_ball.array,
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
-
         return threshold < alignement_behind
