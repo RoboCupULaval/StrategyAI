@@ -32,7 +32,10 @@ class DirectFreeKick(Strategy):
                 node_position_for_pass = self.create_node(role, PositionForPass(self.game_state,
                                                                                 player,
                                                                                 robots_in_formation=formation,
-                                                                                auto_position=True))
+                                                                                auto_position=True,
+                                                                                forbidden_areas=[
+                                                                                    self.game_state.field.free_kick_avoid_area,
+                                                                                    self.game_state.field.our_goal_forbidden_area]))
                 node_rotate_around_ball = self.create_node(role, RotateAroundBall(self.game_state, player, their_goal))
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, their_goal, auto_update_target=True, kick_force=KickForce.HIGH))
 

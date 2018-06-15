@@ -3,6 +3,7 @@
 import logging
 from typing import List, Dict, Type
 
+from ai.STA.Strategy.smart_stop import SmartStop
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.ball_placement import BallPlacement
 from ai.STA.Strategy.defense_wall_no_kick import DefenseWallNoKick
@@ -61,6 +62,7 @@ class StrategyBook:
                          BallPlacement,
                          TestGoalKeeper,
                          LineUp,
+                         SmartStop,
                          self.stop_strategy,
                          *default_strategies,
                          }
