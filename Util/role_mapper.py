@@ -1,8 +1,9 @@
 from collections import Counter
 from typing import Dict
 
+import logging
+
 from Util.role import Role
-from Util.role_mapping_rule import ImpossibleToMap
 from ai.GameDomainObjects import Player
 
 
@@ -15,6 +16,7 @@ class RoleMapper(object):
     LOCKED_ROLES = []
 
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.roles_translation = {r: None for r in Role.as_list()}
 
     def clear(self):
@@ -74,19 +76,53 @@ class RoleMapper(object):
                 break
         self.roles_translation[role] = player
 
-    def map_with_rules(self, available_players, required_rules, optional_rules):
-        nbr_unique_role = len(set(required_rules.keys()) | set(optional_rules.keys()))
-        nbr_role = len(required_rules) + len(optional_rules)
+    def map_with_rules(self, available_players, required_roles, optional_roles, goalie_id=None):
+        nbr_unique_role = len(set(required_roles) | set(optional_roles))
+        nbr_role = len(required_roles) + len(optional_roles)
         assert nbr_unique_role == nbr_role, "The same role can not be in the required rules and the optional rules"
 
-        for role, rule in required_rules.items():
-            player = rule(available_players, role, self.roles_translation)
-            if not isinstance(player, Player):
-                raise TypeError("A rule must return a player, not a '{}'".format(player))
-            self.roles_translation[role] = player
-        try:
-            for role, rule in optional_rules.items():
-                self.roles_translation[role] = rule(available_players, role, self.roles_translation)
-        except ImpossibleToMap:
-            pass
+        prev_assign = self.roles_translation
+        remaining_player = list(available_players.values())
+
+        goal_assign = self._map_goalie_with_ref(remaining_player, required_roles, prev_assign, goalie_id)
+        remaining_required_roles = [r for r in required_roles if r not in goal_assign]
+        remaining_player = [p for p in remaining_player if p not in goal_assign.values()]
+
+        required_assign = self._keep_prev_mapping_otherwise_random(remaining_player,
+                                                                   remaining_required_roles,
+                                                                   prev_assign,
+                                                                   is_required_roles=True)
+
+        remaining_player = [p for p in remaining_player if p not in required_assign.values()]
+
+        optional_assign = self._keep_prev_mapping_otherwise_random(remaining_player,
+                                                                   optional_roles,
+                                                                   prev_assign,
+                                                                   is_required_roles=False)
+
+        self.roles_translation = {**goal_assign, **required_assign, **optional_assign}
+        return self.roles_translation
+
+    def _keep_prev_mapping_otherwise_random(self, remaining_players, roles, prev_assign, is_required_roles):
+        roles_stay_same = {r: prev_assign[r] for r in roles
+                           if r in prev_assign and prev_assign[r] in remaining_players}
+
+        remaining_roles = [r for r in roles if r not in roles_stay_same]
+        remaining_player = [p for p in remaining_players if p not in roles_stay_same.values()]
+
+        if is_required_roles:
+            assert len(remaining_roles) <= len(remaining_player), \
+                "Not enough player left ({} players) to assign theses roles {}".format(len(remaining_player),
+                                                                                       remaining_roles)
+        random_assignment = dict(zip(remaining_roles, remaining_player))
+        return {**roles_stay_same, **random_assignment}
+
+    def _map_goalie_with_ref(self, remaining_player, required_roles, prev_assign, goalie_id):
+        if Role.GOALKEEPER in required_roles:
+            for p in remaining_player:
+                if p.id == goalie_id:
+                    if Role.GOALKEEPER not in prev_assign or prev_assign[Role.GOALKEEPER].id != goalie_id:
+                        self.logger.info("The referee force goalie to be {}".format(p))
+                    return {Role.GOALKEEPER: p}
+        return {}
 

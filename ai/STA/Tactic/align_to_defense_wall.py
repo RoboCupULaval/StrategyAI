@@ -16,7 +16,7 @@ from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
 from Util.ai_command import Idle, CmdBuilder, MoveTo
 from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
+from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -60,12 +60,7 @@ class AlignToDefenseWall(Tactic):
         self.next_state = self.main_state
 
     def init_players_in_formation(self):
-        for idx, player in enumerate(self.robots_in_formation):
-            if self.player == player:
-                self.player_number_in_formation = idx
-                break
-        else:
-            raise RuntimeError("The current player is not in the formation")
+        self.player_number_in_formation = self.robots_in_formation.index(self.player)
 
     def compute_wall_segment(self):
         """
@@ -79,7 +74,7 @@ class AlignToDefenseWall(Tactic):
         goal_line = self.game_state.field.our_goal_line
         bisection_angle = angle_between_three_points(goal_line.p2, self.object_to_block.position, goal_line.p1)
 
-        #  On calcule la distance la plus grande pour les robots du wall, bloque complètement le champs de vision
+        # We calculate the farthest distance from the object which completely block its FOV of the goal
         object_to_center_formation_dist = wall_segment_length / tan(bisection_angle)
 
         self.bisect_inter = find_bisector_of_triangle(self.object_to_block.position, goal_line.p1, goal_line.p2)

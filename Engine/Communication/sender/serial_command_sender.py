@@ -12,28 +12,29 @@ class SerialCommandSender(Sender):
         return McuCommunicator(timeout=0.1)
 
     def send_packet(self, packets_frame):
-
-        for packet in packets_frame.packet:
-            self.connection.sendSpeed(packet.robot_id,
-                                      packet.command.x/1000,
-                                      packet.command.y/1000,
-                                      packet.command.orientation)
-
-            if packet.kick_force is not KickForce.NONE:
-                self.connection.kick(packet.robot_id, self.translate_kick_force(packet.kick_force))
-
-            if packet.dribbler_state == DribbleState.FORCE_STOP:
-                self.connection.turnOffDribbler(packet.robot_id)
-            elif packet.dribbler_state == DribbleState.FORCE_SPIN:
-                self.connection.turnOnDribbler(packet.robot_id)
-
-            if packet.charge_kick:
-                self.connection.charge(packet.robot_id)
-
+        try:
+            for packet in packets_frame.packet:
+                self.connection.sendSpeedAdvance(packet.robot_id,
+                                                 packet.command.x/1000,
+                                                 packet.command.y/1000,
+                                                 packet.command.orientation,
+                                                 packet.charge_kick,
+                                                 self.translate_kick_force(packet.kick_force),
+                                                 self.translate_dribbler_speed(packet.dribbler_state))
+        except AttributeError:
+            raise RuntimeError("You should update your pyhermes, by reinstalling the requirement:"
+                               "'pip install -r requirements.txt --upgrade'")
     @staticmethod
     def translate_kick_force(kick_force: KickForce) -> int:
         kick_translation = {KickForce.NONE: 0,
-                            KickForce.LOW: 1,
-                            KickForce.MEDIUM: 3,
-                            KickForce.HIGH: 5}
+                            KickForce.LOW: 10,
+                            KickForce.MEDIUM: 30,
+                            KickForce.HIGH: 50}
         return kick_translation[kick_force]
+
+    @staticmethod
+    def translate_dribbler_speed(dribbler_speed: DribbleState) -> int:
+        dribbler_translation = {DribbleState.AUTOMATIC: 0,
+                                DribbleState.FORCE_STOP: 0,
+                                DribbleState.FORCE_SPIN: 3}
+        return dribbler_translation[dribbler_speed]

@@ -31,6 +31,7 @@ class PathPartitionner:
     def __init__(self):
         self.obstacles = []
         self.old_path = None
+        self.velocity = None
 
     @property
     def obstacles_position(self):
@@ -48,8 +49,8 @@ class PathPartitionner:
         is_not_self = start_to_obs > 0  # remove self if present
         self.obstacles = obstacles[is_inside_ellipse & is_not_self].tolist()
 
-    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], last_path: Optional[Path]=None):
-
+    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], velocity: Position, last_path: Optional[Path]=None):
+        self.velocity = velocity.array
         self.obstacles = obstacles
         self.old_path = last_path
         self.filter_obstacles(start.array, target.array)
@@ -88,6 +89,8 @@ class PathPartitionner:
         return any(collisions)
 
     def find_collisions(self, start, target):
+        if np.array_equal(start, target): return [], 0
+
         robot_to_obstacles = self.obstacles_position - start
         robot_to_obstacle_norm = np.linalg.norm(robot_to_obstacles, axis=1)
         obstacles = self.obstacles
@@ -118,10 +121,8 @@ class PathPartitionner:
                 while not self.is_valid_sub_target(sub_target_2, self.obstacles_position):
                     sub_target_2 -= avoid_dir * resolution_sub_target
                 #on maximise l'angle entre les segments pour avoir un path plus rectiligne
-                val_1 = np.dot((sub_target_1-start)/np.linalg.norm(sub_target_1-start),
-                               (target - sub_target_1)/np.linalg.norm(target - sub_target_1))
-                val_2 = np.dot((sub_target_2 - start) / np.linalg.norm(sub_target_2 - start),
-                               (target - sub_target_2) / np.linalg.norm(target - sub_target_2))
+                val_1 = np.dot((sub_target_1-start)/np.linalg.norm(sub_target_1-start), self.velocity)
+                val_2 = np.dot((sub_target_2 - start) / np.linalg.norm(sub_target_2 - start), self.velocity)
                 if val_1 > val_2: #le segment 1 est plus aligne avec le path precedant que le segment2
                     sub_target = sub_target_1.copy()
                     sub_target_potential = sub_target_1.copy()

@@ -4,7 +4,7 @@ import logging
 from Util import Pose
 from Util.constant import KEEPOUT_DISTANCE_FROM_BALL
 from Util.role import Role
-from Util.role_mapping_rule import keep_prev_mapping_otherwise_random
+
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.place_ball import PlaceBall
 from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
@@ -26,13 +26,19 @@ class BallPlacement(Strategy):
         for r, p in self.assigned_roles.items():
             if r == Role.FIRST_ATTACK and target is not None:
                 self.create_node(r, PlaceBall(self.game_state, p, target=Pose(target)))
+            elif r == Role.GOALKEEPER:
+                self.create_node(r, StayAwayFromBall(self.game_state,
+                                                     p,
+                                                     forbidden_areas=[],
+                                                     keepout_radius=2*KEEPOUT_DISTANCE_FROM_BALL))
             else:
                 self.create_node(r, StayAwayFromBall(self.game_state, p, keepout_radius=2*KEEPOUT_DISTANCE_FROM_BALL))
 
     @classmethod
     def required_roles(cls):
-        return {Role.FIRST_ATTACK: keep_prev_mapping_otherwise_random}
+        return [Role.GOALKEEPER,
+                Role.FIRST_ATTACK]
 
     @classmethod
     def optional_roles(cls):
-        return {r: keep_prev_mapping_otherwise_random for r in Role if r != Role.FIRST_ATTACK}
+        return [r for r in Role if r not in [Role.GOALKEEPER, Role.FIRST_ATTACK]]

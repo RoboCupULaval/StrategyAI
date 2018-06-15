@@ -1,9 +1,7 @@
-
 from Engine.regulators.PID import PID
 from Engine.regulators.regulator_base_class import RegulatorBaseClass
 from Engine.robot import Robot, MAX_LINEAR_SPEED, MAX_ANGULAR_SPEED
 from Util import Pose
-from Util.geometry import wrap_to_pi, rotate
 
 
 class RealPositionRegulator(RegulatorBaseClass):
@@ -18,7 +16,7 @@ class RealPositionRegulator(RegulatorBaseClass):
                             'y': PID(**self.settings['translation']),
                             'orientation': PID(**self.settings['rotation'], signed_error=True, deadzone=0.10)}
 
-    def execute(self, robot: Robot):
+    def execute(self, robot: Robot, dt: float):
 
         pos_error = robot.position_error
         orientation_error = robot.orientation_error
@@ -28,8 +26,8 @@ class RealPositionRegulator(RegulatorBaseClass):
                                    self.controllers['orientation'].execute(orientation_error))
 
         # Limit max linear speed
-        command.position /= max(1, command.norm / MAX_LINEAR_SPEED)
-        command.orientation /= max(1, abs(command.orientation) / MAX_ANGULAR_SPEED)
+        command.position /= max(1.0, command.norm / MAX_LINEAR_SPEED)
+        command.orientation /= max(1.0, abs(command.orientation) / MAX_ANGULAR_SPEED)
         return command
 
     def reset(self):

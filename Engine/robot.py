@@ -3,7 +3,6 @@ from typing import Optional
 from Util import Pose, Position, Path
 from Util.geometry import wrap_to_pi
 
-
 MAX_LINEAR_SPEED = 4000  # mm/s
 MAX_LINEAR_ACCELERATION = 4000  # mm/s^2
 MAX_ANGULAR_SPEED = 100  # rad/s
@@ -106,4 +105,3 @@ class Robot:
     def distance_to_path_end(self) ->Optional[float]:
         if self.path:
             return (self.position - self.path.target).norm
-
