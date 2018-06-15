@@ -164,8 +164,7 @@ class Field:
         self.our_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2,
                                   self.field_lines["RightFieldLeftPenaltyStretch"].p1)
 
-        self.their_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2.flip_x(),
-                                    self.field_lines["RightFieldLeftPenaltyStretch"].p1.flip_x())
+        self.their_goal_area = Area.flip_x(self.our_goal_area)
 
         self.goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
                                   p2=Position(self.our_goal_x, -self.goal_width / 2))
@@ -174,6 +173,11 @@ class Field:
                                   p2=Position(self.our_goal_x, -self.goal_width / 2))
         self.their_goal_line = Line(p1=Position(self.their_goal_x, +self.goal_width / 2),
                                     p2=Position(self.their_goal_x, -self.goal_width / 2))
+        self.behind_our_goal_line = Area.from_limits(self.our_goal_area.top,
+                                                     self.our_goal_area.bottom,
+                                                     self.our_goal_area.right + 50 * self.goal_depth,
+                                                     self.our_goal_area.left)
+        self.behind_their_goal_line = Area.flip_x(self.behind_our_goal_line)
 
         self.free_kick_avoid_area = Area.pad(self.their_goal_area,
                                              INDIRECT_KICK_OFFSET + KEEPOUT_DISTANCE_FROM_GOAL)

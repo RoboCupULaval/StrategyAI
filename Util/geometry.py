@@ -122,6 +122,10 @@ class Area:
     def from_limits(cls, top, bottom, right, left):
         return cls(Position(left, top), Position(right, bottom))
 
+    @classmethod
+    def flip_x(cls, area):
+        return Area.from_limits(area.top, area.bottom, -area.left, -area.right)
+
 
 def find_bisector_of_triangle(c, a, b):
     """
