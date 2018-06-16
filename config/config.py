@@ -135,7 +135,6 @@ class Config(metaclass=Singleton):
             },
             'ENGINE': {
                 'profiling_filename': 'profile_data_engine.prof',
-                'profiling_dump_time': 10,
                 'number_of_camera': 4,
                 'max_robot_id': 12,
                 'max_undetected_robot_time': 5,
