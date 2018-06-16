@@ -130,8 +130,7 @@ class Config(metaclass=Singleton):
                 'is_autonomous_play_at_startup': False,
                 'on_negative_side': True,
                 'fps': 10,
-                'profiling_filename': 'profile_data_ai.prof',
-                'profiling_dump_time': 10
+                'profiling_filename': 'profile_data_ai.prof'
             },
             'ENGINE': {
                 'profiling_filename': 'profile_data_engine.prof',
