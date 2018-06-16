@@ -96,7 +96,7 @@ class Tactic:
                 new_target = Pose(target_position, next_ai_command.target.orientation)
 
                 if closest_new_target is None \
-                        or (closest_n ew_target - self.player.position).norm > (new_target - self.player.position).norm:
+                        or (closest_new_target - self.player.position).norm > (new_target - self.player.position).norm:
                     closest_new_target = new_target
 
         if closest_new_target is not None:
