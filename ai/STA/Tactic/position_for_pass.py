@@ -37,14 +37,14 @@ class PositionForPass(Tactic):
         else:
             self.robots_in_formation = robots_in_formation
 
-        self.number_of_robots = len(self.robots_in_formation)
         self.is_offense = self.is_player_offense(player)
         self.robots_in_formation = [player for player in self.robots_in_formation if self.is_offense == self.is_player_offense(player)]
+
         self.idx_in_formation = self.robots_in_formation.index(player)
+        self.area = None
 
         # Use for debug_cmd
-        self.area = None
-        self.best_position = None
+        self.best_position = self._find_best_player_position() if self.auto_position else self.target
 
     def is_player_offense(self, player):
         role = self.game_state.get_role_by_player_id(player.id)
