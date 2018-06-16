@@ -59,7 +59,6 @@ class KickForce(Enum):
             return KickForce.HIGH
 
 
-    
 class KickType(Enum):
     DIRECT = 0
     CHIP = 1
