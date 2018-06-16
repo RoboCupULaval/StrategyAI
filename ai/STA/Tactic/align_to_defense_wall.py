@@ -122,7 +122,9 @@ class AlignToDefenseWall(Tactic):
         self.compute_wall_segment()
         if self.game_state.field.is_ball_in_our_goal_area():
             return Idle  # We must not block the goalkeeper
-        elif self._should_ball_be_kick_by_wall() and self._is_closest_not_goaler(self.player):
+        elif self._should_ball_be_kick_by_wall() \
+                and self._is_closest_not_goaler(self.player) \
+                and self._no_enemy_around_ball():
             self.next_state = self.go_kick
         dest = self.position_on_wall_segment()
         dest_orientation = (self.object_to_block.position - dest).angle
@@ -136,7 +138,8 @@ class AlignToDefenseWall(Tactic):
 
         if not self._should_ball_be_kick_by_wall() \
                 or self.game_state.field.is_ball_in_our_goal_area() \
-                or not self._is_closest_not_goaler(self.player):
+                or not self._is_closest_not_goaler(self.player) \
+                or not self._no_enemy_around_ball():
             self.go_kick_tactic = None
             self.next_state = self.main_state
             return Idle
@@ -163,6 +166,14 @@ class AlignToDefenseWall(Tactic):
             return inters[0]
         else:
             return inters[1]
+
+    def _no_enemy_around_ball(self):
+        DANGEROUS_ENEMY_MIN_DISTANCE = 500
+        ball_position = self.game_state.ball_position
+        for enemy in self.game_state.enemy_team.available_players.values():
+            if (enemy.position - ball_position).norm < DANGEROUS_ENEMY_MIN_DISTANCE:
+                return False
+        return True
 
 
 
