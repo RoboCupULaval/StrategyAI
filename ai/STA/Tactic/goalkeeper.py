@@ -137,21 +137,21 @@ class GoalKeeper(Tactic):
                area_in_front_of_goal.point_inside(self.game_state.ball.position) and self._no_enemy_around_ball()
 
     def _best_target_into_goal(self):
-
-        enemy_player_with_ball = player_with_ball(min_dist_from_ball=200, our_team=False)
-        if enemy_player_with_ball is not None:
-            if player_pointing_toward_segment(enemy_player_with_ball, self.GOAL_LINE):
-                ball = self.game_state.ball
-                where_ball_enter_goal = intersection_between_lines(self.GOAL_LINE.p1,
-                                                                   self.GOAL_LINE.p2,
-                                                                   ball.position,
-                                                                   ball.position +
-                                                                   Position(1000 * np.cos(enemy_player_with_ball.pose.orientation),
-                                                                            1000 * np.sin(enemy_player_with_ball.pose.orientation)))
-                where_ball_enter_goal = closest_point_on_segment(where_ball_enter_goal,
-                                                                 self.GOAL_LINE.p1,
-                                                                 self.GOAL_LINE.p2)
-                return where_ball_enter_goal
+        if 0 < len(self.game_state.enemy_team.available_players):
+            enemy_player_with_ball = player_with_ball(min_dist_from_ball=200, our_team=False)
+            if enemy_player_with_ball is not None:
+                if player_pointing_toward_segment(enemy_player_with_ball, self.GOAL_LINE):
+                    ball = self.game_state.ball
+                    where_ball_enter_goal = intersection_between_lines(self.GOAL_LINE.p1,
+                                                                       self.GOAL_LINE.p2,
+                                                                       ball.position,
+                                                                       ball.position +
+                                                                       Position(1000 * np.cos(enemy_player_with_ball.pose.orientation),
+                                                                                1000 * np.sin(enemy_player_with_ball.pose.orientation)))
+                    where_ball_enter_goal = closest_point_on_segment(where_ball_enter_goal,
+                                                                     self.GOAL_LINE.p1,
+                                                                     self.GOAL_LINE.p2)
+                    return where_ball_enter_goal
 
         return find_bisector_of_triangle(self.game_state.ball.position,
                                          self.GOAL_LINE.p2,

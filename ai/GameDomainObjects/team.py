@@ -1,9 +1,9 @@
 # Under MIT License, see LICENSE.txt
 from typing import Dict
 
-from Util.constant import PLAYER_PER_TEAM
 from Util.team_color_service import TeamColor
 from ai.GameDomainObjects.player import Player
+from config.config import Config
 
 
 class Team:
@@ -11,7 +11,7 @@ class Team:
         assert isinstance(team_color, TeamColor)
 
         self._team_color = team_color
-        self._players = {i: Player(i, self) for i in range(PLAYER_PER_TEAM)}
+        self._players = {i: Player(i, self) for i in range(Config()['ENGINE']['max_robot_id'])}
         self._available_players = {}
 
     def update(self, players: Dict):
