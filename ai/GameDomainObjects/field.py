@@ -161,8 +161,11 @@ class Field:
         self.their_goal = Position(self.their_goal_x, 0)
         self.their_goal_pose = Pose(self.their_goal, 0)
 
-        self.our_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2,
-                                  self.field_lines["RightFieldLeftPenaltyStretch"].p1)
+        p1 = self.field_lines["RightPenaltyStretch"].p1
+        p2 = self.field_lines["RightPenaltyStretch"].p2
+        p3 = self.field_lines["RightFieldLeftPenaltyStretch"].p1
+        p4 = self.field_lines["RightFieldLeftPenaltyStretch"].p2
+        self.our_goal_area = Area.from_4_point(p1, p2, p3, p4)
 
         self.their_goal_area = Area.flip_x(self.our_goal_area)
 
