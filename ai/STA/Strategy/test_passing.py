@@ -114,7 +114,7 @@ class TestPassing(Strategy):
 
     def ball_going_toward_player(self, player):
         role = GameState().get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'PositionForPass':
+        if self.roles_graph[role].current_tactic_name == 'PositionForPass' or self.roles_graph[role].current_tactic_name == 'ReceivePass':
             if self.game_state.ball.velocity.norm > 50:
                 return np.dot(normalize(player.position - self.game_state.ball.position).array,
                               normalize(self.game_state.ball.velocity).array) > 0.9

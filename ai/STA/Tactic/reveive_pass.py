@@ -15,7 +15,7 @@ from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
-
+from Util.geometry import perpendicular
 
 GO_BEHIND_SPACING = 250
 GRAB_BALL_SPACING = 100
@@ -34,7 +34,7 @@ class ReceivePass(Tactic):
     def initialize(self):
         self.status_flag = Flags.WIP
         if self.is_ball_going_to_collide():
-            if self.game_state.ball.velocity.norm < 100:
+            if self.game_state.ball.velocity.norm < 100 and False:
                 self.next_state = self.grab_ball
             else:
                 self.next_state = self.wait_for_ball
@@ -54,7 +54,7 @@ class ReceivePass(Tactic):
         if self.is_ball_going_to_collide(threshold=0.95) \
                 and compare_angle(self.player.pose.orientation, orientation,
                                   abs_tol=max(0.1, 0.1 * dist_from_ball/100)):
-            self.next_state = self.grab_ball
+            self.next_state = self.wait_for_ball
         else:
             self.next_state = self.go_behind_ball
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
@@ -75,20 +75,24 @@ class ReceivePass(Tactic):
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=3,
                                       end_speed=0,
-                                      ball_collision=False).addForceDribbler().build()
+                                      ball_collision=False).addChargeKicker().build()
 
     def wait_for_ball(self):
+        perp_vec = perpendicular(self.player.position - self.game_state.ball.position)
+        component_lateral = perp_vec * np.dot(perp_vec.array, normalize(self.game_state.ball.velocity).array)
+        small_segment_len = np.sqrt(1 - component_lateral.norm**2)
+        latteral_move = component_lateral * (self.player.position - self.game_state.ball.position).norm / small_segment_len
         if self._get_distance_from_ball() < HAS_BALL_DISTANCE:
             self.next_state = self.halt
             return self.halt()
         if not self.is_ball_going_to_collide(threshold=0.95):
-            self.next_state = self.go_behind_ball
+            self.next_state = self.wait_for_ball
             return CmdBuilder().build()
         orientation = (self.game_state.ball_position - self.player.position).angle
-        return CmdBuilder().addMoveTo(Pose(self.player.position, orientation),
+        return CmdBuilder().addMoveTo(Pose(self.player.position + latteral_move, orientation),
                                       cruise_speed=3,
                                       end_speed=0,
-                                      ball_collision=False).addForceDribbler().build()
+                                      ball_collision=False).addChargeKicker().build()
 
     def halt(self):
         if self.status_flag == Flags.INIT:

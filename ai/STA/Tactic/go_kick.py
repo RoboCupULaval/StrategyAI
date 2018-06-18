@@ -59,7 +59,7 @@ class GoKick(Tactic):
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
 
         if self.is_able_to_grab_ball_directly(0.5) \
-                and compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.1, 0.1 * dist_from_ball/100)):
+                and compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.1, 0.1 * dist_from_ball/1000)):
             self.next_state = self.grab_ball
             if self._get_distance_from_ball() < KICK_DISTANCE:
                 self.next_state = self.kick
@@ -188,7 +188,7 @@ class GoKick(Tactic):
 
         position_behind = self.game_state.ball.position - dir_ball_to_target * ball_spacing
 
-        if velocity:
+        if velocity and self.game_state.ball.velocity.norm > 20:
             position_behind += (self.game_state.ball.velocity - (normalize(self.game_state.ball.velocity) *
                                                                  np.dot(dir_ball_to_target.array,
                                                                         self.game_state.ball.velocity.array))) / velocity_offset
