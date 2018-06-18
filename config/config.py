@@ -130,16 +130,14 @@ class Config(metaclass=Singleton):
                 'is_autonomous_play_at_startup': False,
                 'on_negative_side': True,
                 'fps': 10,
-                'profiling_filename': 'profile_data_ai.prof',
-                'profiling_dump_time': 10
+                'profiling_filename': 'profile_data_ai.prof'
             },
             'ENGINE': {
                 'profiling_filename': 'profile_data_engine.prof',
-                'profiling_dump_time': 10,
                 'number_of_camera': 4,
-                'max_robot_id': 12,
+                'max_robot_id': 16,
                 'max_undetected_robot_time': 5,
-                'max_undetected_ball_time': 0.25,
+                'max_undetected_ball_time': 0.5,
                 'max_ball_on_field': 2,
                 'max_ball_separation': 2000,
                 'disabled_camera_id': []

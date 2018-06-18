@@ -7,6 +7,7 @@ from sys import stdout
 
 from Engine.Framework import Framework
 from config.config import Config
+from Util.sysinfo import git_version
 
 
 def set_arg_parser():
@@ -55,9 +56,6 @@ def set_arg_parser():
 
 
 if __name__ == '__main__':
-    cli_args = set_arg_parser().parse_args()
-    Config().load_file(cli_args.config_file)
-    Config().load_parameters(cli_args)
 
     consoleFormatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
     consoleHandler = logging.StreamHandler(stream=stdout)
@@ -65,11 +63,17 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.NOTSET, handlers=[consoleHandler])
 
+    cli_args = set_arg_parser().parse_args()
+    Config().load_file(cli_args.config_file)
+    Config().load_parameters(cli_args)
+
     logger = logging.getLogger('Main')
 
     logger.info('Color: {}, Field side: {}, Mode: {}'.format(Config()['GAME']['our_color'].upper(),
                                                     'NEGATIVE' if Config()['GAME']['on_negative_side'] else 'POSITIVE',
                                                     'COMPETITION' if cli_args.competition_mode else 'NORMAL'))
+
+    logger.info('Current git commit hash: ' + git_version())
 
     stop_framework = False
     while not stop_framework:

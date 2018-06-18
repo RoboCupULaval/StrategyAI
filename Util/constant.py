@@ -8,7 +8,6 @@ ROBOT_RADIUS = 90
 ROBOT_DIAMETER = ROBOT_RADIUS * 2
 ROBOT_CENTER_TO_KICKER = 50
 BALL_RADIUS = 21
-PLAYER_PER_TEAM = 12
 MAX_PLAYER_ON_FIELD_PER_TEAM = 6
 BALL_OUTSIDE_FIELD_BUFFER = 200
 
@@ -49,7 +48,16 @@ class KickForce(Enum):
     MEDIUM = 2
     HIGH = 3
 
-    
+    @classmethod
+    def for_dist(cls, dist):
+        if dist < 2000:
+            return KickForce.LOW
+        elif dist < 5000:
+            return KickForce.MEDIUM
+        else:
+            return KickForce.HIGH
+
+
 class KickType(Enum):
     DIRECT = 0
     CHIP = 1

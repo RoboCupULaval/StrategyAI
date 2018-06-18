@@ -2,6 +2,7 @@
 
 from typing import List
 
+from Debug.debug_command_factory import DebugCommandFactory, VIOLET
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder
 from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
@@ -16,11 +17,14 @@ class GoToPosition(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
                  args: List[str]=None, cruise_speed=2):
         super().__init__(game_state, player, target, args)
+
+        self.current_state = self.move
+        self.next_state = self.move
         self.target = target
         self.status_flag = Flags.INIT
         self.cruise_speed = float(args[0]) if len(self.args) > 0 else cruise_speed
 
-    def exec(self):
+    def move(self):
         if self.check_success():
             self.status_flag = Flags.SUCCESS
         else:
@@ -31,3 +35,4 @@ class GoToPosition(Tactic):
         distance = (self.player.pose - self.target.position).norm
         return (distance < POSITION_DEADZONE) and compare_angle(self.player.pose.orientation,
                                                                 self.target.orientation, abs_tol=ANGLE_TO_HALT)
+

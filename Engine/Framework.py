@@ -58,6 +58,6 @@ class Framework:
             self.stop_game()
 
     def stop_game(self):
-        self.engine.terminate()
-        self.coach.terminate()
+        self.engine.join(timeout=0.1)
+        self.coach.join(timeout=0.1)
         sys.exit()

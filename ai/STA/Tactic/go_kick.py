@@ -17,7 +17,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 VALIDATE_KICK_DELAY = 0.5
-TARGET_ASSIGNATION_DELAY = 0.5
+TARGET_ASSIGNATION_DELAY = 1.0
 
 GO_BEHIND_SPACING = 250
 GRAB_BALL_SPACING = 100
@@ -100,24 +100,32 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
             self.kick_last_time = time.time()
-
+        ball_speed = self.game_state.ball.velocity.norm
         orientation = (self.target.position - self.game_state.ball_position).angle
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
+        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * (1 + ball_speed / 1000))
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=3,
-                                      ball_collision=False).addChargeKicker().addKick(self.kick_force).build()
+                                      ball_collision=False)\
+                           .addForceDribbler()\
+                           .addChargeKicker()\
+                           .build()
 
     def kick(self):
         if self.auto_update_target:
             self._find_best_passing_option()
+        if not self.is_able_to_grab_ball_directly(0.8):
+            self.next_state = self.go_behind_ball
+            return self.go_behind_ball()
         self.next_state = self.validate_kick
 
         player_to_target = (self.target.position - self.player.pose.position)
-        behind_ball = self.game_state.ball_position - normalize(player_to_target) * (BALL_RADIUS + ROBOT_CENTER_TO_KICKER)
+        behind_ball = self.game_state.ball_position + normalize(player_to_target) * (ROBOT_CENTER_TO_KICKER)
         orientation = (self.target.position - self.game_state.ball_position).angle
 
         return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
-                                      ball_collision=False).addKick(self.kick_force).build()
+                                      ball_collision=False)\
+                                        .addKick(self.kick_force)\
+                                        .addForceDribbler().build()
 
     def validate_kick(self):
         if self.game_state.ball.is_moving_fast() or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
@@ -128,7 +136,7 @@ class GoKick(Tactic):
             self.status_flag = Flags.INIT
             self.next_state = self.go_behind_ball
 
-        return CmdBuilder().build()
+        return CmdBuilder().addForceDribbler().build()
 
     def halt(self):
         if self.status_flag == Flags.INIT:
@@ -151,18 +159,20 @@ class GoKick(Tactic):
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
             scoring_target = player_covered_from_goal(self.player)
             tentative_target = best_passing_option(self.player, passer_can_kick_in_goal=self.can_kick_in_goal)
+            # Kick in the goal where it's the easiest
             if self.can_kick_in_goal and scoring_target is not None:
-                self.kick_force = KickForce.HIGH
                 self.target = Pose(scoring_target, 0)
+                self.kick_force = KickForce.HIGH
+                # Kick in the goal center
             elif tentative_target is None:
                 if not self.can_kick_in_goal:
                     self.logger.warning("The kicker {} can not find an ally to pass to and can_kick_in_goal is False"
                                         ". So it kicks directly in the goal, sorry".format(self.player))
-                self.kick_force = KickForce.HIGH
                 self.target = Pose(self.game_state.field.their_goal, 0)
-            else:
-                self.kick_force = KickForce.LOW
+                self.kick_force = KickForce.HIGH
+            else:  # Pass the ball to another player
                 self.target = Pose(tentative_target.position)
+                self.kick_force = KickForce.for_dist((self.target.position - self.game_state.ball.position).norm)
 
             self.target_assignation_last_time = time.time()
 
@@ -179,5 +189,4 @@ class GoKick(Tactic):
         vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
         alignement_behind = np.dot(vec_target_to_ball.array,
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
-
         return threshold < alignement_behind

@@ -15,7 +15,6 @@ from Engine.robot import Robot
 from Engine.Communication.robot_state import RobotPacket, RobotState
 
 from Util import Pose
-from Util.constant import ROBOT_RADIUS
 from Util.engine_command import EngineCommand
 from Util.geometry import rotate
 from config.config import Config
@@ -33,8 +32,8 @@ class Controller:
             robot.velocity_regulator = VelocityRegulator()
             robot.position_regulator = PositionRegulator()
 
-    def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand], dt):
-        self.dt = dt
+    def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand]):
+
         self.timestamp = track_frame['timestamp']
 
         for robot in self.robots:
@@ -53,18 +52,18 @@ class Controller:
                 self[cmd.robot_id].engine_cmd = cmd
                 self[cmd.robot_id].path = None
 
-    def execute(self) -> RobotState:
+    def execute(self, dt: float) -> RobotState:
         commands = {}
 
         for robot in self.active_robots:
             robot.path, robot.target_speed = path_smoother(robot.raw_path, robot.cruise_speed, robot.end_speed)
 
-            if robot.distance_to_path_end < ROBOT_RADIUS and robot.end_speed == 0:
-                robot.velocity_regulator.reset()
-                commands[robot.id] = robot.position_regulator.execute(robot, self.dt)
+            if robot.target_speed < 10:
+                commands[robot.id] = min(robot.velocity_regulator.execute(robot, dt),
+                                         robot.position_regulator.execute(robot, dt),
+                                         key=lambda cmd: cmd.norm)
             else:
-                robot.position_regulator.reset()
-                commands[robot.id] = robot.velocity_regulator.execute(robot, self.dt)
+                commands[robot.id] = robot.velocity_regulator.execute(robot, dt)
 
         self.send_debug(commands)
 

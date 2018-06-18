@@ -52,8 +52,6 @@ class AlignAroundTheBall(Tactic):
 
         goal_line = self.game_state.field.goal_line
 
-        angle_to_cover = angle_between_three_points(goal_line.p1, self.game_state.ball_position, goal_line.p2)
-
         self.center_of_goal = find_bisector_of_triangle(self.game_state.ball_position, goal_line.p1, goal_line.p2)
         vec_ball_to_center_of_goal = self.center_of_goal - self.game_state.ball_position
 
