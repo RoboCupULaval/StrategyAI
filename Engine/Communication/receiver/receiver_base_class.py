@@ -1,4 +1,5 @@
 import os
+import socket
 from abc import ABCMeta, abstractmethod
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy

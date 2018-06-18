@@ -78,14 +78,19 @@ if __name__ == '__main__':
     stop_framework = False
     while not stop_framework:
         try:
-            Framework(profiling=cli_args.enable_profiling).start()
+            framework = Framework(profiling=cli_args.enable_profiling)
+            framework.start()
+            sleep(1)
+            framework.stop_game()
         except SystemExit:
             logger.debug('Framework stopped.')
         except:
             logger.exception('An error occurred.')
         finally:
+            framework.stop_game()
+
             if not cli_args.competition_mode:
                 stop_framework = True
             else:
                 logger.debug('Restarting Framework.')
-                sleep(5)
+            sleep(1)

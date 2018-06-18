@@ -6,7 +6,7 @@ import os
 from multiprocessing import Process, Manager
 from queue import Empty
 
-from time import time
+from time import time, sleep
 
 from Debug.debug_command_factory import DebugCommandFactory
 
@@ -75,9 +75,7 @@ class Engine(Process):
         self.fps_sleep = create_fps_timer(self.fps, on_miss_callback=callback)
 
         # profiling
-        self.profiler = cProfile.Profile()
-        if self.framework.profiling:
-            self.profiler.enable()
+        self.profiler = None
 
     def start(self):
         super().start()
@@ -96,6 +94,10 @@ class Engine(Process):
 
         self.logger.debug(logged_string)
 
+        self.profiler = cProfile.Profile()
+        if self.framework.profiling:
+            self.profiler.enable()
+
         try:
             self.wait_for_vision()
             self.last_time = time()
@@ -105,12 +107,15 @@ class Engine(Process):
                 self.main_loop()
                 if self.is_fps_locked: self.fps_sleep()
                 self.framework.engine_watchdog.value = time()
+
         except KeyboardInterrupt:
             pass
         except BrokenPipeError:
-            self.logger.info('A connection was broken.')
+            self.logger.exception('A connection was broken.')
         except:
             self.logger.exception('An error occurred.')
+        finally:
+            self.dump_profiling_stats()
 
     def wait_for_vision(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
@@ -125,6 +130,7 @@ class Engine(Process):
 
     def main_loop(self):
         engine_cmds = self.get_engine_commands()
+        sleep(5)
         game_state = self.tracker.update()
         self.game_state.update(game_state)
 
@@ -150,9 +156,8 @@ class Engine(Process):
 
     def dump_profiling_stats(self):
         if self.framework.profiling:
-            if self.frame_count % (self.fps * config['ENGINE']['profiling_dump_time']) == 0:
-                self.profiler.dump_stats(config['ENGINE']['profiling_filename'])
-                self.logger.debug('Profiling data written to {}.'.format(config['ENGINE']['profiling_filename']))
+            self.profiler.dump_stats(config['ENGINE']['profiling_filename'])
+            self.logger.debug('Profiling data written to {}.'.format(config['ENGINE']['profiling_filename']))
 
     def is_alive(self):
 
@@ -167,11 +172,10 @@ class Engine(Process):
                                         self.referee_recver.is_alive()))
         return borked_process_not_found and super().is_alive()
 
-    def terminate(self):
-        self.dump_profiling_stats()
-        self.vision_receiver.join(timeout=0.1)
-        self.ui_sender.join(timeout=0.1)
-        self.ui_recver.join(timeout=0.1)
-        self.referee_recver.join(timeout=0.1)
+    def join(self, timeout=None):
+        self.vision_receiver.connection.close()
+        self.ui_sender.connection.close()
+        self.ui_recver.connection.close()
+        self.referee_recver.connection.close()
+        super().join(timeout=timeout)
         self.logger.debug('Terminated')
-        super().terminate()

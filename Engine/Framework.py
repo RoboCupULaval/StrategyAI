@@ -43,7 +43,7 @@ class Framework:
         sleep = create_fps_timer(Framework.CHECK_SUBPROCESS_STATE_IN_SECONDS)
 
         try:
-            while self.engine.is_alive() and self.coach.is_alive():
+            while self.coach.is_alive() and self.engine.is_alive():
                 sleep()
 
         except SystemExit:
@@ -54,10 +54,9 @@ class Framework:
             self.logger.info('A connection was broken.')
         except:
             self.logger.exception('An error occurred.')
-        finally:
-            self.stop_game()
 
     def stop_game(self):
-        self.engine.terminate()
-        self.coach.terminate()
+        self.logger.debug('Game stopped.')
+        self.engine.join(timeout=1)
+        self.coach.join(timeout=1)
         sys.exit()

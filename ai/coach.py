@@ -65,9 +65,7 @@ class Coach(Process):
         self.fps_sleep = create_fps_timer(self.fps, on_miss_callback=callback)
 
         # profiling
-        self.profiler = cProfile.Profile()
-        if self.framework.profiling:
-            self.profiler.enable()
+        self.profiler = None
 
     def wait_for_geometry(self):
         self.logger.debug('Waiting for field\'s geometry from the Engine.')
@@ -90,6 +88,11 @@ class Coach(Process):
 
         self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
 
+        # profiling
+        self.profiler = cProfile.Profile()
+        if self.framework.profiling:
+            self.profiler.enable()
+
         try:
             self.wait_for_geometry()
             self.wait_for_referee()
@@ -103,14 +106,11 @@ class Coach(Process):
         except KeyboardInterrupt:
             pass
         except BrokenPipeError:
-            self.logger.info('A connection was broken.')
+            self.logger.exception('A connection was broken.')
         except:
             self.logger.exception('An error occurred.')
-
-    def terminate(self):
-        self.dump_profiling_stats()
-        self.logger.info('Terminated')
-        super().terminate()
+        finally:
+            self.dump_profiling_stats()
 
     def main_loop(self):
         self.game_state.update(self.engine_game_state)
@@ -128,9 +128,8 @@ class Coach(Process):
 
     def dump_profiling_stats(self):
         if self.framework.profiling:
-            if self.frame_count % (self.fps * config['GAME']['profiling_dump_time']) == 0:
-                self.profiler.dump_stats(config['GAME']['profiling_filename'])
-                self.logger.debug('Profiling data written to {}.'.format(config['GAME']['profiling_filename']))
+            self.profiler.dump_stats(config['GAME']['profiling_filename'])
+            self.logger.debug('Profiling data written to {}.'.format(config['GAME']['profiling_filename']))
 
     def is_alive(self):
         if config['GAME']['competition_mode']:
@@ -138,3 +137,7 @@ class Coach(Process):
                 self.logger.critical('Process is hanging. Shutting down.')
                 return False
         return super().is_alive()
+
+    def join(self, timeout=None):
+        super().join(timeout=timeout)
+        self.logger.info('Terminated')

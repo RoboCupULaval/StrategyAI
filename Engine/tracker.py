@@ -97,7 +97,6 @@ class Tracker:
                                   config['ENGINE']['max_undetected_robot_time'],
                                   undetected_robots)
 
-
         for ball in self.active_balls:
             if time() - ball.last_update_time > config['ENGINE']['max_undetected_ball_time']:
                 ball.reset()
@@ -120,6 +119,7 @@ class Tracker:
 
         for robot_obs in detection_frame.get('robots_blue', ()):
             if not self._blue_team[robot_obs['robot_id']].is_active: new_robots['blue'].add(robot_obs['robot_id'])
+
         if new_robots['blue']:
             self.logger.debug('Blue robot(s) detected: %r', new_robots['blue'])
 
