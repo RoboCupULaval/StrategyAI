@@ -50,9 +50,9 @@ class Framework:
         except SystemExit:
             pass
         except KeyboardInterrupt:
-            self.logger.debug('A keyboard interrupt was raise.')
+            self.logger.debug('Interrupted.')
         except BrokenPipeError:
-            self.logger.debug('A connection was broken.')
+            self.logger.exception('A connection was broken.')
         except:
             self.logger.exception('An error occurred.')
         finally:

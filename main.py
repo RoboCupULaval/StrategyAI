@@ -12,6 +12,22 @@ from config.config import Config
 from Util.sysinfo import git_version
 
 
+def set_logging_config(competition_mode):
+    console_formatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
+    console_handler = logging.StreamHandler(stream=stdout)
+    console_handler.setFormatter(console_formatter)
+    handlers = [console_handler]
+
+    if competition_mode:
+        file_formatter = logging.Formatter('(%(asctime)s) - [%(levelname)-5.5s]  %(name)-22.22s: %(message)s')
+        file_handler = logging.FileHandler('./Logs/log_' + str(datetime.date.today()) + '_at_'
+                                           + str(datetime.datetime.now().hour) + 'h.log', 'a')
+        file_handler.setFormatter(file_formatter)
+        handlers.append(file_handler)
+
+    logging.basicConfig(level=logging.NOTSET, handlers=handlers)
+
+
 def set_arg_parser():
     prog_desc = 'Artificial intelligent and Engine software for the ULtron team in the RoboCup SSL.'
     arg_parser = argparse.ArgumentParser(prog='ULtron\'s AI of the RoboCup ULaval group.', description=prog_desc)
@@ -59,31 +75,15 @@ def set_arg_parser():
 
 if __name__ == '__main__':
 
-    consoleFormatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
-    consoleHandler = logging.StreamHandler(stream=stdout)
-    consoleHandler.setFormatter(consoleFormatter)
-
-    logging.basicConfig(level=logging.NOTSET, handlers=[consoleHandler])
 
     cli_args = set_arg_parser().parse_args()
 
-    if cli_args.competition_mode:
+    set_logging_config(cli_args.competition_mode)
 
-        file_formatter = logging.Formatter('(%(asctime)s) - [%(levelname)-5.5s]  %(name)-22.22s: %(message)s')
-        file_handler = logging.FileHandler('./Logs/log_' + str(datetime.date.today()) + '_at_'
-                                           + str(datetime.datetime.now().hour) + 'h.log', 'a')
-        file_handler.setFormatter(file_formatter)
-
-        console_formatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
-        console_handler = logging.StreamHandler(stream=stdout)
-        console_handler.setFormatter(console_formatter)
-
-        logging.basicConfig(level=logging.NOTSET, handlers=[console_handler, file_handler])
+    logger = logging.getLogger('Main')
 
     Config().load_file(cli_args.config_file)
     Config().load_parameters(cli_args)
-
-    logger = logging.getLogger('Main')
 
     logger.info('Color: {}, Field side: {}, Mode: {}'.format(Config()['GAME']['our_color'].upper(),
                                                     'NEGATIVE' if Config()['GAME']['on_negative_side'] else 'POSITIVE',
@@ -106,4 +106,4 @@ if __name__ == '__main__':
                 stop_framework = True
             else:
                 logger.debug('Restarting Framework.')
-            sleep(1)
+                sleep(1)
