@@ -62,8 +62,7 @@ class FreeKick(Strategy):
         ball_position = self.game_state.ball_position
         for r, position in initial_position_for_pass_center.items():
             if self.closest_role is None \
-                or (initial_position_for_pass_center[self.closest_role] - ball_position).norm > \
-                    (position - ball_position).norm:
+                or (initial_position_for_pass_center[self.closest_role] - ball_position).norm > (position - ball_position).norm:
                 self.closest_role = r
 
         self.has_ball_move = False
