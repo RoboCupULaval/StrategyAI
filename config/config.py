@@ -179,6 +179,7 @@ class Config(metaclass=Singleton):
             logging.basicConfig(level=logging.NOTSET, handlers=[file_handler, console_handler])
 
             # NO CAMERA DISABLED IN COMPETITION MODE
+            self.logger.warning("There is one or more disabled cameras. Reenabling them for competition mode")
             self._config['ENGINE']['disabled_camera_id'] = []
 
         self._config_was_set = False
