@@ -48,4 +48,4 @@ class ReceiverProcess(Process, ReceiverBaseClass, metaclass=ABCMeta):
             self.logger.exception('An error occurred.')
         finally:
             self.connection.close()
-            self.logger.debug('Terminated')
+            self.logger.debug('Closed.')

@@ -86,19 +86,21 @@ class Engine(Process):
 
     def run(self):
 
-        logged_string = 'Running with process ID {}'.format(os.getpid())
-        if self.is_fps_locked:
-            logged_string += ' at {} fps.'.format(self.fps)
-        else:
-            logged_string += ' without fps limitation.'
-
-        self.logger.debug(logged_string)
-
-        self.profiler = cProfile.Profile()
-        if self.framework.profiling:
-            self.profiler.enable()
-
         try:
+
+            logged_string = 'Running with process ID {}'.format(os.getpid())
+            if self.is_fps_locked:
+                logged_string += ' at {} fps.'.format(self.fps)
+            else:
+                logged_string += ' without fps limitation.'
+
+            self.logger.debug(logged_string)
+
+            self.profiler = cProfile.Profile()
+            if self.framework.profiling:
+                self.profiler.enable()
+
+
             self.wait_for_vision()
             self.last_time = time()
             while True:
@@ -109,14 +111,13 @@ class Engine(Process):
                 self.framework.engine_watchdog.value = time()
 
         except KeyboardInterrupt:
-            pass
+            self.logger.debug('Interrupted.')
         except BrokenPipeError:
             self.logger.exception('A connection was broken.')
         except:
             self.logger.exception('An error occurred.')
         finally:
-            self.dump_profiling_stats()
-            self.logger.debug('Terminated')
+            self.stop()
 
     def wait_for_vision(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
@@ -171,3 +172,7 @@ class Engine(Process):
                                         self.ui_recver.is_alive(),
                                         self.referee_recver.is_alive()))
         return borked_process_not_found and super().is_alive()
+
+    def stop(self):
+        self.dump_profiling_stats()
+        self.logger.debug('Stopped.')

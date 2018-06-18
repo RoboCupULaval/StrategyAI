@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     cli_args = set_arg_parser().parse_args()
 
-    if not cli_args.competition_mode:
+    if cli_args.competition_mode:
 
         file_formatter = logging.Formatter('(%(asctime)s) - [%(levelname)-5.5s]  %(name)-22.22s: %(message)s')
         file_handler = logging.FileHandler('./Logs/log_' + str(datetime.date.today()) + '_at_'
@@ -78,7 +78,7 @@ if __name__ == '__main__':
         console_handler = logging.StreamHandler(stream=stdout)
         console_handler.setFormatter(console_formatter)
 
-        logging.basicConfig(level=logging.NOTSET, handlers=[file_handler])
+        logging.basicConfig(level=logging.NOTSET, handlers=[console_handler, file_handler])
 
     Config().load_file(cli_args.config_file)
     Config().load_parameters(cli_args)
@@ -97,6 +97,8 @@ if __name__ == '__main__':
             Framework(profiling=cli_args.enable_profiling).start()
         except SystemExit:
             logger.debug('Framework stopped.')
+        except KeyboardInterrupt:
+            logger.debug('Interrupted.')
         except:
             logger.exception('An error occurred.')
         finally:
