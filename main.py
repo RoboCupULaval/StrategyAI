@@ -5,6 +5,8 @@ import logging
 from time import sleep
 from sys import stdout
 
+import datetime
+
 from Engine.Framework import Framework
 from config.config import Config
 from Util.sysinfo import git_version
@@ -64,6 +66,20 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.NOTSET, handlers=[consoleHandler])
 
     cli_args = set_arg_parser().parse_args()
+
+    if not cli_args.competition_mode:
+
+        file_formatter = logging.Formatter('(%(asctime)s) - [%(levelname)-5.5s]  %(name)-22.22s: %(message)s')
+        file_handler = logging.FileHandler('./Logs/log_' + str(datetime.date.today()) + '_at_'
+                                           + str(datetime.datetime.now().hour) + 'h.log', 'a')
+        file_handler.setFormatter(file_formatter)
+
+        console_formatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
+        console_handler = logging.StreamHandler(stream=stdout)
+        console_handler.setFormatter(console_formatter)
+
+        logging.basicConfig(level=logging.NOTSET, handlers=[file_handler])
+
     Config().load_file(cli_args.config_file)
     Config().load_parameters(cli_args)
 
@@ -78,17 +94,12 @@ if __name__ == '__main__':
     stop_framework = False
     while not stop_framework:
         try:
-            framework = Framework(profiling=cli_args.enable_profiling)
-            framework.start()
-            sleep(1)
-            framework.stop_game()
+            Framework(profiling=cli_args.enable_profiling).start()
         except SystemExit:
             logger.debug('Framework stopped.')
         except:
             logger.exception('An error occurred.')
         finally:
-            framework.stop_game()
-
             if not cli_args.competition_mode:
                 stop_framework = True
             else:

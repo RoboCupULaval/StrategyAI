@@ -57,6 +57,15 @@ class Framework:
 
     def stop_game(self):
         self.logger.debug('Game stopped.')
+        self.coach.join()
+        self.coach_watchdog.close()
+        self.engine.vision_state.close()
         self.engine.join(timeout=1)
-        self.coach.join(timeout=1)
+        self.engine.ui_sender.join(timeout=1)
+        self.engine.ui_recver.join(timeout=1)
+        self.engine.referee_recver.join(timeout=1)
+        self.game_state.close()
+        self.field.close()
+        self.engine_watchdog.close()
+        #self.engine.join(timeout=1)
         sys.exit()

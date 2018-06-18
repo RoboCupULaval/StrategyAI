@@ -111,6 +111,7 @@ class Coach(Process):
             self.logger.exception('An error occurred.')
         finally:
             self.dump_profiling_stats()
+            self.logger.info('Terminated')
 
     def main_loop(self):
         self.game_state.update(self.engine_game_state)
@@ -137,7 +138,3 @@ class Coach(Process):
                 self.logger.critical('Process is hanging. Shutting down.')
                 return False
         return super().is_alive()
-
-    def join(self, timeout=None):
-        super().join(timeout=timeout)
-        self.logger.info('Terminated')

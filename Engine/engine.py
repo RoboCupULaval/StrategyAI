@@ -116,6 +116,7 @@ class Engine(Process):
             self.logger.exception('An error occurred.')
         finally:
             self.dump_profiling_stats()
+            self.logger.debug('Terminated')
 
     def wait_for_vision(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
@@ -130,7 +131,6 @@ class Engine(Process):
 
     def main_loop(self):
         engine_cmds = self.get_engine_commands()
-        sleep(5)
         game_state = self.tracker.update()
         self.game_state.update(game_state)
 
@@ -171,11 +171,3 @@ class Engine(Process):
                                         self.ui_recver.is_alive(),
                                         self.referee_recver.is_alive()))
         return borked_process_not_found and super().is_alive()
-
-    def join(self, timeout=None):
-        self.vision_receiver.connection.close()
-        self.ui_sender.connection.close()
-        self.ui_recver.connection.close()
-        self.referee_recver.connection.close()
-        super().join(timeout=timeout)
-        self.logger.debug('Terminated')
