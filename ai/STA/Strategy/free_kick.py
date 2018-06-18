@@ -11,7 +11,7 @@ from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
-from ai.STA.Tactic.reveive_pass import ReceivePass
+from ai.STA.Tactic.receive_pass import ReceivePass
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 import numpy as np
@@ -25,23 +25,30 @@ class FreeKick(Strategy):
 
         formation = [p for r, p in self.assigned_roles.items() if r != Role.GOALKEEPER]
 
+        forbidden_areas = [self.game_state.field.free_kick_avoid_area,
+                           self.game_state.field.our_goal_forbidden_area]
+
         initial_position_for_pass_center = {}
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
             else:
-                node_pass = self.create_node(role, PositionForPass(self.game_state,
-                                                                   player,
-                                                                   robots_in_formation=formation,
-                                                                   auto_position=True,
-                                                                   forbidden_areas=[self.game_state.field.free_kick_avoid_area,
-                                                                                    self.game_state.field.our_goal_forbidden_area]))
+                node_pass = self.create_node(role,
+                                             PositionForPass(self.game_state,
+                                                             player,
+                                                             robots_in_formation=formation,
+                                                             auto_position=True,
+                                                             forbidden_areas=self.game_state.field.border_limits
+                                                                             + forbidden_areas))
                 node_wait_for_pass = self.create_node(role, ReceivePass(self.game_state, player))
                 initial_position_for_pass_center[role] = node_pass.tactic.area.center  # Hack
                 node_go_kick = self.create_node(role, GoKick(self.game_state,
                                                              player,
                                                              auto_update_target=True,
-                                                             can_kick_in_goal=can_kick_in_goal))
+                                                             can_kick_in_goal=can_kick_in_goal,
+                                                             forbidden_areas=self.game_state.field.border_limits
+                                                                             + forbidden_areas
+                                                             ))
 
                 player_is_not_closest = partial(self.is_not_closest, player)
                 player_has_kicked = partial(self.has_kicked, player)

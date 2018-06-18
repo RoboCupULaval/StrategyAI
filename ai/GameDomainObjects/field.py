@@ -214,6 +214,28 @@ class Field:
         return self.left <= item.x <= self.right and \
                self.bottom <= item.y <= self.top
 
+    # FIXME MONTREAL
+    @property
+    def border_limits(self):
+
+        top_area = Area.from_limits(self.top + 100 * self.boundary_width,
+                                    self.top + self.boundary_width,
+                                    self.right + 100 * self.boundary_width,
+                                    self.left - 100 * self.boundary_width)
+        bottom_area = Area.from_limits(self.bottom - self.boundary_width,
+                                       self.bottom - 100 * self.boundary_width,
+                                       self.right + 100 * self.boundary_width,
+                                       self.left - 100 * self.boundary_width)
+        right_area = Area.from_limits(self.top + 100 * self.boundary_width,
+                                      self.bottom - 100 * self.boundary_width,
+                                      self.right + 100 * self.boundary_width,
+                                      self.right + self.boundary_width)
+        left_area = Area.from_limits(self.top + 100 * self.boundary_width,
+                                     self.bottom - 100 * self.boundary_width,
+                                     self.left - self.boundary_width,
+                                     self.left - 100 * self.boundary_width)
+        return [top_area, bottom_area, right_area, left_area]
+
     @property
     def top(self):
         return self.field_width / 2

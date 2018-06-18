@@ -10,7 +10,7 @@ from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
-from ai.STA.Tactic.reveive_pass import ReceivePass
+from ai.STA.Tactic.receive_pass import ReceivePass
 from ai.STA.Tactic.tactic_constants import Flags
 import numpy as np
 
