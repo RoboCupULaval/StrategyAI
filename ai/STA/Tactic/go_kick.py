@@ -80,7 +80,7 @@ class GoKick(Tactic):
         distance_behind = self.get_destination_behind_ball(effective_ball_spacing)
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
 
-        if self.is_able_to_grab_ball_directly(0.8) \
+        if self.is_able_to_grab_ball_directly(0.95) \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.1, 0.1 * dist_from_ball/100)):
             self.next_state = self.grab_ball
         else:
@@ -94,26 +94,28 @@ class GoKick(Tactic):
     def grab_ball(self):
         if self.auto_update_target:
             self._find_best_passing_option()
-        if not self.is_able_to_grab_ball_directly(0.8):
+        if not self.is_able_to_grab_ball_directly(0.95):
             self.next_state = self.go_behind_ball
 
         if self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
             self.kick_last_time = time.time()
         ball_speed = self.game_state.ball.velocity.norm
-        orientation = (self.target.position - self.game_state.ball_position).angle
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING * (1 + ball_speed / 1000))
+        orientation = (self.game_state.ball_position - self.player.position).angle
+        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=3,
+                                      end_speed=0,
                                       ball_collision=False)\
                            .addForceDribbler()\
                            .addChargeKicker()\
+                           .addKick(self.kick_force)\
                            .build()
 
     def kick(self):
         if self.auto_update_target:
             self._find_best_passing_option()
-        if not self.is_able_to_grab_ball_directly(0.8):
+        if not self.is_able_to_grab_ball_directly(0.95):
             self.next_state = self.go_behind_ball
             return self.go_behind_ball()
         self.next_state = self.validate_kick
@@ -123,7 +125,8 @@ class GoKick(Tactic):
         orientation = (self.target.position - self.game_state.ball_position).angle
 
         return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
-                                      ball_collision=False)\
+                                      ball_collision=False,
+                                      end_speed=0)\
                                         .addKick(self.kick_force)\
                                         .addForceDribbler().build()
 
@@ -176,13 +179,21 @@ class GoKick(Tactic):
 
             self.target_assignation_last_time = time.time()
 
-    def get_destination_behind_ball(self, ball_spacing) -> Position:
+    def get_destination_behind_ball(self, ball_spacing, velocity=True, velocity_offset=25) -> Position:
         """
          Compute the point which is at ball_spacing mm behind the ball from the target.
         """
+
         dir_ball_to_target = normalize(self.target.position - self.game_state.ball.position)
 
-        return self.game_state.ball.position - dir_ball_to_target * ball_spacing
+        position_behind = self.game_state.ball.position - dir_ball_to_target * ball_spacing
+
+        if velocity:
+            position_behind += (self.game_state.ball.velocity - (normalize(self.game_state.ball.velocity) *
+                                                                 np.dot(dir_ball_to_target.array,
+                                                                        self.game_state.ball.velocity.array))) / velocity_offset
+
+        return position_behind
 
     def is_able_to_grab_ball_directly(self, threshold):
         # plus que le threshold est gors (1 max), plus qu'on veut que le robot soit direct deriere la balle.
