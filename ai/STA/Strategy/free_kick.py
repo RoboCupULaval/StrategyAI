@@ -40,17 +40,17 @@ class FreeKick(Strategy):
                                                              auto_update_target=True,
                                                              can_kick_in_goal=can_kick_in_goal))
 
-                node_rotate_around_ball = self.create_node(role, RotateAroundBall(self.game_state, player, p_game_state.field.their_goal_pose))
+                #node_rotate_around_ball = self.create_node(role, RotateAroundBall(self.game_state, player, p_game_state.field.their_goal_pose))
 
                 player_is_closest = partial(self.is_closest_not_goalkeeper, player)
                 player_is_not_closest = partial(self.is_not_closest, player)
                 player_has_kicked = partial(self.has_kicked, player)
                 player_is_ready_to_kick = partial(self.is_ready_to_kick, player)
 
-                node_pass.connect_to(node_rotate_around_ball, when=player_is_closest)
-                node_rotate_around_ball.connect_to(node_pass, when=player_is_not_closest)
+                node_pass.connect_to(node_go_kick, when=player_is_closest)
+                #node_rotate_around_ball.connect_to(node_pass, when=player_is_not_closest)
                 node_go_kick.connect_to(node_pass, when=player_is_not_closest)
-                node_rotate_around_ball.connect_to(node_go_kick, when=player_is_ready_to_kick)
+                #node_rotate_around_ball.connect_to(node_go_kick, when=player_is_ready_to_kick)
                 node_go_kick.connect_to(node_go_kick, when=player_has_kicked)
 
         # Find position for ball player closest to ball
