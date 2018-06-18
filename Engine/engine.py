@@ -125,7 +125,6 @@ class Engine(Process):
 
     def main_loop(self):
         engine_cmds = self.get_engine_commands()
-
         game_state = self.tracker.update()
         self.game_state.update(game_state)
 
@@ -170,9 +169,9 @@ class Engine(Process):
 
     def terminate(self):
         self.dump_profiling_stats()
-        self.vision_receiver.terminate()
-        self.ui_sender.terminate()
-        self.ui_recver.terminate()
-        self.referee_recver.terminate()
+        self.vision_receiver.join(timeout=0.1)
+        self.ui_sender.join(timeout=0.1)
+        self.ui_recver.join(timeout=0.1)
+        self.referee_recver.join(timeout=0.1)
         self.logger.debug('Terminated')
         super().terminate()

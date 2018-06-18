@@ -43,9 +43,6 @@ class SenderProcess(Process, SenderBaseClass, metaclass=ABCMeta):
         except:
             self.logger.exception('An error occurred.')
             raise
-
-    def terminate(self):
-        self.logger.debug('Terminated')
-        self._queue.close()
-        self.connection.close()
-        super().terminate()
+        finally:
+            self.connection.close()
+            self.logger.debug('Terminated')

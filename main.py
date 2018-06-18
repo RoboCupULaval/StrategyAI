@@ -88,4 +88,4 @@ if __name__ == '__main__':
                 stop_framework = True
             else:
                 logger.debug('Restarting Framework.')
-                sleep(0.5)
+                sleep(5)
