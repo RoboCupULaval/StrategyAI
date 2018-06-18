@@ -44,7 +44,9 @@ class PlaceBall(Tactic):
         self.steady_orientation = None
 
     def _fetch_ball(self):
-        if self.game_state.field.is_outside_wall_limit(self.game_state.ball_position) or self._check_success():
+        #if self.game_state.field.is_outside_wall_limit(self.game_state.ball_position) or \
+        #        self._check_success():
+        if self._check_success():
             self.next_state = self.halt
         else:
             self.next_state = self.go_behind_ball

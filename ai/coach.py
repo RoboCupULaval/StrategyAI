@@ -137,7 +137,7 @@ class Coach(Process):
 
     def is_alive(self):
         if config['GAME']['competition_mode']:
-            if time() - self.framework.ai_watchdog.value > self.framework.MAX_HANGING_TIME:
+            if time() - self.framework.coach_watchdog.value > self.framework.MAX_HANGING_TIME:
                 self.logger.critical('Process is hanging. Shutting down.')
                 return False
         return super().is_alive()
