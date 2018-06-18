@@ -6,7 +6,7 @@ import os
 from multiprocessing import Process, Manager
 from queue import Empty
 
-from time import time
+from time import time, sleep
 
 from Debug.debug_command_factory import DebugCommandFactory
 
@@ -86,19 +86,21 @@ class Engine(Process):
 
     def run(self):
 
-        logged_string = 'Running with process ID {}'.format(os.getpid())
-        if self.is_fps_locked:
-            logged_string += ' at {} fps.'.format(self.fps)
-        else:
-            logged_string += ' without fps limitation.'
-
-        self.logger.debug(logged_string)
-
-        self.profiler = cProfile.Profile()
-        if self.framework.profiling:
-            self.profiler.enable()
-
         try:
+
+            logged_string = 'Running with process ID {}'.format(os.getpid())
+            if self.is_fps_locked:
+                logged_string += ' at {} fps.'.format(self.fps)
+            else:
+                logged_string += ' without fps limitation.'
+
+            self.logger.debug(logged_string)
+
+            self.profiler = cProfile.Profile()
+            if self.framework.profiling:
+                self.profiler.enable()
+
+
             self.wait_for_vision()
             self.last_time = time()
             while True:
@@ -109,13 +111,13 @@ class Engine(Process):
                 self.framework.engine_watchdog.value = time()
 
         except KeyboardInterrupt:
-            pass
+            self.logger.debug('Interrupted.')
         except BrokenPipeError:
-            self.logger.info('A connection was broken.')
+            self.logger.exception('A connection was broken.')
         except:
             self.logger.exception('An error occurred.')
         finally:
-            self.dump_profiling_stats()
+            self.stop()
 
     def wait_for_vision(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
@@ -130,7 +132,6 @@ class Engine(Process):
 
     def main_loop(self):
         engine_cmds = self.get_engine_commands()
-
         game_state = self.tracker.update()
         self.game_state.update(game_state)
 
@@ -172,10 +173,6 @@ class Engine(Process):
                                         self.referee_recver.is_alive()))
         return borked_process_not_found and super().is_alive()
 
-    def join(self, timeout=None):
-        self.vision_receiver.terminate()
-        self.ui_sender.terminate()
-        self.ui_recver.terminate()
-        self.referee_recver.terminate()
-        self.logger.debug('Terminated')
-        super().join(timeout=timeout)
+    def stop(self):
+        self.dump_profiling_stats()
+        self.logger.debug('Stopped.')

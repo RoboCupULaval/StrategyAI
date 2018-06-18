@@ -86,14 +86,15 @@ class Coach(Process):
 
     def run(self):
 
-        self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
-
-        # profiling
-        self.profiler = cProfile.Profile()
-        if self.framework.profiling:
-            self.profiler.enable()
-
         try:
+
+            self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
+
+            # profiling
+            self.profiler = cProfile.Profile()
+            if self.framework.profiling:
+                self.profiler.enable()
+
             self.wait_for_geometry()
             self.wait_for_referee()
             while True:
@@ -104,17 +105,13 @@ class Coach(Process):
                 self.framework.coach_watchdog.value = time()
 
         except KeyboardInterrupt:
-            pass
+            self.logger.debug('Interrupted.')
         except BrokenPipeError:
-            self.logger.info('A connection was broken.')
+            self.logger.exception('A connection was broken.')
         except:
             self.logger.exception('An error occurred.')
         finally:
-            self.dump_profiling_stats()
-
-    def join(self, timeout=None):
-        self.logger.info('Terminated')
-        super().join(timeout=timeout)
+            self.stop()
 
     def main_loop(self):
         self.game_state.update(self.engine_game_state)
@@ -141,3 +138,7 @@ class Coach(Process):
                 self.logger.critical('Process is hanging. Shutting down.')
                 return False
         return super().is_alive()
+
+    def stop(self):
+        self.dump_profiling_stats()
+        self.logger.info('Stopped.')
