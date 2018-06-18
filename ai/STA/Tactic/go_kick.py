@@ -102,7 +102,7 @@ class GoKick(Tactic):
             self.kick_last_time = time.time()
         ball_speed = self.game_state.ball.velocity.norm
         orientation = (self.game_state.ball_position - self.player.position).angle
-        distance_behind = self.get_destination_behind_ball(-(GRAB_BALL_SPACING))
+        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=3,
                                       end_speed=0,
@@ -179,7 +179,7 @@ class GoKick(Tactic):
 
             self.target_assignation_last_time = time.time()
 
-    def get_destination_behind_ball(self, ball_spacing, velocity=True) -> Position:
+    def get_destination_behind_ball(self, ball_spacing, velocity=True, velocity_offset=25) -> Position:
         """
          Compute the point which is at ball_spacing mm behind the ball from the target.
         """
@@ -191,7 +191,7 @@ class GoKick(Tactic):
         if velocity:
             position_behind += (self.game_state.ball.velocity - (normalize(self.game_state.ball.velocity) *
                                                                  np.dot(dir_ball_to_target.array,
-                                                                        self.game_state.ball.velocity.array))) / 50
+                                                                        self.game_state.ball.velocity.array))) / velocity_offset
 
         return position_behind
 
