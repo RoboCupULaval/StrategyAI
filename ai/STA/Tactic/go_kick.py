@@ -58,9 +58,9 @@ class GoKick(Tactic):
 
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
 
-        if self.is_able_to_grab_ball_directly(0.5) \
+        if self.get_alignment_with_ball_and_target() < 60 \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.1, 0.1 * dist_from_ball/1000)):
-            self.next_state = self.grab_ball
+            self.next_state = self.go_behind_ball
             if self._get_distance_from_ball() < KICK_DISTANCE:
                 self.next_state = self.kick
 
@@ -120,7 +120,7 @@ class GoKick(Tactic):
     def kick(self):
         if self.auto_update_target:
             self._find_best_passing_option()
-        if not self.get_alignment_with_ball_and_target() > 45:
+        if self.get_alignment_with_ball_and_target() > 45:
             self.next_state = self.go_behind_ball
             return self.go_behind_ball()
         self.next_state = self.validate_kick
@@ -231,13 +231,9 @@ class GoKick(Tactic):
             ori = self.game_state.ball.position
             upper = ori + Position.from_angle(base_angle + angle, magnitude)
             lower = ori + Position.from_angle(base_angle - angle, magnitude)
-            upper_back = ori + Position.from_angle(base_angle + angle + np.pi, magnitude)
-            lower_back = ori + Position.from_angle(base_angle - angle + np.pi, magnitude)
             ball_to_player = self.player.position - self.game_state.ball_position
             behind_player = (ball_to_player.norm + 1000) * normalize(ball_to_player) + self.game_state.ball_position
             return [DebugCommandFactory.line(ori, upper),
                     DebugCommandFactory.line(ori, lower),
-                    DebugCommandFactory.line(ori, upper_back),
-                    DebugCommandFactory.line(ori, lower_back),
                     DebugCommandFactory.line(self.game_state.ball_position, behind_player, color=CYAN)] + additional_dbg
         return []

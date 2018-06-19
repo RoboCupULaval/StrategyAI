@@ -25,7 +25,7 @@ KICK_SUCCEED_THRESHOLD = 300
 
 # noinspection PyArgumentList,PyUnresolvedReferences,PyUnresolvedReferences
 class ReceivePass(Tactic):
-    def __init__(self, game_state: GameState, player: Player, target):
+    def __init__(self, game_state: GameState, player: Player, target=Position(0, 0)):
 
         super().__init__(game_state, player)
         self.current_state = self.initialize

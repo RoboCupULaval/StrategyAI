@@ -78,7 +78,7 @@ class GrSimVelocityController(RealVelocityController):
     settings = {'kp': 2, 'ki': 0.3, 'kd': 0}
     v_d = 15
     emergency_break_constant = 0
-    emergency_break_safety_factor = 1
+    emergency_break_safety_factor = 1  # lower = bigger break distance
 
 
 def is_time_to_break(robot, destination, cruise_speed, acceleration, target_speed):
