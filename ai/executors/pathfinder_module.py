@@ -60,7 +60,7 @@ class PathfinderModule:
 
         if ball_collision and self.game_state.is_ball_on_field:
             path_obstacles.append(Obstacle(self.game_state.ball_position.array,
-                                           avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
+                                           avoid_distance=100))
 
         return path_obstacles
 

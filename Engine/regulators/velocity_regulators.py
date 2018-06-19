@@ -13,7 +13,7 @@ config = Config()
 class RealVelocityController(RegulatorBaseClass):
 
     settings = {'kp': 10, 'ki': 0, 'kd': 1}
-    v_d = 10  # lower = bigger path correction
+    v_d = 100  # lower = bigger path correction
     emergency_break_constant = 0.4  # Higher = higher correction of trajectory
     emergency_break_safety_factor = 1  # lower = bigger break distance
 
