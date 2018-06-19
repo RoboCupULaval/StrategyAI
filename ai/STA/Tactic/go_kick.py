@@ -6,6 +6,7 @@ from typing import List, Union
 
 import numpy as np
 
+from Debug.debug_command_factory import DebugCommandFactory, CYAN, RED
 from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
@@ -27,7 +28,6 @@ KICK_SUCCEED_THRESHOLD = 300
 COMMAND_DELAY = 0.5
 
 
-# noinspection PyArgumentList,PyUnresolvedReferences,PyUnresolvedReferences
 class GoKick(Tactic):
     def __init__(self, game_state: GameState, player: Player,
                  target: Pose=Pose(),
@@ -200,3 +200,31 @@ class GoKick(Tactic):
         alignement_behind = np.dot(vec_target_to_ball.array,
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
         return threshold < alignement_behind
+
+    def debug_cmd(self):
+        angle = None
+        additional_dbg = []
+        if self.current_state == self.go_behind_ball:
+            angle = np.arccos(0.95)
+        elif self.current_state == self.grab_ball:
+            angle = np.arccos(0.95)
+        elif self.current_state == self.kick:
+            angle = np.arccos(0.95)
+            additional_dbg = [DebugCommandFactory.circle(self.game_state.ball_position, KICK_DISTANCE, color=RED)]
+
+        if angle is not None:
+            base_angle = (self.game_state.ball.position - self.target.position).angle
+            magnitude = 3000
+            ori = self.game_state.ball.position
+            upper = ori + Position.from_angle(base_angle + angle, magnitude)
+            lower = ori + Position.from_angle(base_angle - angle, magnitude)
+            upper_back = ori + Position.from_angle(base_angle + angle + np.pi, magnitude)
+            lower_back = ori + Position.from_angle(base_angle - angle + np.pi, magnitude)
+            ball_to_player = self.player.position - self.game_state.ball_position
+            behind_player = (ball_to_player.norm + 1000) * normalize(ball_to_player) + self.game_state.ball_position
+            return [DebugCommandFactory.line(ori, upper),
+                    DebugCommandFactory.line(ori, lower),
+                    DebugCommandFactory.line(ori, upper_back),
+                    DebugCommandFactory.line(ori, lower_back),
+                    DebugCommandFactory.line(self.game_state.ball_position, behind_player, color=CYAN)] + additional_dbg
+        return []
