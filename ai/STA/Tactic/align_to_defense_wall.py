@@ -34,7 +34,8 @@ class AlignToDefenseWall(Tactic):
                  args: Optional[List[str]]=None,
                  robots_in_formation: Optional[List[Player]]=None,
                  object_to_block=None,
-                 stay_away_from_ball=False):
+                 stay_away_from_ball=False,
+                 cruise_speed=3):
         super().__init__(game_state, player, args=args)
         if object_to_block is None:
             object_to_block = GameState().ball
@@ -45,6 +46,7 @@ class AlignToDefenseWall(Tactic):
             self.robots_in_formation = robots_in_formation
         assert isinstance(self.robots_in_formation[0], Player)
 
+        self.cruise_speed = cruise_speed
         self.stay_away_from_ball = stay_away_from_ball
         self.go_kick_tactic = None
         self.player_number_in_formation = None
@@ -129,7 +131,7 @@ class AlignToDefenseWall(Tactic):
         dest = self.position_on_wall_segment()
         dest_orientation = (self.object_to_block.position - dest).angle
         return MoveTo(Pose(dest,
-                           dest_orientation))
+                           dest_orientation), cruise_speed=self.cruise_speed)
 
     def go_kick(self):
         self.compute_wall_segment()

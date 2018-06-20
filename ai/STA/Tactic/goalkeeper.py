@@ -61,7 +61,7 @@ class GoalKeeper(Tactic):
             self.next_state = self.intercept
             return self.intercept()  # no time to loose
 
-        circle_radius = self.game_state.field.goal_width / 2
+        circle_radius = self.game_state.field.goal_width / 2 - ROBOT_RADIUS
         circle_center = self.game_state.field.our_goal - self.OFFSET_FROM_GOAL_LINE
         solutions = intersection_line_and_circle(circle_center,
                                                  circle_radius,
