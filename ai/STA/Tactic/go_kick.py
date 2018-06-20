@@ -32,7 +32,7 @@ class GoKick(Tactic):
     def __init__(self, game_state: GameState, player: Player,
                  target: Pose=Pose(),
                  args: List[str]=None,
-                 kick_force: KickForce=KickForce.MEDIUM,
+                 kick_force: KickForce=KickForce.HIGH,
                  auto_update_target=False,
                  go_behind_distance=GRAB_BALL_SPACING*3,
                  forbidden_areas=None,
@@ -59,7 +59,7 @@ class GoKick(Tactic):
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
 
         if self.is_able_to_grab_ball_directly(0.5) \
-                and compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.1, 0.1 * dist_from_ball/100)):
+                and compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.1, 0.1 * dist_from_ball/1000)):
             self.next_state = self.grab_ball
             if self._get_distance_from_ball() < KICK_DISTANCE:
                 self.next_state = self.kick
@@ -108,7 +108,6 @@ class GoKick(Tactic):
                                       end_speed=0,
                                       ball_collision=False)\
                            .addForceDribbler()\
-                           .addChargeKicker()\
                            .addKick(self.kick_force)\
                            .build()
 
@@ -188,7 +187,7 @@ class GoKick(Tactic):
 
         position_behind = self.game_state.ball.position - dir_ball_to_target * ball_spacing
 
-        if velocity:
+        if velocity and self.game_state.ball.velocity.norm > 20 and False:
             position_behind += (self.game_state.ball.velocity - (normalize(self.game_state.ball.velocity) *
                                                                  np.dot(dir_ball_to_target.array,
                                                                         self.game_state.ball.velocity.array))) / velocity_offset
