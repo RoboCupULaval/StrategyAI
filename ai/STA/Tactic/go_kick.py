@@ -21,7 +21,7 @@ VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1.0
 
 GO_BEHIND_SPACING = 180
-GRAB_BALL_SPACING = 90
+GRAB_BALL_SPACING = 80
 APPROACH_SPEED = 100
 KICK_DISTANCE = 90
 KICK_SUCCEED_THRESHOLD = 300
@@ -85,7 +85,7 @@ class GoKick(Tactic):
             collision_ball = False
         distance_behind = self.get_destination_behind_ball(effective_ball_spacing)
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
-        if self.get_alignment_with_ball_and_target() < 25 \
+        if self.get_alignment_with_ball_and_target() < 35 \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=max(0.05, 0.05 * dist_from_ball/1000)):
             self.next_state = self.grab_ball
         else:
@@ -184,7 +184,7 @@ class GoKick(Tactic):
 
             self.target_assignation_last_time = time.time()
 
-    def get_destination_behind_ball(self, ball_spacing, velocity=True, velocity_offset=4) -> Position:
+    def get_destination_behind_ball(self, ball_spacing, velocity=True, velocity_offset=200) -> Position:
         """
          Compute the point which is at ball_spacing mm behind the ball from the target.
         """
