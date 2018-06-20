@@ -31,7 +31,7 @@ class PathPartitionner:
     def __init__(self):
         self.obstacles = []
         self.old_path = None
-        self.velocity = None
+        self.player_velocity = None
 
     @property
     def obstacles_position(self):
@@ -39,7 +39,7 @@ class PathPartitionner:
 
     @property
     def obstacles_avoid_distance(self):
-        return np.array([obs.avoid_distance for obs in self.obstacles])
+        return np.array([obs.avoid_distance * 0.5*(1/(1+np.exp(-0.004 * np.linalg.norm(self.player_velocity) + 7)) + 1) for obs in self.obstacles])
 
     def filter_obstacles(self, start, target):
         obstacles = np.array(self.obstacles)
@@ -49,8 +49,8 @@ class PathPartitionner:
         is_not_self = start_to_obs > 0  # remove self if present
         self.obstacles = obstacles[is_inside_ellipse & is_not_self].tolist()
 
-    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], velocity: Position, last_path: Optional[Path]=None):
-        self.velocity = velocity.array
+    def get_path(self, start: Position, target: Position, obstacles: List[Obstacle], player_velocity: Position, last_path: Optional[Path]=None):
+        self.player_velocity = player_velocity.array
         self.obstacles = obstacles
         self.old_path = last_path
         self.filter_obstacles(start.array, target.array)
@@ -121,8 +121,8 @@ class PathPartitionner:
                 while not self.is_valid_sub_target(sub_target_2, self.obstacles_position):
                     sub_target_2 -= avoid_dir * resolution_sub_target
                 #on maximise l'angle entre les segments pour avoir un path plus rectiligne
-                val_1 = np.dot((sub_target_1-start)/np.linalg.norm(sub_target_1-start), self.velocity)
-                val_2 = np.dot((sub_target_2 - start) / np.linalg.norm(sub_target_2 - start), self.velocity)
+                val_1 = np.dot((sub_target_1-start) / np.linalg.norm(sub_target_1-start), self.player_velocity)
+                val_2 = np.dot((sub_target_2 - start) / np.linalg.norm(sub_target_2 - start), self.player_velocity)
                 if val_1 > val_2: #le segment 1 est plus aligne avec le path precedant que le segment2
                     sub_target = sub_target_1.copy()
                     sub_target_potential = sub_target_1.copy()
