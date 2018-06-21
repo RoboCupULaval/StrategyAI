@@ -39,7 +39,7 @@ class PathPartitionner:
 
     @property
     def obstacles_avoid_distance(self):
-        return np.array([obs.avoid_distance * 0.5*(1/(1+np.exp(-0.004 * np.linalg.norm(self.player_velocity) + 7)) + 1) for obs in self.obstacles])
+        return np.array([obs.avoid_distance for obs in self.obstacles])
 
     def filter_obstacles(self, start, target):
         obstacles = np.array(self.obstacles)
