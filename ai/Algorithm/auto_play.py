@@ -235,7 +235,7 @@ class SimpleAutoPlay(AutoPlay):
             return self._decide_between_normal_play()
         elif self.current_state in self.KICKOFF_STATE and \
                 (GameState().ball.is_mobile() or
-                 (GameState().ball.position - Position(0, 0)).norm > self.game_state.field.center_circle_radius):
+                 (GameState().ball.position - Position(0, 0)).norm > GameState().field.center_circle_radius):
             return self._decide_between_normal_play()
 
         return self.current_state
