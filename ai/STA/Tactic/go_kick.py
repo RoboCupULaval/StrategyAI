@@ -214,7 +214,7 @@ class GoKick(Tactic):
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
         return np.arccos(alignement_behind) * 180 / np.pi
 
-    def debug_cmd_fuck(self):
+    def debug_cmd_disable(self):
         angle = None
         additional_dbg = []
         if self.current_state == self.go_behind_ball:
