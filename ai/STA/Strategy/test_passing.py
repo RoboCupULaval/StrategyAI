@@ -20,7 +20,7 @@ import numpy as np
 # noinspection PyMethodMayBeStatic,PyMethodMayBeStatic
 class TestPassing(Strategy):
 
-    def __init__(self, p_game_state, can_kick_in_goal=False):
+    def __init__(self, p_game_state, can_kick_in_goal=True):
         super().__init__(p_game_state)
 
         formation = [p for r, p in self.assigned_roles.items() if r != Role.GOALKEEPER]
