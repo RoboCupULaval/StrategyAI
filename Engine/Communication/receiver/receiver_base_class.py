@@ -1,4 +1,5 @@
 import os
+import socket
 from abc import ABCMeta, abstractmethod
 from multiprocessing import Process, Queue
 from multiprocessing.managers import DictProxy
@@ -45,9 +46,6 @@ class ReceiverProcess(Process, ReceiverBaseClass, metaclass=ABCMeta):
             pass
         except:
             self.logger.exception('An error occurred.')
-            raise
-
-    def terminate(self):
-        self.connection.close()
-        self.logger.debug('Terminated')
-        super().terminate()
+        finally:
+            self.connection.close()
+            self.logger.debug('Closed.')

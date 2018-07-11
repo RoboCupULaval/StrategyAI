@@ -21,7 +21,7 @@ VALID_DIFF_ANGLE = 0.15
 
 class RotateAroundBall(Tactic):
     def __init__(self, game_state: GameState, player: Player, target: Pose,
-                 args: Optional[List[str]] = None, rotate_time=4, switch_time=1.5):
+                 args: Optional[List[str]] = None, rotate_time=3, switch_time=1.5):
         super().__init__(game_state, player, target, args)
         self.rotate_time = rotate_time
         self.switch_time = switch_time

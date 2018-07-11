@@ -3,7 +3,10 @@
 from pyhermes import McuCommunicator
 
 from Engine.Communication.sender.sender_base_class import Sender
+from Engine.robot import MAX_LINEAR_SPEED, MAX_ANGULAR_SPEED
 from Util.constant import KickForce, DribbleState
+from Util.geometry import clamp
+import numpy as np
 
 
 class SerialCommandSender(Sender):
@@ -14,10 +17,17 @@ class SerialCommandSender(Sender):
     def send_packet(self, packets_frame):
         try:
             for packet in packets_frame.packet:
+                if np.isnan(packet.command.x) or \
+                    np.isnan(packet.command.y) or \
+                    np.isnan(packet.command.orientation):
+                    continue
+                cx = clamp(packet.command.x, -MAX_LINEAR_SPEED, MAX_LINEAR_SPEED)
+                cy = clamp(packet.command.y, -MAX_LINEAR_SPEED, MAX_LINEAR_SPEED)
+                orien = clamp(packet.command.orientation, -MAX_ANGULAR_SPEED, MAX_ANGULAR_SPEED)
                 self.connection.sendSpeedAdvance(packet.robot_id,
-                                                 packet.command.x/1000,
-                                                 packet.command.y/1000,
-                                                 packet.command.orientation,
+                                                 cx/1000,
+                                                 cy/1000,
+                                                 orien,
                                                  packet.charge_kick,
                                                  self.translate_kick_force(packet.kick_force),
                                                  self.translate_dribbler_speed(packet.dribbler_state))

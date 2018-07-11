@@ -130,14 +130,12 @@ class Config(metaclass=Singleton):
                 'is_autonomous_play_at_startup': False,
                 'on_negative_side': True,
                 'fps': 10,
-                'profiling_filename': 'profile_data_ai.prof',
-                'profiling_dump_time': 10
+                'profiling_filename': 'profile_data_ai.prof'
             },
             'ENGINE': {
                 'profiling_filename': 'profile_data_engine.prof',
-                'profiling_dump_time': 10,
                 'number_of_camera': 4,
-                'max_robot_id': 12,
+                'max_robot_id': 16,
                 'max_undetected_robot_time': 5,
                 'max_undetected_ball_time': 0.5,
                 'max_ball_on_field': 2,
@@ -167,16 +165,9 @@ class Config(metaclass=Singleton):
         if cli_args.competition_mode:
             self._config['GAME']['is_autonomous_play_at_startup'] = True
 
-            file_formatter = logging.Formatter('(%(asctime)s) - [%(levelname)-5.5s]  %(name)-22.22s: %(message)s')
-            file_handler = logging.FileHandler('./Logs/log_' + str(datetime.date.today()) + '_at_'
-                                                                  + str(datetime.datetime.now().hour) + 'h.log', 'a')
-            file_handler.setFormatter(file_formatter)
-
-            console_formatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
-            console_handler = logging.StreamHandler(stream=stdout)
-            console_handler.setFormatter(console_formatter)
-
-            logging.basicConfig(level=logging.NOTSET, handlers=[file_handler, console_handler])
+            # NO CAMERA DISABLED IN COMPETITION MODE
+            self.logger.warning("There is one or more disabled cameras. Reenabling them for competition mode")
+            self._config['ENGINE']['disabled_camera_id'] = []
 
         self._config_was_set = False
         self.update_ports()

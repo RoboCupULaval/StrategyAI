@@ -1,4 +1,5 @@
 import os
+import socket
 from abc import ABCMeta, abstractmethod
 from multiprocessing import Process, Queue
 
@@ -42,10 +43,6 @@ class SenderProcess(Process, SenderBaseClass, metaclass=ABCMeta):
             pass
         except:
             self.logger.exception('An error occurred.')
-            raise
-
-    def terminate(self):
-        self.logger.debug('Terminated')
-        self._queue.close()
-        self.connection.close()
-        super().terminate()
+        finally:
+            self.connection.close()
+            self.logger.debug('Closed.')

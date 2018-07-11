@@ -5,9 +5,27 @@ import logging
 from time import sleep
 from sys import stdout
 
+import datetime
+
 from Engine.Framework import Framework
 from config.config import Config
 from Util.sysinfo import git_version
+
+
+def set_logging_config(competition_mode):
+    console_formatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
+    console_handler = logging.StreamHandler(stream=stdout)
+    console_handler.setFormatter(console_formatter)
+    handlers = [console_handler]
+
+    if competition_mode:
+        file_formatter = logging.Formatter('(%(asctime)s) - [%(levelname)-5.5s]  %(name)-22.22s: %(message)s')
+        file_handler = logging.FileHandler('./Logs/log_' + str(datetime.date.today()) + '_at_'
+                                           + str(datetime.datetime.now().hour) + 'h.log', 'a')
+        file_handler.setFormatter(file_formatter)
+        handlers.append(file_handler)
+
+    logging.basicConfig(level=logging.NOTSET, handlers=handlers)
 
 
 def set_arg_parser():
@@ -57,17 +75,15 @@ def set_arg_parser():
 
 if __name__ == '__main__':
 
-    consoleFormatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
-    consoleHandler = logging.StreamHandler(stream=stdout)
-    consoleHandler.setFormatter(consoleFormatter)
-
-    logging.basicConfig(level=logging.NOTSET, handlers=[consoleHandler])
 
     cli_args = set_arg_parser().parse_args()
-    Config().load_file(cli_args.config_file)
-    Config().load_parameters(cli_args)
+
+    set_logging_config(cli_args.competition_mode)
 
     logger = logging.getLogger('Main')
+
+    Config().load_file(cli_args.config_file)
+    Config().load_parameters(cli_args)
 
     logger.info('Color: {}, Field side: {}, Mode: {}'.format(Config()['GAME']['our_color'].upper(),
                                                     'NEGATIVE' if Config()['GAME']['on_negative_side'] else 'POSITIVE',
@@ -81,6 +97,8 @@ if __name__ == '__main__':
             Framework(profiling=cli_args.enable_profiling).start()
         except SystemExit:
             logger.debug('Framework stopped.')
+        except KeyboardInterrupt:
+            logger.debug('Interrupted.')
         except:
             logger.exception('An error occurred.')
         finally:
@@ -88,4 +106,4 @@ if __name__ == '__main__':
                 stop_framework = True
             else:
                 logger.debug('Restarting Framework.')
-                sleep(0.5)
+                sleep(1)

@@ -13,7 +13,7 @@ config = Config()
 class RealVelocityController(RegulatorBaseClass):
 
     settings = {'kp': 10, 'ki': 0, 'kd': 1}
-    v_d = 5  # lower = bigger path correction
+    v_d = 4  # lower = bigger path correction
     emergency_break_constant = 0.4  # Higher = higher correction of trajectory
     emergency_break_safety_factor = 1  # lower = bigger break distance
 
@@ -46,7 +46,7 @@ class RealVelocityController(RegulatorBaseClass):
             return direction_error
 
     def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION):
-        acceleration_offset = 1.5  # on veut que le robot soit plus aggressif en début de trajet
+        acceleration_offset = 1  # on veut que le robot soit plus aggressif en début de trajet
         emergency_break_offset = self.emergency_break_constant / self.dt * (robot.current_speed / 1000)  # on veut que le robot break le plus qu'il peut si on s'approche trop vite de la target
         emergency_break_offset = max(1.0, emergency_break_offset)
 
@@ -78,7 +78,7 @@ class GrSimVelocityController(RealVelocityController):
     settings = {'kp': 2, 'ki': 0.3, 'kd': 0}
     v_d = 15
     emergency_break_constant = 0
-    emergency_break_safety_factor = 1
+    emergency_break_safety_factor = 1  # lower = bigger break distance
 
 
 def is_time_to_break(robot, destination, cruise_speed, acceleration, target_speed):

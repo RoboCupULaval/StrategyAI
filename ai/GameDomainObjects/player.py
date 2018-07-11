@@ -1,13 +1,14 @@
 # Under MIT License, see LICENSE.txt
 
 from Util.pose import Pose
+from config.config import Config
 
 
 class Player:
 
     def __init__(self, number_id: int, team):
         assert isinstance(number_id, int)
-        assert number_id in [x for x in range(0, 13)]
+        assert number_id in range(0, Config()['ENGINE']['max_robot_id'])
 
         self._id = number_id
         self._team = team

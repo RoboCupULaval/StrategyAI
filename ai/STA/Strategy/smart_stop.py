@@ -35,7 +35,8 @@ class SmartStop(Strategy):
                                                           player,
                                                           robots_in_formation=formation_defender,
                                                           object_to_block=self.game_state.ball,
-                                                          stay_away_from_ball=True))
+                                                          stay_away_from_ball=True,
+                                                          cruise_speed=1))
             else:
                 self.create_node(role, AlignAroundTheBall(self.game_state,
                                                           player,

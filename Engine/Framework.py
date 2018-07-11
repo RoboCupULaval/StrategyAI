@@ -1,9 +1,11 @@
 # Under MIT License, see LICENSE.txt
 
 import logging
+import os
+import signal
 from multiprocessing import Queue, Manager
 import sys
-from time import time
+import time
 
 from Engine.engine import Engine
 from ai.coach import Coach
@@ -29,10 +31,9 @@ class Framework:
         self.ui_send_queue = Queue(maxsize=Framework.QUEUE_SIZE)
         self.ui_recv_queue = Queue(maxsize=Framework.QUEUE_SIZE)
 
-        self.engine_watchdog = Manager().Value('f', time())
+        self.engine_watchdog = Manager().Value('f', time.time())
         self.engine = Engine(self)
-
-        self.coach_watchdog = Manager().Value('f', time())
+        self.coach_watchdog = Manager().Value('f', time.time())
         self.coach = Coach(self)
 
     def start(self):
@@ -43,21 +44,31 @@ class Framework:
         sleep = create_fps_timer(Framework.CHECK_SUBPROCESS_STATE_IN_SECONDS)
 
         try:
-            while self.engine.is_alive() and self.coach.is_alive():
+            while self.coach.is_alive() and self.engine.is_alive():
                 sleep()
 
         except SystemExit:
-            self.logger.debug('Terminated')
+            pass
         except KeyboardInterrupt:
-            self.logger.debug('A keyboard interrupt was raise.')
+            self.logger.debug('Interrupted.')
         except BrokenPipeError:
-            self.logger.info('A connection was broken.')
+            self.logger.exception('A connection was broken.')
         except:
             self.logger.exception('An error occurred.')
         finally:
             self.stop_game()
 
     def stop_game(self):
-        self.engine.terminate()
-        self.coach.terminate()
+        self.logger.critical('Framework stopped.')
+
+        try:
+            os.kill(self.engine.pid, signal.SIGINT)
+        except ProcessLookupError:
+            pass
+
+        try:
+            os.kill(self.coach.pid, signal.SIGINT)
+        except ProcessLookupError:
+            pass
+        
         sys.exit()

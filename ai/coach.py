@@ -65,9 +65,7 @@ class Coach(Process):
         self.fps_sleep = create_fps_timer(self.fps, on_miss_callback=callback)
 
         # profiling
-        self.profiler = cProfile.Profile()
-        if self.framework.profiling:
-            self.profiler.enable()
+        self.profiler = None
 
     def wait_for_geometry(self):
         self.logger.debug('Waiting for field\'s geometry from the Engine.')
@@ -88,9 +86,15 @@ class Coach(Process):
 
     def run(self):
 
-        self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
-
         try:
+
+            self.logger.debug('Running with process ID {} at {} fps.'.format(os.getpid(), self.fps))
+
+            # profiling
+            self.profiler = cProfile.Profile()
+            if self.framework.profiling:
+                self.profiler.enable()
+
             self.wait_for_geometry()
             self.wait_for_referee()
             while True:
@@ -101,16 +105,13 @@ class Coach(Process):
                 self.framework.coach_watchdog.value = time()
 
         except KeyboardInterrupt:
-            pass
+            self.logger.debug('Interrupted.')
         except BrokenPipeError:
-            self.logger.info('A connection was broken.')
+            self.logger.exception('A connection was broken.')
         except:
             self.logger.exception('An error occurred.')
-
-    def terminate(self):
-        self.dump_profiling_stats()
-        self.logger.info('Terminated')
-        super().terminate()
+        finally:
+            self.stop()
 
     def main_loop(self):
         self.game_state.update(self.engine_game_state)
@@ -128,13 +129,16 @@ class Coach(Process):
 
     def dump_profiling_stats(self):
         if self.framework.profiling:
-            if self.frame_count % (self.fps * config['GAME']['profiling_dump_time']) == 0:
-                self.profiler.dump_stats(config['GAME']['profiling_filename'])
-                self.logger.debug('Profiling data written to {}.'.format(config['GAME']['profiling_filename']))
+            self.profiler.dump_stats(config['GAME']['profiling_filename'])
+            self.logger.debug('Profiling data written to {}.'.format(config['GAME']['profiling_filename']))
 
     def is_alive(self):
         if config['GAME']['competition_mode']:
-            if time() - self.framework.ai_watchdog.value > self.framework.MAX_HANGING_TIME:
+            if time() - self.framework.coach_watchdog.value > self.framework.MAX_HANGING_TIME:
                 self.logger.critical('Process is hanging. Shutting down.')
                 return False
         return super().is_alive()
+
+    def stop(self):
+        self.dump_profiling_stats()
+        self.logger.info('Stopped.')

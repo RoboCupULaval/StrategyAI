@@ -34,7 +34,8 @@ class AlignToDefenseWall(Tactic):
                  args: Optional[List[str]]=None,
                  robots_in_formation: Optional[List[Player]]=None,
                  object_to_block=None,
-                 stay_away_from_ball=False):
+                 stay_away_from_ball=False,
+                 cruise_speed=3):
         super().__init__(game_state, player, args=args)
         if object_to_block is None:
             object_to_block = GameState().ball
@@ -45,6 +46,7 @@ class AlignToDefenseWall(Tactic):
             self.robots_in_formation = robots_in_formation
         assert isinstance(self.robots_in_formation[0], Player)
 
+        self.cruise_speed = cruise_speed
         self.stay_away_from_ball = stay_away_from_ball
         self.go_kick_tactic = None
         self.player_number_in_formation = None
@@ -122,12 +124,14 @@ class AlignToDefenseWall(Tactic):
         self.compute_wall_segment()
         if self.game_state.field.is_ball_in_our_goal_area():
             return Idle  # We must not block the goalkeeper
-        elif self._should_ball_be_kick_by_wall() and self._is_closest_not_goaler(self.player):
+        elif self._should_ball_be_kick_by_wall() \
+                and self._is_closest_not_goaler(self.player) \
+                and self._no_enemy_around_ball():
             self.next_state = self.go_kick
         dest = self.position_on_wall_segment()
         dest_orientation = (self.object_to_block.position - dest).angle
         return MoveTo(Pose(dest,
-                           dest_orientation))
+                           dest_orientation), cruise_speed=self.cruise_speed)
 
     def go_kick(self):
         self.compute_wall_segment()
@@ -136,7 +140,8 @@ class AlignToDefenseWall(Tactic):
 
         if not self._should_ball_be_kick_by_wall() \
                 or self.game_state.field.is_ball_in_our_goal_area() \
-                or not self._is_closest_not_goaler(self.player):
+                or not self._is_closest_not_goaler(self.player) \
+                or not self._no_enemy_around_ball():
             self.go_kick_tactic = None
             self.next_state = self.main_state
             return Idle
@@ -163,6 +168,14 @@ class AlignToDefenseWall(Tactic):
             return inters[0]
         else:
             return inters[1]
+
+    def _no_enemy_around_ball(self):
+        DANGEROUS_ENEMY_MIN_DISTANCE = 500
+        ball_position = self.game_state.ball_position
+        for enemy in self.game_state.enemy_team.available_players.values():
+            if (enemy.position - ball_position).norm < DANGEROUS_ENEMY_MIN_DISTANCE:
+                return False
+        return True
 
 
 

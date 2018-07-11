@@ -60,7 +60,7 @@ class PathfinderModule:
 
         if ball_collision and self.game_state.is_ball_on_field:
             path_obstacles.append(Obstacle(self.game_state.ball_position.array,
-                                           avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
+                                           avoid_distance=150))
 
         return path_obstacles
 
@@ -118,7 +118,7 @@ class PathfinderModule:
         path = PathPartitionner().get_path(start=start,
                                            target=way_point.position,
                                            obstacles=player_obstacles,
-                                           velocity=velocity,
+                                           player_velocity=velocity,
                                            last_path=last_path)
         return path
 

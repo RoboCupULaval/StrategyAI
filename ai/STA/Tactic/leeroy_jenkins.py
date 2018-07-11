@@ -27,7 +27,7 @@ class LeeroyJenkins(Tactic):
             self.next_state = self.go_kick_high
             return Idle
         if self.go_kick_tactic is None:
-            self.go_kick_tactic = GoKickExperimental(self.game_state, self.player, kick_force=KickForce.LOW,
+            self.go_kick_tactic = GoKick(self.game_state, self.player, kick_force=KickForce.LOW,
                                                      target=self.game_state.field.their_goal_pose)
         if self.go_kick_tactic.status_flag == Flags.SUCCESS:
             self.go_kick_tactic.status_flag = Flags.INIT
@@ -39,8 +39,8 @@ class LeeroyJenkins(Tactic):
             self.next_state = self.go_kick_low
             return Idle
         if self.go_kick_tactic is None:
-            self.go_kick_tactic = GoKickExperimental(self.game_state, self.player, kick_force=KickForce.HIGH,
-                                                     target=self.game_state.field.their_goal_pose)
+            self.go_kick_tactic = GoKick(self.game_state, self.player, kick_force=KickForce.HIGH,
+                                                     auto_update_target=True)
         if self.go_kick_tactic.status_flag == Flags.SUCCESS:
             self.go_kick_tactic.status_flag = Flags.INIT
         return self.go_kick_tactic.exec()
