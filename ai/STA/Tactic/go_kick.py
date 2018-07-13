@@ -7,7 +7,7 @@ from typing import List
 import numpy as np
 
 from Debug.debug_command_factory import DebugCommandFactory, CYAN, RED
-from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce
+from Util.constant import ROBOT_CENTER_TO_KICKER, KickForce
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
 from Util.geometry import compare_angle, normalize
