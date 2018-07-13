@@ -1,6 +1,7 @@
 # Under MIT licence, see LICENCE.txt
 
 import numpy as np
+from typing import Optional
 
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
@@ -20,9 +21,9 @@ KICK_SUCCEED_THRESHOLD = 300
 
 # noinspection PyArgumentList,PyUnresolvedReferences,PyUnresolvedReferences
 class ReceivePass(Tactic):
-    def __init__(self, game_state: GameState, player: Player):
+    def __init__(self, game_state: GameState, player: Player, target: Optional[Pose]=None):
 
-        super().__init__(game_state, player)
+        super().__init__(game_state, player, target)
         self.current_state = self.initialize
         self.next_state = self.initialize
 
