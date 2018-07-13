@@ -78,7 +78,6 @@ class PerfectSim:
         ball_position = self.game_state.ball.position
         robot_to_ball = robot.pose.position - ball_position
 
-        print(robot_to_ball.norm, KICK_DISTANCE_MIN, KICK_DISTANCE_MAX)
         return KICK_DISTANCE_MIN < robot_to_ball.norm <  KICK_DISTANCE_MAX \
                and compare_angle(robot.pose.orientation, robot_to_ball.angle, abs_tol=MAX_ANGLE_FOR_KICK)
 
