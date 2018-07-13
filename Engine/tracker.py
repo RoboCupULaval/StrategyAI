@@ -21,7 +21,7 @@ config = Config()
 
 class Tracker:
 
-    MAX_BALLS_SEPARATION = 2000
+    MAX_BALLS_SEPARATION = 1000
 
     def __init__(self, vision_state: DictProxy, ui_send_queue: Queue):
         self.logger = logging.getLogger(self.__class__.__name__)
