@@ -118,7 +118,7 @@ class PathfinderModule:
         path = PathPartitionner().get_path(start=start,
                                            target=way_point.position,
                                            obstacles=player_obstacles,
-                                           velocity=velocity,
+                                           player_velocity=velocity,
                                            last_path=last_path)
         return path
 

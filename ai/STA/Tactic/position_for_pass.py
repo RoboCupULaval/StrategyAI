@@ -52,7 +52,7 @@ class PositionForPass(Tactic):
 
     def is_player_offense(self, player):
         role = self.game_state.get_role_by_player_id(player.id)
-        return role in [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
+        return role in [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE]
 
     def move_to_pass_position(self):
         destination_orientation = (self.game_state.ball_position - self.player.pose.position).angle
@@ -60,7 +60,9 @@ class PositionForPass(Tactic):
         if (time.time() - self.last_evaluation) > EVALUATION_INTERVAL:
             self.best_position = self._find_best_player_position() if self.auto_position else self.target
             self.last_evaluation = time.time()
-        return MoveTo(Pose(self.best_position, destination_orientation), ball_collision=False)
+        return MoveTo(Pose(self.best_position, destination_orientation),
+                      ball_collision=False,
+                      cruise_speed=2)
 
     def _find_best_player_position(self):
         if not self.auto_position:

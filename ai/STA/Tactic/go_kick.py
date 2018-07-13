@@ -107,8 +107,10 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
             self.kick_last_time = time.time()
-
+            
+        ball_speed = self.game_state.ball.velocity.norm
         orientation = (self.target.position - self.game_state.ball_position).angle
+        spacing_offset = abs(1 - np.dot((self.player.position-self.target.position).array, (self.player.position-self.game_state.ball.position).array))
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation), ball_collision=False)\
                            .addForceDribbler()\
@@ -214,7 +216,7 @@ class GoKick(Tactic):
 
         if not self.is_debug:
             return
-
+          
         angle = None
         additional_dbg = []
         if self.current_state == self.go_behind_ball:
