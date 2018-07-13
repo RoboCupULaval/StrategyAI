@@ -58,13 +58,17 @@ class Framework:
         finally:
             self.stop_game()
 
-
     def stop_game(self):
         self.logger.critical('Framework stopped.')
 
         try:
-            os.kill(self.engine.pid, signal.SIGINT) # This will interrupt the coach as well.
+            os.kill(self.engine.pid, signal.SIGINT)
         except ProcessLookupError:
             pass
 
+        try:
+            os.kill(self.coach.pid, signal.SIGINT)
+        except ProcessLookupError:
+            pass
+        
         sys.exit()
