@@ -2,7 +2,7 @@
 
 import math as m
 import time
-from typing import List, Union
+from typing import List
 
 import numpy as np
 
@@ -50,6 +50,8 @@ class GoKick(Tactic):
             self._find_best_passing_option()
         self.kick_force = kick_force
         self.go_behind_distance = go_behind_distance
+
+        self.is_debug = False
 
     def initialize(self):
         if self.auto_update_target:
@@ -105,14 +107,12 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
             self.kick_last_time = time.time()
+            
         ball_speed = self.game_state.ball.velocity.norm
         orientation = (self.target.position - self.game_state.ball_position).angle
         spacing_offset = abs(1 - np.dot((self.player.position-self.target.position).array, (self.player.position-self.game_state.ball.position).array))
         distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
-        return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=1,
-                                      end_speed=0,
-                                      ball_collision=False)\
+        return CmdBuilder().addMoveTo(Pose(distance_behind, orientation), ball_collision=False)\
                            .addForceDribbler()\
                            .addKick(self.kick_force)\
                            .build()
@@ -129,9 +129,7 @@ class GoKick(Tactic):
         behind_ball = self.game_state.ball_position + normalize(player_to_target) * (ROBOT_CENTER_TO_KICKER)
         orientation = (self.target.position - self.game_state.ball_position).angle
 
-        return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
-                                      ball_collision=False,
-                                      end_speed=0)\
+        return CmdBuilder().addMoveTo(Pose(behind_ball, orientation), ball_collision=False)\
                                         .addKick(self.kick_force)\
                                         .addForceDribbler().build()
 
@@ -214,7 +212,11 @@ class GoKick(Tactic):
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
         return np.arccos(alignement_behind) * 180 / np.pi
 
-    def debug_cmd_disable(self):
+    def debug_cmd(self):
+
+        if not self.is_debug:
+            return
+          
         angle = None
         additional_dbg = []
         if self.current_state == self.go_behind_ball:
