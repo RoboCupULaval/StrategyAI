@@ -20,7 +20,7 @@ import numpy as np
 # noinspection PyMethodMayBeStatic,PyMethodMayBeStatic
 class TestPassing(Strategy):
 
-    def __init__(self, p_game_state, can_kick_in_goal=False):
+    def __init__(self, p_game_state, can_kick_in_goal=True):
         super().__init__(p_game_state)
 
         formation = [p for r, p in self.assigned_roles.items() if r != Role.GOALKEEPER]
@@ -71,13 +71,13 @@ class TestPassing(Strategy):
     @classmethod
     def required_roles(cls):
         return [Role.GOALKEEPER,
-                Role.FIRST_ATTACK,
+                Role.FIRST_DEFENCE,
                 Role.MIDDLE]
 
     @classmethod
     def optional_roles(cls):
         return [Role.SECOND_ATTACK,
-                Role.FIRST_DEFENCE,
+                Role.FIRST_ATTACK,
                 Role.SECOND_DEFENCE]
 
     def is_closest_not_goalkeeper(self, player):

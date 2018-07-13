@@ -1,21 +1,17 @@
 # Under MIT licence, see LICENCE.txt
 
-import math as m
-import time
-from typing import List, Union
-
 import numpy as np
+from typing import Optional
 
-from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
-from Util.geometry import compare_angle, normalize
-from ai.Algorithm.evaluation_module import best_passing_option, player_covered_from_goal
-from ai.GameDomainObjects import Player
+from Util.geometry import compare_angle, normalize, perpendicular
+
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
+
+from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
-from Util.geometry import perpendicular
 
 GO_BEHIND_SPACING = 250
 GRAB_BALL_SPACING = 100
@@ -25,9 +21,9 @@ KICK_SUCCEED_THRESHOLD = 300
 
 # noinspection PyArgumentList,PyUnresolvedReferences,PyUnresolvedReferences
 class ReceivePass(Tactic):
-    def __init__(self, game_state: GameState, player: Player, target):
+    def __init__(self, game_state: GameState, player: Player, target: Optional[Pose]=None):
 
-        super().__init__(game_state, player)
+        super().__init__(game_state, player, target)
         self.current_state = self.initialize
         self.next_state = self.initialize
 
@@ -81,7 +77,7 @@ class ReceivePass(Tactic):
         perp_vec = perpendicular(self.player.position - self.game_state.ball.position)
         component_lateral = perp_vec * np.dot(perp_vec.array, normalize(self.game_state.ball.velocity).array)
         small_segment_len = np.sqrt(1 - component_lateral.norm**2)
-        latteral_move = component_lateral * (self.player.position - self.game_state.ball.position).norm / small_segment_len
+        latteral_move = component_lateral / small_segment_len * (self.player.position - self.game_state.ball.position).norm
         if self._get_distance_from_ball() < HAS_BALL_DISTANCE:
             self.next_state = self.halt
             return self.halt()
@@ -89,7 +85,7 @@ class ReceivePass(Tactic):
             self.next_state = self.wait_for_ball
             return CmdBuilder().build()
         orientation = (self.game_state.ball_position - self.player.position).angle
-        return CmdBuilder().addMoveTo(Pose(self.player.position + latteral_move, orientation),
+        return CmdBuilder().addMoveTo(Pose(self.player.position + latteral_move.view(Position), orientation),
                                       cruise_speed=3,
                                       end_speed=0,
                                       ball_collision=False).addChargeKicker().build()
