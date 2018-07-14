@@ -7,6 +7,8 @@ from sys import stdout
 
 import datetime
 
+import sys
+
 from Framework import Framework
 from config.config import Config
 from Util.sysinfo import git_version
@@ -75,7 +77,7 @@ def set_arg_parser():
 
 if __name__ == '__main__':
 
-    assert sys.version_info >= (2, 5), 'Upgrade your Python version to at least 3.6'
+    assert sys.version_info >= (3, 6), 'Upgrade your Python version to at least 3.6'
 
     cli_args = set_arg_parser().parse_args()
 

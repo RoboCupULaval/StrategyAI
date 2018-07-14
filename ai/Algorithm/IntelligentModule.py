@@ -1,6 +1,6 @@
 # Under MIT license, see LICENSE.txt
 """
-    Contient les classes mères pour les Tracker intelligents.
+    Contient les classes mères pour les modules intelligents.
 """
 from abc import abstractmethod, ABCMeta
 

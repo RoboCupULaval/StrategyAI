@@ -11,7 +11,7 @@ from ai.states.game_state import GameState
 
 class AutoPlay(IntelligentModule, metaclass=ABCMeta):
     """
-        Classe mère des Tracker de jeu automatique.
+        Classe mère des modules de jeu automatique.
         Un module de jeu est un module intelligent servant à faire la sélection
         des stratégies en prenant en compte différents aspects du jeu, notamment le referee
         et la position des robots et de la balle.
