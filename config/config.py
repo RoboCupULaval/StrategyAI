@@ -1,9 +1,6 @@
 
 from configparser import ConfigParser, ParsingError
 import logging
-from sys import stdout
-
-import datetime
 
 from Util import Singleton
 
@@ -145,7 +142,7 @@ class Config(metaclass=Singleton):
                 'max_undetected_robot_time': 5,
                 'max_undetected_ball_time': 0.5,
                 'max_ball_on_field': 2,
-                'max_ball_separation': 2000,
+                'max_ball_separation': 1000,
                 'disabled_camera_id': [],
                 'is_fps_locked': True,
                 'fps': 30,

@@ -7,7 +7,6 @@ from typing import Dict, List, Union, Any, Iterable
 import numpy as np
 from multiprocessing import Queue
 
-# from Debug.debug_command_factory import DebugCommandFactory
 from Engine.Communication.robot_state import RobotState
 from Engine.Tracker.Filters.ball_kalman_filter import BallFilter
 from Engine.Tracker.Filters import RobotFilter
@@ -20,8 +19,6 @@ config = Config()
 
 
 class Tracker:
-
-    MAX_BALLS_SEPARATION = 1000
 
     def __init__(self, vision_state: DictProxy, ui_send_queue: Queue):
         self.logger = logging.getLogger(self.__class__.__name__)

@@ -89,25 +89,23 @@ class Controller:
         return cmd
 
     def send_debug(self, commands: Dict[int, Pose]):
-        #if not commands:
-        #    return
 
         robot_id = 3
 
         if robot_id not in commands:
             return
         self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point('mm/s',
-                                                                     'robot {} cmd speed'.format(robot_id),
+                                                                     f'robot {robot_id} cmd speed',
                                                                      [time.time()],
                                                                      [commands[robot_id].norm]))
 
         self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point('rad/s',
-                                                                     'robot {} cmd rotation speed'.format(robot_id),
+                                                                     f'robot {robot_id} cmd rotation speed',
                                                                      [time.time()],
                                                                      [commands[robot_id].orientation]))
 
         self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point('mm/s',
-                                                                     'robot {} Kalman speed'.format(robot_id),
+                                                                     f'robot {robot_id} Kalman speed',
                                                                      [time.time()],
                                                                      [self[robot_id].velocity.norm]))
 
