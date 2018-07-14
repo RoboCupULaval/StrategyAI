@@ -3,7 +3,12 @@
 import math as m
 import numpy as np
 
-from Util.position import Position
+import Util.position
+Position = Util.position.Position
+
+import Util.pose as pose
+Pose = pose.Pose
+
 from typing import cast, Sequence, List, Union, Optional
 
 
@@ -40,10 +45,10 @@ class Area:
     def __str__(self):
         return "Area(top={}, bottom={}, right={}, left={})".format(self.top, self.bottom, self.right, self.left)
 
-    def __contains__(self, item: Union["Pose", Position]):
-        if item.__class__.__name__ == "Pose":  # Prevent importing Pose
+    def __contains__(self, item: Union[Pose, Position]):
+        if type(item) is Pose:
             return self.point_inside(item.position)
-        elif isinstance(item, Position):
+        elif type(item) is Position:
             return self.point_inside(item)
         else:
             raise ValueError("You can only test if a position or a pose is contained inside the area.")

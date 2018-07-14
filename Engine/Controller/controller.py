@@ -10,7 +10,7 @@ from typing import Dict, List, Any
 from Debug.debug_command_factory import DebugCommandFactory
 
 from Engine.Controller.path_smoother import path_smoother
-from Engine.Controller.Regulators import VelocityRegulator, PositionRegulator
+from Engine.Controller.Regulators import VelocityRegulator
 from Engine.Controller.robot import Robot
 from Engine.Communication.robot_state import RobotPacket, RobotState
 
@@ -29,8 +29,7 @@ class Controller:
         self.timestamp = -1
         self.robots = [Robot(robot_id) for robot_id in range(config['ENGINE']['max_robot_id'])]
         for robot in self.robots:
-            robot.velocity_regulator = VelocityRegulator()
-            robot.position_regulator = PositionRegulator()
+            robot.regulator = VelocityRegulator()
 
     def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand]):
 
@@ -57,13 +56,7 @@ class Controller:
 
         for robot in self.active_robots:
             robot.path, robot.target_speed = path_smoother(robot.raw_path, robot.cruise_speed, robot.end_speed)
-            #
-            # if robot.target_speed < 10 and False:
-            #     commands[robot.id] = min(robot.velocity_regulator.execute(robot, dt),
-            #                              robot.position_regulator.execute(robot, dt),
-            #                              key=lambda cmd: cmd.norm)
-            # else:
-            commands[robot.id] = robot.velocity_regulator.execute(robot, dt)
+            commands[robot.id] = robot.regulator.execute(robot, dt)
 
         self.send_debug(commands)
 
