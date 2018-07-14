@@ -18,7 +18,7 @@ class Line:
         self.p2 = p2
 
     def __str__(self):
-        return 'Line(p1={self.p1}, p2={self.p2})'
+        return f'Line(p1={self.p1}, p2={self.p2})'
 
     @property
     def direction(self):
