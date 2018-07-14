@@ -11,7 +11,7 @@ from Util import Singleton
 MANDATORY_FIELDS = {
     'COMMUNICATION': ['type', 'field_port_file', 'ui_debug_address', 'vision_port',
                       'vision_address', 'referee_port', 'referee_address'],
-    'GAME': ['type'],
+    'COACH': ['type'],
     'ENGINE': ['number_of_camera']
 }
 
@@ -28,7 +28,7 @@ class Config(metaclass=Singleton):
         config = self.read_config_file(filename)
         self._config['ENGINE'].update(config['ENGINE'])
         self._config['COMMUNICATION'].update(config['COMMUNICATION'])
-        self._config['GAME'].update(config['GAME'])
+        self._config['COACH'].update(config['COACH'])
 
         field_config = self.read_config_file(self['COMMUNICATION']['field_port_file'])
         self._config['COMMUNICATION'].update(field_config['COMMUNICATION'])
@@ -64,7 +64,7 @@ class Config(metaclass=Singleton):
 
     def update_ports(self):
         # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
-        if self['GAME']['our_color'] == 'blue':
+        if self['COACH']['our_color'] == 'blue':
             self['COMMUNICATION']['ui_cmd_sender_port'] = 14444    # DO NOT TOUCH
             self['COMMUNICATION']['ui_cmd_receiver_port'] = 15555  # DO NOT TOUCH
         else:
@@ -95,8 +95,8 @@ class Config(metaclass=Singleton):
                     self.logger.critical('Mandatory field \'%s\' is missing from section \'%s\'', field, section)
                     do_exit = True
 
-        if self['GAME']['type'] not in ['sim', 'real']:
-            self.logger.critical('Invalid type in GAME. Received: %s. Expected sim or real.', self['GAME']['type'])
+        if self['COACH']['type'] not in ['sim', 'real']:
+            self.logger.critical('Invalid type in COACH. Received: %s. Expected sim or real.', self['COACH']['type'])
 
         if self['COMMUNICATION']['type'] not in ['grsim', 'serial', 'disabled']:
             self.logger.critical('Invalid type in COMMUNICATION. Received: %s. Expected sim, serial or disabled.', self['COMMUNICATION']['type'])
@@ -116,31 +116,40 @@ class Config(metaclass=Singleton):
             exit(1)
 
     def is_simulation(self):
-        return self['GAME']['type'] == 'sim'
+        return self['COACH']['type'] == 'sim'
 
     @staticmethod
     def default_config():
         return {
-            'COMMUNICATION': {
-                'type': 'grsim'
+            'FRAMEWORK': {
+                'subprocess_check_time': 0.1,
+                'max_queue_size': 100
             },
-            'GAME': {
+            'COMMUNICATION': {
+                'type': 'grsim',
+                'grsim_address': '224.5.23.2',
+                'grsim_port': 20011
+            },
+            'COACH': {
                 'type': 'sim',
                 'our_color': 'yellow',
                 'is_autonomous_play_at_startup': False,
                 'on_negative_side': True,
+                'is_fps_locked': True,
                 'fps': 10,
-                'profiling_filename': 'profile_data_ai.prof'
+                'max_excess_time': 0.1
             },
             'ENGINE': {
-                'profiling_filename': 'profile_data_engine.prof',
                 'number_of_camera': 4,
                 'max_robot_id': 16,
                 'max_undetected_robot_time': 5,
                 'max_undetected_ball_time': 0.5,
                 'max_ball_on_field': 2,
                 'max_ball_separation': 2000,
-                'disabled_camera_id': []
+                'disabled_camera_id': [],
+                'is_fps_locked': True,
+                'fps': 30,
+                'max_excess_time': 0.05
             }
         }
 
@@ -157,13 +166,13 @@ class Config(metaclass=Singleton):
         self._config['ENGINE']['is_fps_locked'] = not cli_args.unlock_engine_fps
         self._config['ENGINE']['enable_profiling'] = cli_args.enable_profiling
 
-        self._config['GAME']['our_color'] = cli_args.color
-        self._config['GAME']['on_negative_side'] = cli_args.side == 'negative'
-        self._config['GAME']['competition_mode'] = cli_args.competition_mode
-        self._config['GAME']['is_autonomous_play_at_startup'] = cli_args.start_in_auto
+        self._config['COACH']['our_color'] = cli_args.color
+        self._config['COACH']['on_negative_side'] = cli_args.side == 'negative'
+        self._config['COACH']['competition_mode'] = cli_args.competition_mode
+        self._config['COACH']['is_autonomous_play_at_startup'] = cli_args.start_in_auto
 
         if cli_args.competition_mode:
-            self._config['GAME']['is_autonomous_play_at_startup'] = True
+            self._config['COACH']['is_autonomous_play_at_startup'] = True
 
             # NO CAMERA DISABLED IN COMPETITION MODE
             self.logger.warning("There is one or more disabled cameras. Reenabling them for competition mode")

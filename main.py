@@ -7,7 +7,7 @@ from sys import stdout
 
 import datetime
 
-from Engine.Framework import Framework
+from Framework import Framework
 from config.config import Config
 from Util.sysinfo import git_version
 
@@ -85,8 +85,8 @@ if __name__ == '__main__':
     Config().load_file(cli_args.config_file)
     Config().load_parameters(cli_args)
 
-    logger.info('Color: {}, Field side: {}, Mode: {}'.format(Config()['GAME']['our_color'].upper(),
-                                                    'NEGATIVE' if Config()['GAME']['on_negative_side'] else 'POSITIVE',
+    logger.info('Color: {}, Field side: {}, Mode: {}'.format(Config()['COACH']['our_color'].upper(),
+                                                    'NEGATIVE' if Config()['COACH']['on_negative_side'] else 'POSITIVE',
                                                     'COMPETITION' if cli_args.competition_mode else 'NORMAL'))
 
     logger.info('Current git commit hash: ' + git_version())

@@ -9,9 +9,9 @@ from typing import Dict, List, Any
 
 from Debug.debug_command_factory import DebugCommandFactory
 
-from Engine.filters.path_smoother import path_smoother
-from Engine.regulators import VelocityRegulator, PositionRegulator
-from Engine.robot import Robot
+from Engine.Controller.path_smoother import path_smoother
+from Engine.Controller.Regulators import VelocityRegulator, PositionRegulator
+from Engine.Controller.robot import Robot
 from Engine.Communication.robot_state import RobotPacket, RobotState
 
 from Util import Pose
@@ -39,7 +39,7 @@ class Controller:
         for robot in self.robots:
             robot.is_on_field = False
 
-        for robot in track_frame[config['GAME']['our_color']]:
+        for robot in track_frame[config['COACH']['our_color']]:
             self[robot['id']].is_on_field = True
             self[robot['id']].pose = robot['pose']
             self[robot['id']].velocity = robot['velocity']
@@ -71,7 +71,7 @@ class Controller:
 
     def generate_packet(self, commands: Dict[int, Pose]) -> RobotState:
         packet = RobotState(timestamp=self.timestamp,
-                            is_team_yellow=config['GAME']['our_color'] == 'yellow',
+                            is_team_yellow=config['COACH']['our_color'] == 'yellow',
                             packet=[])
 
         for robot_id, cmd in commands.items():
@@ -87,7 +87,7 @@ class Controller:
 
     @staticmethod
     def _put_in_robots_referential(robot: Robot, cmd: Pose) -> Pose:
-        if config['GAME']['on_negative_side']:
+        if config['COACH']['on_negative_side']:
             cmd.x *= -1
             cmd.orientation *= -1
             cmd.position = rotate(cmd.position, np.pi + robot.orientation)

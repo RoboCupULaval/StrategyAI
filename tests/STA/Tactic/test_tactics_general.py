@@ -25,7 +25,7 @@ def pytest_generate_tests(metafunc):
     tactic_import_name = '.'.join(tactic_base_class_import.parts[0:])
     tactic_base_class_type = importlib.import_module(tactic_import_name).Tactic
 
-    # check which objects within the modules are classes derived from Tactic
+    # check which objects within the Tracker are classes derived from Tactic
     tactic_classes_list = []
     for a_tactic_module in tactic_modules_list:
         for __, obj in inspect.getmembers(a_tactic_module):

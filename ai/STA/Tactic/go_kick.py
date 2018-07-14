@@ -215,7 +215,7 @@ class GoKick(Tactic):
     def debug_cmd(self):
 
         if not self.is_debug:
-            return
+            return []
           
         angle = None
         additional_dbg = []
