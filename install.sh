@@ -2,12 +2,19 @@
 
 # Create base folder
 cd ~
-mkdir RobocupULaval
-cd RobocupULaval
+mkdir robocup
+cd robocup
 
-# Add python 3.6 repository
+# Add python 3.6 repository if necessary
+case $(lsb_release -rs) in
+18.04) echo "You have 18.04 you don't need an unofficial repo! Hooray!"
+  ;;
+*)
+echo "You don't have 18.04 so you need an unofficial repo. sadf"
 sudo add-apt-repository ppa:jonathonf/python-3.6 -y
 sudo apt update
+  ;;
+esac
 
 # Install dependencies
 sudo apt-get install --yes git python3.6 python-pip python-virtualenv build-essential cmake libqt4-dev libgl1-mesa-dev libglu1-mesa-dev libprotobuf-dev protobuf-compiler libode-dev libboost-dev
@@ -23,10 +30,8 @@ source virtualenv/bin/activate
 # Install requirements
 cd StrategyIA
 pip install -r requirements.txt
-git checkout dev
 cd ../UI-Debug
 pip install -r requirements.txt
-git checkout dev
 
 # Install VarTypes for grSim
 cd /tmp
@@ -39,7 +44,7 @@ make -j 4
 sudo make install
 
 # Install grSim
-cd ~/RobocupULaval
+cd ~/robocup
 git clone https://github.com/RoboCup-SSL/grSim.git
 cd grSim
 mkdir build
