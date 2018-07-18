@@ -13,6 +13,7 @@ case $(lsb_release -rs) in
 echo "You don't have 18.04 so you need an unofficial repo. sadf"
 sudo add-apt-repository ppa:jonathonf/python-3.6 -y
 sudo apt update
+sudo apt-get install python3.6-venv
   ;;
 esac
 
@@ -28,7 +29,7 @@ python3.6 -m venv virtualenv
 source virtualenv/bin/activate
 
 # Install requirements
-cd StrategyIA
+cd StrategyAI
 pip install -r requirements.txt
 cd ../UI-Debug
 pip install -r requirements.txt
