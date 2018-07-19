@@ -67,7 +67,7 @@ class GoalKeeper(Tactic):
                                                  circle_radius,
                                                  self.game_state.ball.position,
                                                  self._best_target_into_goal())
-        # Their is one or two intersection on the circle, take the one on the field
+        # There is one or two intersection on the circle, take the one on the field
         for solution in solutions:
             if solution.x < self.game_state.field.field_length / 2\
                and self.game_state.ball.position.x < self.game_state.field.field_length / 2:
