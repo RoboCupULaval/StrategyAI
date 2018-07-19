@@ -32,7 +32,9 @@ class PassesWithDecisions(Strategy):
                                                             self.assigned_roles[Role.FIRST_ATTACK],
                                                             args=[self.assigned_roles[Role.MIDDLE].id]))
 
-        node_go_kick = self.create_node(Role.FIRST_ATTACK, GoKick(self.game_state, self.assigned_roles[Role.FIRST_ATTACK], their_goal))
+        node_go_kick = self.create_node(Role.FIRST_ATTACK, GoKick(self.game_state,
+                                                                  self.assigned_roles[Role.FIRST_ATTACK],
+                                                                  their_goal))
 
         second_attack_is_best_receiver = partial(self.is_best_receiver, Role.SECOND_ATTACK)
         middle_is_best_receiver = partial(self.is_best_receiver, Role.MIDDLE)

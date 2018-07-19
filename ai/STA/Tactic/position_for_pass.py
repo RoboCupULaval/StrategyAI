@@ -40,7 +40,8 @@ class PositionForPass(Tactic):
             self.robots_in_formation = robots_in_formation
 
         self.is_offense = self.is_player_offense(player)
-        self.robots_in_formation = [player for player in self.robots_in_formation if self.is_offense == self.is_player_offense(player)]
+        self.robots_in_formation = [player for player in self.robots_in_formation
+                                    if self.is_offense == self.is_player_offense(player)]
 
         self.idx_in_formation = self.robots_in_formation.index(player)
         self.area = None
@@ -95,7 +96,7 @@ class PositionForPass(Tactic):
             d = enemy.position - center
             # Clamp distance norm
             d = MIN_DIST_FROM_CENTER * normalize(d) if d.norm < MIN_DIST_FROM_CENTER else d
-            # Square of the inverse of the distance, a bit like Newton's law of universal gravitation
+            # Cube of the inverse of the distance as magnets repulsing each other.
             v -= ATTENUATION * d / (d.norm ** 3)
 
         if self.area.point_inside(center + v):

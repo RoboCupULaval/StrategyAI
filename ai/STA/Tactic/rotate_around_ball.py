@@ -46,7 +46,8 @@ class RotateAroundBall(Tactic):
         if self.start_time is not None:
             if time.time() - self.start_time >= self.rotate_time:
                 self.rotation_sign = self._get_direction()
-                if compare_angle(self.target_orientation, (self.game_state.ball_position - self.player.position).angle, VALID_DIFF_ANGLE):
+                if compare_angle(self.target_orientation, (self.game_state.ball_position - self.player.position).angle,
+                                 VALID_DIFF_ANGLE):
                     self.next_state = self.halt
                     return self._go_to_final_position()
             elif time.time() - self.iter_time >= self.switch_time:
@@ -60,10 +61,12 @@ class RotateAroundBall(Tactic):
                 self.ball_collision = True
                 self.speed = 1
             self.offset_orientation += DIFF_ANGLE * self.rotation_sign
-            self.position = (self.game_state.ball_position - Position.from_angle(self.offset_orientation) * DISTANCE_FROM_BALL)
+            self.position = (self.game_state.ball_position -
+                             Position.from_angle(self.offset_orientation) * DISTANCE_FROM_BALL)
 
         if self.start_time is not None:
-            orientation = self.offset_orientation if time.time() - self.start_time < self.rotate_time else self.target_orientation
+            orientation = self.offset_orientation if time.time() - self.start_time < \
+                                                     self.rotate_time else self.target_orientation
         else:
             orientation = self.target_orientation
         return CmdBuilder().addMoveTo(Pose(self.position, orientation),

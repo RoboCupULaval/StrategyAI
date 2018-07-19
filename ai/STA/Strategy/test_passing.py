@@ -30,12 +30,13 @@ class TestPassing(Strategy):
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
             else:
-                node_pass = self.create_node(role, PositionForPass(self.game_state,
-                                                                   player,
-                                                                   robots_in_formation=formation,
-                                                                   auto_position=True,
-                                                                   forbidden_areas=[self.game_state.field.free_kick_avoid_area,
-                                                                                    self.game_state.field.our_goal_forbidden_area]))
+                node_pass = self.create_node(role,
+                                             PositionForPass(self.game_state,
+                                                             player,
+                                                             robots_in_formation=formation,
+                                                             auto_position=True,
+                                                             forbidden_areas=[self.game_state.field.free_kick_avoid_area,
+                                                                              self.game_state.field.our_goal_forbidden_area]))
                 node_wait_for_pass = self.create_node(role, ReceivePass(self.game_state, player))
                 initial_position_for_pass_center[role] = node_pass.tactic.area.center  # Hack
                 node_go_kick = self.create_node(role, GoKick(self.game_state,
@@ -103,21 +104,14 @@ class TestPassing(Strategy):
         else:
             return False
 
-    def is_ready_to_kick(self, player):
-        if self.has_ball_move:
-            return True  # FIXME: Test irl, might Cause a lot of problem
-        role = GameState().get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'RotateAroundBall':
-            return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
-        else:
-            return False
-
     def ball_going_toward_player(self, player):
         role = GameState().get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'PositionForPass' or self.roles_graph[role].current_tactic_name == 'ReceivePass':
-            if self.game_state.ball.velocity.norm > 50:
-                return np.dot(normalize(player.position - self.game_state.ball.position).array,
-                              normalize(self.game_state.ball.velocity).array) > 0.9
+        if self.roles_graph[role].current_tactic_name == 'PositionForPass' or \
+                self.roles_graph[role].current_tactic_name == 'ReceivePass':
+            if self.game_state.ball.is_mobile(50): # to avoid division by zero and unstable ball_directions
+                ball_approach_angle = np.arccos(np.dot(normalize(player.position - self.game_state.ball.position).array,
+                              normalize(self.game_state.ball.velocity).array)) * 180 / np.pi
+                return ball_approach_angle > 25
         return False
 
     def ball_not_going_toward_player(self, player):
