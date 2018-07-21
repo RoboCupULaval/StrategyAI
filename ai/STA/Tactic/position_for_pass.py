@@ -96,7 +96,7 @@ class PositionForPass(Tactic):
             d = enemy.position - center
             # Clamp distance norm
             d = MIN_DIST_FROM_CENTER * normalize(d) if d.norm < MIN_DIST_FROM_CENTER else d
-            # Cube of the inverse of the distance as magnets repulsing each other.
+            # Square of the inverse of the distance, a bit like Newton's law of universal gravitation
             v -= ATTENUATION * d / (d.norm ** 3)
 
         if self.area.point_inside(center + v):
