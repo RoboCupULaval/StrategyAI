@@ -9,14 +9,16 @@ import time
 
 from Engine.engine import Engine
 from ai.coach import Coach
+
 from Util.timing import create_fps_timer
+
+from config.config import Config
+config = Config()
 
 
 class Framework:
 
     QUEUE_SIZE = 100
-    CHECK_SUBPROCESS_STATE_IN_SECONDS = 0.5
-    MAX_HANGING_TIME = 3.0
 
     def __init__(self, profiling=False):
 
@@ -26,24 +28,29 @@ class Framework:
         self.game_state = Manager().dict()
         self.field = Manager().dict()
 
-        self.ai_queue = Queue(maxsize=Framework.QUEUE_SIZE)
-        self.referee_queue = Queue(maxsize=Framework.QUEUE_SIZE)
-        self.ui_send_queue = Queue(maxsize=Framework.QUEUE_SIZE)
-        self.ui_recv_queue = Queue(maxsize=Framework.QUEUE_SIZE)
+        maxsize = config['FRAMEWORK']['max_queue_size']
+        self.ai_queue = Queue(maxsize=maxsize)
+        self.referee_queue = Queue(maxsize=maxsize)
+        self.ui_send_queue = Queue(maxsize=maxsize)
+        self.ui_recv_queue = Queue(maxsize=maxsize)
 
-        self.engine_watchdog = Manager().Value('f', time.time())
         self.engine = Engine(self)
-        self.coach_watchdog = Manager().Value('f', time.time())
         self.coach = Coach(self)
+
+        self.watchdogs = {
+            self.engine.name: Manager().Value('f', time.time()),
+            self.coach.name:  Manager().Value('f', time.time())
+        }
 
     def start(self):
 
         self.engine.start()
         self.coach.start()
 
-        sleep = create_fps_timer(Framework.CHECK_SUBPROCESS_STATE_IN_SECONDS)
+        sleep = create_fps_timer(config['FRAMEWORK']['subprocess_check_time'])
 
         try:
+
             while self.coach.is_alive() and self.engine.is_alive():
                 sleep()
 

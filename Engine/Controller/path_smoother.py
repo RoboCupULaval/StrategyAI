@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from Util import Position, Path
-from Engine.robot import MAX_LINEAR_ACCELERATION
+from Engine.Controller.robot import MAX_LINEAR_ACCELERATION
 from math import sqrt, sin
 
 from Util.geometry import wrap_to_pi

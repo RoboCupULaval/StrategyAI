@@ -7,10 +7,9 @@ from typing import Dict, List, Union, Any, Iterable
 import numpy as np
 from multiprocessing import Queue
 
-# from Debug.debug_command_factory import DebugCommandFactory
 from Engine.Communication.robot_state import RobotState
-from Engine.filters.ball_kalman_filter import BallFilter
-from Engine.filters.robot_kalman_filter import RobotFilter
+from Engine.Tracker.Filters.ball_kalman_filter import BallFilter
+from Engine.Tracker.Filters import RobotFilter
 
 from Util.geometry import rotate, wrap_to_pi
 from Util import Pose, Position
@@ -20,8 +19,6 @@ config = Config()
 
 
 class Tracker:
-
-    MAX_BALLS_SEPARATION = 1000
 
     def __init__(self, vision_state: DictProxy, ui_send_queue: Queue):
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -106,7 +103,7 @@ class Tracker:
 
     @staticmethod
     def _put_in_world_referential(orientation: float, cmd: Pose) -> Pose:
-        if config['GAME']['on_negative_side']:
+        if config['COACH']['on_negative_side']:
             cmd.position = rotate(cmd.position, -np.pi - orientation)
             cmd.x *= -1
             cmd.orientation *= -1
@@ -133,7 +130,7 @@ class Tracker:
 
         valid_frames = [frame for frame in self.vision_state if self._is_valid_frame(frame)]
 
-        if config['GAME']['on_negative_side']:
+        if config['COACH']['on_negative_side']:
             valid_frames = [Tracker._change_frame_side(frame) for frame in valid_frames]
 
         return sorted(valid_frames, key=lambda frame: frame['t_capture'])
@@ -159,7 +156,7 @@ class Tracker:
 
     @property
     def _our_team(self):
-        if config['GAME']['our_color'] == 'yellow':
+        if config['COACH']['our_color'] == 'yellow':
             our_team = self._yellow_team
         else:
             our_team = self._blue_team
@@ -167,7 +164,7 @@ class Tracker:
 
     @property
     def _their_team(self):
-        if config['GAME']['our_color'] == 'yellow':
+        if config['COACH']['our_color'] == 'yellow':
             their_team = self._blue_team
         else:
             their_team = self._yellow_team

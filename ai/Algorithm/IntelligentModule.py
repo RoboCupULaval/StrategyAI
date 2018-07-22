@@ -7,7 +7,7 @@ from abc import abstractmethod, ABCMeta
 
 class IntelligentModule(object, metaclass=ABCMeta):
     """
-        Classe mère des modules intelligents.
+        Classe mère des Tracker intelligents.
         Actuellement ne défini que l'attribut *state*
     """
 
