@@ -69,7 +69,8 @@ class FreeKick(Strategy):
         ball_position = self.game_state.ball_position
         for r, position in initial_position_for_pass_center.items():
             if self.closest_role is None \
-                or (initial_position_for_pass_center[self.closest_role] - ball_position).norm > (position - ball_position).norm:
+                or (initial_position_for_pass_center[self.closest_role] -
+                    ball_position).norm > (position - ball_position).norm:
                 self.closest_role = r
 
         self.has_ball_move = False
@@ -120,10 +121,12 @@ class FreeKick(Strategy):
 
     def ball_going_toward_player(self, player):
         role = GameState().get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'PositionForPass' or self.roles_graph[role].current_tactic_name == 'ReceivePass':
-            if self.game_state.ball.velocity.norm > 50:
-                return np.dot(normalize(player.position - self.game_state.ball.position).array,
-                              normalize(self.game_state.ball.velocity).array) > 0.9
+        if self.roles_graph[role].current_tactic_name == 'PositionForPass' or \
+                self.roles_graph[role].current_tactic_name == 'ReceivePass':
+            if self.game_state.ball.is_mobile(50): # to avoid division by zero and unstable ball_directions
+                ball_approach_angle = np.arccos(np.dot(normalize(player.position - self.game_state.ball.position).array,
+                              normalize(self.game_state.ball.velocity).array)) * 180 / np.pi
+                return ball_approach_angle > 25
         return False
 
     def ball_not_going_toward_player(self, player):

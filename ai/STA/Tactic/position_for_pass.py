@@ -40,7 +40,8 @@ class PositionForPass(Tactic):
             self.robots_in_formation = robots_in_formation
 
         self.is_offense = self.is_player_offense(player)
-        self.robots_in_formation = [player for player in self.robots_in_formation if self.is_offense == self.is_player_offense(player)]
+        self.robots_in_formation = [player for player in self.robots_in_formation
+                                    if self.is_offense == self.is_player_offense(player)]
 
         self.idx_in_formation = self.robots_in_formation.index(player)
         self.area = None

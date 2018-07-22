@@ -48,7 +48,7 @@ class ReceivePass(Tactic):
         distance_behind = self.get_destination_behind_ball(effective_ball_spacing)
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
 
-        if self.is_ball_going_to_collide(threshold=0.95) \
+        if self.is_ball_going_to_collide(threshold=18) \
                 and compare_angle(self.player.pose.orientation, orientation,
                                   abs_tol=max(0.1, 0.1 * dist_from_ball/100)):
             self.next_state = self.wait_for_ball
@@ -61,7 +61,7 @@ class ReceivePass(Tactic):
                            .addChargeKicker().build()
 
     def grab_ball(self):
-        if not self.is_ball_going_to_collide(threshold=0.95):
+        if not self.is_ball_going_to_collide(threshold=18):
             self.next_state = self.go_behind_ball
 
         if self._get_distance_from_ball() < HAS_BALL_DISTANCE:
@@ -82,7 +82,7 @@ class ReceivePass(Tactic):
         if self._get_distance_from_ball() < HAS_BALL_DISTANCE:
             self.next_state = self.halt
             return self.halt()
-        if not self.is_ball_going_to_collide(threshold=0.95):
+        if not self.is_ball_going_to_collide(threshold=18):
             self.next_state = self.wait_for_ball
             return CmdBuilder().build()
         orientation = (self.game_state.ball_position - self.player.position).angle
@@ -117,7 +117,7 @@ class ReceivePass(Tactic):
 
         return position_behind
 
-    def is_ball_going_to_collide(self, threshold=0.95):
-
-        return np.dot(normalize(self.player.position - self.game_state.ball.position).array,
-                      normalize(self.game_state.ball.velocity).array) > threshold
+    def is_ball_going_to_collide(self, threshold=18): # threshold in degrees
+        ball_approach_angle = np.arccos(np.dot(normalize(player.position - self.game_state.ball.position).array,
+                                               normalize(self.game_state.ball.velocity).array)) * 180 / np.pi
+        return ball_approach_angle > threshold
