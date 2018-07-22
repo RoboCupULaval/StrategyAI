@@ -22,7 +22,10 @@ class TeamGoToPosition(Strategy):
                 continue
             position = role_to_positions[role]
             position.orientation = np.pi
-            node_go_to_position = self.create_node(role, GoToPosition(self.game_state, player, position))
+            node_go_to_position = self.create_node(role, GoToPosition(self.game_state,
+                                                                      player,
+                                                                      position,
+                                                                      cruise_speed=1))
             node_stop = self.create_node(role, Stop(self.game_state, player))
             player_arrived_to_position = partial(self.arrived_to_position, player)
 

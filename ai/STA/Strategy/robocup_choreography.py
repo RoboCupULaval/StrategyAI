@@ -3,13 +3,11 @@
 from functools import partial
 from random import shuffle
 
-from Util.constant import PLAYER_PER_TEAM
 from Util.pose import Pose, Position
 
 
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_to_position import GoToPosition
-from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 from Util.role import Role
 
