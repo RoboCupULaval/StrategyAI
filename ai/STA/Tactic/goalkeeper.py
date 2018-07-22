@@ -1,9 +1,10 @@
 # Under MIT licence, see LICENCE.txt
+from math import acos, sin, cos
 from unittest.suite import _DebugResult
 
 import numpy as np
 
-from Debug.debug_command_factory import DebugCommandFactory
+from Debug.debug_command_factory import DebugCommandFactory, BLUE, GREEN
 from ai.Algorithm.evaluation_module import player_with_ball, player_pointing_toward_point, \
     player_pointing_toward_segment, closest_players_to_point
 
@@ -15,7 +16,7 @@ from Util import Pose, Position
 from Util.ai_command import MoveTo, Idle
 from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL, ROBOT_DIAMETER
 from Util.geometry import intersection_line_and_circle, intersection_between_lines, \
-    closest_point_on_segment, find_bisector_of_triangle, Area
+    closest_point_on_segment, find_bisector_of_triangle, Area, normalize
 from ai.GameDomainObjects import Player
 
 from ai.STA.Tactic.go_kick import GRAB_BALL_SPACING, GoKick
@@ -29,6 +30,9 @@ class GoalKeeper(Tactic):
 
     MOVING_BALL_VELOCITY = 50  # mm/s
     DANGER_BALL_VELOCITY = 600  # mm/s
+    MAX_ANGLE = np.pi / 4
+
+
 
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(),
                  penalty_kick=False, args: List[str]=None,):
@@ -46,6 +50,15 @@ class GoalKeeper(Tactic):
         self.OFFSET_FROM_GOAL_LINE = Position(ROBOT_RADIUS + 10, 0)
         self.GOAL_LINE = self.game_state.field.our_goal_line
 
+        self.goal_to_solution_angle = None
+        self.circle_radius = self.game_state.field.goal_width / 2
+        self.circle_center = self.game_state.field.our_goal - self.OFFSET_FROM_GOAL_LINE
+
+        self.max_top_position = self.field.our_goal + Position(self.circle_radius * cos(self.MAX_ANGLE + np.pi / 2),
+                                                          self.circle_radius * sin(self.MAX_ANGLE + np.pi / 2))
+        self.max_bottom_position = self.field.our_goal + Position(self.circle_radius * cos(self.MAX_ANGLE + np.pi),
+                                                             self.circle_radius * sin(self.MAX_ANGLE + np.pi))
+
     def defense_dumb(self):
         dest_y = self.game_state.ball.position.y \
                  * self.game_state.goal_width / 2 / self.game_state.field.top
@@ -61,18 +74,34 @@ class GoalKeeper(Tactic):
             self.next_state = self.intercept
             return self.intercept()  # no time to loose
 
-        circle_radius = self.game_state.field.goal_width / 2
-        circle_center = self.game_state.field.our_goal - self.OFFSET_FROM_GOAL_LINE
-        solutions = intersection_line_and_circle(circle_center,
-                                                 circle_radius,
+
+        best_target_into_goal = self._best_target_into_goal()
+        solutions = intersection_line_and_circle(self.circle_center,
+                                                 self.circle_radius,
                                                  self.game_state.ball.position,
-                                                 self._best_target_into_goal())
+                                                 best_target_into_goal)
         # There is one or two intersection on the circle, take the one on the field
         for solution in solutions:
             if solution.x < self.game_state.field.field_length / 2\
                and self.game_state.ball.position.x < self.game_state.field.field_length / 2:
+
+                self.goal_to_solution_angle = (solution - self.field.our_goal).angle
+                print("goal to solution : {}".format(self.goal_to_solution_angle * 180 / np.pi))
+                if self.goal_to_solution_angle > 0:
+                    self.goal_to_solution_angle = np.pi - self.goal_to_solution_angle
+                else:
+                    self.goal_to_solution_angle = -np.pi - self.goal_to_solution_angle
+                if self.goal_to_solution_angle < -self.MAX_ANGLE:
+                    next_position = self.max_bottom_position
+                elif self.goal_to_solution_angle > self.MAX_ANGLE:
+                    next_position = self.max_top_position
+                else:
+                    next_angle = self.goal_to_solution_angle + np.pi
+                    next_position = self.field.our_goal + \
+                                Position(self.circle_radius * cos(-next_angle), self.circle_radius * sin(-next_angle))
+
                 orientation_to_ball = (self.game_state.ball.position - self.player.position).angle
-                return MoveTo(Pose(solution, orientation_to_ball),
+                return MoveTo(Pose(next_position, orientation_to_ball),
                               cruise_speed=3,
                               end_speed=0)
 
@@ -159,13 +188,19 @@ class GoalKeeper(Tactic):
 
     def debug_cmd(self):
         if self.current_state == self.defense:
-            return DebugCommandFactory().line(self.game_state.ball.position,
-                                                self._best_target_into_goal(),
-                                                timeout=0.1)
+            return [DebugCommandFactory().circle(self.circle_center, self.circle_radius, color=BLUE, is_fill=False),
+                    DebugCommandFactory().line(self.game_state.ball.position,
+                                               self._best_target_into_goal(),
+                                               color=GREEN,
+                                               timeout=0.1),
+                    DebugCommandFactory().line(self.game_state.ball_position, self.field.our_goal),
+                    DebugCommandFactory().line(self.max_top_position, self.field.our_goal),
+                    DebugCommandFactory().line(self.max_bottom_position, self.field.our_goal)]
+
         elif self.current_state == self.intercept and self.last_intersection is not None:
             return DebugCommandFactory().line(self.game_state.ball.position,
-                                                self.last_intersection,
-                                                timeout=0.1)
+                                              self.last_intersection,
+                                              timeout=0.1)
         else:
             return []
 
