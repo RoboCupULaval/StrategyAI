@@ -161,8 +161,11 @@ class Field:
         self.their_goal = Position(self.their_goal_x, 0)
         self.their_goal_pose = Pose(self.their_goal, 0)
 
-        self.our_goal_area = Area(self.field_lines["RightPenaltyStretch"].p2,
-                                  self.field_lines["RightFieldLeftPenaltyStretch"].p1)
+        p1 = self.field_lines["RightPenaltyStretch"].p1
+        p2 = self.field_lines["RightPenaltyStretch"].p2
+        p3 = self.field_lines["RightFieldLeftPenaltyStretch"].p1
+        p4 = self.field_lines["RightFieldLeftPenaltyStretch"].p2
+        self.our_goal_area = Area.from_4_point(p1, p2, p3, p4)
 
         self.their_goal_area = Area.flip_x(self.our_goal_area)
 
@@ -210,6 +213,28 @@ class Field:
     def __contains__(self, item: Union[Pose, Position]):
         return self.left <= item.x <= self.right and \
                self.bottom <= item.y <= self.top
+
+    # FIXME MONTREAL
+    @property
+    def border_limits(self):
+
+        top_area = Area.from_limits(self.top + 100 * self.boundary_width,
+                                    self.top + self.boundary_width,
+                                    self.right + 100 * self.boundary_width,
+                                    self.left - 100 * self.boundary_width)
+        bottom_area = Area.from_limits(self.bottom - self.boundary_width,
+                                       self.bottom - 100 * self.boundary_width,
+                                       self.right + 100 * self.boundary_width,
+                                       self.left - 100 * self.boundary_width)
+        right_area = Area.from_limits(self.top + 100 * self.boundary_width,
+                                      self.bottom - 100 * self.boundary_width,
+                                      self.right + 100 * self.boundary_width,
+                                      self.right + self.boundary_width)
+        left_area = Area.from_limits(self.top + 100 * self.boundary_width,
+                                     self.bottom - 100 * self.boundary_width,
+                                     self.left - self.boundary_width,
+                                     self.left - 100 * self.boundary_width)
+        return [top_area, bottom_area, right_area, left_area]
 
     @property
     def top(self):

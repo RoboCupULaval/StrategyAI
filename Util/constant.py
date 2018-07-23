@@ -6,9 +6,8 @@ from enum import Enum
 
 ROBOT_RADIUS = 90
 ROBOT_DIAMETER = ROBOT_RADIUS * 2
-ROBOT_CENTER_TO_KICKER = 50
+ROBOT_CENTER_TO_KICKER = 60
 BALL_RADIUS = 21
-PLAYER_PER_TEAM = 12
 MAX_PLAYER_ON_FIELD_PER_TEAM = 6
 BALL_OUTSIDE_FIELD_BUFFER = 200
 
@@ -59,7 +58,6 @@ class KickForce(Enum):
             return KickForce.HIGH
 
 
-    
 class KickType(Enum):
     DIRECT = 0
     CHIP = 1

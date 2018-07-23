@@ -19,6 +19,8 @@ __author__ = 'RoboCupULaval'
 ATTENUATION = 1000 ** 3  # Can be consider the constant that limit the effect of the enemy robot
 MIN_DIST_FROM_CENTER = 200  # An enemy player closer than this distance from the area center, its distance will clamp
 
+EVALUATION_INTERVAL = 0.5
+
 
 class PositionForPass(Tactic):
     """
@@ -37,24 +39,31 @@ class PositionForPass(Tactic):
         else:
             self.robots_in_formation = robots_in_formation
 
-        self.number_of_robots = len(self.robots_in_formation)
         self.is_offense = self.is_player_offense(player)
-        self.robots_in_formation = [player for player in self.robots_in_formation if self.is_offense == self.is_player_offense(player)]
+        self.robots_in_formation = [player for player in self.robots_in_formation
+                                    if self.is_offense == self.is_player_offense(player)]
+
         self.idx_in_formation = self.robots_in_formation.index(player)
+        self.area = None
+
+        self.last_evaluation = time.time()
 
         # Use for debug_cmd
-        self.area = None
-        self.best_position = None
+        self.best_position = self._find_best_player_position() if self.auto_position else self.target
 
     def is_player_offense(self, player):
         role = self.game_state.get_role_by_player_id(player.id)
-        return role in [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
+        return role in [Role.FIRST_ATTACK, Role.SECOND_ATTACK, Role.MIDDLE]
 
     def move_to_pass_position(self):
         destination_orientation = (self.game_state.ball_position - self.player.pose.position).angle
 
-        self.best_position = self._find_best_player_position() if self.auto_position else self.target
-        return MoveTo(Pose(self.best_position, destination_orientation), ball_collision=False)
+        if (time.time() - self.last_evaluation) > EVALUATION_INTERVAL:
+            self.best_position = self._find_best_player_position() if self.auto_position else self.target
+            self.last_evaluation = time.time()
+        return MoveTo(Pose(self.best_position, destination_orientation),
+                      ball_collision=False,
+                      cruise_speed=2)
 
     def _find_best_player_position(self):
         if not self.auto_position:
@@ -69,7 +78,7 @@ class PositionForPass(Tactic):
             left = self.game_state.field.our_goal_area.left + ball_offset
             right = ball_offset
 
-        idx = self.robots_in_formation.index(self.player)
+        idx = self.idx_in_formation
         len_formation = len(self.robots_in_formation)
 
         PADDING = 300  # Add buffer zone between area and the field limit
@@ -89,8 +98,10 @@ class PositionForPass(Tactic):
             d = MIN_DIST_FROM_CENTER * normalize(d) if d.norm < MIN_DIST_FROM_CENTER else d
             # Square of the inverse of the distance, a bit like Newton's law of universal gravitation
             v -= ATTENUATION * d / (d.norm ** 3)
-        offset_from_center = Line(center, center + v)
 
+        if self.area.point_inside(center + v):
+            return center + v
+        offset_from_center = Line(center, center + v)
         # The position must stay inside the area limits, so let's find the intersection between our vector and the area
         area_inter = self.area.intersect(offset_from_center)
         if area_inter:
@@ -98,11 +109,12 @@ class PositionForPass(Tactic):
         return center + v
 
     def debug_cmd(self):
-        if self.area is None:
-            return []
-        color = VIOLET if self.is_offense else RED
-        area_lines = DebugCommandFactory().area(self.area, color=color)
-        line_test = DebugCommandFactory().line(self.area.center, self.best_position, color=color)
-
-        return area_lines + [line_test]
+        return []
+        # if self.area is None:
+        #     return []
+        # color = VIOLET if self.is_offense else RED
+        # area_lines = DebugCommandFactory().area(self.area, color=color)
+        # line_test = DebugCommandFactory().line(self.area.center, self.best_position, color=color)
+        #
+        # return area_lines + [line_test]
 

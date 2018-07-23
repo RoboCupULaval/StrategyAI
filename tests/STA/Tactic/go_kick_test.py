@@ -27,8 +27,7 @@ class TestGoKick(unittest.TestCase):
 
         for _ in range(0, MAX_TICK_UNTIL_KICK):
             self.sim.tick()
-            if self.sim.has_kick():
-                assert self.sim.has_hit_ball
+            if self.sim.has_kick() and self.sim.has_hit_ball:
                 return
         assert False, "Reach max number of tick and no kick"
 
