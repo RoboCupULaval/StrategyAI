@@ -86,7 +86,7 @@ class ReceivePass(Tactic):
             self.next_state = self.wait_for_ball
             return CmdBuilder().build()
         orientation = (self.game_state.ball_position - self.player.position).angle
-        return CmdBuilder().addMoveTo(Pose(self.player.position + latteral_move.view(Position), orientation),
+        return CmdBuilder().addMoveTo(Pose(self.player.position + latteral_move, orientation),
                                       cruise_speed=3,
                                       end_speed=0,
                                       ball_collision=False).addChargeKicker().build()
@@ -118,6 +118,6 @@ class ReceivePass(Tactic):
         return position_behind
 
     def is_ball_going_to_collide(self, threshold=18): # threshold in degrees
-        ball_approach_angle = np.arccos(np.dot(normalize(player.position - self.game_state.ball.position).array,
+        ball_approach_angle = np.arccos(np.dot(normalize(self.player.position - self.game_state.ball.position).array,
                                                normalize(self.game_state.ball.velocity).array)) * 180 / np.pi
         return ball_approach_angle > threshold
