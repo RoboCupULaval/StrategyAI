@@ -129,7 +129,7 @@ class RefereeState:
 
         raw_command = RawRefereeCommand(referee_info["command"])
 
-        if "blueTeamOnPositiveHalf" in referee_info and Config()['GAME']['competition_mode']:
+        if "blueTeamOnPositiveHalf" in referee_info and Config()['COACH']['competition_mode']:
             self._validate_field_side(referee_info["blueTeamOnPositiveHalf"])
 
         self.command = self._parse_command(raw_command)
@@ -162,7 +162,7 @@ class RefereeState:
 
     @staticmethod
     def _convert_vision_position_to_ai_position(designated_position: Position):
-        if Config()["GAME"]["on_negative_side"]:
+        if Config()["COACH"]["on_negative_side"]:
             designated_position.x *= -1
         return designated_position
 
@@ -206,7 +206,7 @@ class RefereeState:
             }
         }
         expected = truth_table[is_blue_positive][TeamColorService().our_team_color]
-        current = FieldSide.NEGATIVE if Config()["GAME"]["on_negative_side"] else FieldSide.POSITIVE
+        current = FieldSide.NEGATIVE if Config()["COACH"]["on_negative_side"] else FieldSide.POSITIVE
         assert expected == current, \
             "The referee is expecting that team {our_team} is {expected}, but currently it's {current}, CHANGE IT!!!"\
                 .format(our_team=TeamColorService().our_team_color.name,

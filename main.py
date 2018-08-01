@@ -7,7 +7,9 @@ from sys import stdout
 
 import datetime
 
-from Engine.Framework import Framework
+import sys
+
+from Framework import Framework
 from config.config import Config
 from Util.sysinfo import git_version
 
@@ -20,8 +22,8 @@ def set_logging_config(competition_mode):
 
     if competition_mode:
         file_formatter = logging.Formatter('(%(asctime)s) - [%(levelname)-5.5s]  %(name)-22.22s: %(message)s')
-        file_handler = logging.FileHandler('./Logs/log_' + str(datetime.date.today()) + '_at_'
-                                           + str(datetime.datetime.now().hour) + 'h.log', 'a')
+        filename = f'./Logs/log_{str(datetime.date.today())}_at_{str(datetime.datetime.now().hour)}h.log'
+        file_handler = logging.FileHandler(filename, 'a')
         file_handler.setFormatter(file_formatter)
         handlers.append(file_handler)
 
@@ -75,6 +77,7 @@ def set_arg_parser():
 
 if __name__ == '__main__':
 
+    assert sys.version_info >= (3, 6), 'Upgrade your Python version to at least 3.6'
 
     cli_args = set_arg_parser().parse_args()
 
@@ -85,11 +88,14 @@ if __name__ == '__main__':
     Config().load_file(cli_args.config_file)
     Config().load_parameters(cli_args)
 
-    logger.info('Color: {}, Field side: {}, Mode: {}'.format(Config()['GAME']['our_color'].upper(),
-                                                    'NEGATIVE' if Config()['GAME']['on_negative_side'] else 'POSITIVE',
-                                                    'COMPETITION' if cli_args.competition_mode else 'NORMAL'))
 
-    logger.info('Current git commit hash: ' + git_version())
+    color = Config()['COACH']['our_color'].upper()
+    side = 'NEGATIVE' if Config()['COACH']['on_negative_side'] else 'POSITIVE'
+    mode = 'COMPETITION' if cli_args.competition_mode else 'NORMAL'
+
+    logger.info(f'Color: {color}, Field side: {side}, Mode: {mode}')
+
+    logger.info(f'Current git commit hash: {git_version()}')
 
     stop_framework = False
     while not stop_framework:
