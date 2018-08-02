@@ -118,6 +118,6 @@ class ReceivePass(Tactic):
         return position_behind
 
     def is_ball_going_to_collide(self, threshold=18): # threshold in degrees
-        ball_approach_angle = np.arccos(np.dot(normalize(player.position - self.game_state.ball.position).array,
+        ball_approach_angle = np.arccos(np.dot(normalize(self.player.position - self.game_state.ball.position).array,
                                                normalize(self.game_state.ball.velocity).array)) * 180 / np.pi
         return ball_approach_angle > threshold
