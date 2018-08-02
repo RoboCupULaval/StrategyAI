@@ -29,11 +29,6 @@ class RobotFilter(KalmanFilter):
                          [0, 0,  0, 0,  1, dt],  # Position Theta
                          [0, 0,  0, 0,  0, 1]])  # Speed Theta
 
-    def observation_model(self):
-        return np.array([[1, 0, 0, 0, 0, 0],   # Position x
-                         [0, 0, 1, 0, 0, 0],   # Position y
-                         [0, 0, 0, 0, 1, 0]])  # Orientation
-
     def control_input_model(self, dt):
         return np.array([[0,  0,  0],  # Position x
                          [dt, 0,  0],  # Speed x
@@ -65,7 +60,10 @@ class RobotFilter(KalmanFilter):
         return np.diag([10000, 10, 10000, 10, 90 * np.pi/180, 1 * np.pi/180])
 
     def update(self, observation, t_capture):
-        error = observation - self.observation_model() @ self.x
+        self.observation_model = np.array([[1, 0, 0, 0, 0, 0],   # Position x
+                                          [0, 0, 1, 0, 0, 0],   # Position y
+                                          [0, 0, 0, 0, 1, 0]])  # Orientation
+        error = observation - self.observation_model @ self.x
         error[2] = RobotFilter.wrap_to_pi(error[2])
         self._update(error, t_capture)
         self.x[4] = RobotFilter.wrap_to_pi(self.x[4])

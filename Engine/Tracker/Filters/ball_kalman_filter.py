@@ -22,10 +22,6 @@ class BallFilter(KalmanFilter):
                          [0,  0, 1, dt],   # Position y
                          [0,  0, 0,  1]])  # Speed y
 
-    def observation_model(self):
-        return np.array([[1, 0, 0, 0],   # Position x
-                         [0, 0, 1, 0]])  # Position y
-
     def process_covariance(self, dt):
         sigma_acc_x = 10
         sigma_acc_y = sigma_acc_x
