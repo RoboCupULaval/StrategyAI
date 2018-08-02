@@ -10,6 +10,7 @@ class KalmanFilter:
         self.is_active = False
         self.last_update_time = 0
         self.first_update_time = 0
+        self.observation_covariance = np.diag([1, 1])
         self.observation_model = np.array([[1, 0, 0, 0],   # Position x
                                           [0, 0, 1, 0]])  # Position y
         self.state_number = int(np.size(self.transition_model(0), 0))
@@ -17,7 +18,6 @@ class KalmanFilter:
 
         self.x = np.zeros(self.state_number)
 
-        self.R = self.observation_covariance
         self.Q = self.process_covariance
         self.P = self.initial_state_covariance()
 
@@ -41,10 +41,6 @@ class KalmanFilter:
     def process_covariance(self, dt):
         return np.zeros(0)
 
-    @abstractmethod
-    def observation_covariance(self):
-        return np.zeros(0)
-
     def _update(self, error, update_time):
         self.is_active = True
 
@@ -57,7 +53,7 @@ class KalmanFilter:
 
         # Compute Kalman gain from states covariance and observation model
         gain = self.P @ self.observation_model.T \
-            @ np.linalg.inv(self.observation_model @ self.P @ self.observation_model.T + self.R())
+            @ np.linalg.inv(self.observation_model @ self.P @ self.observation_model.T + self.observation_covariance)
 
         # Update the states vector
         self.x = self.x + gain @ error

@@ -35,9 +35,6 @@ class BallFilter(KalmanFilter):
 
         return process_covariance
 
-    def observation_covariance(self):
-        return np.diag([1, 1])
-
     def initial_state_covariance(self):
         return np.diag([10 ** 3, 0, 10 ** 3, 0])
 

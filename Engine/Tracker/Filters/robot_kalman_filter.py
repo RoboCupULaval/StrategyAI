@@ -53,13 +53,12 @@ class RobotFilter(KalmanFilter):
 
         return process_covariance
 
-    def observation_covariance(self):
-        return np.diag([100, 100, 0.1 * np.pi/180])
-
     def initial_state_covariance(self):
         return np.diag([10000, 10, 10000, 10, 90 * np.pi/180, 1 * np.pi/180])
 
     def update(self, observation, t_capture):
+
+        self.observation_covariance = np.diag([100, 100, 0.1 * np.pi/180])
         self.observation_model = np.array([[1, 0, 0, 0, 0, 0],   # Position x
                                           [0, 0, 1, 0, 0, 0],   # Position y
                                           [0, 0, 0, 0, 1, 0]])  # Orientation
