@@ -9,9 +9,9 @@ from typing import Dict, List, Any
 
 from Debug.debug_command_factory import DebugCommandFactory
 
-from Engine.filters.path_smoother import path_smoother
-from Engine.regulators import VelocityRegulator, PositionRegulator
-from Engine.robot import Robot
+from Engine.Controller.path_smoother import path_smoother
+from Engine.Controller.Regulators import VelocityRegulator
+from Engine.Controller.robot import Robot
 from Engine.Communication.robot_state import RobotPacket, RobotState
 
 from Util import Pose
@@ -29,8 +29,7 @@ class Controller:
         self.timestamp = -1
         self.robots = [Robot(robot_id) for robot_id in range(config['ENGINE']['max_robot_id'])]
         for robot in self.robots:
-            robot.velocity_regulator = VelocityRegulator()
-            robot.position_regulator = PositionRegulator()
+            robot.regulator = VelocityRegulator()
 
     def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand]):
 
@@ -39,7 +38,7 @@ class Controller:
         for robot in self.robots:
             robot.is_on_field = False
 
-        for robot in track_frame[config['GAME']['our_color']]:
+        for robot in track_frame[config['COACH']['our_color']]:
             self[robot['id']].is_on_field = True
             self[robot['id']].pose = robot['pose']
             self[robot['id']].velocity = robot['velocity']
@@ -57,13 +56,7 @@ class Controller:
 
         for robot in self.active_robots:
             robot.path, robot.target_speed = path_smoother(robot.raw_path, robot.cruise_speed, robot.end_speed)
-
-            if robot.target_speed < 10:
-                commands[robot.id] = min(robot.velocity_regulator.execute(robot, dt),
-                                         robot.position_regulator.execute(robot, dt),
-                                         key=lambda cmd: cmd.norm)
-            else:
-                commands[robot.id] = robot.velocity_regulator.execute(robot, dt)
+            commands[robot.id] = robot.regulator.execute(robot, dt)
 
         self.send_debug(commands)
 
@@ -71,7 +64,7 @@ class Controller:
 
     def generate_packet(self, commands: Dict[int, Pose]) -> RobotState:
         packet = RobotState(timestamp=self.timestamp,
-                            is_team_yellow=config['GAME']['our_color'] == 'yellow',
+                            is_team_yellow=config['COACH']['our_color'] == 'yellow',
                             packet=[])
 
         for robot_id, cmd in commands.items():
@@ -87,7 +80,7 @@ class Controller:
 
     @staticmethod
     def _put_in_robots_referential(robot: Robot, cmd: Pose) -> Pose:
-        if config['GAME']['on_negative_side']:
+        if config['COACH']['on_negative_side']:
             cmd.x *= -1
             cmd.orientation *= -1
             cmd.position = rotate(cmd.position, np.pi + robot.orientation)
@@ -96,25 +89,23 @@ class Controller:
         return cmd
 
     def send_debug(self, commands: Dict[int, Pose]):
-        #if not commands:
-        #    return
 
         robot_id = 3
 
         if robot_id not in commands:
             return
         self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point('mm/s',
-                                                                     'robot {} cmd speed'.format(robot_id),
+                                                                     f'robot {robot_id} cmd speed',
                                                                      [time.time()],
                                                                      [commands[robot_id].norm]))
 
         self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point('rad/s',
-                                                                     'robot {} cmd rotation speed'.format(robot_id),
+                                                                     f'robot {robot_id} cmd rotation speed',
                                                                      [time.time()],
                                                                      [commands[robot_id].orientation]))
 
         self.ui_send_queue.put_nowait(DebugCommandFactory.plot_point('mm/s',
-                                                                     'robot {} Kalman speed'.format(robot_id),
+                                                                     f'robot {robot_id} Kalman speed',
                                                                      [time.time()],
                                                                      [self[robot_id].velocity.norm]))
 

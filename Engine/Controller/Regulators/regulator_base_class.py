@@ -1,6 +1,5 @@
 from abc import abstractmethod, ABCMeta
 
-from Engine.robot import Robot
 from Util import Pose
 
 

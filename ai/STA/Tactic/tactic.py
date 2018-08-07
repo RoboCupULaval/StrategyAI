@@ -40,28 +40,9 @@ class Tactic:
         if forbidden_areas is None:
             field = self.game_state.field
 
-            top_area = Area.from_limits(field.top + 100 * field.boundary_width,
-                                        field.top + field.boundary_width,
-                                        field.right,
-                                        field.left)
-            bottom_area = Area.from_limits(field.bottom - field.boundary_width,
-                                           field.bottom - 100 * field.boundary_width,
-                                           field.right,
-                                           field.left)
-            right_area = Area.from_limits(field.top,
-                                           field.bottom,
-                                           field.right + 100 * field.boundary_width,
-                                           field.right + field.boundary_width)
-            left_area = Area.from_limits(field.top,
-                                         field.bottom,
-                                         field.left - field.boundary_width,
-                                         field.left - 100 * field.boundary_width)
             # Those limits are for ulaval local only
-            areas = [
-                top_area,
-                bottom_area,
-                right_area,
-                left_area,
+            areas = field.border_limits
+            areas += [
                 self.field.behind_our_goal_line,
                 self.field.behind_their_goal_line]
             #areas = []

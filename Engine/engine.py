@@ -1,12 +1,7 @@
 # Under MIT License, see LICENSE.txt
-import cProfile
-import logging
-import os
 
-from multiprocessing import Process, Manager
+from multiprocessing import Manager
 from queue import Empty
-
-from time import time
 
 from Debug.debug_command_factory import DebugCommandFactory
 
@@ -16,8 +11,9 @@ from Engine.Communication.receiver.vision_receiver import VisionReceiver
 from Engine.Communication.sender.robot_command_sender import RobotCommandSender
 from Engine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 
-from Engine.controller import Controller
-from Engine.tracker import Tracker
+from Engine.Controller.controller import Controller
+from framework_process import FrameworkProcess
+from Engine.Tracker.tracker import Tracker
 
 from Util.timing import create_fps_timer
 
@@ -26,16 +22,11 @@ from config.config import Config
 config = Config()
 
 
-class Engine(Process):
-
-    MAX_EXCESS_TIME = 0.05
+class Engine(FrameworkProcess):
 
     def __init__(self, framework):
 
-        super().__init__(name=self.__class__.__name__)
-
-        self.framework = framework
-        self.logger = logging.getLogger(self.__class__.__name__)
+        super().__init__(framework)
 
         # Managers for shared memory between process
         manager = Manager()
@@ -60,25 +51,6 @@ class Engine(Process):
         self.tracker = Tracker(self.vision_state, self.ui_send_queue)
         self.controller = Controller(self.ui_send_queue)
 
-        # fps and limitation
-        self.fps = config['ENGINE']['fps']
-        self.is_fps_locked = config['ENGINE']['is_fps_locked']
-        self.frame_count = 0
-        self.last_frame_count = 0
-        self.dt = 0.0
-        self.last_time = 0.0
-
-        def callback(excess_time):
-            if excess_time > Engine.MAX_EXCESS_TIME:
-                self.logger.debug('Overloaded (%.1f ms behind schedule)', 1000*excess_time)
-
-        self.fps_sleep = create_fps_timer(self.fps, on_miss_callback=callback)
-
-        # profiling
-        self.profiler = cProfile.Profile()
-        if self.framework.profiling:
-            self.profiler.enable()
-
     def start(self):
         super().start()
         self.vision_receiver.start()
@@ -86,44 +58,14 @@ class Engine(Process):
         self.ui_recver.start()
         self.referee_recver.start()
 
-    def run(self):
-
-        logged_string = 'Running with process ID {}'.format(os.getpid())
-        if self.is_fps_locked:
-            logged_string += ' at {} fps.'.format(self.fps)
-        else:
-            logged_string += ' without fps limitation.'
-
-        self.logger.debug(logged_string)
-
-        try:
-            self.wait_for_vision()
-            self.last_time = time()
-            while True:
-                self.frame_count += 1
-                self.update_time()
-                self.main_loop()
-                if self.is_fps_locked: self.fps_sleep()
-                self.framework.engine_watchdog.value = time()
-        except KeyboardInterrupt:
-            pass
-        except BrokenPipeError:
-            self.logger.info('A connection was broken.')
-        except:
-            self.logger.exception('An error occurred.')
-
-    def wait_for_vision(self):
+    def wait_until_ready(self):
         self.logger.debug('Waiting for vision frame from the VisionReceiver...')
         sleep_vision = create_fps_timer(1)
         while not any(self.vision_state):
             sleep_vision()
 
-    def update_time(self):
-        current_time = time()
-        self.dt = current_time - self.last_time
-        self.last_time = current_time
-
     def main_loop(self):
+
         engine_cmds = self.get_engine_commands()
 
         game_state = self.tracker.update()
@@ -149,30 +91,11 @@ class Engine(Process):
             engine_cmds = []
         return engine_cmds
 
-    def dump_profiling_stats(self):
-        if self.framework.profiling:
-            if self.frame_count % (self.fps * config['ENGINE']['profiling_dump_time']) == 0:
-                self.profiler.dump_stats(config['ENGINE']['profiling_filename'])
-                self.logger.debug('Profiling data written to {}.'.format(config['ENGINE']['profiling_filename']))
-
     def is_alive(self):
-
-        if config['GAME']['competition_mode']:
-            if time() - self.framework.engine_watchdog.value > self.framework.MAX_HANGING_TIME:
-                self.logger.critical('Process is hanging. Shutting down.')
-                return False
 
         borked_process_not_found = all((self.vision_receiver.is_alive(),
                                         self.ui_sender.is_alive(),
                                         self.ui_recver.is_alive(),
                                         self.referee_recver.is_alive()))
-        return borked_process_not_found and super().is_alive()
 
-    def terminate(self):
-        self.dump_profiling_stats()
-        self.vision_receiver.terminate()
-        self.ui_sender.terminate()
-        self.ui_recver.terminate()
-        self.referee_recver.terminate()
-        self.logger.debug('Terminated')
-        super().terminate()
+        return borked_process_not_found and super().is_alive()

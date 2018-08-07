@@ -4,11 +4,8 @@ from typing import Dict
 
 import numpy as np
 
-import Util.position
+import Util
 Position = Util.position.Position
-
-import Util.geometry as geometry
-
 
 ORIENTATION_ABSOLUTE_TOLERANCE = 0.004
 
@@ -16,8 +13,8 @@ ORIENTATION_ABSOLUTE_TOLERANCE = 0.004
 class Pose:
 
     def __init__(self, position: Position=Position(), orientation: float=0):
-        if isinstance(position, np.ndarray):
-            raise TypeError("You need to pass a Position to Pose, use Position.from_array() to convert it.")
+        if type(position) is np.ndarray:
+            raise TypeError('You need to pass a Position to Pose. Use Position.from_array() to convert it.')
         self._orientation = orientation
         self._position = position.copy()
 
@@ -72,7 +69,8 @@ class Pose:
         return {'x': self.x, 'y': self.y, 'orientation': self.orientation}
 
     def mirror_x(self):
-        return Pose.from_values(-self.x, self.y, geometry.wrap_to_pi(np.pi - self.orientation))
+        wrap_to_pi = Util.geometry.wrap_to_pi
+        return Pose.from_values(-self.x, self.y, wrap_to_pi(np.pi - self.orientation))
 
     def __add__(self, other: Position) -> 'Pose':
         assert(isinstance(other, Position))
@@ -82,9 +80,9 @@ class Pose:
         return self + (-other)
 
     def __eq__(self, other: 'Pose') -> bool:
-        orientation_equal = geometry.compare_angle(self.orientation,
-                                                   other.orientation,
-                                                   abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE)
+        compare_angle = Util.geometry.compare_angle
+        orientation_equal = compare_angle(self.orientation, other.orientation,
+                                          abs_tol=ORIENTATION_ABSOLUTE_TOLERANCE)
         position_equal = self.position == other.position
         return position_equal and orientation_equal
 
@@ -92,7 +90,7 @@ class Pose:
         return not self.__eq__(other)
 
     def __str__(self) -> str:
-        return '{}, orientation = {:5.3f}'.format(self.position, self.orientation)
+        return f'{self.position}, orientation = {self.orientation:5.3f}'
 
     def __repr__(self) -> str:
-        return 'Pose' + str(self)
+        return self.__class__.__name__ + str(self)

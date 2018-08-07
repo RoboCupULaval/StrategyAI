@@ -3,7 +3,12 @@
 import math as m
 import numpy as np
 
-from Util.position import Position
+import Util.position
+Position = Util.position.Position
+
+import Util.pose as pose
+Pose = pose.Pose
+
 from typing import cast, Sequence, List, Union, Optional
 
 
@@ -13,7 +18,7 @@ class Line:
         self.p2 = p2
 
     def __str__(self):
-        return "Line(p1={}, p2={})".format(self.p1, self.p2)
+        return f'Line(p1={self.p1}, p2={self.p2})'
 
     @property
     def direction(self):
@@ -38,15 +43,15 @@ class Area:
                self.bottom <= p.y <= self.top
 
     def __str__(self):
-        return "Area(top={}, bottom={}, right={}, left={})".format(self.top, self.bottom, self.right, self.left)
+        return f'Area(top={self.top}, bottom={self.bottom}, right={self.right}, left={self.left})'
 
-    def __contains__(self, item: Union["Pose", Position]):
-        if item.__class__.__name__ == "Pose":  # Prevent importing Pose
+    def __contains__(self, item: Union[Pose, Position]):
+        if type(item) is Pose:
             return self.point_inside(item.position)
-        elif isinstance(item, Position):
+        elif type(item) is Position:
             return self.point_inside(item)
         else:
-            raise ValueError("You can only test if a position or a pose is contained inside the area.")
+            raise ValueError('You can only test if a position or a pose is contained inside the area.')
 
     def intersect(self, seg: Line):
         assert isinstance(seg, Line)
@@ -126,6 +131,14 @@ class Area:
     def flip_x(cls, area):
         return Area.from_limits(area.top, area.bottom, -area.left, -area.right)
 
+    @classmethod
+    def from_4_point(cls, p1, p2, p3, p4):
+        top = max(p1.y, p2.y, p3.y, p4.y)
+        bot = min(p1.y, p2.y, p3.y, p4.y)
+        right = max(p1.x, p2.x, p3.x, p4.x)
+        left = min(p1.x, p2.x, p3.x, p4.x)
+        return Area.from_limits(top, bot, right, left)
+
 
 def find_bisector_of_triangle(c, a, b):
     """
@@ -166,7 +179,7 @@ def intersection_between_lines(a1: Position, a2: Position, b1: Position, b2: Pos
     l2 = np.cross(h[2], h[3])  # second line
     x, y, z = np.cross(l1, l2)  # point of intersection
     if z == 0:
-        raise ValueError("Parallel lines")
+        raise ValueError('Parallel lines')
     return Position(x / z, y / z)
 
 
