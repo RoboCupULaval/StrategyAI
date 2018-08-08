@@ -1,5 +1,6 @@
 from abc import abstractmethod
 import numpy as np
+import scipy.linalg as sp
 
 
 class KalmanFilter:
@@ -50,10 +51,16 @@ class KalmanFilter:
             return
 
         self.last_update_time = update_time
-
+        m = self.observation_model @ self.P @ self.observation_model.T + self.observation_covariance
+        #inverse d'une matrice diagonal (hardcoder as fuck)
+        m[0, 0] = 1 / m[0, 0]
+        m[1, 1] = 1 / m[1, 1]
+        if m.size > 4:
+            m[2, 2] = 1 / m[2, 2]
+        # np.linalg.inv(self.observation_model @ self.P @ self.observation_model.T + self.observation_covariance)
         # Compute Kalman gain from states covariance and observation model
         gain = self.P @ self.observation_model.T \
-            @ np.linalg.inv(self.observation_model @ self.P @ self.observation_model.T + self.observation_covariance)
+            @ m
 
         # Update the states vector
         self.x = self.x + gain @ error
