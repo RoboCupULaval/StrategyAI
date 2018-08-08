@@ -1,7 +1,6 @@
 from abc import abstractmethod
 import numpy as np
-import scipy.linalg as sp
-
+import logging
 
 class KalmanFilter:
 
@@ -21,6 +20,7 @@ class KalmanFilter:
 
         self.Q = self.process_covariance
         self.P = self.initial_state_covariance()
+        self.logger = logging.getLogger("KALMAN_FILTER")
 
 
     @property
@@ -54,12 +54,17 @@ class KalmanFilter:
 
         # grosse simplification de la multiplication d'une matrice avec l'inverse d'une matrice diagonale.
         # inverse d'une matrice diag -> on met ses termes ^-1.
-
-        m = np.diag(self.observation_model @ self.P @ self.observation_model.T + self.observation_covariance)
+        m = self.observation_model @ self.P @ self.observation_model.T + self.observation_covariance
+        m_diag = np.diag(m)
         s = self.P @ self.observation_model.T
+        if np.count_nonzero(m - np.diag(m_diag)) == 0:
+            gain = np.divide(s, m_diag)
+        else:
+            gain = s @ np.linalg.inv(m)
+            self.logger.debug('Regular inverse expression used, performance maybe bad. (non-diagonal matrix)')
 
         # Compute Kalman gain from states covariance and observation model
-        gain = np.divide(s, m)
+
         # Update the states vector
         self.x = self.x + gain @ error
 
