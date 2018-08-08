@@ -31,7 +31,7 @@ class Engine(FrameworkProcess):
         # Managers for shared memory between process
         manager = Manager()
         self.vision_state = manager.list([manager.dict() for _ in range(config['ENGINE']['number_of_camera'])])
-        self.game_state = self.framework.game_state
+        self.share_game_state = self.framework.game_state
         self.field = self.framework.field
 
         # Queues for process communication
@@ -69,20 +69,21 @@ class Engine(FrameworkProcess):
         engine_cmds = self.get_engine_commands()
 
         game_state = self.tracker.update()
-        self.game_state.update(game_state)
 
-        self.controller.update(self.game_state, engine_cmds)
+        self.controller.update(game_state, engine_cmds)
         robot_state = self.controller.execute(self.dt)
 
         self.robot_cmd_sender.send_packet(robot_state)
         self.tracker.predict(robot_state, self.dt)
 
+        self.share_game_state.update(game_state)
+
         if any(robot.path for robot in self.controller.robots):
             self.ui_send_queue.put_nowait(DebugCommandFactory.paths(self.controller.robots))
 
-        self.ui_send_queue.put_nowait(DebugCommandFactory.game_state(blue=self.game_state['blue'],
-                                                                     yellow=self.game_state['yellow'],
-                                                                     balls=self.game_state['balls']))
+        self.ui_send_queue.put_nowait(DebugCommandFactory.game_state(blue=game_state['blue'],
+                                                                     yellow=game_state['yellow'],
+                                                                     balls=game_state['balls']))
 
     def get_engine_commands(self):
         try:
