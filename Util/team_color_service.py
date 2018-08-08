@@ -9,7 +9,7 @@ class TeamColorService(metaclass=Singleton):
     YELLOW = 'yellow'
 
     def __init__(self):
-        self._our_team_color = self.convert_color_from_str(Config()['GAME']['our_color'])
+        self._our_team_color = self.convert_color_from_str(Config()['COACH']['our_color'])
         self._enemy_team_color = TeamColor.BLUE if self.is_our_team_yellow else TeamColor.YELLOW
 
     @property

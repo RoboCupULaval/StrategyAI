@@ -3,7 +3,7 @@
 from pyhermes import McuCommunicator
 
 from Engine.Communication.sender.sender_base_class import Sender
-from Engine.robot import MAX_LINEAR_SPEED, MAX_ANGULAR_SPEED
+from Engine.Controller.robot import MAX_LINEAR_SPEED, MAX_ANGULAR_SPEED
 from Util.constant import KickForce, DribbleState
 from Util.geometry import clamp
 import numpy as np

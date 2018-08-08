@@ -32,7 +32,7 @@ class PlayExecutor:
         self.ui_send_queue = ui_send_queue
         self.referee_queue = referee_queue
 
-        self.autonomous_flag = config['GAME']['is_autonomous_play_at_startup']
+        self.autonomous_flag = config['COACH']['is_autonomous_play_at_startup']
         self.ref_states = []
 
         self.pathfinder_module = PathfinderModule()
@@ -108,7 +108,7 @@ class PlayExecutor:
         player_id = this_player.id
         tactic_name = cmd.data['tactic']
         target = Position.from_list(cmd.data['target'])
-        if config['GAME']['on_negative_side']:
+        if config['COACH']['on_negative_side']:
             target = target.flip_x()
         target = Pose(target, this_player.orientation)
         args = cmd.data.get('args', '')
@@ -128,6 +128,7 @@ class PlayExecutor:
         # Apply the default strategy if there is none (for example at startup)
         if self.play_state.current_strategy is None:
             self.play_state.current_strategy = 'DoNothing'
+
         return self.play_state.current_strategy.exec()
 
     def _send_robots_status(self):

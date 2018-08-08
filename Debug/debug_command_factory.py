@@ -3,7 +3,7 @@
 from math import sin, cos
 from typing import Dict, Tuple, List
 
-from Engine.robot import Robot
+from Engine.Controller.robot import Robot
 from Util import Pose, Position
 from Util.geometry import Area
 from Util.path import Path
@@ -53,14 +53,14 @@ def flip_position(position: Position):
     The AI is side independent, so every position send to the UI-Debug must be flip around the y axis
     """
     assert isinstance(position, Position)
-    if not config["GAME"]["on_negative_side"]:
+    if not config["COACH"]["on_negative_side"]:
         return position
     return position.flip_x()
 
 
 def flip_pose(pose: Pose):
     assert isinstance(pose, Pose)
-    if not config["GAME"]["on_negative_side"]:
+    if not config["COACH"]["on_negative_side"]:
         return pose
     return pose.mirror_x()
 
