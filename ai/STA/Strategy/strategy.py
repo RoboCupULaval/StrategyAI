@@ -81,7 +81,7 @@ class Strategy(metaclass=ABCMeta):
         envoyée au robot i.
         """
         cmd_ai = {}
-        cmd_debug = []
+        cmds_debug = []
 
         for r, player in self.assigned_roles.items():
             # TODO: Might break a lot of thing.
@@ -89,11 +89,13 @@ class Strategy(metaclass=ABCMeta):
             if player in self.game_state.our_team.available_players.values():
                 try:
                     cmd_ai[player] = self.roles_graph[r].exec()
-                    cmd_debug.extend(self.roles_graph[r].debug_cmd())
+                    cmd_debug = self.roles_graph[r].debug_cmd()
+                    if cmd_debug is not None:
+                       cmds_debug.extend(cmd_debug)
                 except EmptyGraphException:
                     continue
 
-        return cmd_ai, cmd_debug
+        return cmd_ai, cmds_debug
 
     @classmethod
     def name(cls):

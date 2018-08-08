@@ -86,7 +86,7 @@ class ReceivePass(Tactic):
             self.next_state = self.wait_for_ball
             return CmdBuilder().build()
         orientation = (self.game_state.ball_position - self.player.position).angle
-        return CmdBuilder().addMoveTo(Pose(self.player.position + latteral_move.view(Position), orientation),
+        return CmdBuilder().addMoveTo(Pose(self.player.position + latteral_move, orientation),
                                       cruise_speed=3,
                                       end_speed=0,
                                       ball_collision=False).addChargeKicker().build()

@@ -38,18 +38,17 @@ class RobotFilter(KalmanFilter):
                          [0,  0, dt]])  # Speed Theta
 
     def process_covariance(self, dt):
-        sigma_acc_x = 1000
-        sigma_acc_y = 1000
-        sigma_acc_o = 20000 * np.pi/180
-
+        sacc_x = 1000 ** 2  # sigma_acc_x
+        sacc_y = 1000 ** 2  # sigma_acc_y
+        sacc_o = (20000 * np.pi/180) ** 2  # sigma_acc_o
         process_covariance = \
             np.array([
-                np.array([0.25 * dt ** 4, 0.50 * dt ** 3,              0,              0,              0,              0]) * sigma_acc_x ** 2,
-                np.array([0.50 * dt ** 3, 1.00 * dt ** 2,              0,              0,              0,              0]) * sigma_acc_x ** 2,
-                np.array([             0,              0, 0.25 * dt ** 4, 0.50 * dt ** 3,              0,              0]) * sigma_acc_y ** 2,
-                np.array([             0,              0, 0.50 * dt ** 3, 1.00 * dt ** 2,              0,              0]) * sigma_acc_y ** 2,
-                np.array([             0,              0,              0,              0, 0.25 * dt ** 4, 0.50 * dt ** 3]) * sigma_acc_o ** 2,
-                np.array([             0,              0,              0,              0, 0.50 * dt ** 3, 1.00 * dt ** 2]) * sigma_acc_o ** 2])
+                [0.25 * dt ** 4 * sacc_x, 0.50 * dt ** 3 * sacc_x,                       0,                       0,                       0,                       0],
+                [0.50 * dt ** 3 * sacc_x, 1.00 * dt ** 2 * sacc_x,                       0,                       0,                       0,                       0],
+                [             0,                                0, 0.25 * dt ** 4 * sacc_y, 0.50 * dt ** 3 * sacc_y,                       0,                       0],
+                [             0,                                0, 0.50 * dt ** 3 * sacc_y, 1.00 * dt ** 2 * sacc_y,                       0,                       0],
+                [             0,                                0,                       0,                       0, 0.25 * dt ** 4 * sacc_o, 0.50 * dt ** 3 * sacc_o],
+                [             0,                                0,                       0,                       0, 0.50 * dt ** 3 * sacc_o, 1.00 * dt ** 2 * sacc_o]])
 
         return process_covariance
 

@@ -52,6 +52,7 @@ mkdir build
 cd build
 cmake ..
 make -j 4
+sudo make install
 
 # Install refbox
 cd ../..
