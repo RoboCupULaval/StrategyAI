@@ -14,6 +14,7 @@ class KalmanFilter:
         self.observation_model = np.array([[1, 0, 0, 0],   # Position x
                                           [0, 0, 1, 0]])  # Position y
         self.transition_model = np.zeros(0)
+        self.control_input_model = np.zeros(0)
         self.state_number = int(np.size(self.transition_model, 0))
         self.observable_state = int(np.size(self.observation_model, 0))
 
@@ -32,8 +33,8 @@ class KalmanFilter:
     def update_transition_model(self, dt):
         pass
 
-    def control_input_model(self, dt):
-        return np.zeros(0)
+    def update_control_input_model(self, dt):
+        pass
 
     @abstractmethod
     def initial_state_covariance(self):
@@ -69,9 +70,10 @@ class KalmanFilter:
 
     def _predict(self, dt, input_command=None):
         self.update_transition_model(dt)
+        self.update_control_input_model(dt)
         # Predict the next state from states vector and input commands
         if input_command is not None:
-            self.x = self.transition_model @ self.x + self.control_input_model(dt) @ input_command
+            self.x = self.transition_model @ self.x + self.control_input_model @ input_command
         else:
             self.x = self.transition_model @ self.x
 

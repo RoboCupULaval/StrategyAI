@@ -7,7 +7,7 @@ from Engine.Tracker.Filters import KalmanFilter
 class BallFilter(KalmanFilter):
 
     def __init__(self, id=None):
-        super().__init__()
+        super().__init__(id)
         self.transition_model = np.array([[1, 0.05, 0,  0],   # Position x
                                           [0,  1, 0,  0],   # Speed x
                                           [0,  0, 1, 0.05],   # Position y
