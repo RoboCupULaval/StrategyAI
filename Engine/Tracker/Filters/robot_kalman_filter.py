@@ -6,6 +6,21 @@ from Engine.Tracker.Filters import KalmanFilter
 
 class RobotFilter(KalmanFilter):
 
+    def __init__(self, id):
+        super().__init__(id)
+
+        self.observable_state = int(np.size(self.observation_model, 0))
+        self.transition_model = np.array([[1, 0.05, 0, 0,  0, 0],   # Position x
+                                          [0, 1,  0, 0,  0, 0],   # Speed x
+                                          [0, 0,  1, 0.05, 0, 0],   # Position y
+                                          [0, 0,  0, 1,  0, 0],   # Speed y
+                                          [0, 0,  0, 0,  1, 0.05],  # Position Theta
+                                          [0, 0,  0, 0,  0, 1]])  # Speed Theta
+        self.state_number = int(np.size(self.transition_model, 0))
+        self.observable_state = int(np.size(self.observation_model, 0))
+
+        self.x = np.zeros(self.state_number)
+
     @property
     def pose(self):
         if self.is_active:
@@ -21,13 +36,8 @@ class RobotFilter(KalmanFilter):
         if self.is_active:
             return self.x[4]
 
-    def transition_model(self, dt):
-        return np.array([[1, dt, 0, 0,  0, 0],   # Position x
-                         [0, 1,  0, 0,  0, 0],   # Speed x
-                         [0, 0,  1, dt, 0, 0],   # Position y
-                         [0, 0,  0, 1,  0, 0],   # Speed y
-                         [0, 0,  0, 0,  1, dt],  # Position Theta
-                         [0, 0,  0, 0,  0, 1]])  # Speed Theta
+    def update_transition_model(self, dt):
+        self.transition_model[[0, 2, 4], [1, 3, 5]] = dt
 
     def control_input_model(self, dt):
         return np.array([[0,  0,  0],  # Position x
@@ -56,7 +66,6 @@ class RobotFilter(KalmanFilter):
         return np.diag([10000, 10, 10000, 10, 90 * np.pi/180, 1 * np.pi/180])
 
     def update(self, observation, t_capture):
-
         self.observation_covariance = np.diag([100, 100, 0.1 * np.pi/180])
         self.observation_model = np.array([[1, 0, 0, 0, 0, 0],   # Position x
                                           [0, 0, 1, 0, 0, 0],   # Position y

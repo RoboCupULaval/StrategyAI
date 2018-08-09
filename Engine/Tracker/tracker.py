@@ -227,9 +227,10 @@ class Tracker:
 
         if any(self.active_balls):
             balls_position = np.array([ball.position for ball in self.active_balls])
-            idx = np.argmin(np.linalg.norm(balls_position - obs, axis=1)).view(int)
+            dists = np.linalg.norm(balls_position - obs, axis=1)
+            idx = np.argmin(dists).view(int)
             closest_ball = self.active_balls[idx]
-            if np.linalg.norm(closest_ball.position - obs) > config['ENGINE']['max_ball_separation']:
+            if dists[idx] > config['ENGINE']['max_ball_separation']:
                 if len(self.inactive_balls) > 0:
                     closest_ball = self.inactive_balls[0]
                     self.logger.debug('New ball detected: ID %d.', closest_ball.id)

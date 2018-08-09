@@ -6,6 +6,16 @@ from Engine.Tracker.Filters import KalmanFilter
 
 class BallFilter(KalmanFilter):
 
+    def __init__(self, id=None):
+        super().__init__()
+        self.transition_model = np.array([[1, 0.05, 0,  0],   # Position x
+                                          [0,  1, 0,  0],   # Speed x
+                                          [0,  0, 1, 0.05],   # Position y
+                                          [0,  0, 0,  1]])  # Speed y
+        self.state_number = int(np.size(self.transition_model, 0))
+        self.observable_state = int(np.size(self.observation_model, 0))
+
+        self.x = np.zeros(self.state_number)
     @property
     def position(self):
         if self.is_active:
@@ -16,11 +26,8 @@ class BallFilter(KalmanFilter):
         if self.is_active:
             return self.x[1::2]
 
-    def transition_model(self, dt):
-        return np.array([[1, dt, 0,  0],   # Position x
-                         [0,  1, 0,  0],   # Speed x
-                         [0,  0, 1, dt],   # Position y
-                         [0,  0, 0,  1]])  # Speed y
+    def update_transition_model(self, dt):
+        self.transition_model[[0, 2], [1, 3]] = dt
 
     def process_covariance(self, dt):
         sigma_acc_x = 10

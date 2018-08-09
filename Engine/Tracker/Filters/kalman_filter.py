@@ -13,7 +13,8 @@ class KalmanFilter:
         self.observation_covariance = np.diag([1, 1])
         self.observation_model = np.array([[1, 0, 0, 0],   # Position x
                                           [0, 0, 1, 0]])  # Position y
-        self.state_number = int(np.size(self.transition_model(0), 0))
+        self.transition_model = np.zeros(0)
+        self.state_number = int(np.size(self.transition_model, 0))
         self.observable_state = int(np.size(self.observation_model, 0))
 
         self.x = np.zeros(self.state_number)
@@ -28,8 +29,8 @@ class KalmanFilter:
         return self._id
 
     @abstractmethod
-    def transition_model(self, dt):
-        return np.zeros(0)
+    def update_transition_model(self, dt):
+        pass
 
     def control_input_model(self, dt):
         return np.zeros(0)
@@ -55,14 +56,9 @@ class KalmanFilter:
         # grosse simplification de la multiplication d'une matrice avec l'inverse d'une matrice diagonale.
         # inverse d'une matrice diag -> on met ses termes ^-1.
         m = self.observation_model @ self.P @ self.observation_model.T + self.observation_covariance
-        m_diag = np.diag(m)
         s = self.P @ self.observation_model.T
-        if np.count_nonzero(m - np.diag(m_diag)) == 0:
-            gain = np.divide(s, m_diag)
-        else:
-            gain = s @ np.linalg.inv(m)
-            self.logger.debug('Regular inverse expression used, performance maybe bad. (non-diagonal matrix)')
-
+        m_diag = np.diagonal(m)
+        gain = np.divide(s, m_diag)
         # Compute Kalman gain from states covariance and observation model
 
         # Update the states vector
@@ -72,15 +68,15 @@ class KalmanFilter:
         self.P = self.P - gain @ self.observation_model @ self.P
 
     def _predict(self, dt, input_command=None):
-
+        self.update_transition_model(dt)
         # Predict the next state from states vector and input commands
         if input_command is not None:
-            self.x = self.transition_model(dt) @ self.x + self.control_input_model(dt) @ input_command
+            self.x = self.transition_model @ self.x + self.control_input_model(dt) @ input_command
         else:
-            self.x = self.transition_model(dt) @ self.x
+            self.x = self.transition_model @ self.x
 
         # Update the state covariance matrix from the transition model
-        self.P = self.transition_model(dt) @ self.P @ self.transition_model(dt).T + self.Q(dt)
+        self.P = self.transition_model @ self.P @ self.transition_model.T + self.Q(dt)
 
     def update(self, observation, t_capture):
         error = observation - self.observation_model @ self.x

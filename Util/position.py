@@ -69,7 +69,7 @@ class Position:
         return Position.from_array(self.array.copy())
 
     def flip_x(self):
-        return Position(-self.x, self.y)
+        self.x *= -1
 
     def __add__(self, other: 'Position') -> 'Position':
         return Position.from_array(self.array + other.array)
