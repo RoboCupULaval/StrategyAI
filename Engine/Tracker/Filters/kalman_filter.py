@@ -54,12 +54,18 @@ class KalmanFilter:
 
         self.last_update_time = update_time
 
-        # grosse simplification de la multiplication d'une matrice avec l'inverse d'une matrice diagonale.
-        # inverse d'une matrice diag -> on met ses termes ^-1.
         m = self.observation_model @ self.P @ self.observation_model.T + self.observation_covariance
         s = self.P @ self.observation_model.T
         m_diag = np.diagonal(m)
-        gain = np.divide(s, m_diag)
+
+        # If the matrix is a diagonal
+        if np.count_nonzero(m - np.diag(m_diag)) == 0:
+            # Since the matrix is most of the time a diagonal,
+            # we can compute its inverse way faster with this optimisation
+            gain = np.divide(s, m_diag)
+        else:
+            gain = s @ np.linalg.inv(m)
+            self.logger.debug('Regular inverse expression used, performance maybe bad. (non-diagonal matrix)')
         # Compute Kalman gain from states covariance and observation model
 
         # Update the states vector
