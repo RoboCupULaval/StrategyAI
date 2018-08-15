@@ -22,7 +22,7 @@ class KalmanFilter:
 
         self.Q = self.process_covariance
         self.P = self.initial_state_covariance()
-        self.logger = logging.getLogger("KALMAN_FILTER")
+        self.logger = logging.getLogger(self.__class__.__name__)
 
 
     @property

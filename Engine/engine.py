@@ -31,7 +31,7 @@ class Engine(FrameworkProcess):
         # Managers for shared memory between process
         manager = Manager()
         self.vision_state = manager.list([manager.dict() for _ in range(config['ENGINE']['number_of_camera'])])
-        self.share_game_state = self.framework.game_state
+        self.shared_game_state = self.framework.game_state
         self.field = self.framework.field
 
         # Queues for process communication
@@ -76,7 +76,7 @@ class Engine(FrameworkProcess):
         self.robot_cmd_sender.send_packet(robot_state)
         self.tracker.predict(robot_state, self.dt)
 
-        self.share_game_state.update(game_state)
+        self.shared_game_state.update(game_state)
 
         if any(robot.path for robot in self.controller.robots):
             self.ui_send_queue.put_nowait(DebugCommandFactory.paths(self.controller.robots))

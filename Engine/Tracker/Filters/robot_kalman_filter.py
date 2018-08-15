@@ -51,11 +51,11 @@ class RobotFilter(KalmanFilter):
             return self.x[4]
 
     def update_transition_model(self, dt):
-        # on met à jour le dt du modele avec le vrai dt de la main loop
+        # The position (0,1), (2,3) and (4, 5) is the position in the transition model that contains the dt
         self.transition_model[[0, 2, 4], [1, 3, 5]] = dt
 
     def update_control_input_model(self, dt):
-        # on met à jour le dt du modele avec le vrai dt de la main loop
+        # The position (1,0), (2,1) and (5, 2) is the position in the transition model that contains the dt
         self.control_input_model[[1, 3, 5], [0, 1, 2]] = dt
 
     def process_covariance(self, dt):
