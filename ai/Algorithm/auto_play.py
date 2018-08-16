@@ -132,9 +132,6 @@ class SimpleAutoPlay(AutoPlay):
             self.logger.info("Received referee state {}".format(ref_state.command.name))
 
             next_state = self._on_ref_state_change(ref_state.command)
-
-
-
         self.prev_nb_player = nb_player
 
         self.last_ref_state = ref_state.command

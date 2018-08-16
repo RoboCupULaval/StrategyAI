@@ -29,6 +29,7 @@ class FreeKick(Strategy):
                            self.game_state.field.our_goal_forbidden_area]
 
         initial_position_for_pass_center = {}
+        self.not_kicking_player_role = Role.GOALKEEPER
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
@@ -51,18 +52,14 @@ class FreeKick(Strategy):
                                                              ))
 
                 player_is_not_closest = partial(self.is_not_closest, player)
-                player_has_kicked = partial(self.has_kicked, player)
                 player_is_receiving_pass = partial(self.ball_going_toward_player, player)
                 player_is_not_receiving_pass = partial(self.ball_not_going_toward_player, player)
-                player_has_received_ball = partial(self.has_received, player)
-                player_is_closest = partial(self.is_closest_not_goalkeeper, player)
+                player_is_closest_valid_kicker = partial(self.is_closest_valid_kicker, player)
 
                 node_pass.connect_to(node_wait_for_pass, when=player_is_receiving_pass)
-                node_pass.connect_to(node_go_kick, when=player_is_closest)
-                node_wait_for_pass.connect_to(node_go_kick, when=player_has_received_ball)
+                node_pass.connect_to(node_go_kick, when=player_is_closest_valid_kicker)
                 node_wait_for_pass.connect_to(node_pass, when=player_is_not_receiving_pass)
                 node_go_kick.connect_to(node_pass, when=player_is_not_closest)
-                node_go_kick.connect_to(node_go_kick, when=player_has_kicked)
 
         # Find position for ball player closest to ball
         self.closest_role = None
@@ -87,28 +84,30 @@ class FreeKick(Strategy):
                 Role.FIRST_DEFENCE,
                 Role.SECOND_DEFENCE]
 
-    def is_closest_not_goalkeeper(self, player):
+    def is_closest_valid_kicker(self, player):
+        role = GameState().get_role_by_player_id(player.id)
+        if (role == Role.GOALKEEPER) or (role == self.not_kicking_player_role):
+            return False
         if self.game_state.ball.is_mobile():
             self.has_ball_move = True
-        role = GameState().get_role_by_player_id(player.id)
         if not self.has_ball_move:
             return role == self.closest_role
 
         closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
-        if player == closest_players[0].player:
+        closest_valid_player = closest_players[0].player
+
+        if (closest_valid_player.role == self.not_kicking_player_role) or \
+                (closest_valid_player.player.role == Role.GOALKEEPER):
+            closest_valid_player = closest_players[1].player
+            if (closest_valid_player.role == self.not_kicking_player_role) or \
+                    (closest_valid_player.player.role == Role.GOALKEEPER):
+                closest_valid_player = closest_players[2].player
+
+        if player == closest_valid_player:
             return True
-        return closest_players[0].player == self.game_state.get_player_by_role(Role.GOALKEEPER) \
-               and player == closest_players[1].player
 
     def is_not_closest(self, player):
-        return not self.is_closest_not_goalkeeper(player)
-
-    def has_kicked(self, player):
-        role = GameState().get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'GoKick':
-            return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
-        else:
-            return False
+        return not self.is_closest_valid_kicker(player)
 
     def is_ready_to_kick(self, player):
         if self.has_ball_move:
@@ -138,3 +137,12 @@ class FreeKick(Strategy):
             return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
         else:
             return False
+
+    def has_touched_ball(self, player):
+        role = GameState().get_role_by_player_id(player.id)
+        if self.roles_graph[role].current_tactic_name == 'GoKick':
+            if self.game_state.ball.is_mobile(200):
+                self.not_kicking_player_role = role
+                return True
+        return False
+
