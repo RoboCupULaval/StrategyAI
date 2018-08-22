@@ -1,46 +1,60 @@
 # Under MIT License, see LICENSE.txt
+import logging
+from typing import List, Tuple, Callable, Optional, Dict
 
-from typing import List, Tuple, Callable, Any
+from Util import Pose
+from Util.role import Role
+from ai.GameDomainObjects import Player
 
-from RULEngine.Game.Player import Player
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.singleton import Singleton
-from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.strategy_book import StrategyBook
-from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_book import TacticBook
 from ai.states.game_state import GameState
 
 
-class PlayState(object, metaclass=Singleton):
-    """
-    Garde les éléments correspondant aux STA
-    """
+class PlayState:
+
     def __init__(self):
-        """
-        initialise le PlayState
-        """
-        # Livres
         self.strategy_book = StrategyBook()
         self.tactic_book = TacticBook()
-        self.autonomous_flag = False
-        self.current_strategy = None
+        self.game_state = GameState()
+        self._current_strategy = None
+        self.logger = logging.getLogger(self.__class__.__name__)
 
-    def set_strategy(self, strategy: Strategy) -> None:
-        """
-        applique un stratégie du STA à executer
+    @property
+    def current_strategy(self):
+        return self._current_strategy
 
-        :param strategy: Strategy object déjà instancier, la stratégie à executer
-        :return: None
-        """
-        assert self.strategy_book.check_existance_strategy(str(strategy))
+    @current_strategy.setter
+    def current_strategy(self, strategy_name: str):
+        self.change_strategy(strategy_name)
 
-        self.current_strategy = strategy
+    def change_strategy(self, strategy_name: str, roles: Optional[Dict[Role, int]]=None):
+        assert isinstance(strategy_name, str)
 
-    def set_autonomous_flag(self, flag: bool) -> None:
-        self.autonomous_flag = flag
+        self.logger.debug("Switching to strategy '{}'".format(strategy_name))
 
-    def get_current_tactical_state(self) -> List[Tuple[int, str, str, str]]:
+        strategy_class = self.strategy_book.get_strategy(strategy_name)
+
+        # Use default rule of the strategy
+        if roles is None:
+            self.game_state.map_players_for_strategy(strategy_class)
+        elif not self._is_mapping_valid(roles):
+            self.logger.error("Invalid mapping from UI-debug")
+            return
+        else: # Use roles mapping from UI-debug
+            self.game_state.map_players_to_roles_by_player_id(roles)
+            
+        self._current_strategy = strategy_class(self.game_state)
+
+    def _is_mapping_valid(self, roles):
+        for player_id in roles.values():
+            if player_id not in self.game_state.our_team.available_players.keys():
+                self.logger.error("Robot id {} is not available".format(player_id))
+                return False
+        return True
+
+    @property
+    def current_tactical_state(self) -> List[Tuple[Player, str, str, Role]]:
         """
         Retourne le nom des tactics en cours dans la stratégie en cours
         :return: List[Tuple[int, str, str, str]] les informations actuelles des tactiques courantes
@@ -48,16 +62,7 @@ class PlayState(object, metaclass=Singleton):
 
         return self.current_strategy.get_current_state()
 
-    def get_new_strategy(self, strategy_name: str) -> Callable[[GameState], Strategy]:
-        """
-        Retourne un callable sur la stratégie spécifiée par le strategy_name.
-
-        :param strategy_name: (str) le nom de la stratégie à retourner
-        :return: Callable[[GameState], Strategy] une Stratégie non initialisé (non créer)
-        """
-        return self.strategy_book.get_strategy(strategy_name)
-
-    def get_new_tactic(self, tactic_name: str) -> Callable[[GameState, Player, Pose, Any], Tactic]:
+    def get_new_tactic(self, tactic_name: str) -> Callable:
         """
         Retourne un callable sur la tactic spécifiée par le tactic_name.
 

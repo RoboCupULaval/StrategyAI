@@ -1,28 +1,28 @@
 # Under MIT license, see LICENSE.txt
-from typing import List
+from typing import List, Optional
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.area import stayOutsideCircle
-from ai.Algorithm.path_partitionner import CollisionBody
+from Util import Pose
+from Util.ai_command import MoveTo
+from Util.area import stay_outside_circle
+from Util.constant import KEEPOUT_DISTANCE_FROM_BALL
+from Util.geometry import Area
+from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
-from ai.STA.Tactic.go_to_position_pathfinder import GoToPositionPathfinder
 from ai.states.game_state import GameState
 
 
 class StayAwayFromBall(Tactic):
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose = Pose(),
-                 keepout_radius: int = 500, args: List[str]=None):
-        super().__init__(game_state, player, target, args)
+    def __init__(self, game_state: GameState, player: Player, target: Pose = Pose(),
+                 args: Optional[List[str]]=None,
+                 keepout_radius: int = KEEPOUT_DISTANCE_FROM_BALL,
+                 forbidden_areas: Optional[List[Area]]=None):
+        super().__init__(game_state, player, target, args, forbidden_areas=forbidden_areas)
         self.current_state = self.stay_out_of_circle
         self.next_state = self.stay_out_of_circle
         self.keepout_radius = keepout_radius
-        self.player.collision_body_mask.append(CollisionBody.COLLIDABLE)
 
     def stay_out_of_circle(self):
-        self.game_state.field.field_collision_body.append(
-            CollisionBody(self.game_state.get_ball_position(), self.game_state.get_ball_velocity(), 500))
-        position = stayOutsideCircle(self.player.pose.position,
-                                     self.game_state.get_ball_position(),
+        position = stay_outside_circle(self.player.pose.position,
+                                     self.game_state.ball_position,
                                      self.keepout_radius)
-        return GoToPositionPathfinder(self.game_state, self.player, Pose(position, self.player.pose.orientation))
+        return MoveTo(Pose(position, self.player.pose.orientation))

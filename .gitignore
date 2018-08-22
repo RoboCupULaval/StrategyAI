@@ -43,6 +43,7 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *,cover
+.pytest_cache/
 
 # Translations
 *.mo
@@ -71,5 +72,13 @@ filtered.txt
 unfiltered.txt
 *.csv
 
+# profiling data files
+*.prof
+
 # Config custom
 *.custom.cfg
+
+# own files
+venv/
+Logs/*.log
+

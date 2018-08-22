@@ -1,17 +1,13 @@
 # Under MIT licence, see LICENCE.txt
 from typing import List
 
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Util.area import isInsideSquare, stayInsideSquare
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from RULEngine.Util.constant import ROBOT_RADIUS
-
+from Util import Pose, Position
+from Util.area import is_inside_square, stay_inside_square
+from Util.constant import ROBOT_RADIUS
+from ai.GameDomainObjects import Player
+from Util.ai_command import Idle, GoBetween, MoveTo
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.STA.Action.GoBetween import GoBetween
-from ai.STA.Action.MoveToPosition import MoveToPosition
-from ai.STA.Action.Idle import Idle
 from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
@@ -35,7 +31,7 @@ class ProtectZone(Tactic):
         status_flag : L'indicateur de progression de la tactique
     """
 
-    def __init__(self, game_state: GameState, player: OurPlayer, target: Pose=Pose(), args: List[str]=None,
+    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(), args: List[str]=None,
                  p_y_top: [int, float]=3000, p_y_bottom: [int, float]=-3000, p_x_left: [int, float]=-4500,
                  p_x_right: [int, float]=4500, p_is_yellow: bool=False):
         super().__init__(game_state, player, target, args)
@@ -56,11 +52,11 @@ class ProtectZone(Tactic):
 
     def cover_zone(self):
         enemy_positions = self.get_enemy_in_zone()
-        ball_pos = self.game_state.get_ball_position()
+        ball_pos = self.game_state.ball_position
 
         if len(enemy_positions) == 0:
             self.next_state = self.support_other_zone
-            return Idle(self.game_state, self.player)
+            return Idle
         else:
             self.next_state = self.cover_zone
 
@@ -68,7 +64,7 @@ class ProtectZone(Tactic):
         for pos in enemy_positions:
             mean_position = mean_position + pos
         mean_position /= len(enemy_positions)
-        destination = stayInsideSquare(mean_position, self.y_top, self.y_bottom, self.x_left, self.x_right)
+        destination = stay_inside_square(mean_position, self.y_top, self.y_bottom, self.x_left, self.x_right)
         return GoBetween(self.game_state, self.player, ball_pos, destination, ball_pos, 2*ROBOT_RADIUS)
 
     def support_other_zone(self):
@@ -79,16 +75,16 @@ class ProtectZone(Tactic):
         else:
             self.next_state = self.cover_zone
 
-        destination = stayInsideSquare(self.game_state.get_ball_position(), self.y_top, self.y_bottom, self.x_left,
+        destination = stay_inside_square(self.game_state.ball_position, self.y_top, self.y_bottom, self.x_left,
                                        self.x_right)
         destination = self.game_state.game.field.stay_outside_goal_area(destination, our_goal=True)
-        orientation = (self.game_state.get_ball_position()- destination).angle()
-        return MoveToPosition(self.game_state, self.player, Pose(destination, orientation))
+        orientation = (self.game_state.ball_position-destination).angle
+        return MoveTo(Pose(destination, orientation))
 
     def get_enemy_in_zone(self):
         enemy_list = []
-        for robot in self.game_state.game.enemies.values():
-            pos = self.game_state.get_player_position(robot, False)
-            if isInsideSquare(pos, self.y_top, self.y_bottom, self.x_left, self.x_right):
+        for robot in self.game_state.enemy_team.players.values():
+            pos = robot.pose.position
+            if is_inside_square(pos, self.y_top, self.y_bottom, self.x_left, self.x_right):
                 enemy_list.append(pos)
         return enemy_list

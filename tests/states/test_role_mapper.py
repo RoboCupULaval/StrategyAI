@@ -1,42 +1,58 @@
 from unittest import TestCase
-from ai.Util.role import Role
+
+import pytest
+
+from Util.role import Role
+from Util.role_mapper import RoleMapper
+from Util.team_color_service import TeamColorService
+from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
 
+
 class RoleMapperTests(TestCase):
+
+    def setUp(self):
+        self.state = GameState()
+        self.role_mapper = RoleMapper()
+
     def test_givenNoMapping_whenMapById_thenMapsAllPlayers(self):
-        state = GameState()
-        state.map_players_to_roles_by_player(basic_roles)
-        self.assertDictEqual(state.get_role_mapping(), basic_roles)
+        self.state.map_players_to_roles_by_player(basic_roles)
+        self.assertDictEqual(self.state.role_mapping, basic_roles)
 
     def test_givenBasicMapping_whenMapOtherwise_thenMapsPlayersProperly(self):
-        state = GameState()
-        state.map_players_to_roles_by_player(basic_roles)
-        state.map_players_to_roles_by_player(inverted_roles_no_goal)
-        self.assertDictEqual(state.get_role_mapping(), inverted_roles_no_goal)
+        self.state.map_players_to_roles_by_player(basic_roles)
+        self.state.map_players_to_roles_by_player(inverted_roles_no_goal)
+        self.assertDictEqual(self.state.role_mapping, inverted_roles_no_goal)
 
     def test_givenBasicMapping_whenMapFewerRobots_thenRemovesUnasignedOnes(self):
-        state = GameState()
-        state.map_players_to_roles_by_player(basic_roles)
-        state.map_players_to_roles_by_player(missing_middle)
-        self.assertDictEqual(state.get_role_mapping(), missing_middle_expected)
+        self.state.map_players_to_roles_by_player(basic_roles)
+        self.state.map_players_to_roles_by_player(missing_middle)
+        self.assertDictEqual(self.state.role_mapping, missing_middle_expected)
 
-    # def test_givenBasicMapping_whenMapMissingLockedRole_thenKeepsLockedRole(self):
-    #     state = GameState()
-    #     state.map_players_to_roles_by_player(basic_roles)
-    #     state.map_players_to_roles_by_player(missing_required)
-    #     self.assertDictEqual(state.get_role_mapping(), missing_required_expected)
+    def test_whenMapRuleWithDuplicateRole_thenAssertError(self):
+        A_ROLE_RULE = {Role.GOALKEEPER: None}
 
-    # def test_givenBasicMapping_whenRemapLockedRole_thenThrowsValueError(self):
-    #     state = GameState()
-    #     state.map_players_to_roles_by_player(basic_roles)
-    #     with self.assertRaises(ValueError):
-    #         state.map_players_to_roles_by_player(inverted_roles)
+        with pytest.raises(AssertionError):
+            self.role_mapper.map_with_rules([], A_ROLE_RULE, A_ROLE_RULE)
 
-    # def test_givenLockedRole_whenUpdateLockedRole_thenSwapsRobots(self):
-    #     state = GameState()
-    #     state.map_players_to_roles_by_player(basic_roles)
-    #     state.update_id_for_locked_role(1, Role.GOALKEEPER)
-    #     self.assertDictEqual(state.get_role_mapping(), goalkeeper_swapped)
+    def test_whenMappingWithMoreOptionalRoleThenPlayers_thenOnlyMapTheNumberOfPlayer(self):
+        A_SET_AVAILABLE_PLAYER = {1: Player(1, TeamColorService.BLUE),
+                                  2: Player(2, TeamColorService.BLUE)}
+        LESS_ROLE_THEN_PLAYER = [Role.GOALKEEPER,
+                                 Role.MIDDLE,
+                                 Role.SECOND_ATTACK]
+        mapping = self.role_mapper.map_with_rules(A_SET_AVAILABLE_PLAYER, {}, LESS_ROLE_THEN_PLAYER)
+
+        assert len(A_SET_AVAILABLE_PLAYER) == len(mapping)
+
+    def test_whenMappingWithMoreRequiredRoleThenPlayers_thenAssert(self):
+        A_SET_AVAILABLE_PLAYER = {1: Player(1, TeamColorService.BLUE),
+                                  2: Player(2, TeamColorService.BLUE)}
+        LESS_ROLE_THEN_PLAYER = [Role.GOALKEEPER,
+                                 Role.MIDDLE,
+                                 Role.SECOND_ATTACK]
+        with self.assertRaises(AssertionError):
+            self.role_mapper.map_with_rules(A_SET_AVAILABLE_PLAYER, LESS_ROLE_THEN_PLAYER, {})
 
 
 basic_roles = {

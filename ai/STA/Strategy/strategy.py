@@ -3,124 +3,108 @@
 from abc import ABCMeta
 from typing import List, Tuple, Callable, Dict
 
+import logging
+
+from Util import AICommand, Pose
+from Util.role import Role
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
+from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
-from ai.Util.ai_command import AICommand
-from ai.Util.role import Role
 from ai.states.game_state import GameState
 
 
-# Pour l'instant, les stratégies n'optimisent pas la gestion des ressources (ex: toujours le même robot qui va chercher
-# la balle et non le plus proche). TODO: À optimiser
 class Strategy(metaclass=ABCMeta):
     """ Définie l'interface commune aux stratégies. """
-    def __init__(self, p_game_state: GameState, keep_roles=True):
+    def __init__(self, p_game_state: GameState):
         """
         Initialise la stratégie en créant un graph vide pour chaque robot de l'équipe.
         :param p_game_state: L'état courant du jeu.
         """
         assert isinstance(p_game_state, GameState)
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.game_state = p_game_state
 
-        if keep_roles:
-            self.roles_graph = {r: Graph() for r in Role}
-            players = [p for p in self.game_state.my_team.available_players.values()]
-            roles = [r for r in Role]
-            role_mapping = dict(zip(roles, players))
-            # Magnifique hack pour bypasser un mapping de goalkeeper
-            # current_goaler = p_game_state.get_player_by_role(Role.GOALKEEPER)
-            # if current_goaler is not None:
-            #     new_goaler = role_mapping[Role.GOALKEEPER]
-            #     new_goaler_old_role = p_game_state.get_role_by_player_id(new_goaler.id)
-            #     role_mapping[Role.GOALKEEPER] = current_goaler
-            #     role_mapping[new_goaler_old_role] = new_goaler
+        self.roles_graph = {role: Graph() for role in self.assigned_roles}
 
-            self.game_state.map_players_to_roles_by_player(role_mapping)
+    @property
+    def assigned_roles(self):
+        return self.game_state.assigned_roles
 
+    def obstacles(self):
+        return []
 
-    def add_tactic(self, role: Role, tactic: Tactic) -> None:
+    @classmethod
+    def required_roles(cls) -> Dict[Role, Callable]:
+        """
+        The required roles are the one that must be available otherwise the strategy's goal is unreachable
+        """
+        raise NotImplementedError("Strategy '{}' must provide the list of required roles".format(cls.__name__))
+
+    @classmethod
+    def optional_roles(cls) -> Dict[Role, Callable]:
+        return []
+
+    def create_node(self, role: Role, tactic: Tactic) -> Node:
         """
         Ajoute une tactique au graph des tactiques d'un robot.
         :param role: Le role auquel est assignée la tactique.
         :param tactic: La tactique à assigner au robot du role.
         """
         assert(isinstance(role, Role))
-        self.roles_graph[role].add_node(Node(tactic))
 
-    def add_condition(self, role: Role, start_node: int, end_node: int, condition: Callable[..., bool]):
-        """
-        Ajoute une condition permettant de gérer la transition entre deux tactiques d'un robot.
-        :param role: Le role qui a la tactic.
-        :param start_node: Le noeud de départ du vertex.
-        :param end_node: Le noeud d'arrivée du vertex.
-        :param condition: Une fonction retournant un booléen permettant de déterminer si on peut effectuer la transition
-        du noeud de départ vers le noeud d'arrivé.
-        """
-        assert(isinstance(role, Role))
-        self.roles_graph[role].add_vertex(start_node, end_node, condition)
+        tactic_node = Node(tactic)
+        self.roles_graph[role].add_node(tactic_node)
+        return tactic_node
 
-    def get_current_state(self) -> List[Tuple[int, str, str, str]]:
-        """
-            Retourne l'état actuel de la stratégie, dans une liste de 6 tuples. Chaque tuple contient:
-                -L'id d'un robot;
-                -Le nom de la Tactic qui lui est présentement assignée sous forme d'une chaîne de caractères;
-                -Le nom de l'Action en cours sous forme d'une chaîne de caractères;
-                -Sa target, soit un objet Pose.
-        """
+    def get_current_state(self) -> List[Tuple[Player, str, str, Role]]:
         state = []
-        for r in Role:
-            current_tactic = self.roles_graph[r].get_current_tactic()
+        for role, graph in self.roles_graph.items():
+            current_tactic = graph.current_tactic
             if current_tactic is None:
                 continue
 
-            try:
-                tactic_name = current_tactic.current_state.__name__
-            except AttributeError:
-                tactic_name = "DEFAULT"
-            state.append((current_tactic.player, str(current_tactic)+" "+current_tactic.status_flag.name+" " +
-                          current_tactic.current_state.__name__, tactic_name, current_tactic.target))
+            state_of_current_tactic = current_tactic.current_state.__name__
+
+            clear_name_for_tatic = str(current_tactic) + " " + \
+                                   current_tactic.status_flag.name
+            state.append((current_tactic.player, clear_name_for_tatic, state_of_current_tactic, role))
         return state
 
-    def exec(self) -> Dict[int, AICommand]:
+    def clear_graph_of_role(self, r: Role):
+        self.roles_graph[r] = Graph()
+
+    def exec(self) -> Tuple[Dict[Player, AICommand], List[Dict]]:
         """
         Appelle la méthode exec de chacune des Tactics assignées aux robots.
         :return: Un dict des 6 AICommand à envoyer aux robots. La commande située à l'indice i de la liste doit être
         envoyée au robot i.
         """
-        commands = {}
-        # for i, g in enumerate(self.roles_graph):
-        #     print(i,"->",g)
-        # TODO We should probably iterate over game_state.RoleMapping instead of Role
-        # TODO It would allow us to deal with fewer than 6 roles
-        for r in Role:
-            player = self.game_state.get_player_by_role(r)
-            if player is None:
-                continue
-            tactic = self.roles_graph.get(r, None)
-            if tactic is None:
-                continue
+        cmd_ai = {}
+        cmd_debug = []
 
-            try:
-                commands[player.id] = self.roles_graph[r].exec()
-            except EmptyGraphException as e:
-                continue
-            player.ai_command = commands[player.id]
+        for r, player in self.assigned_roles.items():
+            # TODO: Might break a lot of thing.
+            # Eventually the entering and leaving of player should be directly handle by the coach of something
+            if player in self.game_state.our_team.available_players.values():
+                try:
+                    cmd_ai[player] = self.roles_graph[r].exec()
+                    cmd_debug.extend(self.roles_graph[r].debug_cmd())
+                except EmptyGraphException:
+                    continue
 
-        return commands
+        return cmd_ai, cmd_debug
+
+    @classmethod
+    def name(cls):
+        return cls.__name__
 
     def __str__(self):
         return self.__class__.__name__
 
-    # TODO check if this is correct MGL 2017/06/16
     def __eq__(self, other):
-        """
-        La comparaison est basée sur le nom des stratégies. Deux stratégies possédant le même nom sont considérée égale.
-        """
         assert isinstance(other, Strategy)
         return str(self) == str(other)
 
     def __ne__(self, other):
-        """ Return self != other """
-        assert isinstance(other, Strategy)
         return not self.__eq__(other)

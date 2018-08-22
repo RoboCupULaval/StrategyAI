@@ -1,34 +1,109 @@
 # Under MIT License, see LICENSE.txt
-""" Point d'entrée de l'intelligence artificielle. """
 
 import argparse
+import logging
+from time import sleep
+from sys import stdout
 
-from RULEngine.Framework import Framework
-from coach import Coach
-from config.config_service import ConfigService
+import datetime
 
-__author__ = 'RoboCupULaval'
+from Engine.Framework import Framework
+from config.config import Config
+from Util.sysinfo import git_version
+
+
+def set_logging_config(competition_mode):
+    console_formatter = logging.Formatter('[%(levelname)-5.5s] - %(name)-22.22s: %(message)s')
+    console_handler = logging.StreamHandler(stream=stdout)
+    console_handler.setFormatter(console_formatter)
+    handlers = [console_handler]
+
+    if competition_mode:
+        file_formatter = logging.Formatter('(%(asctime)s) - [%(levelname)-5.5s]  %(name)-22.22s: %(message)s')
+        file_handler = logging.FileHandler('./Logs/log_' + str(datetime.date.today()) + '_at_'
+                                           + str(datetime.datetime.now().hour) + 'h.log', 'a')
+        file_handler.setFormatter(file_formatter)
+        handlers.append(file_handler)
+
+    logging.basicConfig(level=logging.NOTSET, handlers=handlers)
 
 
 def set_arg_parser():
-    # TODO add mode debug, redirect, pathfinder!
-    prog_desc = "Module de l'intelligence artificielle. L'option est de charger un fichier de configuration."
-    arg_parser = argparse.ArgumentParser(prog="RobocupULaval's Team ULtron AI", description=prog_desc)
+    prog_desc = 'Artificial intelligent and Engine software for the ULtron team in the RoboCup SSL.'
+    arg_parser = argparse.ArgumentParser(prog='ULtron\'s AI of the RoboCup ULaval group.', description=prog_desc)
 
-    arg_parser.add_argument('config_file', nargs='?', help="load a configuration file(.ini/cfg style)",
-                            default="config/sim.cfg")
+    arg_parser.add_argument('config_file',
+                            action='store',
+                            help='Load a configuration file(.ini/cfg style).',
+                            default='config/sim.cfg')
 
+    arg_parser.add_argument('color',
+                            help='Select team color',
+                            choices=['blue', 'yellow'])
+
+    arg_parser.add_argument('side',
+                            help='Select if the team is playing on the positive of negative side',
+                            choices=['positive', 'negative'])
+
+    arg_parser.add_argument('--engine_fps',
+                            action='store',
+                            type=int,
+                            help='Set the engine FPS if engine fps is locked.',
+                            default=30)
+
+    arg_parser.add_argument('--unlock_engine_fps',
+                            action='store_true',
+                            help='Flag to unlock the engine FPS.',
+                            default=False)
+
+    arg_parser.add_argument('--enable_profiling',
+                            action='store_true',
+                            help='Enables profiling options through the project.',
+                            default=False)
+
+    arg_parser.add_argument('--start_in_auto',
+                            action='store_true',
+                            help='Start the AI directly in autonomous mode.',
+                            default=False)
+
+    arg_parser.add_argument('--competition_mode',
+                            action='store_true',
+                            help='Enables watchdog which reset the Framework if it stop.',
+                            default=False)
     return arg_parser
 
-if __name__ == '__main__':
-    # parser for command line arguments
-    parser = set_arg_parser()
-    args = parser.parse_args()
 
-    config_service = ConfigService().load_file(args.config_file)
-    # ai init
-    ai_coach = Coach()
-    # RULEngine init
-    framework = Framework()
-    # Starting point
-    framework.start_game(ai_coach.main_loop, ai_coach.set_reference)
+if __name__ == '__main__':
+
+
+    cli_args = set_arg_parser().parse_args()
+
+    set_logging_config(cli_args.competition_mode)
+
+    logger = logging.getLogger('Main')
+
+    Config().load_file(cli_args.config_file)
+    Config().load_parameters(cli_args)
+
+    logger.info('Color: {}, Field side: {}, Mode: {}'.format(Config()['GAME']['our_color'].upper(),
+                                                    'NEGATIVE' if Config()['GAME']['on_negative_side'] else 'POSITIVE',
+                                                    'COMPETITION' if cli_args.competition_mode else 'NORMAL'))
+
+    logger.info('Current git commit hash: ' + git_version())
+
+    stop_framework = False
+    while not stop_framework:
+        try:
+            Framework(profiling=cli_args.enable_profiling).start()
+        except SystemExit:
+            logger.debug('Framework stopped.')
+        except KeyboardInterrupt:
+            logger.debug('Interrupted.')
+        except:
+            logger.exception('An error occurred.')
+        finally:
+            if not cli_args.competition_mode:
+                stop_framework = True
+            else:
+                logger.debug('Restarting Framework.')
+                sleep(1)

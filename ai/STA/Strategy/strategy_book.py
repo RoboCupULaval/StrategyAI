@@ -1,22 +1,23 @@
 # Under MIT license, see LICENSE.txt
 
-""" Livre des stratégies. """
-from typing import List
+import logging
+from typing import List, Dict, Type
 
-from ai.STA.Strategy.defense_wall_3v3 import DefenseWall_3v3
+from ai.STA.Strategy.smart_stop import SmartStop
+from ai.STA.Strategy.strategy import Strategy
+from ai.STA.Strategy.ball_placement import BallPlacement
 from ai.STA.Strategy.defense_wall_no_kick import DefenseWallNoKick
 from ai.STA.Strategy.defense_wall import DefenseWall
 from ai.STA.Strategy.direct_free_kick import DirectFreeKick
 from ai.STA.Strategy.indirect_free_kick import IndirectFreeKick
+from ai.STA.Strategy.lineup import LineUp
 from ai.STA.Strategy.offense import Offense
-from ai.STA.Strategy.offense_3v3 import Offense_3v3
-from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.indiana_jones import IndianaJones
 from ai.STA.Strategy.human_control import HumanControl
 from ai.STA.Strategy.do_nothing import DoNothing
 from ai.STA.Strategy.offense_kickoff import OffenseKickOff
 from ai.STA.Strategy.passes_with_decisions import PassesWithDecisions
-from ai.STA.Strategy.pathfinder_benchmark import Pathfinder_Benchmark
+from ai.STA.Strategy.pathfinder_benchmark import PathfinderBenchmark
 from ai.STA.Strategy.penalty_defense import PenaltyDefense
 from ai.STA.Strategy.penalty_offense import PenaltyOffense
 from ai.STA.Strategy.prepare_kickoff_defense import PrepareKickOffDefense
@@ -26,70 +27,76 @@ from ai.STA.Strategy.prepare_penalty_offense import PreparePenaltyOffense
 from ai.STA.Strategy.robocup_choreography import RobocupChoreography
 from ai.STA.Strategy.bamba_follow import BambaFollow
 from ai.STA.Strategy.stay_away import StayAway
+from ai.STA.Strategy.test_goal_keeper import TestGoalKeeper
+from ai.STA.Strategy.test_passing import TestPassing
+
+__author__ = "Maxime Gagnon-Legault, and others"
 
 
-class StrategyBook(object):
-    """
-        Cette classe est capable de récupérer les stratégies enregistrés dans
-        la configuration des stratégies et de les exposer au Behavior Tree en
-        charge de sélectionner la stratégie courante.
-    """
+class StrategyBook:
 
     def __init__(self):
-        """
-        Initialise le dictionnaire des stratégies présentées au reste de l'IA.
-        """
-        self.strategy_book = {'Offense': Offense,
-                              'HumanControl': HumanControl,
-                              'DoNothing': DoNothing,
-                              "IndianaJones": IndianaJones,
-                              'RobocupChoreography': RobocupChoreography,
-                              'BambaFollow': BambaFollow,
-                              'PassesWithDecisions': PassesWithDecisions,
-                              'DefenseWall': DefenseWall,
-                              'Pathfinder_Benchmark': Pathfinder_Benchmark,
-                              'PrepareKickOffOffense': PrepareKickOffOffense,
-                              'StayAway': StayAway,
-                              'PrepareKickOffDefense': PrepareKickOffDefense,
-                              'PenaltyDefense': PenaltyDefense,
-                              'PenaltyOffense': PenaltyOffense,
-                              'DirectFreeKick': DirectFreeKick,
-                              'IndirectFreeKick': IndirectFreeKick,
-                              'PreparePenaltyDefense': PreparePenaltyDefense,
-                              'PreparePenaltyOffense': PreparePenaltyOffense,
-                              'OffenseKickOff': OffenseKickOff,
-                              'DefenseWallNoKick': DefenseWallNoKick,
-                              'Offense_3v3': Offense_3v3,
-                              'DefenseWall_3v3': DefenseWall_3v3
-                              }
 
-    def get_strategies_name_list(self) -> List[str]:
-        """
-        Retourne une liste des noms des stratégies disponibles à l'IA.
+        self.logger = logging.getLogger(self.__class__.__name__)
 
-        :return: (List[str]) une liste de string, les noms des stratégies disponibles.
-        """
-        return list(self.strategy_book.keys())
+        self.stop_strategy = DoNothing
 
-    def get_strategy(self, strategy_name: str) -> Strategy:
-        """
-        Retourne une instance nouvelle de la stratégie correspondant au nom passé.
+        default_strategies = [Offense, DefenseWall]
 
-        :param strategy_name: (str) le nom de la stratégie à retourner
-        :return: (Tactic) une nouvelle instance de la stratégie demandé.
-        """
+        strategy_book = {TestPassing,
+                         HumanControl,
+                         IndianaJones,
+                         RobocupChoreography,
+                         BambaFollow,
+                         PassesWithDecisions,
+                         PathfinderBenchmark,
+                         PrepareKickOffOffense,
+                         StayAway,
+                         PrepareKickOffDefense,
+                         PenaltyDefense,
+                         PenaltyOffense,
+                         DirectFreeKick,
+                         IndirectFreeKick,
+                         PreparePenaltyDefense,
+                         PreparePenaltyOffense,
+                         OffenseKickOff,
+                         DefenseWallNoKick,
+                         BallPlacement,
+                         TestGoalKeeper,
+                         LineUp,
+                         SmartStop,
+                         self.stop_strategy,
+                         *default_strategies,
+                         }
+
+        self.default_strategies = [strategy.name() for strategy in default_strategies]
+        self.strategy_book = {strategy.name(): strategy for strategy in strategy_book}
+
+    @property
+    def strategies_name(self) -> List[str]:
+        return list(self.strategy_book)
+
+    @property
+    def strategies_roles(self) -> Dict[str, Dict[str, List[str]]]:
+        results = {}
+        for name, strategy_class in self.strategy_book.items():
+            assert isinstance(strategy_class.required_roles(), list), \
+                "Strategy {} does not provide a list in it's required_roles()".format(name)
+            assert isinstance(strategy_class.optional_roles(), list), \
+                "Strategy {} does not provide a list in it's optional_roles()".format(name)
+            results[name] = {"required_roles": list([r.name for r in strategy_class.required_roles()]),
+                             "optional_roles": list([r.name for r in strategy_class.optional_roles()])}
+        return results
+
+    def get_strategy(self, strategy_name: str) -> Type[Strategy]:
+
+        assert isinstance(strategy_name, str)
 
         if self.check_existance_strategy(strategy_name):
             return self.strategy_book[strategy_name]
-        return self.strategy_book['DoNothing']
+        self.logger.error('A non-existing strategy was asked: {}'.format(strategy_name))
+        return self.stop_strategy
 
     def check_existance_strategy(self, strategy_name: str) -> bool:
-        """
-        Regarde que la stratégie existe dans le livre des stratégies.
-
-        :param strategy_name: (str) le nom de la stratégie à évaluer l'existance.
-        :return: (bool) true si la stratégie existe dans le livre, false sinon.
-        """
         assert isinstance(strategy_name, str)
-
         return strategy_name in self.strategy_book

@@ -1,152 +1,150 @@
 # Under MIT License, see LICENSE.txt
 
+import logging
+from multiprocessing.managers import DictProxy
 
-"""
-    Ce module garde en mémoire l'état du jeu
-"""
-from typing import Union
-
-from RULEngine.Game.OurPlayer import OurPlayer
-from RULEngine.Game.Player import Player
-from RULEngine.Util.reference_transfer_object import ReferenceTransferObject
-from RULEngine.Util.constant import TeamColor
-from RULEngine.Util.singleton import Singleton
-from RULEngine.Util.Pose import Pose
-from RULEngine.Util.Position import Position
-from ai.Util.role import Role
-from ai.Util.role_mapper import RoleMapper
+from Util import Position
+from Util.constant import TeamColor
+from Util.role_mapper import RoleMapper
+from Util.singleton import Singleton
+from Util.team_color_service import TeamColorService
+from ai.GameDomainObjects import Ball, Team, Field, RefereeState
+from ai.GameDomainObjects.field import FieldSide
+from config.config import Config
 
 
-class GameState(object, metaclass=Singleton):
+class GameState(metaclass=Singleton):
 
     def __init__(self):
-        """
-        initialise le GameState, initialise les variables avec des valeurs nulles
-        """
-        self.game = None
-        self.our_team_color = None
-        self.field = None
-        self.my_team = None
-        self.other_team = None
-        self.timestamp = 0
-        self.const = None
-        self._role_mapper = RoleMapper()
+        self.logger = logging.getLogger(self.__class__.__name__)
 
-    def get_player_by_role(self, role: Role) -> OurPlayer:
+        self._role_mapper = RoleMapper()
+        self._ball = Ball()
+        self._field = Field(self._ball)
+
+        self._blue_team = Team(team_color=TeamColor.BLUE)
+        self._yellow_team = Team(team_color=TeamColor.YELLOW)
+
+        self._our_team = self._yellow_team if TeamColorService().is_our_team_yellow else self._blue_team
+        self._enemy_team = self._blue_team if TeamColorService().is_our_team_yellow else self._yellow_team
+
+        self.last_ref_state = None
+
+    def reset(self):
+        self.__init__()
+
+    def update(self, new_game_state):
+        if new_game_state:
+            # Game State is a shared dict with the Engine. Might cause a race condition
+            game_state = new_game_state.copy()  # FIX: this is a shallow copy. is it okay?
+            self._blue_team.update(game_state['blue'])
+            self._yellow_team.update(game_state['yellow'])
+
+            if game_state['balls']:
+                self._ball.update(game_state['balls'][0])
+
+    # FIXME
+    def get_player_position(self, player_id, our_team=True):
+        player = self.get_player_by_id(player_id, our_team)
+        return player.position
+
+    def clear_roles(self):
+        self._role_mapper.clear()
+
+    @property
+    def assigned_roles(self):
+        return {r: p for r, p in self._role_mapper.roles_translation.items() if p is not None}
+
+    def map_players_for_strategy(self, strategy_class):
+        goalie_id = self.last_ref_state.team_info['ours']['goalie'] if self.last_ref_state is not None else None
+        self._role_mapper.map_with_rules(self.our_team.available_players,
+                                         strategy_class.required_roles(),
+                                         strategy_class.optional_roles(),
+                                         goalie_id)
+
+    def get_player_by_role(self, role):
         return self._role_mapper.roles_translation[role]
 
-    def get_role_by_player_id(self, player_id: int) -> Union[Role, None]:
+    def get_role_by_player_id(self, player_id: int):
         for r, p in self._role_mapper.roles_translation.items():
             if p is not None and p.id == player_id:
                 return r
 
-    def bind_random_available_players_to_role(self) -> OurPlayer:
-        pass
+    def get_player_by_id(self, player_id, our_team=True):
+        if our_team:
+            if player_id not in self.our_team.available_players:
+                raise RuntimeError("No player available with that player_id {}".format(player_id))
+            return self.our_team.available_players[player_id]
+        else:
+            if player_id not in self.enemy_team.available_players:
+                raise RuntimeError("No player available with that player_id {}".format(player_id))
+            return self.enemy_team.available_players[player_id]
 
     def map_players_to_roles_by_player_id(self, mapping_by_player_id):
-        mapping_by_player = {role: self.my_team.available_players[player_id] for role, player_id in mapping_by_player_id.items()}
-        self._role_mapper.map_by_player(mapping_by_player)
+        try:
+            mapping_by_player = {role: self.our_team.players[player_id]
+                                 for role, player_id in mapping_by_player_id.items()}
+            self._role_mapper.map_by_player(mapping_by_player)
+        except IndexError as e:
+            self.logger.debug('Try to map to a unavailable player ({})'.format(e))
 
     def map_players_to_roles_by_player(self, mapping):
         self._role_mapper.map_by_player(mapping)
 
-    def get_role_mapping(self):
+    def map_player_to_first_available_role(self, player_id):
+        player = self.our_team.players[player_id]
+        return self._role_mapper.map_player_to_first_available_role(player)
+
+    @property
+    def our_side(self):
+        # Note: The AI is independent from which side it is play on,
+        # the engine handle the mirroring of everything
+        return FieldSide.POSITIVE
+        # return FieldSide.NEGATIVE if Config()['GAME']['on_negative_side'] else FieldSide.POSITIVE
+
+    @property
+    def role_mapping(self):
         return self._role_mapper.roles_translation
 
-    def update_player_for_locked_role(self, player_id, role):
-        player = self._get_player_from_all_possible_player(player_id)
-        return self._role_mapper.update_player_for_locked_role(player, role)
+    @property
+    def ball_position(self) -> Position:
+        return self._field.ball.position
 
-    def _get_player_from_all_possible_player(self, player_id):
-        return self.my_team.players[player_id]
+    @property
+    def ball_velocity(self) -> Position:
+        return self._field.ball.velocity
 
-    def get_player(self, player_id: int, is_my_team=True) -> Player:
+    @property
+    def our_team(self) -> Team:
+        return self._our_team
+
+    @property
+    def enemy_team(self) -> Team:
+        return self._enemy_team
+
+    @property
+    def ball(self) -> Ball:
+        return self._field.ball
+
+    @property
+    def field(self) -> Field:
+        return self._field
+
+    @property
+    def const(self):
+        return self._field.constant
+
+    @const.setter
+    def const(self, field: DictProxy):
+        self._field.constant = field
+
+    @ball.setter
+    def ball(self, ball: Ball):
         """
-        Retourne l'instance du joueur avec id player_id dans l'équipe choisit
-
-        :param player_id: id of the desired player
-        :param is_my_team: True for ally team, False for opponent team
-        :return: the player instance
+        Should only used by PerfectSim or other testing utility
         """
-        try:
-            if is_my_team:
-                return self.my_team.available_players[player_id]
-            else:
-                return self.other_team.available_players[player_id]
-        except Exception as e:
-            print(e)
-            raise e
+        self._field = Field(ball)
 
-    def get_player_pose(self, player_id: int, is_my_team=True) -> Pose:
-        """
-            Retourne la pose d'un joueur d'une équipe
-
-            :param is_my_team: Booléen avec valeur vrai par défaut, l'équipe du joueur est mon équipe
-            :param player_id: identifiant du joueur, en int
-            :return: L'instance Pose de la pose du joueur
-        """
-        if is_my_team:
-            return self.my_team.available_players[player_id].pose
-        else:
-            return self.other_team.available_players[player_id].pose
-
-    def get_player_position(self, player_id: int, is_my_team=True) -> Position:
-        """
-            Retourne la position d'un joueur d'une équipe
-
-            :param is_my_team: Booléen avec valeur vrai par défaut, l'équipe du joueur est mon équipe
-            :param player_id: identifiant du joueur, en int
-            :return: L'instance Position de la position du joueur
-        """
-        if is_my_team:
-            return self.my_team.available_players[player_id].pose.position
-        else:
-            return self.other_team.available_players[player_id].pose.position
-
-    def get_ball_position(self) -> Position:
-        """
-            Retourne la position de la balle
-            :return: L'instance de Position, la position de la balle
-        """
-        return self.field.ball.position
-
-    def set_ball_position(self, newPosition: Position, delta_t) -> None:
-        self.field.ball.set_position(newPosition, delta_t)
-
-    def get_ball_velocity(self) -> Position:
-        """
-        Retourne le vecteur vélocité de la balle.
-        Use with care, probably not implemented correctly
-
-        :return: la vélocité de la balle.
-        """
-        return self.field.ball.velocity
-
-    def get_delta_t(self) -> float:
-        """
-            Retourne le delta_t de la state
-
-            :return: float: le timestamp
-        """
-        return self.game.delta_t
-
-    def set_reference(self, reference_transfer_object: ReferenceTransferObject) -> None:
-        """
-        Ajoute les références des objets du monde.
-
-        :param reference_transfer_object: reference_transfer_object instance avec les références mise dedans
-        :return: None.
-        """
-        assert isinstance(reference_transfer_object, ReferenceTransferObject), \
-            "setting reference to the gamestate require an instance of RULEngine.Util.GameWorld"
-        assert reference_transfer_object.game.referee is not None, \
-            "setting the game_state reference with an invalid (None) referee!"
-        assert reference_transfer_object.team_color_svc is not None, \
-            "setting the game_state reference with an invalid (None) team_color_service!"
-
-        self.game = reference_transfer_object.game
-        self.field = self.game.field
-        self.my_team = self.game.friends
-        self.other_team = self.game.enemies
-        self.our_team_color = reference_transfer_object.team_color_svc.OUR_TEAM_COLOR
-        self.const = self.game.field.constant
+    @property
+    def is_ball_on_field(self):
+        return self._field.ball is not None
