@@ -221,8 +221,11 @@ def compare_angle(angle1: float, angle2: float, abs_tol: float=0.004) -> bool:
 
 
 def rotate(vec: Position, angle: float) -> Position:
-    rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
-    return Position.from_array(rotation @ vec.array)
+    x = vec.x
+    y = vec.y
+    cosa = np.cos(angle)
+    sina = np.sin(angle)
+    return Position(x * cosa - y * sina, x * sina + y * cosa)
 
 
 def normalize(vec: Position) -> Position:

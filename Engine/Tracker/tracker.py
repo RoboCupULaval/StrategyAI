@@ -31,6 +31,8 @@ class Tracker:
         self._balls = [BallFilter(ball_id) for ball_id in range(config['ENGINE']['max_ball_on_field'])]
 
         self._camera_capture_time = [-1 for _ in range(config['ENGINE']['number_of_camera'])]
+        self.neg_side = True if config['COACH']['on_negative_side'] else False
+        self.our_color = config['COACH']['our_color']
 
     def update(self) -> Dict[str, List[Dict[str, Any]]]:
 
@@ -101,9 +103,8 @@ class Tracker:
                                   ball.id,
                                   config['ENGINE']['max_undetected_ball_time'])
 
-    @staticmethod
-    def _put_in_world_referential(orientation: float, cmd: Pose) -> Pose:
-        if config['COACH']['on_negative_side']:
+    def _put_in_world_referential(self, orientation: float, cmd: Pose) -> Pose:
+        if self.neg_side:
             cmd.position = rotate(cmd.position, -np.pi - orientation)
             cmd.x *= -1
             cmd.orientation *= -1
@@ -130,7 +131,7 @@ class Tracker:
 
         valid_frames = [frame for frame in self.vision_state if self._is_valid_frame(frame)]
 
-        if config['COACH']['on_negative_side']:
+        if self.neg_side:
             valid_frames = [Tracker._change_frame_side(frame) for frame in valid_frames]
 
         return sorted(valid_frames, key=lambda frame: frame['t_capture'])
@@ -156,7 +157,7 @@ class Tracker:
 
     @property
     def _our_team(self):
-        if config['COACH']['our_color'] == 'yellow':
+        if self.our_color == 'yellow':
             our_team = self._yellow_team
         else:
             our_team = self._blue_team
@@ -164,7 +165,7 @@ class Tracker:
 
     @property
     def _their_team(self):
-        if config['COACH']['our_color'] == 'yellow':
+        if self.our_color == 'yellow':
             their_team = self._blue_team
         else:
             their_team = self._yellow_team
@@ -226,9 +227,10 @@ class Tracker:
 
         if any(self.active_balls):
             balls_position = np.array([ball.position for ball in self.active_balls])
-            idx = np.argmin(np.linalg.norm(balls_position - obs, axis=1)).view(int)
+            dists = np.linalg.norm(balls_position - obs, axis=1)
+            idx = np.argmin(dists).view(int)
             closest_ball = self.active_balls[idx]
-            if np.linalg.norm(closest_ball.position - obs) > config['ENGINE']['max_ball_separation']:
+            if dists[idx] > config['ENGINE']['max_ball_separation']:
                 if len(self.inactive_balls) > 0:
                     closest_ball = self.inactive_balls[0]
                     self.logger.debug('New ball detected: ID %d.', closest_ball.id)

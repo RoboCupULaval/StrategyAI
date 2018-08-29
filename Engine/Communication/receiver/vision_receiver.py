@@ -62,13 +62,13 @@ class VisionReceiver(ReceiverProcess):
 
     def receive_packet(self):
 
-        wrapper_packet = SSL_WrapperPacket()
-
         try:
             data = self.connection.recv(2048)
         except timeout:
             self.logger.debug('No Vision Frame received.')
             return
+
+        wrapper_packet = SSL_WrapperPacket()
 
         try:
             wrapper_packet.ParseFromString(data)
