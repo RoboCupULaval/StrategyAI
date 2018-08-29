@@ -24,7 +24,7 @@ class Strategy(metaclass=ABCMeta):
         assert isinstance(p_game_state, GameState)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.game_state = p_game_state
-
+        self.not_kicking_player_role = []
         self.roles_graph = {role: Graph() for role in self.assigned_roles}
 
     @property

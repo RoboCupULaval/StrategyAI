@@ -5,7 +5,7 @@ from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL
 from Util.geometry import Area, normalize
 from Util.role import Role
 
-from ai.Algorithm.evaluation_module import closest_player_to_point, closest_players_to_point
+from ai.Algorithm.evaluation_module import closest_player_to_point, closest_players_to_point, player_with_ball
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
@@ -38,7 +38,7 @@ class Offense(Strategy):
                                                              auto_update_target=True))
                 node_wait_for_pass = self.create_node(role, ReceivePass(self.game_state, player))
 
-                player_is_closest = partial(self.is_closest_not_goalkeeper, player)
+                player_is_closest = partial(self.is_closest_valid_kicker, player)
                 player_is_not_closest = partial(self.is_not_closest, player)
                 player_has_kicked = partial(self.has_kicked, player)
                 player_is_receiving_pass = partial(self.ball_going_toward_player, player)
@@ -64,6 +64,26 @@ class Offense(Strategy):
         return [Role.FIRST_DEFENCE,
                 Role.SECOND_ATTACK,
                 Role.SECOND_DEFENCE]
+
+    def is_closest_valid_kicker(self, player):
+        print(self.not_kicking_player_role)
+        role = GameState().get_role_by_player_id(player.id)
+        if (role == Role.GOALKEEPER) or (role in self.not_kicking_player_role):
+            return False
+
+        closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
+        closest_valid_player = closest_players[0].player
+        closest_valid_player_role = GameState().get_role_by_player_id(closest_valid_player.id)
+        if (closest_valid_player_role in self.not_kicking_player_role) or \
+                (closest_valid_player_role == Role.GOALKEEPER):
+            closest_valid_player = closest_players[1].player
+            closest_valid_player_role = GameState().get_role_by_player_id(closest_valid_player.id)
+            if (closest_valid_player_role in self.not_kicking_player_role) or \
+                    (closest_valid_player_role == Role.GOALKEEPER):
+                closest_valid_player = closest_players[2].player
+
+        if player == closest_valid_player:
+            return True
 
     def is_closest_not_goalkeeper(self, player):
         closest_players = closest_players_to_point(self.game_state.ball_position, our_team=True)
@@ -101,3 +121,9 @@ class Offense(Strategy):
             return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
         else:
             return False
+
+    def player_can_now_kick(self):
+        player_that_has_ball = player_with_ball()  # our_team AND their_team
+        if player_that_has_ball:
+            if GameState().get_role_by_player_id(player_that_has_ball.id) not in self.not_kicking_player_role:
+                self.not_kicking_player_role = []

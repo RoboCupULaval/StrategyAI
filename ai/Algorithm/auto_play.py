@@ -95,10 +95,12 @@ class SimpleAutoPlay(AutoPlay):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.last_ref_state = RefereeCommand.HALT
         self.prev_nb_player = None
+        self.not_kicking_player_role = []
 
     # TODO: Check if role assignment works well enough, so we don't need available_players_changed
     def update(self, ref_state: RefereeState, available_players_changed=False):
         self.play_state.game_state.last_ref_state = ref_state
+        self.not_kicking_player_role = self.play_state.current_strategy.not_kicking_player_role
         self.next_state = self._select_next_state(ref_state)
 
         if self.next_state is None:
@@ -108,7 +110,7 @@ class SimpleAutoPlay(AutoPlay):
         elif self.next_state != self.current_state or available_players_changed:
             self.logger.info("Switching to auto play state {}".format(self.next_state.name))
             self.play_state.current_strategy = SimpleAutoPlay._state_to_strategy_name(self.next_state)
-
+        self.play_state.current_strategy.not_kicking_player_role = self.not_kicking_player_role
         self.current_state = self.next_state
     
     def str(self):
