@@ -69,8 +69,7 @@ class Pose:
         return {'x': self.x, 'y': self.y, 'orientation': self.orientation}
 
     def mirror_x(self):
-        wrap_to_pi = Util.geometry.wrap_to_pi
-        return Pose.from_values(-self.x, self.y, wrap_to_pi(np.pi - self.orientation))
+        return Pose.from_values(-self.x, self.y, Util.geometry.wrap_to_pi(np.pi - self.orientation))
 
     def __add__(self, other: Position) -> 'Pose':
         assert(isinstance(other, Position))
