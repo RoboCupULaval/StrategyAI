@@ -66,20 +66,18 @@ class Offense(Strategy):
                 Role.SECOND_DEFENCE]
 
     def is_closest_valid_kicker(self, player):
-        print(self.not_kicking_player_role)
-        role = GameState().get_role_by_player_id(player.id)
-        if (role == Role.GOALKEEPER) or (role in self.not_kicking_player_role):
+        self.player_can_now_kick()
+        goal_keeper_id = GameState().get_player_by_role(Role.GOALKEEPER).id
+        if (player.id == goal_keeper_id) or (player.id in self.not_kicking_player_role):
             return False
 
         closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
         closest_valid_player = closest_players[0].player
-        closest_valid_player_role = GameState().get_role_by_player_id(closest_valid_player.id)
-        if (closest_valid_player_role in self.not_kicking_player_role) or \
-                (closest_valid_player_role == Role.GOALKEEPER):
+        if (closest_valid_player.id in self.not_kicking_player_role) or \
+                (closest_valid_player.id == goal_keeper_id):
             closest_valid_player = closest_players[1].player
-            closest_valid_player_role = GameState().get_role_by_player_id(closest_valid_player.id)
-            if (closest_valid_player_role in self.not_kicking_player_role) or \
-                    (closest_valid_player_role == Role.GOALKEEPER):
+            if (closest_valid_player.id in self.not_kicking_player_role) or \
+                    (closest_valid_player.id == goal_keeper_id):
                 closest_valid_player = closest_players[2].player
 
         if player == closest_valid_player:
@@ -125,5 +123,5 @@ class Offense(Strategy):
     def player_can_now_kick(self):
         player_that_has_ball = player_with_ball()  # our_team AND their_team
         if player_that_has_ball:
-            if GameState().get_role_by_player_id(player_that_has_ball.id) not in self.not_kicking_player_role:
+            if player_that_has_ball.id not in self.not_kicking_player_role:
                 self.not_kicking_player_role = []
