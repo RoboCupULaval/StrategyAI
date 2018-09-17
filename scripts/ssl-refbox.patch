@@ -1,0 +1,22 @@
+diff --git a/referee.conf b/referee.conf
+index 817c1f2..9666b53 100644
+--- a/referee.conf
++++ b/referee.conf
+@@ -35,7 +35,7 @@ BREAK = 120
+ # Length of a yellow card in seconds
+ YELLOW_CARD_TIME = 120
+ # Whether team names must be entered before starting a game
+-TEAM_NAMES_REQUIRED = true
++TEAM_NAMES_REQUIRED = false
+ # Whether remote connection is activated by default
+ RCON_ENABLED_BY_DEFAULT = true
+ 
+@@ -55,7 +55,7 @@ ADDRESS = 224.5.23.1
+ # UDP port number to send old legacy packets to (comment to not send)
+ LEGACY_PORT = 10001
+ # UDP port number to send Protobuf packets to (comment to not send)
+-PROTOBUF_PORT = 10003
++PROTOBUF_PORT = 10023
+ # Name of the network interface to send packets on (comment to send on all interfaces)
+ #INTERFACE = eth0
+ # TCP port number to accept remote control connections on (comment to disable remote control)

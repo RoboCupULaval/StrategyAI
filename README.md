@@ -15,7 +15,14 @@ la STA, dont le papier de recherche se retrouve
 
 
 ### Installation
-Pour les détails d'installations voir le fichier [INSTALLATION.md](https://github.com/RoboCupULaval/StrategyAI/blob/dev/INSTALLATION.md)
+To install all including all the tools (referee, simulator, ui and autoref):
+```bash
+sudo apt-get install python3
+mkdir -p ~/robocup/ultron
+cd !$ && git clone https://github.com/RoboCupULaval/StrategyAI.git
+cd StrategyAI/
+python3 install_all.sh
+```
 
 ### Workflow Git
 Le dépôt StrategyAI fonctionne avec les pull requests:
