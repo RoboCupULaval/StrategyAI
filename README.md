@@ -21,7 +21,7 @@ sudo apt-get install python3
 mkdir -p ~/robocup/ultron
 cd !$ && git clone https://github.com/RoboCupULaval/StrategyAI.git
 cd StrategyAI/
-python3 install_all.sh
+python3 install_all.py
 ```
 
 ### Workflow Git

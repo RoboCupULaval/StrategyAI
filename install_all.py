@@ -37,7 +37,7 @@ def init_folder():
 
 def grsim():
     PATCH_FILE = os.getcwd() + "/scripts/grsim.patch"
-    CORRECT_GRSIM_CONFIG = os.getcwd() + "/scripts/.grsim.xml"
+    CORRECT_GRSIM_CONFIG = os.getcwd() + "/scripts/grsim.xml"
     GRSIM_COMMIT_HASH = "45f0b3d71134b90594ee387675f95324160cb239"
 
     run_cmd("sudo -S apt-get install --yes git build-essential cmake libqt4-dev libgl1-mesa-dev libglu1-mesa-dev "
@@ -49,7 +49,7 @@ def grsim():
     # By default grsim use the ~/.grsim.xml for saving settings. The patch makes it use ~/arena/tools/.grsim.xml
     # This make it possible to have two versions of grsim with two different configurations
     run_cmd("git apply {}".format(PATCH_FILE), TOOLS_DIR + "/grSim")
-    run_cmd("cp {src} {dst}".format(src=CORRECT_GRSIM_CONFIG, dst=TOOLS_DIR), TOOLS_DIR + "/grSim")
+    run_cmd("cp {src} {dst}".format(src=CORRECT_GRSIM_CONFIG, dst=TOOLS_DIR + "/.grsim.xml"))
 
     cmake_install("vartypes")
     cmake_install("grSim")
@@ -81,19 +81,31 @@ def autoref():
     run_cmd("./build.sh", TOOLS_DIR + "/AutoReferee")
 
 def ultron():
-    run_cmd("./{path_to_repo}/scripts/install_ultron.sh".format(path_to_repo=os.getcwd()))
+    run_cmd(os.getcwd() + "/scripts/install_ultron.sh")
 
 
 
 steps = \
     [(init_folder, "Setup folders"),
-     (grsim, "Install and configure GrSim"),
-     (ssl_refbox, "Install and configure refbox"),
-     (ultron, "Install team ultron")
-     #(autoref, "Install and configure TIGER's autoref")
+     (grsim, "Install and configure GrSim (simulator"),
+     (ssl_refbox, "Install and configure refbox (referee)"),
+     (ultron, "Install team ultron"),
+     (autoref, "Install and configure TIGER's autoref")
      ]
 
 if __name__ == "__main__":
+    skip_cnt = 0
+    while True:
+        print("======= Installation steps =======")
+        [print("\t[{}] {}".format(i, name)) for i, (_, name) in enumerate(steps)]
+        res = input("Do you want to skip a{} step? [#step/n]:".format("nother" if skip_cnt > 0 else ""))
+        if res.lower() == 'n' or res == "":
+            break
+        id = int(res)
+        if 0 <= id < len(steps):
+            del steps[id]
+            skip_cnt += 1
+
     n = len(steps)
     for i, (step, name) in enumerate(steps):
         print("{color}[{i}/{n}] {name} {end_color}".format(i=i+1, n=n, name=name, color=GREEN, end_color=END_COLOR))
