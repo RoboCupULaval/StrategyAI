@@ -27,7 +27,7 @@ class GoalKeeper(Tactic):
     DANGER_BALL_VELOCITY = 600  # mm/s
 
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(),
-                 args: List[str]=None,):
+                 penalty_kick=False, args: List[str]=None,):
         forbidden_area = [Area.pad(game_state.field.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)]
         super().__init__(game_state, player, target, args, forbidden_areas=forbidden_area)
 
