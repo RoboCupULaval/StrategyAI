@@ -19,7 +19,6 @@ GAP_ANGLE = 10 * pi / 180  # in rad, distance that prevent robots from touching 
 class AlignAroundTheBall(Tactic):
     def __init__(self, game_state: GameState,
                  player: Player,
-                 target: Pose = Pose(),
                  args: Optional[List[str]] = None,
                  robots_in_formation: Optional[List[Player]] = None):
         super().__init__(game_state, player, args=args)

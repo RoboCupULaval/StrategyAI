@@ -8,7 +8,7 @@ from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
 
 
-def ProtectGoal(game_state: GameState, player: Player, is_right_goal: bool=True,
+def ProtectGoal(game_state: GameState, player: Player,
                  minimum_distance: float=150 / 2, maximum_distance: float=None):
 
         """
