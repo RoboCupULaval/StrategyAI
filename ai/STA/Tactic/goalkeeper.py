@@ -16,7 +16,7 @@ from Util import Pose, Position
 from Util.ai_command import MoveTo, Idle
 from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL, ROBOT_DIAMETER
 from Util.geometry import intersection_line_and_circle, intersection_between_lines, \
-    closest_point_on_segment, find_bisector_of_triangle, Area, Line
+    closest_point_on_segment, find_bisector_of_triangle, Area, Line, clamp
 from ai.GameDomainObjects import Player
 
 from ai.STA.Tactic.go_kick import GRAB_BALL_SPACING, GoKick
@@ -30,7 +30,6 @@ class GoalKeeper(Tactic):
 
     MOVING_BALL_VELOCITY = 50  # mm/s
     DANGER_BALL_VELOCITY = 600  # mm/s
-    MAX_ANGLE = np.pi / 4
 
 
 
@@ -54,10 +53,13 @@ class GoalKeeper(Tactic):
         self.circle_radius = self.game_state.field.goal_width / 2
         self.circle_center = self.game_state.field.our_goal - self.OFFSET_FROM_GOAL_LINE
 
-        self.max_top_position = self.field.our_goal + Position(self.circle_radius * cos(self.MAX_ANGLE + np.pi / 2),
-                                                          self.circle_radius * sin(self.MAX_ANGLE + np.pi / 2))
-        self.max_bottom_position = self.field.our_goal + Position(self.circle_radius * cos(self.MAX_ANGLE + np.pi),
-                                                             self.circle_radius * sin(self.MAX_ANGLE + np.pi))
+        self.min_angle_from_goal = np.arcsin(ROBOT_RADIUS / (self.game_state.field.goal_line.length / 2))
+        #self.min_angle_from_goal = np.pi / 8
+        # self.max_top_position = self.field.our_goal + Position(self.circle_radius * cos(self.min_angle_from_goal + np.pi / 2),
+        #                                                   self.circle_radius * sin(self.min_angle_from_goal + np.pi / 2))
+        # self.max_bottom_position = self.field.our_goal + Position(self.circle_radius * cos(self.min_angle_from_goal + np.pi),
+        #                                                      self.circle_radius * sin(self.min_angle_from_goal + np.pi))
+
 
     def defense_dumb(self):
         dest_y = self.game_state.ball.position.y \
@@ -85,20 +87,30 @@ class GoalKeeper(Tactic):
             if solution.x < self.game_state.field.field_length / 2\
                and self.game_state.ball.position.x < self.game_state.field.field_length / 2:
 
-                self.goal_to_solution_angle = (solution - self.field.our_goal).angle
-                print("goal to solution : {}".format(self.goal_to_solution_angle * 180 / np.pi))
-                if self.goal_to_solution_angle > 0:
-                    self.goal_to_solution_angle = np.pi - self.goal_to_solution_angle
+                a = (solution - self.field.our_goal).angle
+                self.goal_to_solution_angle = a # For debugging
+                print("goal to solution : {}".format(a * 180 / np.pi))
+
+                if a < 0:
+                    a = clamp(a, -np.pi, -self.min_angle_from_goal - np.pi / 2)
                 else:
-                    self.goal_to_solution_angle = -np.pi - self.goal_to_solution_angle
-                if self.goal_to_solution_angle < -self.MAX_ANGLE:
-                    next_position = self.max_bottom_position
-                elif self.goal_to_solution_angle > self.MAX_ANGLE:
-                    next_position = self.max_top_position
-                else:
-                    next_angle = self.goal_to_solution_angle + np.pi
-                    next_position = self.field.our_goal + \
-                                Position(self.circle_radius * cos(-next_angle), self.circle_radius * sin(-next_angle))
+                    a = clamp(a, self.min_angle_from_goal + np.pi / 2, np.pi)
+
+                next_position = self.field.our_goal + \
+                                Position.from_angle(a, self.circle_radius)
+
+                # if self.goal_to_solution_angle > 0:
+                #     self.goal_to_solution_angle = np.pi - self.goal_to_solution_angle
+                # else:
+                #     self.goal_to_solution_angle = -np.pi - self.goal_to_solution_angle
+                # if self.goal_to_solution_angle < -self.min_angle_from_goal:
+                #     next_position = self.max_bottom_position
+                # elif self.goal_to_solution_angle > self.min_angle_from_goal:
+                #     next_position = self.max_top_position
+                # else:
+                #     next_angle = self.goal_to_solution_angle + np.pi
+                #     next_position = self.field.our_goal + \
+                #                 Position(self.circle_radius * cos(-next_angle), self.circle_radius * sin(-next_angle))
 
                 orientation_to_ball = (self.game_state.ball.position - self.player.position).angle
                 return MoveTo(Pose(next_position, orientation_to_ball),
@@ -198,8 +210,9 @@ class GoalKeeper(Tactic):
                                                color=GREEN,
                                                timeout=0.1),
                     DebugCommandFactory().line(self.game_state.ball_position, self.field.our_goal),
-                    DebugCommandFactory().line(self.max_top_position, self.field.our_goal),
-                    DebugCommandFactory().line(self.max_bottom_position, self.field.our_goal)]
+                    # DebugCommandFactory().line(self.max_top_position, self.field.our_goal),
+                    # DebugCommandFactory().line(self.max_bottom_position, self.field.our_goal)
+                    ]
 
         elif self.current_state == self.intercept and self.last_intersection is not None:
             return DebugCommandFactory().line(self.game_state.ball.position,
