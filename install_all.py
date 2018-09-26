@@ -13,8 +13,9 @@ LOCAL_INSTALL = ROOT + "/local"
 # The ~/robocup/local is the location where all the binary and library are installed
 # CMAKE_PREFIX_PATH -> where to fetch library/binary/include
 # CMAKE_INSTALL_PREFIX -> where to install library/binary/include
-CMAKE_INSTALL_CMD = "mkdir -p build && cd build && cmake .. -DCMAKE_PREFIX_PATH={local_dir} " \
-                    "-DCMAKE_INSTALL_PREFIX={local_dir} && make -j 4".format(local_dir=LOCAL_INSTALL)
+# CMAKE_INSTALL_CMD = "mkdir -p build && cd build && cmake .. -DCMAKE_PREFIX_PATH={local_dir} " \
+#                     "-DCMAKE_INSTALL_PREFIX={local_dir} && make -j 4".format(local_dir=LOCAL_INSTALL)
+CMAKE_INSTALL_CMD = "mkdir -p build && cd build && cmake .. && make -j 4"
 
 
 def run_cmd(cmd, working_directory=None):
@@ -26,7 +27,7 @@ def run_cmd(cmd, working_directory=None):
 
 
 def cmake_install(tool_name, install=True):
-    cmd = CMAKE_INSTALL_CMD + " install" if install else CMAKE_INSTALL_CMD
+    cmd = CMAKE_INSTALL_CMD + " && sudo -S make install" if install else CMAKE_INSTALL_CMD
     run_cmd(cmd, TOOLS_DIR + "/" + tool_name)
 
 

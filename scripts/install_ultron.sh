@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Create base folder
+# Base folder
+mkdir -p ~/robocup/ultron
 cd ~/robocup/ultron
 
 # Add python 3.6 repository if necessary
@@ -16,7 +17,7 @@ sudo apt-get install python3.6-venv
 esac
 
 # Install dependencies
-sudo -S apt-get install --yes git python3.6 python-pip python-virtualenv build-essential cmake libqt4-dev libgl1-mesa-dev libglu1-mesa-dev libprotobuf-dev protobuf-compiler libode-dev libboost-dev
+sudo -S apt-get install --yes git python3.6 python-pip python3-venv python-virtualenv build-essential cmake libqt4-dev libgl1-mesa-dev libglu1-mesa-dev libprotobuf-dev protobuf-compiler libode-dev libboost-dev
 
 # Clone repos
 git clone https://github.com/RoboCupULaval/UI-Debug.git
