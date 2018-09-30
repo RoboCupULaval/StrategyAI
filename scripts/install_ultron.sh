@@ -27,7 +27,5 @@ python3.6 -m venv virtualenv
 source virtualenv/bin/activate
 
 # Install requirements
-cd StrategyAI
-pip install -r requirements.txt
-cd ../UI-Debug
-pip install -r requirements.txt
+pip install -r StrategyAI/requirements.txt
+pip install -r UI-Debug/requirements.txt

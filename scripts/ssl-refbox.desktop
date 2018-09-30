@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Name=SSL refbox
+Comment=Referee interface for Robocup SSL # The following hack is required because the home folder is impossible to know
+Exec=sh -c "cd \\$HOME/robocup/tools/ssl-refbox/ && ./sslrefbox"
+Type=Application
+Terminal=true
