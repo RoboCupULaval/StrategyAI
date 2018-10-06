@@ -15,13 +15,10 @@ la STA, dont le papier de recherche se retrouve
 
 
 ### Installation
-Pour install tous les outils (referee, simulator, ui and autoref):
+Pour install ultron et tous les outils (referee, simulator, ui and autoref):
 ```bash
-sudo apt-get install python3 git
-mkdir -p ~/robocup/ultron
-cd ~/robocup/ultron && git clone https://github.com/RoboCupULaval/StrategyAI.git
-cd StrategyAI/
-python3 install_all.py
+sudo apt-get install curl git
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/RoboCupULaval/StrategyAI/dev/tools/install_from_scratch.sh)"
 ```
 
 ### Workflow Git
