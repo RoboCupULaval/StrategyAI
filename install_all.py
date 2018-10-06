@@ -19,7 +19,7 @@ CMAKE_INSTALL_CMD = "mkdir -p build && cd build && cmake .. && make -j 4"
 
 
 def run_cmd(cmd, working_directory=None):
-    print("{color}==>{end_color}  {cmd}".format(color=GREEN, end_color=END_COLOR, cmd=cmd))
+    print(f"{GREEN}==>{END_COLOR}  {cmd}")
     subprocess.Popen(cmd,
                      shell=True,
                      cwd=working_directory).wait()
