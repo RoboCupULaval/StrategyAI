@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # The goal of this script is to be executed directly via curl:
-# sh -c "$(curl -fsSL https://raw.githubusercontent.com/RoboCupULaval/StrategyAI/dev/tools/install_from_scratch.sh)"
+# sh -c "$(curl -fsSL https://raw.githubusercontent.com/RoboCupULaval/StrategyAI/dev/scripts/install_from_scratch.sh)"
 # It install the ultron and than launch `install_all.py`
 
 mkdir -p ~/robocup/ultron

@@ -18,7 +18,7 @@ la STA, dont le papier de recherche se retrouve
 Pour install ultron et tous les outils (referee, simulator, ui and autoref):
 ```bash
 sudo apt-get install curl git
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/RoboCupULaval/StrategyAI/dev/tools/install_from_scratch.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/RoboCupULaval/StrategyAI/dev/scripts/install_from_scratch.sh)"
 ```
 
 ### Workflow Git
