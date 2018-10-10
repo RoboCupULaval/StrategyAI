@@ -121,6 +121,7 @@ class GoalKeeper(Tactic):
                       cruise_speed=3,
                       end_speed=0)
 
+    # Essayer avec le test-goolkeeper
     def intercept(self):
         # Find the point where the ball will go
         if not self._ball_going_toward_goal() and not self.game_state.field.is_ball_in_our_goal_area():
@@ -135,14 +136,14 @@ class GoalKeeper(Tactic):
                                                            ball.position + ball.velocity)
 
         # This is where the ball is going to enter the goal
-        where_ball_enter_goal = closest_point_on_segment(where_ball_enter_goal, self.GOAL_LINE.p1, self.GOAL_LINE.p2)
-        enter_goal_to_ball = Line(where_ball_enter_goal, ball.position)
-
-        # The goalkeeper can not enter goal since there a line blocking vision
-        end_segment = enter_goal_to_ball.direction * ROBOT_RADIUS + where_ball_enter_goal
+        collisionless_goal_line = Line(self.GOAL_LINE.p1 + Position(0, ROBOT_RADIUS),
+                                       self.GOAL_LINE.p2 - Position(0, ROBOT_RADIUS))
+        where_ball_enter_goal = closest_point_on_segment(where_ball_enter_goal,
+                                                         collisionless_goal_line.p1,
+                                                         collisionless_goal_line.p2)
 
         intersect_pts = closest_point_on_segment(self.player.position,
-                                                 ball.position, end_segment)
+                                                 ball.position, where_ball_enter_goal)
         self.last_intersection = intersect_pts
         return MoveTo(Pose(intersect_pts, self.player.pose.orientation),  # It's a bit faster, to keep our orientation
                       cruise_speed=3,
