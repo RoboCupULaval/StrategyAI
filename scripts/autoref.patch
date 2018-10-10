@@ -1,0 +1,28 @@
+diff --git a/modules/moduli-cam/src/main/java/edu/tigers/sumatra/cam/SSLVisionCam.java b/modules/moduli-cam/src/main/java/edu/tigers/sumatra/cam/SSLVisionCam.java
+index 4fc93aa..fc91c2a 100644
+--- a/modules/moduli-cam/src/main/java/edu/tigers/sumatra/cam/SSLVisionCam.java
++++ b/modules/moduli-cam/src/main/java/edu/tigers/sumatra/cam/SSLVisionCam.java
+@@ -45,8 +45,8 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
+ 	private final SSLVisionCamGeometryTranslator geometryTranslator = new SSLVisionCamGeometryTranslator();
+ 	
+ 	
+-	@Configurable(defValue = "10006")
+-	private int port = 10006;
++	@Configurable(defValue = "10227")
++	private int port = 10227;
+ 	
+ 	@Configurable(defValue = "224.5.23.2")
+ 	private String address = "224.5.23.2";
+diff --git a/modules/moduli-referee/src/main/java/edu/tigers/sumatra/referee/source/NetworkRefereeReceiver.java b/modules/moduli-referee/src/main/java/edu/tigers/sumatra/referee/source/NetworkRefereeReceiver.java
+index 46ca7aa..f522f02 100644
+--- a/modules/moduli-referee/src/main/java/edu/tigers/sumatra/referee/source/NetworkRefereeReceiver.java
++++ b/modules/moduli-referee/src/main/java/edu/tigers/sumatra/referee/source/NetworkRefereeReceiver.java
+@@ -33,7 +33,7 @@ public class NetworkRefereeReceiver extends ARefereeMessageSource implements Run
+ 	
+ 	private static final int BUFFER_SIZE = 10000;
+ 	
+-	@Configurable(defValue = "10003")
++	@Configurable(defValue = "10023")
+ 	private static int port;
+ 	@Configurable(defValue = "224.5.23.1")
+ 	private static String address;
