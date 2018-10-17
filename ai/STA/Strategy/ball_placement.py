@@ -1,5 +1,4 @@
 # Under MIT license, see LICENSE.txt
-import logging
 
 from Util import Pose
 from Util.constant import KEEPOUT_DISTANCE_FROM_BALL

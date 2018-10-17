@@ -2,7 +2,6 @@
 from Util.role import Role
 from Util.role_mapper import NoRoleAvailable
 from ai.STA.Strategy.strategy import Strategy
-from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
 

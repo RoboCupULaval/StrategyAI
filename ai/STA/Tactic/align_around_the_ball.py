@@ -2,11 +2,10 @@
 from math import atan, pi, cos, sin
 from typing import List, Optional
 
-from Debug.debug_command_factory import DebugCommandFactory, RED
 from Util import Pose, Position
 from Util.ai_command import Idle, MoveTo
 from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_BALL
-from Util.geometry import normalize, find_bisector_of_triangle, angle_between_three_points
+from Util.geometry import normalize, find_bisector_of_triangle
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState

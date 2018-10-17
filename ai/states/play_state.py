@@ -2,10 +2,8 @@
 import logging
 from typing import List, Tuple, Callable, Optional, Dict
 
-from Util import Pose
 from Util.role import Role
 from ai.GameDomainObjects import Player
-
 from ai.STA.Strategy.strategy_book import StrategyBook
 from ai.STA.Tactic.tactic_book import TacticBook
 from ai.states.game_state import GameState

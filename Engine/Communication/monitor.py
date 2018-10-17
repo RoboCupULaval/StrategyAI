@@ -1,8 +1,7 @@
 import sched
 import time
-from threading import Thread
-
 from multiprocessing import Queue
+from threading import Thread
 
 
 def clear_queue(queue: Queue):

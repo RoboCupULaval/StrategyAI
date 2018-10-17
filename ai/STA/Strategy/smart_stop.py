@@ -1,22 +1,13 @@
 # Under MIT License, see LICENSE.txt
 
-from functools import partial
-
 from Util.constant import KEEPOUT_DISTANCE_FROM_BALL
-from Util.pose import Position, Pose
 from Util.role import Role
 
-from ai.Algorithm.evaluation_module import closest_player_to_point, closest_players_to_point
 from ai.Algorithm.path_partitionner import Obstacle
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_around_the_ball import AlignAroundTheBall
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall
-from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
-from ai.STA.Tactic.position_for_pass import PositionForPass
-from ai.STA.Tactic.rotate_around_ball import RotateAroundBall
-from ai.STA.Tactic.tactic_constants import Flags
-from ai.states.game_state import GameState
 
 
 # noinspection PyMethodMayBeStatic,PyMethodMayBeStatic
