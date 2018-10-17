@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VarXML>
+	<VarList name="Geometry">
+		<VarList name="Game">
+			<VarStringEnum name="Division">
+				Division B
+				<VarString name="0">
+					Division A
+				</VarString>
+				<VarString name="1">
+					Division B
+				</VarString>
+			</VarStringEnum>
+			<VarInt name="Robots Count" minval="" maxval="">
+				6
+			</VarInt>
+		</VarList>
+		<VarList name="Field">
+			<VarList name="Division A">
+				<VarDouble name="Line Thickness" minval="" maxval="">
+					0.01
+				</VarDouble>
+				<VarDouble name="Length" minval="" maxval="">
+					12
+				</VarDouble>
+				<VarDouble name="Width" minval="" maxval="">
+					9
+				</VarDouble>
+				<VarDouble name="Radius" minval="" maxval="">
+					0.5
+				</VarDouble>
+				<VarDouble name="Free Kick Distance From Defense Area" minval="" maxval="">
+					0.7
+				</VarDouble>
+				<VarDouble name="Penalty width" minval="" maxval="">
+					2.4
+				</VarDouble>
+				<VarDouble name="Penalty depth" minval="" maxval="">
+					1.2
+				</VarDouble>
+				<VarDouble name="Penalty point" minval="" maxval="">
+					1.2
+				</VarDouble>
+				<VarDouble name="Margin" minval="" maxval="">
+					0.3
+				</VarDouble>
+				<VarDouble name="Referee margin" minval="" maxval="">
+					0.4
+				</VarDouble>
+				<VarDouble name="Wall thickness" minval="" maxval="">
+					0.05
+				</VarDouble>
+				<VarDouble name="Goal thickness" minval="" maxval="">
+					0.02
+				</VarDouble>
+				<VarDouble name="Goal depth" minval="" maxval="">
+					0.2
+				</VarDouble>
+				<VarDouble name="Goal width" minval="" maxval="">
+					1.2
+				</VarDouble>
+				<VarDouble name="Goal height" minval="" maxval="">
+					0.16
+				</VarDouble>
+			</VarList>
+			<VarList name="Division B">
+				<VarDouble name="Line Thickness" minval="" maxval="">
+					0.01
+				</VarDouble>
+				<VarDouble name="Length" minval="" maxval="">
+					9
+				</VarDouble>
+				<VarDouble name="Width" minval="" maxval="">
+					6
+				</VarDouble>
+				<VarDouble name="Radius" minval="" maxval="">
+					0.5
+				</VarDouble>
+				<VarDouble name="Free Kick Distance From Defense Area" minval="" maxval="">
+					0.7
+				</VarDouble>
+				<VarDouble name="Penalty width" minval="" maxval="">
+					2
+				</VarDouble>
+				<VarDouble name="Penalty depth" minval="" maxval="">
+					1
+				</VarDouble>
+				<VarDouble name="Penalty point" minval="" maxval="">
+					1
+				</VarDouble>
+				<VarDouble name="Margin" minval="" maxval="">
+					0.3
+				</VarDouble>
+				<VarDouble name="Referee margin" minval="" maxval="">
+					0.4
+				</VarDouble>
+				<VarDouble name="Wall thickness" minval="" maxval="">
+					0.05
+				</VarDouble>
+				<VarDouble name="Goal thickness" minval="" maxval="">
+					0.02
+				</VarDouble>
+				<VarDouble name="Goal depth" minval="" maxval="">
+					0.2
+				</VarDouble>
+				<VarDouble name="Goal width" minval="" maxval="">
+					1
+				</VarDouble>
+				<VarDouble name="Goal height" minval="" maxval="">
+					0.16
+				</VarDouble>
+			</VarList>
+		</VarList>
+		<VarList name="Ball">
+			<VarDouble name="Radius" minval="" maxval="">
+				0.0215
+			</VarDouble>
+		</VarList>
+		<VarStringEnum name="Blue Team">
+			Parsian
+			<VarString name="0">
+				Parsian
+			</VarString>
+			<VarString name="1">
+				ParsianNew
+			</VarString>
+			<VarString name="2">
+				RoboIME2012
+			</VarString>
+		</VarStringEnum>
+		<VarStringEnum name="Yellow Team">
+			Parsian
+			<VarString name="0">
+				Parsian
+			</VarString>
+			<VarString name="1">
+				ParsianNew
+			</VarString>
+			<VarString name="2">
+				RoboIME2012
+			</VarString>
+		</VarStringEnum>
+	</VarList>
+	<VarList name="Physics">
+		<VarList name="World">
+			<VarDouble name="Desired FPS" minval="" maxval="">
+				30
+			</VarDouble>
+			<VarBool name="Synchronize ODE with OpenGL">
+				false
+			</VarBool>
+			<VarDouble name="ODE time step" minval="" maxval="">
+				0.033
+			</VarDouble>
+			<VarDouble name="Gravity" minval="" maxval="">
+				9.800000000000001
+			</VarDouble>
+		</VarList>
+		<VarList name="Ball">
+			<VarDouble name="Ball mass" minval="" maxval="">
+				0.043
+			</VarDouble>
+			<VarDouble name="Ball-ground friction" minval="" maxval="">
+				0.05
+			</VarDouble>
+			<VarDouble name="Ball-ground slip" minval="" maxval="">
+				1
+			</VarDouble>
+			<VarDouble name="Ball-ground bounce factor" minval="" maxval="">
+				0.5
+			</VarDouble>
+			<VarDouble name="Ball-ground bounce min velocity" minval="" maxval="">
+				0.1
+			</VarDouble>
+			<VarDouble name="Ball linear damping" minval="" maxval="">
+				0.004
+			</VarDouble>
+			<VarDouble name="Ball angular damping" minval="" maxval="">
+				0.004
+			</VarDouble>
+		</VarList>
+	</VarList>
+	<VarList name="Communication">
+		<VarString name="Vision multicast address">
+			224.5.23.2
+		</VarString>
+		<VarInt name="Vision multicast port" minval="" maxval="">
+			10227
+		</VarInt>
+		<VarInt name="Command listen port" minval="" maxval="">
+			20011
+		</VarInt>
+		<VarInt name="Blue Team status send port" minval="" maxval="">
+			30011
+		</VarInt>
+		<VarInt name="Yellow Team status send port" minval="" maxval="">
+			30012
+		</VarInt>
+		<VarInt name="Sending delay (milliseconds)" minval="" maxval="">
+			0
+		</VarInt>
+		<VarInt name="Send geometry every X frames" minval="" maxval="">
+			120
+		</VarInt>
+		<VarList name="Gaussian noise">
+			<VarBool name="Noise">
+				false
+			</VarBool>
+			<VarDouble name="Deviation for x values" minval="" maxval="">
+				3
+			</VarDouble>
+			<VarDouble name="Deviation for y values" minval="" maxval="">
+				3
+			</VarDouble>
+			<VarDouble name="Deviation for angle values" minval="" maxval="">
+				2
+			</VarDouble>
+			<VarBool name="Vanishing">
+				false
+			</VarBool>
+		</VarList>
+		<VarList name="Vanishing probability">
+			<VarDouble name="Blue team" minval="" maxval="">
+				0
+			</VarDouble>
+			<VarDouble name="Yellow team" minval="" maxval="">
+				0
+			</VarDouble>
+			<VarDouble name="Ball" minval="" maxval="">
+				0
+			</VarDouble>
+		</VarList>
+	</VarList>
+</VarXML>
