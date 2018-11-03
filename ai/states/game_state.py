@@ -8,9 +8,9 @@ from Util.constant import TeamColor
 from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
 from Util.team_color_service import TeamColorService
+import ai.Algorithm.evaluation_module
 from ai.GameDomainObjects import Ball, Team, Field, RefereeState
 from ai.GameDomainObjects.field import FieldSide
-from config.config import Config
 
 
 class GameState(metaclass=Singleton):
@@ -30,6 +30,8 @@ class GameState(metaclass=Singleton):
 
         self.last_ref_state = None
 
+        # Prevent circular reference
+        self.double_touch_checker = ai.Algorithm.evaluation_module.DoubleTouchDetector()
         #self._evaluation_module = EvaluationModule(self)
 
     def reset(self):
@@ -45,6 +47,8 @@ class GameState(metaclass=Singleton):
             if game_state['balls']:
                 self._ball.update(game_state['balls'][0])
 
+            self.double_touch_checker.update(self)
+
     # FIXME
     def get_player_position(self, player_id, our_team=True):
         player = self.get_player_by_id(player_id, our_team)
@@ -52,10 +56,6 @@ class GameState(metaclass=Singleton):
 
     def clear_roles(self):
         self._role_mapper.clear()
-
-    @property
-    def assigned_roles(self):
-        return {r: p for r, p in self._role_mapper.roles_translation.items() if p is not None}
 
     def map_players_for_strategy(self, strategy_class):
         goalie_id = self.last_ref_state.team_info['ours']['goalie'] if self.last_ref_state is not None else None
@@ -104,6 +104,13 @@ class GameState(metaclass=Singleton):
         return FieldSide.POSITIVE
         # return FieldSide.NEGATIVE if Config()['COACH']['on_negative_side'] else FieldSide.POSITIVE
 
+    @property
+    def ban_players(self):
+        return self.double_touch_checker.ban_players
+
+    @property
+    def assigned_roles(self):
+        return {r: p for r, p in self._role_mapper.roles_translation.items() if p is not None}
     @property
     def role_mapping(self):
         return self._role_mapper.roles_translation

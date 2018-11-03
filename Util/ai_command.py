@@ -55,7 +55,7 @@ class CmdBuilder:
 
     def addKick(self, kick_force: KickForce=KickForce.LOW):
         assert isinstance(kick_force, KickForce), 'kick_force should be a KickForce, not a {}'.format(type(kick_force))
-        self._kick_force = kick_force
+        self._kick_force = KickForce.LOW
         self._kick_type = KickType.DIRECT
         return self
 

@@ -1,10 +1,11 @@
 # Under MIT License, see LICENSE.txt
+import logging
 from typing import List
 
 from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, normalize, closest_point_on_line
 from Util.position import Position
 from Util.role import Role
-from Util.constant import ROBOT_RADIUS, BALL_OUTSIDE_FIELD_BUFFER
+from Util.constant import ROBOT_RADIUS, BALL_OUTSIDE_FIELD_BUFFER, IN_PLAY_MIN_DISTANCE
 from Util.constant import ROBOT_RADIUS
 from ai.Algorithm.path_partitionner import Obstacle
 from ai.GameDomainObjects import Player
@@ -14,40 +15,97 @@ from ai.GameDomainObjects.field import FieldSide
 import numpy as np
 
 
-class Evaluator:
-    def update(self, game_state, evaluation_module):
-        raise NotImplementedError("'update' must be implemented for each evatuator")
+class DoubleTouchDetector(object):
+    def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+        self._state = self._idle
+        self._our_kicker = None
+        self._ball_position_at_start = None
+        self._ban_players = []
+
+    def update(self, game_state):
+        self._state(game_state)
+
+    def enable(self):
+        self.logger.info("Enable")
+        self._state = self._waiting_for_touch
+
+    def disable(self):
+        self.logger.info("Disable")
+        self._state = self._idle
+
+    @property
+    def ban_players(self):
+        return self._ban_players
+
+    def _idle(self, _):
+        self._our_kicker = None
+        self._ball_position_at_start = None
+        self._ban_players = []
+
+    def _waiting_for_touch(self, game_state):
+        for p in find_players_touching_the_ball(game_state):
+            if p in game_state.our_team.available_players.values():
+                self.logger.info(f"Our Player {p} has touch the ball.")
+                self._our_kicker = p
+                self._state = self._waiting_for_kicker_to_kick
+            else: # A enemy touch the ball, no double touch
+                self.logger.info(f"Their Player {p} has touch the ball.")
+                self._state = self._idle
+            return
+
+    def _waiting_for_kicker_to_kick(self, game_state):
+        if self._ball_position_at_start is None:
+            self._ball_position_at_start = game_state.ball.position.copy()
+
+        if (self._ball_position_at_start - game_state.ball.position).norm > IN_PLAY_MIN_DISTANCE:
+            self.logger.info(f"Our kicker {self._our_kicker} has move the ball too much, it can not touch it again.")
+            self._ban_players = [self._our_kicker]
+            self._state = self._waiting_for_another_player_to_touch_ball
+        else: # Another player might touch the ball while we are kicking
+            self._waiting_for_another_player_to_touch_ball(game_state)
+
+    def _waiting_for_another_player_to_touch_ball(self, game_state):
+        for p in find_players_touching_the_ball(game_state):
+            if p != self._our_kicker:
+                self.logger.info(f"Another player {p} has touch the ball, double touch adverted.")
+                self._state = self._idle
+                return
 
 
-def LazyEvaluation(func):
-    def wrapper(self):
-        if func not in self._was_evaluated:
-            self._was_evaluated[func] = func(self)
-        return self._was_evaluated[func]
-    return wrapper
+def find_players_touching_the_ball(game_state):
+    REASONABLE_OFFSET = 30
+    ball_pos = game_state.ball.position
+    players = list(game_state.our_team.available_players.values()) + \
+              list(game_state.enemy_team.available_players.values())
+    for p in players:
+        if (p.position - ball_pos).norm <= ROBOT_RADIUS + REASONABLE_OFFSET:
+            yield p
 
 
-class EvaluationModule:
+# class Evaluator:
+#     def update(self, game_state, evaluation_module):
+#         raise NotImplementedError("'update' must be implemented for each evatuator")
+#
+#
+# def LazyEvaluation(func):
+#     def wrapper(self):
+#         if func not in self._was_evaluated:
+#             self._was_evaluated[func] = func(self)
+#         return self._was_evaluated[func]
+#     return wrapper
 
-    def __init__(self, game_state):
-        self.game_state = game_state
-
-        self._was_evaluated = {}
-
-    def update(self):
-        self._was_evaluated = {}
-
-    @LazyEvaluation
-    def example(self):
-        print("evaluating")
-        return 2+2
-
-    @LazyEvaluation
-    def our_closest_players_to_ball(self):
-        return closest_players_to_point(self.game_state.ball_position, our_team=True)
-
-    def our_closest_player_to_ball(self):
-        return self.our_closest_players_to_ball()[0]
+#
+# class EvaluationModule:
+#
+#     def __init__(self):
+#         self.double_touch = DoubleTouchDetector()
+#
+#     def update(self, game_state):
+#         pass
+#
+#     def
 
 
 class PlayerPosition(object):

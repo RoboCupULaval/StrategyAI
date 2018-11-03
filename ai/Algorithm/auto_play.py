@@ -87,7 +87,14 @@ class SimpleAutoPlay(AutoPlay):
                        SimpleAutoPlayState.INDIRECT_FREE_OFFENSE]
 
     KICKOFF_STATE = [SimpleAutoPlayState.OFFENSE_KICKOFF,
-                       SimpleAutoPlayState.DEFENSE_KICKOFF]
+                     SimpleAutoPlayState.DEFENSE_KICKOFF]
+
+    ENABLE_DOUBLE_TOUCH_DETECTOR_STATE = [RefereeCommand.DIRECT_FREE_US,
+                                          RefereeCommand.INDIRECT_FREE_US,
+                                          RefereeCommand.PREPARE_KICKOFF_US]
+
+    DISABLE_DOUBLE_TOUCH_DETECTOR_STATE = [RefereeCommand.STOP,
+                                           RefereeCommand.HALT]
 
     MINIMUM_NB_PLAYER = 3
 
@@ -183,6 +190,12 @@ class SimpleAutoPlay(AutoPlay):
 
     def _on_ref_state_change(self, ref_cmd: RefereeCommand):
         self.start_state_ball_pos = GameState().ball_position
+
+        if ref_cmd in self.ENABLE_DOUBLE_TOUCH_DETECTOR_STATE:
+            GameState().double_touch_checker.enable()
+        if ref_cmd in self.DISABLE_DOUBLE_TOUCH_DETECTOR_STATE:
+            GameState().double_touch_checker.disable()
+
         return {
             RefereeCommand.HALT: SimpleAutoPlayState.HALT,
 
