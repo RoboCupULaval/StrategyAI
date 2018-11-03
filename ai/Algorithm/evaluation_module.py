@@ -14,6 +14,42 @@ from ai.GameDomainObjects.field import FieldSide
 import numpy as np
 
 
+class Evaluator:
+    def update(self, game_state, evaluation_module):
+        raise NotImplementedError("'update' must be implemented for each evatuator")
+
+
+def LazyEvaluation(func):
+    def wrapper(self):
+        if func not in self._was_evaluated:
+            self._was_evaluated[func] = func(self)
+        return self._was_evaluated[func]
+    return wrapper
+
+
+class EvaluationModule:
+
+    def __init__(self, game_state):
+        self.game_state = game_state
+
+        self._was_evaluated = {}
+
+    def update(self):
+        self._was_evaluated = {}
+
+    @LazyEvaluation
+    def example(self):
+        print("evaluating")
+        return 2+2
+
+    @LazyEvaluation
+    def our_closest_players_to_ball(self):
+        return closest_players_to_point(self.game_state.ball_position, our_team=True)
+
+    def our_closest_player_to_ball(self):
+        return self.our_closest_players_to_ball()[0]
+
+
 class PlayerPosition(object):
     def __init__(self, player, distance):
         self.player = player
@@ -117,6 +153,7 @@ def find_collisions(obstacles: List[Obstacle], obstacles_position: np.ndarray, o
 
 
 # noinspection PyUnusedLocal
+# TODO: Change 'our_team' to 'is_our_team'
 def closest_players_to_point(point: Position, our_team=None):
     # Retourne une liste de tuples (player, distance) en ordre croissant de distance,
     # our_team pour obtenir une liste contenant une équipe en particulier

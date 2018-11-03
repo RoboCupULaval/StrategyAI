@@ -30,6 +30,8 @@ class GameState(metaclass=Singleton):
 
         self.last_ref_state = None
 
+        #self._evaluation_module = EvaluationModule(self)
+
     def reset(self):
         self.__init__()
 
