@@ -3,10 +3,11 @@
 from functools import partial
 from math import acos
 
+from Util.constant import IN_PLAY_MIN_DISTANCE
 from Util.geometry import normalize
 from Util.role import Role
 
-from ai.Algorithm.evaluation_module import closest_players_to_point
+from ai.Algorithm.evaluation_module import closest_players_to_point, closest_players_to_point_except
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
@@ -73,7 +74,7 @@ class FreeKick(Strategy):
                     ball_position).norm > (position - ball_position).norm:
                 self.closest_role = r
 
-        self.has_ball_move = False
+        self.ball_start_position = self.game_state.ball.position
 
     @classmethod
     def required_roles(cls):
@@ -88,17 +89,18 @@ class FreeKick(Strategy):
                 Role.SECOND_DEFENCE]
 
     def is_closest_not_goalkeeper(self, player):
-        if self.game_state.ball.is_mobile():
-            self.has_ball_move = True
-        role = GameState().get_role_by_player_id(player.id)
-        if not self.has_ball_move:
+        ban_players = self.game_state.double_touch_checker.ban_players
+        if player in ban_players:
+            return False
+
+        role = self.game_state.get_role_by_player_id(player.id)
+        if (self.ball_start_position - self.game_state.ball.position).norm <= IN_PLAY_MIN_DISTANCE:
             return role == self.closest_role
 
-        closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
-        if player == closest_players[0].player:
-            return True
-        return closest_players[0].player == self.game_state.get_player_by_role(Role.GOALKEEPER) \
-               and player == closest_players[1].player
+        closests = closest_players_to_point_except(self.game_state.ball.position,
+                                                   except_roles=[Role.GOALKEEPER],
+                                                   except_players=ban_players)
+        return len(closests) > 0 and closests[0].player == player
 
     def is_not_closest(self, player):
         return not self.is_closest_not_goalkeeper(player)

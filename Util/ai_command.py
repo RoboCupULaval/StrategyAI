@@ -50,12 +50,13 @@ class CmdBuilder:
         self._end_speed = end_speed
         self._ball_collision = ball_collision
         self._enable_pathfinder = enable_pathfinder
-        if way_points is not None: self._way_points = way_points
+        if way_points is not None:
+            self._way_points = way_points
         return self
 
     def addKick(self, kick_force: KickForce=KickForce.LOW):
         assert isinstance(kick_force, KickForce), 'kick_force should be a KickForce, not a {}'.format(type(kick_force))
-        self._kick_force = KickForce.LOW
+        self._kick_force = kick_force
         self._kick_type = KickType.DIRECT
         return self
 

@@ -8,8 +8,8 @@ from Util.constant import TeamColor
 from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
 from Util.team_color_service import TeamColorService
-import ai.Algorithm.evaluation_module
-from ai.GameDomainObjects import Ball, Team, Field, RefereeState
+from ai.Algorithm.evaluators.double_touch_detector import DoubleTouchDetector
+from ai.GameDomainObjects import Ball, Team, Field
 from ai.GameDomainObjects.field import FieldSide
 
 
@@ -31,8 +31,7 @@ class GameState(metaclass=Singleton):
         self.last_ref_state = None
 
         # Prevent circular reference
-        self.double_touch_checker = ai.Algorithm.evaluation_module.DoubleTouchDetector()
-        #self._evaluation_module = EvaluationModule(self)
+        self.double_touch_checker = DoubleTouchDetector()
 
     def reset(self):
         self.__init__()

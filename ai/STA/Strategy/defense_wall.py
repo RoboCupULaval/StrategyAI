@@ -147,6 +147,10 @@ class DefenseWall(Strategy):
     def should_go_kick(self, player):
         if self.game_state.field.is_ball_in_our_goal_area():
             return False
+        # Player can go kick
+        ban_players = self.game_state.double_touch_checker.ban_players
+        if player in ban_players:
+            return False
         # If no defenser can exit wall to kick
         for p in self.robots_in_wall_formation:
             if (p.position - self.game_state.ball.position).norm < FETCH_BALL_ZONE_RADIUS:
@@ -154,7 +158,7 @@ class DefenseWall(Strategy):
         # And no attacker is closer
         dist_to_ball = (player.position - self.game_state.ball.position).norm
         for p in self.attackers:
-            if p != player and (p.position - self.game_state.ball.position).norm < dist_to_ball:
+            if p not in ban_players and p != player and (p.position - self.game_state.ball.position).norm < dist_to_ball:
                 return False
         return True
 
