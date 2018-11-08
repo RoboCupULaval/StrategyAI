@@ -5,7 +5,7 @@ from typing import Optional
 
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
-from Util.geometry import compare_angle, normalize, perpendicular
+from Util.geometry import compare_angle, normalize, perpendicular, closest_point_on_line
 
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -65,6 +65,7 @@ class ReceivePass(Tactic):
             self.next_state = self.go_behind_ball
 
         if self._get_distance_from_ball() < HAS_BALL_DISTANCE:
+            print("Distance from ball is ok for pass", self._get_distance_from_ball())
             self.next_state = self.halt
             return self.halt()
         orientation = (self.game_state.ball_position - self.player.position).angle
@@ -74,12 +75,32 @@ class ReceivePass(Tactic):
                                       end_speed=0,
                                       ball_collision=False).addChargeKicker().build()
 
+    # def wait_for_ball(self):
+    #     print("waiting for ball")
+    #     ball_pos = self.game_state.ball.position
+    #     ball_vel = self.game_state.ball.velocity
+    #     col = closest_point_on_line(self.player.position, ball_pos, ball_pos + ball_vel)
+    #     if self._get_distance_from_ball() < HAS_BALL_DISTANCE:
+    #         print("Distance from ball is ok for pass", self._get_distance_from_ball())
+    #         self.next_state = self.halt
+    #         return self.halt()
+    #     if not self.is_ball_going_to_collide(threshold=18):
+    #         self.next_state = self.wait_for_ball
+    #         return CmdBuilder().build()
+    #     orientation = (self.game_state.ball_position - self.player.position).angle
+    #     return CmdBuilder().addMoveTo(Pose(col, orientation),
+    #                                   cruise_speed=3,
+    #                                   end_speed=0,
+    #                                   ball_collision=False).addChargeKicker().build()
+
     def wait_for_ball(self):
+        # print("waiting for ball")
         perp_vec = perpendicular(self.player.position - self.game_state.ball.position)
         component_lateral = perp_vec * np.dot(perp_vec.array, normalize(self.game_state.ball.velocity).array)
         small_segment_len = np.sqrt(1 - component_lateral.norm**2)
         latteral_move = component_lateral / small_segment_len * (self.player.position - self.game_state.ball.position).norm
         if self._get_distance_from_ball() < HAS_BALL_DISTANCE:
+            # print("Distance from ball is ok for pass", self._get_distance_from_ball())
             self.next_state = self.halt
             return self.halt()
         if not self.is_ball_going_to_collide(threshold=18):

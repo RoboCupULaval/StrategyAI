@@ -64,6 +64,7 @@ class Node:
             if vertex.evaluate_condition():
                 # The next node might has already been executed, thus it need a reset
                 vertex.next_node.set_flag(Flags.INIT)
+                print(f"Switching from {self} to {vertex.next_node}")
                 return next_ai_command, vertex.next_node
         return next_ai_command, self
 
@@ -79,7 +80,4 @@ class Node:
         """
         :return: Une représentation du noeud sous forme d'une chaîne de caractères.
         """
-        output_string = "Tactic: " + str(self.tactic) + "/ Vertices: "
-        for vertex in self.vertices:
-            output_string += "\n    " + str(vertex)
-        return output_string
+        return "Tactic: " + str(self.tactic)

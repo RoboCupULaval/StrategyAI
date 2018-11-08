@@ -3,7 +3,7 @@
 from multiprocessing import Manager
 from queue import Empty
 
-from Debug.debug_command_factory import DebugCommandFactory
+from Debug.debug_command_factory import DebugCommandFactory, DEFAULT_DEBUG_TIMEOUT
 
 from Engine.Communication.receiver.referee_receiver import RefereeReceiver
 from Engine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
@@ -77,14 +77,9 @@ class Engine(FrameworkProcess):
         self.tracker.predict(robot_state, self.dt)
 
         self.shared_game_state.update(game_state)
-
-        if any(robot.path for robot in self.controller.robots):
-            self.ui_send_queue.put_nowait(DebugCommandFactory.paths(self.controller.robots))
-
-        self.ui_send_queue.put_nowait(DebugCommandFactory.game_state(blue=game_state['blue'],
-                                                                     yellow=game_state['yellow'],
-                                                                     balls=game_state['balls']))
-
+        
+        self.send_debug(game_state)
+        
     def get_engine_commands(self):
         try:
             engine_cmds = self.ai_queue.get_nowait()
@@ -100,3 +95,15 @@ class Engine(FrameworkProcess):
                                         self.referee_recver.is_alive()))
 
         return borked_process_not_found and super().is_alive()
+
+    def send_debug(self, game_state):
+        # Send debug at the DEFAULT_DEBUG_TIMEOUT frame rate
+        ratio = int(DEFAULT_DEBUG_TIMEOUT * self.fps)
+        if ratio > 1 and self.frame_count % ratio == 0:
+            if any(robot.path for robot in self.controller.robots):
+                self.ui_send_queue.put_nowait(DebugCommandFactory.paths(self.controller.robots))
+
+            self.ui_send_queue.put_nowait(DebugCommandFactory.game_state(blue=game_state['blue'],
+                                                                     yellow=game_state['yellow'],
+                                                                     balls=game_state['balls']))
+

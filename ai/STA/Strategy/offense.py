@@ -46,13 +46,13 @@ class Offense(Strategy):
                 player_is_not_receiving_pass = partial(self.ball_not_going_toward_player, player)
                 player_has_received_ball = partial(self.has_received, player)
 
-                node_pass.connect_to(node_go_kick, when=player_is_closest)
                 node_pass.connect_to(node_wait_for_pass, when=player_is_receiving_pass)
+                node_pass.connect_to(node_go_kick, when=player_is_closest)
                 node_wait_for_pass.connect_to(node_go_kick, when=player_has_received_ball)
                 node_wait_for_pass.connect_to(node_pass, when=player_is_not_receiving_pass)
                 node_go_kick.connect_to(node_pass, when=player_is_not_closest)
+                node_go_kick.connect_to(node_wait_for_pass, when=player_is_receiving_pass)
                 node_go_kick.connect_to(node_go_kick, when=player_has_kicked)
-
 
     @classmethod
     def required_roles(cls):
@@ -88,12 +88,12 @@ class Offense(Strategy):
 
     def ball_going_toward_player(self, player):
         role = GameState().get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'PositionForPass' or \
-                self.roles_graph[role].current_tactic_name == 'ReceivePass':
-            if self.game_state.ball.is_mobile(50): # to avoid division by zero and unstable ball_directions
-                ball_approach_angle = np.arccos(np.dot(normalize(player.position - self.game_state.ball.position).array,
-                              normalize(self.game_state.ball.velocity).array)) * 180 / np.pi
-                return ball_approach_angle > 25
+        # if self.roles_graph[role].current_tactic_name == 'PositionForPass' or \
+        #         self.roles_graph[role].current_tactic_name == 'ReceivePass':
+        if self.game_state.ball.is_mobile(50):  # to avoid division by zero and unstable ball_directions
+            ball_approach_angle = np.arccos(np.dot(normalize(player.position - self.game_state.ball.position).array,
+                          normalize(self.game_state.ball.velocity).array)) * 180 / np.pi
+            return ball_approach_angle > 25
         return False
 
     def ball_not_going_toward_player(self, player):
