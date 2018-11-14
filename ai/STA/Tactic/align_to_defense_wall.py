@@ -80,8 +80,8 @@ class AlignToDefenseWall(Tactic):
 
         # The penalty zone used to be a circle and thus really easy to handle, but now it's a rectangle...
         # It easier to first create the smallest circle that fit the rectangle.
-        min_radius_over_penality_zone = ROBOT_RADIUS + (
-                    self.game_state.field.our_goal_area.upper_left - self.game_state.field.our_goal).norm
+        min_radius_over_penality_zone = ROBOT_RADIUS + \
+            (self.game_state.field.our_goal_area.upper_left - self.game_state.field.our_goal).norm
         object_to_block_to_center_formation_dist = min(
             vec_object_to_goal_line_bisect.norm - min_radius_over_penality_zone,
             object_to_center_formation_dist)
