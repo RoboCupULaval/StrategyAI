@@ -92,7 +92,7 @@ class GoKick(Tactic):
         if self.get_alignment_with_ball_and_target() < 25 \
                 and compare_angle(self.player.pose.orientation,
                                   required_orientation,
-                                  abs_tol=max(0.05, 0.05 * dist_from_ball/1000)):
+                                  abs_tol=max(0.10, 0.10 * dist_from_ball/1000)):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
