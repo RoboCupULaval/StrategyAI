@@ -8,9 +8,8 @@ from Util.constant import TeamColor
 from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
 from Util.team_color_service import TeamColorService
-from ai.GameDomainObjects import Ball, Team, Field, RefereeState
+from ai.GameDomainObjects import Ball, Team, Field
 from ai.GameDomainObjects.field import FieldSide
-from config.config import Config
 
 
 class GameState(metaclass=Singleton):

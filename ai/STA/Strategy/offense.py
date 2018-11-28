@@ -1,20 +1,17 @@
 # Under MIT license, see LICENSE.txt
 from functools import partial
 
-from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL
-from Util.geometry import Area, normalize
-from Util.role import Role
+import numpy as np
 
-from ai.Algorithm.evaluation_module import closest_player_to_point, closest_players_to_point
+from Util.geometry import normalize
+from Util.role import Role
+from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
 from ai.STA.Tactic.tactic_constants import Flags
-import numpy as np
-
-
 # noinspection PyMethodMayBeStatic,PyMethodMayBeStatic
 from ai.states.game_state import GameState
 

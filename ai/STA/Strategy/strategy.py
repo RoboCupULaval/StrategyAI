@@ -1,11 +1,10 @@
 # Under MIT license, see LICENSE.txt
 
+import logging
 from abc import ABCMeta
 from typing import List, Tuple, Callable, Dict
 
-import logging
-
-from Util import AICommand, Pose
+from Util import AICommand
 from Util.role import Role
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node

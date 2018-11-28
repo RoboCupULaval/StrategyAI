@@ -1,21 +1,20 @@
 # Under MIT licence, see LICENCE.txt
 
-import math as m
 import time
-from typing import List, Union
+from typing import List
 
 import numpy as np
 
-from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
+from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce
 from Util.geometry import compare_angle, normalize
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
-from ai.states.game_state import GameState
 from ai.executors.pathfinder_module import WayPoint
+from ai.states.game_state import GameState
 
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
