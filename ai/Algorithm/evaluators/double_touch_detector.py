@@ -8,8 +8,12 @@ def find_players_touching_the_ball(game_state):
     ball_pos = game_state.ball.position
     players = list(game_state.our_team.available_players.values()) + \
               list(game_state.enemy_team.available_players.values())
+
+    # We might never detect the touching player, but we might detect the ball acceleration
+    # TODO check behind the ball, instead of in a circle
+    offset = REASONABLE_OFFSET * (1 + game_state.ball.velocity.norm / 100)
     for p in players:
-        if (p.position - ball_pos).norm <= ROBOT_RADIUS + REASONABLE_OFFSET:
+        if (p.position - ball_pos).norm <= ROBOT_RADIUS + offset:
             yield p
 
 

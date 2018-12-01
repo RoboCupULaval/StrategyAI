@@ -75,7 +75,8 @@ class Offense(Strategy):
                                                    except_roles=[Role.GOALKEEPER],
                                                    except_players=ban_players)
         if len(closests) > 0 :
-            print(f"I am Player {player}, {closests[0].player} is closest")
+            print(f"I am Player {player}, {closests[0].player} is closest. Ball is at {self.game_state.ball_position}"
+                  f" {self.game_state.ball.velocity.norm:8.3f}")
         return len(closests) > 0 and closests[0].player == player
 
     def is_not_closest(self, player):

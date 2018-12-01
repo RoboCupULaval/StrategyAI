@@ -51,7 +51,7 @@ class ReceivePass(Tactic):
             self.next_state = self.halt
             return Idle
 
-        # Find the point where the ball will go
+        # Find the point where the ball will leave the field
         ball_trajectory = Line(ball.position, ball.position + ball.velocity)
         intersection_with_field = self.game_state.field.area.intersect_with_line(ball_trajectory)
 
@@ -71,7 +71,13 @@ class ReceivePass(Tactic):
 
         intersect_pts = closest_point_on_segment(self.player.position,
                                                  ball.position, end_segment)
-        return MoveTo(Pose(intersect_pts, self.player.pose.orientation),  # It's a bit faster, to keep our orientation
+
+        if (self.player.position - intersect_pts).norm < ROBOT_RADIUS:
+            best_orientation = (ball.position - end_segment).angle
+        else:
+            # We move a bit faster, if we keep our orientation
+            best_orientation = self.player.pose.orientation
+        return MoveTo(Pose(intersect_pts, best_orientation),
                       cruise_speed=3,
                       end_speed=0,
                       ball_collision=False)
