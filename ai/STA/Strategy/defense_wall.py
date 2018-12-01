@@ -8,7 +8,8 @@ from Util.position import Position
 from Util.pose import Pose
 import numpy as np
 
-from ai.Algorithm.evaluation_module import closest_players_to_point
+from ai.Algorithm.evaluation_module import closest_players_to_point, ball_going_toward_player, \
+    ball_not_going_toward_player
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall, FETCH_BALL_ZONE_RADIUS
 from ai.STA.Tactic.go_kick import GoKick
@@ -61,8 +62,8 @@ class DefenseWall(Strategy):
                 attacker_should_go_kick = partial(self.should_go_kick, player)
                 attacker_should_not_go_kick = partial(self.should_not_go_kick, player)
                 attacker_has_kicked = partial(self.has_kicked, role)
-                player_is_receiving_pass = partial(self.ball_going_toward_player, player)
-                player_is_not_receiving_pass = partial(self.ball_not_going_toward_player, player)
+                player_is_receiving_pass = partial(ball_going_toward_player, game_state, player)
+                player_is_not_receiving_pass = partial(ball_not_going_toward_player, game_state, player)
                 player_has_received_ball = partial(self.has_received, player)
 
                 node_position_pass.connect_to(node_wait_for_pass, when=player_is_receiving_pass)
@@ -89,8 +90,8 @@ class DefenseWall(Strategy):
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=their_goal))
                 node_wait_for_pass = self.create_node(role, ReceivePass(self.game_state, player))
 
-                player_is_receiving_pass = partial(self.ball_going_toward_player, player)
-                player_is_not_receiving_pass = partial(self.ball_not_going_toward_player, player)
+                player_is_receiving_pass = partial(ball_going_toward_player, game_state, player)
+                player_is_not_receiving_pass = partial(ball_not_going_toward_player, game_state, player)
                 player_has_received_ball = partial(self.has_received, player)
                 player_has_kicked = partial(self.has_kicked, role)
 
@@ -119,8 +120,8 @@ class DefenseWall(Strategy):
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=their_goal))
                 node_wait_for_pass = self.create_node(role, ReceivePass(self.game_state, player))
 
-                player_is_receiving_pass = partial(self.ball_going_toward_player, player)
-                player_is_not_receiving_pass = partial(self.ball_not_going_toward_player, player)
+                player_is_receiving_pass = partial(ball_going_toward_player, game_state, player)
+                player_is_not_receiving_pass = partial(ball_not_going_toward_player, game_state, player)
                 player_has_received_ball = partial(self.has_received, player)
                 player_has_kicked = partial(self.has_kicked, role)
 
@@ -220,19 +221,6 @@ class DefenseWall(Strategy):
             cover_to_formation = {cover: [cover] for cover in self.robots_in_cover_formation}
 
         return cover_to_coveree, cover_to_formation
-
-
-    def ball_going_toward_player(self, player):
-        role = GameState().get_role_by_player_id(player.id)
-        # if self.roles_graph[role].current_tactic_name == 'PositionForPass' or self.roles_graph[role].current_tactic_name == 'ReceivePass':
-        if self.game_state.ball.is_mobile(50): # to avoid division by zero and unstable ball_directions
-            ball_approach_angle = np.arccos(np.dot(normalize(player.position - self.game_state.ball.position).array,
-                          normalize(self.game_state.ball.velocity).array)) * 180 / np.pi
-            return ball_approach_angle > 25
-        return False
-
-    def ball_not_going_toward_player(self, player):
-        return not self.ball_going_toward_player(player)
 
     def has_received(self, player):
         role = GameState().get_role_by_player_id(player.id)

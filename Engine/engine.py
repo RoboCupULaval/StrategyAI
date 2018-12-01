@@ -98,12 +98,12 @@ class Engine(FrameworkProcess):
 
     def send_debug(self, game_state):
         # Send debug at the DEFAULT_DEBUG_TIMEOUT frame rate
-        ratio = int(DEFAULT_DEBUG_TIMEOUT * self.fps)
-        if ratio > 1 and self.frame_count % ratio == 0:
-            if any(robot.path for robot in self.controller.robots):
-                self.ui_send_queue.put_nowait(DebugCommandFactory.paths(self.controller.robots))
+        # ratio = int(DEFAULT_DEBUG_TIMEOUT * self.fps)
+        # if ratio > 1 and self.frame_count % ratio == 0:
+        if any(robot.path for robot in self.controller.robots):
+            self.ui_send_queue.put_nowait(DebugCommandFactory.paths(self.controller.robots))
 
-            self.ui_send_queue.put_nowait(DebugCommandFactory.game_state(blue=game_state['blue'],
+        self.ui_send_queue.put_nowait(DebugCommandFactory.game_state(blue=game_state['blue'],
                                                                      yellow=game_state['yellow'],
                                                                      balls=game_state['balls']))
 

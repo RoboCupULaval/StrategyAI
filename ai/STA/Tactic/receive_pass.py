@@ -4,8 +4,9 @@ import numpy as np
 from typing import Optional
 
 from Util import Pose, Position
-from Util.ai_command import CmdBuilder, Idle
-from Util.geometry import compare_angle, normalize, perpendicular, closest_point_on_line
+from Util.ai_command import CmdBuilder, Idle, MoveTo
+from Util.constant import ROBOT_RADIUS
+from Util.geometry import compare_angle, normalize, perpendicular, closest_point_on_line, Line, closest_point_on_segment
 
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
@@ -19,7 +20,6 @@ HAS_BALL_DISTANCE = 130
 KICK_SUCCEED_THRESHOLD = 300
 
 
-# noinspection PyArgumentList,PyUnresolvedReferences,PyUnresolvedReferences
 class ReceivePass(Tactic):
 
     def __init__(self, game_state: GameState, player: Player, target: Optional[Pose]=None):
@@ -30,15 +30,51 @@ class ReceivePass(Tactic):
 
     def initialize(self):
         self.status_flag = Flags.WIP
-        if self.is_ball_going_to_collide():
-            if self.game_state.ball.velocity.norm < 100 and False:
-                self.next_state = self.grab_ball
-            else:
-                self.next_state = self.wait_for_ball
-        else:
-            self.next_state = self.go_behind_ball
+        self.next_state = self.intercept
 
         return Idle
+
+    def intercept(self):
+        ball = self.game_state.ball
+        if self.game_state.field.is_outside_wall_limit(ball.position):
+            self.logger.info("The ball has leave field")
+            self.next_state = self.halt
+            return Idle
+
+        if self.game_state.ball.is_immobile():
+            self.logger.info("The ball is not moving, succes?")
+            self.next_state = self.halt
+            return Idle
+
+        if (ball.position - self.player.position).norm < ROBOT_RADIUS + 50:
+            self.logger.info("The ball about to touch us, succes?")
+            self.next_state = self.halt
+            return Idle
+
+        # Find the point where the ball will go
+        ball_trajectory = Line(ball.position, ball.position + ball.velocity)
+        intersection_with_field = self.game_state.field.area.intersect_with_line(ball_trajectory)
+
+        where_ball_enter_leave_field = None
+        for inter in intersection_with_field:
+            # If this is the intersection that have the same direction as ball.velocity
+            if (inter - ball.position).dot(ball.velocity) > 0:
+                where_ball_enter_leave_field = inter
+                break
+
+        if where_ball_enter_leave_field is None:
+            raise RuntimeError("How did I get here?")
+
+        # The robot can intercepts the ball by leaving the field, thus we must add a ROBOT_RADIUS
+        ball_to_leave_field = Line(ball.position, where_ball_enter_leave_field)
+        end_segment = where_ball_enter_leave_field + ball_to_leave_field.direction * ROBOT_RADIUS
+
+        intersect_pts = closest_point_on_segment(self.player.position,
+                                                 ball.position, end_segment)
+        return MoveTo(Pose(intersect_pts, self.player.pose.orientation),  # It's a bit faster, to keep our orientation
+                      cruise_speed=3,
+                      end_speed=0,
+                      ball_collision=False)
 
     def go_behind_ball(self):
         orientation = (self.game_state.ball_position - self.player.position).angle
@@ -65,7 +101,6 @@ class ReceivePass(Tactic):
             self.next_state = self.go_behind_ball
 
         if self._get_distance_from_ball() < HAS_BALL_DISTANCE:
-            print("Distance from ball is ok for pass", self._get_distance_from_ball())
             self.next_state = self.halt
             return self.halt()
         orientation = (self.game_state.ball_position - self.player.position).angle
@@ -113,10 +148,7 @@ class ReceivePass(Tactic):
                                       ball_collision=False).addChargeKicker().build()
 
     def halt(self):
-        if self.status_flag == Flags.INIT:
-            self.next_state = self.initialize
-        else:
-            self.status_flag = Flags.SUCCESS
+        self.status_flag = Flags.SUCCESS
         return Idle
 
     def _get_distance_from_ball(self):

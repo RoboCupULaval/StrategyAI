@@ -21,7 +21,7 @@ class PlayerPosition(object):
         self.distance = distance
 
 
-def player_with_ball(min_dist_from_ball=1.2*ROBOT_RADIUS, our_team=None):
+def player_with_ball(min_dist_from_ball=1.2 * ROBOT_RADIUS, our_team=None):
     # Retourne le joueur qui possède la balle, NONE si balle libre
     closest_player = closest_player_to_point(GameState().ball_position, our_team)
     if closest_player.distance < min_dist_from_ball:
@@ -49,7 +49,8 @@ def player_covered_from_goal(player: Player):
                                                 player.position, GameState().field.their_goal_line.p2)
     vec_player_to_goal = GameState().field.their_goal - player.position
 
-    our_team = [other_player for other_player in GameState().our_team.available_players.values() if other_player is not player]
+    our_team = [other_player for other_player in GameState().our_team.available_players.values() if
+                other_player is not player]
     enemy_team = [other_player for other_player in GameState().enemy_team.available_players.values()]
     pertinent_collisions = []
     for other_player in our_team + enemy_team:
@@ -66,7 +67,7 @@ def player_covered_from_goal(player: Player):
     results = []
     for i in range(0, 15 + 1):  # discretisation de la ligne de but
         goal_point = GameState().field.their_goal_line.p1 + GameState().field.their_goal_line.direction * \
-                     (GameState().field.their_goal_line.length * i / 15)
+                                                            (GameState().field.their_goal_line.length * i / 15)
         is_colliding = is_path_colliding(pertinent_collisions, pertinent_collisions_positions,
                                          pertinent_collisions_avoid_radius, player.position.array, goal_point.array)
         results.append((is_colliding, goal_point))
@@ -74,11 +75,10 @@ def player_covered_from_goal(player: Player):
 
     if max_len_seg == 0 and indexend == 0:
         return None
-    return results[int(indexend-1 - np.math.ceil(max_len_seg / 2))][1]
+    return results[int(indexend - 1 - np.math.ceil(max_len_seg / 2))][1]
 
 
 def find_max_consecutive_bool(results):
-
     count = 0
     max_len_seg = 0  # longueur du segment
     indexend = 0
@@ -145,7 +145,7 @@ def closest_player_to_point(point: Position, our_team=None):
 
 def closest_players_to_point_except(point: Position, except_roles=[], except_players=[]):
     closests = closest_players_to_point(point, our_team=True)
-    ban_players = except_players
+    ban_players = except_players.copy()
     ban_players += [GameState().get_player_by_role(r) for r in except_roles]
     return [player_dist for player_dist in closests if player_dist.player not in ban_players]
 
@@ -153,7 +153,7 @@ def closest_players_to_point_except(point: Position, except_roles=[], except_pla
 # noinspection PyUnresolvedReferences
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
-    if GameState().our_side == FieldSide.POSITIVE: # POSITIVE
+    if GameState().our_side == FieldSide.POSITIVE:  # POSITIVE
         return GameState().ball_position.x > 0
     else:
         return GameState().ball_position.x < 0
@@ -222,9 +222,21 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
     for j in GameState().enemy_team.available_players.values():
         # Obstacle : les players ennemis
         scores *= trajectory_score(GameState().ball_position, targets, j.pose.position)
-        #print(scores)
-        #print(scores_temp)
+        # print(scores)
+        # print(scores_temp)
     return scores
+
+
+def ball_going_toward_player(game_state, player):
+    if game_state.ball.is_mobile(50):  # to avoid division by zero and unstable ball_directions
+        ball_approach_angle = np.arccos(np.dot(normalize(player.position - game_state.ball.position).array,
+                                               normalize(game_state.ball.velocity).array)) * 180 / np.pi
+        return ball_approach_angle < 25
+    return False
+
+
+def ball_not_going_toward_player(game_state, player):
+    return not ball_going_toward_player(game_state, player)
 
 
 # noinspection PyPep8Naming
@@ -248,7 +260,7 @@ def trajectory_score(pointA, pointsB, obstacle):
     AB = pointsB - pointA
     AO = obstacle - pointA
     # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
-    normsAB = np.sqrt(np.transpose((AB*AB)).sum(axis=0))
+    normsAB = np.sqrt(np.transpose((AB * AB)).sum(axis=0))
     normsAC = np.divide(np.dot(AB, AO), normsAB)
     normsOC = np.sqrt(np.abs(np.linalg.norm(AO) ** 2 - normsAC ** 2))
     if scores.size == 1:
@@ -284,7 +296,7 @@ def best_position_in_region(player, A, B):
     positions = np.stack(positions)
     # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
     dists_from_ball_raw = np.sqrt(((positions - ball_position.array) *
-                               (positions - ball_position.array)).sum(axis=1))
+                                   (positions - ball_position.array)).sum(axis=1))
     positions = positions[dists_from_ball_raw > 1000, :]
     dists_from_ball = dists_from_ball_raw[dists_from_ball_raw > 1000]
     scores = line_of_sight_clearance_ball(player, positions, dists_from_ball)
@@ -313,7 +325,7 @@ def get_away_from_trajectory(position, start, end, min_distance):
         dist = position - point
     except ZeroDivisionError:
         point = position
-        dist = perpendicular(end - start) * min_distance/2
+        dist = perpendicular(end - start) * min_distance / 2
     if dist.norm < min_distance:
         return point - dist.norm * min_distance
     else:
