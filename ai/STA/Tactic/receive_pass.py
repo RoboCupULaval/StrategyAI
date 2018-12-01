@@ -14,10 +14,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
 
-GO_BEHIND_SPACING = 250
-GRAB_BALL_SPACING = 100
-HAS_BALL_DISTANCE = 130
-KICK_SUCCEED_THRESHOLD = 300
+SAFE_DISTANCE_TO_SWITCH_TO_GO_KICK = ROBOT_RADIUS + 150
 
 
 class ReceivePass(Tactic):
@@ -31,24 +28,27 @@ class ReceivePass(Tactic):
     def initialize(self):
         self.status_flag = Flags.WIP
         self.next_state = self.intercept
+        return Idle
 
+    def halt(self):
+        self.status_flag = Flags.SUCCESS
         return Idle
 
     def intercept(self):
         ball = self.game_state.ball
         if self.game_state.field.is_outside_wall_limit(ball.position):
             self.logger.info("The ball has leave field")
-            self.next_state = self.halt
+            self.next_state = self.go_away_from_ball
             return Idle
 
         if self.game_state.ball.is_immobile():
-            self.logger.info("The ball is not moving, succes?")
-            self.next_state = self.halt
+            self.logger.info("The ball is not moving, success?")
+            self.next_state = self.go_away_from_ball
             return Idle
 
         if (ball.position - self.player.position).norm < ROBOT_RADIUS + 50:
-            self.logger.info("The ball about to touch us, succes?")
-            self.next_state = self.halt
+            self.logger.info("The ball about to touch us, success?")
+            self.next_state = self.go_away_from_ball
             return Idle
 
         # Find the point where the ball will leave the field
@@ -63,7 +63,8 @@ class ReceivePass(Tactic):
                 break
 
         if where_ball_enter_leave_field is None:
-            raise RuntimeError("How did I get here?")
+            self.logger.info("The ball is somehow inside and outside the field")
+            self.next_state = self.halt
 
         # The robot can intercepts the ball by leaving the field, thus we must add a ROBOT_RADIUS
         ball_to_leave_field = Line(ball.position, where_ball_enter_leave_field)
@@ -82,101 +83,25 @@ class ReceivePass(Tactic):
                       end_speed=0,
                       ball_collision=False)
 
-    def go_behind_ball(self):
-        orientation = (self.game_state.ball_position - self.player.position).angle
-        ball_speed = self.game_state.ball.velocity.norm
-        ball_speed_modifier = (ball_speed/1000 + 1)
-        effective_ball_spacing = GRAB_BALL_SPACING * 3 * ball_speed_modifier
-        distance_behind = self.get_destination_behind_ball(effective_ball_spacing)
-        dist_from_ball = (self.player.position - self.game_state.ball_position).norm
+    def go_away_from_ball(self):
+        """
+        If the ball have been intersect, we should switch directly to go_kick.
+        However go_kick does not like been initiated near the ball and will immediately kick it.
+        To prevent this we do a simple go_behind_ball with the kicker off BEFORE switching to go_kick
+        """
+        ball_position = self.game_state.ball.position
+        player_to_ball = ball_position - self.player.position
+        if player_to_ball.norm > SAFE_DISTANCE_TO_SWITCH_TO_GO_KICK:
+            self.next_state = self.halt
+            return self.next_state()
 
-        if self.is_ball_going_to_collide(threshold=18) \
-                and compare_angle(self.player.pose.orientation, orientation,
-                                  abs_tol=max(0.1, 0.1 * dist_from_ball/100)):
-            self.next_state = self.wait_for_ball
-        else:
-            self.next_state = self.go_behind_ball
-        return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
+        target = self.game_state.field.their_goal  # We want a general orientation, go_kick will do the alignment
+        away_position = normalize(ball_position - target) * SAFE_DISTANCE_TO_SWITCH_TO_GO_KICK + ball_position
+        orientation = (target - self.game_state.ball.position).angle
+
+        return CmdBuilder().addMoveTo(Pose(away_position, orientation),
                                       cruise_speed=3,
                                       end_speed=0,
                                       ball_collision=True)\
                            .addChargeKicker().build()
 
-    def grab_ball(self):
-        if not self.is_ball_going_to_collide(threshold=18):
-            self.next_state = self.go_behind_ball
-
-        if self._get_distance_from_ball() < HAS_BALL_DISTANCE:
-            self.next_state = self.halt
-            return self.halt()
-        orientation = (self.game_state.ball_position - self.player.position).angle
-        distance_behind = self.get_destination_behind_ball(GRAB_BALL_SPACING)
-        return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
-                                      cruise_speed=3,
-                                      end_speed=0,
-                                      ball_collision=False).addChargeKicker().build()
-
-    # def wait_for_ball(self):
-    #     print("waiting for ball")
-    #     ball_pos = self.game_state.ball.position
-    #     ball_vel = self.game_state.ball.velocity
-    #     col = closest_point_on_line(self.player.position, ball_pos, ball_pos + ball_vel)
-    #     if self._get_distance_from_ball() < HAS_BALL_DISTANCE:
-    #         print("Distance from ball is ok for pass", self._get_distance_from_ball())
-    #         self.next_state = self.halt
-    #         return self.halt()
-    #     if not self.is_ball_going_to_collide(threshold=18):
-    #         self.next_state = self.wait_for_ball
-    #         return CmdBuilder().build()
-    #     orientation = (self.game_state.ball_position - self.player.position).angle
-    #     return CmdBuilder().addMoveTo(Pose(col, orientation),
-    #                                   cruise_speed=3,
-    #                                   end_speed=0,
-    #                                   ball_collision=False).addChargeKicker().build()
-
-    def wait_for_ball(self):
-        # print("waiting for ball")
-        perp_vec = perpendicular(self.player.position - self.game_state.ball.position)
-        component_lateral = perp_vec * np.dot(perp_vec.array, normalize(self.game_state.ball.velocity).array)
-        small_segment_len = np.sqrt(1 - component_lateral.norm**2)
-        latteral_move = component_lateral / small_segment_len * (self.player.position - self.game_state.ball.position).norm
-        if self._get_distance_from_ball() < HAS_BALL_DISTANCE:
-            # print("Distance from ball is ok for pass", self._get_distance_from_ball())
-            self.next_state = self.halt
-            return self.halt()
-        if not self.is_ball_going_to_collide(threshold=18):
-            self.next_state = self.wait_for_ball
-            return CmdBuilder().build()
-        orientation = (self.game_state.ball_position - self.player.position).angle
-        return CmdBuilder().addMoveTo(Pose(self.player.position + latteral_move, orientation),
-                                      cruise_speed=3,
-                                      end_speed=0,
-                                      ball_collision=False).addChargeKicker().build()
-
-    def halt(self):
-        self.status_flag = Flags.SUCCESS
-        return Idle
-
-    def _get_distance_from_ball(self):
-        return (self.player.pose.position - self.game_state.ball_position).norm
-
-    def get_destination_behind_ball(self, ball_spacing, velocity=True, velocity_offset=25) -> Position:
-        """
-         Compute the point which is at ball_spacing mm behind the ball from the target.
-        """
-
-        dir_ball_to_target = normalize(self.game_state.ball.velocity)
-
-        position_behind = self.game_state.ball.position - dir_ball_to_target * ball_spacing
-
-        if velocity:
-            position_behind += (self.game_state.ball.velocity - (normalize(self.game_state.ball.velocity) *
-                                                                 np.dot(dir_ball_to_target.array,
-                                                                        self.game_state.ball.velocity.array))) / velocity_offset
-
-        return position_behind
-
-    def is_ball_going_to_collide(self, threshold=18): # threshold in degrees
-        ball_approach_angle = np.arccos(np.dot(normalize(self.player.position - self.game_state.ball.position).array,
-                                               normalize(self.game_state.ball.velocity).array)) * 180 / np.pi
-        return ball_approach_angle > threshold

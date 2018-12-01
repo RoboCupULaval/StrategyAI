@@ -91,9 +91,9 @@ class GoKick(Tactic):
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
 
 
-        self.logger.info(f"In go_behind_ball Two condidions: alig = {self.get_alignment_with_ball_and_target() < 25} "
-                         f"angle = {compare_angle(self.player.pose.orientation, required_orientation, abs_tol=max(0.05, 0.05 * dist_from_ball/1000))} "
-                         f"target = {position_behind_ball}")
+        # self.logger.info(f"In go_behind_ball Two condidions: alig = {self.get_alignment_with_ball_and_target() < 25} "
+        #                  f"angle = {compare_angle(self.player.pose.orientation, required_orientation, abs_tol=max(0.05, 0.05 * dist_from_ball/1000))} "
+        #                  f"target = {position_behind_ball}")
         if self.get_alignment_with_ball_and_target() < 25 \
                 and compare_angle(self.player.pose.orientation,
                                   required_orientation,
@@ -107,7 +107,6 @@ class GoKick(Tactic):
                            .addChargeKicker().addKick(self.kick_force).build()
 
     def grab_ball(self):
-        self.logger.info("In grab_ball")
         if self.auto_update_target:
             self._find_best_passing_option()
         if self.get_alignment_with_ball_and_target() > 45:
@@ -125,7 +124,6 @@ class GoKick(Tactic):
                            .build()
 
     def kick(self):
-        self.logger.info("In kick")
         if self.auto_update_target:
             self._find_best_passing_option()
         if self.get_alignment_with_ball_and_target() > 45:
@@ -142,7 +140,6 @@ class GoKick(Tactic):
                                         .addForceDribbler().build()
 
     def validate_kick(self):
-        self.logger.info("In validate_kick")
         if self.game_state.ball.is_moving_fast() or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.halt
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
