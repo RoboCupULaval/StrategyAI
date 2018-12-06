@@ -14,7 +14,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
 
-SAFE_DISTANCE_TO_SWITCH_TO_GO_KICK = ROBOT_RADIUS + 150
+SAFE_DISTANCE_TO_SWITCH_TO_GO_KICK = ROBOT_RADIUS + 200
 
 
 class ReceivePass(Tactic):
