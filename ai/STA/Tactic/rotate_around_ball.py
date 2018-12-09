@@ -6,7 +6,7 @@ from typing import Optional, List
 import numpy as np
 
 from Util import Pose, Position
-from Util.ai_command import Idle, CmdBuilder
+from Util.ai_command import CmdBuilder
 from Util.geometry import compare_angle, find_signed_delta_angle
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic

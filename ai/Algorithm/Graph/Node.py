@@ -66,7 +66,8 @@ class Node:
             if vertex.evaluate_condition():
                 # The next node might has already been executed, thus it need a reset
                 vertex.next_node.set_flag(Flags.INIT)
-                print(f"{time.time()} Robot {self.tactic.player} Switching from {self} to {vertex.next_node}")
+                # self.logger.debug(f"{time.time()} Robot {self.tactic.player} "
+                #                   f"Switching from {self} to {vertex.next_node}")
                 return next_ai_command, vertex.next_node
         return next_ai_command, self
 

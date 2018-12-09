@@ -1,28 +1,24 @@
 # Under MIT licence, see LICENCE.txt
-from unittest.suite import _DebugResult
-
-import numpy as np
-
-from Debug.debug_command_factory import DebugCommandFactory
-from ai.Algorithm.evaluation_module import player_with_ball, player_pointing_toward_point, \
-    player_pointing_toward_segment, closest_players_to_point
 
 __author__ = 'RoboCupULaval'
 
 from typing import List
 
+import numpy as np
+
+from Debug.debug_command_factory import DebugCommandFactory
 from Util import Pose, Position
 from Util.ai_command import MoveTo, Idle
 from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL, ROBOT_DIAMETER
 from Util.geometry import intersection_line_and_circle, intersection_between_lines, \
     closest_point_on_segment, find_bisector_of_triangle, Area, Line
+from ai.Algorithm.evaluation_module import player_with_ball, player_pointing_toward_segment, closest_players_to_point
 from ai.GameDomainObjects import Player
-
 from ai.STA.Tactic.go_kick import GRAB_BALL_SPACING, GoKick
-
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
 
+DANGEROUS_ENEMY_MIN_DISTANCE = 500
 
 
 class GoalKeeper(Tactic):
@@ -177,6 +173,5 @@ class GoalKeeper(Tactic):
         closest = closest_players_to_point(self.game_state.ball_position, our_team=False)
         if len(closest) == 0:
             return True
-        DANGEROUS_ENEMY_MIN_DISTANCE = 500
         return closest[0].distance > DANGEROUS_ENEMY_MIN_DISTANCE
 

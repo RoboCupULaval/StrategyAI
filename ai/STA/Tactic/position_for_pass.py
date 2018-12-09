@@ -1,16 +1,12 @@
 # Under MIT licence, see LICENCE.txt
-import numpy as np
 import time
 from typing import List, Optional
 
-from Debug.debug_command_factory import DebugCommandFactory, VIOLET, RED
 from Util import Pose, Position
-from Util.ai_command import CmdBuilder, MoveTo
+from Util.ai_command import MoveTo
 from Util.geometry import Area, Line, clamp, normalize
 from Util.role import Role
-from ai.Algorithm.evaluation_module import best_position_in_region
 from ai.GameDomainObjects import Player
-from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
 

@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Dict, Union
 
 from Util import Position, Pose
-from Util.constant import ROBOT_RADIUS, REASONABLE_OFFSET, KEEPOUT_DISTANCE_FROM_GOAL, INDIRECT_KICK_OFFSET
+from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL, INDIRECT_KICK_OFFSET
 from Util.geometry import Area, Line
 from ai.GameDomainObjects import Ball
 

@@ -1,6 +1,5 @@
-from typing import Sequence, List
-
 from collections import MutableSequence
+from typing import Sequence
 
 from numpy.core.multiarray import ndarray
 

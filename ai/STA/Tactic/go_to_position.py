@@ -2,8 +2,7 @@
 
 from typing import List
 
-from Debug.debug_command_factory import DebugCommandFactory, VIOLET
-from Util import Pose, Position
+from Util import Pose
 from Util.ai_command import CmdBuilder
 from Util.constant import POSITION_DEADZONE, ANGLE_TO_HALT
 from Util.geometry import compare_angle

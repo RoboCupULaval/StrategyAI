@@ -5,11 +5,10 @@ from typing import Optional, List
 
 import numpy as np
 
-from Util import Pose, Position, AICommand
-from Util.constant import BALL_RADIUS, ROBOT_RADIUS, KickForce
-
-from ai.GameDomainObjects import Player
+from Util import Pose
 from Util.ai_command import Idle, CmdBuilder, MoveTo
+from Util.constant import BALL_RADIUS, ROBOT_RADIUS, KickForce
+from ai.GameDomainObjects import Player
 from ai.STA.Action.GoBehind import GoBehind
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
