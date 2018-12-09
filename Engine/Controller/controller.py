@@ -58,8 +58,6 @@ class Controller:
             robot.path, robot.target_speed = path_smoother(robot.raw_path, robot.cruise_speed, robot.end_speed)
             commands[robot.id] = robot.regulator.execute(robot, dt)
 
-        # self.send_debug(commands)
-
         return self.generate_packet(commands)
 
     def generate_packet(self, commands: Dict[int, Pose]) -> RobotState:
