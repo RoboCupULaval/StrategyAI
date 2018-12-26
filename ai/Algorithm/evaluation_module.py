@@ -4,7 +4,7 @@ from typing import List
 
 import numpy as np
 
-from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, closest_point_on_line
+from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, closest_point_on_line, normalize
 from Util.position import Position
 from Util.role import Role
 from Util.constant import ROBOT_RADIUS

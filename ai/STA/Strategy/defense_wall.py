@@ -7,7 +7,8 @@ import numpy as np
 from Util.geometry import normalize
 from Util.role import Role
 
-from ai.Algorithm.evaluation_module import closest_players_to_point
+from ai.Algorithm.evaluation_module import closest_players_to_point, ball_not_going_toward_player, \
+    ball_going_toward_player
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall, FETCH_BALL_ZONE_RADIUS
 from ai.STA.Tactic.go_kick import GoKick
