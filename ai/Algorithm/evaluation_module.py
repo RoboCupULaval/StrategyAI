@@ -43,17 +43,18 @@ def player_pointing_toward_segment(player: Player, segment: Line):
 
 
 def player_covered_from_goal(player: Player):
+    ball_position = GameState().ball.position
     shooting_angle = angle_between_three_points(GameState().field.their_goal_line.p1,
-                                                player.position, GameState().field.their_goal_line.p2)
-    vec_player_to_goal = GameState().field.their_goal - player.position
+                                                ball_position, GameState().field.their_goal_line.p2)
+    vec_ball_to_goal = GameState().field.their_goal - ball_position
 
     our_team = [other_player for other_player in GameState().our_team.available_players.values() if
                 other_player is not player]
     enemy_team = [other_player for other_player in GameState().enemy_team.available_players.values()]
     pertinent_collisions = []
     for other_player in our_team + enemy_team:
-        if object_pointing_toward_point(player.position,
-                                        vec_player_to_goal.angle,
+        if object_pointing_toward_point(ball_position,
+                                        vec_ball_to_goal.angle,
                                         other_player.position,
                                         wrap_to_pi(shooting_angle + 5 * np.pi / 180)):
             pertinent_collisions.append(Obstacle(other_player.position.array, avoid_distance=90))
@@ -63,23 +64,25 @@ def player_covered_from_goal(player: Player):
     pertinent_collisions_positions = np.array([obs.position for obs in pertinent_collisions])
     pertinent_collisions_avoid_radius = np.array([obs.avoid_distance for obs in pertinent_collisions])
     results = []
-    for i in range(0, 15 + 1):  # discretisation de la ligne de but
-        goal_point = GameState().field.their_goal_line.p1 + GameState().field.their_goal_line.direction * \
-                                                            (GameState().field.their_goal_line.length * i / 15)
+    nb_beam = 15
+    their_goal_line = GameState().field.their_goal_line
+    for i in range(0, nb_beam + 1):  # discretisation de la ligne de but
+        goal_point = their_goal_line.p1 + their_goal_line.direction * (their_goal_line.length * i / nb_beam)
         is_colliding = is_path_colliding(pertinent_collisions, pertinent_collisions_positions,
-                                         pertinent_collisions_avoid_radius, player.position.array, goal_point.array)
+                                         pertinent_collisions_avoid_radius, ball_position.array, goal_point.array)
         results.append((is_colliding, goal_point))
-    max_len_seg, indexend = find_max_consecutive_bool(results)
+    max_len_seg, index_end = find_max_consecutive_bool(results)
 
-    if max_len_seg == 0 and indexend == 0:
+    if max_len_seg == 0 and index_end == 0:
         return None
-    return results[int(indexend - 1 - np.math.ceil(max_len_seg / 2))][1]
+    middle_idx = int(index_end - 1 - max_len_seg // 2)
+    return results[middle_idx][1]
 
 
 def find_max_consecutive_bool(results):
     count = 0
     max_len_seg = 0  # longueur du segment
-    indexend = 0
+    index_end = 0
 
     for i, (is_colliding, _) in enumerate(results):
         if not is_colliding:
@@ -87,12 +90,12 @@ def find_max_consecutive_bool(results):
         else:
             if count > max_len_seg:
                 max_len_seg = count
-                indexend = i
+                index_end = i
             count = 0
     if count > max_len_seg:
         max_len_seg = count
-        indexend = i
-    return [max_len_seg, indexend]
+        index_end = i
+    return max_len_seg, index_end
 
 
 def is_path_colliding(obstacles, obstacles_position, obstacles_avoid_radius, start, target) -> bool:

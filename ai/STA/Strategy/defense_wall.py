@@ -67,7 +67,7 @@ class DefenseWall(Strategy):
                 node_position_pass.connect_to(node_go_kick, when=attacker_should_go_kick)
                 node_wait_for_pass.connect_to(node_go_kick, when=player_has_received_ball)
                 node_wait_for_pass.connect_to(node_position_pass, when=player_is_not_receiving_pass)
-                node_go_kick.connect_to(node_wait_for_pass, when=player_is_receiving_pass)
+                # node_go_kick.connect_to(node_wait_for_pass, when=player_is_receiving_pass)
                 node_go_kick.connect_to(node_position_pass, when=attacker_should_not_go_kick)
                 node_go_kick.connect_to(node_go_kick, when=attacker_has_kicked)
             elif role in self.cover_role:
@@ -91,8 +91,6 @@ class DefenseWall(Strategy):
                 player_is_not_receiving_pass = partial(ball_not_going_toward_player, game_state, player)
                 player_has_received_ball = partial(self.has_received, player)
                 player_has_kicked = partial(self.has_kicked, role)
-
-
 
                 node_align_to_covered_object.connect_to(node_position_pass,
                                                         when=self.game_state.field.is_ball_in_our_goal_area)
