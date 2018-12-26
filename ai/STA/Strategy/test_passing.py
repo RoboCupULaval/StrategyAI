@@ -1,11 +1,8 @@
 # Under MIT License, see LICENSE.txt
 
 from functools import partial
-from math import acos
 
-from Util.geometry import normalize
 from Util.role import Role
-
 from ai.Algorithm.evaluation_module import closest_players_to_point, ball_going_toward_player, \
     ball_not_going_toward_player
 from ai.STA.Strategy.strategy import Strategy
@@ -15,7 +12,6 @@ from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
-import numpy as np
 
 
 # noinspection PyMethodMayBeStatic,PyMethodMayBeStatic

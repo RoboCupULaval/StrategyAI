@@ -1,17 +1,16 @@
 # Under MIT licence, see LICENCE.txt
-from typing import List, Optional, Any, Iterable
-
 import logging
+from typing import List, Optional, Any
 
 import time
 
 from Debug.debug_command_factory import DebugCommandFactory, VIOLET
 from Util import Pose, Position
 from Util.ai_command import AICommand
-from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL
+from Util.ai_command import Idle
+from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL
 from Util.geometry import Area, Line
 from ai.GameDomainObjects import Player
-from Util.ai_command import Idle
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 

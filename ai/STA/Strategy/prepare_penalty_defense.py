@@ -1,5 +1,4 @@
 # Under MIT license, see LICENSE.txt
-import numpy as np
 
 from Util.pose import Pose
 from Util.role import Role

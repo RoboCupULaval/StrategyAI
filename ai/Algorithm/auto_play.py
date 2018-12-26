@@ -17,6 +17,7 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
         des stratégies en prenant en compte différents aspects du jeu, notamment le referee
         et la position des robots et de la balle.
     """
+
     def __init__(self, play_state: PlayState):
         super().__init__()
         self.play_state = play_state
@@ -119,7 +120,7 @@ class SimpleAutoPlay(AutoPlay):
             self.play_state.current_strategy = SimpleAutoPlay._state_to_strategy_name(self.next_state)
 
         self.current_state = self.next_state
-    
+
     def str(self):
         pass
 
@@ -135,7 +136,7 @@ class SimpleAutoPlay(AutoPlay):
                                     .format(nb_player, self.MINIMUM_NB_PLAYER))
             next_state = SimpleAutoPlayState.NOT_ENOUGH_PLAYER
         # Number of player change or On command change
-        elif (self.prev_nb_player is not None and self.prev_nb_player < self.MINIMUM_NB_PLAYER <= nb_player)\
+        elif (self.prev_nb_player is not None and self.prev_nb_player < self.MINIMUM_NB_PLAYER <= nb_player) \
                 or self.last_ref_state != ref_state.command:
             self.logger.info("Received referee state {}".format(ref_state.command.name))
 

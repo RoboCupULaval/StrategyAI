@@ -3,14 +3,12 @@ import random
 from typing import List
 
 from Util import Pose, Position
-from Util.ai_command import CmdBuilder, MoveTo
+from Util.ai_command import MoveTo
 from Util.constant import BALL_RADIUS, ROBOT_RADIUS, POSITION_DEADZONE, ANGLE_TO_HALT
 from Util.geometry import compare_angle
 from ai.GameDomainObjects.player import Player
-from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
-
 
 ORIENTATION_DEADZONE = 0.2
 DISTANCE_TO_KICK_REAL = ROBOT_RADIUS * 3.4

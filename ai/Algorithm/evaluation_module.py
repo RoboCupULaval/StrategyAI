@@ -2,17 +2,15 @@
 import logging
 from typing import List
 
-from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, normalize, closest_point_on_line
+import numpy as np
+
+from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, closest_point_on_line
 from Util.position import Position
 from Util.role import Role
-from Util.constant import ROBOT_RADIUS, BALL_OUTSIDE_FIELD_BUFFER, IN_PLAY_MIN_DISTANCE
 from Util.constant import ROBOT_RADIUS
 from ai.Algorithm.path_partitionner import Obstacle
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
-from ai.GameDomainObjects.field import FieldSide
-
-import numpy as np
 
 
 class PlayerPosition(object):
@@ -153,10 +151,7 @@ def closest_players_to_point_except(point: Position, except_roles=[], except_pla
 # noinspection PyUnresolvedReferences
 def is_ball_our_side():
     # Retourne TRUE si la balle est dans notre demi-terrain
-    if GameState().our_side == FieldSide.POSITIVE:  # POSITIVE
-        return GameState().ball_position.x > 0
-    else:
-        return GameState().ball_position.x < 0
+    return GameState().ball_position.x > 0
 
 
 # noinspection PyUnresolvedReferences
