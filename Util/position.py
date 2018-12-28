@@ -5,6 +5,7 @@ import numpy as np
 
 POSITION_ABS_TOL = 0.01
 
+
 #pylint: disable=invalid-name, invalid-unary-operand-type
 class Position:
 
@@ -70,6 +71,9 @@ class Position:
 
     def flip_x(self):
         return Position(-self.x, self.y)
+
+    def flip_y(self):
+        return Position(self.x, -self.y)
 
     def __add__(self, other: 'Position') -> 'Position':
         return Position.from_array(self.array + other.array)

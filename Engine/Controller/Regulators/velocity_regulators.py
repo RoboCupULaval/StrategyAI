@@ -16,7 +16,8 @@ settings = {
     'emergency_brake_constant': 0.4, # Higher = higher correction of trajectory
     'brake_offset': 1.2,  # Offset to brake before because of the delay
     'max_acceleration': MAX_LINEAR_ACCELERATION,
-    'derivative_deadzone': 0.5
+    'derivative_deadzone': 0.5,
+    'acceleration_deadzone': 10,  # mm, if the robot is at X mm of the objective it can not accelerate
 }
 
 if Config()['COACH']['type'] == 'sim':
@@ -40,14 +41,14 @@ class VelocityRegulator(RegulatorBaseClass):
 
         path_correction = self.following_path_vector(robot)
 
-        velocity = normalize(robot.position_error)* speed_norm
+        velocity = (normalize(robot.position_error) + path_correction / settings['v_d']) * speed_norm
         if velocity.norm > speed_norm: velocity = normalize(velocity) * speed_norm
 
         cmd_orientation = self.orientation_controller.execute(robot.orientation_error)
         cmd_orientation = clamp(cmd_orientation, -MAX_ANGULAR_SPEED, MAX_ANGULAR_SPEED)
 
         self.last_commanded_velocity = velocity
-
+        print(speed_norm, cmd_orientation)
         return Pose(velocity, cmd_orientation)
 
     def following_path_vector(self, robot):
@@ -62,25 +63,19 @@ class VelocityRegulator(RegulatorBaseClass):
         
         dt = self.dt
 
-        if robot.target_speed > robot.current_speed:
+        #  /------\
+        # /        \
+        # A   B    C
+        if robot.target_speed > robot.current_speed:  # Only for non-zero current_speed
             next_speed = robot.current_speed + acc * dt
         else:
-            if self.is_distance_for_brake(robot, acc, offset=1):
+            if self.is_distance_for_brake(robot, acc, offset=1) and robot.position_error.norm > settings['acceleration_deadzone']:
+                # A and B, for B the clamp prevent a speed higher than cruise speed
                 next_speed = robot.current_speed + acc * dt
-            else:
-                distance_to_reach_target_speed = 0.5 * abs(robot.current_speed ** 2 - robot.target_speed ** 2) / acc
-                if robot.position_error.norm < distance_to_reach_target_speed:
-
-                    # FIXME: This doesn't seem right
-                    emergency_brake_offset = settings['emergency_brake_constant'] / dt * robot.current_speed / 1000
-                    emergency_brake_offset = max(1.0, emergency_brake_offset)
-
-                    next_speed = robot.current_speed - acc * dt
-
-                else:
-                    next_speed = robot.current_speed - acc * dt
-        print(robot.position_error.norm, next_speed)
-        return clamp(next_speed, -1 * robot.cruise_speed, robot.cruise_speed)
+            else:  # C
+                next_speed = robot.current_speed - acc * dt
+        # print(robot.position_error.norm, next_speed)
+        return clamp(next_speed, 0, robot.cruise_speed)
 
     @staticmethod
     def is_distance_for_brake(robot, acc, offset=1) -> bool:
