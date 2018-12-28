@@ -19,7 +19,7 @@ from ai.states.game_state import GameState
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1.0
 
-GO_BEHIND_SPACING = 180
+GO_BEHIND_SPACING = 250
 GRAB_BALL_SPACING = 90
 APPROACH_SPEED = 100
 KICK_DISTANCE = 90
@@ -95,8 +95,14 @@ class GoKick(Tactic):
             self.next_state = self.grab_ball
         else:
             self.next_state = self.go_behind_ball
+        if dist_from_ball < 1000 and angle_behind > 90:  # avoid the robot being "slingshot" while traveling near the ball at high speed
+            cruise_speed = 1 # this way the robot slows down when near the ball and in front of it
+
+        else:
+            cruise_speed = 3
+
         return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation),
-                                      cruise_speed=3,
+                                      cruise_speed=cruise_speed,
                                       end_speed=0,
                                       ball_collision=collision_ball)\
                            .addChargeKicker().addKick(self.kick_force).build()

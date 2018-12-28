@@ -79,7 +79,6 @@ class VelocityRegulator(RegulatorBaseClass):
 
                 else:
                     next_speed = robot.current_speed - acc * dt
-        print(robot.position_error.norm, next_speed)
         return clamp(next_speed, -1 * robot.cruise_speed, robot.cruise_speed)
 
     @staticmethod
