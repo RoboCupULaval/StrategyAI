@@ -40,7 +40,7 @@ class VelocityRegulator(RegulatorBaseClass):
 
         path_correction = self.following_path_vector(robot)
 
-        velocity = (normalize(robot.position_error) + path_correction / settings['v_d']) * speed_norm
+        velocity = normalize(robot.position_error)* speed_norm
         if velocity.norm > speed_norm: velocity = normalize(velocity) * speed_norm
 
         cmd_orientation = self.orientation_controller.execute(robot.orientation_error)
@@ -75,11 +75,11 @@ class VelocityRegulator(RegulatorBaseClass):
                     emergency_brake_offset = settings['emergency_brake_constant'] / dt * robot.current_speed / 1000
                     emergency_brake_offset = max(1.0, emergency_brake_offset)
 
-                    next_speed = robot.current_speed - acc * dt * emergency_brake_offset
+                    next_speed = robot.current_speed - acc * dt
 
                 else:
                     next_speed = robot.current_speed - acc * dt
-
+        print(robot.position_error.norm, next_speed)
         return clamp(next_speed, -1 * robot.cruise_speed, robot.cruise_speed)
 
     @staticmethod
