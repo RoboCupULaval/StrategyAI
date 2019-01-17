@@ -170,7 +170,7 @@ class Field:
         self.their_goal_area = Area.flip_x(self.our_goal_area)
 
         self.goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
-                                  p2=Position(self.our_goal_x, -self.goal_width / 2))
+                              p2=Position(self.our_goal_x, -self.goal_width / 2))
 
         self.our_goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
                                   p2=Position(self.our_goal_x, -self.goal_width / 2))
