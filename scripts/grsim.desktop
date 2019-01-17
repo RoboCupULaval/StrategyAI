@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Name=GrSim
+Comment=Robocup SSL simulator
+Exec=grsim
+Type=Application
+Terminal=false

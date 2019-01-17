@@ -18,9 +18,7 @@ from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL, ROBOT_DIAMET
 from Util.geometry import intersection_line_and_circle, intersection_between_lines, \
     closest_point_on_segment, find_bisector_of_triangle, Area, Line, clamp
 from ai.GameDomainObjects import Player
-
 from ai.STA.Tactic.go_kick import GRAB_BALL_SPACING, GoKick
-
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
 
@@ -29,6 +27,7 @@ class GoalKeeper(Tactic):
 
     MOVING_BALL_VELOCITY = 50  # mm/s
     DANGER_BALL_VELOCITY = 600  # mm/s
+    DANGEROUS_ENEMY_MIN_DISTANCE = 500
 
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(),
                  penalty_kick=False, args: List[str]=None,):
@@ -82,7 +81,6 @@ class GoalKeeper(Tactic):
                       cruise_speed=3,
                       end_speed=0)
 
-    # Essayer avec le test-goolkeeper
     def intercept(self):
         # Find the point where the ball will go
         if not self._ball_going_toward_goal() and not self.game_state.field.is_ball_in_our_goal_area():
@@ -202,5 +200,4 @@ class GoalKeeper(Tactic):
         closest = closest_players_to_point(self.game_state.ball_position, our_team=False)
         if len(closest) == 0:
             return True
-        DANGEROUS_ENEMY_MIN_DISTANCE = 500
-        return closest[0].distance > DANGEROUS_ENEMY_MIN_DISTANCE
+        return closest[0].distance > self.DANGEROUS_ENEMY_MIN_DISTANCE

@@ -1,9 +1,8 @@
 
 import unittest
-from time import sleep
 
 from Util import Pose, Position
-from ai.STA.Tactic.go_kick import GoKick, COMMAND_DELAY
+from ai.STA.Tactic.go_kick import GoKick
 from tests.STA.perfect_sim import PerfectSim
 
 A_ROBOT_ID = 1

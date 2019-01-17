@@ -1,15 +1,14 @@
 # Under MIT licence, see LICENCE.txt
 
-import math as m
 import time
 from typing import List
 
 import numpy as np
 
 from Debug.debug_command_factory import DebugCommandFactory, CYAN, RED
-from Util.constant import ROBOT_CENTER_TO_KICKER, KickForce
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
+from Util.constant import ROBOT_CENTER_TO_KICKER, KickForce
 from Util.geometry import compare_angle, normalize
 from ai.Algorithm.evaluation_module import best_passing_option, player_covered_from_goal
 from ai.GameDomainObjects import Player

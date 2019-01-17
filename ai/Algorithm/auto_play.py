@@ -16,6 +16,7 @@ class AutoPlay(IntelligentModule, metaclass=ABCMeta):
         des stratégies en prenant en compte différents aspects du jeu, notamment le referee
         et la position des robots et de la balle.
     """
+
     def __init__(self, play_state: PlayState):
         super().__init__()
         self.play_state = play_state
@@ -86,7 +87,7 @@ class SimpleAutoPlay(AutoPlay):
                        SimpleAutoPlayState.INDIRECT_FREE_OFFENSE]
 
     KICKOFF_STATE = [SimpleAutoPlayState.OFFENSE_KICKOFF,
-                       SimpleAutoPlayState.DEFENSE_KICKOFF]
+                     SimpleAutoPlayState.DEFENSE_KICKOFF]
 
     MINIMUM_NB_PLAYER = 3
 
@@ -110,10 +111,9 @@ class SimpleAutoPlay(AutoPlay):
             self.play_state.current_strategy = SimpleAutoPlay._state_to_strategy_name(self.next_state)
 
         self.current_state = self.next_state
-    
+
     def str(self):
         pass
-
 
     def _select_next_state(self, ref_state: RefereeState):
 
@@ -127,13 +127,11 @@ class SimpleAutoPlay(AutoPlay):
                                     .format(nb_player, self.MINIMUM_NB_PLAYER))
             next_state = SimpleAutoPlayState.NOT_ENOUGH_PLAYER
         # Number of player change or On command change
-        elif (self.prev_nb_player is not None and self.prev_nb_player < self.MINIMUM_NB_PLAYER <= nb_player)\
+        elif (self.prev_nb_player is not None and self.prev_nb_player < self.MINIMUM_NB_PLAYER <= nb_player) \
                 or self.last_ref_state != ref_state.command:
             self.logger.info("Received referee state {}".format(ref_state.command.name))
 
             next_state = self._on_ref_state_change(ref_state.command)
-
-
 
         self.prev_nb_player = nb_player
 
@@ -210,7 +208,6 @@ class SimpleAutoPlay(AutoPlay):
             RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.BALL_PLACEMENT_US,
 
         }.get(ref_cmd, RefereeCommand.HALT)
-
 
     def _normal_start(self):
         return {

@@ -7,7 +7,6 @@ from queue import Empty
 from Debug.debug_command_factory import DebugCommandFactory
 from ai.Util.sta_change_command import STAChangeCommand
 from ai.executors.play_executor import PlayExecutor
-from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 
 
