@@ -25,13 +25,10 @@ from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
 
 
-
 class GoalKeeper(Tactic):
 
     MOVING_BALL_VELOCITY = 50  # mm/s
     DANGER_BALL_VELOCITY = 600  # mm/s
-
-
 
     def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(),
                  penalty_kick=False, args: List[str]=None,):
@@ -53,13 +50,7 @@ class GoalKeeper(Tactic):
         self.circle_radius = self.game_state.field.goal_width / 2
         self.circle_center = self.game_state.field.our_goal - self.OFFSET_FROM_GOAL_LINE
 
-        self.min_angle_from_goal = np.arcsin(ROBOT_RADIUS / (self.game_state.field.goal_line.length / 2)) * 3
-        #self.min_angle_from_goal = np.pi / 8
-        # self.max_top_position = self.field.our_goal + Position(self.circle_radius * cos(self.min_angle_from_goal + np.pi / 2),
-        #                                                   self.circle_radius * sin(self.min_angle_from_goal + np.pi / 2))
-        # self.max_bottom_position = self.field.our_goal + Position(self.circle_radius * cos(self.min_angle_from_goal + np.pi),
-        #                                                      self.circle_radius * sin(self.min_angle_from_goal + np.pi))
-
+        self.min_angle_from_goal = np.arcsin(ROBOT_RADIUS / (self.game_state.field.goal_line.length / 2)) * 1.2
 
     def defense_dumb(self):
         dest_y = self.game_state.ball.position.y \
@@ -136,7 +127,6 @@ class GoalKeeper(Tactic):
     def _move_to_clamped_position(self, position, keep_player_orientation=False):
         a = (position - self.field.our_goal).angle
         self.goal_to_solution_angle = a  # For debugging
-        print(a)
         if a < 0:
             a = clamp(a, -np.pi, -self.min_angle_from_goal - np.pi / 2)
         else:
@@ -198,9 +188,7 @@ class GoalKeeper(Tactic):
                                                self._best_target_into_goal(),
                                                color=GREEN,
                                                timeout=0.1),
-                    DebugCommandFactory().line(self.game_state.ball_position, self.field.our_goal),
-                    # DebugCommandFactory().line(self.max_top_position, self.field.our_goal),
-                    # DebugCommandFactory().line(self.max_bottom_position, self.field.our_goal)
+                    DebugCommandFactory().line(self.game_state.ball_position, self.field.our_goal)
                     ]
 
         elif self.current_state == self.intercept and self.last_intersection is not None:
@@ -216,4 +204,3 @@ class GoalKeeper(Tactic):
             return True
         DANGEROUS_ENEMY_MIN_DISTANCE = 500
         return closest[0].distance > DANGEROUS_ENEMY_MIN_DISTANCE
-
