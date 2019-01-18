@@ -2,7 +2,7 @@ pytest>=3.6
 responses
 pytest-cov
 pytest-pep8
-pytest-leaks
+# pytest-leaks
 pytest-travis-fold
 pytest-pylint
 flake8
