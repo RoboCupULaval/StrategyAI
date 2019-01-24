@@ -173,7 +173,7 @@ class Field:
         self.area = Area.from_limits(self.top, self.bottom, self.right, self.left)
 
         self.goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
-                                  p2=Position(self.our_goal_x, -self.goal_width / 2))
+                              p2=Position(self.our_goal_x, -self.goal_width / 2))
 
         self.our_goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
                                   p2=Position(self.our_goal_x, -self.goal_width / 2))
