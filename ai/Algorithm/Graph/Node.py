@@ -1,4 +1,5 @@
 # Under MIT license, see LICENSE.txt
+import logging
 
 from ai.Algorithm.Graph.Vertex import Vertex
 from ai.STA.Tactic.tactic import Tactic
@@ -30,6 +31,8 @@ class Node:
         assert isinstance(p_tactic, Tactic)
         self.tactic = p_tactic
         self.vertices = []
+
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def add_vertex(self, p_vertex):
         """
