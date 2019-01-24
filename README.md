@@ -45,3 +45,24 @@ De plus, le code doit avoir les tests unitaires associés.
 source ~/robocup/ultron/virtualenv/bin/activate
 bash ./dual_launch_two_ui.sh
 ```
+
+### Setup dans pycharm
+##### Ajout de l'environnement virtuelle
+Pour rajouter l'environnement virtuel dans Pycharm aller dans `File->Settings->Project StrategyAI->Project Interpreter`.
+Appuyez sur l'icone d'un engrenage `->Add`. 
+Dans la fenêtre qui apparaît selectionner `Existing Intepreter`. Le chemin pour la location entrée: `/home/votre_nom/robocup/ultron/virtualenv/bin/python`.
+
+
+##### Ajout des runners
+Pour facilement tester l'ia dans Pycharm, il est utile de pouvoir lancer la lancer en utilisant un `Run Configuration`.
+Créer une configuration ayant ses paramètres, elle va lancer l'intelligence artificiel en simulation:
+ - `name` -> `ia sim blue`
+ - `Script Path` -> `/home/votre_user/robocup/ultron/StrategyAI/main.py`
+ - `Parameter` -> `config/sim.cfg blue positive`
+ - `Working Directory` -> `/home/votre_user/robocup/ultron/StrategyAI`
+ 
+Créer une configuration ayant ses paramètres, elle va lancer l'interface graphique de débugage: 
+ - `name` -> `UI Debug sim blue`
+ - `Script Path` -> `/home/votre_user/robocup/ultron/UI-Debug/main.py`
+ - `Parameter` -> `../StrategyAI/config/field/sim.cfg blue`
+ - `Working Directory` -> `/home/votre_user/robocup/ultron/UI-Debug`
