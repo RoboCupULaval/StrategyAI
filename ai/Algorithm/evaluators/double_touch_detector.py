@@ -52,11 +52,11 @@ class DoubleTouchDetector(object):
     def _waiting_for_touch(self, game_state):
         for p in find_players_touching_the_ball(game_state):
             if p in game_state.our_team.available_players.values():
-                self.logger.info(f"Our Player {p} has touch the ball.")
+                self.logger.info(f"Our Player {p} has touched the ball.")
                 self._our_kicker = p
                 self._state = self._waiting_for_kicker_to_kick
             else:  # A enemy touch the ball, no double touch
-                self.logger.info(f"The enemy Player {p} has touch the ball.")
+                self.logger.info(f"The enemy Player {p} has touched the ball.")
                 self.disable()
             return
 
