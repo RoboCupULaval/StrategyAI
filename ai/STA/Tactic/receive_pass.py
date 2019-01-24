@@ -37,7 +37,7 @@ class ReceivePass(Tactic):
     def intercept(self):
         ball = self.game_state.ball
         if self.game_state.field.is_outside_wall_limit(ball.position):
-            self.logger.info("The ball has leave field")
+            self.logger.info("The ball has left the field")
             self.next_state = self.go_away_from_ball
             return Idle
 
