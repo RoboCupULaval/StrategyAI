@@ -100,6 +100,7 @@ class Field:
                                                  p2=Position(3490, -1000))
         }
         self.field_arcs = {}
+        self.area = None  # Area object with same dimension as field
 
         self._update_field_const()
 
@@ -168,6 +169,8 @@ class Field:
         self.our_goal_area = Area.from_4_point(p1, p2, p3, p4)
 
         self.their_goal_area = Area.flip_x(self.our_goal_area)
+
+        self.area = Area.from_limits(self.top, self.bottom, self.right, self.left)
 
         self.goal_line = Line(p1=Position(self.our_goal_x, +self.goal_width / 2),
                               p2=Position(self.our_goal_x, -self.goal_width / 2))
