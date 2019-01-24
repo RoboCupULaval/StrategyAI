@@ -183,8 +183,8 @@ class DebugCommandFactory:
                                     'timeout': timeout}, link=link)
 
     @staticmethod
-    def area(area: Area, color=VIOLET):
-        return list(DebugCommandFactory.line(s.p1, s.p2, color=color) for s in area.segments)
+    def area(area: Area, color=VIOLET, timeout=DEFAULT_DEBUG_TIMEOUT):
+        return list(DebugCommandFactory.line(s.p1, s.p2, color=color, timeout=timeout) for s in area.segments)
 
     @staticmethod
     def plot_point(y_unit: str, y_label: str, x: List[float], y: List[float]):

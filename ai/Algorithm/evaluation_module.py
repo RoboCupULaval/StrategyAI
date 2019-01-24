@@ -1,12 +1,13 @@
 # Under MIT License, see LICENSE.txt
+import logging
 from typing import List
 
 import numpy as np
 
-from Util.constant import ROBOT_RADIUS
-from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, closest_point_on_line
+from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, closest_point_on_line, normalize
 from Util.position import Position
 from Util.role import Role
+from Util.constant import ROBOT_RADIUS
 from ai.Algorithm.path_partitionner import Obstacle
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
@@ -64,7 +65,7 @@ def player_covered_from_goal(player: Player):
     results = []
     for i in range(0, 15 + 1):  # discretisation de la ligne de but
         goal_point = GameState().field.their_goal_line.p1 + GameState().field.their_goal_line.direction * \
-                     (GameState().field.their_goal_line.length * i / 15)
+                                                            (GameState().field.their_goal_line.length * i / 15)
         is_colliding = is_path_colliding(pertinent_collisions, pertinent_collisions_positions,
                                          pertinent_collisions_avoid_radius, player.position.array, goal_point.array)
         results.append((is_colliding, goal_point))
@@ -115,6 +116,7 @@ def find_collisions(obstacles: List[Obstacle], obstacles_position: np.ndarray, o
 
 
 # noinspection PyUnusedLocal
+# TODO: Change 'our_team' to 'is_our_team'
 def closest_players_to_point(point: Position, our_team=None):
     # Retourne une liste de tuples (player, distance) en ordre croissant de distance,
     # our_team pour obtenir une liste contenant une équipe en particulier
@@ -137,6 +139,13 @@ def closest_player_to_point(point: Position, our_team=None):
     # Retourne le player le plus proche,
     # our_team pour obtenir une liste contenant une équipe en particulier
     return closest_players_to_point(point, our_team)[0]
+
+
+def closest_players_to_point_except(point: Position, except_roles=[], except_players=[]):
+    closests = closest_players_to_point(point, our_team=True)
+    ban_players = except_players.copy()
+    ban_players += [GameState().get_player_by_role(r) for r in except_roles]
+    return [player_dist for player_dist in closests if player_dist.player not in ban_players]
 
 
 # noinspection PyUnresolvedReferences
@@ -211,6 +220,18 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
         # print(scores)
         # print(scores_temp)
     return scores
+
+
+def ball_going_toward_player(game_state, player):
+    if game_state.ball.is_mobile(50):  # to avoid division by zero and unstable ball_directions
+        ball_approach_angle = np.arccos(np.dot(normalize(player.position - game_state.ball.position).array,
+                                               normalize(game_state.ball.velocity).array)) * 180 / np.pi
+        return ball_approach_angle < 25
+    return False
+
+
+def ball_not_going_toward_player(game_state, player):
+    return not ball_going_toward_player(game_state, player)
 
 
 # noinspection PyPep8Naming

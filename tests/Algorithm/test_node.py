@@ -25,6 +25,7 @@ class TestNode(unittest.TestCase):
     def _create_mock_tactic(command):
         tactic = create_autospec(Tactic)
         tactic.exec = lambda: command
+        tactic.player = "A player"
         return tactic
 
     def test_init(self):
