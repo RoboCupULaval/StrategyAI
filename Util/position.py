@@ -68,6 +68,9 @@ class Position:
     def copy(self) -> 'Position':
         return Position.from_array(self.array.copy())
 
+    def dot(self, p: 'Position') -> float:
+        return self.array.dot(p.array)
+
     def flip_x(self):
         return Position(-self.x, self.y)
 
