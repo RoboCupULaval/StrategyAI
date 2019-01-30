@@ -251,70 +251,19 @@ def trajectory_score(pointA, pointsB, obstacle):
     if isinstance(pointsB, Position):
         pointsB = pointsB.array
 
-    if len(pointsB.shape) == 1:
-        scores = np.array([0])
-    else:
-        scores = np.zeros(pointsB.shape[0])
+    scores = np.array([0])
     AB = pointsB - pointA
     AO = obstacle - pointA
     # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
     normsAB = np.sqrt(np.transpose((AB * AB)).sum(axis=0))
     normsAC = np.divide(np.dot(AB, AO), normsAB)
     normsOC = np.sqrt(np.abs(np.linalg.norm(AO) ** 2 - normsAC ** 2))
-    if scores.size == 1:
-        if normsAC < 0 or normsAC > 1.1 * normsAB:
-            scores = 1
-        else:
-            min_proportion = proportion_max if normsOC == 0 else min(normsAC / normsOC, proportion_max)
-            scores = max(1, min_proportion)
+    if normsAC < 0 or normsAC > 1.1 * normsAB:
+        scores = 1
     else:
-        scores[normsAC < 0] = 1
-        scores[normsAC > 1.1 * normsAB] = 1
-        temp = np.divide(normsAC[scores == 0], normsOC[scores == 0])
-        temp[temp > proportion_max] = proportion_max
-        temp[temp < 1] = 1
-        scores[scores == 0] = temp
+        min_proportion = proportion_max if normsOC == 0 else min(normsAC / normsOC, proportion_max)
+        scores = max(1, min_proportion)
     return scores
-
-
-# noinspection PyPep8Naming,PyUnresolvedReferences
-def best_position_in_region(player, A, B):
-    # Retourne la position (dans un rectangle aux points A et B) la mieux placée pour une passe
-    ncounts = 5
-    bottom_left = Position(min(A.x, B.x), min(A.y, B.y))
-    top_right = Position(max(A.x, B.x), max(A.y, B.y))
-    ball_position = GameState().ball_position
-
-    positions = []
-    for i in range(ncounts):
-        x_point = bottom_left.x + i * (top_right.x - bottom_left.x) / (ncounts - 1)
-        for j in range(ncounts):
-            y_point = bottom_left.y + j * (top_right.y - bottom_left.y) / (ncounts - 1)
-            positions += [Position(x_point, y_point).array]
-    positions = np.stack(positions)
-    # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
-    dists_from_ball_raw = np.sqrt(((positions - ball_position.array) *
-                                   (positions - ball_position.array)).sum(axis=1))
-    positions = positions[dists_from_ball_raw > 1000, :]
-    dists_from_ball = dists_from_ball_raw[dists_from_ball_raw > 1000]
-    scores = line_of_sight_clearance_ball(player, positions, dists_from_ball)
-    our_side = GameState().field.our_goal_x
-    if abs(A.x - our_side) < abs(B.x - our_side):
-        x_closest_to_our_side = A.x
-    else:
-        x_closest_to_our_side = B.x
-
-    width = abs(A.x - B.x)
-
-    saturation_modifier = np.clip((positions[:, 0] - x_closest_to_our_side) / width, 0.05, 1)
-    scores /= saturation_modifier
-    try:
-        best_score_index = np.argmin(scores)
-        best_position = positions[best_score_index, :]
-    except IndexError:
-        best_position = Position()
-
-    return best_position
 
 
 def get_away_from_trajectory(position, start, end, min_distance):
