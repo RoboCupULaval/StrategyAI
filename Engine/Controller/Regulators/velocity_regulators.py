@@ -11,10 +11,10 @@ from config.config import Config
 config = Config()
 
 settings = {
-    'orientation_pid_settings': {'kp': 10, 'ki': 0, 'kd': 1},
+    'orientation_pid_settings': {'kp': 5, 'ki': 0.5, 'kd': 1},
     'v_d': 4, # lower = bigger path correction
-    'emergency_brake_constant': 0.4, # Higher = higher correction of trajectory
-    'brake_offset': 1.2,  # Offset to brake before because of the delay
+    'emergency_brake_constant': 0.7, # Higher = higher correction of trajectory
+    'brake_offset': 1.3,  # Offset to brake before because of the delay
     'max_acceleration': MAX_LINEAR_ACCELERATION,
     'derivative_deadzone': 0.5,
     'acceleration_deadzone': 10,  # mm, if the robot is at X mm of the objective it can not accelerate
