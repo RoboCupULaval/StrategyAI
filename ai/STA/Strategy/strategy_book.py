@@ -3,6 +3,9 @@
 import logging
 from typing import List, Dict, Type
 
+from ai.STA.Strategy.Celebration import Celebration
+from ai.STA.Strategy.celebrate import BeFree2
+from ai.STA.Strategy.triangle import Triangle
 from ai.STA.Strategy.smart_stop import SmartStop
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.ball_placement import BallPlacement
@@ -46,6 +49,7 @@ class StrategyBook:
         strategy_book = {TestPassing,
                          HumanControl,
                          IndianaJones,
+                         BeFree2,
                          RobocupChoreography,
                          BambaFollow,
                          PassesWithDecisions,
@@ -64,6 +68,8 @@ class StrategyBook:
                          BallPlacement,
                          TestGoalKeeper,
                          LineUp,
+                         Triangle,
+                         Celebration,
                          SmartStop,
                          self.stop_strategy,
                          *default_strategies,

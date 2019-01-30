@@ -14,10 +14,10 @@ from ai.states.game_state import GameState
 
 
 class GoToPosition(Tactic):
-    def __init__(self, game_state: GameState, player: Player, target: Pose,
+    def __init__(self, game_state: GameState, player: Player, target: Pose, live_zone=POSITION_DEADZONE,
                  args: List[str]=None, cruise_speed=2):
         super().__init__(game_state, player, target, args)
-
+        self.live_zone = live_zone
         self.current_state = self.move
         self.next_state = self.move
         self.target = target
@@ -33,6 +33,6 @@ class GoToPosition(Tactic):
 
     def check_success(self):
         distance = (self.player.pose - self.target.position).norm
-        return (distance < POSITION_DEADZONE) and compare_angle(self.player.pose.orientation,
+        return (distance < self.live_zone) and compare_angle(self.player.pose.orientation,
                                                                 self.target.orientation, abs_tol=ANGLE_TO_HALT)
 
