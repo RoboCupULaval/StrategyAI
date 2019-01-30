@@ -51,12 +51,6 @@ class GoalKeeper(Tactic):
 
         self.min_angle_from_goal = np.arcsin(ROBOT_RADIUS / (self.game_state.field.goal_line.length / 2)) * 1.2
 
-    def defense_dumb(self):
-        dest_y = self.game_state.ball.position.y \
-                 * self.game_state.goal_width / 2 / self.game_state.field.top
-        position = self.game_state.field.our_goal - Position(ROBOT_RADIUS + 10, -dest_y)
-        return MoveTo(Pose(position, np.pi))
-
     def defense(self):
         # Prepare to block the ball
         if self._is_ball_safe_to_kick() and self.game_state.ball.is_immobile():
