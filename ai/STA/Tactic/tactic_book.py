@@ -23,7 +23,6 @@ from ai.STA.Tactic.protect_zone import ProtectZone
 from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
 from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.tactic_test import TacticTest
 
 
 class TacticBook:
@@ -36,7 +35,6 @@ class TacticBook:
         defaults_tactics = [GoToPosition, GoKick]
 
         tactics = {ReceivePass,
-                   TacticTest,
                    PlaceBall,
                    FaceTarget,
                    DemoFollowBall,
