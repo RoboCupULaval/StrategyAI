@@ -7,13 +7,14 @@ import numpy as np
 from Debug.debug_command_factory import DebugCommandFactory, BLUE, GREEN
 from ai.Algorithm.evaluation_module import player_with_ball, player_pointing_toward_point, \
     player_pointing_toward_segment, closest_players_to_point
+from ai.executors.pathfinder_module import WayPoint
 
 __author__ = 'RoboCupULaval'
 
 from typing import List
 
 from Util import Pose, Position
-from Util.ai_command import MoveTo, Idle
+from Util.ai_command import MoveTo, Idle, CmdBuilder
 from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL, ROBOT_DIAMETER
 from Util.geometry import intersection_line_and_circle, intersection_between_lines, \
     closest_point_on_segment, find_bisector_of_triangle, Area, Line, clamp
@@ -24,13 +25,12 @@ from ai.states.game_state import GameState
 
 
 class GoalKeeper(Tactic):
-
     MOVING_BALL_VELOCITY = 50  # mm/s
     DANGER_BALL_VELOCITY = 600  # mm/s
     DANGEROUS_ENEMY_MIN_DISTANCE = 500
 
-    def __init__(self, game_state: GameState, player: Player, target: Pose=Pose(),
-                 penalty_kick=False, args: List[str]=None,):
+    def __init__(self, game_state: GameState, player: Player, target: Pose = Pose(),
+                 penalty_kick=False, args: List[str] = None, ):
         forbidden_area = [Area.pad(game_state.field.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)]
         super().__init__(game_state, player, target, args, forbidden_areas=forbidden_area)
 
@@ -39,8 +39,8 @@ class GoalKeeper(Tactic):
 
         self.target = Pose(self.game_state.field.our_goal, np.pi)  # Ignore target argument, always go for our goal
 
-        self.go_kick_tactic = None # Used by clear
-        self.last_intersection = None # For debug
+        self.go_kick_tactic = None  # Used by clear
+        self.last_intersection = None  # For debug
 
         self.OFFSET_FROM_GOAL_LINE = Position(ROBOT_RADIUS + 10, 0)
         self.GOAL_LINE = self.game_state.field.our_goal_line
@@ -52,6 +52,10 @@ class GoalKeeper(Tactic):
         self.min_angle_from_goal = np.arcsin(ROBOT_RADIUS / (self.game_state.field.goal_line.length / 2)) * 1.2
 
     def defense(self):
+        if self._goalkeeper_stuck_behind_goal():
+            self.next_state = self.move_out_from_behind_goal
+            return self.next_state()
+
         # Prepare to block the ball
         if self._is_ball_safe_to_kick() and self.game_state.ball.is_immobile():
             self.next_state = self.clear
@@ -67,8 +71,8 @@ class GoalKeeper(Tactic):
                                                  best_target_into_goal)
         # There is one or two intersection on the circle, take the one on the field
         for solution in solutions:
-            if solution.x < self.game_state.field.field_length / 2\
-               and self.game_state.ball.position.x < self.game_state.field.field_length / 2:
+            if solution.x < self.game_state.field.field_length / 2 \
+                    and self.game_state.ball.position.x < self.game_state.field.field_length / 2:
                 return self._move_to_clamped_position(solution)
 
         return MoveTo(Pose(self.game_state.field.our_goal, np.pi),
@@ -76,12 +80,16 @@ class GoalKeeper(Tactic):
                       end_speed=0)
 
     def intercept(self):
-        # Find the point where the ball will go
+        if self._goalkeeper_stuck_behind_goal():
+            self.next_state = self.move_out_from_behind_goal
+            return self.next_state()
+
         if not self._ball_going_toward_goal() and not self.game_state.field.is_ball_in_our_goal_area():
             self.next_state = self.defense
         elif self.game_state.field.is_ball_in_our_goal_area() and self.game_state.ball.is_immobile():
             self.next_state = self.clear
 
+        # Find the point where the ball will go
         ball = self.game_state.ball
         where_ball_enter_goal = intersection_between_lines(self.GOAL_LINE.p1,
                                                            self.GOAL_LINE.p2,
@@ -102,12 +110,16 @@ class GoalKeeper(Tactic):
         return self._move_to_clamped_position(intersect_pts, keep_player_orientation=True)
 
     def clear(self):
+        if self._goalkeeper_stuck_behind_goal():
+            self.next_state = self.move_out_from_behind_goal
+            return self.next_state()
+
         # Move the ball to outside of the penality zone
         if self.go_kick_tactic is None:
             self.go_kick_tactic = GoKick(self.game_state,
                                          self.player,
                                          auto_update_target=True,
-                                         go_behind_distance=1.2*GRAB_BALL_SPACING,
+                                         go_behind_distance=1.2 * GRAB_BALL_SPACING,
                                          forbidden_areas=self.forbidden_areas)  # make it easier
         if not self._is_ball_safe_to_kick():
             self.next_state = self.defense
@@ -115,6 +127,37 @@ class GoalKeeper(Tactic):
             return Idle
         else:
             return self.go_kick_tactic.exec()
+
+    def move_out_from_behind_goal(self):
+        if not self._goalkeeper_stuck_behind_goal():
+            self.next_state = self.defense
+            return self.next_state()
+
+        y = self.player.position.y
+        half_goal_width = self.field.goal_width / 2
+
+        way_point = []
+        if y > 0:
+            if y < half_goal_width + ROBOT_RADIUS:
+                way_point.append(WayPoint(Position(self.field.right + self.field.goal_depth + ROBOT_RADIUS,
+                                                   half_goal_width + ROBOT_RADIUS)))
+            target = Position(self.field.right - ROBOT_RADIUS, self.field.our_goal_area.top)
+        else:
+            if y > -half_goal_width - ROBOT_RADIUS:
+                way_point.append(WayPoint(Position(self.field.right + self.field.goal_depth + ROBOT_RADIUS,
+                                                   -half_goal_width - ROBOT_RADIUS)))
+            target = Position(self.field.right - ROBOT_RADIUS, self.field.our_goal_area.bottom)
+
+        return CmdBuilder().addMoveTo(Pose(target, self.player.orientation),
+                                      way_points=way_point).build()
+
+    def _goalkeeper_stuck_behind_goal(self):
+        return self.player.position.x > self.field.right and not self._goalkeeper_is_inside_goal()
+
+    def _goalkeeper_is_inside_goal(self):
+        x = self.player.position.x
+        y = self.player.position.y
+        return self.field.right < x < self.field.right + self.field.goal_depth and abs(y) < self.field.field_width / 2
 
     def _move_to_clamped_position(self, position, keep_player_orientation=False):
         a = (position - self.field.our_goal).angle
@@ -124,8 +167,7 @@ class GoalKeeper(Tactic):
         else:
             a = clamp(a, self.min_angle_from_goal + np.pi / 2, np.pi)
 
-        next_position = self.field.our_goal + \
-                        Position.from_angle(a, self.circle_radius)
+        next_position = self.field.our_goal + Position.from_angle(a, self.circle_radius)
 
         if keep_player_orientation:
             orientation = self.player.pose.orientation

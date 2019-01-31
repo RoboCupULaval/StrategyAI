@@ -81,7 +81,7 @@ class CmdBuilder:
                          cruise_speed=self._cruise_speed,
                          end_speed=self._end_speed,
                          ball_collision=self._ball_collision,
-                         way_points=self._way_points,
+                         way_points=self._way_points,  # Points the robot must follow before reaching the target
                          enable_pathfinder=self._enable_pathfinder)
 
 
