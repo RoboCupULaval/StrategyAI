@@ -3,7 +3,7 @@
 import logging
 from typing import List, Dict, Type
 
-from ai.STA.Strategy.celebrate import BeFree2
+from ai.STA.Strategy.celebrate import Celebrate
 from ai.STA.Strategy.smart_stop import SmartStop
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.ball_placement import BallPlacement
@@ -47,7 +47,7 @@ class StrategyBook:
         strategy_book = {TestPassing,
                          HumanControl,
                          IndianaJones,
-                         BeFree2,
+                         Celebrate,
                          RobocupChoreography,
                          BambaFollow,
                          PassesWithDecisions,

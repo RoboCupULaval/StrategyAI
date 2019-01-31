@@ -11,7 +11,7 @@ from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.tactic_constants import Flags
 
 
-class BeFree2(Strategy):
+class Celebrate(Strategy):
 
     DISTANCE_LIMIT = 300
 
