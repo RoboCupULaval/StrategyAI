@@ -90,7 +90,7 @@ class Strategy(metaclass=ABCMeta):
                     cmd_ai[player] = self.roles_graph[r].exec()
                     cmd_debug = self.roles_graph[r].debug_cmd()
                     if cmd_debug is not None:
-                       cmds_debug.extend(cmd_debug)
+                        cmds_debug.extend(cmd_debug)
                 except EmptyGraphException:
                     continue
 

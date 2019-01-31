@@ -23,7 +23,10 @@ REASONABLE_OFFSET = 50  # To take into account the camera precision and other th
 KEEPOUT_DISTANCE_FROM_BALL = 500 + ROBOT_RADIUS + REASONABLE_OFFSET
 KEEPOUT_DISTANCE_FROM_GOAL = ROBOT_RADIUS + REASONABLE_OFFSET
 
-# Rule 9.4
+# Rule 5.2: Minimum movement before a ball is "in play"
+IN_PLAY_MIN_DISTANCE = 50
+
+# Rule 8.2.1: Distance from the opposing team defending zone
 INDIRECT_KICK_OFFSET = 200
 
 # Deadzones

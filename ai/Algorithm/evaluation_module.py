@@ -1,12 +1,13 @@
 # Under MIT License, see LICENSE.txt
+import logging
 from typing import List
 
 import numpy as np
 
-from Util.constant import ROBOT_RADIUS
-from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, closest_point_on_line
+from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, closest_point_on_line, normalize
 from Util.position import Position
 from Util.role import Role
+from Util.constant import ROBOT_RADIUS
 from ai.Algorithm.path_partitionner import Obstacle
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
@@ -42,17 +43,18 @@ def player_pointing_toward_segment(player: Player, segment: Line):
 
 
 def player_covered_from_goal(player: Player):
+    ball_position = GameState().ball.position
     shooting_angle = angle_between_three_points(GameState().field.their_goal_line.p1,
-                                                player.position, GameState().field.their_goal_line.p2)
-    vec_player_to_goal = GameState().field.their_goal - player.position
+                                                ball_position, GameState().field.their_goal_line.p2)
+    vec_ball_to_goal = GameState().field.their_goal - ball_position
 
     our_team = [other_player for other_player in GameState().our_team.available_players.values() if
                 other_player is not player]
     enemy_team = [other_player for other_player in GameState().enemy_team.available_players.values()]
     pertinent_collisions = []
     for other_player in our_team + enemy_team:
-        if object_pointing_toward_point(player.position,
-                                        vec_player_to_goal.angle,
+        if object_pointing_toward_point(ball_position,
+                                        vec_ball_to_goal.angle,
                                         other_player.position,
                                         wrap_to_pi(shooting_angle + 5 * np.pi / 180)):
             pertinent_collisions.append(Obstacle(other_player.position.array, avoid_distance=90))
@@ -62,23 +64,25 @@ def player_covered_from_goal(player: Player):
     pertinent_collisions_positions = np.array([obs.position for obs in pertinent_collisions])
     pertinent_collisions_avoid_radius = np.array([obs.avoid_distance for obs in pertinent_collisions])
     results = []
-    for i in range(0, 15 + 1):  # discretisation de la ligne de but
-        goal_point = GameState().field.their_goal_line.p1 + GameState().field.their_goal_line.direction * \
-                     (GameState().field.their_goal_line.length * i / 15)
+    nb_beam = 15
+    their_goal_line = GameState().field.their_goal_line
+    for i in range(0, nb_beam + 1):  # discretisation de la ligne de but
+        goal_point = their_goal_line.p1 + their_goal_line.direction * (their_goal_line.length * i / nb_beam)
         is_colliding = is_path_colliding(pertinent_collisions, pertinent_collisions_positions,
-                                         pertinent_collisions_avoid_radius, player.position.array, goal_point.array)
+                                         pertinent_collisions_avoid_radius, ball_position.array, goal_point.array)
         results.append((is_colliding, goal_point))
-    max_len_seg, indexend = find_max_consecutive_bool(results)
+    max_len_seg, index_end = find_max_consecutive_bool(results)
 
-    if max_len_seg == 0 and indexend == 0:
+    if max_len_seg == 0 and index_end == 0:
         return None
-    return results[int(indexend - 1 - np.math.ceil(max_len_seg / 2))][1]
+    middle_idx = int(index_end - 1 - max_len_seg // 2)
+    return results[middle_idx][1]
 
 
 def find_max_consecutive_bool(results):
     count = 0
     max_len_seg = 0  # longueur du segment
-    indexend = 0
+    index_end = 0
 
     for i, (is_colliding, _) in enumerate(results):
         if not is_colliding:
@@ -86,12 +90,12 @@ def find_max_consecutive_bool(results):
         else:
             if count > max_len_seg:
                 max_len_seg = count
-                indexend = i
+                index_end = i
             count = 0
     if count > max_len_seg:
         max_len_seg = count
-        indexend = i
-    return [max_len_seg, indexend]
+        index_end = i
+    return max_len_seg, index_end
 
 
 def is_path_colliding(obstacles, obstacles_position, obstacles_avoid_radius, start, target) -> bool:
@@ -115,6 +119,7 @@ def find_collisions(obstacles: List[Obstacle], obstacles_position: np.ndarray, o
 
 
 # noinspection PyUnusedLocal
+# TODO: Change 'our_team' to 'is_our_team'
 def closest_players_to_point(point: Position, our_team=None):
     # Retourne une liste de tuples (player, distance) en ordre croissant de distance,
     # our_team pour obtenir une liste contenant une équipe en particulier
@@ -137,6 +142,13 @@ def closest_player_to_point(point: Position, our_team=None):
     # Retourne le player le plus proche,
     # our_team pour obtenir une liste contenant une équipe en particulier
     return closest_players_to_point(point, our_team)[0]
+
+
+def closest_players_to_point_except(point: Position, except_roles=[], except_players=[]):
+    closests = closest_players_to_point(point, our_team=True)
+    ban_players = except_players.copy()
+    ban_players += [GameState().get_player_by_role(r) for r in except_roles]
+    return [player_dist for player_dist in closests if player_dist.player not in ban_players]
 
 
 # noinspection PyUnresolvedReferences
@@ -211,6 +223,18 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
         # print(scores)
         # print(scores_temp)
     return scores
+
+
+def ball_going_toward_player(game_state, player):
+    if game_state.ball.is_mobile(50):  # to avoid division by zero and unstable ball_directions
+        ball_approach_angle = np.arccos(np.dot(normalize(player.position - game_state.ball.position).array,
+                                               normalize(game_state.ball.velocity).array)) * 180 / np.pi
+        return ball_approach_angle < 25
+    return False
+
+
+def ball_not_going_toward_player(game_state, player):
+    return not ball_going_toward_player(game_state, player)
 
 
 # noinspection PyPep8Naming
