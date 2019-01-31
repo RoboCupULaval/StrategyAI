@@ -15,13 +15,10 @@ la STA, dont le papier de recherche se retrouve
 
 
 ### Installation
-To install all including all the tools (referee, simulator, ui and autoref):
+Pour install ultron et tous les outils (referee, simulator, ui and autoref):
 ```bash
-sudo apt-get install python3
-mkdir -p ~/robocup/ultron
-cd !$ && git clone https://github.com/RoboCupULaval/StrategyAI.git
-cd StrategyAI/
-python3 install_all.py
+sudo apt-get install curl git
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/RoboCupULaval/StrategyAI/dev/scripts/install_from_scratch.sh)"
 ```
 
 ### Workflow Git
@@ -33,11 +30,18 @@ Le dépôt StrategyAI fonctionne avec les pull requests:
 Pour que le code soit considéré comme valide, celui-ci doit respecter le standard de code [PEP-8](https://www.python.org/dev/peps/pep-0008/).
 De plus, le code doit avoir les tests unitaires associés.
 
+### Emplacements des logiciels
+- `~/robocup/tools`
+    - `grSim/`: Simulateur, peut-être lancer via la commande `grsim`
+    - `ssl-refbox/`: Logiciel de Referee, pour le lancer `cd ~/robocup/tools/ssl-refbox && ./sslrefbox`
+- `~/robocup/ultron`
+    - `StrategyAI/`: Back-end, pour lancer voir plus bas
+    - `UI-Debug/`: Front-end, pour lancer voir plus bas
+
 ### Exemple pour lancer deux équipes:
 À modifier selon vos chemins, à lancer à partir de la racine du dépôt de StrategyAI. Ce fichier est disponible à la racine du dépôt sous le nom de dual_launch.sh
 
->#!/bin/bash
->
->#start ai blue
->
->python main.py config/sim.cfg | python main.py config/sim_yellow.cfg | python ../UI-Debug/main.py config/field/sim.cfg blue | python ../UI-Debug/main.py config/field/sim.cfg yellow
+```bash
+source ~/robocup/ultron/virtualenv/bin/activate
+bash ./dual_launch_two_ui.sh
+```

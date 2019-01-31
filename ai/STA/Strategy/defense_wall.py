@@ -1,22 +1,18 @@
 # Under MIT license, see LICENSE.txt
 from functools import partial
-from itertools import zip_longest, cycle
+from itertools import cycle
+
+import numpy as np
 
 from Util.geometry import normalize
 from Util.role import Role
-from Util.position import Position
-from Util.pose import Pose
-import numpy as np
-
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall, FETCH_BALL_ZONE_RADIUS
 from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
-from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 

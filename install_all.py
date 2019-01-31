@@ -19,7 +19,7 @@ CMAKE_INSTALL_CMD = "mkdir -p build && cd build && cmake .. && make -j 4"
 
 
 def run_cmd(cmd, working_directory=None):
-    print("{color}==>{end_color}  {cmd}".format(color=GREEN, end_color=END_COLOR, cmd=cmd))
+    print(f"{GREEN}==>{END_COLOR}  {cmd}")
     subprocess.Popen(cmd,
                      shell=True,
                      cwd=working_directory).wait()
@@ -52,6 +52,9 @@ def grsim():
     run_cmd("git apply {}".format(PATCH_FILE), TOOLS_DIR + "/grSim")
     run_cmd("cp {src} {dst}".format(src=CORRECT_GRSIM_CONFIG, dst=TOOLS_DIR + "/.grsim.xml"))
 
+    # Desktop shortcut
+    run_cmd("cp {src} {dst}".format(src=os.getcwd() + "/scripts/grsim.desktop", dst="~/Desktop"))
+
     cmake_install("vartypes")
     cmake_install("grSim")
 
@@ -65,6 +68,9 @@ def ssl_refbox():
 
     # This patch change the default port and make so adding team's name is not mandatory
     run_cmd("git apply {}".format(PATCH_FILE), TOOLS_DIR + "/ssl-refbox")
+
+    # Add a desktop shortcut
+    run_cmd("cp {src} {dst}".format(src=os.getcwd() + "/scripts/ssl-refbox.desktop", dst="~/Desktop"))
 
     cmake_install("ssl-refbox", install=False)
 
