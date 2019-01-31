@@ -41,7 +41,7 @@ class CmdBuilder:
                   cruise_speed: float=1,
                   end_speed: float=0,
                   ball_collision=True,
-                  way_points=None,
+                  way_points=None,  # Points the robot must follow before reaching the target
                   enable_pathfinder=True):
         assert isinstance(target, (Pose, Position))
 

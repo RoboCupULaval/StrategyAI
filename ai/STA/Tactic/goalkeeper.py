@@ -133,23 +133,19 @@ class GoalKeeper(Tactic):
             self.next_state = self.defense
             return self.next_state()
 
-        y = self.player.position.y
-        half_goal_width = self.field.goal_width / 2
+        goal_area_corner = Position(self.field.right - ROBOT_RADIUS, self.field.our_goal_area.top)
+        goal_corner = Position(self.field.right + self.field.goal_depth + ROBOT_RADIUS,
+                               self.field.goal_width / 2 + ROBOT_RADIUS)
 
-        way_point = []
-        if y > 0:
-            if y < half_goal_width + ROBOT_RADIUS:
-                way_point.append(WayPoint(Position(self.field.right + self.field.goal_depth + ROBOT_RADIUS,
-                                                   half_goal_width + ROBOT_RADIUS)))
-            target = Position(self.field.right - ROBOT_RADIUS, self.field.our_goal_area.top)
-        else:
-            if y > -half_goal_width - ROBOT_RADIUS:
-                way_point.append(WayPoint(Position(self.field.right + self.field.goal_depth + ROBOT_RADIUS,
-                                                   -half_goal_width - ROBOT_RADIUS)))
-            target = Position(self.field.right - ROBOT_RADIUS, self.field.our_goal_area.bottom)
+        if self.player.position.y < 0:
+            goal_area_corner = goal_area_corner.flip_y()
+            goal_corner = goal_corner.flip_y()
 
-        return CmdBuilder().addMoveTo(Pose(target, self.player.orientation),
-                                      way_points=way_point).build()
+        way_points = []
+        if -goal_corner.y < self.player.position.y < goal_corner.y:
+            way_points.append(WayPoint(goal_corner))
+
+        return CmdBuilder().addMoveTo(Pose(goal_area_corner, self.player.orientation), way_points=way_points).build()
 
     def _goalkeeper_stuck_behind_goal(self):
         return self.player.position.x > self.field.right and not self._goalkeeper_is_inside_goal()
@@ -157,7 +153,8 @@ class GoalKeeper(Tactic):
     def _goalkeeper_is_inside_goal(self):
         x = self.player.position.x
         y = self.player.position.y
-        return self.field.right < x < self.field.right + self.field.goal_depth and abs(y) < self.field.field_width / 2
+        goal_right = self.field.right + self.field.goal_depth
+        return self.field.right < x < goal_right and abs(y) < self.field.field_width / 2
 
     def _move_to_clamped_position(self, position, keep_player_orientation=False):
         a = (position - self.field.our_goal).angle
