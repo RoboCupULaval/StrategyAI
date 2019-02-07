@@ -5,7 +5,7 @@ from unittest.suite import _DebugResult
 import numpy as np
 
 from Debug.debug_command_factory import DebugCommandFactory, BLUE, GREEN
-from ai.Algorithm.evaluation_module import player_with_ball, player_pointing_toward_point, \
+from ai.Algorithm.evaluation_module import player_with_ball, \
     player_pointing_toward_segment, closest_players_to_point
 
 __author__ = 'RoboCupULaval'
@@ -160,7 +160,7 @@ class GoalKeeper(Tactic):
 
     def _best_target_into_goal(self):
         if 0 < len(self.game_state.enemy_team.available_players):
-            enemy_player_with_ball = player_with_ball(min_dist_from_ball=200, our_team=False)
+            enemy_player_with_ball = player_with_ball(min_dist_from_ball=200, is_our_team=False)
             if enemy_player_with_ball is not None:
                 if player_pointing_toward_segment(enemy_player_with_ball, self.GOAL_LINE):
                     ball = self.game_state.ball
@@ -197,7 +197,7 @@ class GoalKeeper(Tactic):
             return []
 
     def _no_enemy_around_ball(self):
-        closest = closest_players_to_point(self.game_state.ball_position, our_team=False)
+        closest = closest_players_to_point(self.game_state.ball_position, is_our_team=False)
         if len(closest) == 0:
             return True
         return closest[0].distance > self.DANGEROUS_ENEMY_MIN_DISTANCE

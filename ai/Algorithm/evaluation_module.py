@@ -19,17 +19,13 @@ class PlayerPosition(object):
         self.distance = distance
 
 
-def player_with_ball(min_dist_from_ball=1.2 * ROBOT_RADIUS, our_team=None):
+def player_with_ball(min_dist_from_ball, is_our_team: bool):
     # Retourne le joueur qui possède la balle, NONE si balle libre
-    closest_player = closest_player_to_point(GameState().ball_position, our_team)
+    closest_player = closest_player_to_point(GameState().ball_position, is_our_team)
     if closest_player.distance < min_dist_from_ball:
         return closest_player.player
     else:
         return None
-
-
-def player_pointing_toward_point(player: Player, point: Position, angle_tolerance=90 * np.pi / 180):
-    return abs((player.pose.orientation - (point - player.position).angle)) < angle_tolerance / 2
 
 
 def object_pointing_toward_point(object_position, object_orientation, point, angle_tolerance=90 * np.pi / 180):
@@ -119,17 +115,16 @@ def find_collisions(obstacles: List[Obstacle], obstacles_position: np.ndarray, o
 
 
 # noinspection PyUnusedLocal
-# TODO: Change 'our_team' to 'is_our_team'
-def closest_players_to_point(point: Position, our_team=None):
+def closest_players_to_point(point: Position, is_our_team: bool):
     # Retourne une liste de tuples (player, distance) en ordre croissant de distance,
-    # our_team pour obtenir une liste contenant une équipe en particulier
+    # is_our_team pour obtenir une liste contenant une équipe en particulier
     list_player = []
-    if our_team or our_team is None:
+    if is_our_team:
         for i in GameState().our_team.available_players.values():
             # les players friends
             player_distance = (i.pose.position - point).norm
             list_player.append(PlayerPosition(i, player_distance))
-    if not our_team:
+    else:
         for i in GameState().enemy_team.available_players.values():
             # les players ennemis
             player_distance = (i.pose.position - point).norm
@@ -138,14 +133,14 @@ def closest_players_to_point(point: Position, our_team=None):
     return list_player
 
 
-def closest_player_to_point(point: Position, our_team=None):
+def closest_player_to_point(point: Position, is_our_team: bool):
     # Retourne le player le plus proche,
-    # our_team pour obtenir une liste contenant une équipe en particulier
-    return closest_players_to_point(point, our_team)[0]
+    # is_our_team pour obtenir une liste contenant une équipe en particulier
+    return closest_players_to_point(point, is_our_team)[0]
 
 
 def closest_players_to_point_except(point: Position, except_roles=[], except_players=[]):
-    closests = closest_players_to_point(point, our_team=True)
+    closests = closest_players_to_point(point, is_our_team=True)
     ban_players = except_players.copy()
     ban_players += [GameState().get_player_by_role(r) for r in except_roles]
     return [player_dist for player_dist in closests if player_dist.player not in ban_players]
@@ -202,29 +197,6 @@ def line_of_sight_clearance(player, target):
     return score
 
 
-# noinspection PyUnusedLocal
-def line_of_sight_clearance_ball(player, targets, distances=None):
-    # Retourne un score en fonction du dégagement de la trajectoire de la target vers la ball excluant le robot actuel
-    # (plus c'est dégagé plus le score est petit)
-    ball_position = GameState().ball_position
-    if distances is None:
-        # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
-        scores = np.sqrt(((targets - np.array(ball_position)) *
-                          (targets - np.array(ball_position))).sum(axis=1))
-    else:
-        scores = distances
-    # for j in GameState().my_team.available_players.values():
-    #     # Obstacle : les players friends
-    #     if not (j.id == player.id or j.pose.position == target):
-    #         score *= trajectory_score(GameState().get_ball_position(), target, j.pose.position)
-    for j in GameState().enemy_team.available_players.values():
-        # Obstacle : les players ennemis
-        scores *= trajectory_score(GameState().ball_position, targets, j.pose.position)
-        # print(scores)
-        # print(scores_temp)
-    return scores
-
-
 def ball_going_toward_player(game_state, player):
     if game_state.ball.is_mobile(50):  # to avoid division by zero and unstable ball_directions
         ball_approach_angle = np.arccos(np.dot(normalize(player.position - game_state.ball.position).array,
@@ -265,15 +237,3 @@ def trajectory_score(pointA, pointsB, obstacle):
         scores = max(1, min_proportion)
     return scores
 
-
-def get_away_from_trajectory(position, start, end, min_distance):
-    try:
-        point = closest_point_on_line(position, start, end)
-        dist = position - point
-    except ZeroDivisionError:
-        point = position
-        dist = perpendicular(end - start) * min_distance / 2
-    if dist.norm < min_distance:
-        return point - dist.norm * min_distance
-    else:
-        return position

@@ -192,10 +192,10 @@ class DefenseWall(Strategy):
     def _generate_cover_to_coveree_mapping(self):
         # We want to assign a coveree(enemy) to every cover(ally)
         # We also want to know for each cover(ally), the other covers that share the same target(enemy)
-        closest_enemies_to_ball = closest_players_to_point(self.game_state.ball_position, our_team=False)
+        closest_enemies_to_ball = closest_players_to_point(self.game_state.ball_position, is_our_team=False)
         if len(closest_enemies_to_ball) > 0:
             closest_enemy_to_ball = closest_enemies_to_ball[0].player
-            closest_enemies_to_our_goal = closest_players_to_point(self.game_state.field.our_goal, our_team=False)
+            closest_enemies_to_our_goal = closest_players_to_point(self.game_state.field.our_goal, is_our_team=False)
             enemy_not_with_ball = [enemy.player for enemy in closest_enemies_to_our_goal if enemy.player is not closest_enemy_to_ball]
         else:
             enemy_not_with_ball = []
