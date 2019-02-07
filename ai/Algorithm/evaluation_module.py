@@ -3,8 +3,10 @@ import logging
 from typing import List
 
 import numpy as np
+import math
 
-from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, closest_point_on_line, normalize
+from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, closest_point_on_line, normalize, \
+    clamp
 from Util.position import Position
 from Util.role import Role
 from Util.constant import ROBOT_RADIUS
@@ -183,7 +185,7 @@ def best_passing_option(passing_player, passer_can_kick_in_goal=True):
     return receiver
 
 
-def line_of_sight_clearance(player, target):
+def line_of_sight_clearance(player: Player, target: Position):
     # Retourne un score en fonction du dégagement de la trajectoire (plus c'est dégagé plus le score est petit)
     score = (player.pose.position - target).norm
     for p in GameState().our_team.available_players.values():
@@ -209,31 +211,26 @@ def ball_not_going_toward_player(game_state, player):
     return not ball_going_toward_player(game_state, player)
 
 
-# noinspection PyPep8Naming
-def trajectory_score(pointA, pointsB, obstacle):
+def trajectory_score(player: Position, target: Position, obstacle: Position):
     # Retourne un score en fonction de la distance de l'obstacle par rapport à la trajectoire AB
-    proportion_max = 15  # Proportion du triangle rectancle derrière les robots obstacles
+    min_proportion = 1
+    max_proportion = 15  # Proportion max du triangle rectancle derrière les robots obstacles
 
-    # FIXME: HACK SALE, je ne comprends pas le fonctionnement de cette partie du code, analyser plus tard!
-    if isinstance(pointA, Position):
-        pointA = pointA.array
-    if isinstance(obstacle, Position):
-        obstacle = obstacle.array
+    player_to_target = target - player
+    player_to_obstacle = obstacle - player
 
-    if isinstance(pointsB, Position):
-        pointsB = pointsB.array
+    player_to_target_norm = player_to_target.norm
 
-    scores = np.array([0])
-    AB = pointsB - pointA
-    AO = obstacle - pointA
-    # la maniere full cool de calculer la norme d'un matrice verticale de vecteur horizontaux:
-    normsAB = np.sqrt(np.transpose((AB * AB)).sum(axis=0))
-    normsAC = np.divide(np.dot(AB, AO), normsAB)
-    normsOC = np.sqrt(np.abs(np.linalg.norm(AO) ** 2 - normsAC ** 2))
-    if normsAC < 0 or normsAC > 1.1 * normsAB:
-        scores = 1
+    # Point C is the projection of player_to_obstacle on player_to_target
+    player_to_c_norm = player_to_target.dot(player_to_obstacle) / player_to_target_norm
+    obstacle_to_c_norm = math.sqrt(player_to_obstacle.norm ** 2 - player_to_c_norm ** 2)
+
+    if player_to_c_norm < 0 or player_to_c_norm > 1.1 * player_to_target_norm:
+        score = min_proportion
+    elif obstacle_to_c_norm == 0:
+        score = max_proportion
     else:
-        min_proportion = proportion_max if normsOC == 0 else min(normsAC / normsOC, proportion_max)
-        scores = max(1, min_proportion)
-    return scores
+        score = clamp(player_to_c_norm / obstacle_to_c_norm, min_proportion, max_proportion)
+
+    return score
 
