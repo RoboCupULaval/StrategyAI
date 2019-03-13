@@ -1,11 +1,10 @@
 # Under MIT license, see LICENSE.txt
 
+import logging
 from abc import ABCMeta
 from typing import List, Tuple, Callable, Dict
 
-import logging
-
-from Util import AICommand, Pose
+from Util import AICommand
 from Util.role import Role
 from ai.Algorithm.Graph.Graph import Graph, EmptyGraphException
 from ai.Algorithm.Graph.Node import Node
@@ -91,7 +90,7 @@ class Strategy(metaclass=ABCMeta):
                     cmd_ai[player] = self.roles_graph[r].exec()
                     cmd_debug = self.roles_graph[r].debug_cmd()
                     if cmd_debug is not None:
-                       cmds_debug.extend(cmd_debug)
+                        cmds_debug.extend(cmd_debug)
                 except EmptyGraphException:
                     continue
 

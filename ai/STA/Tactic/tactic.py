@@ -1,15 +1,16 @@
 # Under MIT licence, see LICENCE.txt
-from typing import List, Optional, Any, Iterable
-
 import logging
+from typing import List, Optional, Any
+
+import time
 
 from Debug.debug_command_factory import DebugCommandFactory, VIOLET
 from Util import Pose, Position
 from Util.ai_command import AICommand
-from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL
+from Util.ai_command import Idle
+from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL
 from Util.geometry import Area, Line
 from ai.GameDomainObjects import Player
-from Util.ai_command import Idle
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
@@ -17,6 +18,7 @@ __author__ = 'RobocupULaval'
 
 
 class Tactic:
+    DEFAULT_DEBUG_CMD_TIMEOUT = 1
 
     def __init__(self, game_state: GameState, player: Player, target: Optional[Pose]=None,
                  args: Optional[List[Any]]=None, forbidden_areas: Optional[List[Area]]=None):
@@ -51,6 +53,8 @@ class Tactic:
                                      self.game_state.field.our_goal_forbidden_area]
         else:
             self.forbidden_areas = forbidden_areas
+
+        self.debug_cmd_timeout = time.time()
 
     def halt(self) -> Idle:
         self.next_state = self.halt
@@ -100,9 +104,11 @@ class Tactic:
 
     def debug_cmd(self):
         cmds = []
-        [cmds.extend(DebugCommandFactory().area(area, color=VIOLET)) for area in self.forbidden_areas]
+        if time.time() - self.debug_cmd_timeout > self.DEFAULT_DEBUG_CMD_TIMEOUT:
+            [cmds.extend(DebugCommandFactory().area(area, color=VIOLET, timeout=self.DEFAULT_DEBUG_CMD_TIMEOUT))
+             for area in self.forbidden_areas]
+            self.debug_cmd_timeout = time.time()
         return cmds
-        #return []
 
     @classmethod
     def name(cls):

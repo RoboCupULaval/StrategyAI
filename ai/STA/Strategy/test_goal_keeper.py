@@ -26,7 +26,8 @@ class TestGoalKeeper(Strategy):
         node_go_kick = self.create_node(Role.FIRST_ATTACK, GoKick(self.game_state,
                                                                   attacker,
                                                                   target=our_goal,
-                                                                  kick_force=KickForce.HIGH))
+                                                                  kick_force=KickForce.HIGH,
+                                                                  forbidden_areas=self.game_state.field.border_limits))
 
         player_has_kicked = partial(self.has_kicked, Role.FIRST_ATTACK)
 

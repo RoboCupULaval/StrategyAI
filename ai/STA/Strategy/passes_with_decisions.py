@@ -2,16 +2,13 @@
 
 from functools import partial
 
-from Util.pose import Position, Pose
-
+from Util.role import Role
 from ai.Algorithm.evaluation_module import best_passing_option
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.pass_to_player import PassToPlayer
-from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.tactic_constants import Flags
-from Util.role import Role
 
 
 # TODO: This strategy is quite limited, only a two player move (FIRST_ATTACK and GOALER)

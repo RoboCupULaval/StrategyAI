@@ -1,38 +1,34 @@
 # Under MIT licence, see LICENCE.txt
-import time
 from math import tan
 from typing import List, Optional
 
-import numpy as np
-
 from Debug.debug_command_factory import DebugCommandFactory
-from Util import Pose, Position
+from Util import Pose
+from Util.ai_command import Idle, MoveTo
+from Util.constant import ROBOT_RADIUS, ROBOT_DIAMETER, KEEPOUT_DISTANCE_FROM_BALL
 from Util.geometry import perpendicular, normalize, find_bisector_of_triangle, angle_between_three_points, Line, \
     intersection_line_and_circle
-
-from Util.constant import BALL_RADIUS, ROBOT_RADIUS, ROBOT_DIAMETER, KEEPOUT_DISTANCE_FROM_BALL
 from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
-from Util.ai_command import Idle, CmdBuilder, MoveTo
 from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.tactic import Tactic
-from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 __author__ = 'RoboCupULaval'
 
 ORIENTATION_DEADZONE = 0.2
+DANGEROUS_ENEMY_MIN_DISTANCE = 500
 
 GAP_IN_WALL = 40  # in mm, distance that prevent robots from touching each other
 FETCH_BALL_ZONE_RADIUS = 1000  # in mm, circle around the wall's robot, where it can go kick the ball
 
+
 class AlignToDefenseWall(Tactic):
     def __init__(self, game_state: GameState,
                  player: Player,
-                 args: Optional[List[str]]=None,
-                 robots_in_formation: Optional[List[Player]]=None,
+                 args: Optional[List[str]] = None,
+                 robots_in_formation: Optional[List[Player]] = None,
                  object_to_block=None,
                  stay_away_from_ball=False,
                  cruise_speed=3):
@@ -84,11 +80,14 @@ class AlignToDefenseWall(Tactic):
 
         # The penalty zone used to be a circle and thus really easy to handle, but now it's a rectangle...
         # It easier to first create the smallest circle that fit the rectangle.
-        min_radius_over_penality_zone = ROBOT_RADIUS + (self.game_state.field.our_goal_area.upper_left - self.game_state.field.our_goal).norm
-        object_to_block_to_center_formation_dist = min(vec_object_to_goal_line_bisect.norm - min_radius_over_penality_zone,
-                                                       object_to_center_formation_dist)
+        min_radius_over_penality_zone = ROBOT_RADIUS + \
+            (self.game_state.field.our_goal_area.upper_left - self.game_state.field.our_goal).norm
+        object_to_block_to_center_formation_dist = min(
+            vec_object_to_goal_line_bisect.norm - min_radius_over_penality_zone,
+            object_to_center_formation_dist)
 
-        self.center_formation = object_to_block_to_center_formation_dist * normalize(vec_object_to_goal_line_bisect) + self.object_to_block.position
+        self.center_formation = object_to_block_to_center_formation_dist * normalize(
+            vec_object_to_goal_line_bisect) + self.object_to_block.position
 
         if self.stay_away_from_ball:
             if (self.game_state.ball_position - self.center_formation).norm < KEEPOUT_DISTANCE_FROM_BALL:
@@ -170,12 +169,8 @@ class AlignToDefenseWall(Tactic):
             return inters[1]
 
     def _no_enemy_around_ball(self):
-        DANGEROUS_ENEMY_MIN_DISTANCE = 500
         ball_position = self.game_state.ball_position
         for enemy in self.game_state.enemy_team.available_players.values():
             if (enemy.position - ball_position).norm < DANGEROUS_ENEMY_MIN_DISTANCE:
                 return False
         return True
-
-
-

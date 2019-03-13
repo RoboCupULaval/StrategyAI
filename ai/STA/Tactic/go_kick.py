@@ -1,15 +1,14 @@
 # Under MIT licence, see LICENCE.txt
 
-import math as m
 import time
 from typing import List
 
 import numpy as np
 
 from Debug.debug_command_factory import DebugCommandFactory, CYAN, RED
-from Util.constant import ROBOT_CENTER_TO_KICKER, KickForce
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
+from Util.constant import ROBOT_CENTER_TO_KICKER, KickForce
 from Util.geometry import compare_angle, normalize
 from ai.Algorithm.evaluation_module import best_passing_option, player_covered_from_goal
 from ai.GameDomainObjects import Player
@@ -89,13 +88,13 @@ class GoKick(Tactic):
             collision_ball = False
         position_behind_ball = self.get_destination_behind_ball(effective_ball_spacing)
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
+
         if self.get_alignment_with_ball_and_target() < 25 \
                 and compare_angle(self.player.pose.orientation,
                                   required_orientation,
                                   abs_tol=max(0.05, 0.05 * dist_from_ball/1000)):
             self.next_state = self.grab_ball
-        else:
-            self.next_state = self.go_behind_ball
+
         return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation),
                                       cruise_speed=3,
                                       end_speed=0,
