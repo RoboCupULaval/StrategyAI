@@ -22,7 +22,7 @@ settings = {
 
 if Config()['COACH']['type'] == 'sim':
     settings['orientation_pid_settings'] = {'kp': 2, 'ki': 0.3, 'kd': 0}
-    settings['v_d'] = 15
+    settings['v_d'] = 40
     settings['emergency_brake_constant'] = 0
 
 
@@ -48,7 +48,6 @@ class VelocityRegulator(RegulatorBaseClass):
         cmd_orientation = clamp(cmd_orientation, -MAX_ANGULAR_SPEED, MAX_ANGULAR_SPEED)
 
         self.last_commanded_velocity = velocity
-        print(speed_norm, cmd_orientation)
         return Pose(velocity, cmd_orientation)
 
     def following_path_vector(self, robot):
