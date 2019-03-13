@@ -1,5 +1,3 @@
-# Under MIT license, see LICENSE.txt
-
 from typing import List
 
 from Debug.debug_command_factory import DebugCommandFactory, VIOLET
