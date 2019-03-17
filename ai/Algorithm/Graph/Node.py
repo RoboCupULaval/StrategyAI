@@ -1,9 +1,12 @@
 # Under MIT license, see LICENSE.txt
+import logging
 
 from ai.Algorithm.Graph.Vertex import Vertex
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from typing import Callable
+
+import time
 
 
 class Node:
@@ -28,6 +31,8 @@ class Node:
         assert isinstance(p_tactic, Tactic)
         self.tactic = p_tactic
         self.vertices = []
+
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def add_vertex(self, p_vertex):
         """
@@ -64,6 +69,7 @@ class Node:
             if vertex.evaluate_condition():
                 # The next node might has already been executed, thus it need a reset
                 vertex.next_node.set_flag(Flags.INIT)
+                print(f"{time.time()} Robot {self.tactic.player} Switching from {self} to {vertex.next_node}")
                 return next_ai_command, vertex.next_node
         return next_ai_command, self
 
@@ -79,7 +85,4 @@ class Node:
         """
         :return: Une représentation du noeud sous forme d'une chaîne de caractères.
         """
-        output_string = "Tactic: " + str(self.tactic) + "/ Vertices: "
-        for vertex in self.vertices:
-            output_string += "\n    " + str(vertex)
-        return output_string
+        return "Tactic: " + str(self.tactic)

@@ -31,7 +31,8 @@ class VisionReceiver(ReceiverProcess):
     def connect(self, connection_info):
         connection = socket(AF_INET, SOCK_DGRAM)
         connection.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        connection.bind(connection_info)
+        # For some reason with Ubuntu on Windows (WSL) you need to first bind to 0.0.0.0, before changing the address
+        connection.bind(('0.0.0.0', connection_info[1])) 
         if ip_address(connection_info[0]).is_multicast:
             connection.setsockopt(IPPROTO_IP,
                                   IP_ADD_MEMBERSHIP,
