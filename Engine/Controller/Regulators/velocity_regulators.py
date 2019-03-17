@@ -22,8 +22,8 @@ settings = {
 
 if Config()['COACH']['type'] == 'sim':
     settings['orientation_pid_settings'] = {'kp': 2, 'ki': 0.3, 'kd': 0}
-    settings['v_d'] = 40
-    settings['emergency_brake_constant'] = 0
+    settings['v_d'] = 15
+    settings['brake_offset'] = 1
 
 
 class VelocityRegulator(RegulatorBaseClass):

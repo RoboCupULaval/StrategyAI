@@ -76,26 +76,27 @@ class GoKick(Tactic):
         if self.auto_update_target:
             self._find_best_passing_option()
         self.status_flag = Flags.WIP
+        dist_from_ball = (self.player.position - self.game_state.ball_position).norm
+
         required_orientation = (self.target.position - self.game_state.ball_position).angle
         ball_speed = self.game_state.ball.velocity.norm
         ball_speed_modifier = (ball_speed/1000 + 1)
         angle_behind = self.get_alignment_with_ball_and_target()
         if angle_behind > 35:
-            effective_ball_spacing = GO_BEHIND_SPACING * min(3, abs(angle_behind/45)) * ball_speed_modifier
+            effective_ball_spacing = GO_BEHIND_SPACING
             collision_ball = True
         else:
             effective_ball_spacing = GO_BEHIND_SPACING
             collision_ball = False
+            if self.get_alignment_with_ball_and_target() < 35 \
+                    and compare_angle(self.player.pose.orientation,
+                                      required_orientation,
+                                      abs_tol=max(0.05, 0.05 * dist_from_ball / 1000)):
+                self.next_state = self.grab_ball
+            else:
+                self.next_state = self.go_behind_ball
         position_behind_ball = self.get_destination_behind_ball(effective_ball_spacing)
-        dist_from_ball = (self.player.position - self.game_state.ball_position).norm
 
-        if self.get_alignment_with_ball_and_target() < 35 \
-                and compare_angle(self.player.pose.orientation,
-                                  required_orientation,
-                                  abs_tol=max(0.05, 0.05 * dist_from_ball/1000)):
-            self.next_state = self.grab_ball
-        else:
-            self.next_state = self.go_behind_ball
 
         if (angle_behind > 70) and (dist_from_ball<1000):
             cruise_speed = 1 + ball_speed/1000

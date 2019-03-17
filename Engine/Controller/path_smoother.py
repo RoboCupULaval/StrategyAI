@@ -12,45 +12,18 @@ def path_smoother(path, speed, end_speed) -> Tuple[Path, float]:
     if len(path) < 3:
         return path, end_speed
 
-    number_of_turns = len(path.points) - 2
-    next_speeds = []
-    next_turn_point_list = path
-    for i in range(number_of_turns):
-        p1 = path[i]
-        p2 = path[i+1]
-        p3 = path[i+2]
+    p1 = path[0]
+    p2 = path[1]
+    p3 = path[2]
 
-        p4, p5 = compute_circle_points(p1, p2, p3, speed, acc=MAX_LINEAR_ACCELERATION)
+    p4, p5 = compute_circle_points(p1, p2, p3, speed, acc=MAX_LINEAR_ACCELERATION)
 
-        if (p1 - p2).norm < (p4 - p2).norm or (p3 - p2).norm < (p5 - p2).norm:
-            point_list = path[:3]
-        else:
-            point_list = [path.start, p4, p5]
-        if i == 0:
-            next_turn_point_list = point_list
-        turn_radius, _ = compute_turn_radius(*point_list, speed, acc=MAX_LINEAR_ACCELERATION)
-        next_speed = speed_in_corner(turn_radius, acc=MAX_LINEAR_ACCELERATION)
-        next_speeds.append(next_speed)
-    retries = 0
-    i = 0
-    while i < len(next_speeds)-1:
-        if retries > 10:
-            next_speeds[0] = 0
-            break
-        initial_speed = next_speeds[i]
-        final_speed = next_speeds[i+1]
-        if final_speed > initial_speed:
-            pass
-        else:
-            delta_position = (path.points[i+1]-path.points[i+2]).norm
-            if not is_time_to_break(initial_speed, final_speed, delta_position):
-                next_speeds[i] = get_good_speed_to_break(final_speed, delta_position)
-                i = 0
-                retries += 1
-
-        i += 1
-
-    return Path.from_sequence(next_turn_point_list), next_speeds[0]
+    if (p1 - p2).norm < (p4 - p2).norm or (p3 - p2).norm < (p5 - p2).norm:
+        point_list = path[:3]
+    else:
+        point_list = [path.start, p4, p5]
+    turn_radius, _ = compute_turn_radius(*point_list, speed, acc=MAX_LINEAR_ACCELERATION)
+    return Path.from_sequence(point_list), 0
 
 
 def compute_circle_points(p1, p2, p3, speed: float, acc: float) -> Tuple[Position, Position]:
