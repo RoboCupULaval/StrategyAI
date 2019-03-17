@@ -2,9 +2,15 @@ from typing import Optional
 
 from Util import Pose, Position, Path
 from Util.geometry import wrap_to_pi
+from config.config import Config
 
+config = Config()
+
+if Config()['COACH']['type'] == 'sim':
+    MAX_LINEAR_ACCELERATION = 3000  # mm/s
+else:
+    MAX_LINEAR_ACCELERATION = 7000  # mm/s
 MAX_LINEAR_SPEED = 4000  # mm/s
-MAX_LINEAR_ACCELERATION = 4000  # mm/s^2
 MAX_ANGULAR_SPEED = 70  # rad/s
 MAX_ANGULAR_ACC = 10  # rad/s^2
 

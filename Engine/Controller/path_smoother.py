@@ -23,7 +23,9 @@ def path_smoother(path, speed, end_speed) -> Tuple[Path, float]:
     else:
         point_list = [path.start, p4, p5]
     turn_radius, _ = compute_turn_radius(*point_list, speed, acc=MAX_LINEAR_ACCELERATION)
-    return Path.from_sequence(point_list), 0
+    next_speed = speed_in_corner(turn_radius, acc=MAX_LINEAR_ACCELERATION)
+    next_speed = min(500.0, next_speed)
+    return Path.from_sequence(point_list), next_speed
 
 
 def compute_circle_points(p1, p2, p3, speed: float, acc: float) -> Tuple[Position, Position]:

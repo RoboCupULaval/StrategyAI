@@ -63,7 +63,7 @@ class GoKickExperimental(Tactic):
 
         ball_speed = self.game_state.ball.velocity.norm
         ball_speed_modifier = (ball_speed / 1000 + 1)
-        effective_ball_spacing = GO_BEHIND_SPACING * ball_speed_modifier
+        effective_ball_spacing = GO_BEHIND_SPACING * 1
 
         position_behind_ball_for_approach = self.get_destination_behind_ball(effective_ball_spacing)
         position_behind_ball_for_grab = self.game_state.ball_position - normalize(player_to_target) * GRAB_BALL_SPACING
@@ -72,7 +72,7 @@ class GoKickExperimental(Tactic):
         if self.is_able_to_grab_ball_directly(0.8):
             self.points_sequence = []
             if compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1) and \
-                    (dist_from_ball < GRAB_BALL_SPACING * 1.25):
+                    (dist_from_ball < GRAB_BALL_SPACING * 1):
                 self.next_state = self.validate_kick
                 return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
                                               ball_collision=False, cruise_speed=3).addKick(self.kick_force).build()
