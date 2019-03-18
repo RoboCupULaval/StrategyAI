@@ -65,47 +65,19 @@ class PathfinderModule:
         return path_obstacles
 
     def generate_path(self, player, ai_cmd: AICommand):
+
         way_points = ai_cmd.way_points
         start = player.position
         target = ai_cmd.target.position
-        path_to_target = self.sub_paths[player][-1]
         sub_paths = []
+        path_positions = [WayPoint(start), *way_points, WayPoint(target)]
+        for i in range(len(path_positions)-1):
+            sub_paths.append(self.generate_simple_path(path_positions[i].position, path_positions[i+1],
+                                                       player.velocity.position))
+        path = sub_paths[0]
+        for i in range(len(sub_paths)-1):
+            path += sub_paths[i+1]
 
-        if len(way_points) > 0:
-
-            if len(way_points) == (len(self.sub_paths[player])-1):
-                last_paths = self.sub_paths[player][:-1]
-            else:
-                last_paths = [None for _ in way_points]
-
-            way_point = way_points[0]
-            path_temp = self.generate_simple_path(start, way_point, player.velocity.position, last_paths[0])
-            path = path_temp
-            sub_paths += [path_temp]
-            start = way_point.position
-
-            if len(way_points) > 1:
-                for way_point, last_path in zip(way_points[1:], last_paths[1:]):
-                    sub_paths += [self.generate_simple_path(start,
-                                                            way_point,
-                                                            player.velocity.position,
-                                                            last_path)]
-                    start = way_point.position
-
-            # path reliant le dernier way_point à la target
-            path_temp = self.generate_simple_path(way_points[-1].position,
-                                                  WayPoint(target, ai_cmd.ball_collision),
-                                                  player.velocity.position,
-                                                  path_to_target)
-            path += path_temp
-            sub_paths += [path_temp]
-        else:
-            path = self.generate_simple_path(start,
-                                             WayPoint(target, ai_cmd.ball_collision),
-                                             player.velocity.position,
-                                             path_to_target)
-            sub_paths += [path]
-        self.sub_paths[player] = sub_paths
         path.filter(threshold=10)
         return path
 
