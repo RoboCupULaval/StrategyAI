@@ -70,7 +70,8 @@ class PathfinderModule:
         start = player.position
         target = ai_cmd.target.position
         sub_paths = []
-        path_positions = [WayPoint(start), *way_points, WayPoint(target)]
+        path_positions = [WayPoint(start, ball_collision=ai_cmd.ball_collision), *way_points,
+                          WayPoint(target, ball_collision=ai_cmd.ball_collision)]
         for i in range(len(path_positions)-1):
             sub_paths.append(self.generate_simple_path(path_positions[i].position, path_positions[i+1],
                                                        player.velocity.position))

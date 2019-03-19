@@ -19,7 +19,7 @@ from ai.states.game_state import GameState
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1
 
-GO_BEHIND_SPACING = 300
+GO_BEHIND_SPACING = 250
 GRAB_BALL_SPACING = 200
 APPROACH_SPEED = 100
 KICK_DISTANCE = 100
@@ -68,11 +68,10 @@ class GoKickExperimental(Tactic):
         position_behind_ball_for_approach = self.get_destination_behind_ball(effective_ball_spacing)
         position_behind_ball_for_grab = self.game_state.ball_position - normalize(player_to_target) * GRAB_BALL_SPACING
         position_behind_ball_for_kick = self.game_state.ball_position + normalize(player_to_target) * KICK_DISTANCE
-
-        if self.is_able_to_grab_ball_directly(0.8):
-            self.points_sequence = []
+        self.points_sequence = []
+        if self.is_able_to_grab_ball_directly(0.7):
             if compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1) and \
-                    (dist_from_ball < GRAB_BALL_SPACING):
+                    (dist_from_ball < GO_BEHIND_SPACING * 1.25):
                 self.next_state = self.validate_kick
                 return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
                                               ball_collision=False, cruise_speed=3).addKick(self.kick_force).build()
@@ -151,6 +150,5 @@ class GoKickExperimental(Tactic):
         vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
         alignement_behind = np.dot(vec_target_to_ball.array,
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
-
         return threshold < alignement_behind
 
