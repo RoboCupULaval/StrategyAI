@@ -28,6 +28,7 @@ from ai.STA.Strategy.robocup_choreography import RobocupChoreography
 from ai.STA.Strategy.bamba_follow import BambaFollow
 from ai.STA.Strategy.stay_away import StayAway
 from ai.STA.Strategy.test_goal_keeper import TestGoalKeeper
+from ai.STA.Strategy.test_high_speed import TestHighSpeed
 from ai.STA.Strategy.test_passing import TestPassing
 
 __author__ = "Maxime Gagnon-Legault, and others"
@@ -65,6 +66,7 @@ class StrategyBook:
                          TestGoalKeeper,
                          LineUp,
                          SmartStop,
+                         TestHighSpeed,
                          self.stop_strategy,
                          *default_strategies,
                          }

@@ -5,6 +5,7 @@ import numpy as np
 
 POSITION_ABS_TOL = 0.01
 
+
 #pylint: disable=invalid-name, invalid-unary-operand-type
 class Position:
 

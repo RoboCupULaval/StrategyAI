@@ -37,7 +37,6 @@ class StressTestRobotWaypoint(Tactic):
 
         if (self.player.position-self.points[0].position).norm < ROTATE_DISTANCE:
             self.points.rotate()
-
         return CmdBuilder().addMoveTo(Pose(self.points[0].position, orientation),
                                       way_points=list(self.points),
                                       cruise_speed=self.cruise_speed).build()
@@ -49,6 +48,5 @@ class StressTestRobot(StressTestRobotWaypoint):
 
         if (self.player.position - self.points[0].position).norm < ROTATE_DISTANCE:
             self.points.rotate()
-
         return CmdBuilder().addMoveTo(Pose(self.points[0].position, orientation),
                                       cruise_speed=self.cruise_speed).build()
