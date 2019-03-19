@@ -24,6 +24,7 @@ def path_smoother(path, speed, end_speed) -> Tuple[Path, float]:
         point_list = [path.start, p4, p5]
     turn_radius, _ = compute_turn_radius(*point_list, speed, acc=MAX_LINEAR_ACCELERATION)
     next_speed = speed_in_corner(turn_radius, acc=MAX_LINEAR_ACCELERATION)
+    next_speed = min(500.0, next_speed)
     return Path.from_sequence(point_list), next_speed
 
 
@@ -77,3 +78,13 @@ def deviation(radius: float, theta: float) -> float:
 def point_on_segment(start: Position, end: Position, distance: float):
     ratio = distance / (start-end).norm
     return start * (1-ratio) + end * ratio
+
+
+def is_time_to_break(initial_speed, final_speed, delta_positon):
+    return delta_positon < ((final_speed ** 2 - initial_speed ** 2) / 2 * MAX_LINEAR_ACCELERATION)
+
+
+def get_good_speed_to_break(final_speed, delta_position):
+    if final_speed ** 2 < 2 * MAX_LINEAR_ACCELERATION * delta_position:
+        return 0
+    return sqrt(final_speed ** 2 - 2 * MAX_LINEAR_ACCELERATION * delta_position)
