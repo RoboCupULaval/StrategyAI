@@ -94,7 +94,6 @@ class GoKick(Tactic):
                 self.next_state = self.go_behind_ball
         position_behind_ball = self.get_destination_behind_ball(effective_ball_spacing)
 
-
         if (angle_behind > 70) and (dist_from_ball<1000):
             cruise_speed = 1 + ball_speed/1000
         else:
@@ -116,6 +115,7 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
             self.kick_last_time = time.time()
+
         ball_speed = self.game_state.ball.velocity.norm
         required_orientation = (self.target.position - self.game_state.ball_position).angle
         position_behind_ball = self.get_destination_behind_ball(GRAB_BALL_SPACING)
@@ -131,7 +131,6 @@ class GoKick(Tactic):
             self.next_state = self.go_behind_ball
             return self.go_behind_ball()
         self.next_state = self.validate_kick
-
         player_to_target = (self.target.position - self.player.pose.position)
         position_behind_ball = self.game_state.ball_position + normalize(player_to_target) * ROBOT_CENTER_TO_KICKER
         required_orientation = (self.target.position - self.game_state.ball_position).angle
@@ -143,6 +142,7 @@ class GoKick(Tactic):
     def validate_kick(self):
         if self.game_state.ball.is_moving_fast() or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.halt
+
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
             self.next_state = self.kick
         else:
@@ -155,7 +155,7 @@ class GoKick(Tactic):
         if self.status_flag == Flags.INIT:
             self.next_state = self.initialize
         else:
-            self.status_flag = Flags.SUCCESS
+            self.status_flag = Flags.WIP
         return Idle
 
     def _get_distance_from_ball(self):
@@ -192,7 +192,7 @@ class GoKick(Tactic):
 
         position_behind = self.game_state.ball.position - dir_ball_to_target * ball_spacing
 
-        if velocity and self.game_state.ball.velocity.norm > 20:
+        if velocity and self.game_state.ball.velocity.norm > 2000000:
             position_behind += (self.game_state.ball.velocity -
                                 (normalize(self.game_state.ball.velocity) *
                                  np.dot(dir_ball_to_target.array,
