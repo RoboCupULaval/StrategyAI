@@ -50,7 +50,7 @@ class SlapShot(Strategy):
             else:
                 node_go_to_position = self.create_node(role, GoToPosition(self.game_state, player,
                                                                           Pose(Position(0, -200), 0)))
-                node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=Pose(Position(6000, 0), 0)))
+                node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=Pose(Position(4000, 0), 0)))
 
                 all_player_ready = partial(self.all_player_ready, player)
                 has_kicked = partial(self.has_kicked, player)
@@ -89,7 +89,7 @@ class SlapShot(Strategy):
                and player == closest_players[1].player
 
     def has_kicked(self, player):
-        return GameState().ball.is_moving_fast()
+        return GameState().ball.is_mobile()
 
     def has_received(self, player):
         role = GameState().get_role_by_player_id(player.id)

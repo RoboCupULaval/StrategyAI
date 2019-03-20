@@ -37,7 +37,7 @@ class GoKick(Tactic):
                  forbidden_areas=None,
                  can_kick_in_goal=True):
 
-        super().__init__(game_state, player, target, args=args, forbidden_areas=forbidden_areas)
+        super().__init__(game_state, player, target, args=args, forbidden_areas=[])
         self.current_state = self.initialize
         self.next_state = self.initialize
         self.kick_last_time = time.time()
@@ -88,14 +88,14 @@ class GoKick(Tactic):
             effective_ball_spacing = GO_BEHIND_SPACING
             collision_ball = False
             if compare_angle(self.player.pose.orientation, required_orientation,
-                             abs_tol=max(0.05, 0.05 * dist_from_ball / 1000)):
+                             abs_tol=max(0.05, 0.5 * dist_from_ball / 1000)):
                 self.next_state = self.grab_ball
             else:
                 self.next_state = self.go_behind_ball
         position_behind_ball = self.get_destination_behind_ball(effective_ball_spacing)
 
-        if (angle_behind > 70) and (dist_from_ball<1000):
-            cruise_speed = 1 + ball_speed/1000
+        if (angle_behind > 90) and (dist_from_ball<1000):
+            cruise_speed = 2 + ball_speed/1000
         else:
             cruise_speed = 3
 
