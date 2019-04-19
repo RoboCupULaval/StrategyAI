@@ -41,8 +41,11 @@ class VelocityRegulator(RegulatorBaseClass):
 
         path_correction = self.following_path_vector(robot)
 
-        velocity = (normalize(robot.position_error) + path_correction / settings['v_d']) * speed_norm
-        if velocity.norm > speed_norm: velocity = normalize(velocity) * speed_norm
+        try:
+            velocity = (normalize(robot.position_error) + path_correction / settings['v_d']) * speed_norm
+            if velocity.norm > speed_norm: velocity = normalize(velocity) * speed_norm
+        except ZeroDivisionError:
+            velocity = Position(0, 0)  # In case we have no positional error
 
         cmd_orientation = self.orientation_controller.execute(robot.orientation_error)
         cmd_orientation = clamp(cmd_orientation, -MAX_ANGULAR_SPEED, MAX_ANGULAR_SPEED)
