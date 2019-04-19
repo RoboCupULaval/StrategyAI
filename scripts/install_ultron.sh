@@ -29,3 +29,6 @@ source virtualenv/bin/activate
 # Install requirements
 pip install -r StrategyAI/requirements.txt
 pip install -r UI-Debug/requirements.txt
+
+# Add user to dialout group to enable access to serial ports
+sudo adduser $USER dialout
