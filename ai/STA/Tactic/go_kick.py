@@ -62,7 +62,7 @@ class GoKick(Tactic):
         if self.get_alignment_with_ball_and_target() < 60 \
                 and compare_angle(self.player.pose.orientation,
                                   required_orientation,
-                                  abs_tol=max(0.1, 0.1 * dist_from_ball/1000)):
+                                  abs_tol=max(0.1, 0.1 * dist_from_ball/1000)) or not self.is_able_to_grab_ball_directly(0.7):
             self.next_state = self.go_behind_ball
             if self._get_distance_from_ball() < KICK_DISTANCE:
                 self.next_state = self.kick
@@ -88,7 +88,7 @@ class GoKick(Tactic):
             effective_ball_spacing = GO_BEHIND_SPACING
             collision_ball = False
             if compare_angle(self.player.pose.orientation, required_orientation,
-                             abs_tol=max(0.05, 0.05 * dist_from_ball / 1000)):
+                             abs_tol=max(0.05, 0.05 * dist_from_ball / 1000)) or self.is_able_to_grab_ball_directly(0.8):
                 self.next_state = self.grab_ball
             else:
                 self.next_state = self.go_behind_ball
@@ -113,7 +113,7 @@ class GoKick(Tactic):
         if angle_behind > 35:
             self.next_state = self.go_behind_ball
 
-        if self._get_distance_from_ball() < KICK_DISTANCE:
+        if self._get_distance_from_ball() < KICK_DISTANCE or self.is_able_to_grab_ball_directly(0.8):
             self.next_state = self.kick
             self.kick_last_time = time.time()
         ball_speed = self.game_state.ball.velocity.norm
@@ -234,3 +234,10 @@ class GoKick(Tactic):
                     DebugCommandFactory.line(ori, lower),
                     DebugCommandFactory.line(self.game_state.ball_position, behind_player, color=CYAN)] + additional_dbg
         return []
+
+    def is_able_to_grab_ball_directly(self, threshold):
+        # plus que le threshold est gors (1 max), plus qu'on veut que le robot soit direct deriere la balle.
+        vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
+        alignement_behind = np.dot(vec_target_to_ball.array,
+                                   (normalize(self.player.position - self.game_state.ball_position)).array)
+        return threshold < alignement_behind
