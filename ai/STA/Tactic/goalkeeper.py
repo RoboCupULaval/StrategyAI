@@ -30,7 +30,7 @@ class GoalKeeper(Tactic):
     DANGEROUS_ENEMY_MIN_DISTANCE = 500
 
     def __init__(self, game_state: GameState, player: Player, target: Pose = Pose(),
-                 penalty_kick=False, args: List[str] = None, ):
+                 penalty_kick=False, enable_clear=True, args: List[str] = None, ):
         forbidden_area = [Area.pad(game_state.field.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)]
         super().__init__(game_state, player, target, args, forbidden_areas=forbidden_area)
 
@@ -38,6 +38,9 @@ class GoalKeeper(Tactic):
         self.next_state = self.defense
 
         self.target = Pose(self.game_state.field.our_goal, np.pi)  # Ignore target argument, always go for our goal
+
+        self.penalty_kick = penalty_kick
+        self.enable_clear = enable_clear
 
         self.go_kick_tactic = None  # Used by clear
         self.last_intersection = None  # For debug
@@ -57,7 +60,7 @@ class GoalKeeper(Tactic):
             return self.next_state()
 
         # Prepare to block the ball
-        if self._is_ball_safe_to_kick() and self.game_state.ball.is_immobile():
+        if self.enable_clear and self._is_ball_safe_to_kick() and self.game_state.ball.is_immobile():
             self.next_state = self.clear
 
         if self._ball_going_toward_goal():
@@ -86,15 +89,19 @@ class GoalKeeper(Tactic):
 
         if not self._ball_going_toward_goal() and not self.game_state.field.is_ball_in_our_goal_area():
             self.next_state = self.defense
-        elif self.game_state.field.is_ball_in_our_goal_area() and self.game_state.ball.is_immobile():
+        elif self.enable_clear and self.game_state.field.is_ball_in_our_goal_area() and self.game_state.ball.is_immobile():
             self.next_state = self.clear
 
         # Find the point where the ball will go
         ball = self.game_state.ball
-        where_ball_enter_goal = intersection_between_lines(self.GOAL_LINE.p1,
-                                                           self.GOAL_LINE.p2,
-                                                           ball.position,
-                                                           ball.position + ball.velocity)
+        try:
+            where_ball_enter_goal = intersection_between_lines(self.GOAL_LINE.p1,
+                                                               self.GOAL_LINE.p2,
+                                                               ball.position,
+                                                               ball.position + ball.velocity)
+        except ValueError: # In case of parallel lines
+            self.next_state = self.defense
+            return self.next_state()
 
         # This is where the ball is going to enter the goal
         collisionless_goal_line = Line(self.GOAL_LINE.p1 - Position(0, ROBOT_RADIUS),

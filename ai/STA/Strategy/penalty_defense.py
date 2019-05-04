@@ -22,3 +22,15 @@ class PenaltyDefense(TeamGoToPosition):
         self.create_node(Role.GOALKEEPER, GoalKeeper(game_state, goalkeeper, penalty_kick=True))
 
         self.assign_tactics(role_to_positions)
+
+    @classmethod
+    def required_roles(cls):
+        return [Role.GOALKEEPER]
+
+    @classmethod
+    def optional_roles(cls):
+        return [Role.FIRST_ATTACK,
+                Role.SECOND_ATTACK,
+                Role.MIDDLE,
+                Role.FIRST_DEFENCE,
+                Role.SECOND_DEFENCE]

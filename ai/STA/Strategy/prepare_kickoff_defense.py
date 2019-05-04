@@ -19,8 +19,6 @@ class PrepareKickOffDefense(TeamGoToPosition):
         center_offset = game_state.field.center_circle_radius
 
         # Positions objectifs des joueurs
-        # FIXME: This is bad, the orientation of the player will always be the same,
-        # independently of if we are in a positive or negative x
         attack_top_position = Pose.from_values(GameState().field.our_goal_x / 10,
                                                GameState().field.bottom * 3 / 5, 0)
         attack_bottom_position = Pose.from_values(GameState().field.our_goal_x / 10,
