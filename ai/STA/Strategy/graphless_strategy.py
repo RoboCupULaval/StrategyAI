@@ -6,13 +6,14 @@ from Util import AICommand
 from Util.role import Role
 from ai.GameDomainObjects import Player
 from ai.STA.Strategy.strategy import Strategy
+from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
 
 
 class GraphlessStrategy(Strategy):
     def __init__(self, p_game_state: GameState):
         super().__init__(p_game_state)
-        self.roles_to_tactics = {}
+        self.roles_to_tactics: Dict[Role, Tactic] = {}
         self.next_state = self.halt
 
     def exec(self) -> Tuple[Dict[Player, AICommand], List[Dict]]:

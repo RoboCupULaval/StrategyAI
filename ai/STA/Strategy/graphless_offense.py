@@ -1,9 +1,8 @@
 # Under MIT license, see LICENSE.txt
-from functools import partial
 
 from Util.role import Role
 
-from ai.Algorithm.evaluation_module import closest_players_to_point_except, ball_going_toward_player, ball_not_going_toward_player
+from ai.Algorithm.evaluation_module import closest_players_to_point_except, ball_going_toward_player
 from ai.STA.Strategy.graphless_strategy import GraphlessStrategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
@@ -17,38 +16,70 @@ class GraphlessOffense(GraphlessStrategy):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-        self.roles_to_tactics = {}
-
-        robots_in_formation = [p for r, p in self.assigned_roles.items() if r != Role.GOALKEEPER]
+        self.robots_in_formation = [p for r, p in self.assigned_roles.items() if r != Role.GOALKEEPER]
 
         for role, player in self.assigned_roles.items():
             if role is Role.GOALKEEPER:
-                self.create_node(role, GoalKeeper(self.game_state, player))
+                self.roles_to_tactics[role] = GoalKeeper(self.game_state, player)
             else:
-                node_position_for_pass = self.create_node(role, PositionForPass(self.game_state,
-                                                                                player,
-                                                                                auto_position=True,
-                                                                                robots_in_formation=robots_in_formation))
-                node_go_kick = self.create_node(role, GoKick(self.game_state,
-                                                             player,
-                                                             auto_update_target=True, can_kick_in_goal=False))
-                node_receive_pass = self.create_node(role, ReceivePass(self.game_state, player))
+                self.roles_to_tactics[role] = PositionForPass(self.game_state,
+                                                              player,
+                                                              auto_position=True,
+                                                              robots_in_formation=self.robots_in_formation)
+        self.next_state = self.go_get_ball
 
-                player_is_closest_and_is_not_receiving_pass = partial(self.is_closest_not_goalkeeper_and_is_not_receiving_pass, player)
-                player_is_not_closest_and_is_not_making_pass = partial(self.player_is_not_closest_and_is_not_making_pass, player)
-                player_has_kicked = partial(self.has_kicked, player)
-                player_is_receiving_pass_or_ball_is_going_toward_player = \
-                    partial(self.player_is_receiving_pass_or_ball_is_going_toward_player, p_game_state, player)
-                ball_is_not_going_toward_player_and_player_is_not_receiving_pass = partial(self.ball_is_not_going_toward_player_and_player_is_not_receiving_pass, p_game_state, player)
-                player_has_received_ball = partial(self.has_received, player)
+        self.current_pass_receiver = None
 
-                node_position_for_pass.connect_to(node_receive_pass, when=player_is_receiving_pass_or_ball_is_going_toward_player)
-                node_position_for_pass.connect_to(node_go_kick, when=player_is_closest_and_is_not_receiving_pass)
-                node_receive_pass.connect_to(node_go_kick, when=player_has_received_ball)
-                node_receive_pass.connect_to(node_position_for_pass, when=ball_is_not_going_toward_player_and_player_is_not_receiving_pass)
-                node_go_kick.connect_to(node_position_for_pass, when=player_is_not_closest_and_is_not_making_pass)
-                # node_go_kick.connect_to(node_receive_pass, when=player_is_receiving_pass)
-                node_go_kick.connect_to(node_go_kick, when=player_has_kicked)
+    def go_get_ball(self):
+        for role, player in self.assigned_roles.items():
+            tactic = self.roles_to_tactics[role]
+            if isinstance(tactic, GoKick):
+                if not self.is_closest_not_goalkeeper(player):
+                    self.roles_to_tactics[role] = PositionForPass(self.game_state,
+                                                                  player,
+                                                                  auto_position=True,
+                                                                  robots_in_formation=self.robots_in_formation)
+                elif tactic.status_flag == Flags.PASS_TO_PLAYER:
+                    self.current_pass_receiver = tactic.current_player_target
+                    self.next_state = self.receive_pass
+                    return  # We dont want to override self.current_pass_receiver
+
+            elif isinstance(tactic, PositionForPass) and self.is_closest_not_goalkeeper(player):
+                self.roles_to_tactics[role] = GoKick(self.game_state,
+                                                     player,
+                                                     auto_update_target=True,
+                                                     can_kick_in_goal=False)
+
+            elif ball_going_toward_player(self.game_state, player):
+                self.current_pass_receiver = player
+                self.next_state = self.receive_pass
+
+    def receive_pass(self):
+        last_receiver_role = self.game_state.get_role_by_player_id(self.current_pass_receiver.id)
+        last_receiver_tactic = self.roles_to_tactics[last_receiver_role]
+
+        for role, player in self.assigned_roles.items():
+            tactic = self.roles_to_tactics[role]
+            if isinstance(tactic, GoKick):
+                gokick_target = tactic.current_player_target
+
+                if gokick_target is not None:
+                    if gokick_target != self.current_pass_receiver:
+                        new_receiver_role = self.game_state.get_role_by_player_id(gokick_target.id)
+
+                        last_receiver_tactic = PositionForPass(self.game_state,
+                                                               player,
+                                                               auto_position=True,
+                                                               robots_in_formation=self.robots_in_formation)
+
+                        self.roles_to_tactics[new_receiver_role] = ReceivePass(self.game_state, player)
+
+                        self.current_pass_receiver = gokick_target
+                elif not isinstance(last_receiver_tactic, ReceivePass):  # It was not a real pass
+                    last_receiver_tactic = ReceivePass(self.game_state, player)
+
+            elif isinstance(tactic, ReceivePass) and self.has_received(player):
+                self.next_state = self.go_get_ball
 
     @classmethod
     def required_roles(cls):
@@ -73,22 +104,6 @@ class GraphlessOffense(GraphlessStrategy):
 
         return len(closests) > 0 and closests[0].player == player
 
-    def ball_is_not_going_toward_player_and_player_is_not_receiving_pass(self, game_state, player):
-        return ball_not_going_toward_player(game_state, player) and not self.is_receiving_pass(player)
-
-    def is_closest_not_goalkeeper_and_is_not_receiving_pass(self, player):
-        return self.is_closest_not_goalkeeper(player) and not self.is_receiving_pass(player)
-
-    def player_is_not_closest_and_is_not_making_pass(self, player):
-        return not self.is_closest_not_goalkeeper(player) and not self.is_making_a_pass(player)
-
-    def is_making_a_pass(self, player):
-        role = self.game_state.get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'GoKick':
-            if self.roles_graph[role].current_tactic.status_flag == Flags.PASS_TO_PLAYER:
-                return True
-        return False
-
     def has_kicked(self, player):
         role = self.game_state.get_role_by_player_id(player.id)
         if self.roles_graph[role].current_tactic_name == 'GoKick':
@@ -102,17 +117,3 @@ class GraphlessOffense(GraphlessStrategy):
             return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
         else:
             return False
-
-    def player_is_receiving_pass_or_ball_is_going_toward_player(self, game_state, player):
-        return self.is_receiving_pass(player)  # or ball_going_toward_player(game_state, player)
-
-    # TODO assigner passing_robot_pose ou passing_robot à la tactic du receptionneur de passe
-    def is_receiving_pass(self, player):
-        for role, p in self.assigned_roles.items():
-            if self.roles_graph[role].current_tactic_name == 'GoKick':
-                if self.roles_graph[role].current_tactic.status_flag == Flags.PASS_TO_PLAYER:
-                    is_receiving = player == self.roles_graph[role].current_tactic.current_player_target
-                    if is_receiving:
-                        self.logger.info(f"=============== *** robot {p} is passing to robot {player}")
-                    return is_receiving
-        return False
