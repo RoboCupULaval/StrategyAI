@@ -13,16 +13,17 @@ from google.protobuf import descriptor_pb2
 _sym_db = _symbol_database.Default()
 
 
-import messages_robocup_ssl_detection_pb2
-import messages_robocup_ssl_geometry_pb2
+import messages_robocup_ssl_detection_pb2 as messages__robocup__ssl__detection__pb2
+import messages_robocup_ssl_geometry_pb2 as messages__robocup__ssl__geometry__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='messages_robocup_ssl_wrapper.proto',
   package='',
+  syntax='proto2',
   serialized_pb=_b('\n\"messages_robocup_ssl_wrapper.proto\x1a$messages_robocup_ssl_detection.proto\x1a#messages_robocup_ssl_geometry.proto\"`\n\x11SSL_WrapperPacket\x12&\n\tdetection\x18\x01 \x01(\x0b\x32\x13.SSL_DetectionFrame\x12#\n\x08geometry\x18\x02 \x01(\x0b\x32\x11.SSL_GeometryData')
   ,
-  dependencies=[messages_robocup_ssl_detection_pb2.DESCRIPTOR,messages_robocup_ssl_geometry_pb2.DESCRIPTOR,])
+  dependencies=[messages__robocup__ssl__detection__pb2.DESCRIPTOR,messages__robocup__ssl__geometry__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
@@ -57,6 +58,7 @@ _SSL_WRAPPERPACKET = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -64,8 +66,8 @@ _SSL_WRAPPERPACKET = _descriptor.Descriptor(
   serialized_end=209,
 )
 
-_SSL_WRAPPERPACKET.fields_by_name['detection'].message_type = messages_robocup_ssl_detection_pb2._SSL_DETECTIONFRAME
-_SSL_WRAPPERPACKET.fields_by_name['geometry'].message_type = messages_robocup_ssl_geometry_pb2._SSL_GEOMETRYDATA
+_SSL_WRAPPERPACKET.fields_by_name['detection'].message_type = messages__robocup__ssl__detection__pb2._SSL_DETECTIONFRAME
+_SSL_WRAPPERPACKET.fields_by_name['geometry'].message_type = messages__robocup__ssl__geometry__pb2._SSL_GEOMETRYDATA
 DESCRIPTOR.message_types_by_name['SSL_WrapperPacket'] = _SSL_WRAPPERPACKET
 
 SSL_WrapperPacket = _reflection.GeneratedProtocolMessageType('SSL_WrapperPacket', (_message.Message,), dict(

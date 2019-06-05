@@ -7,7 +7,7 @@ from struct import pack
 
 from protobuf_to_dict import protobuf_to_dict
 
-from Engine.Communication.protobuf.referee_pb2 import SSL_Referee
+from Engine.Communication.protobuf.referee_pb2 import Referee
 from Engine.Communication.receiver.receiver_base_class import ReceiverProcess
 from Engine.Communication.monitor import monitor_queue
 from ai.GameDomainObjects import RefereeState
@@ -31,7 +31,7 @@ class RefereeReceiver(ReceiverProcess):
 
     def receive_packet(self):
 
-        packet = SSL_Referee()
+        packet = Referee()
 
         data = self.connection.recv(1024)
 

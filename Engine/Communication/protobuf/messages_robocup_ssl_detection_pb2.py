@@ -18,6 +18,7 @@ _sym_db = _symbol_database.Default()
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='messages_robocup_ssl_detection.proto',
   package='',
+  syntax='proto2',
   serialized_pb=_b('\n$messages_robocup_ssl_detection.proto\"x\n\x11SSL_DetectionBall\x12\x12\n\nconfidence\x18\x01 \x02(\x02\x12\x0c\n\x04\x61rea\x18\x02 \x01(\r\x12\t\n\x01x\x18\x03 \x02(\x02\x12\t\n\x01y\x18\x04 \x02(\x02\x12\t\n\x01z\x18\x05 \x01(\x02\x12\x0f\n\x07pixel_x\x18\x06 \x02(\x02\x12\x0f\n\x07pixel_y\x18\x07 \x02(\x02\"\x97\x01\n\x12SSL_DetectionRobot\x12\x12\n\nconfidence\x18\x01 \x02(\x02\x12\x10\n\x08robot_id\x18\x02 \x01(\r\x12\t\n\x01x\x18\x03 \x02(\x02\x12\t\n\x01y\x18\x04 \x02(\x02\x12\x13\n\x0borientation\x18\x05 \x01(\x02\x12\x0f\n\x07pixel_x\x18\x06 \x02(\x02\x12\x0f\n\x07pixel_y\x18\x07 \x02(\x02\x12\x0e\n\x06height\x18\x08 \x01(\x02\"\xd9\x01\n\x12SSL_DetectionFrame\x12\x14\n\x0c\x66rame_number\x18\x01 \x02(\r\x12\x11\n\tt_capture\x18\x02 \x02(\x01\x12\x0e\n\x06t_sent\x18\x03 \x02(\x01\x12\x11\n\tcamera_id\x18\x04 \x02(\r\x12!\n\x05\x62\x61lls\x18\x05 \x03(\x0b\x32\x12.SSL_DetectionBall\x12*\n\rrobots_yellow\x18\x06 \x03(\x0b\x32\x13.SSL_DetectionRobot\x12(\n\x0brobots_blue\x18\x07 \x03(\x0b\x32\x13.SSL_DetectionRobot')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -35,7 +36,7 @@ _SSL_DETECTIONBALL = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='confidence', full_name='SSL_DetectionBall.confidence', index=0,
       number=1, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -49,35 +50,35 @@ _SSL_DETECTIONBALL = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='x', full_name='SSL_DetectionBall.x', index=2,
       number=3, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='y', full_name='SSL_DetectionBall.y', index=3,
       number=4, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='z', full_name='SSL_DetectionBall.z', index=4,
       number=5, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='pixel_x', full_name='SSL_DetectionBall.pixel_x', index=5,
       number=6, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='pixel_y', full_name='SSL_DetectionBall.pixel_y', index=6,
       number=7, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -89,6 +90,7 @@ _SSL_DETECTIONBALL = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -107,7 +109,7 @@ _SSL_DETECTIONROBOT = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='confidence', full_name='SSL_DetectionRobot.confidence', index=0,
       number=1, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -121,42 +123,42 @@ _SSL_DETECTIONROBOT = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='x', full_name='SSL_DetectionRobot.x', index=2,
       number=3, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='y', full_name='SSL_DetectionRobot.y', index=3,
       number=4, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='orientation', full_name='SSL_DetectionRobot.orientation', index=4,
       number=5, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='pixel_x', full_name='SSL_DetectionRobot.pixel_x', index=5,
       number=6, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='pixel_y', full_name='SSL_DetectionRobot.pixel_y', index=6,
       number=7, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='height', full_name='SSL_DetectionRobot.height', index=7,
       number=8, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -168,6 +170,7 @@ _SSL_DETECTIONROBOT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -193,14 +196,14 @@ _SSL_DETECTIONFRAME = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='t_capture', full_name='SSL_DetectionFrame.t_capture', index=1,
       number=2, type=1, cpp_type=5, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='t_sent', full_name='SSL_DetectionFrame.t_sent', index=2,
       number=3, type=1, cpp_type=5, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -240,6 +243,7 @@ _SSL_DETECTIONFRAME = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],

@@ -18,6 +18,7 @@ _sym_db = _symbol_database.Default()
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='grSim_Replacement.proto',
   package='',
+  syntax='proto2',
   serialized_pb=_b('\n\x17grSim_Replacement.proto\"k\n\x16grSim_RobotReplacement\x12\t\n\x01x\x18\x01 \x02(\x01\x12\t\n\x01y\x18\x02 \x02(\x01\x12\x0b\n\x03\x64ir\x18\x03 \x02(\x01\x12\n\n\x02id\x18\x04 \x02(\r\x12\x12\n\nyellowteam\x18\x05 \x02(\x08\x12\x0e\n\x06turnon\x18\x06 \x01(\x08\"E\n\x15grSim_BallReplacement\x12\t\n\x01x\x18\x01 \x02(\x01\x12\t\n\x01y\x18\x02 \x02(\x01\x12\n\n\x02vx\x18\x03 \x02(\x01\x12\n\n\x02vy\x18\x04 \x02(\x01\"b\n\x11grSim_Replacement\x12$\n\x04\x62\x61ll\x18\x01 \x01(\x0b\x32\x16.grSim_BallReplacement\x12\'\n\x06robots\x18\x02 \x03(\x0b\x32\x17.grSim_RobotReplacement')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -35,21 +36,21 @@ _GRSIM_ROBOTREPLACEMENT = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='x', full_name='grSim_RobotReplacement.x', index=0,
       number=1, type=1, cpp_type=5, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='y', full_name='grSim_RobotReplacement.y', index=1,
       number=2, type=1, cpp_type=5, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='dir', full_name='grSim_RobotReplacement.dir', index=2,
       number=3, type=1, cpp_type=5, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -82,6 +83,7 @@ _GRSIM_ROBOTREPLACEMENT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -100,28 +102,28 @@ _GRSIM_BALLREPLACEMENT = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='x', full_name='grSim_BallReplacement.x', index=0,
       number=1, type=1, cpp_type=5, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='y', full_name='grSim_BallReplacement.y', index=1,
       number=2, type=1, cpp_type=5, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='vx', full_name='grSim_BallReplacement.vx', index=2,
       number=3, type=1, cpp_type=5, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='vy', full_name='grSim_BallReplacement.vy', index=3,
       number=4, type=1, cpp_type=5, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -133,6 +135,7 @@ _GRSIM_BALLREPLACEMENT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -170,6 +173,7 @@ _GRSIM_REPLACEMENT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],

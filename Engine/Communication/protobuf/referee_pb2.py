@@ -13,22 +13,24 @@ from google.protobuf import descriptor_pb2
 _sym_db = _symbol_database.Default()
 
 
-import game_event_pb2
+import ssl_game_event_pb2 as ssl__game__event__pb2
+import ssl_game_event_2019_pb2 as ssl__game__event__2019__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='referee.proto',
   package='',
-  serialized_pb=_b('\n\rreferee.proto\x1a\x10game_event.proto\"\xad\n\n\x0bSSL_Referee\x12\x18\n\x10packet_timestamp\x18\x01 \x02(\x04\x12!\n\x05stage\x18\x02 \x02(\x0e\x32\x12.SSL_Referee.Stage\x12\x17\n\x0fstage_time_left\x18\x03 \x01(\x11\x12%\n\x07\x63ommand\x18\x04 \x02(\x0e\x32\x14.SSL_Referee.Command\x12\x17\n\x0f\x63ommand_counter\x18\x05 \x02(\r\x12\x19\n\x11\x63ommand_timestamp\x18\x06 \x02(\x04\x12%\n\x06yellow\x18\x07 \x02(\x0b\x32\x15.SSL_Referee.TeamInfo\x12#\n\x04\x62lue\x18\x08 \x02(\x0b\x32\x15.SSL_Referee.TeamInfo\x12/\n\x13\x64\x65signated_position\x18\t \x01(\x0b\x32\x12.SSL_Referee.Point\x12\x1e\n\x16\x62lueTeamOnPositiveHalf\x18\n \x01(\x08\x12*\n\tgameEvent\x18\x0b \x01(\x0b\x32\x17.SSL_Referee_Game_Event\x1a\xa7\x01\n\x08TeamInfo\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\r\n\x05score\x18\x02 \x02(\r\x12\x11\n\tred_cards\x18\x03 \x02(\r\x12\x1d\n\x11yellow_card_times\x18\x04 \x03(\rB\x02\x10\x01\x12\x14\n\x0cyellow_cards\x18\x05 \x02(\r\x12\x10\n\x08timeouts\x18\x06 \x02(\r\x12\x14\n\x0ctimeout_time\x18\x07 \x02(\r\x12\x0e\n\x06goalie\x18\x08 \x02(\r\x1a\x1d\n\x05Point\x12\t\n\x01x\x18\x01 \x02(\x02\x12\t\n\x01y\x18\x02 \x02(\x02\"\xd1\x02\n\x05Stage\x12\x19\n\x15NORMAL_FIRST_HALF_PRE\x10\x00\x12\x15\n\x11NORMAL_FIRST_HALF\x10\x01\x12\x14\n\x10NORMAL_HALF_TIME\x10\x02\x12\x1a\n\x16NORMAL_SECOND_HALF_PRE\x10\x03\x12\x16\n\x12NORMAL_SECOND_HALF\x10\x04\x12\x14\n\x10\x45XTRA_TIME_BREAK\x10\x05\x12\x18\n\x14\x45XTRA_FIRST_HALF_PRE\x10\x06\x12\x14\n\x10\x45XTRA_FIRST_HALF\x10\x07\x12\x13\n\x0f\x45XTRA_HALF_TIME\x10\x08\x12\x19\n\x15\x45XTRA_SECOND_HALF_PRE\x10\t\x12\x15\n\x11\x45XTRA_SECOND_HALF\x10\n\x12\x1a\n\x16PENALTY_SHOOTOUT_BREAK\x10\x0b\x12\x14\n\x10PENALTY_SHOOTOUT\x10\x0c\x12\r\n\tPOST_GAME\x10\r\"\x86\x03\n\x07\x43ommand\x12\x08\n\x04HALT\x10\x00\x12\x08\n\x04STOP\x10\x01\x12\x10\n\x0cNORMAL_START\x10\x02\x12\x0f\n\x0b\x46ORCE_START\x10\x03\x12\x1a\n\x16PREPARE_KICKOFF_YELLOW\x10\x04\x12\x18\n\x14PREPARE_KICKOFF_BLUE\x10\x05\x12\x1a\n\x16PREPARE_PENALTY_YELLOW\x10\x06\x12\x18\n\x14PREPARE_PENALTY_BLUE\x10\x07\x12\x16\n\x12\x44IRECT_FREE_YELLOW\x10\x08\x12\x14\n\x10\x44IRECT_FREE_BLUE\x10\t\x12\x18\n\x14INDIRECT_FREE_YELLOW\x10\n\x12\x16\n\x12INDIRECT_FREE_BLUE\x10\x0b\x12\x12\n\x0eTIMEOUT_YELLOW\x10\x0c\x12\x10\n\x0cTIMEOUT_BLUE\x10\r\x12\x0f\n\x0bGOAL_YELLOW\x10\x0e\x12\r\n\tGOAL_BLUE\x10\x0f\x12\x19\n\x15\x42\x41LL_PLACEMENT_YELLOW\x10\x10\x12\x17\n\x13\x42\x41LL_PLACEMENT_BLUE\x10\x11')
+  syntax='proto2',
+  serialized_pb=_b('\n\rreferee.proto\x1a\x14ssl_game_event.proto\x1a\x19ssl_game_event_2019.proto\"\xa5\x0c\n\x07Referee\x12\x18\n\x10packet_timestamp\x18\x01 \x02(\x04\x12\x1d\n\x05stage\x18\x02 \x02(\x0e\x32\x0e.Referee.Stage\x12\x17\n\x0fstage_time_left\x18\x03 \x01(\x11\x12!\n\x07\x63ommand\x18\x04 \x02(\x0e\x32\x10.Referee.Command\x12\x17\n\x0f\x63ommand_counter\x18\x05 \x02(\r\x12\x19\n\x11\x63ommand_timestamp\x18\x06 \x02(\x04\x12!\n\x06yellow\x18\x07 \x02(\x0b\x32\x11.Referee.TeamInfo\x12\x1f\n\x04\x62lue\x18\x08 \x02(\x0b\x32\x11.Referee.TeamInfo\x12+\n\x13\x64\x65signated_position\x18\t \x01(\x0b\x32\x0e.Referee.Point\x12\"\n\x1a\x62lue_team_on_positive_half\x18\n \x01(\x08\x12#\n\ngame_event\x18\x0b \x01(\x0b\x32\x0b.Game_EventB\x02\x18\x01\x12&\n\x0cnext_command\x18\x0c \x01(\x0e\x32\x10.Referee.Command\x12\x1f\n\x0bgame_events\x18\r \x03(\x0b\x32\n.GameEvent\x12\x30\n\x14proposed_game_events\x18\x0e \x03(\x0b\x32\x12.ProposedGameEvent\x12%\n\x1d\x63urrent_action_time_remaining\x18\x0f \x01(\x05\x1a\x90\x02\n\x08TeamInfo\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\r\n\x05score\x18\x02 \x02(\r\x12\x11\n\tred_cards\x18\x03 \x02(\r\x12\x1d\n\x11yellow_card_times\x18\x04 \x03(\rB\x02\x10\x01\x12\x14\n\x0cyellow_cards\x18\x05 \x02(\r\x12\x10\n\x08timeouts\x18\x06 \x02(\r\x12\x14\n\x0ctimeout_time\x18\x07 \x02(\r\x12\x0e\n\x06goalie\x18\x08 \x02(\r\x12\x14\n\x0c\x66oul_counter\x18\t \x01(\r\x12\x1f\n\x17\x62\x61ll_placement_failures\x18\n \x01(\r\x12\x16\n\x0e\x63\x61n_place_ball\x18\x0c \x01(\x08\x12\x18\n\x10max_allowed_bots\x18\r \x01(\r\x1a\x1d\n\x05Point\x12\t\n\x01x\x18\x01 \x02(\x02\x12\t\n\x01y\x18\x02 \x02(\x02\"\xd1\x02\n\x05Stage\x12\x19\n\x15NORMAL_FIRST_HALF_PRE\x10\x00\x12\x15\n\x11NORMAL_FIRST_HALF\x10\x01\x12\x14\n\x10NORMAL_HALF_TIME\x10\x02\x12\x1a\n\x16NORMAL_SECOND_HALF_PRE\x10\x03\x12\x16\n\x12NORMAL_SECOND_HALF\x10\x04\x12\x14\n\x10\x45XTRA_TIME_BREAK\x10\x05\x12\x18\n\x14\x45XTRA_FIRST_HALF_PRE\x10\x06\x12\x14\n\x10\x45XTRA_FIRST_HALF\x10\x07\x12\x13\n\x0f\x45XTRA_HALF_TIME\x10\x08\x12\x19\n\x15\x45XTRA_SECOND_HALF_PRE\x10\t\x12\x15\n\x11\x45XTRA_SECOND_HALF\x10\n\x12\x1a\n\x16PENALTY_SHOOTOUT_BREAK\x10\x0b\x12\x14\n\x10PENALTY_SHOOTOUT\x10\x0c\x12\r\n\tPOST_GAME\x10\r\"\x8e\x03\n\x07\x43ommand\x12\x08\n\x04HALT\x10\x00\x12\x08\n\x04STOP\x10\x01\x12\x10\n\x0cNORMAL_START\x10\x02\x12\x0f\n\x0b\x46ORCE_START\x10\x03\x12\x1a\n\x16PREPARE_KICKOFF_YELLOW\x10\x04\x12\x18\n\x14PREPARE_KICKOFF_BLUE\x10\x05\x12\x1a\n\x16PREPARE_PENALTY_YELLOW\x10\x06\x12\x18\n\x14PREPARE_PENALTY_BLUE\x10\x07\x12\x16\n\x12\x44IRECT_FREE_YELLOW\x10\x08\x12\x14\n\x10\x44IRECT_FREE_BLUE\x10\t\x12\x18\n\x14INDIRECT_FREE_YELLOW\x10\n\x12\x16\n\x12INDIRECT_FREE_BLUE\x10\x0b\x12\x12\n\x0eTIMEOUT_YELLOW\x10\x0c\x12\x10\n\x0cTIMEOUT_BLUE\x10\r\x12\x13\n\x0bGOAL_YELLOW\x10\x0e\x1a\x02\x08\x01\x12\x11\n\tGOAL_BLUE\x10\x0f\x1a\x02\x08\x01\x12\x19\n\x15\x42\x41LL_PLACEMENT_YELLOW\x10\x10\x12\x17\n\x13\x42\x41LL_PLACEMENT_BLUE\x10\x11\"]\n\x11ProposedGameEvent\x12\x13\n\x0bvalid_until\x18\x01 \x02(\x04\x12\x13\n\x0bproposer_id\x18\x02 \x02(\t\x12\x1e\n\ngame_event\x18\x03 \x02(\x0b\x32\n.GameEvent')
   ,
-  dependencies=[game_event_pb2.DESCRIPTOR,])
+  dependencies=[ssl__game__event__pb2.DESCRIPTOR,ssl__game__event__2019__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
-_SSL_REFEREE_STAGE = _descriptor.EnumDescriptor(
+_REFEREE_STAGE = _descriptor.EnumDescriptor(
   name='Stage',
-  full_name='SSL_Referee.Stage',
+  full_name='Referee.Stage',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -91,14 +93,14 @@ _SSL_REFEREE_STAGE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=631,
-  serialized_end=968,
+  serialized_start=902,
+  serialized_end=1239,
 )
-_sym_db.RegisterEnumDescriptor(_SSL_REFEREE_STAGE)
+_sym_db.RegisterEnumDescriptor(_REFEREE_STAGE)
 
-_SSL_REFEREE_COMMAND = _descriptor.EnumDescriptor(
+_REFEREE_COMMAND = _descriptor.EnumDescriptor(
   name='Command',
-  full_name='SSL_Referee.Command',
+  full_name='Referee.Command',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -160,11 +162,11 @@ _SSL_REFEREE_COMMAND = _descriptor.EnumDescriptor(
       type=None),
     _descriptor.EnumValueDescriptor(
       name='GOAL_YELLOW', index=14, number=14,
-      options=None,
+      options=_descriptor._ParseOptions(descriptor_pb2.EnumValueOptions(), _b('\010\001')),
       type=None),
     _descriptor.EnumValueDescriptor(
       name='GOAL_BLUE', index=15, number=15,
-      options=None,
+      options=_descriptor._ParseOptions(descriptor_pb2.EnumValueOptions(), _b('\010\001')),
       type=None),
     _descriptor.EnumValueDescriptor(
       name='BALL_PLACEMENT_YELLOW', index=16, number=16,
@@ -177,75 +179,103 @@ _SSL_REFEREE_COMMAND = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=971,
-  serialized_end=1361,
+  serialized_start=1242,
+  serialized_end=1640,
 )
-_sym_db.RegisterEnumDescriptor(_SSL_REFEREE_COMMAND)
+_sym_db.RegisterEnumDescriptor(_REFEREE_COMMAND)
 
 
-_SSL_REFEREE_TEAMINFO = _descriptor.Descriptor(
+_REFEREE_TEAMINFO = _descriptor.Descriptor(
   name='TeamInfo',
-  full_name='SSL_Referee.TeamInfo',
+  full_name='Referee.TeamInfo',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='name', full_name='SSL_Referee.TeamInfo.name', index=0,
+      name='name', full_name='Referee.TeamInfo.name', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='score', full_name='SSL_Referee.TeamInfo.score', index=1,
+      name='score', full_name='Referee.TeamInfo.score', index=1,
       number=2, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='red_cards', full_name='SSL_Referee.TeamInfo.red_cards', index=2,
+      name='red_cards', full_name='Referee.TeamInfo.red_cards', index=2,
       number=3, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='yellow_card_times', full_name='SSL_Referee.TeamInfo.yellow_card_times', index=3,
+      name='yellow_card_times', full_name='Referee.TeamInfo.yellow_card_times', index=3,
       number=4, type=13, cpp_type=3, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=_descriptor._ParseOptions(descriptor_pb2.FieldOptions(), _b('\020\001'))),
     _descriptor.FieldDescriptor(
-      name='yellow_cards', full_name='SSL_Referee.TeamInfo.yellow_cards', index=4,
+      name='yellow_cards', full_name='Referee.TeamInfo.yellow_cards', index=4,
       number=5, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='timeouts', full_name='SSL_Referee.TeamInfo.timeouts', index=5,
+      name='timeouts', full_name='Referee.TeamInfo.timeouts', index=5,
       number=6, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='timeout_time', full_name='SSL_Referee.TeamInfo.timeout_time', index=6,
+      name='timeout_time', full_name='Referee.TeamInfo.timeout_time', index=6,
       number=7, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='goalie', full_name='SSL_Referee.TeamInfo.goalie', index=7,
+      name='goalie', full_name='Referee.TeamInfo.goalie', index=7,
       number=8, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='foul_counter', full_name='Referee.TeamInfo.foul_counter', index=8,
+      number=9, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='ball_placement_failures', full_name='Referee.TeamInfo.ball_placement_failures', index=9,
+      number=10, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='can_place_ball', full_name='Referee.TeamInfo.can_place_ball', index=10,
+      number=12, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='max_allowed_bots', full_name='Referee.TeamInfo.max_allowed_bots', index=11,
+      number=13, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -254,31 +284,32 @@ _SSL_REFEREE_TEAMINFO = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=430,
-  serialized_end=597,
+  serialized_start=596,
+  serialized_end=868,
 )
 
-_SSL_REFEREE_POINT = _descriptor.Descriptor(
+_REFEREE_POINT = _descriptor.Descriptor(
   name='Point',
-  full_name='SSL_Referee.Point',
+  full_name='Referee.Point',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='x', full_name='SSL_Referee.Point.x', index=0,
+      name='x', full_name='Referee.Point.x', index=0,
       number=1, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='y', full_name='SSL_Referee.Point.y', index=1,
+      name='y', full_name='Referee.Point.y', index=1,
       number=2, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -290,93 +321,169 @@ _SSL_REFEREE_POINT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=599,
-  serialized_end=628,
+  serialized_start=870,
+  serialized_end=899,
 )
 
-_SSL_REFEREE = _descriptor.Descriptor(
-  name='SSL_Referee',
-  full_name='SSL_Referee',
+_REFEREE = _descriptor.Descriptor(
+  name='Referee',
+  full_name='Referee',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='packet_timestamp', full_name='SSL_Referee.packet_timestamp', index=0,
+      name='packet_timestamp', full_name='Referee.packet_timestamp', index=0,
       number=1, type=4, cpp_type=4, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='stage', full_name='SSL_Referee.stage', index=1,
+      name='stage', full_name='Referee.stage', index=1,
       number=2, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='stage_time_left', full_name='SSL_Referee.stage_time_left', index=2,
+      name='stage_time_left', full_name='Referee.stage_time_left', index=2,
       number=3, type=17, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='command', full_name='SSL_Referee.command', index=3,
+      name='command', full_name='Referee.command', index=3,
       number=4, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='command_counter', full_name='SSL_Referee.command_counter', index=4,
+      name='command_counter', full_name='Referee.command_counter', index=4,
       number=5, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='command_timestamp', full_name='SSL_Referee.command_timestamp', index=5,
+      name='command_timestamp', full_name='Referee.command_timestamp', index=5,
       number=6, type=4, cpp_type=4, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='yellow', full_name='SSL_Referee.yellow', index=6,
+      name='yellow', full_name='Referee.yellow', index=6,
       number=7, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='blue', full_name='SSL_Referee.blue', index=7,
+      name='blue', full_name='Referee.blue', index=7,
       number=8, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='designated_position', full_name='SSL_Referee.designated_position', index=8,
+      name='designated_position', full_name='Referee.designated_position', index=8,
       number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='blueTeamOnPositiveHalf', full_name='SSL_Referee.blueTeamOnPositiveHalf', index=9,
+      name='blue_team_on_positive_half', full_name='Referee.blue_team_on_positive_half', index=9,
       number=10, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='gameEvent', full_name='SSL_Referee.gameEvent', index=10,
+      name='game_event', full_name='Referee.game_event', index=10,
       number=11, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=_descriptor._ParseOptions(descriptor_pb2.FieldOptions(), _b('\030\001'))),
+    _descriptor.FieldDescriptor(
+      name='next_command', full_name='Referee.next_command', index=11,
+      number=12, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='game_events', full_name='Referee.game_events', index=12,
+      number=13, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='proposed_game_events', full_name='Referee.proposed_game_events', index=13,
+      number=14, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='current_action_time_remaining', full_name='Referee.current_action_time_remaining', index=14,
+      number=15, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[_REFEREE_TEAMINFO, _REFEREE_POINT, ],
+  enum_types=[
+    _REFEREE_STAGE,
+    _REFEREE_COMMAND,
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=67,
+  serialized_end=1640,
+)
+
+
+_PROPOSEDGAMEEVENT = _descriptor.Descriptor(
+  name='ProposedGameEvent',
+  full_name='ProposedGameEvent',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='valid_until', full_name='ProposedGameEvent.valid_until', index=0,
+      number=1, type=4, cpp_type=4, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='proposer_id', full_name='ProposedGameEvent.proposer_id', index=1,
+      number=2, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='game_event', full_name='ProposedGameEvent.game_event', index=2,
+      number=3, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -384,56 +491,73 @@ _SSL_REFEREE = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_SSL_REFEREE_TEAMINFO, _SSL_REFEREE_POINT, ],
+  nested_types=[],
   enum_types=[
-    _SSL_REFEREE_STAGE,
-    _SSL_REFEREE_COMMAND,
   ],
   options=None,
   is_extendable=False,
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=36,
-  serialized_end=1361,
+  serialized_start=1642,
+  serialized_end=1735,
 )
 
-_SSL_REFEREE_TEAMINFO.containing_type = _SSL_REFEREE
-_SSL_REFEREE_POINT.containing_type = _SSL_REFEREE
-_SSL_REFEREE.fields_by_name['stage'].enum_type = _SSL_REFEREE_STAGE
-_SSL_REFEREE.fields_by_name['command'].enum_type = _SSL_REFEREE_COMMAND
-_SSL_REFEREE.fields_by_name['yellow'].message_type = _SSL_REFEREE_TEAMINFO
-_SSL_REFEREE.fields_by_name['blue'].message_type = _SSL_REFEREE_TEAMINFO
-_SSL_REFEREE.fields_by_name['designated_position'].message_type = _SSL_REFEREE_POINT
-_SSL_REFEREE.fields_by_name['gameEvent'].message_type = game_event_pb2._SSL_REFEREE_GAME_EVENT
-_SSL_REFEREE_STAGE.containing_type = _SSL_REFEREE
-_SSL_REFEREE_COMMAND.containing_type = _SSL_REFEREE
-DESCRIPTOR.message_types_by_name['SSL_Referee'] = _SSL_REFEREE
+_REFEREE_TEAMINFO.containing_type = _REFEREE
+_REFEREE_POINT.containing_type = _REFEREE
+_REFEREE.fields_by_name['stage'].enum_type = _REFEREE_STAGE
+_REFEREE.fields_by_name['command'].enum_type = _REFEREE_COMMAND
+_REFEREE.fields_by_name['yellow'].message_type = _REFEREE_TEAMINFO
+_REFEREE.fields_by_name['blue'].message_type = _REFEREE_TEAMINFO
+_REFEREE.fields_by_name['designated_position'].message_type = _REFEREE_POINT
+_REFEREE.fields_by_name['game_event'].message_type = ssl__game__event__pb2._GAME_EVENT
+_REFEREE.fields_by_name['next_command'].enum_type = _REFEREE_COMMAND
+_REFEREE.fields_by_name['game_events'].message_type = ssl__game__event__2019__pb2._GAMEEVENT
+_REFEREE.fields_by_name['proposed_game_events'].message_type = _PROPOSEDGAMEEVENT
+_REFEREE_STAGE.containing_type = _REFEREE
+_REFEREE_COMMAND.containing_type = _REFEREE
+_PROPOSEDGAMEEVENT.fields_by_name['game_event'].message_type = ssl__game__event__2019__pb2._GAMEEVENT
+DESCRIPTOR.message_types_by_name['Referee'] = _REFEREE
+DESCRIPTOR.message_types_by_name['ProposedGameEvent'] = _PROPOSEDGAMEEVENT
 
-SSL_Referee = _reflection.GeneratedProtocolMessageType('SSL_Referee', (_message.Message,), dict(
+Referee = _reflection.GeneratedProtocolMessageType('Referee', (_message.Message,), dict(
 
   TeamInfo = _reflection.GeneratedProtocolMessageType('TeamInfo', (_message.Message,), dict(
-    DESCRIPTOR = _SSL_REFEREE_TEAMINFO,
+    DESCRIPTOR = _REFEREE_TEAMINFO,
     __module__ = 'referee_pb2'
-    # @@protoc_insertion_point(class_scope:SSL_Referee.TeamInfo)
+    # @@protoc_insertion_point(class_scope:Referee.TeamInfo)
     ))
   ,
 
   Point = _reflection.GeneratedProtocolMessageType('Point', (_message.Message,), dict(
-    DESCRIPTOR = _SSL_REFEREE_POINT,
+    DESCRIPTOR = _REFEREE_POINT,
     __module__ = 'referee_pb2'
-    # @@protoc_insertion_point(class_scope:SSL_Referee.Point)
+    # @@protoc_insertion_point(class_scope:Referee.Point)
     ))
   ,
-  DESCRIPTOR = _SSL_REFEREE,
+  DESCRIPTOR = _REFEREE,
   __module__ = 'referee_pb2'
-  # @@protoc_insertion_point(class_scope:SSL_Referee)
+  # @@protoc_insertion_point(class_scope:Referee)
   ))
-_sym_db.RegisterMessage(SSL_Referee)
-_sym_db.RegisterMessage(SSL_Referee.TeamInfo)
-_sym_db.RegisterMessage(SSL_Referee.Point)
+_sym_db.RegisterMessage(Referee)
+_sym_db.RegisterMessage(Referee.TeamInfo)
+_sym_db.RegisterMessage(Referee.Point)
+
+ProposedGameEvent = _reflection.GeneratedProtocolMessageType('ProposedGameEvent', (_message.Message,), dict(
+  DESCRIPTOR = _PROPOSEDGAMEEVENT,
+  __module__ = 'referee_pb2'
+  # @@protoc_insertion_point(class_scope:ProposedGameEvent)
+  ))
+_sym_db.RegisterMessage(ProposedGameEvent)
 
 
-_SSL_REFEREE_TEAMINFO.fields_by_name['yellow_card_times'].has_options = True
-_SSL_REFEREE_TEAMINFO.fields_by_name['yellow_card_times']._options = _descriptor._ParseOptions(descriptor_pb2.FieldOptions(), _b('\020\001'))
+_REFEREE_TEAMINFO.fields_by_name['yellow_card_times'].has_options = True
+_REFEREE_TEAMINFO.fields_by_name['yellow_card_times']._options = _descriptor._ParseOptions(descriptor_pb2.FieldOptions(), _b('\020\001'))
+_REFEREE_COMMAND.values_by_name["GOAL_YELLOW"].has_options = True
+_REFEREE_COMMAND.values_by_name["GOAL_YELLOW"]._options = _descriptor._ParseOptions(descriptor_pb2.EnumValueOptions(), _b('\010\001'))
+_REFEREE_COMMAND.values_by_name["GOAL_BLUE"].has_options = True
+_REFEREE_COMMAND.values_by_name["GOAL_BLUE"]._options = _descriptor._ParseOptions(descriptor_pb2.EnumValueOptions(), _b('\010\001'))
+_REFEREE.fields_by_name['game_event'].has_options = True
+_REFEREE.fields_by_name['game_event']._options = _descriptor._ParseOptions(descriptor_pb2.FieldOptions(), _b('\030\001'))
 # @@protoc_insertion_point(module_scope)

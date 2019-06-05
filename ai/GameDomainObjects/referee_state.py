@@ -5,7 +5,7 @@ from typing import Dict
 
 import logging
 
-from Engine.Communication.protobuf.referee_pb2 import SSL_Referee
+from Engine.Communication.protobuf.referee_pb2 import Referee
 from Util.constant import TeamColor
 from Util.position import Position
 from Util.team_color_service import TeamColorService
@@ -214,7 +214,7 @@ class RefereeState:
                         current=current.name)
 
     @classmethod
-    def log_change(cls, packet: SSL_Referee):
+    def log_change(cls, packet: Referee):
 
         if packet['blue']['name'] == '': packet['blue']['name'] = 'unknown'
         if packet['yellow']['name'] == '': packet['yellow']['name'] = 'unknown'
