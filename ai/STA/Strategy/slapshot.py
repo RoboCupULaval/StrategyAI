@@ -61,8 +61,8 @@ class SlapShot(Strategy):
     @classmethod
     def required_roles(cls):
         return [Role.GOALKEEPER,
-                Role.FIRST_DEFENCE,
-                Role.MIDDLE]
+                Role.FIRST_ATTACK,
+                Role.SECOND_ATTACK]
 
     @classmethod
     def optional_roles(cls):

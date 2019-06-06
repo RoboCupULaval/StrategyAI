@@ -11,13 +11,13 @@ from config.config import Config
 config = Config()
 
 settings = {
-    'orientation_pid_settings': {'kp': 5, 'ki': 0.5, 'kd': 1},
-    'v_d': 4, # lower = bigger path correction
-    'emergency_brake_constant': 0.7, # Higher = higher correction of trajectory
-    'brake_offset': 1.3,  # Offset to brake before because of the delay
+    'orientation_pid_settings': {'kp': 2, 'ki': 1, 'kd': 0.3},
+    'v_d': 1000,  # lower = bigger path correction
+    'emergency_brake_constant': 0, # Higher = higher correction of trajectory
+    'brake_offset': 1,  # Offset to brake before because of the delay
     'max_acceleration': MAX_LINEAR_ACCELERATION,
-    'derivative_deadzone': 0.5,
-    'acceleration_deadzone': 10,  # mm, if the robot is at X mm of the objective it can not accelerate
+    'derivative_deadzone': 0,
+    'acceleration_deadzone': 0,  # mm, if the robot is at X mm of the objective it can not accelerate
 }
 
 if Config()['COACH']['type'] == 'sim':
@@ -39,7 +39,7 @@ class VelocityRegulator(RegulatorBaseClass):
         self.dt = dt
         speed_norm = self.get_next_speed(robot)
 
-        path_correction = self.following_path_vector(robot)
+        path_correction = self.following_path_vector(robot) * 0
 
         velocity = (normalize(robot.position_error) + path_correction / settings['v_d']) * speed_norm
         if velocity.norm > speed_norm: velocity = normalize(velocity) * speed_norm
