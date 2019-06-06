@@ -7,6 +7,7 @@ from queue import Empty
 from typing import List, Dict
 
 from Debug.debug_command_factory import DebugCommandFactory
+from Engine.Communication.sender.referee_team_sender import RefereeTeamSender
 from Util import Pose, Position, AICommand, EngineCommand, Path
 from Util.role import Role
 from ai.Algorithm.auto_play import SimpleAutoPlay
@@ -26,6 +27,7 @@ class PlayExecutor:
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
+        self.referee_team_sender = RefereeTeamSender('ULtron', 4)
         self.auto_play = SimpleAutoPlay(play_state)
         self.play_state = play_state
         self.game_state = GameState()
@@ -43,6 +45,9 @@ class PlayExecutor:
 
         if self.autonomous_flag:
             self._exec_auto_play()
+
+        if len(self.ref_states) > 0:
+            self.referee_team_sender.start(self.ref_states[-1].referee_ip_addr)
 
         ai_cmds, debug_cmds = self._execute_strategy()
 

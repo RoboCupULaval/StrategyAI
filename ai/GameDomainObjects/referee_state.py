@@ -95,6 +95,7 @@ class RefereeState:
         self.stage = Stage.NORMAL_FIRST_HALF_PRE
         self.stage_time_left = 0
         self.ball_placement_position = None
+        self.referee_ip_addr = None
         self.team_info = {"ours": dict(new_team_info), "theirs": dict(new_team_info)}
 
         self.blue_team_is_positive = None
@@ -134,6 +135,8 @@ class RefereeState:
 
         self.command = self._parse_command(raw_command)
         self._parse_team_info(referee_info)
+
+        self.referee_ip_addr = referee_info['ip_addr']
 
     def _parse_command(self, command: RawRefereeCommand):
         # Color wise commands

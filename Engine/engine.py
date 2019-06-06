@@ -8,6 +8,7 @@ from Debug.debug_command_factory import DebugCommandFactory, DEFAULT_DEBUG_TIMEO
 from Engine.Communication.receiver.referee_receiver import RefereeReceiver
 from Engine.Communication.receiver.uidebug_command_receiver import UIDebugCommandReceiver
 from Engine.Communication.receiver.vision_receiver import VisionReceiver
+from Engine.Communication.sender.referee_team_sender import RefereeTeamSender
 from Engine.Communication.sender.robot_command_sender import RobotCommandSender
 from Engine.Communication.sender.uidebug_command_sender import UIDebugCommandSender
 
