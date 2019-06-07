@@ -1,34 +1,39 @@
 # Under MIT licence, see LICENCE.txt
-
+import time
 from typing import Optional
 
 from Util import Pose
 from Util.ai_command import CmdBuilder, Idle, MoveTo
 from Util.constant import ROBOT_RADIUS
 from Util.geometry import normalize, Line, closest_point_on_segment
-from ai.Algorithm.evaluation_module import ball_not_going_toward_player
+from ai.Algorithm.evaluation_module import ball_going_toward_player
 from ai.GameDomainObjects import Player, Ball
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 SAFE_DISTANCE_TO_SWITCH_TO_GO_KICK = ROBOT_RADIUS + 200
+MIN_DELAY_TO_SWITCH_IMMOBILE_BALL = 0.5
 
 
 class ReceivePass(Tactic):
 
-    def __init__(self, game_state: GameState, player: Player, target: Optional[Pose]=None):
+    def __init__(self, game_state: GameState,
+                 player: Player,
+                 target: Optional[Pose] = None,
+                 passing_robot: Optional[Player] = None):
       
         super().__init__(game_state, player, target)
-        self.current_state = self.initialize
-        self.next_state = self.initialize
+        self.passing_robot = passing_robot
 
-        self.passing_robot_pose = None  # passing_robot_pose != None => Align with passing robot
-
-    def initialize(self):
         self.status_flag = Flags.WIP
-        self.next_state = self.intercept
-        return Idle
+        if passing_robot is not None:
+            self.current_state = self.next_state = self.align_with_passing_robot
+        else:
+            self.current_state = self.next_state = self.intercept
+
+        self.passing_robot_has_kicked = False
+        self.ball_is_immobile_since = None
 
     def halt(self):
         self.status_flag = Flags.SUCCESS
@@ -51,12 +56,8 @@ class ReceivePass(Tactic):
         if self._must_change_state(ball):
             return Idle
 
-        # pass_trajectory = Line(self.passing_robot_pose.position, ball.position)
-        # target_pose = self._find_target_pose(ball, pass_trajectory)
-        # move_command = MoveTo(target_pose, cruise_speed=2, end_speed=0, ball_collision=False)
-
-        target_pose = Pose(self.player.position, -self.passing_robot_pose.orientation)
-
+        target_orientation = (self.passing_robot.position - self.player.position).angle
+        target_pose = Pose(self.player.position, target_orientation)
         return MoveTo(target_pose, cruise_speed=2, end_speed=0, ball_collision=False)
 
     def go_away_from_ball(self):
@@ -88,23 +89,22 @@ class ReceivePass(Tactic):
             return True
 
         if ball.is_immobile():
-            self.logger.info("The ball is not moving, success?")
-            self.next_state = self.go_away_from_ball
-            return True
+            if self.ball_is_immobile_since is None:
+                self.ball_is_immobile_since = time.time()
+            elif time.time() - self.ball_is_immobile_since > MIN_DELAY_TO_SWITCH_IMMOBILE_BALL:
+                self.logger.info("The ball is not moving, success?")
+                self.next_state = self.go_away_from_ball
+                self.ball_is_immobile_since = None
+                return True
 
         if (ball.position - self.player.position).norm < ROBOT_RADIUS + 50:
             self.logger.info("The ball about to touch us, success?")
             self.next_state = self.go_away_from_ball
             return True
 
-        # TODO si le go kicker a reussi sa passe, changer de align_with_passing_robot à intercept, afin de suivre la trajectoire
-        # TODO de la balle
-        if self.passing_robot_pose is None:
+        if self.passing_robot_has_kicked or ball_going_toward_player(self.game_state, self.player):
             self.next_state = self.intercept
             return self.current_state != self.intercept
-        elif ball_not_going_toward_player(self.game_state, self.player) or self._passing_robot_has_ball():
-            self.next_state = self.align_with_passing_robot
-            return self.current_state != self.align_with_passing_robot
 
         return False
 
@@ -128,7 +128,6 @@ class ReceivePass(Tactic):
     def _find_where_ball_leaves_field(self, ball: Ball, trajectory: Line):
         intersection_with_field = self.game_state.field.area.intersect_with_line(trajectory)
         where_ball_leaves_field = None
-
         for inter in intersection_with_field:
             # If this is the intersection that have the same direction as trajectory direction
             if (inter - ball.position).dot(trajectory.direction) > 0:
@@ -136,6 +135,8 @@ class ReceivePass(Tactic):
                 break
 
         if where_ball_leaves_field is None:
+            self.logger.error(f"_find_where_ball_leaves_field - ball: {ball.position}, trajectory: {trajectory}")
+            self.logger.error(f"_find_where_ball_leaves_field - intersections_with_field: {intersection_with_field}")
             raise RuntimeError("The ball is somehow inside and outside the field")
 
         return where_ball_leaves_field

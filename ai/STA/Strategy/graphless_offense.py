@@ -3,6 +3,7 @@
 from Util.role import Role
 
 from ai.Algorithm.evaluation_module import closest_players_to_point_except, ball_going_toward_player
+from ai.GameDomainObjects import Player
 from ai.STA.Strategy.graphless_strategy import GraphlessStrategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
@@ -13,7 +14,7 @@ from ai.states.game_state import GameState
 
 
 class GraphlessOffense(GraphlessStrategy):
-    def __init__(self, p_game_state):
+    def __init__(self, p_game_state: GameState):
         super().__init__(p_game_state)
 
         self.robots_in_formation = [p for r, p in self.assigned_roles.items() if r != Role.GOALKEEPER]
@@ -35,51 +36,70 @@ class GraphlessOffense(GraphlessStrategy):
             tactic = self.roles_to_tactics[role]
             if isinstance(tactic, GoKick):
                 if not self.is_closest_not_goalkeeper(player):
+                    self.logger.info(f"Robot {player.id} was not closest. Returning to PositionForPass")
                     self.roles_to_tactics[role] = PositionForPass(self.game_state,
                                                                   player,
                                                                   auto_position=True,
                                                                   robots_in_formation=self.robots_in_formation)
                 elif tactic.status_flag == Flags.PASS_TO_PLAYER:
-                    self.current_pass_receiver = tactic.current_player_target
+                    self.logger.info(f"Robot {player.id} decided to make a pass to Robot {tactic.current_player_target.id}")
+                    self._assign_target_to_receive_pass(tactic.current_player_target, passing_robot=player)
+
+                    self.logger.info("Switching to receive_pass")
                     self.next_state = self.receive_pass
                     return  # We dont want to override self.current_pass_receiver
 
-            elif isinstance(tactic, PositionForPass) and self.is_closest_not_goalkeeper(player):
+            elif self.is_closest_not_goalkeeper(player):
+                self.logger.info(f"Robot {player.id} is closest! Switching to GoKick")
                 self.roles_to_tactics[role] = GoKick(self.game_state,
                                                      player,
                                                      auto_update_target=True,
                                                      can_kick_in_goal=False)
 
             elif ball_going_toward_player(self.game_state, player):
-                self.current_pass_receiver = player
+                self.logger.info(f"Ball is going toward Robot {player.id}!")
+                self._assign_target_to_receive_pass(player, passing_robot=None)
+
+                self.logger.info("Switching to receive_pass")
                 self.next_state = self.receive_pass
 
     def receive_pass(self):
-        last_receiver_role = self.game_state.get_role_by_player_id(self.current_pass_receiver.id)
-        last_receiver_tactic = self.roles_to_tactics[last_receiver_role]
-
         for role, player in self.assigned_roles.items():
             tactic = self.roles_to_tactics[role]
             if isinstance(tactic, GoKick):
                 gokick_target = tactic.current_player_target
-
                 if gokick_target is not None:
                     if gokick_target != self.current_pass_receiver:
-                        new_receiver_role = self.game_state.get_role_by_player_id(gokick_target.id)
+                        self.logger.info(
+                            f"Robot {player.id} changed its target! Last target: Robot {self.current_pass_receiver.id}  -- New target : {gokick_target.id}")
 
-                        last_receiver_tactic = PositionForPass(self.game_state,
-                                                               player,
-                                                               auto_position=True,
-                                                               robots_in_formation=self.robots_in_formation)
+                        self.logger.info(f"Switching Robot {self.current_pass_receiver.id} tactic to PositionForPass")
+                        last_receiver_role = self.game_state.get_role_by_player_id(self.current_pass_receiver.id)
 
-                        self.roles_to_tactics[new_receiver_role] = ReceivePass(self.game_state, player)
+                        self.roles_to_tactics[last_receiver_role] = PositionForPass(self.game_state,
+                                                                                    self.current_pass_receiver,
+                                                                                    auto_position=True,
+                                                                                    robots_in_formation=self.robots_in_formation)
 
-                        self.current_pass_receiver = gokick_target
-                elif not isinstance(last_receiver_tactic, ReceivePass):  # It was not a real pass
-                    last_receiver_tactic = ReceivePass(self.game_state, player)
+                        self._assign_target_to_receive_pass(gokick_target, player)
 
-            elif isinstance(tactic, ReceivePass) and self.has_received(player):
+                    if tactic.status_flag == Flags.SUCCESS:
+                        self.logger.info(f"Robot {player.id} has kicked!")
+                        receiver_role = self.game_state.get_role_by_player_id(self.current_pass_receiver.id)
+                        receiver_tactic = self.roles_to_tactics[receiver_role]
+                        assert isinstance(receiver_tactic, ReceivePass)
+                        receiver_tactic.passing_robot_has_kicked = True
+
+            elif isinstance(tactic, ReceivePass) and tactic.status_flag == Flags.SUCCESS:
+                self.logger.info(f"Robot {player.id} has received ball!")
+                self.logger.info("Switching to go_get_ball")
                 self.next_state = self.go_get_ball
+
+    def _assign_target_to_receive_pass(self, target: Player, passing_robot):
+        self.logger.info(f"Switching Robot {target.id} tactic to ReceivePass")
+        role = self.game_state.get_role_by_player_id(target.id)
+        self.roles_to_tactics[role] = ReceivePass(self.game_state, target, passing_robot=passing_robot)
+        self.current_pass_receiver = target
 
     @classmethod
     def required_roles(cls):
@@ -93,7 +113,7 @@ class GraphlessOffense(GraphlessStrategy):
                 Role.SECOND_ATTACK,
                 Role.SECOND_DEFENCE]
 
-    def is_closest_not_goalkeeper(self, player):
+    def is_closest_not_goalkeeper(self, player: Player):
         ban_players = self.game_state.ban_players
         if player in ban_players:
             return False
@@ -103,17 +123,3 @@ class GraphlessOffense(GraphlessStrategy):
                                                    except_players=ban_players)
 
         return len(closests) > 0 and closests[0].player == player
-
-    def has_kicked(self, player):
-        role = self.game_state.get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'GoKick':
-            return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
-        else:
-            return False
-
-    def has_received(self, player):
-        role = GameState().get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'ReceivePass':
-            return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
-        else:
-            return False

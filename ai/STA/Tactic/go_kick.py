@@ -122,7 +122,6 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
             self.kick_last_time = time.time()
-        ball_speed = self.game_state.ball.velocity.norm
         required_orientation = (self.target.position - self.game_state.ball_position).angle
         position_behind_ball = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False) \
@@ -210,8 +209,7 @@ class GoKick(Tactic):
 
             # Pass the ball to another player
             else:
-                print(
-                    f"_find_best_passing_option - pass to another player - status_flag: {self.status_flag}, nb_consecutive_times_a_pass_is_decided: {self.nb_consecutive_times_a_pass_is_decided}")
+                print(f"_find_best_passing_option - pass to another player - status_flag: {self.status_flag}, nb_consecutive_times_a_pass_is_decided: {self.nb_consecutive_times_a_pass_is_decided}")
                 self.nb_consecutive_times_a_pass_is_decided += 1
                 self.nb_consecutive_times_a_pass_is_not_decided = 0
                 if self.status_flag == Flags.INIT or \
@@ -243,7 +241,6 @@ class GoKick(Tactic):
         return position_behind
 
     def get_alignment_with_ball_and_target(self):
-        print(f"ball_position : {self.game_state.ball.position}, target_position: {self.target.position}")
         vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
         alignement_behind = np.dot(vec_target_to_ball.array,
                                    (normalize(self.player.position - self.game_state.ball_position)).array)

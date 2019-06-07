@@ -34,6 +34,21 @@ class GraphlessStrategy(Strategy):
     def halt(self):
         self.roles_to_tactics = {}
 
+    def get_current_state(self) -> List[Tuple[Player, str, str, Role]]:
+        state = []
+        for role, tactic in self.roles_to_tactics.items():
+
+            state_of_current_tactic = tactic.current_state.__name__
+
+            clear_name_for_tatic = str(tactic) + " " + \
+                                   tactic.status_flag.name
+            state.append((tactic.player, clear_name_for_tatic, state_of_current_tactic, role))
+        return state
+
+    @property
+    def roles_graph(self):
+        raise RuntimeError("Graphless strategy does not have a roles_graph!")
+
     @classmethod
     def required_roles(cls) -> Dict[Role, Callable]:
         """
