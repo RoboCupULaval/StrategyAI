@@ -5,6 +5,7 @@ from Util.role import Role
 
 from ai.STA.Strategy.team_go_to_position import TeamGoToPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
+from ai.STA.Tactic.penalty_goalkeeper import PenaltyGoalKeeper
 from ai.states.game_state import GameState
 
 
@@ -20,7 +21,7 @@ class PreparePenaltyDefense(TeamGoToPosition):
                              Role.SECOND_DEFENCE: Pose.from_values(their_goal.position.x / 8, GameState().field.bottom * 2 / 3)}
 
         goalkeeper = self.game_state.get_player_by_role(Role.GOALKEEPER)
-        self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, goalkeeper, penalty_kick=True, enable_clear=False))
+        self.create_node(Role.GOALKEEPER, PenaltyGoalKeeper(self.game_state, goalkeeper))
 
         self.assign_tactics(role_to_positions)
 
