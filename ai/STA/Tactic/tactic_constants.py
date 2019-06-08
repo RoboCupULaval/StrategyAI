@@ -10,6 +10,7 @@ class Flags(Enum):
     WIP = 1
     FAILURE = 2
     SUCCESS = 3
+    PASS_TO_PLAYER = 4
 
 
 def is_complete(p_status_flag):
