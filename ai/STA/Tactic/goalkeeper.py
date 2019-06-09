@@ -17,7 +17,8 @@ from Util import Pose, Position
 from Util.ai_command import MoveTo, Idle, CmdBuilder
 from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL, ROBOT_DIAMETER
 from Util.geometry import intersection_line_and_circle, intersection_between_lines, \
-    closest_point_on_segment, find_bisector_of_triangle, Area, Line, clamp
+    closest_point_on_segment, find_bisector_of_triangle, Line, clamp
+from Util.area import Area
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_kick import GRAB_BALL_SPACING, GoKick
 from ai.STA.Tactic.tactic import Tactic
