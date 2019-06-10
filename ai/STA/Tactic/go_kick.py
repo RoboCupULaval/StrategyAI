@@ -19,9 +19,6 @@ from ai.states.game_state import GameState
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1.0
 
-MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_TO_PASS = 2
-MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_FROM_PASS = 5
-
 GO_BEHIND_SPACING = 180
 GRAB_BALL_SPACING = 90
 APPROACH_SPEED = 100
@@ -32,15 +29,15 @@ COMMAND_DELAY = 0.5
 
 class GoKick(Tactic):
     def __init__(self, game_state: GameState, player: Player,
-                 target: Pose = Pose(),
-                 args: List[str] = None,
-                 kick_force: KickForce = KickForce.HIGH,
+                 target: Pose=Pose(),
+                 args: List[str]=None,
+                 kick_force: KickForce=KickForce.HIGH,
                  auto_update_target=False,
-                 go_behind_distance=GRAB_BALL_SPACING * 3,
+                 go_behind_distance=GRAB_BALL_SPACING*3,
                  forbidden_areas=None,
                  can_kick_in_goal=True):
 
-        super().__init__(game_state, player, target, args=args, forbidden_areas=forbidden_areas)
+        super().__init__(game_state, player, target, args=args, forbidden_areas=[])
         self.current_state = self.initialize
         self.next_state = self.initialize
         self.kick_last_time = time.time()
@@ -48,15 +45,12 @@ class GoKick(Tactic):
         self.can_kick_in_goal = can_kick_in_goal
         self.target_assignation_last_time = 0
         self.target = target
-
-        self.current_player_target = None
-        self.nb_consecutive_times_a_pass_is_decided = 0
-        self.nb_consecutive_times_a_pass_is_not_decided = 0
-
+        if self.auto_update_target:
+            self._find_best_passing_option()
         self.kick_force = kick_force
         self.go_behind_distance = go_behind_distance
 
-        self.is_debug = True
+        self.is_debug = False
 
     def initialize(self):
         if self.auto_update_target:
@@ -68,7 +62,7 @@ class GoKick(Tactic):
         if self.get_alignment_with_ball_and_target() < 60 \
                 and compare_angle(self.player.pose.orientation,
                                   required_orientation,
-                                  abs_tol=max(0.1, 0.1 * dist_from_ball / 1000)):
+                                  abs_tol=max(0.1, 0.1 * dist_from_ball/1000)):
             self.next_state = self.go_behind_ball
             if self._get_distance_from_ball() < KICK_DISTANCE:
                 self.next_state = self.kick
@@ -81,38 +75,53 @@ class GoKick(Tactic):
     def go_behind_ball(self):
         if self.auto_update_target:
             self._find_best_passing_option()
-        else:
-            self.status_flag = Flags.WIP
+        self.status_flag = Flags.WIP
+        dist_from_ball = (self.player.position - self.game_state.ball_position).norm
 
         required_orientation = (self.target.position - self.game_state.ball_position).angle
-        position_behind_ball = self.get_destination_behind_ball(GRAB_BALL_SPACING)
-        cruise_speed = 3
+        ball_speed = self.game_state.ball.velocity.norm
+        angle_behind = self.get_alignment_with_ball_and_target()
+        if angle_behind > 25:
+            effective_ball_spacing = GO_BEHIND_SPACING
+            collision_ball = True
+        else:
+            effective_ball_spacing = GO_BEHIND_SPACING
+            collision_ball = False
+            if compare_angle(self.player.pose.orientation, required_orientation,
+                             abs_tol=max(0.05, 0.05 * dist_from_ball / 1000)):
+                self.next_state = self.grab_ball
+            else:
+                self.next_state = self.go_behind_ball
+        position_behind_ball = self.get_destination_behind_ball(effective_ball_spacing)
 
-        if (position_behind_ball - self.player.position).norm < 50:
-            self.next_state = self.grab_ball
+        if (angle_behind > 70) and (dist_from_ball<1000):
+            cruise_speed = 1 + ball_speed/1000
+        else:
+            cruise_speed = 3 + ball_speed/1000
 
         return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation),
                                       cruise_speed=cruise_speed,
                                       end_speed=0,
-                                      ball_collision=True) \
-            .addChargeKicker().addKick(self.kick_force).build()
+                                      ball_collision=collision_ball)\
+                           .addChargeKicker().addKick(self.kick_force).build()
 
     def grab_ball(self):
         if self.auto_update_target:
             self._find_best_passing_option()
         angle_behind = self.get_alignment_with_ball_and_target()
-        if angle_behind > 35:
+        if angle_behind > 25:
             self.next_state = self.go_behind_ball
 
         if self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
             self.kick_last_time = time.time()
+        ball_speed = self.game_state.ball.velocity.norm
         required_orientation = (self.target.position - self.game_state.ball_position).angle
         position_behind_ball = self.get_destination_behind_ball(GRAB_BALL_SPACING)
-        return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False) \
-            .addForceDribbler() \
-            .addKick(self.kick_force) \
-            .build()
+        return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False)\
+                           .addForceDribbler()\
+                           .addKick(self.kick_force)\
+                           .build()
 
     def kick(self):
         if self.auto_update_target:
@@ -126,9 +135,9 @@ class GoKick(Tactic):
         position_behind_ball = self.game_state.ball_position + normalize(player_to_target) * ROBOT_CENTER_TO_KICKER
         required_orientation = (self.target.position - self.game_state.ball_position).angle
 
-        return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False) \
-            .addKick(self.kick_force) \
-            .addForceDribbler().build()
+        return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False)\
+                                        .addKick(self.kick_force)\
+                                        .addForceDribbler().build()
 
     def validate_kick(self):
         if self.game_state.ball.is_moving_fast() or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
@@ -152,59 +161,24 @@ class GoKick(Tactic):
         return (self.player.pose.position - self.game_state.ball_position).norm
 
     def _find_best_passing_option(self):
-        # Update passing target
-        if self.current_player_target is not None:
-            self.target = Pose(self.current_player_target.position)
-            self.kick_force = KickForce.for_dist((self.target.position - self.game_state.ball.position).norm)
-
-        # Update decision
         assignation_delay = (time.time() - self.target_assignation_last_time)
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
-            print("_find_best_passing_option : REASSIGN TARGET")
             scoring_target = player_covered_from_goal(self.player)
             tentative_target = best_passing_option(self.player, passer_can_kick_in_goal=self.can_kick_in_goal)
-
             # Kick in the goal where it's the easiest
             if self.can_kick_in_goal and scoring_target is not None:
-                print("_find_best_passing_option - self.can_kick_in_goal and scoring_target is not None")
-                self.nb_consecutive_times_a_pass_is_decided = 0
-                self.nb_consecutive_times_a_pass_is_not_decided += 1
-                if not self.status_flag == Flags.PASS_TO_PLAYER or self.nb_consecutive_times_a_pass_is_not_decided >= MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_FROM_PASS:
-                    self.current_player_target = None
-                    self.status_flag = Flags.WIP
-
-                    self.target = Pose(scoring_target, 0)
-                    self.kick_force = KickForce.HIGH
-
-            # Kick in the goal center
+                self.target = Pose(scoring_target, 0)
+                self.kick_force = KickForce.HIGH
+                # Kick in the goal center
             elif tentative_target is None:
-                print("_find_best_passing_option - tentative_target is None:")
-                self.nb_consecutive_times_a_pass_is_decided = 0
-                self.nb_consecutive_times_a_pass_is_not_decided += 1
-                if not self.status_flag == Flags.PASS_TO_PLAYER or self.nb_consecutive_times_a_pass_is_not_decided >= MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_FROM_PASS:
-                    self.current_player_target = None
-                    self.status_flag = Flags.WIP
-
-                    if not self.can_kick_in_goal:
-                        self.logger.warning(
-                            "The kicker {} can not find an ally to pass to and can_kick_in_goal is False"
-                            ". So it kicks directly in the goal, sorry".format(self.player))
-                    self.target = Pose(self.game_state.field.their_goal, 0)
-                    self.kick_force = KickForce.HIGH
-
-            # Pass the ball to another player
-            else:
-                print(f"_find_best_passing_option - pass to another player - status_flag: {self.status_flag}, nb_consecutive_times_a_pass_is_decided: {self.nb_consecutive_times_a_pass_is_decided}")
-                self.nb_consecutive_times_a_pass_is_decided += 1
-                self.nb_consecutive_times_a_pass_is_not_decided = 0
-                if self.status_flag == Flags.INIT or \
-                        (
-                                not self.status_flag == Flags.PASS_TO_PLAYER and self.nb_consecutive_times_a_pass_is_decided >= MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_TO_PASS):
-                    self.current_player_target = tentative_target
-                    self.status_flag = Flags.PASS_TO_PLAYER
-
-                    self.target = Pose(tentative_target.position)
-                    self.kick_force = KickForce.for_dist((self.target.position - self.game_state.ball.position).norm)
+                if not self.can_kick_in_goal:
+                    self.logger.warning("The kicker {} can not find an ally to pass to and can_kick_in_goal is False"
+                                        ". So it kicks directly in the goal, sorry".format(self.player))
+                self.target = Pose(self.game_state.field.their_goal, 0)
+                self.kick_force = KickForce.HIGH
+            else:  # Pass the ball to another player
+                self.target = Pose(tentative_target.position)
+                self.kick_force = KickForce.for_dist((self.target.position - self.game_state.ball.position).norm)
 
             self.target_assignation_last_time = time.time()
 
@@ -226,6 +200,7 @@ class GoKick(Tactic):
         return position_behind
 
     def get_alignment_with_ball_and_target(self):
+
         vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
         alignement_behind = np.dot(vec_target_to_ball.array,
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
@@ -235,10 +210,9 @@ class GoKick(Tactic):
 
         if not self.is_debug:
             return []
-
+          
         angle = None
-        additional_dbg = [DebugCommandFactory.circle(self.target.position,
-                                                     KICK_DISTANCE * 3)] if self.current_player_target is not None and self.status_flag == Flags.PASS_TO_PLAYER else []
+        additional_dbg = []
         if self.current_state == self.go_behind_ball:
             angle = 18
         elif self.current_state == self.grab_ball:
@@ -247,15 +221,22 @@ class GoKick(Tactic):
             angle = 45
             additional_dbg = [DebugCommandFactory.circle(self.game_state.ball_position, KICK_DISTANCE, color=RED)]
         if angle is not None:
-            angle *= np.pi / 180.0
+            angle *= np.pi/180.0
             base_angle = (self.game_state.ball.position - self.target.position).angle
             magnitude = 3000
             ori = self.game_state.ball.position
-            upper = ori - Position.from_angle(base_angle + angle, magnitude)
-            lower = ori - Position.from_angle(base_angle - angle, magnitude)
+            upper = ori + Position.from_angle(base_angle + angle, magnitude)
+            lower = ori + Position.from_angle(base_angle - angle, magnitude)
             ball_to_player = self.player.position - self.game_state.ball_position
             behind_player = (ball_to_player.norm + 1000) * normalize(ball_to_player) + self.game_state.ball_position
             return [DebugCommandFactory.line(ori, upper),
                     DebugCommandFactory.line(ori, lower),
                     DebugCommandFactory.line(self.game_state.ball_position, behind_player, color=CYAN)] + additional_dbg
         return []
+
+    def is_able_to_grab_ball_directly(self, threshold):
+        # plus que le threshold est gors (1 max), plus qu'on veut que le robot soit direct deriere la balle.
+        vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
+        alignement_behind = np.dot(vec_target_to_ball.array,
+                                   (normalize(self.player.position - self.game_state.ball_position)).array)
+        return threshold < alignement_behind
