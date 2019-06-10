@@ -92,7 +92,7 @@ class GoKick(Tactic):
                 self.next_state = self.grab_ball
             else:
                 self.next_state = self.go_behind_ball
-        position_behind_ball = self.get_destination_behind_ball(effective_ball_spacing)
+        position_behind_ball = self.get_destination_behind_ball(effective_ball_spacing, velocity=False)
 
         if (angle_behind > 90) and (dist_from_ball<1000):
             cruise_speed = 2 + ball_speed/1000
@@ -118,7 +118,7 @@ class GoKick(Tactic):
 
         ball_speed = self.game_state.ball.velocity.norm
         required_orientation = (self.target.position - self.game_state.ball_position).angle
-        position_behind_ball = self.get_destination_behind_ball(GRAB_BALL_SPACING)
+        position_behind_ball = self.get_destination_behind_ball(GRAB_BALL_SPACING, velocity=False)
         return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False)\
                            .addForceDribbler()\
                            .addKick(self.kick_force)\
@@ -192,7 +192,7 @@ class GoKick(Tactic):
 
         position_behind = self.game_state.ball.position - dir_ball_to_target * ball_spacing
 
-        if velocity and self.game_state.ball.velocity.norm > 2000000:
+        if velocity and self.game_state.ball.velocity.norm > 20:
             position_behind += (self.game_state.ball.velocity -
                                 (normalize(self.game_state.ball.velocity) *
                                  np.dot(dir_ball_to_target.array,

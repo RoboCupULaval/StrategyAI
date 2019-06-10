@@ -32,8 +32,6 @@ class SlapShot(Strategy):
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
-            elif role == Role.MIDDLE or role == Role.SECOND_DEFENCE or role == Role.FIRST_DEFENCE:
-                self.create_node(role, Stop(self.game_state, player))
             elif role == Role.FIRST_ATTACK:
                 node_go_to_position = self.create_node(role, GoToPosition(self.game_state, player,
                                                                           Pose(Position(0, 1000), 0)))
@@ -47,7 +45,7 @@ class SlapShot(Strategy):
                 node_go_to_position.connect_to(node_go_kick, when=all_player_ready)
                 node_go_kick.connect_to(node_go_to_position, when=has_kicked)
 
-            else:
+            elif role == Role.SECOND_ATTACK:
                 node_go_to_position = self.create_node(role, GoToPosition(self.game_state, player,
                                                                           Pose(Position(0, -200), 0)))
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=Pose(Position(4000, 0), 0)))
@@ -66,8 +64,8 @@ class SlapShot(Strategy):
 
     @classmethod
     def optional_roles(cls):
-        return [Role.SECOND_ATTACK,
-                Role.FIRST_ATTACK,
+        return [Role.FIRST_DEFENCE,
+                Role.MIDDLE,
                 Role.SECOND_DEFENCE]
 
     def all_player_ready(self, player):

@@ -39,10 +39,7 @@ class VelocityRegulator(RegulatorBaseClass):
         self.dt = dt
         speed_norm = self.get_next_speed(robot)
 
-        path_correction = self.following_path_vector(robot) * 0
-
-        velocity = (normalize(robot.position_error) + path_correction / settings['v_d']) * speed_norm
-        if velocity.norm > speed_norm: velocity = normalize(velocity) * speed_norm
+        velocity = normalize(robot.position_error) * speed_norm
 
         cmd_orientation = self.orientation_controller.execute(robot.orientation_error)
         cmd_orientation = clamp(cmd_orientation, -MAX_ANGULAR_SPEED, MAX_ANGULAR_SPEED)
