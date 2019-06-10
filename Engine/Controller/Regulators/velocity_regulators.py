@@ -21,7 +21,7 @@ settings = {
 }
 
 if Config()['COACH']['type'] == 'sim':
-    settings['orientation_pid_settings'] = {'kp': 10, 'ki': 3, 'kd': 0}
+    settings['orientation_pid_settings'] = {'kp': 10, 'ki': 3, 'kd': 0.3}
     settings['v_d'] = 15000
     settings['brake_offset'] = 1
 
@@ -71,7 +71,11 @@ class VelocityRegulator(RegulatorBaseClass):
         if robot.target_speed > robot.current_speed:  # Only for non-zero current_speed
             next_speed = robot.current_speed + acc * dt
         else:
-            if self.is_distance_for_brake(robot, acc, offset=1) and robot.position_error.norm > settings['acceleration_deadzone']:
+            if robot.target_speed == 0:
+                offset = 2
+            else:
+                offset = 1
+            if self.is_distance_for_brake(robot, acc, offset=offset):
                 # A and B, for B the clamp prevent a speed higher than cruise speed
                 next_speed = robot.current_speed + acc * dt
             else:  # C
