@@ -11,7 +11,7 @@ from config.config import Config
 config = Config()
 
 settings = {
-    'orientation_pid_settings': {'kp': 5, 'ki': 0.5, 'kd': 1},
+    'orientation_pid_settings': {'kp': 100, 'ki': 10, 'kd': 0},
     'v_d': 4, # lower = bigger path correction
     'emergency_brake_constant': 0.7, # Higher = higher correction of trajectory
     'brake_offset': 1.3,  # Offset to brake before because of the delay
@@ -21,8 +21,8 @@ settings = {
 }
 
 if Config()['COACH']['type'] == 'sim':
-    settings['orientation_pid_settings'] = {'kp': 2, 'ki': 0.3, 'kd': 0}
-    settings['v_d'] = 15
+    settings['orientation_pid_settings'] = {'kp': 10, 'ki': 3, 'kd': 0}
+    settings['v_d'] = 15000
     settings['brake_offset'] = 1
 
 
