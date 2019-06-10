@@ -237,7 +237,11 @@ class GoKick(Tactic):
 
     def is_able_to_grab_ball_directly(self, threshold):
         # plus que le threshold est gors (1 max), plus qu'on veut que le robot soit direct deriere la balle.
-        vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
+        try:
+            vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
+        except ZeroDivisionError:
+            vec_target_to_ball = Position(0, 0)  # In case we have no positional error
+
         alignement_behind = np.dot(vec_target_to_ball.array,
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
         return threshold < alignement_behind
