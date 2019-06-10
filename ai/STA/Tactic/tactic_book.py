@@ -8,7 +8,6 @@ from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot
 from ai.STA.Tactic.face_target import FaceTarget
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.go_kick_experimental_sequence import GoKickExperimental
-from ai.STA.Tactic.go_kick_simple import GoKickSimple
 from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
@@ -33,8 +32,7 @@ class TacticBook:
 
         defaults_tactics = [GoToPosition, GoKick]
 
-        tactics = {GoKickSimple,
-                   ReceivePass,
+        tactics = {ReceivePass,
                    PlaceBall,
                    FaceTarget,
                    DemoFollowBall,
