@@ -88,10 +88,3 @@ class SlapShot(Strategy):
 
     def has_kicked(self, player):
         return GameState().ball.is_mobile()
-
-    def has_received(self, player):
-        role = GameState().get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'ReceivePass':
-            return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
-        else:
-            return False
