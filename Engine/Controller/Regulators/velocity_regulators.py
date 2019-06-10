@@ -11,19 +11,9 @@ from config.config import Config
 config = Config()
 
 settings = {
-    'orientation_pid_settings': {'kp': 5, 'ki': 0.5, 'kd': 1},
-    'v_d': 4, # lower = bigger path correction
-    'emergency_brake_constant': 0.7, # Higher = higher correction of trajectory
-    'brake_offset': 1.3,  # Offset to brake before because of the delay
-    'max_acceleration': MAX_LINEAR_ACCELERATION,
-    'derivative_deadzone': 0.5,
-    'acceleration_deadzone': 10,  # mm, if the robot is at X mm of the objective it can not accelerate
+    'orientation_pid_settings': {'kp': 10, 'ki': 3, 'kd': 0.3},
+    'derivative_deadzone': 0.5
 }
-
-if Config()['COACH']['type'] == 'sim':
-    settings['orientation_pid_settings'] = {'kp': 2, 'ki': 0.3, 'kd': 0}
-    settings['v_d'] = 15
-    settings['brake_offset'] = 1
 
 
 class VelocityRegulator(RegulatorBaseClass):
@@ -39,14 +29,10 @@ class VelocityRegulator(RegulatorBaseClass):
         self.dt = dt
         speed_norm = self.get_next_speed(robot)
 
-        path_correction = self.following_path_vector(robot)
-
         try:
-            velocity = (normalize(robot.position_error) + path_correction / settings['v_d']) * speed_norm
-            if velocity.norm > speed_norm: velocity = normalize(velocity) * speed_norm
+            velocity = normalize(robot.position_error) * speed_norm
         except ZeroDivisionError:
             velocity = Position(0, 0)  # In case we have no positional error
-
         cmd_orientation = self.orientation_controller.execute(robot.orientation_error)
         cmd_orientation = clamp(cmd_orientation, -MAX_ANGULAR_SPEED, MAX_ANGULAR_SPEED)
 
@@ -61,7 +47,7 @@ class VelocityRegulator(RegulatorBaseClass):
         else:
             return direction_error
 
-    def get_next_speed(self, robot, acc=settings['max_acceleration']):
+    def get_next_speed(self, robot, acc=MAX_LINEAR_ACCELERATION):
         
         dt = self.dt
 
@@ -71,7 +57,8 @@ class VelocityRegulator(RegulatorBaseClass):
         if robot.target_speed > robot.current_speed:  # Only for non-zero current_speed
             next_speed = robot.current_speed + acc * dt
         else:
-            if self.is_distance_for_brake(robot, acc, offset=1) and robot.position_error.norm > settings['acceleration_deadzone']:
+            offset = 2 if robot.target_speed == 0 else 1
+            if self.is_distance_for_brake(robot, acc, offset=offset):
                 # A and B, for B the clamp prevent a speed higher than cruise speed
                 next_speed = robot.current_speed + acc * dt
             else:  # C
@@ -93,7 +80,7 @@ class VelocityRegulator(RegulatorBaseClass):
 def is_time_to_brake(robot, destination, cruise_speed, acceleration, target_speed):
     # v_f ** 2 = v_i ** 2 - 2 * acc * distance
     dist_to_target = (destination - robot.pose.position).norm
-    return dist_to_target < (abs(cruise_speed ** 2 - target_speed**2) / (2 * acceleration)) * settings['brake_offset']
+    return dist_to_target < (abs(cruise_speed ** 2 - target_speed**2) / (2 * acceleration))
 
 
 def optimal_speed(robot, destination, cruise_speed, acceleration, target_speed):

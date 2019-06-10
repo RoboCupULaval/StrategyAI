@@ -56,7 +56,7 @@ class GoKick(Tactic):
         self.kick_force = kick_force
         self.go_behind_distance = go_behind_distance
 
-        self.is_debug = True
+        self.is_debug = False
 
     def initialize(self):
         if self.auto_update_target:
@@ -274,3 +274,18 @@ class GoKick(Tactic):
                     DebugCommandFactory.line(ori, lower),
                     DebugCommandFactory.line(self.game_state.ball_position, behind_player, color=CYAN)] + additional_dbg
         return []
+
+    def is_able_to_grab_ball_directly(self, threshold):
+        # plus que le threshold est gors (1 max), plus qu'on veut que le robot soit direct deriere la balle.
+        try:
+            vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
+        except ZeroDivisionError:
+            vec_target_to_ball = Position(0, 0)  # In case we have no positional error
+
+        try:
+            player_to_ball = (normalize(self.player.position - self.game_state.ball_position)).array
+        except ZeroDivisionError:
+            player_to_ball = Position(0, 0)  # In case we have no positional error
+
+        alignement_behind = np.dot(vec_target_to_ball.array, player_to_ball)
+        return threshold < alignement_behind
