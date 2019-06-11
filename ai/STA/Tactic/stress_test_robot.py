@@ -10,7 +10,7 @@ from ai.executors.pathfinder_module import WayPoint
 from ai.states.game_state import GameState
 
 VALID_DISTANCE = ROBOT_RADIUS * 0.5
-DEFAULT_SPEED = 2
+DEFAULT_SPEED = 4
 ROTATE_DISTANCE = 500
 
 
