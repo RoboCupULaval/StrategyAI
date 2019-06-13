@@ -101,7 +101,7 @@ class GoKick(Tactic):
                 self.next_state = self.go_behind_ball
         position_behind_ball = self.get_destination_behind_ball(effective_ball_spacing)
 
-        if (angle_behind > 70) and (dist_from_ball < 1000):
+        if angle_behind > 70 and dist_from_ball < 1000:
             cruise_speed = 1 + ball_speed / 1000
         else:
             cruise_speed = 3
@@ -110,7 +110,9 @@ class GoKick(Tactic):
                                       cruise_speed=cruise_speed,
                                       end_speed=0,
                                       ball_collision=collision_ball) \
-            .addChargeKicker().addKick(self.kick_force).build()
+                           .addChargeKicker() \
+                           .addKick(self.kick_force) \
+                           .build()
 
     def grab_ball(self):
         if self.auto_update_target:
@@ -125,9 +127,9 @@ class GoKick(Tactic):
         required_orientation = (self.target.position - self.game_state.ball_position).angle
         position_behind_ball = self.get_destination_behind_ball(GRAB_BALL_SPACING)
         return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False) \
-            .addForceDribbler() \
-            .addKick(self.kick_force) \
-            .build()
+                           .addForceDribbler() \
+                           .addKick(self.kick_force) \
+                           .build()
 
     def kick(self):
         if self.auto_update_target:
@@ -142,8 +144,8 @@ class GoKick(Tactic):
         required_orientation = (self.target.position - self.game_state.ball_position).angle
 
         return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False) \
-            .addKick(self.kick_force) \
-            .addForceDribbler().build()
+                           .addKick(self.kick_force) \
+                           .addForceDribbler().build()
 
     def validate_kick(self):
         if self.game_state.ball.is_moving_fast() or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
