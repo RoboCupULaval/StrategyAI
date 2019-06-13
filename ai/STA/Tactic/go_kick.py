@@ -56,7 +56,7 @@ class GoKick(Tactic):
         self.kick_force = kick_force
         self.go_behind_distance = go_behind_distance
 
-        self.is_debug = False
+        self.is_debug = True
 
     def initialize(self):
         if self.auto_update_target:

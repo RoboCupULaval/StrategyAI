@@ -123,6 +123,9 @@ class Field:
     def is_outside_wall_limit(self, pos: [Pose, Position], bound=None):
         return not self.is_inside_wall_limit(pos, bound)
 
+    def is_outside_field_limit(self, pos: [Pose, Position]):
+        return not self.is_inside_wall_limit(pos, bound=0)
+
     @property
     def ball(self):
         if not self._ball:

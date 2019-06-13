@@ -33,6 +33,8 @@ class GraphlessOffense(GraphlessStrategy):
 
     def go_get_ball(self):
         for role, player in self.assigned_roles.items():
+            if role == Role.GOALKEEPER:
+                continue
             tactic = self.roles_to_tactics[role]
             if isinstance(tactic, GoKick):
                 if not self.is_closest_not_goalkeeper(player):
@@ -54,7 +56,7 @@ class GraphlessOffense(GraphlessStrategy):
                 self.roles_to_tactics[role] = GoKick(self.game_state,
                                                      player,
                                                      auto_update_target=True,
-                                                     can_kick_in_goal=False)
+                                                     can_kick_in_goal=True)
 
             elif ball_going_toward_player(self.game_state, player):
                 self.logger.info(f"Ball is going toward Robot {player.id}!")
@@ -65,6 +67,8 @@ class GraphlessOffense(GraphlessStrategy):
 
     def receive_pass(self):
         for role, player in self.assigned_roles.items():
+            if role == Role.GOALKEEPER:
+                continue
             tactic = self.roles_to_tactics[role]
             if isinstance(tactic, GoKick):
                 gokick_target = tactic.current_player_target

@@ -165,12 +165,8 @@ def best_passing_option(passing_player, passer_can_kick_in_goal=True):
     goal = GameState().field.their_goal
 
     receiver = None
-    for p in GameState().our_team.available_players.values():
-        try:
-            is_goaler = p == GameState().get_player_by_role(Role.GOALKEEPER)
-        except KeyError:
-            is_goaler = False
-        if p != passing_player and not is_goaler:
+    for r, p in GameState().assigned_roles.items():
+        if p != passing_player and r != Role.GOALKEEPER:
             # Calcul du score pour passeur vers receveur
             score = line_of_sight_clearance(passing_player, p.pose.position)
 

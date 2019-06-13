@@ -48,7 +48,8 @@ class ReceivePass(Tactic):
         ball_trajectory = Line(ball.position, ball.position + ball.velocity)
         target_pose = self._find_target_pose(ball, ball_trajectory)
 
-        return MoveTo(target_pose, cruise_speed=2, end_speed=0, ball_collision=False)
+        return CmdBuilder().addMoveTo(target_pose, cruise_speed=2, end_speed=0, ball_collision=False) \
+                           .addForceDribbler().build()
 
     def align_with_passing_robot(self):
         ball = self.game_state.ball
@@ -58,7 +59,8 @@ class ReceivePass(Tactic):
 
         target_orientation = (self.passing_robot.position - self.player.position).angle
         target_pose = Pose(self.player.position, target_orientation)
-        return MoveTo(target_pose, cruise_speed=2, end_speed=0, ball_collision=False)
+        return CmdBuilder().addMoveTo(target_pose, cruise_speed=2, end_speed=0, ball_collision=False)\
+                           .addForceDribbler().build()
 
     def go_away_from_ball(self):
         """
@@ -83,7 +85,7 @@ class ReceivePass(Tactic):
                            .addChargeKicker().build()
 
     def _must_change_state(self, ball: Ball):
-        if self.game_state.field.is_outside_wall_limit(ball.position):
+        if self.game_state.field.is_outside_field_limit(ball.position):
             self.logger.info("The ball has left the field")
             self.next_state = self.go_away_from_ball
             return True
@@ -111,6 +113,8 @@ class ReceivePass(Tactic):
     def _find_target_pose(self, ball, ball_trajectory):
         # Find the point where the ball will leave the field
         where_ball_leaves_field = self._find_where_ball_leaves_field(ball, ball_trajectory)
+        if where_ball_leaves_field is None:
+            return Pose(ball.position, (ball.position - self.player.position).angle)
 
         ball_to_leave_field = Line(ball.position, where_ball_leaves_field)
 
