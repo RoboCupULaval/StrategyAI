@@ -3,6 +3,7 @@
 import logging
 from typing import List, Dict, Type
 
+from ai.STA.Strategy.slapshot import SlapShot
 from ai.STA.Strategy.demo_2v2 import Demo2v2
 from ai.STA.Strategy.graphless_offense import GraphlessOffense
 from ai.STA.Strategy.smart_stop import SmartStop
@@ -47,6 +48,7 @@ class StrategyBook:
         default_strategies = [Offense, DefenseWall]
 
         strategy_book = {TestPassing,
+                         SlapShot,
                          HumanControl,
                          IndianaJones,
                          RobocupChoreography,
