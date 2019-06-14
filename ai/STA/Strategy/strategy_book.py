@@ -3,6 +3,8 @@
 import logging
 from typing import List, Dict, Type
 
+from ai.STA.Strategy.graphless_freekick import GraphlessFreeKick
+from ai.STA.Strategy.graphless_indirect_free_kick import GraphlessIndirectFreeKick
 from ai.STA.Strategy.slapshot import SlapShot
 from ai.STA.Strategy.demo_2v2 import Demo2v2
 from ai.STA.Strategy.graphless_offense import GraphlessOffense
@@ -73,6 +75,8 @@ class StrategyBook:
                          TestHighSpeed,
                          Demo2v2,
                          GraphlessOffense,
+                         GraphlessFreeKick,
+                         GraphlessIndirectFreeKick,
                          self.stop_strategy,
                          *default_strategies,
                          }

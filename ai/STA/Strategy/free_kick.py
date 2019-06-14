@@ -4,8 +4,7 @@ from functools import partial
 
 from Util.constant import IN_PLAY_MIN_DISTANCE
 from Util.role import Role
-
-from ai.Algorithm.evaluation_module import closest_players_to_point, closest_players_to_point_except, \
+from ai.Algorithm.evaluation_module import closest_players_to_point_except, \
     ball_going_toward_player, ball_not_going_toward_player
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
@@ -106,15 +105,6 @@ class FreeKick(Strategy):
     def has_kicked(self, player):
         role = GameState().get_role_by_player_id(player.id)
         if self.roles_graph[role].current_tactic_name == 'GoKick':
-            return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
-        else:
-            return False
-
-    def is_ready_to_kick(self, player):
-        if self.has_ball_move:
-            return True  # FIXME: Test irl, might Cause a lot of problem
-        role = GameState().get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'RotateAroundBall':
             return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
         else:
             return False
