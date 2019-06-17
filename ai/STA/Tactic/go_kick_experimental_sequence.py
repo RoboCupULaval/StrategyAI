@@ -63,22 +63,24 @@ class GoKickExperimental(Tactic):
 
         ball_speed = self.game_state.ball.velocity.norm
         ball_speed_modifier = (ball_speed / 1000 + 1)
-        effective_ball_spacing = GO_BEHIND_SPACING * ball_speed_modifier
+        effective_ball_spacing = GO_BEHIND_SPACING * 4
 
         position_behind_ball_for_approach = self.get_destination_behind_ball(effective_ball_spacing)
         position_behind_ball_for_grab = self.game_state.ball_position - normalize(player_to_target) * GRAB_BALL_SPACING
         position_behind_ball_for_kick = self.game_state.ball_position + normalize(player_to_target) * KICK_DISTANCE
         self.points_sequence = []
-        if self.is_able_to_grab_ball_directly(0.7):
-            if compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1) and \
-                    (dist_from_ball < GO_BEHIND_SPACING * 1.25):
-                self.next_state = self.validate_kick
+        if self.is_able_to_grab_ball_directly(0.9):
+            if compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
                 return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
                                               ball_collision=False, cruise_speed=3).addKick(self.kick_force).build()
-            return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_grab, orientation),
-                                          ball_collision=False, cruise_speed=3).build()
+            self.points_sequence = [WayPoint(position_behind_ball_for_grab, ball_collision=False)]
+            return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
+                                          ball_collision=False,
+                                          way_points=self.points_sequence,
+                                          cruise_speed=3).build()
         else:
-            self.points_sequence = [WayPoint(position_behind_ball_for_approach, ball_collision=True)]
+            self.points_sequence = [WayPoint(position_behind_ball_for_approach, ball_collision=True),
+                                    WayPoint(position_behind_ball_for_grab, ball_collision=False)]
 
         return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
                                       ball_collision=False,
@@ -99,11 +101,12 @@ class GoKickExperimental(Tactic):
         self.tries_flag += 1
 
         player_to_target = (self.target.position - self.player.pose.position)
-        behind_ball = self.game_state.ball_position - normalize(player_to_target) * (BALL_RADIUS + ROBOT_CENTER_TO_KICKER)
+        behind_ball = self.game_state.ball_position + normalize(player_to_target) * (BALL_RADIUS + ROBOT_CENTER_TO_KICKER)
         orientation = (self.target.position - self.game_state.ball_position).angle
 
         return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
-                                      ball_collision=False).addKick(self.kick_force).build()
+                                      ball_collision=False,
+                                      cruise_speed=3).addKick(self.kick_force).build()
 
     def validate_kick(self):
         if (self.game_state.ball_velocity.norm > 600) or (self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD):
