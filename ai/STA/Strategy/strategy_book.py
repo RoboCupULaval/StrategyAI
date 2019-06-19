@@ -5,7 +5,6 @@ from typing import List, Dict, Type
 
 from ai.STA.Strategy.slapshot import SlapShot
 from ai.STA.Strategy.demo_2v2 import Demo2v2
-from ai.STA.Strategy.graphless_offense import GraphlessOffense
 from ai.STA.Strategy.smart_stop import SmartStop
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Strategy.ball_placement import BallPlacement
@@ -72,7 +71,6 @@ class StrategyBook:
                          SmartStop,
                          TestHighSpeed,
                          Demo2v2,
-                         GraphlessOffense,
                          self.stop_strategy,
                          *default_strategies,
                          }

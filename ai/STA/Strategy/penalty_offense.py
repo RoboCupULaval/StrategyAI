@@ -9,6 +9,7 @@ from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.states.game_state import GameState
 from Util.geometry import Area
 
+
 class PenaltyOffense(TeamGoToPosition):
     def __init__(self, game_state):
         super().__init__(game_state)
@@ -35,3 +36,15 @@ class PenaltyOffense(TeamGoToPosition):
         self.create_node(Role.GOALKEEPER, GoalKeeper(game_state, goalkeeper, penalty_kick=True))
 
         self.assign_tactics(role_to_positions)
+
+    @classmethod
+    def required_roles(cls):
+        return [Role.GOALKEEPER,
+                Role.FIRST_ATTACK]
+
+    @classmethod
+    def optional_roles(cls):
+        return [Role.SECOND_ATTACK,
+                Role.MIDDLE,
+                Role.FIRST_DEFENCE,
+                Role.SECOND_DEFENCE]

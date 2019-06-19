@@ -28,11 +28,11 @@ COMMAND_DELAY = 0.5
 
 
 # noinspection PyArgumentList,PyUnresolvedReferences,PyUnresolvedReferences
-class GoKickExperimental(Tactic):
+class GoKickAggressive(Tactic):
     def __init__(self, game_state: GameState, player: Player,
                  target: Pose=Pose(),
                  args: List[str]=None,
-                 kick_force: KickForce=KickForce.MEDIUM,
+                 kick_force: KickForce=KickForce.HIGH,
                  auto_update_target=False,
                  go_behind_distance=GO_BEHIND_SPACING):
 
@@ -62,22 +62,26 @@ class GoKickExperimental(Tactic):
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
 
         ball_speed = self.game_state.ball.velocity.norm
-        ball_speed_modifier = (ball_speed / 1000 + 1)
+        ball_speed_vector = normalize(self.game_state.ball.velocity)
+        ball_speed_modifier = (ball_speed / 1000)
         effective_ball_spacing = GO_BEHIND_SPACING * 4
 
-        position_behind_ball_for_approach = self.get_destination_behind_ball(effective_ball_spacing)
+        position_behind_ball_for_approach = self.get_destination_behind_ball(effective_ball_spacing) + ball_speed_vector * ball_speed_modifier
         position_behind_ball_for_grab = self.game_state.ball_position - normalize(player_to_target) * GRAB_BALL_SPACING
         position_behind_ball_for_kick = self.game_state.ball_position + normalize(player_to_target) * KICK_DISTANCE
         self.points_sequence = []
         if self.is_able_to_grab_ball_directly(0.9):
             if compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
+
                 return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
-                                              ball_collision=False, cruise_speed=3).addKick(self.kick_force).build()
+                                              ball_collision=False, cruise_speed=3).addKick(self.kick_force).\
+                    addForceDribbler().build()
+            cruise_speed = 1
             self.points_sequence = [WayPoint(position_behind_ball_for_grab, ball_collision=False)]
             return CmdBuilder().addMoveTo(Pose(position_behind_ball_for_kick, orientation),
                                           ball_collision=False,
                                           way_points=self.points_sequence,
-                                          cruise_speed=3).build()
+                                          cruise_speed=cruise_speed).addForceDribbler().build()
         else:
             self.points_sequence = [WayPoint(position_behind_ball_for_approach, ball_collision=True),
                                     WayPoint(position_behind_ball_for_grab, ball_collision=False)]
