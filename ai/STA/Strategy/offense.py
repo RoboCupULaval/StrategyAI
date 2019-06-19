@@ -6,6 +6,7 @@ from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point_except, ball_going_toward_player, ball_not_going_toward_player
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
+from ai.STA.Tactic.go_kick_adaptative import GoKickAdaptative
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
@@ -27,9 +28,9 @@ class Offense(Strategy):
                                                                                 player,
                                                                                 auto_position=True,
                                                                                 robots_in_formation=robots_in_formation))
-                node_go_kick = self.create_node(role, GoKick(self.game_state,
-                                                             player,
-                                                             auto_update_target=True, can_kick_in_goal=False))
+                node_go_kick = self.create_node(role, GoKickAdaptative(self.game_state,
+                                                                       player,
+                                                                       auto_update_target=True, can_kick_in_goal=False))
                 node_receive_pass = self.create_node(role, ReceivePass(self.game_state, player))
 
                 player_is_closest_and_is_not_receiving_pass = partial(self.is_closest_not_goalkeeper_and_is_not_receiving_pass, player)

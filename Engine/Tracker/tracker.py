@@ -56,8 +56,6 @@ class Tracker:
 
         for ball_obs in detection_frame.get('balls', ()):
             obs = np.array([ball_obs['x'], ball_obs['y']])
-            if abs(obs[0])>2700 or abs(obs[1])>1700:
-                continue
             closest_ball = self.find_closest_ball_to_observation(obs)
             if closest_ball:
                 closest_ball.update(obs, detection_frame['t_capture'])
