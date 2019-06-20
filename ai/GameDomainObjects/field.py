@@ -4,8 +4,9 @@ from enum import Enum
 from typing import Dict, Union
 
 from Util import Position, Pose
-from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL, INDIRECT_KICK_OFFSET
-from Util.geometry import Area, Line
+from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL, INDIRECT_KICK_OFFSET, ROBOT_RADIUS
+from Util.geometry import Line
+from Util.area import Area, ForbiddenZone
 from ai.GameDomainObjects import Ball
 
 
@@ -191,8 +192,8 @@ class Field:
 
         self.free_kick_avoid_area = Area.pad(self.their_goal_area,
                                              INDIRECT_KICK_OFFSET + KEEPOUT_DISTANCE_FROM_GOAL)
-        self.our_goal_forbidden_area = Area.pad(self.our_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
-        self.their_goal_forbidden_area = Area.pad(self.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
+        self.our_goal_forbidden_area = ForbiddenZone.pad(self.our_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
+        self.their_goal_forbidden_area = ForbiddenZone.pad(self.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
 
         self.center = Position(0, 0)
 
@@ -225,23 +226,10 @@ class Field:
     @property
     def border_limits(self):
 
-        top_area = Area.from_limits(self.top + 100 * self.boundary_width,
-                                    self.top + self.boundary_width,
-                                    self.right + 100 * self.boundary_width,
-                                    self.left - 100 * self.boundary_width)
-        bottom_area = Area.from_limits(self.bottom - self.boundary_width,
-                                       self.bottom - 100 * self.boundary_width,
-                                       self.right + 100 * self.boundary_width,
-                                       self.left - 100 * self.boundary_width)
-        right_area = Area.from_limits(self.top + 100 * self.boundary_width,
-                                      self.bottom - 100 * self.boundary_width,
-                                      self.right + 100 * self.boundary_width,
-                                      self.right + self.boundary_width)
-        left_area = Area.from_limits(self.top + 100 * self.boundary_width,
-                                     self.bottom - 100 * self.boundary_width,
-                                     self.left - self.boundary_width,
-                                     self.left - 100 * self.boundary_width)
-        return [top_area, bottom_area, right_area, left_area]
+        field = ForbiddenZone.from_limits(self.top, self.bottom, self.right, self.left)
+        pad_field = ForbiddenZone.pad(field, self.boundary_width - KEEPOUT_DISTANCE_FROM_GOAL)
+        pad_field.inside_forbidden = False  # Make is so the exterior of the field are forbidden, not the interior
+        return [pad_field]
 
     @property
     def top(self):

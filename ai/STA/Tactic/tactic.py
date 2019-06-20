@@ -9,12 +9,14 @@ from Util import Pose, Position
 from Util.ai_command import AICommand
 from Util.ai_command import Idle
 from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL
-from Util.geometry import Area, Line
+from Util.geometry import Line
+from Util.area import Area, ForbiddenZone
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 __author__ = 'RobocupULaval'
+
 
 
 class Tactic:
@@ -43,12 +45,10 @@ class Tactic:
             field = self.game_state.field
 
             # Those limits are for ulaval local only
-            areas = field.border_limits
-            areas += [
-                self.field.behind_our_goal_line,
-                self.field.behind_their_goal_line]
-            #areas = []
-            self.forbidden_areas = [Area.pad(area, KEEPOUT_DISTANCE_FROM_GOAL) for area in areas]
+            self.forbidden_areas = field.border_limits
+            self.forbidden_areas += [
+                    ForbiddenZone.pad(self.field.behind_our_goal_line, KEEPOUT_DISTANCE_FROM_GOAL),
+                    ForbiddenZone.pad(self.field.behind_their_goal_line, KEEPOUT_DISTANCE_FROM_GOAL)]
             self.forbidden_areas += [self.game_state.field.their_goal_forbidden_area,
                                      self.game_state.field.our_goal_forbidden_area]
         else:
@@ -71,29 +71,32 @@ class Tactic:
 
         return next_ai_command
 
-    def _check_for_forbidden_area(self, next_ai_command):
+    def _check_for_forbidden_area(self, next_ai_command: AICommand):
         old_target_position = next_ai_command.target.position
         target_to_position = Line(self.player.position, next_ai_command.target.position)
         closest_new_target = None
+        dist_new_target = None
         for area in self.forbidden_areas:
             if old_target_position in area:
                 target_position = self._find_best_next_target(area, old_target_position, self.player.position, target_to_position)
                 new_target = Pose(target_position, next_ai_command.target.orientation)
 
-                if closest_new_target is None \
-                        or (closest_new_target - self.player.position).norm > (new_target - self.player.position).norm:
+                dist = (new_target - self.player.position).norm
+                if closest_new_target is None or dist_new_target > dist:
                     closest_new_target = new_target
+                    dist_new_target = dist
 
         if closest_new_target is not None:
             # This trailing _ is not for protected access, it was add to avoid a name conflict with the function replace
-            return next_ai_command._replace(target=closest_new_target )
+            return next_ai_command._replace(target=closest_new_target)
         return next_ai_command
 
     def _find_best_next_target(self, area: Area, old_target_position, player_position: Position, target_to_position: Line):
         intersections = area.intersect(target_to_position)
         if intersections:
             return intersections[0]
-        elif old_target_position == player_position:
+        elif old_target_position == player_position or \
+            (isinstance(area, ForbiddenZone) and not area.inside_forbidden):
             return area.closest_border_point(old_target_position)
         else:  # The player is already in the forbidden area, so it must go in the opposite direction than the target
             intersections = area.intersect_with_line(target_to_position)

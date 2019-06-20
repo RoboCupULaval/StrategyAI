@@ -5,7 +5,7 @@ from typing import Dict, Tuple, List
 
 from Engine.Controller.robot import Robot
 from Util import Pose, Position
-from Util.geometry import Area
+from Util.area import Area
 from Util.path import Path
 from Util.role import Role
 from ai.GameDomainObjects.player import Player
