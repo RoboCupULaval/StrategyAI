@@ -72,6 +72,24 @@ class SimpleAutoPlayState(IntEnum):
     NOT_ENOUGH_PLAYER = 21
 
 
+def our_player_is_closest():
+    our_closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
+    their_closest_players = closest_players_to_point(GameState().ball_position, our_team=False)
+
+    if len(their_closest_players) == 0:
+        return True
+    if len(our_closest_players) == 0:
+        return False
+    return our_closest_players[0].distance < their_closest_players[0].distance
+
+
+def no_enemy_around_ball():
+    SAFE_DISTANCE = 1000
+    their_closest_players = closest_players_to_point(GameState().ball_position, our_team=False)
+    return len(their_closest_players) == 0 or their_closest_players[0].distance > SAFE_DISTANCE
+
+
+
 class SimpleAutoPlay(AutoPlay):
     """
         Classe simple implémentant la sélection de stratégies.
@@ -239,7 +257,7 @@ class SimpleAutoPlay(AutoPlay):
         }.get(self.last_ref_state, SimpleAutoPlayState.NORMAL_DEFENSE)
 
     def _decide_between_normal_play(self):
-        if is_ball_our_side():
+        if is_ball_our_side() and not (our_player_is_closest() and no_enemy_around_ball()):
             return SimpleAutoPlayState.NORMAL_DEFENSE
         else:
             return SimpleAutoPlayState.NORMAL_OFFENSE
