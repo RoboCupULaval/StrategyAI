@@ -1,16 +1,11 @@
 # Under MIT licence, see LICENCE.txt
-from math import acos, sin, cos
-from unittest.suite import _DebugResult
 
 import numpy as np
 
-from Debug.debug_command_factory import DebugCommandFactory, BLUE, GREEN
-from ai.Algorithm.evaluation_module import player_with_ball, player_pointing_toward_point, \
-    player_pointing_toward_segment, closest_players_to_point
+from Debug.debug_command_factory import DebugCommandFactory, GREEN
+from Util.area import Area
+from ai.Algorithm.evaluation_module import player_with_ball
 from ai.STA.Tactic.goalkeeper import GoalKeeper
-from ai.executors.pathfinder_module import WayPoint
-
-__author__ = 'RoboCupULaval'
 
 from typing import List
 
@@ -18,11 +13,14 @@ from Util import Pose, Position
 from Util.ai_command import MoveTo, Idle, CmdBuilder
 from Util.constant import ROBOT_RADIUS, KEEPOUT_DISTANCE_FROM_GOAL, ROBOT_DIAMETER, BALL_RADIUS
 from Util.geometry import intersection_line_and_circle, intersection_between_lines, \
-    closest_point_on_segment, find_bisector_of_triangle, Area, Line, clamp
+    closest_point_on_segment, find_bisector_of_triangle, Line, clamp
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_kick import GRAB_BALL_SPACING, GoKick
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
+
+
+__author__ = 'RoboCupULaval'
 
 
 class PenaltyGoalKeeper(GoalKeeper):
