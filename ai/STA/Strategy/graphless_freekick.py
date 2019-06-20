@@ -64,7 +64,7 @@ class GraphlessFreeKick(GraphlessStrategy):
                                                                   player,
                                                                   auto_position=True,
                                                                   robots_in_formation=self.robots_in_formation)
-                elif tactic.status_flag == Flags.PASS_TO_PLAYER:
+                elif tactic.status_flag == Flags.PASS_TO_PLAYER and self._is_close_to_ball(player):
                     self.logger.info(
                         f"Robot {player.id} decided to make a pass to Robot {tactic.current_player_target.id}")
                     self._assign_target_to_receive_pass(tactic.current_player_target, passing_robot=player)
@@ -155,3 +155,6 @@ class GraphlessFreeKick(GraphlessStrategy):
                                                    except_roles=[Role.GOALKEEPER],
                                                    except_players=ban_players)
         return len(closests) > 0 and closests[0].player == player
+
+    def _is_close_to_ball(self, player: Player):
+        return (self.game_state.ball_position - player.position).norm < MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS

@@ -13,6 +13,9 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
 
+MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS = 1000
+
+
 class GraphlessOffense(GraphlessStrategy):
     def __init__(self, p_game_state: GameState):
         super().__init__(p_game_state)
@@ -43,8 +46,8 @@ class GraphlessOffense(GraphlessStrategy):
                                                                   player,
                                                                   auto_position=True,
                                                                   robots_in_formation=self.robots_in_formation)
-                elif tactic.status_flag == Flags.PASS_TO_PLAYER:
-                    self.logger.info(f"Robot {player.id} decided to make a pass to Robot {tactic.current_player_target.id}")
+                elif tactic.status_flag == Flags.PASS_TO_PLAYER and self._is_close_to_ball(player):
+                    self.logger.info(f"Robot {player.id} is passing to Robot {tactic.current_player_target.id}")
                     self._assign_target_to_receive_pass(tactic.current_player_target, passing_robot=player)
 
                     self.logger.info("Switching to receive_pass")
@@ -127,3 +130,6 @@ class GraphlessOffense(GraphlessStrategy):
                                                    except_players=ban_players)
 
         return len(closests) > 0 and closests[0].player == player
+
+    def _is_close_to_ball(self, player: Player):
+        return (self.game_state.ball_position - player.position).norm < MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS

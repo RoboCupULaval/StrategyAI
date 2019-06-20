@@ -90,7 +90,8 @@ class ReceivePass(Tactic):
             self.next_state = self.go_away_from_ball
             return True
 
-        if ball.is_immobile():
+        # We do not wat to switch to go_away_from_ball is the ball has not been already kicked
+        if ball.is_immobile() and self.current_state != self.align_with_passing_robot:
             if self.ball_is_immobile_since is None:
                 self.ball_is_immobile_since = time.time()
             elif time.time() - self.ball_is_immobile_since > MIN_DELAY_TO_SWITCH_IMMOBILE_BALL:
