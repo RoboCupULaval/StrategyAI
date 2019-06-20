@@ -110,15 +110,6 @@ class FreeKick(Strategy):
         else:
             return False
 
-    def is_ready_to_kick(self, player):
-        if self.has_ball_move:
-            return True  # FIXME: Test irl, might Cause a lot of problem
-        role = GameState().get_role_by_player_id(player.id)
-        if self.roles_graph[role].current_tactic_name == 'RotateAroundBall':
-            return self.roles_graph[role].current_tactic.status_flag == Flags.SUCCESS
-        else:
-            return False
-
     def has_received(self, player):
         role = GameState().get_role_by_player_id(player.id)
         if self.roles_graph[role].current_tactic_name == 'ReceivePass':

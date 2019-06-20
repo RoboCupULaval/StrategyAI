@@ -100,6 +100,9 @@ class SimpleAutoPlay(AutoPlay):
         SimpleAutoPlayState.NORMAL_DEFENSE
     ]
 
+    PENALTY_STATE = [SimpleAutoPlayState.DEFENSE_PENALTY,
+                     SimpleAutoPlayState.OFFENSE_PENALTY]
+
     FREE_KICK_STATE = [SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
                        SimpleAutoPlayState.DIRECT_FREE_OFFENSE,
                        SimpleAutoPlayState.INDIRECT_FREE_DEFENSE,
@@ -110,7 +113,8 @@ class SimpleAutoPlay(AutoPlay):
 
     ENABLE_DOUBLE_TOUCH_DETECTOR_STATE = [RefereeCommand.DIRECT_FREE_US,
                                           RefereeCommand.INDIRECT_FREE_US,
-                                          RefereeCommand.PREPARE_KICKOFF_US]
+                                          RefereeCommand.PREPARE_KICKOFF_US,
+                                          RefereeCommand.PREPARE_PENALTY_US]
 
     DISABLE_DOUBLE_TOUCH_DETECTOR_STATE = [RefereeCommand.STOP,
                                            RefereeCommand.HALT]
@@ -266,6 +270,8 @@ class SimpleAutoPlay(AutoPlay):
     def _exec_state(self):
         # We use the ball's mobility for detecting a kick and change state
         if self.current_state in self.NORMAL_STATE and GameState().ball.is_immobile():
+            return self._decide_between_normal_play()
+        elif self.current_state in self.PENALTY_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()
         elif self.current_state in self.FREE_KICK_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()

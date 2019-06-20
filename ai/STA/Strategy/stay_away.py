@@ -1,5 +1,5 @@
 # Under MIT license, see LICENSE.txt
-
+from Util.constant import KEEPOUT_DISTANCE_FROM_BALL
 from Util.role import Role
 
 from ai.STA.Strategy.strategy import Strategy
@@ -12,8 +12,9 @@ class StayAway(Strategy):
         super().__init__(p_game_state)
         for r, p in self.assigned_roles.items():
             if r == Role.GOALKEEPER:
-                # The goalkeeper must not leave its goal
-                self.create_node(r, StayAwayFromBall(self.game_state, p, forbidden_areas=[]))
+                # If the ball is at the perimeter of the goal, we don't want to have the goalkeeper move out of the goal
+                keepout_radius = KEEPOUT_DISTANCE_FROM_BALL / 2
+                self.create_node(r, StayAwayFromBall(self.game_state, p, keepout_radius=keepout_radius, forbidden_areas=[]))
             else:
                 self.create_node(r, StayAwayFromBall(self.game_state, p))
 
