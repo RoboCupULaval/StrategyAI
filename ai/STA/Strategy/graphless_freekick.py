@@ -6,11 +6,13 @@ from ai.Algorithm.evaluation_module import closest_players_to_point_except, \
     ball_going_toward_player
 from ai.GameDomainObjects import Player
 from ai.STA.Strategy.graphless_strategy import GraphlessStrategy
-from ai.STA.Tactic.go_kick import GoKick
+from ai.STA.Tactic.go_kick_adaptative import GoKickAdaptative
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
 from ai.STA.Tactic.tactic_constants import Flags
+
+MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS = 1000
 
 
 # noinspection PyMethodMayBeStatic,PyMethodMayBeStatic
@@ -57,7 +59,7 @@ class GraphlessFreeKick(GraphlessStrategy):
             if role == Role.GOALKEEPER:
                 continue
             tactic = self.roles_to_tactics[role]
-            if isinstance(tactic, GoKick):
+            if isinstance(tactic, GoKickAdaptative):
                 if not self.is_closest_not_goalkeeper(player):
                     self.logger.info(f"Robot {player.id} was not closest. Returning to PositionForPass")
                     self.roles_to_tactics[role] = PositionForPass(self.game_state,
@@ -74,14 +76,14 @@ class GraphlessFreeKick(GraphlessStrategy):
                     return  # We dont want to override self.current_pass_receiver
 
             elif self.is_closest_not_goalkeeper(player):
-                self.logger.info(f"Robot {player.id} is closest! Switching to GoKick")
-                self.roles_to_tactics[role] = GoKick(self.game_state,
-                                                     player,
-                                                     auto_update_target=True,
-                                                     can_kick_in_goal=self.can_kick_in_goal,
-                                                     forbidden_areas=self.game_state.field.border_limits
-                                                                     + self.forbidden_areas
-                                                     )
+                self.logger.info(f"Robot {player.id} is closest! Switching to GoKickAdaptative")
+                self.roles_to_tactics[role] = GoKickAdaptative(self.game_state,
+                                                               player,
+                                                               auto_update_target=True,
+                                                               can_kick_in_goal=self.can_kick_in_goal,
+                                                               forbidden_areas=self.game_state.field.border_limits
+                                                                               + self.forbidden_areas
+                                                               )
 
             elif ball_going_toward_player(self.game_state, player):
                 self.logger.info(f"Ball is going toward Robot {player.id}!")
@@ -95,7 +97,7 @@ class GraphlessFreeKick(GraphlessStrategy):
             if role == Role.GOALKEEPER:
                 continue
             tactic = self.roles_to_tactics[role]
-            if isinstance(tactic, GoKick):
+            if isinstance(tactic, GoKickAdaptative):
                 gokick_target = tactic.current_player_target
                 if gokick_target is not None:
                     if gokick_target != self.current_pass_receiver:

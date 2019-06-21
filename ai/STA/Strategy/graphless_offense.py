@@ -5,7 +5,7 @@ from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point_except, ball_going_toward_player
 from ai.GameDomainObjects import Player
 from ai.STA.Strategy.graphless_strategy import GraphlessStrategy
-from ai.STA.Tactic.go_kick import GoKick
+from ai.STA.Tactic.go_kick_adaptative import GoKickAdaptative
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
@@ -39,7 +39,7 @@ class GraphlessOffense(GraphlessStrategy):
             if role == Role.GOALKEEPER:
                 continue
             tactic = self.roles_to_tactics[role]
-            if isinstance(tactic, GoKick):
+            if isinstance(tactic, GoKickAdaptative):
                 if not self.is_closest_not_goalkeeper(player):
                     self.logger.info(f"Robot {player.id} was not closest. Returning to PositionForPass")
                     self.roles_to_tactics[role] = PositionForPass(self.game_state,
@@ -55,8 +55,8 @@ class GraphlessOffense(GraphlessStrategy):
                     return  # We dont want to override self.current_pass_receiver
 
             elif self.is_closest_not_goalkeeper(player):
-                self.logger.info(f"Robot {player.id} is closest! Switching to GoKick")
-                self.roles_to_tactics[role] = GoKick(self.game_state,
+                self.logger.info(f"Robot {player.id} is closest! Switching to GoKickAdaptative")
+                self.roles_to_tactics[role] = GoKickAdaptative(self.game_state,
                                                      player,
                                                      auto_update_target=True,
                                                      can_kick_in_goal=True)
@@ -73,7 +73,7 @@ class GraphlessOffense(GraphlessStrategy):
             if role == Role.GOALKEEPER:
                 continue
             tactic = self.roles_to_tactics[role]
-            if isinstance(tactic, GoKick):
+            if isinstance(tactic, GoKickAdaptative):
                 gokick_target = tactic.current_player_target
                 if gokick_target is not None:
                     if gokick_target != self.current_pass_receiver:
@@ -132,4 +132,6 @@ class GraphlessOffense(GraphlessStrategy):
         return len(closests) > 0 and closests[0].player == player
 
     def _is_close_to_ball(self, player: Player):
-        return (self.game_state.ball_position - player.position).norm < MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS
+        player_to_ball_distance = (self.game_state.ball_position - player.position).norm
+        self.logger.info(f"player_to_ball_distance: {player_to_ball_distance}")
+        return player_to_ball_distance < MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS

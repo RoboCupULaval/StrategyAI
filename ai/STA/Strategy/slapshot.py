@@ -9,7 +9,7 @@ from ai.Algorithm.evaluation_module import closest_players_to_point, ball_going_
     ball_not_going_toward_player
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.go_kick_experimental_sequence import GoKickExperimental
+from ai.STA.Tactic.go_kick_aggressive import GoKickAggressive
 from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
@@ -49,11 +49,17 @@ class SlapShot(Strategy):
                 node_go_to_position = self.create_node(role, GoToPosition(self.game_state, player,
                                                                           Pose(Position(0, -200), 0)))
                 node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=Pose(Position(4000, 0), 0)))
-
+                node_go_kick_aggressive = self.create_node(role, GoKickAggressive(self.game_state,
+                                                                                  player,
+                                                                                  target=Pose(Position(4000, 0), 0),
+                                                                                  kick_force=KickForce.HIGH))
                 all_player_ready = partial(self.all_player_ready, player)
                 has_kicked = partial(self.has_kicked, player)
+                ball_open = partial(self.is_ball_open)
 
                 node_go_to_position.connect_to(node_go_kick, when=has_kicked)
+                node_go_to_position.connect_to(node_go_kick_aggressive, when=has_kicked)
+                node_go_kick.connect_to(node_go_kick_aggressive, when=ball_open)
 
 
     @classmethod
@@ -88,3 +94,9 @@ class SlapShot(Strategy):
 
     def has_kicked(self, player):
         return GameState().ball.is_mobile()
+
+    def is_ball_open(self):
+        if abs(self.game_state.ball_position[0])<self.game_state.field.field_length/2 and \
+                abs(self.game_state.ball_position[1])<self.game_state.field.field_width/2:
+            return True
+        return False
