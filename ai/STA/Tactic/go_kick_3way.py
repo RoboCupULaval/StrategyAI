@@ -15,6 +15,7 @@ from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
+from ai.Algorithm.evaluation_module import object_going_toward_other_object, ball_going_toward_player
 
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1.0
@@ -28,17 +29,17 @@ COMMAND_DELAY = 0.5
 
 
 # noinspection PyArgumentList,PyUnresolvedReferences,PyUnresolvedReferences
-class GoKickAdaptative(Tactic):
+class GoKick3Way(Tactic):
     def __init__(self, game_state: GameState, player: Player,
-                 target: Pose=Pose(),
-                 args: List[str]=None,
-                 kick_force: KickForce=KickForce.HIGH,
+                 target: Pose = Pose(),
+                 args: List[str] = None,
+                 kick_force: KickForce = KickForce.HIGH,
                  auto_update_target=False,
-                 go_behind_distance=GRAB_BALL_SPACING*3,
+                 go_behind_distance=GRAB_BALL_SPACING * 3,
                  forbidden_areas=None,
                  can_kick_in_goal=True):
 
-        super().__init__(game_state, player, target, args=args, forbidden_areas=[])
+        super().__init__(game_state, player, target, args=args, forbidden_areas=forbidden_areas)
         self.current_state = self.initialize
         self.next_state = self.initialize
         self.kick_last_time = time.time()
@@ -54,39 +55,72 @@ class GoKickAdaptative(Tactic):
     def initialize(self):
         if self.auto_update_target:
             self._find_best_passing_option()
-        orientation = (self.target.position - self.game_state.ball_position).angle
 
-        dist_from_ball = (self.player.position - self.game_state.ball_position).norm
-
-        if self.is_able_to_grab_ball_directly(0.5) \
-                and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
-            self.next_state = self.grab_ball
-            if self._get_distance_from_ball() < KICK_DISTANCE:
-                self.next_state = self.kick
-
-        else:
-            self.next_state = self.go_behind_ball
+        self.check_ball_state()
 
         return Idle
 
+    def check_ball_state(self):
+        if self.game_state.ball.velocity.norm>200:
+            if self.is_ball_going_toward_target():
+                if self.is_ball_going_toward_player():
+                    self.next_state = self.stop_ball
+                    print("wow")
+                else:
+                    self.next_state = self.chase_ball
+        else:
+            self.next_state = self.go_behind_ball
+
     def go_behind_ball(self):
+        print("behind")
         if self.auto_update_target:
             self._find_best_passing_option()
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.game_state.ball_position).angle
         ball_speed = self.game_state.ball.velocity.norm
-        ball_speed_modifier = (1.6 * ball_speed/1000 + 1)
-        angle_behind=self.get_alligment_with_ball_and_target()
-        if angle_behind > 30:
-            effective_ball_spacing = GRAB_BALL_SPACING * min(2, abs(angle_behind/30)) * ball_speed_modifier
+        ball_speed_modifier = (ball_speed / 1000 + 1)
+        angle_behind = self.get_alligment_with_ball_and_target()
+        if angle_behind > 40:
+            effective_ball_spacing = GRAB_BALL_SPACING * min(2, abs(angle_behind / 40)) * ball_speed_modifier
             collision_ball = True
         else:
             effective_ball_spacing = GRAB_BALL_SPACING
             collision_ball = False
         vec_ball_to_player = normalize(self.game_state.ball_position - self.player.position)
-        perpendicular_ball_velocity = self.game_state.ball.velocity - vec_ball_to_player * np.dot(self.game_state.ball.velocity.array, vec_ball_to_player.array)
-        distance_behind = self.get_destination_behind_ball(effective_ball_spacing, ball_velocity_vector=perpendicular_ball_velocity)
-        dist_from_ball = (self.player.position - self.game_state.ball_position).norm
+        perpendicular_ball_velocity = self.game_state.ball.velocity - vec_ball_to_player * np.dot(
+            self.game_state.ball.velocity.array, vec_ball_to_player.array)
+        distance_behind = self.get_destination_behind_ball(effective_ball_spacing,
+                                                           ball_velocity_vector=perpendicular_ball_velocity)
+        if self.is_able_to_grab_ball_directly(0.95) \
+                and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
+            self.next_state = self.grab_ball
+        else:
+            self.check_ball_state()
+        return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
+                                      cruise_speed=3,
+                                      end_speed=0,
+                                      ball_collision=collision_ball) \
+            .addChargeKicker().build()
+
+    def chase_ball(self):
+        if self.auto_update_target:
+            self._find_best_passing_option()
+        self.status_flag = Flags.WIP
+        orientation = (self.target.position - self.game_state.ball_position).angle
+        ball_speed = self.game_state.ball.velocity.norm
+        ball_speed_modifier = (ball_speed / 1000 + 1)
+        angle_behind = self.get_alligment_with_ball_and_target()
+        if angle_behind > 40:
+            effective_ball_spacing = GRAB_BALL_SPACING * min(2, abs(angle_behind / 40)) * ball_speed_modifier
+            collision_ball = True
+        else:
+            effective_ball_spacing = GRAB_BALL_SPACING
+            collision_ball = False
+        vec_ball_to_player = normalize(self.game_state.ball_position - self.player.position)
+        perpendicular_ball_velocity = self.game_state.ball.velocity - vec_ball_to_player * np.dot(
+            self.game_state.ball.velocity.array, vec_ball_to_player.array)
+        distance_behind = self.get_destination_behind_ball(effective_ball_spacing,
+                                                           ball_velocity_vector=perpendicular_ball_velocity)
         end_speed = ball_speed
         if self.is_able_to_grab_ball_directly(0.95) \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
@@ -96,8 +130,42 @@ class GoKickAdaptative(Tactic):
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=3,
                                       end_speed=end_speed,
-                                      ball_collision=collision_ball)\
-                           .addChargeKicker().build()
+                                      ball_collision=collision_ball) \
+            .addChargeKicker().build()
+
+
+    def stop_ball(self):
+        print("stop_ball")
+        if self.auto_update_target:
+            self._find_best_passing_option()
+        self.status_flag = Flags.WIP
+        orientation = (self.player.position - self.game_state.ball_position).angle
+        ball_speed = self.game_state.ball.velocity.norm
+        position_behind = self.get_destination_to_stop_ball(GRAB_BALL_SPACING)
+        end_speed = ball_speed + 500
+        if self.is_able_to_stop_ball(0.95) \
+                and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
+            self.next_state = self.wait_for_ball
+        else:
+            self.next_state = self.stop_ball
+        return CmdBuilder().addMoveTo(Pose(position_behind, orientation),
+                                      cruise_speed=3,
+                                      end_speed=end_speed,
+                                      ball_collision=True) \
+            .addChargeKicker().build()
+
+    def wait_for_ball(self):
+        print("wait_for_ball")
+        self.check_ball_state()
+
+        orientation = (self.player.position - self.game_state.ball_position).angle
+        position_behind = self.get_destination_to_stop_ball(0)
+
+        return CmdBuilder().addMoveTo(Pose(position_behind, orientation),
+                                      cruise_speed=3,
+                                      end_speed=0,
+                                      ball_collision=False) \
+            .addChargeKicker().build()
 
     def grab_ball(self):
         if self.auto_update_target:
@@ -110,17 +178,18 @@ class GoKickAdaptative(Tactic):
             self.kick_last_time = time.time()
         ball_speed = self.game_state.ball.velocity.norm
         vec_ball_to_player = normalize(self.game_state.ball_position - self.player.position)
-        perpendicular_ball_velocity = self.game_state.ball.velocity - vec_ball_to_player * np.dot(self.game_state.ball.velocity.array, vec_ball_to_player.array)
+        perpendicular_ball_velocity = self.game_state.ball.velocity - vec_ball_to_player * np.dot(
+            self.game_state.ball.velocity.array, vec_ball_to_player.array)
         end_speed = ball_speed
         orientation = (self.target.position - self.game_state.ball_position).angle
         distance_behind = self.get_destination_behind_ball(0, ball_velocity_vector=perpendicular_ball_velocity)
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=3,
                                       end_speed=end_speed,
-                                      ball_collision=False)\
-                           .addForceDribbler()\
-                           .addKick(self.kick_force)\
-                           .build()
+                                      ball_collision=False) \
+            .addForceDribbler() \
+            .addKick(self.kick_force) \
+            .build()
 
     def kick(self):
         if self.auto_update_target:
@@ -138,9 +207,9 @@ class GoKickAdaptative(Tactic):
         return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
                                       ball_collision=False,
                                       cruise_speed=3,
-                                      end_speed=end_speed)\
-                                        .addKick(self.kick_force)\
-                                        .addForceDribbler().build()
+                                      end_speed=end_speed) \
+            .addKick(self.kick_force) \
+            .addForceDribbler().build()
 
     def validate_kick(self):
         if self.game_state.ball.is_moving_fast() or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
@@ -163,7 +232,7 @@ class GoKickAdaptative(Tactic):
     def _get_distance_from_ball(self):
         return (self.player.pose.position - self.game_state.ball_position).norm
 
-    def _is_player_towards_ball_and_target(self, abs_tol=m.pi/30):
+    def _is_player_towards_ball_and_target(self, abs_tol=m.pi / 30):
         ball_position = self.game_state.ball_position
         target_to_ball = ball_position - self.target.position
         ball_to_player = self.player.pose.position - ball_position
@@ -191,7 +260,8 @@ class GoKickAdaptative(Tactic):
 
             self.target_assignation_last_time = time.time()
 
-    def get_destination_behind_ball(self, ball_spacing, velocity=True, velocity_offset=15, ball_velocity_vector=Position()) -> Position:
+    def get_destination_behind_ball(self, ball_spacing, velocity=True, velocity_offset=15,
+                                    ball_velocity_vector=Position()) -> Position:
         """
          Compute the point which is at ball_spacing mm behind the ball from the target.
         """
@@ -205,7 +275,18 @@ class GoKickAdaptative(Tactic):
                                                                  np.dot(dir_ball_to_target.array,
                                                                         self.game_state.ball.velocity.array))) / velocity_offset
 
-        return position_behind + ball_velocity_vector / 5
+        return position_behind + ball_velocity_vector / 10
+
+    def get_destination_to_stop_ball(self, ball_spacing) -> Position:
+        """
+         Compute the point which is at ball_spacing mm behind the ball from the target.
+        """
+
+        dir_ball_speed = normalize(self.game_state.ball.velocity)
+
+        position_behind = self.game_state.ball.position - dir_ball_speed * ball_spacing
+
+        return position_behind
 
     def is_able_to_grab_ball_directly(self, threshold):
         # plus que le threshold est gors (1 max), plus qu'on veut que le robot soit direct deriere la balle.
@@ -214,9 +295,25 @@ class GoKickAdaptative(Tactic):
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
         return threshold < alignement_behind
 
+    def is_able_to_stop_ball(self, threshold):
+        # plus que le threshold est gors (1 max), plus qu'on veut que le robot soit direct deriere la balle.
+        vec_robot_to_ball = normalize(self.game_state.ball.position - self.player.position)
+        alignement_behind = np.dot(vec_robot_to_ball.array,
+                                   (normalize(self.game_state.ball_velocity).array))
+        return threshold < alignement_behind
+
     def get_alligment_with_ball_and_target(self):
 
         vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
         alignement_behind = np.dot(vec_target_to_ball.array,
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
         return np.arccos(alignement_behind) * 180 / np.pi
+
+    def is_ball_going_toward_target(self):
+        return object_going_toward_other_object(self.game_state.ball, self.target, max_angle_of_approach=40)
+
+    def is_ball_going_toward_player(self):
+        return ball_going_toward_player(self.game_state, self.player, max_angle_of_approach=40)
+
+    def is_ball_going_away_from_player(self):
+        return ball_going_toward_player(self.game_state, self.player, max_angle_of_approach=90)

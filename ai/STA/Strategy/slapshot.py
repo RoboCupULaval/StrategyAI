@@ -10,6 +10,7 @@ from ai.Algorithm.evaluation_module import closest_players_to_point, ball_going_
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.go_kick_aggressive import GoKickAggressive
+from ai.STA.Tactic.go_kick_adaptative import GoKickAdaptative
 from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
@@ -24,6 +25,9 @@ class SlapShot(Strategy):
 
     def __init__(self, p_game_state, can_kick_in_goal=True):
         super().__init__(p_game_state)
+        self.player_1_pose = Pose(Position(-1000, 1000), 0)
+        self.player_2_pose = Pose(Position(0, -200), 0)
+        self.ball_position_start = self.player_1_pose.position + Position(500, 0)
 
 
         formation = [p for r, p in self.assigned_roles.items() if r != Role.GOALKEEPER]
@@ -34,10 +38,10 @@ class SlapShot(Strategy):
                 self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
             elif role == Role.FIRST_ATTACK:
                 node_go_to_position = self.create_node(role, GoToPosition(self.game_state, player,
-                                                                          Pose(Position(0, 1000), 0)))
+                                                                          self.player_1_pose))
                 node_go_kick = self.create_node(role, GoKick(self.game_state,
                                                              player,
-                                                             target=Pose(Position(2000, -2000), 0),
+                                                             target=Pose(Position(2000, 0), 0),
                                                              kick_force=KickForce.LOW))
                 all_player_ready = partial(self.all_player_ready, player)
                 has_kicked = partial(self.has_kicked, player)
@@ -47,9 +51,9 @@ class SlapShot(Strategy):
 
             elif role == Role.SECOND_ATTACK:
                 node_go_to_position = self.create_node(role, GoToPosition(self.game_state, player,
-                                                                          Pose(Position(0, -200), 0)))
-                node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=Pose(Position(4000, 0), 0)))
-                node_go_kick_aggressive = self.create_node(role, GoKickAggressive(self.game_state,
+                                                                          self.player_2_pose))
+                node_go_kick = self.create_node(role, GoKickAdaptative(self.game_state, player, target=Pose(Position(4000, 0), 0)))
+                node_go_kick_aggressive = self.create_node(role, GoKickAdaptative(self.game_state,
                                                                                   player,
                                                                                   target=Pose(Position(4000, 0), 0),
                                                                                   kick_force=KickForce.HIGH))
@@ -57,7 +61,7 @@ class SlapShot(Strategy):
                 has_kicked = partial(self.has_kicked, player)
                 ball_open = partial(self.is_ball_open)
 
-                node_go_to_position.connect_to(node_go_kick, when=has_kicked)
+                node_go_to_position.connect_to(node_go_kick_aggressive, when=has_kicked)
                 node_go_to_position.connect_to(node_go_kick_aggressive, when=has_kicked)
                 node_go_kick.connect_to(node_go_kick_aggressive, when=ball_open)
 
@@ -75,15 +79,17 @@ class SlapShot(Strategy):
                 Role.SECOND_DEFENCE]
 
     def all_player_ready(self, player):
+
         role = GameState().get_role_by_player_id(player.id)
         if role == Role.FIRST_ATTACK:
             player1 = GameState().get_player_by_role(Role.FIRST_ATTACK)
             player2 = GameState().get_player_by_role(Role.SECOND_ATTACK)
-            if ((player1.position - Position(0, 1000)).norm < 100) and ((player2.position -
-                                                                         Position(0, -200)).norm < 100):
-                if (GameState().ball_position - Position(500, 1000)).norm < 500:
-                    return True
+            if ((player1.position -self.player_1_pose.position).norm < 100) and ((player2.position -
+                                                                         self.player_2_pose.position).norm < 100):
+                if (GameState().ball_position - self.ball_position_start).norm < 500:
 
+                    return True
+            print("wow")
             return False
 
         closest_players = closest_players_to_point(GameState().ball_position, our_team=True)

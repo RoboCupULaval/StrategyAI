@@ -225,12 +225,16 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
     return scores
 
 
-def ball_going_toward_player(game_state, player):
-    if game_state.ball.is_mobile(50):  # to avoid division by zero and unstable ball_directions
-        ball_approach_angle = np.arccos(np.dot(normalize(player.position - game_state.ball.position).array,
-                                               normalize(game_state.ball.velocity).array)) * 180 / np.pi
-        return ball_approach_angle < 25
+def object_going_toward_other_object(object_1, object_2, max_angle_of_approach=25):
+    if object_1.is_mobile(50):  # to avoid division by zero and unstable ball_directions
+        object_1_approach_angle = np.arccos(np.dot(normalize(object_2.position - object_1.position).array,
+                                                   normalize(object_1.velocity).array)) * 180 / np.pi
+        return object_1_approach_angle < max_angle_of_approach
     return False
+
+
+def ball_going_toward_player(game_state, player, max_angle_of_approach=25):
+    return object_going_toward_other_object(game_state.ball, player, max_angle_of_approach=max_angle_of_approach)
 
 
 def ball_not_going_toward_player(game_state, player):

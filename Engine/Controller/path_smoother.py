@@ -9,6 +9,8 @@ from Util.geometry import wrap_to_pi
 
 def path_smoother(path, speed, end_speed) -> Tuple[Path, float]:
 
+    if end_speed < 200:
+        end_speed = 0 # un end_speed tres petit prooque un overshoot en vitesse vraiment disproportione.
     if len(path) < 3:
         return path, end_speed
 

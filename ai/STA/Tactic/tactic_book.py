@@ -7,6 +7,7 @@ from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
 from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot
 from ai.STA.Tactic.face_target import FaceTarget
 from ai.STA.Tactic.go_kick import GoKick
+from ai.STA.Tactic.go_kick_3way import GoKick3Way
 from ai.STA.Tactic.go_kick_adaptative import GoKickAdaptative
 from ai.STA.Tactic.go_kick_aggressive import GoKickAggressive
 from ai.STA.Tactic.go_to_position import GoToPosition
@@ -31,9 +32,10 @@ class TacticBook:
 
         self.stop_tactic = Stop
 
-        defaults_tactics = [GoToPosition, GoKick]
+        defaults_tactics = [GoToPosition, GoKick3Way]
 
         tactics = {GoKickAdaptative,
+                   GoKick3Way,
                    ReceivePass,
                    PlaceBall,
                    FaceTarget,
