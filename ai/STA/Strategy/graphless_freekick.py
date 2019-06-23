@@ -1,13 +1,17 @@
 # Under MIT License, see LICENSE.txt
 import time
 
-from Util.constant import IN_PLAY_MIN_DISTANCE
+import math
+
+from Util import Pose
+from Util.constant import IN_PLAY_MIN_DISTANCE, ROBOT_RADIUS
 from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point_except, \
     ball_going_toward_player
 from ai.GameDomainObjects import Player
 from ai.STA.Strategy.graphless_strategy import GraphlessStrategy
 from ai.STA.Tactic.go_kick import GoKick
+from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
@@ -59,6 +63,26 @@ class GraphlessFreeKick(GraphlessStrategy):
 
     def get_in_position(self):
         self.logger.info("=====GET IN POSITION")
+
+        for role, player in self.assigned_roles.items():
+            if role == Role.GOALKEEPER:
+                continue
+            tactic = self.roles_to_tactics[role]
+            if self.is_closest_not_goalkeeper(player):
+                self.logger.info(f"Robot {player.id} was not closest. Returning to PositionForPass")
+
+                their_goal_to_ball = self.game_state.ball_position - self.game_state.field.their_goal
+                go_behind_position = self.game_state.ball_position + their_goal_to_ball.unit * ROBOT_RADIUS * 1.5
+                go_behind_orientation = their_goal_to_ball.angle + math.pi
+                self.roles_to_tactics[role] = GoToPosition(self.game_state,
+                                                           player,
+                                                           target=Pose(go_behind_position, go_behind_orientation))
+            else:
+                self.roles_to_tactics[role] = PositionForPass(self.game_state,
+                                                              player,
+                                                              auto_position=True,
+                                                              robots_in_formation=self.robots_in_formation)
+
         if time.time() - self.start_time > TIME_TO_GET_IN_POSITION:
             self.next_state = self.go_get_ball
 
