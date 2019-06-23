@@ -1,17 +1,19 @@
 # Under MIT License, see LICENSE.txt
+import time
 
 from Util.constant import IN_PLAY_MIN_DISTANCE
 from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point_except, \
     ball_going_toward_player
 from ai.GameDomainObjects import Player
-from ai.STA.Strategy.graphless_offense import MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS
 from ai.STA.Strategy.graphless_strategy import GraphlessStrategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
 from ai.STA.Tactic.tactic_constants import Flags
+
+TIME_TO_GET_IN_POSITION = 5
 
 
 # noinspection PyMethodMayBeStatic,PyMethodMayBeStatic
@@ -49,9 +51,16 @@ class GraphlessFreeKick(GraphlessStrategy):
                 self.closest_role = r
 
         self.ball_start_position = self.game_state.ball.position
-        self.next_state = self.go_get_ball
+        self.next_state = self.get_in_position
         self.current_pass_receiver = None
         self.can_kick_in_goal = can_kick_in_goal
+
+        self.start_time = time.time()
+
+    def get_in_position(self):
+        self.logger.info("=====GET IN POSITION")
+        if time.time() - self.start_time > TIME_TO_GET_IN_POSITION:
+            self.next_state = self.go_get_ball
 
     def go_get_ball(self):
         self.logger.info("=====GO GET BALL")
@@ -66,7 +75,7 @@ class GraphlessFreeKick(GraphlessStrategy):
                                                                   player,
                                                                   auto_position=True,
                                                                   robots_in_formation=self.robots_in_formation)
-                elif tactic.status_flag == Flags.PASS_TO_PLAYER and self._will_probably_kick_soon(player):
+                elif tactic.status_flag == Flags.PASS_TO_PLAYER:
                     self.logger.info(
                         f"Robot {player.id} decided to make a pass to Robot {tactic.current_player_target.id}")
                     self._assign_target_to_receive_pass(tactic.current_player_target, passing_robot=player)
@@ -135,7 +144,7 @@ class GraphlessFreeKick(GraphlessStrategy):
                 self.next_state = self.go_get_ball
 
         # FIXME
-        if all(not isinstance(self.roles_to_tactics[role], GoKickAdaptative) for role, _ in self.assigned_roles.items()):
+        if all(not isinstance(self.roles_to_tactics[role], GoKick) for role, _ in self.assigned_roles.items()):
             self.next_state = self.go_get_ball
 
     def _assign_target_to_receive_pass(self, target: Player, passing_robot):
@@ -170,13 +179,3 @@ class GraphlessFreeKick(GraphlessStrategy):
                                                    except_players=ban_players)
         return len(closests) > 0 and closests[0].player == player
 
-    def _will_probably_kick_soon(self, player: Player):
-        tactic = self.roles_to_tactics[self.game_state.get_role_by_player_id(player.id)]
-        assert isinstance(tactic, GoKickAdaptative)
-
-        player_to_ball_distance = (self.game_state.ball_position - player.position).norm
-        is_close_to_ball = player_to_ball_distance < MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS
-
-        ball_to_receiver_unit = (self.game_state.current_player_target.position - self.game_state.ball_position).unit
-        is_approaching_ball = player.velocity.position.unit.dot(ball_to_receiver_unit) > 0.5
-        return is_close_to_ball or is_approaching_ball

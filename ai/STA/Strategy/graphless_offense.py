@@ -68,6 +68,13 @@ class GraphlessOffense(GraphlessStrategy):
                 self.logger.info("Switching to receive_pass")
                 self.next_state = self.receive_pass
 
+            # Robots must not stay in receive pass if they are not receiving a pass
+            elif isinstance(tactic, ReceivePass):
+                self.roles_to_tactics[role] = PositionForPass(self.game_state,
+                                                              player,
+                                                              auto_position=True,
+                                                              robots_in_formation=self.robots_in_formation)
+
     def receive_pass(self):
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
@@ -102,7 +109,7 @@ class GraphlessOffense(GraphlessStrategy):
                 self.logger.info("Switching to go_get_ball")
                 self.next_state = self.go_get_ball
 
-        if all(not isinstance(self.roles_to_tactics[role], GoKickAdaptative) for role, _ in self.assigned_roles.items()):
+        if all(not isinstance(self.roles_to_tactics[role], GoKick) for role, _ in self.assigned_roles.items()):
             self.next_state = self.go_get_ball
 
     def _assign_target_to_receive_pass(self, target: Player, passing_robot):
