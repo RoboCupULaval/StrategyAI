@@ -145,6 +145,7 @@ class GraphlessFreeKick(GraphlessStrategy):
 
         # FIXME
         if all(not isinstance(self.roles_to_tactics[role], GoKick) for role, _ in self.assigned_roles.items()):
+            self.logger.info("No robot is assigned to GoKick! Switching to go_get_ball")
             self.next_state = self.go_get_ball
 
     def _assign_target_to_receive_pass(self, target: Player, passing_robot):

@@ -100,8 +100,8 @@ class ReceivePass(Tactic):
                 self.ball_is_immobile_since = None
                 return True
 
-        if (ball.position - self.player.position).norm < ROBOT_RADIUS + 50:
-            self.logger.info("The ball about to touch us, success?")
+        if (ball.position - self.player.position).norm < ROBOT_RADIUS + 50 and ball.is_immobile():
+            self.logger.info("The ball just touch us, success?")
             self.next_state = self.go_away_from_ball
             return True
 
