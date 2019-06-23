@@ -1,7 +1,8 @@
 # Under MIT license, see LICENSE.txt
 
-from Util.role import Role
+import numpy as np
 
+from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point_except, ball_going_toward_player
 from ai.GameDomainObjects import Player
 from ai.STA.Strategy.graphless_strategy import GraphlessStrategy
@@ -12,8 +13,7 @@ from ai.STA.Tactic.receive_pass import ReceivePass
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
-
-MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS = 1000
+MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS = 1500
 
 
 class GraphlessOffense(GraphlessStrategy):
@@ -46,7 +46,7 @@ class GraphlessOffense(GraphlessStrategy):
                                                                   player,
                                                                   auto_position=True,
                                                                   robots_in_formation=self.robots_in_formation)
-                elif tactic.status_flag == Flags.PASS_TO_PLAYER and self._is_close_to_ball(player):
+                elif tactic.status_flag == Flags.PASS_TO_PLAYER and self._will_probably_kick_soon(player):
                     self.logger.info(f"Robot {player.id} is passing to Robot {tactic.current_player_target.id}")
                     self._assign_target_to_receive_pass(tactic.current_player_target, passing_robot=player)
 
@@ -102,6 +102,9 @@ class GraphlessOffense(GraphlessStrategy):
                 self.logger.info("Switching to go_get_ball")
                 self.next_state = self.go_get_ball
 
+        if all(not isinstance(self.roles_to_tactics[role], GoKickAdaptative) for role, _ in self.assigned_roles.items()):
+            self.next_state = self.go_get_ball
+
     def _assign_target_to_receive_pass(self, target: Player, passing_robot):
         self.logger.info(f"Switching Robot {target.id} tactic to ReceivePass")
         role = self.game_state.get_role_by_player_id(target.id)
@@ -131,5 +134,13 @@ class GraphlessOffense(GraphlessStrategy):
 
         return len(closests) > 0 and closests[0].player == player
 
-    def _is_close_to_ball(self, player: Player):
-        return (self.game_state.ball_position - player.position).norm < MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS
+    def _will_probably_kick_soon(self, player: Player):
+        tactic = self.roles_to_tactics[self.game_state.get_role_by_player_id(player.id)]
+        assert isinstance(tactic, GoKick)
+
+        player_to_ball_distance = (self.game_state.ball_position - player.position).norm
+        is_close_to_ball = player_to_ball_distance < MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS
+
+        ball_to_receiver_unit = (tactic.current_player_target.position - self.game_state.ball_position).unit
+        is_approaching_ball = player.velocity.position.unit.dot(ball_to_receiver_unit) > 0.5
+        return is_close_to_ball or is_approaching_ball
