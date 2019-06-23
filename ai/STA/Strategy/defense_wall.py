@@ -47,7 +47,8 @@ class DefenseWall(Strategy):
 
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
-                self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
+                pass
+                #self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
             elif player in self.attackers:
                 node_position_pass = self.create_node(role, PositionForPass(self.game_state,
                                                                             player,
@@ -126,7 +127,7 @@ class DefenseWall(Strategy):
                 node_wait_for_pass.connect_to(node_go_kick, when=player_has_received_ball)
                 node_go_kick.connect_to(node_align_to_defense_wall, when=player_has_kicked)
                 node_position_pass.connect_to(node_wait_for_pass, when=player_is_receiving_pass)
-                node_position_pass.connect_to(node_align_to_defense_wall, when=player_is_not_receiving_pass)
+                # node_position_pass.connect_to(node_align_to_defense_wall, when=player_is_not_receiving_pass)
 
 
     @classmethod
@@ -168,6 +169,9 @@ class DefenseWall(Strategy):
         else:
             return False
 
+    def _remove_not_available_roles(self, unfiltered_roles):
+        return [r for r in unfiltered_roles if r in self.assigned_roles.keys()]
+
     def _dispatch_player(self):
 
         if not self.can_kick and self.multiple_cover:
@@ -175,6 +179,8 @@ class DefenseWall(Strategy):
             self.cover_role += [Role.SECOND_ATTACK]
         if not self.can_kick and not self.multiple_cover:
             self.defensive_role += [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
+        self.defensive_role = self._remove_not_available_roles(self.defensive_role)
+        self.cover_role = self._remove_not_available_roles(self.cover_role)
 
         self.robots_in_wall_formation = [p for r, p in self.assigned_roles.items() if r in self.defensive_role]
         self.robots_in_cover_formation = [p for r, p in self.assigned_roles.items() if r in self.cover_role]
