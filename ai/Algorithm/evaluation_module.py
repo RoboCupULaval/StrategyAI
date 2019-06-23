@@ -64,7 +64,7 @@ def player_covered_from_goal(player: Player):
     pertinent_collisions_positions = np.array([obs.position for obs in pertinent_collisions])
     pertinent_collisions_avoid_radius = np.array([obs.avoid_distance for obs in pertinent_collisions])
     results = []
-    nb_beam = 15
+    nb_beam = 45
     their_goal_line = GameState().field.their_goal_line
     for i in range(0, nb_beam + 1):  # discretisation de la ligne de but
         goal_point = their_goal_line.p1 + their_goal_line.direction * (their_goal_line.length * i / nb_beam)

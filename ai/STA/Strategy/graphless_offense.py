@@ -10,6 +10,7 @@ from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
+from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 
@@ -17,6 +18,11 @@ MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS = 1500
 
 
 class GraphlessOffense(GraphlessStrategy):
+
+    MOVING_BALL_VELOCITY = 50  # mm/s
+    DANGER_BALL_VELOCITY = 600  # mm/s
+    DANGEROUS_ENEMY_MIN_DISTANCE = 500
+
     def __init__(self, p_game_state: GameState):
         super().__init__(p_game_state)
 
@@ -61,19 +67,22 @@ class GraphlessOffense(GraphlessStrategy):
                                                      auto_update_target=True,
                                                      can_kick_in_goal=True)
 
-            elif ball_going_toward_player(self.game_state, player):
-                self.logger.info(f"Ball is going toward Robot {player.id}!")
-                self._assign_target_to_receive_pass(player, passing_robot=None)
-
-                self.logger.info("Switching to receive_pass")
-                self.next_state = self.receive_pass
-
             # Robots must not stay in receive pass if they are not receiving a pass
             elif isinstance(tactic, ReceivePass):
                 self.roles_to_tactics[role] = PositionForPass(self.game_state,
                                                               player,
                                                               auto_position=True,
                                                               robots_in_formation=self.robots_in_formation)
+
+            elif ball_going_toward_player(self.game_state, player):
+                self.logger.info(f"Ball is going toward Robot {player.id}!")
+                if self._ball_going_toward_goal():
+                    self.logger.info(f"Robot {player.id} is blocking the ball from entering goal. Switching its tactic to stay away.")
+                    self.roles_to_tactics[role] = StayAwayFromBall(self.game_state, player)
+                else:
+                    self._assign_target_to_receive_pass(player, passing_robot=None)
+                    self.logger.info("Switching to receive_pass")
+                    self.next_state = self.receive_pass
 
     def receive_pass(self):
         for role, player in self.assigned_roles.items():
@@ -147,7 +156,20 @@ class GraphlessOffense(GraphlessStrategy):
 
         player_to_ball_distance = (self.game_state.ball_position - player.position).norm
         is_close_to_ball = player_to_ball_distance < MAX_DISTANCE_TO_SWITCH_TO_RECEIVE_PASS
+        if is_close_to_ball:
+            self.logger.info("Go Kick is close to ball")
 
         ball_to_receiver_unit = (tactic.current_player_target.position - self.game_state.ball_position).unit
         is_approaching_ball = player.velocity.position.unit.dot(ball_to_receiver_unit) > 0.5
+        if is_approaching_ball:
+            self.logger.info("Go Kick is approaching the ball")
+
         return is_close_to_ball or is_approaching_ball
+
+    # Copied from goalkeeper tactic
+    def _ball_going_toward_goal(self):
+        upper_angle = (self.game_state.ball.position - self.game_state.field.our_goal_line.p2).angle + 5 * np.pi / 180.0
+        lower_angle = (self.game_state.ball.position - self.game_state.field.our_goal_line.p1).angle - 5 * np.pi / 180.0
+        ball_speed = self.game_state.ball.velocity.norm
+        return (ball_speed > self.DANGER_BALL_VELOCITY and self.game_state.ball.velocity.x > 0) or \
+               (ball_speed > self.MOVING_BALL_VELOCITY and upper_angle <= self.game_state.ball.velocity.angle <= lower_angle)
