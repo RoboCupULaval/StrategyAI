@@ -1,6 +1,6 @@
 # Under MIT licence, see LICENCE.txt
 import time
-from typing import Optional
+from typing import Optional, List
 
 from Util import Pose
 from Util.ai_command import CmdBuilder, Idle, MoveTo
@@ -17,13 +17,13 @@ MIN_DELAY_TO_SWITCH_IMMOBILE_BALL = 0.5
 
 
 class ReceivePass(Tactic):
-
     def __init__(self, game_state: GameState,
                  player: Player,
                  target: Optional[Pose] = None,
+                 args: List[str] = None,
                  passing_robot: Optional[Player] = None):
       
-        super().__init__(game_state, player, target)
+        super().__init__(game_state, player, target, args=args)
         self.passing_robot = passing_robot
 
         self.status_flag = Flags.WIP
