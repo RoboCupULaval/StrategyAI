@@ -8,7 +8,7 @@ from Util.ai_command import Idle, MoveTo
 from Util.area import Area
 from Util.constant import ROBOT_RADIUS, ROBOT_DIAMETER, KEEPOUT_DISTANCE_FROM_BALL, REASONABLE_OFFSET
 from Util.geometry import perpendicular, normalize, find_bisector_of_triangle, angle_between_three_points, Line, \
-    intersection_line_and_circle
+    intersection_line_and_circle, points_on_same_vert_or_hori_line
 from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
@@ -104,9 +104,8 @@ class AlignToDefenseWall(Tactic):
         # we must recompute a new wall segment which is on the border of the goal area
         # since a robot can not move into a forbidden area, we increase the size of the forbidden area by a small amount
         goal_area = Area.pad(self.game_state.field.our_goal_forbidden_area, 10)
-        # If wall segment is inside the goal area,
-        if self._wall_is_in_a_forbidden_area(goal_area):
 
+        if self._wall_is_in_a_forbidden_area(goal_area):
             line_a = Line(self.object_to_block.position, self.game_state.field.our_goal_line.p1)
             line_b = Line(self.object_to_block.position, self.game_state.field.our_goal_line.p2)
             inter_a = goal_area.intersect(line_a)
@@ -115,15 +114,15 @@ class AlignToDefenseWall(Tactic):
                 self.logger.error(f"This is impossible, lines should touch goal area only once: {inter_a} {inter_b}")
                 return
             inter_a, inter_b = inter_a[0], inter_b[0]
-            # There are three cases for a wall_segment inside the goal area:
+            # There are two cases for a wall_segment inside the goal area:
             # A) wall_segment touch left and top/bot part of the area
-            if abs(inter_a.x - inter_b.x) > 1 and abs(inter_a.y - inter_b.y) > 1:
+            if not points_on_same_vert_or_hori_line(inter_a, inter_b):
                 # The penalty zone used to be a circle and thus really easy to handle, but now it's a rectangle...
                 # It easier to first create the smallest circle that fit the rectangle.
                 min_radius_over_penality_zone = (self.game_state.field.our_goal_forbidden_area.upper_left - self.game_state.field.our_goal).norm
                 self.center_formation = self.bisect_inter \
                                         + min_radius_over_penality_zone * normalize(vec_goal_line_bisect_to_object)
-            else:  # C) wall_segment touch left part of the area or  top/bot part of the area
+            else:  # B) wall_segment touch left part of the area or top/bot part of the area
                 # The wall is simply the intersection between line_a/line_b and the goal area
                 self.center_formation = (inter_a + inter_b) / 2
                 dir_wall_segment = normalize(inter_a - inter_b)
