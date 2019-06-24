@@ -190,14 +190,7 @@ class GoalKeeper(Tactic):
                (ball_speed > self.MOVING_BALL_VELOCITY and upper_angle <= self.game_state.ball.velocity.angle <= lower_angle)
 
     def _is_ball_safe_to_kick(self):
-        # Since defender can not kick the ball while inside the goal there are position where the ball is unreachable
-        # The goalee must leave the goal area and kick the ball
-        goal_area = self.game_state.field.our_goal_area
-        width = KEEPOUT_DISTANCE_FROM_GOAL + ROBOT_DIAMETER
-        area_in_front_of_goal = Area.from_limits(goal_area.top, goal_area.bottom,
-                                                 goal_area.left, goal_area.left - width)
-        return self.game_state.field.is_ball_in_our_goal_area() or \
-               area_in_front_of_goal.point_inside(self.game_state.ball.position) and self._no_enemy_around_ball()
+        return self.game_state.field.is_ball_in_our_goal_area()
 
     def _best_target_into_goal(self):
         if 0 < len(self.game_state.enemy_team.available_players):

@@ -78,6 +78,7 @@ class AlignToDefenseWall(Tactic):
 
         self.bisect_inter = find_bisector_of_triangle(self.object_to_block.position, goal_line.p1, goal_line.p2)
         vec_object_to_goal_line_bisect = self.bisect_inter - self.object_to_block.position
+        vec_goal_line_bisect_to_object = self.object_to_block.position - self.bisect_inter
 
 
         # # If the object is far away from the goal, we use object_to_center_formation_dist,
@@ -100,13 +101,11 @@ class AlignToDefenseWall(Tactic):
         self.wall_segment = Line(self.center_formation + half_wall_segment,
                                  self.center_formation - half_wall_segment)
 
-        # If wall segment is inside the goal area,
         # we must recompute a new wall segment which is on the border of the goal area
+        # since a robot can not move into a forbidden area, we increase the size of the forbidden area by a small amount
         goal_area = Area.pad(self.game_state.field.our_goal_forbidden_area, 10)
-        if self.object_to_block.position not in goal_area and \
-            (self.center_formation in goal_area
-            or self.wall_segment.p1 in goal_area
-            or self.wall_segment.p2 in goal_area):
+        # If wall segment is inside the goal area,
+        if self._wall_is_in_a_forbidden_area(goal_area):
 
             line_a = Line(self.object_to_block.position, self.game_state.field.our_goal_line.p1)
             line_b = Line(self.object_to_block.position, self.game_state.field.our_goal_line.p2)
@@ -119,14 +118,12 @@ class AlignToDefenseWall(Tactic):
             # There are three cases for a wall_segment inside the goal area:
             # A) wall_segment touch left and top/bot part of the area
             if abs(inter_a.x - inter_b.x) > 1 and abs(inter_a.y - inter_b.y) > 1:
-                print('a', inter_a, inter_b)
                 # The penalty zone used to be a circle and thus really easy to handle, but now it's a rectangle...
                 # It easier to first create the smallest circle that fit the rectangle.
                 min_radius_over_penality_zone = (self.game_state.field.our_goal_forbidden_area.upper_left - self.game_state.field.our_goal).norm
-                self.center_formation = self.game_state.field.our_goal \
-                                        - min_radius_over_penality_zone * normalize(vec_object_to_goal_line_bisect)
+                self.center_formation = self.bisect_inter \
+                                        + min_radius_over_penality_zone * normalize(vec_goal_line_bisect_to_object)
             else:  # C) wall_segment touch left part of the area or  top/bot part of the area
-                print('c')
                 # The wall is simply the intersection between line_a/line_b and the goal area
                 self.center_formation = (inter_a + inter_b) / 2
                 dir_wall_segment = normalize(inter_a - inter_b)
@@ -167,11 +164,7 @@ class AlignToDefenseWall(Tactic):
             self.next_state = self.go_kick
         dest = self.position_on_wall_segment()
 
-        if self.wall_segment.length > 0:
-            # Look forward, perpendicular to the wall
-            dest_orientation = (-perpendicular(self.wall_segment.direction)).angle
-        else:
-            dest_orientation = (self.object_to_block.position - dest).angle
+        dest_orientation = (self.object_to_block.position - self.bisect_inter).angle
         return MoveTo(Pose(dest,
                            dest_orientation), cruise_speed=self.cruise_speed)
 
@@ -217,3 +210,12 @@ class AlignToDefenseWall(Tactic):
             if (enemy.position - ball_position).norm < DANGEROUS_ENEMY_MIN_DISTANCE:
                 return False
         return True
+
+    def _wall_is_in_a_forbidden_area(self, goal_area):
+        if self.object_to_block.position in goal_area:
+            return False
+        return (self.center_formation in goal_area
+                or self.wall_segment.p1.x > self.game_state.field.right  # Robot can not go behind the goal line
+                or self.wall_segment.p2.x > self.game_state.field.right
+                or self.wall_segment.p1 in goal_area
+                or self.wall_segment.p2 in goal_area)

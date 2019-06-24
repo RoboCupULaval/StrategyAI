@@ -47,8 +47,7 @@ class DefenseWall(Strategy):
 
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
-                pass
-                #self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
+                self.create_node(Role.GOALKEEPER, GoalKeeper(self.game_state, player))
             elif player in self.attackers:
                 node_position_pass = self.create_node(role, PositionForPass(self.game_state,
                                                                             player,
