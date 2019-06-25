@@ -3,7 +3,7 @@ import time
 from typing import Optional, List
 
 from Util import Pose
-from Util.ai_command import CmdBuilder, Idle, MoveTo
+from Util.ai_command import CmdBuilder, Idle
 from Util.constant import ROBOT_RADIUS
 from Util.geometry import normalize, Line, closest_point_on_segment
 from ai.Algorithm.evaluation_module import ball_going_toward_player

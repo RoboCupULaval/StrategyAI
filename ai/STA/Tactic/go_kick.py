@@ -177,13 +177,11 @@ class GoKick(Tactic):
         # Update decision
         assignation_delay = (time.time() - self.target_assignation_last_time)
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
-            print("_find_best_passing_option : REASSIGN TARGET")
             scoring_target = player_covered_from_goal(self.player)
             tentative_target = best_passing_option(self.player, passer_can_kick_in_goal=self.can_kick_in_goal)
 
             # Kick in the goal where it's the easiest
             if self.can_kick_in_goal and scoring_target is not None:
-                print("_find_best_passing_option - self.can_kick_in_goal and scoring_target is not None")
                 self.nb_consecutive_times_a_pass_is_decided = 0
                 self.nb_consecutive_times_a_pass_is_not_decided += 1
                 if not self.status_flag == Flags.PASS_TO_PLAYER or self.nb_consecutive_times_a_pass_is_not_decided >= MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_FROM_PASS:
@@ -195,7 +193,6 @@ class GoKick(Tactic):
 
             # Kick in the goal center
             elif tentative_target is None:
-                print("_find_best_passing_option - tentative_target is None:")
                 self.nb_consecutive_times_a_pass_is_decided = 0
                 self.nb_consecutive_times_a_pass_is_not_decided += 1
                 if not self.status_flag == Flags.PASS_TO_PLAYER or self.nb_consecutive_times_a_pass_is_not_decided >= MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_FROM_PASS:
@@ -211,7 +208,6 @@ class GoKick(Tactic):
 
             # Pass the ball to another player
             else:
-                print(f"_find_best_passing_option - pass to another player - status_flag: {self.status_flag}, nb_consecutive_times_a_pass_is_decided: {self.nb_consecutive_times_a_pass_is_decided}")
                 self.nb_consecutive_times_a_pass_is_decided += 1
                 self.nb_consecutive_times_a_pass_is_not_decided = 0
                 if self.status_flag == Flags.INIT or \
