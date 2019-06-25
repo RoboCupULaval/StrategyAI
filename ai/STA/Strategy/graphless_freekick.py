@@ -72,7 +72,7 @@ class GraphlessFreeKick(GraphlessStrategy):
                 self.logger.info(f"Robot {player.id} was not closest. Returning to PositionForPass")
 
                 their_goal_to_ball = self.game_state.ball_position - self.game_state.field.their_goal
-                go_behind_position = self.game_state.ball_position + their_goal_to_ball.unit * ROBOT_RADIUS * 1.5
+                go_behind_position = self.game_state.ball_position + their_goal_to_ball.unit * ROBOT_RADIUS * 2.0
                 go_behind_orientation = their_goal_to_ball.angle + math.pi
                 self.roles_to_tactics[role] = GoToPosition(self.game_state,
                                                            player,

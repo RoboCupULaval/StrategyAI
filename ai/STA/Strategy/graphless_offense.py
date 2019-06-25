@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from Util.geometry import wrap_to_pi
 from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point_except, ball_going_toward_player
 from ai.GameDomainObjects import Player
@@ -21,7 +22,6 @@ class GraphlessOffense(GraphlessStrategy):
 
     MOVING_BALL_VELOCITY = 50  # mm/s
     DANGER_BALL_VELOCITY = 600  # mm/s
-    DANGEROUS_ENEMY_MIN_DISTANCE = 500
 
     def __init__(self, p_game_state: GameState):
         super().__init__(p_game_state)
@@ -166,10 +166,12 @@ class GraphlessOffense(GraphlessStrategy):
 
         return is_close_to_ball or is_approaching_ball
 
-    # Copied from goalkeeper tactic
     def _ball_going_toward_goal(self):
-        upper_angle = (self.game_state.ball.position - self.game_state.field.our_goal_line.p2).angle + 5 * np.pi / 180.0
-        lower_angle = (self.game_state.ball.position - self.game_state.field.our_goal_line.p1).angle - 5 * np.pi / 180.0
+        angle_p1 = wrap_to_pi((self.game_state.field.their_goal_line.p1 - self.game_state.ball.position).angle + np.pi)
+        angle_p2 = wrap_to_pi((self.game_state.field.their_goal_line.p2 - self.game_state.ball.position).angle + np.pi)
+        lower_angle = angle_p1 - 5 * np.pi / 180.0
+        upper_angle = angle_p2 + 5 * np.pi / 180.0
+        ball_velocity_angle = wrap_to_pi(self.game_state.ball.velocity.angle + np.pi)
         ball_speed = self.game_state.ball.velocity.norm
-        return (ball_speed > self.DANGER_BALL_VELOCITY and self.game_state.ball.velocity.x > 0) or \
-               (ball_speed > self.MOVING_BALL_VELOCITY and upper_angle <= self.game_state.ball.velocity.angle <= lower_angle)
+        return (ball_speed > self.DANGER_BALL_VELOCITY and self.game_state.ball.velocity.x < 0) or \
+               (ball_speed > self.MOVING_BALL_VELOCITY and lower_angle <= ball_velocity_angle <= upper_angle)
