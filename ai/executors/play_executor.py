@@ -142,9 +142,11 @@ def generate_engine_cmd(player: Player, ai_cmd: AICommand, path: Path) -> Engine
     return EngineCommand(player.id,
                          cruise_speed=ai_cmd.cruise_speed * 1000,
                          path=path,
+                         move_type=ai_cmd.move_type,
                          kick_type=ai_cmd.kick_type,
                          kick_force=ai_cmd.kick_force,
                          dribbler_state=ai_cmd.dribbler_state,
                          target_orientation=ai_cmd.target.orientation if ai_cmd.target else None,
                          end_speed=ai_cmd.end_speed,
-                         charge_kick=ai_cmd.charge_kick)
+                         charge_kick=ai_cmd.charge_kick,
+                         target_radius=ai_cmd.target_radius)

@@ -8,6 +8,7 @@ import numpy as np
 from typing import Dict, List, Any
 
 from Debug.debug_command_factory import DebugCommandFactory
+from Engine.Controller.Regulators.pivot_regulators import PivotRegulator
 
 from Engine.Controller.path_smoother import path_smoother
 from Engine.Controller.Regulators import VelocityRegulator
@@ -15,6 +16,7 @@ from Engine.Controller.robot import Robot
 from Engine.Communication.robot_state import RobotPacket, RobotState
 
 from Util import Pose
+from Util.constant import MoveType
 from Util.engine_command import EngineCommand
 from Util.geometry import rotate
 from config.config import Config
@@ -29,7 +31,8 @@ class Controller:
         self.timestamp = -1
         self.robots = [Robot(robot_id) for robot_id in range(config['ENGINE']['max_robot_id'])]
         for robot in self.robots:
-            robot.regulator = VelocityRegulator()
+            robot.vel_regulator = VelocityRegulator()
+            robot.pivot_regulator = PivotRegulator()
 
     def update(self, track_frame: Dict[str, Any], engine_cmds: List[EngineCommand]):
 
@@ -55,8 +58,11 @@ class Controller:
         commands = {}
 
         for robot in self.active_robots:
-            robot.path, robot.target_speed = path_smoother(robot.raw_path, robot.cruise_speed, robot.end_speed)
-            commands[robot.id] = robot.regulator.execute(robot, dt)
+            if robot.engine_cmd.move_type in [MoveType.MOVE_PATHFINDER, MoveType.MOVE_NO_PATHFINDER]:
+                robot.path, robot.target_speed = path_smoother(robot.raw_path, robot.cruise_speed, robot.end_speed)
+                commands[robot.id] = robot.vel_regulator.execute(robot, dt)
+            elif robot.is_pivoting:
+                commands[robot.id] = robot.pivot_regulator.execute(robot, dt)
 
         return self.generate_packet(commands)
 

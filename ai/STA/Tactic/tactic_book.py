@@ -14,6 +14,7 @@ from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.leeroy_jenkins import LeeroyJenkins
 from ai.STA.Tactic.pass_to_player import PassToPlayer
 from ai.STA.Tactic.penalty_goalkeeper import PenaltyGoalKeeper
+from ai.STA.Tactic.pivot_kick import PivotKick
 from ai.STA.Tactic.place_ball import PlaceBall
 from ai.STA.Tactic.receive_pass import ReceivePass
 from ai.STA.Tactic.rotate_around_ball import RotateAroundBall
@@ -21,6 +22,7 @@ from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.stress_test_robot import StressTestRobotWaypoint, StressTestRobot
 from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.test_pivot import TestPivot
 
 
 class TacticBook:
@@ -49,6 +51,8 @@ class TacticBook:
                    StressTestRobotWaypoint,
                    AlignAroundTheBall,
                    LeeroyJenkins,
+                   TestPivot,
+                   PivotKick,
                    *defaults_tactics,
                    self.stop_tactic}
 

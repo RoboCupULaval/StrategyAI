@@ -4,7 +4,7 @@ from collections import namedtuple
 
 from typing import Union
 
-from Util.constant import KickForce, KickType, DribbleState
+from Util.constant import KickForce, KickType, DribbleState, MoveType
 from Util.position import Position
 from Util.pose import Pose
 from Util.geometry import closest_point_on_segment, normalize
@@ -18,7 +18,8 @@ AICommand = namedtuple('AICommand', 'target,'
                                     'end_speed,'
                                     'ball_collision,'
                                     'way_points,'
-                                    'enable_pathfinder')
+                                    'move_type,'
+                                    'target_radius')
 
 class CmdBuilder:
 
@@ -34,22 +35,32 @@ class CmdBuilder:
         self._end_speed = 0
         self._ball_collision = True
         self._way_points = []
-        self._enable_pathfinder = True
+        self._move_type = MoveType.MOVE_PATHFINDER
+        self._target_radius = None # used by pivot
 
     def addMoveTo(self,
                   target: Union[Pose, Position],
                   cruise_speed: float=1,
                   end_speed: float=0,
                   ball_collision=True,
-                  way_points=None,  # Points the robot must follow before reaching the target
+                  way_points=None,
                   enable_pathfinder=True):
+        """
+        Move to a target pose
+        :param target: Pose to reach in mm and in rad
+        :param cruise_speed: Maximum speed in m/s
+        :param end_speed: Speed when target is reached m/s
+        :param ball_collision: Should pathfinder try to avoid touching the ball
+        :param way_points: (optional) List of points the robot must follow before reaching the target
+        :param enable_pathfinder: Should the pathfinder be used
+        """
         assert isinstance(target, (Pose, Position))
 
         self._target = Pose(target) if isinstance(target, Position) else target
         self._cruise_speed = cruise_speed
         self._end_speed = end_speed
         self._ball_collision = ball_collision
-        self._enable_pathfinder = enable_pathfinder
+        self._move_type = MoveType.MOVE_PATHFINDER if enable_pathfinder else MoveType.MOVE_NO_PATHFINDER
         if way_points is not None:
             self._way_points = way_points
         return self
@@ -72,6 +83,23 @@ class CmdBuilder:
         self._charge_kick = True
         return self
 
+    def addPivotTo(self, target, target_angle, target_radius, cruise_speed=1):
+        """
+        Allow the robot to pivot around a point
+        :param target: Point around which the robot is rotated
+        :param target_angle: Angle (in rad) in the world frame of the robot at the end of the pivot
+        :param target_radius: Distance (in mm) between target and robot at the end of the pivot
+        :param cruise_speed: Rotation speed in (rad/s)
+        """
+        assert isinstance(target, (Pose, Position))
+
+        self._move_type = MoveType.PIVOT
+        self._target = target if isinstance(target, Pose) else Pose(target)
+        self._cruise_speed = cruise_speed
+        self._target.orientation = target_angle
+        self._target_radius = target_radius
+        return self
+
     def build(self) -> AICommand:
         return AICommand(target=self._target,
                          kick_type=self._kick_type,
@@ -82,7 +110,8 @@ class CmdBuilder:
                          end_speed=self._end_speed,
                          ball_collision=self._ball_collision,
                          way_points=self._way_points,  # Points the robot must follow before reaching the target
-                         enable_pathfinder=self._enable_pathfinder)
+                         move_type=self._move_type,
+                         target_radius=self._target_radius)
 
 
 def Kick(kick_force: KickForce=KickForce.LOW):

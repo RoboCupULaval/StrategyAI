@@ -1,6 +1,7 @@
 from typing import Optional
 
 from Util import Pose, Position, Path
+from Util.constant import MoveType
 from Util.geometry import wrap_to_pi
 from config.config import Config
 
@@ -17,11 +18,12 @@ MAX_ANGULAR_ACC = 100  # rad/s^2
 
 class Robot:
 
-    __slots__ = ('_id', 'is_on_field', 'regulator', 'pose', 'velocity', 'path', 'engine_cmd', 'target_speed')
+    __slots__ = ('_id', 'is_on_field', 'vel_regulator', 'pivot_regulator', 'pose', 'velocity', 'path', 'engine_cmd', 'target_speed')
 
     def __init__(self, _id: int):
         self._id = _id
-        self.regulator = None
+        self.vel_regulator = None
+        self.pivot_regulator = None
         self.pose = None
         self.velocity = None
         self.path = None
@@ -35,7 +37,11 @@ class Robot:
 
     @property
     def is_active(self):
-        return self.is_on_field and self.raw_path is not None
+        return self.is_on_field and (self.raw_path is not None or self.is_pivoting)
+
+    @property
+    def is_pivoting(self):
+        return self.engine_cmd and self.engine_cmd.move_type == MoveType.PIVOT
 
     @property
     def target_pose(self) -> Pose:
@@ -66,6 +72,8 @@ class Robot:
 
     @property
     def target_position(self) -> Optional[Position]:
+        if self.is_pivoting:
+            return self.raw_path.target
         if self.path is not None:
             return self.path.next_position
 

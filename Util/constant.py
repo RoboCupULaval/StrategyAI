@@ -70,3 +70,8 @@ class DribbleState(Enum):
     AUTOMATIC = 0
     FORCE_STOP = 1
     FORCE_SPIN = 2
+
+class MoveType(Enum):
+    MOVE_PATHFINDER = 0
+    MOVE_NO_PATHFINDER = 1
+    PIVOT = 2

@@ -4,6 +4,7 @@ from collections import defaultdict
 from typing import Dict, List
 
 from Util import AICommand, Position, Path
+from Util.constant import MoveType
 from ai.Algorithm.path_partitionner import PathPartitionner, Obstacle
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
@@ -36,10 +37,12 @@ class PathfinderModule:
         self.strategy_obstacles = strategy_obstacles
         for player, ai_cmd in ai_cmds.items():
             if ai_cmd.target is not None:
-                if ai_cmd.enable_pathfinder:
+                if ai_cmd.move_type == MoveType.MOVE_PATHFINDER:
                     self.paths[player] = self.generate_path(player, ai_cmd)
-                else:
+                elif ai_cmd.move_type in [MoveType.MOVE_NO_PATHFINDER, MoveType.PIVOT]:
                     self.paths[player] = Path(start=player.position, target=ai_cmd.target.position)
+                else:
+                    self.paths[player] = None
             else:
                 self.paths[player] = None
 

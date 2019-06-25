@@ -28,6 +28,10 @@ class Line:
     def length(self):
         return (self.p2 - self.p1).norm
 
+    @classmethod
+    def from_direction(cls, p: Position, dir: Position):
+        return cls(p, p + dir)
+
 
 def find_bisector_of_triangle(c, a, b):
     """
@@ -116,6 +120,11 @@ def rotate(vec: Position, angle: float) -> Position:
     sina = np.sin(angle)
     return Position(x * cosa - y * sina, x * sina + y * cosa)
 
+
+def normalize_to_zero(vec: Position) -> Position:
+    if vec.norm == 0:
+        return Position(0, 0)
+    return vec.copy() / vec.norm
 
 def normalize(vec: Position) -> Position:
     if vec.norm == 0:
