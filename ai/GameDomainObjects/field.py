@@ -225,7 +225,6 @@ class Field:
     # FIXME MONTREAL
     @property
     def border_limits(self):
-
         field = ForbiddenZone.from_limits(self.top, self.bottom, self.right, self.left)
         pad_field = ForbiddenZone.pad(field, self.boundary_width - KEEPOUT_DISTANCE_FROM_GOAL)
         pad_field.inside_forbidden = False  # Make is so the exterior of the field are forbidden, not the interior

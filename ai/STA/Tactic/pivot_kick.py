@@ -35,7 +35,17 @@ class PivotKick(Tactic):
         player_to_ball = self.game_state.ball_position - self.player.position
         behind_ball = self.game_state.ball_position - (self.ROBOT_CENTER_TO_KICKER + BALL_RADIUS) * normalize_to_zero(player_to_ball)
         pose = Pose(behind_ball, player_to_ball.angle)
-        return CmdBuilder().addMoveTo(pose, cruise_speed=3, ball_collision=False).addForceDribbler().build()
+        cmd = CmdBuilder().addMoveTo(pose,
+                                     cruise_speed=3,
+                                     end_speed=self.game_state.ball.velocity.norm,
+                                     ball_collision=False)\
+            .addKick(KickForce.NONE)
+
+        # Dribbler is kind of noisy
+        if player_to_ball.norm < 500:
+            return cmd.addForceDribbler().build()
+        else:
+            return cmd.addStopDribbler().build()
 
     def kick(self):
         if not self._ball_touching_dribbler(5 * BALL_RADIUS):
@@ -56,18 +66,19 @@ class PivotKick(Tactic):
                                       target_angle=0, # not used for the moment
                                       target_radius=radius,
                                       cruise_speed=rot_speed)
+                          # .addForceDribbler()
         if self._player_is_facing_goal():
             return cmd.addKick(KickForce.HIGH).build()
         else:
             return cmd.build()
 
     def _ball_touching_dribbler(self, kick_distance_max=1.5 * BALL_RADIUS):
-        MAX_ANGLE_FOR_KICK = 30
+        MAX_ANGLE_FOR_KICK = 17  # actually 14 irl, but this number work better in practice
 
         ball_position = self.game_state.ball.position
         player_to_ball = ball_position - self.player.position
 
-        return player_to_ball.norm <  self.ROBOT_CENTER_TO_KICKER + kick_distance_max \
+        return player_to_ball.norm < self.ROBOT_CENTER_TO_KICKER + kick_distance_max \
                and compare_angle(self.player.orientation, player_to_ball.angle, abs_tol=np.deg2rad(MAX_ANGLE_FOR_KICK))
 
     def _player_is_facing_goal(self):

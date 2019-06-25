@@ -4,7 +4,7 @@ from Engine.Controller.Regulators.PID import PID
 from Engine.Controller.Regulators.regulator_base_class import RegulatorBaseClass
 from Engine.Controller.robot import Robot, MAX_LINEAR_ACCELERATION, MAX_ANGULAR_SPEED
 from Util import Pose
-from Util.geometry import clamp, normalize, rotate
+from Util.geometry import clamp, normalize, rotate, wrap_to_pi
 from Util.pose import Position
 
 from config.config import Config
@@ -43,7 +43,7 @@ class PivotRegulator(RegulatorBaseClass):
 
         target_orientation = robot.position_error.angle
         # Correct the orientation
-        orientation_error = target_orientation - robot.orientation
+        orientation_error = wrap_to_pi(target_orientation - robot.orientation)
         cmd_orientation = self.orientation_controller.execute(orientation_error)
         cmd_orientation = clamp(cmd_orientation, -MAX_ANGULAR_SPEED, MAX_ANGULAR_SPEED)
 

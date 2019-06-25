@@ -27,6 +27,6 @@ class TestPivot(Tactic):
         self.target_angle = (target.position - player.position).angle + np.deg2rad(90)
 
     def move(self):
-        return CmdBuilder().addPivotTo(self.target, target_angle=self.target_angle, target_radius=self.target_radius, cruise_speed=1.5).build()
+        return CmdBuilder().addPivotTo(self.target, target_angle=self.target_angle, target_radius=self.target_radius, cruise_speed=0.4).build()
 
 
