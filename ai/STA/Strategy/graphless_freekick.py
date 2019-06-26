@@ -129,7 +129,6 @@ class GraphlessFreeKick(GraphlessStrategy):
                                                               robots_in_formation=self.robots_in_formation)
 
     def receive_pass(self):
-        self.logger.info("=====RECEIVEPASS")
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 continue
