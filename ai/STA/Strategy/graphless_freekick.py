@@ -62,12 +62,9 @@ class GraphlessFreeKick(GraphlessStrategy):
         self.start_time = time.time()
 
     def get_in_position(self):
-        self.logger.info("=====GET IN POSITION")
-
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 continue
-            tactic = self.roles_to_tactics[role]
             if self.is_closest_not_goalkeeper(player):
                 self.logger.info(f"Robot {player.id} was not closest. Returning to PositionForPass")
 
@@ -87,7 +84,6 @@ class GraphlessFreeKick(GraphlessStrategy):
             self.next_state = self.go_get_ball
 
     def go_get_ball(self):
-        self.logger.info("=====GO GET BALL")
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 continue
