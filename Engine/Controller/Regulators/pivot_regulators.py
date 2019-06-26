@@ -11,7 +11,7 @@ from config.config import Config
 config = Config()
 
 settings = {
-    'orientation_pid_settings': {'kp': 10, 'ki': 1, 'kd': 0.0},
+    'orientation_pid_settings': {'kp': 10, 'ki': 3, 'kd': 0.3},
     'derivative_deadzone': 0.5
 }
 
@@ -26,20 +26,21 @@ class PivotRegulator(RegulatorBaseClass):
 
     def reset(self):
         self.orientation_controller.reset()
-        self.last_commanded_velocity = Position()
         self.dt = 0.0
 
     def execute(self, robot: Robot, dt):
         self.dt = dt
 
-        # Velocity in robot's frame
-        rotation_speed = robot.cruise_speed / 1000  # rad/s
         radius = robot.position_error.norm
         target_radius = robot.engine_cmd.target_radius
         # To control the radius, we tell the robot to go towards or away from the target
         # I only used a pid with P=1 for this correction, it's dumb, but it works
         corr_x = radius - target_radius
-        velocity = Position(corr_x, rotation_speed * radius)
+
+        # Velocity in robot's frame
+        # rotation_speed = robot.cruise_speed / 1000  # rad/s
+        rotation_speed = robot.cruise_speed / radius
+        velocity = Position(corr_x, robot.cruise_speed)
 
         target_orientation = robot.position_error.angle
         # Correct the orientation
