@@ -39,14 +39,14 @@ class GoKick3Way(Tactic):
                  forbidden_areas=None,
                  can_kick_in_goal=True):
 
-        super().__init__(game_state, player, target, args=args, forbidden_areas=forbidden_areas)
+        super().__init__(game_state, player, target, args=args, forbidden_areas=[])
         self.current_state = self.initialize
         self.next_state = self.go_behind_ball
         self.kick_last_time = time.time()
         self.auto_update_target = auto_update_target
         self.can_kick_in_goal = can_kick_in_goal
         self.target_assignation_last_time = 0
-        self.target = targetà
+        self.target = target
         if self.auto_update_target:
             self._find_best_passing_option()
         self.kick_force = kick_force
@@ -195,16 +195,24 @@ class GoKick3Way(Tactic):
         self.check_ball_state()
         ball_speed = self.game_state.ball.velocity.norm
         end_speed = ball_speed
-        player_to_target = (self.target.position - self.player.pose.position)
+        player_to_ball = normalize(self.game_state.ball_position - self.player.pose.position)
         behind_ball = self.game_state.ball_position
         orientation = (self.target.position - self.game_state.ball_position).angle
+        a = False  # en attente du flag pour savoir si le player peut kick ou pas
+        if a:
+            ram_position = Pose(player_to_ball*100+self.game_state.ball_position, orientation)
+            return CmdBuilder().addMoveTo(ram_position,
+                                          ball_collision=False,
+                                          cruise_speed=3,
+                                          end_speed=2).build()
+        else:
 
-        return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
-                                      ball_collision=False,
-                                      cruise_speed=3,
-                                      end_speed=end_speed) \
-            .addKick(self.kick_force) \
-            .addForceDribbler().build()
+            return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
+                              ball_collision=False,
+                              cruise_speed=3,
+                              end_speed=end_speed) \
+                .addKick(self.kick_force) \
+                .addForceDribbler().build()
 
     def validate_kick(self):
         if self.game_state.ball.is_moving_fast() and self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
