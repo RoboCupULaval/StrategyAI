@@ -46,8 +46,7 @@ class GoKick3Way(Tactic):
         self.auto_update_target = auto_update_target
         self.can_kick_in_goal = can_kick_in_goal
         self.target_assignation_last_time = 0
-        self.target = target
-        self.target = Pose(self.game_state.field.their_goal, 0)
+        self.target = targetà
         if self.auto_update_target:
             self._find_best_passing_option()
         self.kick_force = kick_force
