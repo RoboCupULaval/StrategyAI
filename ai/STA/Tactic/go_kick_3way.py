@@ -41,12 +41,13 @@ class GoKick3Way(Tactic):
 
         super().__init__(game_state, player, target, args=args, forbidden_areas=forbidden_areas)
         self.current_state = self.initialize
-        self.next_state = self.initialize
+        self.next_state = self.go_behind_ball
         self.kick_last_time = time.time()
         self.auto_update_target = auto_update_target
         self.can_kick_in_goal = can_kick_in_goal
         self.target_assignation_last_time = 0
         self.target = target
+        self.target = Pose(self.game_state.field.their_goal, 0)
         if self.auto_update_target:
             self._find_best_passing_option()
         self.kick_force = kick_force
@@ -55,7 +56,6 @@ class GoKick3Way(Tactic):
     def initialize(self):
         if self.auto_update_target:
             self._find_best_passing_option()
-
         self.check_ball_state()
 
         return Idle
@@ -65,14 +65,14 @@ class GoKick3Way(Tactic):
             if self.is_ball_going_toward_target():
                 if self.is_ball_going_toward_player():
                     self.next_state = self.stop_ball
-                    print("wow")
                 else:
                     self.next_state = self.chase_ball
+        elif self.is_able_to_grab_ball_directly(0.85) and self._get_distance_from_ball() < KICK_DISTANCE:
+            self.next_state = self.kick
         else:
             self.next_state = self.go_behind_ball
 
     def go_behind_ball(self):
-        print("behind")
         if self.auto_update_target:
             self._find_best_passing_option()
         self.status_flag = Flags.WIP
@@ -110,7 +110,7 @@ class GoKick3Way(Tactic):
         ball_speed = self.game_state.ball.velocity.norm
         ball_speed_modifier = (ball_speed / 1000 + 1)
         angle_behind = self.get_alligment_with_ball_and_target()
-        if angle_behind > 40:
+        if angle_behind > 20:
             effective_ball_spacing = GRAB_BALL_SPACING * min(2, abs(angle_behind / 40)) * ball_speed_modifier
             collision_ball = True
         else:
@@ -126,28 +126,26 @@ class GoKick3Way(Tactic):
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
             self.next_state = self.grab_ball
         else:
-            self.next_state = self.go_behind_ball
+            self.check_ball_state()
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=3,
                                       end_speed=end_speed,
                                       ball_collision=collision_ball) \
             .addChargeKicker().build()
 
-
     def stop_ball(self):
-        print("stop_ball")
         if self.auto_update_target:
             self._find_best_passing_option()
         self.status_flag = Flags.WIP
-        orientation = (self.player.position - self.game_state.ball_position).angle
+        orientation = (self.target.position - self.game_state.ball_position).angle
         ball_speed = self.game_state.ball.velocity.norm
         position_behind = self.get_destination_to_stop_ball(GRAB_BALL_SPACING)
         end_speed = ball_speed + 500
         if self.is_able_to_stop_ball(0.95) \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
-            self.next_state = self.wait_for_ball
+            self.next_state = self.grab_ball
         else:
-            self.next_state = self.stop_ball
+            self.check_ball_state()
         return CmdBuilder().addMoveTo(Pose(position_behind, orientation),
                                       cruise_speed=3,
                                       end_speed=end_speed,
@@ -155,10 +153,8 @@ class GoKick3Way(Tactic):
             .addChargeKicker().build()
 
     def wait_for_ball(self):
-        print("wait_for_ball")
         self.check_ball_state()
-
-        orientation = (self.player.position - self.game_state.ball_position).angle
+        orientation = (self.target.position - self.game_state.ball_position).angle
         position_behind = self.get_destination_to_stop_ball(0)
 
         return CmdBuilder().addMoveTo(Pose(position_behind, orientation),
@@ -188,16 +184,16 @@ class GoKick3Way(Tactic):
                                       end_speed=end_speed,
                                       ball_collision=False) \
             .addForceDribbler() \
-            .addKick(self.kick_force) \
+            .addChargeKicker() \
             .build()
 
     def kick(self):
         if self.auto_update_target:
             self._find_best_passing_option()
         if not self.is_able_to_grab_ball_directly(0.7):
-            self.next_state = self.go_behind_ball
-            return self.go_behind_ball()
-        self.next_state = self.validate_kick
+            self.next_state=self.grab_ball
+            return self.next_state()
+        self.check_ball_state()
         ball_speed = self.game_state.ball.velocity.norm
         end_speed = ball_speed
         player_to_target = (self.target.position - self.player.pose.position)
@@ -212,8 +208,8 @@ class GoKick3Way(Tactic):
             .addForceDribbler().build()
 
     def validate_kick(self):
-        if self.game_state.ball.is_moving_fast() or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
-            self.next_state = self.halt
+        if self.game_state.ball.is_moving_fast() and self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
+            self.next_state = self.kick
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
             self.next_state = self.kick
         else:

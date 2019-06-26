@@ -12,7 +12,7 @@ from ai.Algorithm.evaluation_module import closest_players_to_point, ball_not_go
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall, FETCH_BALL_ZONE_RADIUS
 from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.go_kick_adaptative import GoKickAdaptative
+from ai.STA.Tactic.go_kick_3way import GoKick3Way
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
@@ -54,7 +54,7 @@ class DefenseWall(Strategy):
                                                                             player,
                                                                             robots_in_formation=self.attackers,
                                                                             auto_position=True))
-                node_go_kick = self.create_node(role, GoKickAdaptative(self.game_state, player, target=their_goal))
+                node_go_kick = self.create_node(role, GoKick3Way(self.game_state, player, target=their_goal))
                 node_wait_for_pass = self.create_node(role, ReceivePass(self.game_state, player))
 
                 attacker_should_go_kick = partial(self.should_go_kick, player)
@@ -85,7 +85,7 @@ class DefenseWall(Strategy):
                                                                             robots_in_formation=self.robots_in_cover_formation,
                                                                             auto_position=True))
 
-                node_go_kick = self.create_node(role, GoKickAdaptative(self.game_state, player, target=their_goal))
+                node_go_kick = self.create_node(role, GoKick3Way(self.game_state, player, target=their_goal))
                 node_wait_for_pass = self.create_node(role, ReceivePass(self.game_state, player))
 
                 player_is_receiving_pass = partial(ball_going_toward_player, game_state, player)
@@ -113,7 +113,7 @@ class DefenseWall(Strategy):
                                                                             robots_in_formation=self.robots_in_wall_formation,
                                                                             auto_position=True))
 
-                node_go_kick = self.create_node(role, GoKickAdaptative(self.game_state, player, target=their_goal))
+                node_go_kick = self.create_node(role, GoKick3Way(self.game_state, player, target=their_goal))
                 node_wait_for_pass = self.create_node(role, ReceivePass(self.game_state, player))
 
                 player_is_receiving_pass = partial(ball_going_toward_player, game_state, player)

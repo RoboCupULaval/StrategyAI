@@ -10,7 +10,7 @@ from ai.Algorithm.evaluation_module import closest_players_to_point, ball_going_
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.go_kick_aggressive import GoKickAggressive
-from ai.STA.Tactic.go_kick_adaptative import GoKickAdaptative
+from ai.STA.Tactic.go_kick_3way import GoKick3Way
 from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
@@ -52,8 +52,8 @@ class SlapShot(Strategy):
             elif role == Role.SECOND_ATTACK:
                 node_go_to_position = self.create_node(role, GoToPosition(self.game_state, player,
                                                                           self.player_2_pose))
-                node_go_kick = self.create_node(role, GoKickAdaptative(self.game_state, player, target=Pose(Position(4000, 0), 0)))
-                node_go_kick_aggressive = self.create_node(role, GoKickAdaptative(self.game_state,
+                node_go_kick = self.create_node(role, GoKick3Way(self.game_state, player, target=Pose(Position(4000, 0), 0)))
+                node_go_kick_aggressive = self.create_node(role, GoKick3Way(self.game_state,
                                                                                   player,
                                                                                   target=Pose(Position(4000, 0), 0),
                                                                                   kick_force=KickForce.HIGH))
