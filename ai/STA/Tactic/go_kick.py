@@ -135,10 +135,18 @@ class GoKick(Tactic):
         player_to_target = (self.target.position - self.player.pose.position)
         position_behind_ball = self.game_state.ball_position + normalize(player_to_target) * ROBOT_CENTER_TO_KICKER
         required_orientation = (self.target.position - self.game_state.ball_position).angle
-
-        return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False)\
-                                        .addKick(self.kick_force)\
-                                        .addForceDribbler().build()
+        a = False  # en attente du flag pour savoir si le player peut kick ou pas
+        if a:
+            player_to_ball = normalize(self.game_state.ball_position - self.player.pose.position)
+            ram_position = Pose(player_to_ball*100+self.game_state.ball_position, orientation)
+            return CmdBuilder().addMoveTo(ram_position,
+                                          ball_collision=False,
+                                          cruise_speed=3,
+                                          end_speed=2).build()
+        else:
+            return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False)\
+                                            .addKick(self.kick_force)\
+                                            .addForceDribbler().build()
 
     def validate_kick(self):
         if self.game_state.ball.is_moving_fast() and self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:

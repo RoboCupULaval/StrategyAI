@@ -195,11 +195,11 @@ class GoKick3Way(Tactic):
         self.check_ball_state()
         ball_speed = self.game_state.ball.velocity.norm
         end_speed = ball_speed
-        player_to_ball = normalize(self.game_state.ball_position - self.player.pose.position)
         behind_ball = self.game_state.ball_position
         orientation = (self.target.position - self.game_state.ball_position).angle
         a = False  # en attente du flag pour savoir si le player peut kick ou pas
         if a:
+            player_to_ball = normalize(self.game_state.ball_position - self.player.pose.position)
             ram_position = Pose(player_to_ball*100+self.game_state.ball_position, orientation)
             return CmdBuilder().addMoveTo(ram_position,
                                           ball_collision=False,
