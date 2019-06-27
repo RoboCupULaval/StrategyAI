@@ -105,6 +105,9 @@ class RoleMapper(object):
         remaining_nonfunctional_kickers = [p for p in remaining_players if p not in remaining_functional_kickers]
 
         nb_nonfunctional_kickers_to_assign = len(remaining_required_roles) - len(remaining_functional_kickers)
+        assert nb_nonfunctional_kickers_to_assign <= len(remaining_nonfunctional_kickers), \
+            "Not enough player left ({} players) to assign theses roles {}".format(len(remaining_nonfunctional_kickers),
+                                                                                   remaining_required_roles)
         for _ in range(nb_nonfunctional_kickers_to_assign):
             for role in self.BUMPING_ROBOTS_ROLE_ORDER:
                 if role in remaining_required_roles:
@@ -119,6 +122,7 @@ class RoleMapper(object):
         remaining_functional_kickers = [p for p in remaining_functional_kickers if p not in required_assign.values()]
 
         nb_nonfunctional_kickers_to_assign = len(optional_roles) - len(remaining_functional_kickers)
+        nb_nonfunctional_kickers_to_assign = min(nb_nonfunctional_kickers_to_assign, len(remaining_nonfunctional_kickers))
         for _ in range(nb_nonfunctional_kickers_to_assign):
             for role in self.BUMPING_ROBOTS_ROLE_ORDER:
                 if role in optional_roles:
