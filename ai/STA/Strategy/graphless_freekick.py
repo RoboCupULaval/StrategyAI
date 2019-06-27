@@ -75,7 +75,8 @@ class GraphlessFreeKick(GraphlessStrategy):
                 go_behind_orientation = their_goal_to_ball.angle + math.pi
                 self.roles_to_tactics[role] = GoToPosition(self.game_state,
                                                            player,
-                                                           target=Pose(go_behind_position, go_behind_orientation))
+                                                           target=Pose(go_behind_position, go_behind_orientation),
+                                                           cruise_speed=1)
             else:
                 self.roles_to_tactics[role] = PositionForPass(self.game_state,
                                                               player,
