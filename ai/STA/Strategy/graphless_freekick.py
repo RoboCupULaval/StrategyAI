@@ -58,6 +58,7 @@ class GraphlessFreeKick(GraphlessStrategy):
         self.next_state = self.get_in_position
         self.current_pass_receiver = None
         self.can_kick_in_goal = can_kick_in_goal
+        self.first_passing_player = None
 
         self.start_time = time.time()
 
@@ -66,7 +67,8 @@ class GraphlessFreeKick(GraphlessStrategy):
             if role == Role.GOALKEEPER:
                 continue
             if self.is_closest_not_goalkeeper(player):
-                self.logger.info(f"Robot {player.id} was not closest. Returning to PositionForPass")
+                self.logger.info(f"Robot {player.id} is closest => go behind ball")
+                self.first_passing_player = player
 
                 their_goal_to_ball = self.game_state.ball_position - self.game_state.field.their_goal
                 go_behind_position = self.game_state.ball_position + their_goal_to_ball.unit * ROBOT_RADIUS * 2.0
@@ -80,10 +82,13 @@ class GraphlessFreeKick(GraphlessStrategy):
                                                               auto_position=True,
                                                               robots_in_formation=self.robots_in_formation)
 
-        if time.time() - self.start_time > TIME_TO_GET_IN_POSITION:
-            self.next_state = self.go_get_ball
+        self.next_state = self.wait_before_pass
 
-    def go_get_ball(self):
+    def wait_before_pass(self):
+        if time.time() - self.start_time > TIME_TO_GET_IN_POSITION:
+            self.next_state = self.pass_to_receiver
+
+    def pass_to_receiver(self):
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 continue
@@ -106,10 +111,12 @@ class GraphlessFreeKick(GraphlessStrategy):
 
             elif self.is_closest_not_goalkeeper(player):
                 self.logger.info(f"Robot {player.id} is closest! Switching to GoKick")
+
+                can_kick_in_goal = self.can_kick_in_goal if self.first_passing_player else True
                 self.roles_to_tactics[role] = GoKick(self.game_state,
                                                      player,
                                                      auto_update_target=True,
-                                                     can_kick_in_goal=self.can_kick_in_goal,
+                                                     can_kick_in_goal=can_kick_in_goal,
                                                      forbidden_areas=self.game_state.field.border_limits
                                                                      + self.forbidden_areas
                                                      )
@@ -160,12 +167,12 @@ class GraphlessFreeKick(GraphlessStrategy):
             elif isinstance(tactic, ReceivePass) and tactic.status_flag == Flags.SUCCESS:
                 self.logger.info(f"Robot {player.id} has received ball!")
                 self.logger.info("Switching to go_get_ball")
-                self.next_state = self.go_get_ball
+                self.next_state = self.pass_to_receiver
 
         # FIXME
         if all(not isinstance(self.roles_to_tactics[role], GoKick) for role, _ in self.assigned_roles.items()):
             self.logger.info("No robot is assigned to GoKick! Switching to go_get_ball")
-            self.next_state = self.go_get_ball
+            self.next_state = self.pass_to_receiver
 
     def _assign_target_to_receive_pass(self, target: Player, passing_robot):
         self.logger.info(f"Switching Robot {target.id} tactic to ReceivePass")
