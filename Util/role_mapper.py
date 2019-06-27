@@ -105,12 +105,11 @@ class RoleMapper(object):
         remaining_nonfunctional_kickers = [p for p in remaining_players if p not in remaining_functional_kickers]
 
         nb_nonfunctional_kickers_to_assign = len(remaining_required_roles) - len(remaining_functional_kickers)
-        if nb_nonfunctional_kickers_to_assign > 0:
+        for _ in range(nb_nonfunctional_kickers_to_assign):
             for role in self.BUMPING_ROBOTS_ROLE_ORDER:
                 if role in remaining_required_roles:
                     nonfunctional_kickers_assign[remaining_nonfunctional_kickers.pop()] = role
                     remaining_required_roles.remove(role)
-                    nb_nonfunctional_kickers_to_assign -= 1
 
         required_assign = self._keep_prev_mapping_otherwise_random(remaining_functional_kickers,
                                                                    remaining_required_roles,
@@ -120,12 +119,11 @@ class RoleMapper(object):
         remaining_functional_kickers = [p for p in remaining_functional_kickers if p not in required_assign.values()]
 
         nb_nonfunctional_kickers_to_assign = len(optional_roles) - len(remaining_functional_kickers)
-        if nb_nonfunctional_kickers_to_assign > 0:
+        for _ in range(nb_nonfunctional_kickers_to_assign):
             for role in self.BUMPING_ROBOTS_ROLE_ORDER:
                 if role in optional_roles:
                     nonfunctional_kickers_assign[remaining_nonfunctional_kickers.pop()] = role
                     optional_roles.remove(role)
-                    nb_nonfunctional_kickers_to_assign -= 1
 
         optional_assign = self._keep_prev_mapping_otherwise_random(remaining_functional_kickers,
                                                                    optional_roles,
