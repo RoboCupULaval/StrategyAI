@@ -134,7 +134,8 @@ class Config(metaclass=Singleton):
                 'on_negative_side': True,
                 'is_fps_locked': True,
                 'fps': 10,
-                'max_excess_time': 0.1
+                'max_excess_time': 0.1,
+                'working_kicker_ids': [0, 1, 2, 3, 4, 5, 6, 7]
             },
             'ENGINE': {
                 'number_of_camera': 4,
