@@ -80,7 +80,7 @@ class SlapShot(Strategy):
 
             return False
 
-        closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
+        closest_players = closest_players_to_point(GameState().ball_position, is_our_team=True)
         if player == closest_players[0].player:
             return True
         return closest_players[0].player == self.game_state.get_player_by_role(Role.GOALKEEPER) \

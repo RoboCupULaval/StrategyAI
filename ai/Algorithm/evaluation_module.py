@@ -19,9 +19,9 @@ class PlayerPosition(object):
         self.distance = distance
 
 
-def player_with_ball(min_dist_from_ball=1.2 * ROBOT_RADIUS, our_team=None):
+def player_with_ball(min_dist_from_ball=1.2 * ROBOT_RADIUS, is_our_team=None):
     # Retourne le joueur qui possède la balle, NONE si balle libre
-    closest_player = closest_player_to_point(GameState().ball_position, our_team)
+    closest_player = closest_player_to_point(GameState().ball_position, is_our_team)
     if closest_player.distance < min_dist_from_ball:
         return closest_player.player
     else:
@@ -119,17 +119,16 @@ def find_collisions(obstacles: List[Obstacle], obstacles_position: np.ndarray, o
 
 
 # noinspection PyUnusedLocal
-# TODO: Change 'our_team' to 'is_our_team'
-def closest_players_to_point(point: Position, our_team=None):
+def closest_players_to_point(point: Position, is_our_team=None):
     # Retourne une liste de tuples (player, distance) en ordre croissant de distance,
     # our_team pour obtenir une liste contenant une équipe en particulier
     list_player = []
-    if our_team or our_team is None:
+    if is_our_team or is_our_team is None:
         for i in GameState().our_team.available_players.values():
             # les players friends
             player_distance = (i.pose.position - point).norm
             list_player.append(PlayerPosition(i, player_distance))
-    if not our_team:
+    if not is_our_team:
         for i in GameState().enemy_team.available_players.values():
             # les players ennemis
             player_distance = (i.pose.position - point).norm
@@ -145,7 +144,7 @@ def closest_player_to_point(point: Position, our_team=None):
 
 
 def closest_players_to_point_except(point: Position, except_roles=[], except_players=[]):
-    closests = closest_players_to_point(point, our_team=True)
+    closests = closest_players_to_point(point, is_our_team=True)
     ban_players = except_players.copy()
     ban_players += [GameState().get_player_by_role(r) for r in except_roles]
     return [player_dist for player_dist in closests if player_dist.player not in ban_players]

@@ -52,7 +52,7 @@ class GraphlessOffense(GraphlessStrategy):
                                                                   player,
                                                                   auto_position=True,
                                                                   robots_in_formation=self.robots_in_formation)
-                elif tactic.status_flag == Flags.PASS_TO_PLAYER and self._will_probably_kick_soon(player):
+                elif tactic.status_flag == Flags.PASS_TO_PLAYER and self._will_probably_kick_soon(player):  # TODO this is different
                     self.logger.info(f"Robot {player.id} is passing to Robot {tactic.current_player_target.id}")
                     self._assign_target_to_receive_pass(tactic.current_player_target, passing_robot=player)
 
@@ -67,22 +67,22 @@ class GraphlessOffense(GraphlessStrategy):
                                                      auto_update_target=True,
                                                      can_kick_in_goal=True)
 
-            # Robots must not stay in receive pass if they are not receiving a pass
-            elif isinstance(tactic, ReceivePass):
-                self.roles_to_tactics[role] = PositionForPass(self.game_state,
-                                                              player,
-                                                              auto_position=True,
-                                                              robots_in_formation=self.robots_in_formation)
-
             elif ball_going_toward_player(self.game_state, player):
                 self.logger.info(f"Ball is going toward Robot {player.id}!")
-                if self._ball_going_toward_goal():
+                if self._ball_going_toward_their_goal():
                     self.logger.info(f"Robot {player.id} is blocking the ball from entering goal. Switching its tactic to stay away.")
                     self.roles_to_tactics[role] = StayAwayFromBall(self.game_state, player)
                 else:
                     self._assign_target_to_receive_pass(player, passing_robot=None)
                     self.logger.info("Switching to receive_pass")
                     self.next_state = self.receive_pass
+
+            # Robots must not stay in receive pass if they are not receiving a pass
+            elif isinstance(tactic, ReceivePass):
+                self.roles_to_tactics[role] = PositionForPass(self.game_state,
+                                                              player,
+                                                              auto_position=True,
+                                                              robots_in_formation=self.robots_in_formation)
 
     def receive_pass(self):
         for role, player in self.assigned_roles.items():
@@ -166,7 +166,7 @@ class GraphlessOffense(GraphlessStrategy):
 
         return is_close_to_ball or is_approaching_ball
 
-    def _ball_going_toward_goal(self):
+    def _ball_going_toward_their_goal(self):
         angle_p1 = wrap_to_pi((self.game_state.field.their_goal_line.p1 - self.game_state.ball.position).angle + np.pi)
         angle_p2 = wrap_to_pi((self.game_state.field.their_goal_line.p2 - self.game_state.ball.position).angle + np.pi)
         lower_angle = angle_p1 - 5 * np.pi / 180.0

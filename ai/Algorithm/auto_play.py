@@ -72,8 +72,8 @@ class SimpleAutoPlayState(IntEnum):
 
 
 def our_player_is_closest():
-    our_closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
-    their_closest_players = closest_players_to_point(GameState().ball_position, our_team=False)
+    our_closest_players = closest_players_to_point(GameState().ball_position, is_our_team=True)
+    their_closest_players = closest_players_to_point(GameState().ball_position, is_our_team=False)
 
     if len(their_closest_players) == 0:
         return True
@@ -84,7 +84,7 @@ def our_player_is_closest():
 
 def no_enemy_around_ball():
     SAFE_DISTANCE = 1000
-    their_closest_players = closest_players_to_point(GameState().ball_position, our_team=False)
+    their_closest_players = closest_players_to_point(GameState().ball_position, is_our_team=False)
     return len(their_closest_players) == 0 or their_closest_players[0].distance > SAFE_DISTANCE
 
 
@@ -273,9 +273,13 @@ class SimpleAutoPlay(AutoPlay):
         elif self.current_state in self.PENALTY_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()
         elif self.current_state in self.FREE_KICK_STATE and self._is_ball_in_play() and \
-                not GameState().double_touch_checker.is_enabled():
+                not GameState().double_touch_checker.is_enabled() and self._enemy_has_ball():
             return self._decide_between_normal_play()
         elif self.current_state in self.KICKOFF_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()
 
         return self.current_state
+
+    def _enemy_has_ball(self):
+        return player_with_ball(min_dist_from_ball=4 * ROBOT_RADIUS,
+                                is_our_team=False) in GameState().enemy_team.available_players

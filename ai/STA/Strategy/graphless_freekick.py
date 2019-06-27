@@ -87,9 +87,9 @@ class GraphlessFreeKick(GraphlessStrategy):
 
     def wait_before_pass(self):
         if time.time() - self.start_time > TIME_TO_GET_IN_POSITION:
-            self.next_state = self.pass_to_receiver
+            self.next_state = self.go_get_ball
 
-    def pass_to_receiver(self):
+    def go_get_ball(self):
         for role, player in self.assigned_roles.items():
             if role == Role.GOALKEEPER:
                 continue
@@ -113,7 +113,12 @@ class GraphlessFreeKick(GraphlessStrategy):
             elif self.is_closest_not_goalkeeper(player):
                 self.logger.info(f"Robot {player.id} is closest! Switching to GoKick")
 
-                can_kick_in_goal = self.can_kick_in_goal if self.first_passing_player else True
+                # TODO this is different
+                if player == self.first_passing_player and self.game_state.double_touch_checker.is_enabled():
+                    can_kick_in_goal = self.can_kick_in_goal
+                else:
+                    can_kick_in_goal = True
+
                 self.roles_to_tactics[role] = GoKick(self.game_state,
                                                      player,
                                                      auto_update_target=True,
@@ -122,6 +127,7 @@ class GraphlessFreeKick(GraphlessStrategy):
                                                                      + self.forbidden_areas
                                                      )
 
+            # TODO this is different
             elif ball_going_toward_player(self.game_state, player):
                 self.logger.info(f"Ball is going toward Robot {player.id}!")
                 self._assign_target_to_receive_pass(player, passing_robot=None)
@@ -168,12 +174,12 @@ class GraphlessFreeKick(GraphlessStrategy):
             elif isinstance(tactic, ReceivePass) and tactic.status_flag == Flags.SUCCESS:
                 self.logger.info(f"Robot {player.id} has received ball!")
                 self.logger.info("Switching to go_get_ball")
-                self.next_state = self.pass_to_receiver
+                self.next_state = self.go_get_ball
 
         # FIXME
         if all(not isinstance(self.roles_to_tactics[role], GoKick) for role, _ in self.assigned_roles.items()):
             self.logger.info("No robot is assigned to GoKick! Switching to go_get_ball")
-            self.next_state = self.pass_to_receiver
+            self.next_state = self.go_get_ball
 
     def _assign_target_to_receive_pass(self, target: Player, passing_robot):
         self.logger.info(f"Switching Robot {target.id} tactic to ReceivePass")

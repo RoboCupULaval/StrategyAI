@@ -141,7 +141,7 @@ class PenaltyGoalKeeper(GoalKeeper):
 
     def _best_target_into_goal(self):
         if 0 < len(self.game_state.enemy_team.available_players):
-            enemy_player_with_ball = player_with_ball(min_dist_from_ball=4 * ROBOT_RADIUS, our_team=False)
+            enemy_player_with_ball = player_with_ball(min_dist_from_ball=4 * ROBOT_RADIUS, is_our_team=False)
             if enemy_player_with_ball is not None:
                 ball = self.game_state.ball
                 where_ball_enter_goal = intersection_between_lines(self.GOAL_LINE.p1,
