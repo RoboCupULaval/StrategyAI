@@ -24,7 +24,11 @@ class Strategy(metaclass=ABCMeta):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.game_state = p_game_state
 
-        self.roles_graph = {role: Graph() for role in self.assigned_roles}
+        self._roles_graph = {role: Graph() for role in self.assigned_roles}
+
+    @property
+    def roles_graph(self):
+        return self._roles_graph
 
     @property
     def assigned_roles(self):

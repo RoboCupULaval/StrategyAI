@@ -110,6 +110,7 @@ class GameState(metaclass=Singleton):
     @property
     def assigned_roles(self):
         return {r: p for r, p in self._role_mapper.roles_translation.items() if p is not None}
+
     @property
     def role_mapping(self):
         return self._role_mapper.roles_translation

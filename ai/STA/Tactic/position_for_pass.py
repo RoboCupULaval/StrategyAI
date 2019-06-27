@@ -4,8 +4,8 @@ from typing import List, Optional
 
 from Util import Pose, Position
 from Util.ai_command import MoveTo
-from Util.geometry import Line, clamp, normalize
 from Util.area import Area
+from Util.geometry import Line, clamp, normalize
 from Util.role import Role
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic

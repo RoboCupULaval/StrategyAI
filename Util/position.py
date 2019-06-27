@@ -66,6 +66,10 @@ class Position:
     def to_tuple(self) -> Tuple[int, int]:
         return int(self.x), int(self.y)
 
+    @property
+    def unit(self) -> 'Position':
+        return self / self.norm
+
     def copy(self) -> 'Position':
         return Position.from_array(self.array.copy())
 

@@ -1,4 +1,3 @@
-import logging
 from abc import abstractmethod, ABCMeta
 from enum import IntEnum
 
@@ -6,8 +5,8 @@ from Util.constant import IN_PLAY_MIN_DISTANCE
 from ai.Algorithm.IntelligentModule import IntelligentModule
 from ai.Algorithm.evaluation_module import *
 from ai.GameDomainObjects.referee_state import RefereeCommand, RefereeState
-from ai.states.play_state import PlayState
 from ai.states.game_state import GameState
+from ai.states.play_state import PlayState
 
 
 class AutoPlay(IntelligentModule, metaclass=ABCMeta):
@@ -180,7 +179,7 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.GOAL_US: 'IndianaJones',
             SimpleAutoPlayState.GOAL_THEM: 'StayAway',
 
-            SimpleAutoPlayState.NORMAL_OFFENSE: 'Offense',
+            SimpleAutoPlayState.NORMAL_OFFENSE: 'GraphlessOffense',
             SimpleAutoPlayState.NORMAL_DEFENSE: 'DefenseWall',
 
             SimpleAutoPlayState.TIMEOUT: 'DoNothing',
@@ -199,9 +198,9 @@ class SimpleAutoPlay(AutoPlay):
 
             # Freekicks
             SimpleAutoPlayState.DIRECT_FREE_DEFENSE: 'DefenseWallNoKick',
-            SimpleAutoPlayState.DIRECT_FREE_OFFENSE: 'DirectFreeKick',
+            SimpleAutoPlayState.DIRECT_FREE_OFFENSE: 'GraphlessDirectFreeKick',
             SimpleAutoPlayState.INDIRECT_FREE_DEFENSE: 'DefenseWallNoKick',
-            SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'IndirectFreeKick',
+            SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'GraphlessIndirectFreeKick',
 
             # Place the ball to the designated position
             SimpleAutoPlayState.BALL_PLACEMENT_US: 'BallPlacement',
@@ -273,7 +272,8 @@ class SimpleAutoPlay(AutoPlay):
             return self._decide_between_normal_play()
         elif self.current_state in self.PENALTY_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()
-        elif self.current_state in self.FREE_KICK_STATE and self._is_ball_in_play():
+        elif self.current_state in self.FREE_KICK_STATE and self._is_ball_in_play() and \
+                not GameState().double_touch_checker.is_enabled():
             return self._decide_between_normal_play()
         elif self.current_state in self.KICKOFF_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()

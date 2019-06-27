@@ -12,7 +12,7 @@ ORIENTATION_ABSOLUTE_TOLERANCE = 0.004
 # pylint: disable=invalid-name
 class Pose:
 
-    def __init__(self, position: Position=Position(), orientation: float=0):
+    def __init__(self, position: Position = Position(), orientation: float = 0):
         if type(position) is np.ndarray:
             raise TypeError('You need to pass a Position to Pose. Use Position.from_array() to convert it.')
         self._orientation = orientation
@@ -23,7 +23,7 @@ class Pose:
         return cls(Position(my_dict['x'], my_dict['y']), my_dict['orientation'])
 
     @classmethod
-    def from_values(cls, x: float, y: float, orientation: float=0) -> 'Pose':
+    def from_values(cls, x: float, y: float, orientation: float = 0) -> 'Pose':
         return cls(Position(x, y), orientation)
 
     @property
