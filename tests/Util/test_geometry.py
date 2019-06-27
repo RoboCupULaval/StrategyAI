@@ -7,8 +7,8 @@ import pytest
 
 from Util import Position
 from Util.geometry import closest_point_on_line, closest_point_on_segment, closest_point_to_points, \
-    intersection_between_lines, find_bisector_of_triangle, angle_between_three_points, Area, \
-    random_direction, intersection_between_segments
+    intersection_between_lines, find_bisector_of_triangle, angle_between_three_points, random_direction, intersection_between_segments
+from Util.area import Area
 from Util.geometry import compare_angle, wrap_to_pi, perpendicular, normalize, are_close, rotate
 
 

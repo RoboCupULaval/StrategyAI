@@ -1,4 +1,3 @@
-import logging
 from abc import abstractmethod, ABCMeta
 from enum import IntEnum
 
@@ -6,8 +5,8 @@ from Util.constant import IN_PLAY_MIN_DISTANCE
 from ai.Algorithm.IntelligentModule import IntelligentModule
 from ai.Algorithm.evaluation_module import *
 from ai.GameDomainObjects.referee_state import RefereeCommand, RefereeState
-from ai.states.play_state import PlayState
 from ai.states.game_state import GameState
+from ai.states.play_state import PlayState
 
 
 class AutoPlay(IntelligentModule, metaclass=ABCMeta):
@@ -100,6 +99,9 @@ class SimpleAutoPlay(AutoPlay):
         SimpleAutoPlayState.NORMAL_DEFENSE
     ]
 
+    PENALTY_STATE = [SimpleAutoPlayState.DEFENSE_PENALTY,
+                     SimpleAutoPlayState.OFFENSE_PENALTY]
+
     FREE_KICK_STATE = [SimpleAutoPlayState.DIRECT_FREE_DEFENSE,
                        SimpleAutoPlayState.DIRECT_FREE_OFFENSE,
                        SimpleAutoPlayState.INDIRECT_FREE_DEFENSE,
@@ -110,7 +112,8 @@ class SimpleAutoPlay(AutoPlay):
 
     ENABLE_DOUBLE_TOUCH_DETECTOR_STATE = [RefereeCommand.DIRECT_FREE_US,
                                           RefereeCommand.INDIRECT_FREE_US,
-                                          RefereeCommand.PREPARE_KICKOFF_US]
+                                          RefereeCommand.PREPARE_KICKOFF_US,
+                                          RefereeCommand.PREPARE_PENALTY_US]
 
     DISABLE_DOUBLE_TOUCH_DETECTOR_STATE = [RefereeCommand.STOP,
                                            RefereeCommand.HALT]
@@ -195,9 +198,9 @@ class SimpleAutoPlay(AutoPlay):
 
             # Freekicks
             SimpleAutoPlayState.DIRECT_FREE_DEFENSE: 'DefenseWallNoKick',
-            SimpleAutoPlayState.DIRECT_FREE_OFFENSE: 'DirectFreeKick',
+            SimpleAutoPlayState.DIRECT_FREE_OFFENSE: 'GraphlessDirectFreeKick',
             SimpleAutoPlayState.INDIRECT_FREE_DEFENSE: 'DefenseWallNoKick',
-            SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'IndirectFreeKick',
+            SimpleAutoPlayState.INDIRECT_FREE_OFFENSE: 'GraphlessIndirectFreeKick',
 
             # Place the ball to the designated position
             SimpleAutoPlayState.BALL_PLACEMENT_US: 'BallPlacement',
@@ -267,7 +270,10 @@ class SimpleAutoPlay(AutoPlay):
         # We use the ball's mobility for detecting a kick and change state
         if self.current_state in self.NORMAL_STATE and GameState().ball.is_immobile():
             return self._decide_between_normal_play()
-        elif self.current_state in self.FREE_KICK_STATE and self._is_ball_in_play():
+        elif self.current_state in self.PENALTY_STATE and self._is_ball_in_play():
+            return self._decide_between_normal_play()
+        elif self.current_state in self.FREE_KICK_STATE and self._is_ball_in_play() and \
+                not GameState().double_touch_checker.is_enabled():
             return self._decide_between_normal_play()
         elif self.current_state in self.KICKOFF_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()

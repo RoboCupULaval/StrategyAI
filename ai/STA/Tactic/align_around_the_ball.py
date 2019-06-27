@@ -35,7 +35,7 @@ class AlignAroundTheBall(Tactic):
         self.current_state = self.main_state
         self.next_state = self.main_state
 
-        self.dist_from_ball = KEEPOUT_DISTANCE_FROM_BALL * 1.1
+        self.dist_from_ball = KEEPOUT_DISTANCE_FROM_BALL * 1.6
 
     def init_players_in_formation(self):
         self.player_number_in_formation = self.robots_in_formation.index(self.player)

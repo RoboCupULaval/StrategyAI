@@ -14,6 +14,7 @@ from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.leeroy_jenkins import LeeroyJenkins
 from ai.STA.Tactic.pass_to_player import PassToPlayer
+from ai.STA.Tactic.penalty_goalkeeper import PenaltyGoalKeeper
 from ai.STA.Tactic.place_ball import PlaceBall
 from ai.STA.Tactic.receive_pass import ReceivePass
 from ai.STA.Tactic.rotate_around_ball import RotateAroundBall
@@ -40,6 +41,7 @@ class TacticBook:
                    DemoFollowBall,
                    DemoFollowRobot,
                    GoalKeeper,
+                   PenaltyGoalKeeper,
                    GoToRandomPosition,
                    PassToPlayer,
                    StayAwayFromBall,

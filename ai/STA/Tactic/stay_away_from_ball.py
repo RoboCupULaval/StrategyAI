@@ -3,9 +3,9 @@ from typing import List, Optional
 
 from Util import Pose
 from Util.ai_command import MoveTo
-from Util.area import stay_outside_circle
 from Util.constant import KEEPOUT_DISTANCE_FROM_BALL
-from Util.geometry import Area
+from Util.geometry import stay_outside_circle
+from Util.area import Area
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.states.game_state import GameState
