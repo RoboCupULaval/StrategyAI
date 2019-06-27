@@ -35,6 +35,7 @@ class TacticBook:
         defaults_tactics = [GoToPosition, GoKick3Way]
 
         tactics = {GoKick3Way,
+                   GoKick,
                    ReceivePass,
                    PlaceBall,
                    FaceTarget,
