@@ -6,9 +6,9 @@ from typing import List, Union
 
 import numpy as np
 
-from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce
+from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce, ROBOT_RADIUS
 from Util import Pose, Position
-from Util.ai_command import CmdBuilder, Idle
+from Util.ai_command import CmdBuilder, Idle, MoveTo
 from Util.geometry import compare_angle, normalize
 from ai.Algorithm.evaluation_module import best_passing_option, player_covered_from_goal
 from ai.GameDomainObjects import Player
@@ -16,6 +16,7 @@ from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 from ai.Algorithm.evaluation_module import object_going_toward_other_object, ball_going_toward_player
+from Util.geometry import normalize, Line, closest_point_on_segment
 
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1.0
@@ -28,7 +29,6 @@ KICK_SUCCEED_THRESHOLD = 300
 COMMAND_DELAY = 0.5
 
 
-# noinspection PyArgumentList,PyUnresolvedReferences,PyUnresolvedReferences
 class GoKick3Way(Tactic):
     def __init__(self, game_state: GameState, player: Player,
                  target: Pose = Pose(),
@@ -60,12 +60,16 @@ class GoKick3Way(Tactic):
         return Idle
 
     def check_ball_state(self):
-        if self.game_state.ball.velocity.norm>200:
+        if self.game_state.ball.velocity.norm > 200:
             if self.is_ball_going_toward_target():
-                if self.is_ball_going_toward_player():
-                    self.next_state = self.stop_ball
+                if self.is_ball_going_toward_player() and self._get_distance_from_ball() > 500:
+                    self.next_state = self.intercept
                 else:
                     self.next_state = self.chase_ball
+            elif self.is_ball_going_toward_player(110) and self._get_distance_from_ball() > 500:
+                self.next_state = self.intercept
+            else:
+                self.next_state = self.go_behind_ball
         elif self.is_able_to_grab_ball_directly(0.85) and self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
         else:
@@ -138,7 +142,7 @@ class GoKick3Way(Tactic):
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.game_state.ball_position).angle
         ball_speed = self.game_state.ball.velocity.norm
-        position_behind = self.get_destination_to_stop_ball(GRAB_BALL_SPACING)
+        position_behind = self.get_destination_to_stop_ball(GRAB_BALL_SPACING*2)
         end_speed = ball_speed + 500
         if self.is_able_to_stop_ball(0.95) \
                 and compare_angle(self.player.pose.orientation, orientation, abs_tol=0.1):
@@ -168,7 +172,7 @@ class GoKick3Way(Tactic):
         if not self.is_able_to_grab_ball_directly(0.85):
             self.next_state = self.go_behind_ball
 
-        if self._get_distance_from_ball() < KICK_DISTANCE:
+        if self._get_distance_from_ball() < KICK_DISTANCE and self.is_able_to_grab_ball_directly(0.65):
             self.next_state = self.kick
             self.kick_last_time = time.time()
         ball_speed = self.game_state.ball.velocity.norm
@@ -178,6 +182,15 @@ class GoKick3Way(Tactic):
         end_speed = ball_speed
         orientation = (self.target.position - self.game_state.ball_position).angle
         distance_behind = self.get_destination_behind_ball(0, ball_velocity_vector=perpendicular_ball_velocity)
+        if self._get_distance_from_ball() > KICK_DISTANCE*1.5:
+            return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
+                                          cruise_speed=3,
+                                          end_speed=end_speed,
+                                          ball_collision=False) \
+                .addForceDribbler() \
+                .addChargeKicker().addKick(kick_force=self.kick_force) \
+                .build()
+
         return CmdBuilder().addMoveTo(Pose(distance_behind, orientation),
                                       cruise_speed=3,
                                       end_speed=end_speed,
@@ -315,8 +328,60 @@ class GoKick3Way(Tactic):
     def is_ball_going_toward_target(self):
         return object_going_toward_other_object(self.game_state.ball, self.target, max_angle_of_approach=40)
 
-    def is_ball_going_toward_player(self):
-        return ball_going_toward_player(self.game_state, self.player, max_angle_of_approach=40)
+    def is_ball_going_toward_player(self, angle=40):
+        return ball_going_toward_player(self.game_state, self.player, max_angle_of_approach=angle)
 
-    def is_ball_going_away_from_player(self):
-        return ball_going_toward_player(self.game_state, self.player, max_angle_of_approach=90)
+    def is_ball_going_away_from_player(self, angle=90):
+        return ball_going_toward_player(self.game_state, self.player, max_angle_of_approach=angle)
+
+    def intercept(self):
+        ball = self.game_state.ball
+
+        self.check_ball_state()
+        ball_trajectory = Line(ball.position, ball.position + ball.velocity)
+        target_pose = self._find_target_pose(ball, ball_trajectory)
+        if self._get_distance_from_ball() < KICK_DISTANCE * 1.5:
+            return CmdBuilder().addMoveTo(target_pose,
+                                   ball_collision=False,
+                                   cruise_speed=3) \
+                .addKick(self.kick_force) \
+                .addForceDribbler().build()
+        else:
+            return CmdBuilder().addMoveTo(target_pose,
+                                          ball_collision=False,
+                                          cruise_speed=3,
+                                          end_speed=2) \
+                .addForceDribbler().build()
+
+    def _find_target_pose(self, ball, ball_trajectory):
+        # Find the point where the ball will leave the field
+        where_ball_leaves_field = self._find_where_ball_leaves_field(ball, ball_trajectory)
+
+        ball_to_leave_field = Line(ball.position, where_ball_leaves_field)
+
+        # The robot can intercepts the ball by leaving the field, thus we must add a ROBOT_RADIUS
+        intersect_position_limit = where_ball_leaves_field + ball_to_leave_field.direction * ROBOT_RADIUS
+        intersect_position = closest_point_on_segment(self.player.position, ball.position, intersect_position_limit)
+
+        if (self.player.position - intersect_position).norm < ROBOT_RADIUS:
+            best_orientation = (ball.position - intersect_position_limit).angle
+        else:
+            best_orientation = self.player.pose.orientation  # We move a bit faster, if we keep our orientation
+        orientation = (self.target.position - self.game_state.ball_position).angle
+        return Pose(intersect_position, orientation)
+
+    def _find_where_ball_leaves_field(self, ball, trajectory):
+        intersection_with_field = self.game_state.field.area.intersect_with_line(trajectory)
+        where_ball_leaves_field = None
+        for inter in intersection_with_field:
+            # If this is the intersection that have the same direction as trajectory direction
+            if (inter - ball.position).dot(trajectory.direction) > 0:
+                where_ball_leaves_field = inter
+                break
+
+        if where_ball_leaves_field is None:
+            self.logger.error(f"_find_where_ball_leaves_field - ball: {ball.position}, trajectory: {trajectory}")
+            self.logger.error(f"_find_where_ball_leaves_field - intersections_with_field: {intersection_with_field}")
+            return Position()
+
+        return where_ball_leaves_field
