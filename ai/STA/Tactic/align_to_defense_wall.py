@@ -170,7 +170,8 @@ class AlignToDefenseWall(Tactic):
     def go_kick(self):
         self.compute_wall_segment()
         if self.go_kick_tactic is None:
-            self.go_kick_tactic = GoKick(self.game_state, self.player, target=self.game_state.field.their_goal_pose)
+            # Maybe we should hardcord the target here? It would be safer target=self.game_state.field.their_goal_pose,
+            self.go_kick_tactic = GoKick(self.game_state, self.player, auto_update_target=True)
 
         if not self._should_ball_be_kick_by_wall() \
                 or self.game_state.field.is_ball_in_our_goal_area() \

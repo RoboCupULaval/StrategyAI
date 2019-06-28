@@ -29,8 +29,8 @@ class Offense(Strategy):
                                                                    auto_position=True,
                                                                    robots_in_formation=robots_in_formation))
                 node_go_kick = self.create_node(role, GoKick3Way(self.game_state,
-                                                             player,
-                                                             auto_update_target=True))
+                                                                 player,
+                                                                 auto_update_target=True))
                 node_wait_for_pass = self.create_node(role, ReceivePass(self.game_state, player))
 
                 player_is_closest = partial(self.is_closest_not_goalkeeper, player)
