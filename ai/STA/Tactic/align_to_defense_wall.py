@@ -5,9 +5,10 @@ from typing import List, Optional
 from Debug.debug_command_factory import DebugCommandFactory
 from Util import Pose
 from Util.ai_command import Idle, MoveTo
-from Util.constant import ROBOT_RADIUS, ROBOT_DIAMETER, KEEPOUT_DISTANCE_FROM_BALL
+from Util.area import Area
+from Util.constant import ROBOT_RADIUS, ROBOT_DIAMETER, KEEPOUT_DISTANCE_FROM_BALL, REASONABLE_OFFSET
 from Util.geometry import perpendicular, normalize, find_bisector_of_triangle, angle_between_three_points, Line, \
-    intersection_line_and_circle
+    intersection_line_and_circle, points_on_same_vert_or_hori_line
 from Util.role import Role
 from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
@@ -77,25 +78,58 @@ class AlignToDefenseWall(Tactic):
 
         self.bisect_inter = find_bisector_of_triangle(self.object_to_block.position, goal_line.p1, goal_line.p2)
         vec_object_to_goal_line_bisect = self.bisect_inter - self.object_to_block.position
+        vec_goal_line_bisect_to_object = self.object_to_block.position - self.bisect_inter
 
-        # The penalty zone used to be a circle and thus really easy to handle, but now it's a rectangle...
-        # It easier to first create the smallest circle that fit the rectangle.
-        min_radius_over_penality_zone = ROBOT_RADIUS + \
-            (self.game_state.field.our_goal_area.upper_left - self.game_state.field.our_goal).norm
-        object_to_block_to_center_formation_dist = min(
-            vec_object_to_goal_line_bisect.norm - min_radius_over_penality_zone,
-            object_to_center_formation_dist)
 
-        self.center_formation = object_to_block_to_center_formation_dist * normalize(
-            vec_object_to_goal_line_bisect) + self.object_to_block.position
+        # # If the object is far away from the goal, we use object_to_center_formation_dist,
+        # # otherwise we touch the circle that fit the rectangle (goal area).
+        # # object_to_block_to_center_formation_dist = min(
+        # #     vec_object_to_goal_line_bisect.norm - min_radius_over_penality_zone,
+        # #     object_to_center_formation_dist)
+        object_to_block_to_center_formation_dist = object_to_center_formation_dist
+
+        self.center_formation = object_to_block_to_center_formation_dist * normalize(vec_object_to_goal_line_bisect) \
+                                + self.object_to_block.position
 
         if self.stay_away_from_ball:
             if (self.game_state.ball_position - self.center_formation).norm < KEEPOUT_DISTANCE_FROM_BALL:
                 self.center_formation = self._closest_point_away_from_ball()
 
-        half_wall_segment = 0.5 * wall_segment_length * perpendicular(normalize(vec_object_to_goal_line_bisect))
+        dir_wall_segment = perpendicular(normalize(vec_object_to_goal_line_bisect))
+
+        half_wall_segment = 0.5 * wall_segment_length * dir_wall_segment
         self.wall_segment = Line(self.center_formation + half_wall_segment,
                                  self.center_formation - half_wall_segment)
+
+        # we must recompute a new wall segment which is on the border of the goal area
+        # since a robot can not move into a forbidden area, we increase the size of the forbidden area by a small amount
+        goal_area = Area.pad(self.game_state.field.our_goal_forbidden_area, 10)
+
+        if self._wall_is_in_a_forbidden_area(goal_area):
+            line_a = Line(self.object_to_block.position, self.game_state.field.our_goal_line.p1)
+            line_b = Line(self.object_to_block.position, self.game_state.field.our_goal_line.p2)
+            inter_a = goal_area.intersect(line_a)
+            inter_b = goal_area.intersect(line_b)
+            if len(inter_a) != 1 or len(inter_b) != 1:
+                self.logger.error(f"This is impossible, lines should touch goal area only once: {inter_a} {inter_b}")
+                return
+            inter_a, inter_b = inter_a[0], inter_b[0]
+            # There are two cases for a wall_segment inside the goal area:
+            # A) wall_segment touch left and top/bot part of the area
+            if not points_on_same_vert_or_hori_line(inter_a, inter_b):
+                # The penalty zone used to be a circle and thus really easy to handle, but now it's a rectangle...
+                # It easier to first create the smallest circle that fit the rectangle.
+                min_radius_over_penality_zone = (self.game_state.field.our_goal_forbidden_area.upper_left - self.game_state.field.our_goal).norm
+                self.center_formation = self.bisect_inter \
+                                        + min_radius_over_penality_zone * normalize(vec_goal_line_bisect_to_object)
+            else:  # B) wall_segment touch left part of the area or top/bot part of the area
+                # The wall is simply the intersection between line_a/line_b and the goal area
+                self.center_formation = (inter_a + inter_b) / 2
+                dir_wall_segment = normalize(inter_a - inter_b)
+
+            half_wall_segment = 0.5 * wall_segment_length * dir_wall_segment
+            self.wall_segment = Line(self.center_formation + half_wall_segment,
+                                     self.center_formation - half_wall_segment)
 
     def position_on_wall_segment(self):
         idx = self.player_number_in_formation
@@ -111,10 +145,10 @@ class AlignToDefenseWall(Tactic):
                 DebugCommandFactory().line(self.center_formation,
                                            self.bisect_inter,
                                            timeout=0.1),
-                DebugCommandFactory().line(self.game_state.ball_position,
+                DebugCommandFactory().line(self.object_to_block.position,
                                            self.game_state.field.our_goal_line.p1,
                                            timeout=0.1),
-                DebugCommandFactory().line(self.game_state.ball_position,
+                DebugCommandFactory().line(self.object_to_block.position,
                                            self.game_state.field.our_goal_line.p2,
                                            timeout=0.1)
                 ]
@@ -128,7 +162,8 @@ class AlignToDefenseWall(Tactic):
                 and self._no_enemy_around_ball():
             self.next_state = self.go_kick
         dest = self.position_on_wall_segment()
-        dest_orientation = (self.object_to_block.position - dest).angle
+
+        dest_orientation = (self.object_to_block.position - self.bisect_inter).angle
         return MoveTo(Pose(dest,
                            dest_orientation), cruise_speed=self.cruise_speed)
 
@@ -174,3 +209,12 @@ class AlignToDefenseWall(Tactic):
             if (enemy.position - ball_position).norm < DANGEROUS_ENEMY_MIN_DISTANCE:
                 return False
         return True
+
+    def _wall_is_in_a_forbidden_area(self, goal_area):
+        if self.object_to_block.position in goal_area:
+            return False
+        return (self.center_formation in goal_area
+                or self.wall_segment.p1.x > self.game_state.field.right  # Robot can not go behind the goal line
+                or self.wall_segment.p2.x > self.game_state.field.right
+                or self.wall_segment.p1 in goal_area
+                or self.wall_segment.p2 in goal_area)

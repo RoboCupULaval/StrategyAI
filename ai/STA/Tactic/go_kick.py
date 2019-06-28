@@ -32,11 +32,11 @@ COMMAND_DELAY = 0.5
 
 class GoKick(Tactic):
     def __init__(self, game_state: GameState, player: Player,
-                 target: Pose=Pose(),
-                 args: List[str]=None,
-                 kick_force: KickForce=KickForce.HIGH,
+                 target: Pose = Pose(),
+                 args: List[str] = None,
+                 kick_force: KickForce = KickForce.HIGH,
                  auto_update_target=False,
-                 go_behind_distance=GRAB_BALL_SPACING*3,
+                 go_behind_distance=GRAB_BALL_SPACING * 3,
                  forbidden_areas=None,
                  can_kick_in_goal=True):
 
@@ -184,7 +184,6 @@ class GoKick(Tactic):
         # Update decision
         assignation_delay = (time.time() - self.target_assignation_last_time)
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
-            print("_find_best_passing_option : REASSIGN TARGET")
             scoring_target = player_covered_from_goal(self.player)
             tentative_target = best_passing_option(self.player, passer_can_kick_in_goal=self.can_kick_in_goal)
 

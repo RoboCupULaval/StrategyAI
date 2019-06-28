@@ -179,7 +179,7 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.GOAL_US: 'IndianaJones',
             SimpleAutoPlayState.GOAL_THEM: 'StayAway',
 
-            SimpleAutoPlayState.NORMAL_OFFENSE: 'Offense',
+            SimpleAutoPlayState.NORMAL_OFFENSE: 'GraphlessOffense',
             SimpleAutoPlayState.NORMAL_DEFENSE: 'DefenseWall',
 
             SimpleAutoPlayState.TIMEOUT: 'DoNothing',

@@ -213,3 +213,7 @@ def stay_outside_circle(position, center, radius):
     pos_x = radius * m.cos(pos_angle) + center.x
     pos_y = radius * m.sin(pos_angle) + center.y
     return Position(pos_x, pos_y)
+
+
+def points_on_same_vert_or_hori_line(a: Position, b: Position):
+    return abs(a.x - b.x) < 0.1 or abs(a.y - b.y) < 0.1
