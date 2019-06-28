@@ -39,6 +39,9 @@ class DoubleTouchDetector(object):
         self.logger.info("Disabling double touch detector")
         self._state = self._disabled
 
+    def is_enabled(self):
+        return self._state != self._disabled
+
     @property
     def ban_players(self):
         return self._ban_players

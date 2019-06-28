@@ -21,6 +21,7 @@ from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.stress_test_robot import StressTestRobotWaypoint, StressTestRobot
 from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.test_best_passing_option import TestBestPassingOption
 
 
 class TacticBook:
@@ -49,6 +50,7 @@ class TacticBook:
                    StressTestRobotWaypoint,
                    AlignAroundTheBall,
                    LeeroyJenkins,
+                   TestBestPassingOption,
                    *defaults_tactics,
                    self.stop_tactic}
 

@@ -4,8 +4,7 @@ from functools import partial
 
 from Util.constant import IN_PLAY_MIN_DISTANCE
 from Util.role import Role
-
-from ai.Algorithm.evaluation_module import closest_players_to_point, closest_players_to_point_except, \
+from ai.Algorithm.evaluation_module import closest_players_to_point_except, \
     ball_going_toward_player, ball_not_going_toward_player
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.go_kick import GoKick
