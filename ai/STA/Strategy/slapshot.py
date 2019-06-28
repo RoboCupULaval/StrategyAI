@@ -62,7 +62,6 @@ class SlapShot(Strategy):
                 ball_open = partial(self.is_ball_open)
 
                 node_go_to_position.connect_to(node_go_kick_aggressive, when=has_kicked)
-                node_go_to_position.connect_to(node_go_kick_aggressive, when=has_kicked)
                 node_go_kick.connect_to(node_go_kick_aggressive, when=ball_open)
 
 
