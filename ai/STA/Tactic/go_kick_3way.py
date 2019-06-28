@@ -39,7 +39,7 @@ class GoKick3Way(Tactic):
                  forbidden_areas=None,
                  can_kick_in_goal=True):
 
-        super().__init__(game_state, player, target, args=args, forbidden_areas=[])
+        super().__init__(game_state, player, target, args=args, forbidden_areas=forbidden_areas)
         self.current_state = self.initialize
         self.next_state = self.go_behind_ball
         self.kick_last_time = time.time()
