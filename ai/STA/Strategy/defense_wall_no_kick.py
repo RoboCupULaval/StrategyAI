@@ -6,6 +6,7 @@ from ai.states.game_state import GameState
 
 BALL_HAS_MOVE_TOO_MUCH = 300
 
+
 # noinspection
 class DefenseWallNoKick(DefenseWall):
     def __init__(self, game_state: GameState):
