@@ -165,6 +165,8 @@ class RefereeState:
             return RefereeCommand.PREPARE_SHOOTOUT_US
         if referee_command == RefereeCommand.NORMAL_START:
             return RefereeCommand.NORMAL_START_SHOOTOUT
+        else:
+            return referee_command
 
     def _parse_team_info(self, frame):
 

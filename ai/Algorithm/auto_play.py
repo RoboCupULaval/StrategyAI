@@ -296,3 +296,9 @@ class SimpleAutoPlay(AutoPlay):
             return self._decide_between_normal_play()
 
         return self.current_state
+
+    def _normal_start_shootout(self):
+        return {
+            RefereeCommand.PREPARE_SHOOTOUT_THEM: SimpleAutoPlayState.DEFENSE_SHOOTOUT,
+            RefereeCommand.PREPARE_SHOOTOUT_US: SimpleAutoPlayState.OFFENSE_SHOOTOUT,
+        }.get(self.last_ref_state, SimpleAutoPlayState.PREPARE_SHOOTOUT_DEFENSE)
