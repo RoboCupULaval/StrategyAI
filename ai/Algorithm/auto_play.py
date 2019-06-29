@@ -200,8 +200,8 @@ class SimpleAutoPlay(AutoPlay):
             # Shootout
             SimpleAutoPlayState.PREPARE_SHOOTOUT_OFFENSE: 'PrepareShootoutOffense',
             SimpleAutoPlayState.PREPARE_SHOOTOUT_DEFENSE: 'PrepareShootoutDefense',
-            SimpleAutoPlayState.OFFENSE_SHOOTOUT: 'OffenseShootout',
-            SimpleAutoPlayState.DEFENSE_SHOOTOUT: 'DefenseShootout',
+            SimpleAutoPlayState.OFFENSE_SHOOTOUT: 'ShootoutOffense',
+            SimpleAutoPlayState.DEFENSE_SHOOTOUT: 'ShootoutDefense',
 
             # Penalty
             SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE: 'PreparePenaltyOffense',
