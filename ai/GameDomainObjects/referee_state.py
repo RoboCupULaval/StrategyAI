@@ -57,6 +57,10 @@ class RefereeCommand(IntEnum):
     BALL_PLACEMENT_US = 16
     BALL_PLACEMENT_THEM = 17
 
+    PREPARE_SHOOTOUT_US = 18
+    PREPARE_SHOOTOUT_THEM = 19
+    NORMAL_START_SHOOTOUT = 20
+
 
 class Stage(IntEnum):
     NORMAL_FIRST_HALF_PRE = 0
@@ -143,8 +147,24 @@ class RefereeState:
                 parsed_cmd = self._convert_raw_to_us(command)
             else:
                 parsed_cmd = self._convert_raw_to_them(command)
+
         # Not color wise commands
-        return RefereeCommand(parsed_cmd)
+        referee_command = RefereeCommand(parsed_cmd)
+
+        # Convert commands in case of a shootout
+        if self.stage == Stage.PENALTY_SHOOTOUT:
+            referee_command = RefereeState._convert_shootout_commands(referee_command)
+
+        return referee_command
+
+    @staticmethod
+    def _convert_shootout_commands(referee_command):
+        if referee_command == RefereeCommand.PREPARE_PENALTY_THEM:
+            return RefereeCommand.PREPARE_SHOOTOUT_THEM
+        if referee_command == RefereeCommand.PREPARE_PENALTY_US:
+            return RefereeCommand.PREPARE_SHOOTOUT_US
+        if referee_command == RefereeCommand.NORMAL_START:
+            return RefereeCommand.NORMAL_START_SHOOTOUT
 
     def _parse_team_info(self, frame):
 

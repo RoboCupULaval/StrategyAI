@@ -70,6 +70,11 @@ class SimpleAutoPlayState(IntEnum):
     INDIRECT_FREE_DEFENSE = 20
     NOT_ENOUGH_PLAYER = 21
 
+    PREPARE_SHOOTOUT_OFFENSE = 22
+    PREPARE_SHOOTOUT_DEFENSE = 23
+    OFFENSE_SHOOTOUT = 24
+    DEFENSE_SHOOTOUT = 25
+
 
 def our_player_is_closest():
     our_closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
@@ -86,7 +91,6 @@ def no_enemy_around_ball():
     SAFE_DISTANCE = 1000
     their_closest_players = closest_players_to_point(GameState().ball_position, our_team=False)
     return len(their_closest_players) == 0 or their_closest_players[0].distance > SAFE_DISTANCE
-
 
 
 class SimpleAutoPlay(AutoPlay):
@@ -109,6 +113,9 @@ class SimpleAutoPlay(AutoPlay):
 
     KICKOFF_STATE = [SimpleAutoPlayState.OFFENSE_KICKOFF,
                      SimpleAutoPlayState.DEFENSE_KICKOFF]
+
+    SHOOTOUT_STATE = [SimpleAutoPlayState.DEFENSE_SHOOTOUT,
+                      SimpleAutoPlayState.OFFENSE_SHOOTOUT]
 
     ENABLE_DOUBLE_TOUCH_DETECTOR_STATE = [RefereeCommand.DIRECT_FREE_US,
                                           RefereeCommand.INDIRECT_FREE_US,
@@ -190,6 +197,12 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.OFFENSE_KICKOFF: 'OffenseKickOff',
             SimpleAutoPlayState.DEFENSE_KICKOFF: 'PrepareKickOffDefense',
 
+            # Shootout
+            SimpleAutoPlayState.PREPARE_SHOOTOUT_OFFENSE: 'PrepareShootoutOffense',
+            SimpleAutoPlayState.PREPARE_SHOOTOUT_DEFENSE: 'PrepareShootoutDefense',
+            SimpleAutoPlayState.OFFENSE_SHOOTOUT: 'OffenseShootout',
+            SimpleAutoPlayState.DEFENSE_SHOOTOUT: 'DefenseShootout',
+
             # Penalty
             SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE: 'PreparePenaltyOffense',
             SimpleAutoPlayState.PREPARE_PENALTY_DEFENSE: 'PreparePenaltyDefense',
@@ -227,6 +240,7 @@ class SimpleAutoPlay(AutoPlay):
 
             RefereeCommand.FORCE_START: self._decide_between_normal_play(),
             RefereeCommand.NORMAL_START: self._normal_start(),
+            RefereeCommand.NORMAL_START_SHOOTOUT: self._normal_start_shootout(),
 
             RefereeCommand.TIMEOUT_THEM: SimpleAutoPlayState.TIMEOUT,
             RefereeCommand.TIMEOUT_US: SimpleAutoPlayState.TIMEOUT,
@@ -243,6 +257,9 @@ class SimpleAutoPlay(AutoPlay):
 
             RefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
             RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.BALL_PLACEMENT_US,
+
+            RefereeCommand.PREPARE_SHOOTOUT_THEM: SimpleAutoPlayState.PREPARE_SHOOTOUT_DEFENSE,
+            RefereeCommand.PREPARE_SHOOTOUT_US: SimpleAutoPlayState.PREPARE_SHOOTOUT_OFFENSE
 
         }.get(ref_cmd, SimpleAutoPlayState.HALT)
 
