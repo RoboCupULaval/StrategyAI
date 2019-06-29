@@ -179,7 +179,7 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.GOAL_US: 'IndianaJones',
             SimpleAutoPlayState.GOAL_THEM: 'StayAway',
 
-            SimpleAutoPlayState.NORMAL_OFFENSE: 'GraphlessOffense',
+            SimpleAutoPlayState.NORMAL_OFFENSE: 'Offense',
             SimpleAutoPlayState.NORMAL_DEFENSE: 'DefenseWall',
 
             SimpleAutoPlayState.TIMEOUT: 'DoNothing',
@@ -272,8 +272,7 @@ class SimpleAutoPlay(AutoPlay):
             return self._decide_between_normal_play()
         elif self.current_state in self.PENALTY_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()
-        elif self.current_state in self.FREE_KICK_STATE and self._is_ball_in_play() and \
-                not GameState().double_touch_checker.is_enabled():
+        elif self.current_state in self.FREE_KICK_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()
         elif self.current_state in self.KICKOFF_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()
