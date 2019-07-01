@@ -12,6 +12,7 @@ from Util.ai_command import CmdBuilder, Idle, MoveTo
 from Util.geometry import compare_angle, normalize
 from ai.Algorithm.evaluation_module import best_passing_option, player_covered_from_goal
 from ai.GameDomainObjects import Player
+from ai.STA.Tactic.go_kick import MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_TO_PASS
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -47,8 +48,14 @@ class GoKick3Way(Tactic):
         self.can_kick_in_goal = can_kick_in_goal
         self.target_assignation_last_time = 0
         self.target = target
+
+        self.current_player_target = None
+        self.nb_consecutive_times_a_pass_is_decided = 0
+        self.nb_consecutive_times_a_pass_is_not_decided = 0
+
         if self.auto_update_target:
             self._find_best_passing_option()
+
         self.kick_force = kick_force
         self.go_behind_distance = go_behind_distance
 
@@ -255,24 +262,55 @@ class GoKick3Way(Tactic):
         return compare_angle(target_to_ball.angle, ball_to_player.angle, abs_tol=abs_tol)
 
     def _find_best_passing_option(self):
+        # Update passing target
+        if self.current_player_target is not None:
+            self.target = Pose(self.current_player_target.position)
+            self.kick_force = KickForce.for_dist((self.target.position - self.game_state.ball.position).norm)
+
+        # Update decision
         assignation_delay = (time.time() - self.target_assignation_last_time)
         if assignation_delay > TARGET_ASSIGNATION_DELAY:
             scoring_target = player_covered_from_goal(self.player)
             tentative_target = best_passing_option(self.player, passer_can_kick_in_goal=self.can_kick_in_goal)
+
             # Kick in the goal where it's the easiest
             if self.can_kick_in_goal and scoring_target is not None:
-                self.target = Pose(scoring_target, 0)
-                self.kick_force = KickForce.HIGH
-                # Kick in the goal center
+                self.nb_consecutive_times_a_pass_is_decided = 0
+                self.nb_consecutive_times_a_pass_is_not_decided += 1
+                if not self.status_flag == Flags.PASS_TO_PLAYER or self.nb_consecutive_times_a_pass_is_not_decided >= MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_FROM_PASS:
+                    self.current_player_target = None
+                    self.status_flag = Flags.WIP
+
+                    self.target = Pose(scoring_target, 0)
+                    self.kick_force = KickForce.HIGH
+
+            # Kick in the goal center
             elif tentative_target is None:
-                if not self.can_kick_in_goal:
-                    self.logger.warning("The kicker {} can not find an ally to pass to and can_kick_in_goal is False"
-                                        ". So it kicks directly in the goal, sorry".format(self.player))
-                self.target = Pose(self.game_state.field.their_goal, 0)
-                self.kick_force = KickForce.HIGH
-            else:  # Pass the ball to another player
-                self.target = Pose(tentative_target.position)
-                self.kick_force = KickForce.for_dist((self.target.position - self.game_state.ball.position).norm)
+                self.nb_consecutive_times_a_pass_is_decided = 0
+                self.nb_consecutive_times_a_pass_is_not_decided += 1
+                if not self.status_flag == Flags.PASS_TO_PLAYER or self.nb_consecutive_times_a_pass_is_not_decided >= MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_FROM_PASS:
+                    self.current_player_target = None
+                    self.status_flag = Flags.WIP
+
+                    if not self.can_kick_in_goal:
+                        self.logger.warning(
+                            "The kicker {} can not find an ally to pass to and can_kick_in_goal is False"
+                            ". So it kicks directly in the goal, sorry".format(self.player))
+                    self.target = Pose(self.game_state.field.their_goal, 0)
+                    self.kick_force = KickForce.HIGH
+
+            # Pass the ball to another player
+            else:
+                self.nb_consecutive_times_a_pass_is_decided += 1
+                self.nb_consecutive_times_a_pass_is_not_decided = 0
+                if self.status_flag == Flags.INIT or \
+                        (
+                                not self.status_flag == Flags.PASS_TO_PLAYER and self.nb_consecutive_times_a_pass_is_decided >= MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_TO_PASS):
+                    self.current_player_target = tentative_target
+                    self.status_flag = Flags.PASS_TO_PLAYER
+
+                    self.target = Pose(tentative_target.position)
+                    self.kick_force = KickForce.for_dist((self.target.position - self.game_state.ball.position).norm)
 
             self.target_assignation_last_time = time.time()
 
