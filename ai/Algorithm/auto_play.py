@@ -4,7 +4,7 @@ from enum import IntEnum
 from Util.constant import IN_PLAY_MIN_DISTANCE
 from ai.Algorithm.IntelligentModule import IntelligentModule
 from ai.Algorithm.evaluation_module import *
-from ai.GameDomainObjects.referee_state import RefereeCommand, RefereeState
+from ai.GameDomainObjects.referee_state import RefereeCommand, RefereeState, Stage
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 
@@ -152,19 +152,25 @@ class SimpleAutoPlay(AutoPlay):
     def str(self):
         pass
 
+    def _minimum_nb_player(self, ref_state):
+        # In a penalty shootout all robot are removed except one for each team
+        if ref_state.stage == Stage.PENALTY_SHOOTOUT:
+            return 1
+        return self.MINIMUM_NB_PLAYER
+
     def _select_next_state(self, ref_state: RefereeState):
 
         # During the game
         next_state = self._exec_state()
 
         nb_player = len(GameState().our_team.available_players)
-        if nb_player < self.MINIMUM_NB_PLAYER and ref_state.command != RefereeCommand.HALT:
+        if nb_player < self._minimum_nb_player(ref_state) and ref_state.command != RefereeCommand.HALT:
             if self.prev_nb_player is None or nb_player != self.prev_nb_player:
                 self.logger.warning("Not enough player to play. We have {} players and the minimum is {} "
-                                    .format(nb_player, self.MINIMUM_NB_PLAYER))
+                                    .format(nb_player, self._minimum_nb_player(ref_state)))
             next_state = SimpleAutoPlayState.NOT_ENOUGH_PLAYER
         # Number of player change or On command change
-        elif (self.prev_nb_player is not None and self.prev_nb_player < self.MINIMUM_NB_PLAYER <= nb_player) \
+        elif (self.prev_nb_player is not None and self.prev_nb_player < self._minimum_nb_player(ref_state) <= nb_player) \
                 or self.last_ref_state != ref_state.command:
             self.logger.info("Received referee state {}".format(ref_state.command.name))
 

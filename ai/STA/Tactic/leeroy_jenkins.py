@@ -12,7 +12,7 @@ from ai.states.game_state import GameState
 
 class LeeroyJenkins(Tactic):
 
-    MINIMUM_DISTANCE_FOR_SMALL_KICK = 2000
+    MINIMUM_DISTANCE_FOR_SMALL_KICK = 2800
 
     def __init__(self, game_state: GameState, player: Player, target: Pose = Pose(), args: Optional[List[str]]=None):
         super().__init__(game_state, player, target, args)
