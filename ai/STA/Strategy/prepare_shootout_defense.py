@@ -4,14 +4,13 @@ from Util.pose import Pose
 from Util.role import Role
 
 from ai.STA.Strategy.team_go_to_position import TeamGoToPosition
-from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.penalty_goalkeeper import PenaltyGoalKeeper
-from ai.states.game_state import GameState
 
 
 class PrepareShootoutDefense(TeamGoToPosition):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
+
         field = self.game_state.field
         our_goal = field.our_goal_pose
 
