@@ -5,6 +5,7 @@ from Engine.Communication.sender.sender_base_class import Sender
 from Engine.Communication.sender.udp_socket import udp_socket
 
 from Util.constant import KickForce, DribbleState
+from config.config import Config
 
 __author__ = "Maxime Gagnon-Legault"
 
@@ -32,7 +33,12 @@ class GrSimCommandSender(Sender):
             grsim_command.velnormal = packet.command.y/1000
             grsim_command.velangular = packet.command.orientation
             grsim_command.spinner = packet.dribbler_state != DribbleState.FORCE_STOP
-            grsim_command.kickspeedx = self.translate_kick_force(packet.kick_force)
+
+            if grsim_command.id in Config()["working_kicker_ids"]:
+                grsim_command.kickspeedx = self.translate_kick_force(packet.kick_force)
+            else:
+                grsim_command.kickspeedx = 0
+
             grsim_command.kickspeedz = 0
 
         active_robot_id = {packet.robot_id for packet in packets_frame.packet}
