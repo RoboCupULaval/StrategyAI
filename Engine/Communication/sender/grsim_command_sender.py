@@ -34,7 +34,7 @@ class GrSimCommandSender(Sender):
             grsim_command.velangular = packet.command.orientation
             grsim_command.spinner = packet.dribbler_state != DribbleState.FORCE_STOP
 
-            if grsim_command.id in Config()["working_kicker_ids"]:
+            if grsim_command.id in Config()["COACH"]["working_kicker_ids"]:
                 grsim_command.kickspeedx = self.translate_kick_force(packet.kick_force)
             else:
                 grsim_command.kickspeedx = 0
