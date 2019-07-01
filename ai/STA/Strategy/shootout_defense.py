@@ -24,3 +24,11 @@ class ShootoutDefense(Strategy):
     @classmethod
     def required_roles(cls):
         return [Role.GOALKEEPER]
+
+    @classmethod
+    def optional_roles(cls):
+        return [Role.FIRST_ATTACK,
+                Role.SECOND_ATTACK,
+                Role.MIDDLE,
+                Role.FIRST_DEFENCE,
+                Role.SECOND_DEFENCE]
