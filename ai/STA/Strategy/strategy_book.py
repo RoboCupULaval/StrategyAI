@@ -5,6 +5,10 @@ from typing import List, Dict, Type
 
 from ai.STA.Strategy.graphless_direct_free_kick import GraphlessDirectFreeKick
 from ai.STA.Strategy.graphless_indirect_free_kick import GraphlessIndirectFreeKick
+from ai.STA.Strategy.prepare_shootout_defense import PrepareShootoutDefense
+from ai.STA.Strategy.prepare_shootout_offense import PrepareShootoutOffense
+from ai.STA.Strategy.shootout_defense import ShootoutDefense
+from ai.STA.Strategy.shootout_offense import ShootoutOffense
 from ai.STA.Strategy.slapshot import SlapShot
 from ai.STA.Strategy.demo_2v2 import Demo2v2
 from ai.STA.Strategy.graphless_offense import GraphlessOffense
@@ -77,6 +81,10 @@ class StrategyBook:
                          GraphlessOffense,
                          GraphlessIndirectFreeKick,
                          GraphlessDirectFreeKick,
+                         PrepareShootoutDefense,
+                         ShootoutDefense,
+                         PrepareShootoutOffense,
+                         ShootoutOffense,
                          self.stop_strategy,
                          *default_strategies,
                          }
