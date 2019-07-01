@@ -11,7 +11,7 @@ from config.config import Config
 config = Config()
 
 settings = {
-    'orientation_pid_settings': {'kp': 10, 'ki': 3, 'kd': 0.3},
+    'orientation_pid_settings': {'kp': 5, 'ki': 1, 'kd': 0},
     'derivative_deadzone': 0.5
 }
 

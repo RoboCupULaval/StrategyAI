@@ -68,7 +68,7 @@ class GoKick(Tactic):
         if self.get_alignment_with_ball_and_target() < 60 \
                 and compare_angle(self.player.pose.orientation,
                                   required_orientation,
-                                  abs_tol=max(0.1, 0.1 * dist_from_ball / 1000)):
+                                  abs_tol=max(0.1, 0.1 * dist_from_ball / 1000)) or not self.is_able_to_grab_ball_directly(0.7):
             self.next_state = self.go_behind_ball
             if self._get_distance_from_ball() < KICK_DISTANCE:
                 self.next_state = self.kick
@@ -81,8 +81,7 @@ class GoKick(Tactic):
     def go_behind_ball(self):
         if self.auto_update_target:
             self._find_best_passing_option()
-        else:
-            self.status_flag = Flags.WIP
+        self.status_flag = Flags.WIP
         dist_from_ball = (self.player.position - self.game_state.ball_position).norm
 
         required_orientation = (self.target.position - self.game_state.ball_position).angle
@@ -101,6 +100,7 @@ class GoKick(Tactic):
                 self.next_state = self.go_behind_ball
         position_behind_ball = self.get_destination_behind_ball(effective_ball_spacing)
 
+
         if angle_behind > 70 and dist_from_ball < 1000:
             cruise_speed = 1 + ball_speed / 1000
         else:
@@ -109,10 +109,8 @@ class GoKick(Tactic):
         return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation),
                                       cruise_speed=cruise_speed,
                                       end_speed=0,
-                                      ball_collision=collision_ball) \
-                           .addChargeKicker() \
-                           .addKick(self.kick_force) \
-                           .build()
+                                      ball_collision=collision_ball)\
+                           .addChargeKicker().addKick(self.kick_force).build()
 
     def grab_ball(self):
         if self.auto_update_target:
@@ -124,11 +122,12 @@ class GoKick(Tactic):
         if self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
             self.kick_last_time = time.time()
+        ball_speed = self.game_state.ball.velocity.norm
         required_orientation = (self.target.position - self.game_state.ball_position).angle
         position_behind_ball = self.get_destination_behind_ball(GRAB_BALL_SPACING)
-        return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False) \
-                           .addForceDribbler() \
-                           .addKick(self.kick_force) \
+        return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False)\
+                           .addForceDribbler()\
+                           .addKick(self.kick_force)\
                            .build()
 
     def kick(self):
@@ -142,13 +141,21 @@ class GoKick(Tactic):
         player_to_target = (self.target.position - self.player.pose.position)
         position_behind_ball = self.game_state.ball_position + normalize(player_to_target) * ROBOT_CENTER_TO_KICKER
         required_orientation = (self.target.position - self.game_state.ball_position).angle
-
-        return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False) \
-                           .addKick(self.kick_force) \
-                           .addForceDribbler().build()
+        a = False  # en attente du flag pour savoir si le player peut kick ou pas
+        if a:
+            player_to_ball = normalize(self.game_state.ball_position - self.player.pose.position)
+            ram_position = Pose(player_to_ball*100+self.game_state.ball_position, orientation)
+            return CmdBuilder().addMoveTo(ram_position,
+                                          ball_collision=False,
+                                          cruise_speed=3,
+                                          end_speed=2).build()
+        else:
+            return CmdBuilder().addMoveTo(Pose(position_behind_ball, required_orientation), ball_collision=False)\
+                                            .addKick(self.kick_force)\
+                                            .addForceDribbler().build()
 
     def validate_kick(self):
-        if self.game_state.ball.is_moving_fast() or self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
+        if self.game_state.ball.is_moving_fast() and self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.halt
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
             self.next_state = self.kick
@@ -250,8 +257,7 @@ class GoKick(Tactic):
             return []
 
         angle = None
-        additional_dbg = [DebugCommandFactory.circle(self.target.position,
-                                                     KICK_DISTANCE * 3)] if self.current_player_target is not None and self.status_flag == Flags.PASS_TO_PLAYER else []
+        additional_dbg = []
         if self.current_state == self.go_behind_ball:
             angle = 18
         elif self.current_state == self.grab_ball:

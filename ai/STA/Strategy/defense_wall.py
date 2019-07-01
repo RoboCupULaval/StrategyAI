@@ -12,6 +12,7 @@ from ai.Algorithm.evaluation_module import closest_players_to_point, ball_not_go
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall, FETCH_BALL_ZONE_RADIUS
 from ai.STA.Tactic.go_kick import GoKick
+from ai.STA.Tactic.go_kick_3way import GoKick3Way
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass

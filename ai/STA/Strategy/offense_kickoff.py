@@ -12,5 +12,7 @@ class OffenseKickOff(PrepareKickOffOffense):
 
         middle_player = self.assigned_roles[Role.MIDDLE]
         self.clear_graph_of_role(Role.MIDDLE)
-        self.create_node(Role.MIDDLE, GoKick(self.game_state, middle_player, self.game_state.field.their_goal_pose))
+        self.create_node(Role.MIDDLE, GoKick(self.game_state,
+                                             middle_player,
+                                             auto_update_target=True))
 
