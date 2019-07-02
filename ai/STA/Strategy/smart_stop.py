@@ -13,6 +13,7 @@ from ai.STA.Tactic.goalkeeper import GoalKeeper
 # noinspection PyMethodMayBeStatic,PyMethodMayBeStatic
 class SmartStop(Strategy):
     DEFENDERS = [Role.FIRST_DEFENCE, Role.SECOND_DEFENCE]
+    
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
@@ -38,13 +39,14 @@ class SmartStop(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return [Role.GOALKEEPER,
-                Role.FIRST_ATTACK,
-                Role.SECOND_ATTACK]
+        return []
 
     @classmethod
     def optional_roles(cls):
-        return [Role.FIRST_DEFENCE,
+        return [Role.GOALKEEPER,
+                Role.FIRST_ATTACK,
+                Role.SECOND_ATTACK,
+                Role.FIRST_DEFENCE,
                 Role.MIDDLE,
                 Role.SECOND_DEFENCE]
 

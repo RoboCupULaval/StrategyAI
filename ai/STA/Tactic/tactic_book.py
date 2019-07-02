@@ -7,7 +7,8 @@ from ai.STA.Tactic.demo_follow_ball import DemoFollowBall
 from ai.STA.Tactic.demo_follow_robot import DemoFollowRobot
 from ai.STA.Tactic.face_target import FaceTarget
 from ai.STA.Tactic.go_kick import GoKick
-from ai.STA.Tactic.go_kick_experimental_sequence import GoKickExperimental
+from ai.STA.Tactic.go_kick_3way import GoKick3Way
+from ai.STA.Tactic.go_kick_aggressive import GoKickAggressive
 from ai.STA.Tactic.go_to_position import GoToPosition
 from ai.STA.Tactic.go_to_random_pose_in_zone import GoToRandomPosition
 from ai.STA.Tactic.goalkeeper import GoalKeeper
@@ -21,6 +22,7 @@ from ai.STA.Tactic.stay_away_from_ball import StayAwayFromBall
 from ai.STA.Tactic.stop import Stop
 from ai.STA.Tactic.stress_test_robot import StressTestRobotWaypoint, StressTestRobot
 from ai.STA.Tactic.tactic import Tactic
+from ai.STA.Tactic.test_best_passing_option import TestBestPassingOption
 
 
 class TacticBook:
@@ -30,9 +32,11 @@ class TacticBook:
 
         self.stop_tactic = Stop
 
-        defaults_tactics = [GoToPosition, GoKick]
+        defaults_tactics = [GoToPosition, GoKick3Way]
 
-        tactics = {ReceivePass,
+        tactics = {GoKick3Way,
+                   GoKick,
+                   ReceivePass,
                    PlaceBall,
                    FaceTarget,
                    DemoFollowBall,
@@ -43,12 +47,13 @@ class TacticBook:
                    PassToPlayer,
                    StayAwayFromBall,
                    RotateAroundBall,
-                   GoKickExperimental,
+                   GoKickAggressive,
                    RotateAroundBall,
                    StressTestRobot,
                    StressTestRobotWaypoint,
                    AlignAroundTheBall,
                    LeeroyJenkins,
+                   TestBestPassingOption,
                    *defaults_tactics,
                    self.stop_tactic}
 

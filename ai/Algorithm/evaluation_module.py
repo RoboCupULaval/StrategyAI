@@ -64,7 +64,7 @@ def player_covered_from_goal(player: Player):
     pertinent_collisions_positions = np.array([obs.position for obs in pertinent_collisions])
     pertinent_collisions_avoid_radius = np.array([obs.avoid_distance for obs in pertinent_collisions])
     results = []
-    nb_beam = 15
+    nb_beam = 45
     their_goal_line = GameState().field.their_goal_line
     for i in range(0, nb_beam + 1):  # discretisation de la ligne de but
         goal_point = their_goal_line.p1 + their_goal_line.direction * (their_goal_line.length * i / nb_beam)
@@ -165,12 +165,8 @@ def best_passing_option(passing_player, passer_can_kick_in_goal=True):
     goal = GameState().field.their_goal
 
     receiver = None
-    for p in GameState().our_team.available_players.values():
-        try:
-            is_goaler = p == GameState().get_player_by_role(Role.GOALKEEPER)
-        except KeyError:
-            is_goaler = False
-        if p != passing_player and not is_goaler:
+    for r, p in GameState().assigned_roles.items():
+        if p != passing_player and r != Role.GOALKEEPER:
             # Calcul du score pour passeur vers receveur
             score = line_of_sight_clearance(passing_player, p.pose.position)
 
@@ -225,12 +221,16 @@ def line_of_sight_clearance_ball(player, targets, distances=None):
     return scores
 
 
-def ball_going_toward_player(game_state, player):
-    if game_state.ball.is_mobile(50):  # to avoid division by zero and unstable ball_directions
-        ball_approach_angle = np.arccos(np.dot(normalize(player.position - game_state.ball.position).array,
-                                               normalize(game_state.ball.velocity).array)) * 180 / np.pi
-        return ball_approach_angle < 25
+def object_going_toward_other_object(object_1, object_2, max_angle_of_approach=25):
+    if object_1.is_mobile(50):  # to avoid division by zero and unstable ball_directions
+        object_1_approach_angle = np.arccos(np.dot(normalize(object_2.position - object_1.position).array,
+                                                   normalize(object_1.velocity).array)) * 180 / np.pi
+        return object_1_approach_angle < max_angle_of_approach
     return False
+
+
+def ball_going_toward_player(game_state, player, max_angle_of_approach=25):
+    return object_going_toward_other_object(game_state.ball, player, max_angle_of_approach=max_angle_of_approach)
 
 
 def ball_not_going_toward_player(game_state, player):

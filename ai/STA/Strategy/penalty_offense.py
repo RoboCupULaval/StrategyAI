@@ -32,8 +32,11 @@ class PenaltyOffense(TeamGoToPosition):
                              Role.SECOND_DEFENCE: Pose.from_values(our_goal.position.x / 8, field.bottom * 2 / 3)}
 
         kicker = self.assigned_roles[Role.MIDDLE]
-        self.create_node(Role.MIDDLE, GoKick(game_state, kicker, their_goal, kick_force=KickForce.HIGH,
-                                                   forbidden_areas=[new_goal]))
+        self.create_node(Role.MIDDLE, GoKick(game_state,
+                                             kicker,
+                                             kick_force=KickForce.HIGH,
+                                             forbidden_areas=[new_goal],
+                                             auto_update_target=True))
 
         goalkeeper = self.assigned_roles[Role.GOALKEEPER]
         self.create_node(Role.GOALKEEPER, GoalKeeper(game_state, goalkeeper, penalty_kick=True))

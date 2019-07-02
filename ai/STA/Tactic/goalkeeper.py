@@ -1,12 +1,9 @@
 # Under MIT licence, see LICENCE.txt
-from math import acos, sin, cos
-from unittest.suite import _DebugResult
 
 import numpy as np
 
 from Debug.debug_command_factory import DebugCommandFactory, BLUE, GREEN
-from ai.Algorithm.evaluation_module import player_with_ball, player_pointing_toward_point, \
-    player_pointing_toward_segment, closest_players_to_point
+from ai.Algorithm.evaluation_module import player_with_ball, player_pointing_toward_segment, closest_players_to_point
 from ai.executors.pathfinder_module import WayPoint
 
 __author__ = 'RoboCupULaval'
@@ -100,7 +97,7 @@ class GoalKeeper(Tactic):
                                                                self.GOAL_LINE.p2,
                                                                ball.position,
                                                                ball.position + ball.velocity)
-        except ValueError: # In case of parallel lines
+        except ValueError:  # In case of parallel lines
             self.next_state = self.defense
             return self.next_state()
 
@@ -183,21 +180,14 @@ class GoalKeeper(Tactic):
                       end_speed=0)
 
     def _ball_going_toward_goal(self):
-        upper_angle = (self.game_state.ball.position - self.GOAL_LINE.p2).angle + 5 * np.pi / 180.0
-        lower_angle = (self.game_state.ball.position - self.GOAL_LINE.p1).angle - 5 * np.pi / 180.0
+        lower_angle = (self.GOAL_LINE.p2 - self.game_state.ball.position).angle - 5 * np.pi / 180.0
+        upper_angle = (self.GOAL_LINE.p1 - self.game_state.ball.position).angle + 5 * np.pi / 180.0
         ball_speed = self.game_state.ball.velocity.norm
         return (ball_speed > self.DANGER_BALL_VELOCITY and self.game_state.ball.velocity.x > 0) or \
-               (ball_speed > self.MOVING_BALL_VELOCITY and upper_angle <= self.game_state.ball.velocity.angle <= lower_angle)
+               (ball_speed > self.MOVING_BALL_VELOCITY and lower_angle <= self.game_state.ball.velocity.angle <= upper_angle)
 
     def _is_ball_safe_to_kick(self):
-        # Since defender can not kick the ball while inside the goal there are position where the ball is unreachable
-        # The goalee must leave the goal area and kick the ball
-        goal_area = self.game_state.field.our_goal_area
-        width = KEEPOUT_DISTANCE_FROM_GOAL + ROBOT_DIAMETER
-        area_in_front_of_goal = Area.from_limits(goal_area.top, goal_area.bottom,
-                                                 goal_area.left, goal_area.left - width)
-        return self.game_state.field.is_ball_in_our_goal_area() or \
-               area_in_front_of_goal.point_inside(self.game_state.ball.position) and self._no_enemy_around_ball()
+        return self.game_state.field.is_ball_in_our_goal_area()
 
     def _best_target_into_goal(self):
         if 0 < len(self.game_state.enemy_team.available_players):

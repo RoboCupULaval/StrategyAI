@@ -58,10 +58,14 @@ class GameState(metaclass=Singleton):
 
     def map_players_for_strategy(self, strategy_class):
         goalie_id = self.last_ref_state.team_info['ours']['goalie'] if self.last_ref_state is not None else None
-        self._role_mapper.map_with_rules(self.our_team.available_players,
-                                         strategy_class.required_roles(),
-                                         strategy_class.optional_roles(),
-                                         goalie_id)
+        try:
+            self._role_mapper.map_with_rules(self.our_team.available_players,
+                                             strategy_class.required_roles(),
+                                             strategy_class.optional_roles(),
+                                             goalie_id)
+        except:
+            self.logger.info(f"Exception raised during mapping of players in strategy {strategy_class}")
+            raise
 
     def get_player_by_role(self, role):
         return self._role_mapper.roles_translation[role]

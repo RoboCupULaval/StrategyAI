@@ -25,6 +25,9 @@ class Player:
     def __str__(self):
         return '{} {}'.format(self.team.team_color.name, self.id)
 
+    def is_mobile(self, immobile_speed = 300.0): # mm/s
+        return immobile_speed < self.velocity.norm
+
     @property
     def id(self):
         return self._id

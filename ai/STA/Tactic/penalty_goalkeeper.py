@@ -26,7 +26,6 @@ __author__ = 'RoboCupULaval'
 class PenaltyGoalKeeper(GoalKeeper):
     """Same behavior as GoalKeeper, except the player must touch the goal line in defense and intercept"""
 
-
     MOVING_BALL_VELOCITY = 50  # mm/s
     DANGER_BALL_VELOCITY = 600  # mm/s
     DANGEROUS_ENEMY_MIN_DISTANCE = 500
@@ -139,7 +138,6 @@ class PenaltyGoalKeeper(GoalKeeper):
         # The referee is suppose to place the ball at the penalty line.
         # However they are never super precise, so we will not react to if the ball is a bit inside our goal.
         return self.game_state.field.is_ball_in_our_goal_area() and penalty_line_x + BALL_RADIUS * 12 < ball.x
-
 
     def _best_target_into_goal(self):
         if 0 < len(self.game_state.enemy_team.available_players):

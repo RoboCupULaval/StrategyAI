@@ -12,6 +12,7 @@ from ai.Algorithm.evaluation_module import closest_players_to_point, ball_not_go
 from ai.STA.Strategy.strategy import Strategy
 from ai.STA.Tactic.align_to_defense_wall import AlignToDefenseWall, FETCH_BALL_ZONE_RADIUS
 from ai.STA.Tactic.go_kick import GoKick
+from ai.STA.Tactic.go_kick_3way import GoKick3Way
 from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
@@ -124,9 +125,11 @@ class DefenseWall(Strategy):
                 node_position_pass.connect_to(node_align_to_defense_wall, when=self.game_state.field.is_ball_outside_our_goal_area)
 
                 node_wait_for_pass.connect_to(node_go_kick, when=player_has_received_ball)
+                node_wait_for_pass.connect_to(node_position_pass, when=self.game_state.field.is_ball_in_our_goal_area)
+                node_go_kick.connect_to(node_position_pass, when=self.game_state.field.is_ball_in_our_goal_area)
                 node_go_kick.connect_to(node_align_to_defense_wall, when=player_has_kicked)
                 node_position_pass.connect_to(node_wait_for_pass, when=player_is_receiving_pass)
-                node_position_pass.connect_to(node_align_to_defense_wall, when=player_is_not_receiving_pass)
+                # node_position_pass.connect_to(node_align_to_defense_wall, when=player_is_not_receiving_pass)
 
 
     @classmethod
@@ -168,6 +171,9 @@ class DefenseWall(Strategy):
         else:
             return False
 
+    def _remove_not_available_roles(self, unfiltered_roles):
+        return [r for r in unfiltered_roles if r in self.assigned_roles.keys()]
+
     def _dispatch_player(self):
 
         if not self.can_kick and self.multiple_cover:
@@ -175,6 +181,8 @@ class DefenseWall(Strategy):
             self.cover_role += [Role.SECOND_ATTACK]
         if not self.can_kick and not self.multiple_cover:
             self.defensive_role += [Role.FIRST_ATTACK, Role.SECOND_ATTACK]
+        self.defensive_role = self._remove_not_available_roles(self.defensive_role)
+        self.cover_role = self._remove_not_available_roles(self.cover_role)
 
         self.robots_in_wall_formation = [p for r, p in self.assigned_roles.items() if r in self.defensive_role]
         self.robots_in_cover_formation = [p for r, p in self.assigned_roles.items() if r in self.cover_role]
