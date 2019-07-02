@@ -10,7 +10,7 @@ from Util.constant import ROBOT_RADIUS, ROBOT_DIAMETER, KEEPOUT_DISTANCE_FROM_BA
 from Util.geometry import perpendicular, normalize, find_bisector_of_triangle, angle_between_three_points, Line, \
     intersection_line_and_circle, points_on_same_vert_or_hori_line
 from Util.role import Role
-from ai.Algorithm.evaluation_module import closest_players_to_point
+from ai.Algorithm.evaluation_module import closest_players_to_point, closest_players_to_point_except
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.tactic import Tactic
@@ -66,19 +66,24 @@ class AlignToDefenseWall(Tactic):
             We compute the position where the wall's robot can block the field of view of opposing robot with the ball.
             The field of view is defined as the triangle created by the ball and the goal_line extremities.
         """
+        # If ball is behind our goal, the math become a bit more complex,
+        # so to fix that case we change position to the closest point in front of the goal.
+        object_to_block_position = self.object_to_block.position.copy()
+        if object_to_block_position.x > self.game_state.field.right:
+            object_to_block_position.x = self.game_state.field.right - 10  # fix rounding problem
 
         nb_robots = len(self.robots_in_formation)
         wall_segment_length = nb_robots * ROBOT_DIAMETER + GAP_IN_WALL * (nb_robots - 1)
 
         goal_line = self.game_state.field.our_goal_line
-        bisection_angle = angle_between_three_points(goal_line.p2, self.object_to_block.position, goal_line.p1)
+        bisection_angle = angle_between_three_points(goal_line.p2, object_to_block_position, goal_line.p1)
 
         # We calculate the farthest distance from the object which completely block its FOV of the goal
         object_to_center_formation_dist = wall_segment_length / tan(bisection_angle)
 
-        self.bisect_inter = find_bisector_of_triangle(self.object_to_block.position, goal_line.p1, goal_line.p2)
-        vec_object_to_goal_line_bisect = self.bisect_inter - self.object_to_block.position
-        vec_goal_line_bisect_to_object = self.object_to_block.position - self.bisect_inter
+        self.bisect_inter = find_bisector_of_triangle(object_to_block_position, goal_line.p1, goal_line.p2)
+        vec_object_to_goal_line_bisect = self.bisect_inter - object_to_block_position
+        vec_goal_line_bisect_to_object = object_to_block_position - self.bisect_inter
 
 
         # # If the object is far away from the goal, we use object_to_center_formation_dist,
@@ -89,7 +94,7 @@ class AlignToDefenseWall(Tactic):
         object_to_block_to_center_formation_dist = object_to_center_formation_dist
 
         self.center_formation = object_to_block_to_center_formation_dist * normalize(vec_object_to_goal_line_bisect) \
-                                + self.object_to_block.position
+                                + object_to_block_position
 
         if self.stay_away_from_ball:
             if (self.game_state.ball_position - self.center_formation).norm < KEEPOUT_DISTANCE_FROM_BALL:
@@ -105,9 +110,9 @@ class AlignToDefenseWall(Tactic):
         # since a robot can not move into a forbidden area, we increase the size of the forbidden area by a small amount
         goal_area = Area.pad(self.game_state.field.our_goal_forbidden_area, 10)
 
-        if self._wall_is_in_a_forbidden_area(goal_area):
-            line_a = Line(self.object_to_block.position, self.game_state.field.our_goal_line.p1)
-            line_b = Line(self.object_to_block.position, self.game_state.field.our_goal_line.p2)
+        if self._wall_is_in_a_forbidden_area(object_to_block_position, goal_area):
+            line_a = Line(object_to_block_position, self.game_state.field.our_goal_line.p1)
+            line_b = Line(object_to_block_position, self.game_state.field.our_goal_line.p2)
             inter_a = goal_area.intersect(line_a)
             inter_b = goal_area.intersect(line_b)
             if len(inter_a) != 1 or len(inter_b) != 1:
@@ -169,9 +174,6 @@ class AlignToDefenseWall(Tactic):
 
     def go_kick(self):
         self.compute_wall_segment()
-        if self.go_kick_tactic is None:
-            # Maybe we should hardcord the target here? It would be safer target=self.game_state.field.their_goal_pose,
-            self.go_kick_tactic = GoKick(self.game_state, self.player, auto_update_target=True)
 
         if not self._should_ball_be_kick_by_wall() \
                 or self.game_state.field.is_ball_in_our_goal_area() \
@@ -181,6 +183,9 @@ class AlignToDefenseWall(Tactic):
             self.next_state = self.main_state
             return Idle
         else:
+            if self.go_kick_tactic is None:
+                # Maybe we should hardcord the target here? It would be safer target=self.game_state.field.their_goal_pose,
+                self.go_kick_tactic = GoKick(self.game_state, self.player, auto_update_target=True)
             return self.go_kick_tactic.exec()
 
     def _should_ball_be_kick_by_wall(self):
@@ -188,11 +193,15 @@ class AlignToDefenseWall(Tactic):
                (self.position_on_wall_segment() - self.game_state.ball.position).norm < FETCH_BALL_ZONE_RADIUS
 
     def _is_closest_not_goaler(self, player):
-        closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
-        if player == closest_players[0].player:
-            return True
-        return closest_players[0].player == self.game_state.get_player_by_role(Role.GOALKEEPER) \
-               and player == closest_players[1].player
+        ban_players = self.game_state.ban_players
+        if player in ban_players:
+            return False
+
+        closests = closest_players_to_point_except(self.game_state.ball.position,
+                                                   except_roles=[Role.GOALKEEPER],
+                                                   except_players=ban_players)
+
+        return len(closests) > 0 and closests[0].player == player
 
     def _closest_point_away_from_ball(self):
         inters = intersection_line_and_circle(self.game_state.ball_position, KEEPOUT_DISTANCE_FROM_BALL,
@@ -211,8 +220,8 @@ class AlignToDefenseWall(Tactic):
                 return False
         return True
 
-    def _wall_is_in_a_forbidden_area(self, goal_area):
-        if self.object_to_block.position in goal_area:
+    def _wall_is_in_a_forbidden_area(self, object_to_block_position, goal_area):
+        if object_to_block_position in goal_area:
             return False
         return (self.center_formation in goal_area
                 or self.wall_segment.p1.x > self.game_state.field.right  # Robot can not go behind the goal line
