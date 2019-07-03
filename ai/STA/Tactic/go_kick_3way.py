@@ -77,7 +77,10 @@ class GoKick3Way(Tactic):
                 if self.is_ball_going_toward_player() and self._get_distance_from_ball() > 500:
                     self.next_state = self.intercept
                 else:
-                    self.next_state = self.chase_ball
+                    if self.player.id not in Config()["COACH"]["working_kicker_ids"]:
+                        self.next_state = self.kick
+                    else:
+                        self.next_state = self.chase_ball
             elif self.is_ball_going_toward_player(110) and self._get_distance_from_ball() > 500:
                 self.next_state = self.intercept
             else:
@@ -219,20 +222,20 @@ class GoKick3Way(Tactic):
             self.next_state=self.grab_ball
             return self.next_state()
 
+        self.check_ball_state()
+        ball_speed = self.game_state.ball.velocity.norm
+        end_speed = ball_speed
+        behind_ball = self.game_state.ball_position
         orientation = (self.target.position - self.game_state.ball_position).angle
         if self.player.id not in Config()["COACH"]["working_kicker_ids"]:
             self.logger.debug("RAM BALL!")
             player_to_ball = normalize(self.game_state.ball_position - self.player.pose.position)
-            self.ram_position = Pose(player_to_ball*1000000000+self.game_state.ball_position, orientation)
+            self.ram_position = Pose(player_to_ball*100+self.game_state.ball_position, orientation)
             return CmdBuilder().addMoveTo(self.ram_position,
                                           ball_collision=False,
                                           cruise_speed=5,
                                           end_speed=5).build()
         else:
-            self.check_ball_state()
-            ball_speed = self.game_state.ball.velocity.norm
-            end_speed = ball_speed
-            behind_ball = self.game_state.ball_position
             return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
                               ball_collision=False,
                               cruise_speed=3,
