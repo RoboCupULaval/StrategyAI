@@ -39,6 +39,7 @@ from ai.STA.Strategy.stay_away import StayAway
 from ai.STA.Strategy.test_goal_keeper import TestGoalKeeper
 from ai.STA.Strategy.test_high_speed import TestHighSpeed
 from ai.STA.Strategy.test_passing import TestPassing
+from ai.STA.Strategy.test_passing_options import TestPassingOptions
 
 __author__ = "Maxime Gagnon-Legault, and others"
 
@@ -85,6 +86,7 @@ class StrategyBook:
                          ShootoutDefense,
                          PrepareShootoutOffense,
                          ShootoutOffense,
+                         TestPassingOptions,
                          self.stop_strategy,
                          *default_strategies,
                          }
