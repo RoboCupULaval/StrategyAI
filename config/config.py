@@ -62,6 +62,9 @@ class Config(metaclass=Singleton):
         self['ENGINE']['ignore_balls_in'] = {'': None,
                                              'positive': FieldSide.POSITIVE,
                                              'negative': FieldSide.NEGATIVE}.get(self['ENGINE']['ignore_balls_in'], None)
+  
+        if type(self['COACH']['working_kicker_ids']) is str:
+            exec("self['COACH']['working_kicker_ids'] = " + self['COACH']['working_kicker_ids'])
 
     def update_ports(self):
         # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
@@ -115,6 +118,13 @@ class Config(metaclass=Singleton):
                 self.logger.critical('disabled_camera_id argument in ENGINE is invalid: %s. Expected a list.', self['ENGINE']['disabled_camera_id'])
                 do_exit = True
 
+        if type(self['COACH']['working_kicker_ids']) is str:
+            try:
+                exec(self['COACH']['working_kicker_ids'])
+            except SyntaxError:
+                self.logger.critical('working_kicker_ids argument in COACH is invalid: %s. Expected a list.', self['COACH']['working_kicker_ids'])
+                do_exit = True
+
         if 0 > int(self['ENGINE']['number_of_camera']) > 4:
             self.logger.critical('The number of camera in ENGINE should be between 1 and 4, not %s', int(self['ENGINE']['number_of_camera']))
             do_exit = True
@@ -144,7 +154,8 @@ class Config(metaclass=Singleton):
                 'on_negative_side': True,
                 'is_fps_locked': True,
                 'fps': 10,
-                'max_excess_time': 0.1
+                'max_excess_time': 0.1,
+                'working_kicker_ids': [0, 1, 2, 3, 4, 5, 6, 7]
             },
             'ENGINE': {
                 'number_of_camera': 4,

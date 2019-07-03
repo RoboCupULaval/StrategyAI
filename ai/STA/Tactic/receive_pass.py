@@ -81,7 +81,8 @@ class ReceivePass(Tactic):
         return CmdBuilder().addMoveTo(Pose(away_position, orientation),
                                       cruise_speed=3,
                                       end_speed=0,
-                                      ball_collision=True)\
+                                      ball_collision=True) \
+                           .addForceDribbler() \
                            .addChargeKicker().build()
 
     def _must_change_state(self, ball: Ball):
