@@ -17,7 +17,7 @@ from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
 from ai.STA.Tactic.tactic_constants import Flags
 
-TIME_TO_GET_IN_POSITION = 5
+TIME_TO_GET_IN_POSITION = 2
 
 
 # noinspection PyMethodMayBeStatic,PyMethodMayBeStatic
