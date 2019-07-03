@@ -52,8 +52,14 @@ class PathfinderModule:
         our_team = [player for player in self.game_state.our_team.available_players.values()]
         enemy_team = [player for player in self.game_state.enemy_team.available_players.values()]
 
-        for other in our_team + enemy_team:
+        for other in our_team:
             self.obstacles.append(Obstacle(other.position.array, avoid_distance=MIN_DISTANCE_FROM_OBSTACLE))
+
+        for other in enemy_team:
+            avoid_distance = MIN_DISTANCE_FROM_OBSTACLE
+            if other.position in self.game_state.field.their_goal_forbidden_area:
+                avoid_distance *= 2
+            self.obstacles.append(Obstacle(other.position.array, avoid_distance=avoid_distance))
 
     def player_optional_obstacles(self, ball_collision: bool) -> List[Obstacle]:
         path_obstacles = self.obstacles.copy()
