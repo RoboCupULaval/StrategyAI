@@ -10,11 +10,6 @@ from Util.area import Area, ForbiddenZone
 from ai.GameDomainObjects import Ball
 
 
-class FieldSide(Enum):
-    POSITIVE = 0
-    NEGATIVE = 1
-
-
 # noinspection PyPep8
 class FieldCircularArc:
     def __init__(self, arc: Dict):

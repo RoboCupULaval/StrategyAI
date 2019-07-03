@@ -3,7 +3,7 @@ from configparser import ConfigParser, ParsingError
 import logging
 
 from Util import Singleton
-
+from Util.constant import FieldSide
 
 MANDATORY_FIELDS = {
     'COMMUNICATION': ['type', 'field_port_file', 'ui_debug_address', 'vision_port',
@@ -59,6 +59,10 @@ class Config(metaclass=Singleton):
         if type(self['ENGINE']['disabled_camera_id']) is str:
             exec("self['ENGINE']['disabled_camera_id'] = " + self['ENGINE']['disabled_camera_id']) # SB: Sorry, it works.
 
+        self['ENGINE']['ignore_balls_in'] = {'': None,
+                                             'positive': FieldSide.POSITIVE,
+                                             'negative': FieldSide.NEGATIVE}.get(self['ENGINE']['ignore_balls_in'], None)
+  
         if type(self['COACH']['working_kicker_ids']) is str:
             exec("self['COACH']['working_kicker_ids'] = " + self['COACH']['working_kicker_ids'])
 
@@ -100,6 +104,12 @@ class Config(metaclass=Singleton):
 
         if self['COMMUNICATION']['type'] not in ['grsim', 'serial', 'disabled']:
             self.logger.critical('Invalid type in COMMUNICATION. Received: %s. Expected sim, serial or disabled.', self['COMMUNICATION']['type'])
+
+        if self['ENGINE']['ignore_balls_in'] not in ['', 'positive', 'negative']:
+            self.logger.critical('ignore_balls_in argument in ENGINE is invalid: %s. '
+                                 'Expected a \'\', \'positive\', \'negative\'.', self['ENGINE']['ignore_balls_in'])
+            do_exit = True
+
 
         if type(self['ENGINE']['disabled_camera_id']) is str:
             try:
@@ -155,6 +165,7 @@ class Config(metaclass=Singleton):
                 'max_ball_on_field': 2,
                 'max_ball_separation': 1000,
                 'disabled_camera_id': [],
+                'ignore_balls_in': '',
                 'is_fps_locked': True,
                 'fps': 30,
                 'max_excess_time': 0.05

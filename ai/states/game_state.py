@@ -4,13 +4,12 @@ import logging
 from multiprocessing.managers import DictProxy
 
 from Util import Position
-from Util.constant import TeamColor
+from Util.constant import TeamColor, FieldSide
 from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
 from Util.team_color_service import TeamColorService
 from ai.Algorithm.evaluators.double_touch_detector import DoubleTouchDetector
 from ai.GameDomainObjects import Ball, Team, Field
-from ai.GameDomainObjects.field import FieldSide
 
 
 class GameState(metaclass=Singleton):
@@ -105,7 +104,6 @@ class GameState(metaclass=Singleton):
         # Note: The AI is independent from which side it is play on,
         # the engine handle the mirroring of everything
         return FieldSide.POSITIVE
-        # return FieldSide.NEGATIVE if Config()['COACH']['on_negative_side'] else FieldSide.POSITIVE
 
     @property
     def ban_players(self):
