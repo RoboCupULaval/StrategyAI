@@ -18,6 +18,7 @@ from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
 from ai.Algorithm.evaluation_module import object_going_toward_other_object, ball_going_toward_player
 from Util.geometry import normalize, Line, closest_point_on_segment
+from config.config import Config
 
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1.0
@@ -217,8 +218,7 @@ class GoKick3Way(Tactic):
         end_speed = ball_speed
         behind_ball = self.game_state.ball_position
         orientation = (self.target.position - self.game_state.ball_position).angle
-        a = False  # en attente du flag pour savoir si le player peut kick ou pas
-        if a:
+        if self.player.id not in Config()["COACH"]["working_kicker_ids"]:
             player_to_ball = normalize(self.game_state.ball_position - self.player.pose.position)
             ram_position = Pose(player_to_ball*100+self.game_state.ball_position, orientation)
             return CmdBuilder().addMoveTo(ram_position,
