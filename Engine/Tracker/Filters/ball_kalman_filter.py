@@ -16,6 +16,7 @@ class BallFilter(KalmanFilter):
         self.observable_state = int(np.size(self.observation_model, 0))
 
         self.x = np.zeros(self.state_number)
+
     @property
     def position(self):
         if self.is_active:
