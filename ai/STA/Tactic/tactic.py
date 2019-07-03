@@ -42,19 +42,23 @@ class Tactic:
         self.target = target
 
         if forbidden_areas is None:
-            field = self.game_state.field
-
-            # Those limits are for ulaval local only
-            self.forbidden_areas = field.border_limits
-            self.forbidden_areas += [
-                    ForbiddenZone.pad(self.field.behind_our_goal_line, KEEPOUT_DISTANCE_FROM_GOAL),
-                    ForbiddenZone.pad(self.field.behind_their_goal_line, KEEPOUT_DISTANCE_FROM_GOAL)]
-            self.forbidden_areas += [self.game_state.field.their_goal_forbidden_area,
-                                     self.game_state.field.our_goal_forbidden_area]
+            self.forbidden_areas = Tactic.default_forbidden_areas(game_state)
         else:
             self.forbidden_areas = forbidden_areas
 
         self.debug_cmd_timeout = time.time()
+
+    @staticmethod
+    def default_forbidden_areas(game_state):
+        field = game_state.field
+        # Those limits are for ulaval local only
+        forbidden_areas = field.border_limits
+        forbidden_areas += [
+            ForbiddenZone.pad(field.behind_our_goal_line, KEEPOUT_DISTANCE_FROM_GOAL),
+            ForbiddenZone.pad(field.behind_their_goal_line, KEEPOUT_DISTANCE_FROM_GOAL)]
+        forbidden_areas += [game_state.field.their_goal_forbidden_area,
+                            game_state.field.our_goal_forbidden_area]
+        return forbidden_areas
 
     def halt(self) -> Idle:
         self.next_state = self.halt

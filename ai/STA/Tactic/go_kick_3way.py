@@ -1,23 +1,24 @@
 # Under MIT licence, see LICENCE.txt
 
-import math as m
 import time
-from typing import List, Union
+from typing import List
 
+import math as m
 import numpy as np
 
-from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce, ROBOT_RADIUS
 from Util import Pose, Position
-from Util.ai_command import CmdBuilder, Idle, MoveTo
-from Util.geometry import compare_angle, normalize
+from Util.ai_command import CmdBuilder, Idle
+from Util.area import ForbiddenZone
+from Util.constant import KickForce, ROBOT_RADIUS, ROBOT_DIAMETER
+from Util.geometry import compare_angle
+from Util.geometry import normalize, Line, closest_point_on_segment
 from ai.Algorithm.evaluation_module import best_passing_option, player_covered_from_goal
+from ai.Algorithm.evaluation_module import object_going_toward_other_object, ball_going_toward_player
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_kick import MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_TO_PASS
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
-from ai.Algorithm.evaluation_module import object_going_toward_other_object, ball_going_toward_player
-from Util.geometry import normalize, Line, closest_point_on_segment
 from config.config import Config
 
 VALIDATE_KICK_DELAY = 0.5
@@ -40,6 +41,11 @@ class GoKick3Way(Tactic):
                  go_behind_distance=GRAB_BALL_SPACING * 3,
                  forbidden_areas=None,
                  can_kick_in_goal=True):
+
+        if forbidden_areas is None:
+            forbidden_areas = forbidden_areas + [
+                ForbiddenZone.pad(game_state.field.their_goal_forbidden_area, ROBOT_DIAMETER)
+            ]
 
         super().__init__(game_state, player, target, args=args, forbidden_areas=forbidden_areas)
         self.current_state = self.initialize
