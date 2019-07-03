@@ -1,23 +1,24 @@
 # Under MIT licence, see LICENCE.txt
 
-import math as m
 import time
-from typing import List, Union
+from typing import List
 
+import math as m
 import numpy as np
 
-from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce, ROBOT_RADIUS
+from Debug.debug_command_factory import DebugCommandFactory, BLUE
 from Util import Pose, Position
-from Util.ai_command import CmdBuilder, Idle, MoveTo
-from Util.geometry import compare_angle, normalize
+from Util.ai_command import CmdBuilder, Idle
+from Util.constant import KickForce, ROBOT_RADIUS
+from Util.geometry import compare_angle
+from Util.geometry import normalize, Line, closest_point_on_segment
 from ai.Algorithm.evaluation_module import best_passing_option, player_covered_from_goal
+from ai.Algorithm.evaluation_module import object_going_toward_other_object, ball_going_toward_player
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_kick import MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_TO_PASS
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
-from ai.Algorithm.evaluation_module import object_going_toward_other_object, ball_going_toward_player
-from Util.geometry import normalize, Line, closest_point_on_segment
 from config.config import Config
 
 VALIDATE_KICK_DELAY = 0.5
@@ -26,7 +27,7 @@ TARGET_ASSIGNATION_DELAY = 1.0
 GO_BEHIND_SPACING = 250
 GRAB_BALL_SPACING = 120
 APPROACH_SPEED = 100
-KICK_DISTANCE = 130
+KICK_DISTANCE = 1000
 KICK_SUCCEED_THRESHOLD = 300
 COMMAND_DELAY = 0.5
 
@@ -59,6 +60,9 @@ class GoKick3Way(Tactic):
 
         self.kick_force = kick_force
         self.go_behind_distance = go_behind_distance
+
+        self.ram_position = None
+
 
     def initialize(self):
         if self.auto_update_target:
@@ -211,22 +215,24 @@ class GoKick3Way(Tactic):
         if self.auto_update_target:
             self._find_best_passing_option()
         if not self.is_able_to_grab_ball_directly(0.7):
+            self.logger.debug("============ not is_able_to_grab_ball_directly")
             self.next_state=self.grab_ball
             return self.next_state()
-        self.check_ball_state()
-        ball_speed = self.game_state.ball.velocity.norm
-        end_speed = ball_speed
-        behind_ball = self.game_state.ball_position
+
         orientation = (self.target.position - self.game_state.ball_position).angle
         if self.player.id not in Config()["COACH"]["working_kicker_ids"]:
+            self.logger.debug("RAM BALL!")
             player_to_ball = normalize(self.game_state.ball_position - self.player.pose.position)
-            ram_position = Pose(player_to_ball*100+self.game_state.ball_position, orientation)
-            return CmdBuilder().addMoveTo(ram_position,
+            self.ram_position = Pose(player_to_ball*1000000000+self.game_state.ball_position, orientation)
+            return CmdBuilder().addMoveTo(self.ram_position,
                                           ball_collision=False,
-                                          cruise_speed=3,
-                                          end_speed=2).build()
+                                          cruise_speed=5,
+                                          end_speed=5).build()
         else:
-
+            self.check_ball_state()
+            ball_speed = self.game_state.ball.velocity.norm
+            end_speed = ball_speed
+            behind_ball = self.game_state.ball_position
             return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
                               ball_collision=False,
                               cruise_speed=3,
@@ -423,3 +429,8 @@ class GoKick3Way(Tactic):
             return Position()
 
         return where_ball_leaves_field
+
+    def debug_cmd(self):
+        return [
+            DebugCommandFactory().line(self.game_state.ball_position, self.ram_position.position, BLUE)
+        ] if self.ram_position is not None else []
