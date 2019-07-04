@@ -78,7 +78,7 @@ class GoKick3Way(Tactic):
                 self.next_state = self.intercept
             else:
                 self.next_state = self.go_behind_ball
-        elif self.is_able_to_grab_ball_directly(0.85) and self._get_distance_from_ball() < KICK_DISTANCE:
+        elif self.is_able_to_grab_ball_directly(0.90) and self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
         else:
             self.next_state = self.go_behind_ball
