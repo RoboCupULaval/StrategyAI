@@ -9,7 +9,7 @@ import numpy as np
 from Debug.debug_command_factory import DebugCommandFactory, BLUE
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
-from Util.constant import KickForce, ROBOT_RADIUS
+from Util.constant import KickForce, ROBOT_RADIUS, REASONABLE_OFFSET
 from Util.geometry import compare_angle
 from Util.geometry import normalize, Line, closest_point_on_segment
 from ai.Algorithm.evaluation_module import best_passing_option, player_covered_from_goal
@@ -62,7 +62,6 @@ class GoKick3Way(Tactic):
         self.go_behind_distance = go_behind_distance
 
         self.ram_position = None
-
 
     def initialize(self):
         if self.auto_update_target:
@@ -230,11 +229,13 @@ class GoKick3Way(Tactic):
         if self.player.id not in Config()["COACH"]["working_kicker_ids"]:
             self.logger.debug("RAM BALL!")
             player_to_ball = normalize(self.game_state.ball_position - self.player.pose.position)
-            self.ram_position = Pose(player_to_ball*100+self.game_state.ball_position, orientation)
+            self.ram_position = Pose(player_to_ball.unit*1000 + self.game_state.ball_position, orientation)
+            if self._get_distance_from_ball() < ROBOT_RADIUS * 2 + REASONABLE_OFFSET:
+                self.logger.debug("SLOW DOWN!")
             return CmdBuilder().addMoveTo(self.ram_position,
                                           ball_collision=False,
-                                          cruise_speed=5,
-                                          end_speed=5).build()
+                                          cruise_speed=0 if self._get_distance_from_ball() < ROBOT_RADIUS * 2 + REASONABLE_OFFSET else 6,
+                                          end_speed=end_speed).build()
         else:
             return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
                               ball_collision=False,
