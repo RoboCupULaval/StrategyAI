@@ -39,7 +39,7 @@ class PenaltyOffense(TeamGoToPosition):
 
         kicker = self.assigned_roles[Role.MIDDLE]
         top_hole = self.game_state.field.their_goal.copy()
-        top_hole.y += self.game_state.field.goal_width / 2 - ROBOT_RADIUS
+        top_hole.y += self.game_state.field.goal_width / 2 - 2 * ROBOT_RADIUS
         bot_hole = self.game_state.field.their_goal.copy()
         bot_hole.y -= self.game_state.field.goal_width / 2
 
@@ -50,7 +50,8 @@ class PenaltyOffense(TeamGoToPosition):
         go_behind = self.create_node(Role.MIDDLE, GoToPosition(self.game_state,
                                                                kicker,
                                                                target=Pose(go_behind_position, go_behind_orientation),
-                                                               cruise_speed=1))
+                                                               cruise_speed=1,
+                                                               ball_collision=False))
         go_kick = self.create_node(Role.MIDDLE, GoKick(game_state,
                                                  kicker,
                                                  target=Pose(top_hole),
