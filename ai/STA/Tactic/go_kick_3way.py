@@ -234,8 +234,8 @@ class GoKick3Way(Tactic):
                 self.logger.debug("SLOW DOWN!")
             return CmdBuilder().addMoveTo(self.ram_position,
                                           ball_collision=False,
-                                          cruise_speed=0 if self._get_distance_from_ball() < ROBOT_RADIUS * 2 + REASONABLE_OFFSET else 6,
-                                          end_speed=end_speed).build()
+                                          cruise_speed=5,
+                                          end_speed=0.01 if self._get_distance_from_ball() < ROBOT_RADIUS * 2 + REASONABLE_OFFSET else 6).build()
         else:
             return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
                               ball_collision=False,
