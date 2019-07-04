@@ -58,12 +58,16 @@ class PenaltyOffense(TeamGoToPosition):
                                                  forbidden_areas=[new_goal]))
 
         go_behind.connect_to(go_kick, when=self.goalkeeper_is_top_or_timeout)
+        go_kick.connect_to(go_behind, when=self.not_goalkeeper_is_top_or_timeout)
         self.start_time = time.time()
 
         goalkeeper = self.assigned_roles[Role.GOALKEEPER]
         self.create_node(Role.GOALKEEPER, GoalKeeper(game_state, goalkeeper, penalty_kick=True))
 
         self.assign_tactics(role_to_positions)
+
+    def not_goalkeeper_is_top_or_timeout(self):
+        return not self.goalkeeper_is_top_or_timeout()
 
     def goalkeeper_is_top_or_timeout(self):
         MAX_WAIT_TIME = 5
@@ -78,7 +82,7 @@ class PenaltyOffense(TeamGoToPosition):
         if goalkeeper.position not in self.game_state.field.their_goal_area:
             return False
 
-        return abs(goalkeeper.position.y) > self.game_state.field.goal_width / 2 - ROBOT_DIAMETER
+        return goalkeeper.position.y < -self.game_state.field.goal_width / 2 + ROBOT_DIAMETER
 
 
     @classmethod
