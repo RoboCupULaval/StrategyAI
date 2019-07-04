@@ -26,8 +26,8 @@ class Tactic:
                  args: Optional[List[Any]]=None, forbidden_areas: Optional[List[Area]]=None):
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        assert isinstance(player, Player), "Le player doit être un Player, non un '{}'".format(player)
-        assert target is None or isinstance(target, Pose), "La target devrait être une Pose"
+        assert isinstance(player, Player), "The player should be a Player, not a '{}'".format(player)
+        assert target is None or isinstance(target, Pose), "The target should be a Pose"
         self.game_state = game_state
         self.player = player
         self.player_id = player.id
