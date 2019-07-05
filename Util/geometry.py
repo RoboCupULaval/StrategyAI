@@ -28,6 +28,9 @@ class Line:
     def length(self):
         return (self.p2 - self.p1).norm
 
+    def copy(self):
+        return Line(self.p1.copy(), self.p2.copy())
+
 
 def find_bisector_of_triangle(c, a, b):
     """

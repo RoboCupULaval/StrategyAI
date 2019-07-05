@@ -1,4 +1,5 @@
 # Under MIT License, see LICENSE.txt
+from typing import Union
 
 from pyhermes import McuCommunicator
 
@@ -35,12 +36,21 @@ class SerialCommandSender(Sender):
             raise RuntimeError("You should update your pyhermes, by reinstalling the requirement:"
                                "'pip install -r requirements.txt --upgrade'")
     @staticmethod
-    def translate_kick_force(kick_force: KickForce) -> int:
-        kick_translation = {KickForce.NONE: 0,
-                            KickForce.LOW: 10,     # 1   m/s
-                            KickForce.MEDIUM: 18,  # 2   m/s
-                            KickForce.HIGH: 60}    # 5.5 m/s
-        return kick_translation[kick_force]
+    def translate_kick_force(kick_force: Union[KickForce, float]) -> int:
+        # command = speed / 0.1536 + 0.61 /  0.1536
+        # The plage of usable value is 12 to 30, after 30 the force stay the same,  the minimum speed is 1 m/s
+        if isinstance(kick_force, float):
+            kick_force_translated = int(clamp(kick_force / 0.1536 + 0.61 / 0.1536, 12, 30))
+        elif isinstance(kick_force, KickForce):
+            kick_force_translated = {
+                KickForce.NONE: 0,
+                KickForce.LOW: 10,     # 1   m/s
+                KickForce.MEDIUM: 18,  # 2   m/s
+                KickForce.HIGH: 60     # 5.5 m/s
+            }.get(kick_force)
+        else:
+            raise RuntimeError(f"Kick force : {kick_force} is not a KickForce or an int")
+        return kick_force_translated
 
     @staticmethod
     def translate_dribbler_speed(dribbler_speed: DribbleState) -> int:
