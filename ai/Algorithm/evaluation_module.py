@@ -4,7 +4,8 @@ from typing import List
 
 import numpy as np
 
-from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, closest_point_on_line, normalize
+from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, closest_point_on_line, \
+    normalize, intersection_between_lines
 from Util.position import Position
 from Util.role import Role
 from Util.constant import ROBOT_RADIUS
@@ -180,6 +181,17 @@ def best_passing_option(passing_player, passer_can_kick_in_goal=True):
         score = (line_of_sight_clearance(passing_player, goal))
         if score_min > score:
             receiver = None
+
+    # DO NOT PASS TOWARD OUR GOAL... TOO DANGEROUS
+    if receiver is not None:
+        pass_direction = normalize(receiver.position - passing_player.position)
+        if pass_direction.x > 0:
+            inter = intersection_between_lines(passing_player.position,
+                                               passing_player.position + pass_direction,
+                                               GameState().field.our_goal_line.p1,
+                                               GameState().field.our_goal_line.p2)
+            if abs(inter.y) < (GameState().field.goal_width / 2) * 1.5:
+                receiver = None
 
     return receiver
 
