@@ -200,7 +200,7 @@ class SimpleAutoPlay(AutoPlay):
             # Kickoff
             SimpleAutoPlayState.PREPARE_KICKOFF_OFFENSE: 'PrepareKickOffOffense',
             SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE: 'PrepareKickOffDefense',
-            SimpleAutoPlayState.OFFENSE_KICKOFF: 'OffenseKickOff',
+            SimpleAutoPlayState.OFFENSE_KICKOFF: 'OffenseKickOffWithPass',
             SimpleAutoPlayState.DEFENSE_KICKOFF: 'PrepareKickOffDefense',
 
             # Shootout

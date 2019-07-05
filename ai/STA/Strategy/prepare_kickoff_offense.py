@@ -14,9 +14,9 @@ class PrepareKickOffOffense(TeamGoToPosition):
 
         # Positions objectifs des joueurs
         attack_top_position = Pose.from_values(self.game_state.field.our_goal_x / 15,
-                                               self.game_state.field.bottom * 3 / 5, 0)
+                                               self.game_state.field.bottom * 4 / 5, 0)
         attack_bottom_position = Pose.from_values(self.game_state.field.our_goal_x / 15,
-                                                  self.game_state.field.top * 3 / 5, 0)
+                                                  self.game_state.field.top * 4 / 5, 0)
         middle_position = Pose.from_values(self.game_state.field.our_goal_x / 15, 0, 0)
         defense_top_position = Pose.from_values(self.game_state.field.our_goal_x / 2,
                                                 self.game_state.field.top / 3, 0)
