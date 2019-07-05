@@ -7,7 +7,7 @@ import numpy as np
 from Util.geometry import Line, angle_between_three_points, perpendicular, wrap_to_pi, closest_point_on_line, normalize
 from Util.position import Position
 from Util.role import Role
-from Util.constant import ROBOT_RADIUS
+from Util.constant import ROBOT_RADIUS, BALL_RADIUS
 from ai.Algorithm.path_partitionner import Obstacle
 from ai.GameDomainObjects import Player
 from ai.states.game_state import GameState
@@ -44,8 +44,16 @@ def player_pointing_toward_segment(player: Player, segment: Line):
 
 def player_covered_from_goal(player: Player):
     ball_position = GameState().ball.position
-    shooting_angle = angle_between_three_points(GameState().field.their_goal_line.p1,
-                                                ball_position, GameState().field.their_goal_line.p2)
+    their_goal_line = GameState().field.their_goal_line.copy()
+    # In Sydney, we found that our kick hit the wall around the goal quite often
+    if their_goal_line.p1.y > their_goal_line.p2.y:
+        their_goal_line.p1.y -= BALL_RADIUS
+        their_goal_line.p2.y += BALL_RADIUS
+    else:
+        their_goal_line.p2.y -= BALL_RADIUS
+        their_goal_line.p1.y += BALL_RADIUS
+
+    shooting_angle = angle_between_three_points(their_goal_line.p1, ball_position, their_goal_line.p2)
     vec_ball_to_goal = GameState().field.their_goal - ball_position
 
     our_team = [other_player for other_player in GameState().our_team.available_players.values() if
@@ -65,7 +73,6 @@ def player_covered_from_goal(player: Player):
     pertinent_collisions_avoid_radius = np.array([obs.avoid_distance for obs in pertinent_collisions])
     results = []
     nb_beam = 45
-    their_goal_line = GameState().field.their_goal_line
     for i in range(0, nb_beam + 1):  # discretisation de la ligne de but
         goal_point = their_goal_line.p1 + their_goal_line.direction * (their_goal_line.length * i / nb_beam)
         is_colliding = is_path_colliding(pertinent_collisions, pertinent_collisions_positions,
