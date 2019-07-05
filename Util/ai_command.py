@@ -54,8 +54,8 @@ class CmdBuilder:
             self._way_points = way_points
         return self
 
-    def addKick(self, kick_force: Union[KickForce, int] = KickForce.LOW):
-        assert isinstance(kick_force, (KickForce, int)), 'kick_force should be a KickForce or a int, not a {}'.format(type(kick_force))
+    def addKick(self, kick_force: Union[KickForce, float] = KickForce.LOW):
+        assert isinstance(kick_force, (KickForce, float)), 'kick_force should be a KickForce or a float, not a {}'.format(type(kick_force))
         self._kick_force = kick_force
         self._kick_type = KickType.DIRECT
         return self

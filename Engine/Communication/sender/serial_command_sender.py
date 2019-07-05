@@ -36,11 +36,11 @@ class SerialCommandSender(Sender):
             raise RuntimeError("You should update your pyhermes, by reinstalling the requirement:"
                                "'pip install -r requirements.txt --upgrade'")
     @staticmethod
-    def translate_kick_force(kick_force: Union[KickForce, int]) -> int:
+    def translate_kick_force(kick_force: Union[KickForce, float]) -> int:
         # command = speed / 0.1536 + 0.61 /  0.1536
         # The plage of usable value is 12 to 30, after 30 the force stay the same,  the minimum speed is 1 m/s
-        if isinstance(kick_force, int):
-            kick_force_translated = clamp(kick_force / 0.1536 + 0.61 / 0.1536, 12, 30)
+        if isinstance(kick_force, float):
+            kick_force_translated = int(clamp(kick_force / 0.1536 + 0.61 / 0.1536, 12, 30))
         elif isinstance(kick_force, KickForce):
             kick_force_translated = {
                 KickForce.NONE: 0,
