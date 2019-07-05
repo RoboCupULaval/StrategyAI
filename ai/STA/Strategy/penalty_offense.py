@@ -25,7 +25,7 @@ class PenaltyOffense(TeamGoToPosition):
         their_goal_forbidden_area = self.game_state.field.their_goal_forbidden_area
         new_goal = Area.from_limits(their_goal_forbidden_area.top,
                                     their_goal_forbidden_area.bottom,
-                                    their_goal_forbidden_area.right - BALL_RADIUS * 6,
+                                    their_goal_forbidden_area.right - BALL_RADIUS * 6 - 30, # For Sydney
                                     their_goal_forbidden_area.left)
 
         field = self.game_state.field
