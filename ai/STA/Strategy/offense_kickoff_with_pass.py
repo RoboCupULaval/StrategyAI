@@ -23,15 +23,17 @@ class OffenseKickOffWithPass(PrepareKickOffOffense):
         no_pass.connect_to(force_pass, when=self.their_is_a_pass_receiver)
         force_pass.connect_to(no_pass, when=self.their_is_no_pass_receiver)
 
+        self.attackers = [r for r in [Role.FIRST_ATTACK, Role.SECOND_ATTACK] if r in self.assigned_roles]
+
     def their_is_a_pass_receiver(self):
-        right_limit = self.game_state.field.our_goal_x * 2 / 15 + ROBOT_RADIUS
+        right_limit = self.game_state.field.our_goal_x * 4 / 15 + ROBOT_RADIUS
         field = self.game_state.field
         top_area = Area.from_limits(field.top, field.center_circle_radius, 0, right_limit)
         bot_area = Area.flip_y(top_area)
-        for role, player in self.assigned_roles.items():
-            if role in [Role.FIRST_ATTACK, Role.SECOND_ATTACK]:
-                if player.position in top_area or player.position in bot_area:
-                    return True
+        for role in self.attackers:
+            player = self.assigned_roles[role]
+            if player.position in top_area or player.position in bot_area:
+                return True
         return False
 
     def their_is_no_pass_receiver(self):

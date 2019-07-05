@@ -20,11 +20,12 @@ class TeamGoToPosition(Strategy):
         for role, player in self.assigned_roles.items():
             if role not in role_to_positions:
                 continue
-            position = role_to_positions[role]
-            position.orientation = np.pi
+            pose = role_to_positions[role]
+            if pose.orientation == 0:
+                pose.orientation = np.pi  # Most of the time we look toward the enemy
             node_go_to_position = self.create_node(role, GoToPosition(self.game_state,
                                                                       player,
-                                                                      position,
+                                                                      pose,
                                                                       cruise_speed=1))
             node_stop = self.create_node(role, Stop(self.game_state, player))
             player_arrived_to_position = partial(self.arrived_to_position, player)

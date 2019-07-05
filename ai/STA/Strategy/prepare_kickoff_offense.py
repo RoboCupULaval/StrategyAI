@@ -1,5 +1,7 @@
 # Under MIT License, see LICENSE.txt
+from math import pi
 
+from Util.constant import ROBOT_RADIUS
 from Util.pose import Pose
 from Util.role import Role
 
@@ -12,11 +14,14 @@ class PrepareKickOffOffense(TeamGoToPosition):
     def __init__(self, p_game_state):
         super().__init__(p_game_state)
 
-        # Positions objectifs des joueurs
-        attack_top_position = Pose.from_values(self.game_state.field.our_goal_x / 15,
-                                               self.game_state.field.bottom * 4 / 5, 0)
-        attack_bottom_position = Pose.from_values(self.game_state.field.our_goal_x / 15,
-                                                  self.game_state.field.top * 4 / 5, 0)
+        # The two attackers must be ready for a pass
+        # The top attack is a bit closer from the center, because the passing option hesitate between the two attackers
+        attack_top_position = Pose.from_values(self.game_state.field.our_goal_x * 2 / 15,
+                                               self.game_state.field.bottom * 4 / 5 - ROBOT_RADIUS,
+                                               pi/2)
+        attack_bottom_position = Pose.from_values(self.game_state.field.our_goal_x * 2 / 15,
+                                                  self.game_state.field.top * 4 / 5,
+                                                  -pi/2)
         middle_position = Pose.from_values(self.game_state.field.our_goal_x / 15, 0, 0)
         defense_top_position = Pose.from_values(self.game_state.field.our_goal_x / 2,
                                                 self.game_state.field.top / 3, 0)

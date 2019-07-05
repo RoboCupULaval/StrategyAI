@@ -61,7 +61,7 @@ class GrSimCommandSender(Sender):
     @staticmethod
     def translate_kick_force(kick_force: [KickForce, float]) -> int:
         if isinstance(kick_force, float):
-            return int(clamp(2*kick_force, 0.5, 30))
+            return int(clamp(1.5*kick_force, 0.5, 7))
         elif isinstance(kick_force, KickForce):
             kick_translation = {KickForce.NONE: 0,
                                 KickForce.LOW: 2,
