@@ -6,10 +6,9 @@ from typing import Dict
 import logging
 
 from Engine.Communication.protobuf.referee_pb2 import SSL_Referee
-from Util.constant import TeamColor
+from Util.constant import TeamColor, FieldSide
 from Util.position import Position
 from Util.team_color_service import TeamColorService
-from ai.GameDomainObjects.field import FieldSide
 from config.config import Config
 
 

@@ -7,7 +7,7 @@ from config.config import Config
 config = Config()
 
 if Config()['COACH']['type'] == 'sim':
-    MAX_LINEAR_ACCELERATION = 3000  # mm/s
+    MAX_LINEAR_ACCELERATION = 4000  # mm/s
 else:
     MAX_LINEAR_ACCELERATION = 4000  # mm/s
 MAX_LINEAR_SPEED = 4000  # mm/s

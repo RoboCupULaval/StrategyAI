@@ -44,7 +44,12 @@ class TeamColor(Enum):
     YELLOW = 0
     BLUE = 1
 
-    
+
+class FieldSide(Enum):
+    POSITIVE = 0
+    NEGATIVE = 1
+
+
 class KickForce(Enum):
     NONE = 0
     LOW = 1
@@ -56,7 +61,7 @@ class KickForce(Enum):
         speed = (dist / 1000) / seconds_to_reach
         return speed
         # if dist < 2000:
-        #     return KickForce.LOW
+        #     return KickForce.MEDIUM
         # elif dist < 5000:
         #     return KickForce.MEDIUM
         # else:

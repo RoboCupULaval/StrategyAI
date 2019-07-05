@@ -39,12 +39,11 @@ class SmartStop(Strategy):
 
     @classmethod
     def required_roles(cls):
-        return []
+        return [Role.GOALKEEPER]
 
     @classmethod
     def optional_roles(cls):
-        return [Role.GOALKEEPER,
-                Role.FIRST_ATTACK,
+        return [Role.FIRST_ATTACK,
                 Role.SECOND_ATTACK,
                 Role.FIRST_DEFENCE,
                 Role.MIDDLE,

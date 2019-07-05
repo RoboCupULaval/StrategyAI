@@ -11,7 +11,9 @@ from Engine.Communication.robot_state import RobotState
 from Engine.Tracker.Filters import RobotFilter
 from Engine.Tracker.Filters.ball_kalman_filter import BallFilter
 from Util import Pose, Position
+from Util.constant import FieldSide
 from Util.geometry import rotate, wrap_to_pi
+from Util.team_color_service import TeamColorService
 from config.config import Config
 
 config = Config()
@@ -47,10 +49,14 @@ class Tracker:
     def _update(self, detection_frame: Dict[str, List[Dict[str, Any]]]):
 
         for robot_obs in detection_frame.get('robots_blue', ()):
+            if TeamColorService().our_team_color == TeamColorService.BLUE and robot_obs['robot_id'] > 7:
+                continue
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
             self._blue_team[robot_obs['robot_id']].update(obs, detection_frame['t_capture'])
 
         for robot_obs in detection_frame.get('robots_yellow', ()):
+            if TeamColorService().our_team_color == TeamColorService.YELLOW and robot_obs['robot_id'] > 7:
+                continue
             obs = np.array([robot_obs['x'], robot_obs['y'], robot_obs['orientation']])
             self._yellow_team[robot_obs['robot_id']].update(obs, detection_frame['t_capture'])
 
@@ -130,6 +136,8 @@ class Tracker:
 
         valid_frames = [frame for frame in self.vision_state if self._is_valid_frame(frame)]
 
+        valid_frames = [Tracker._remove_ignored_side(frame) for frame in valid_frames]
+
         if self.neg_side:
             valid_frames = [Tracker._change_frame_side(frame) for frame in valid_frames]
 
@@ -146,6 +154,19 @@ class Tracker:
             ball_obs['x'] *= -1
 
         return detection_frame
+
+    @staticmethod
+    def _remove_ignored_side(frame):
+        ignore_ball_in = Config()['ENGINE']['ignore_balls_in']
+        if ignore_ball_in is None:
+            return frame
+
+        for label in ['robots_blue', 'robots_yellow', 'balls']:
+            if label in frame:
+                frame[label] = [r for r in frame[label] if (ignore_ball_in == FieldSide.POSITIVE and r['x'] < 0) or (ignore_ball_in == FieldSide.NEGATIVE and r['x'] >= 0)]
+
+        return frame
+
 
     def _is_valid_frame(self, frame):
         if frame:

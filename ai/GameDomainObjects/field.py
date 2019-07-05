@@ -10,11 +10,6 @@ from Util.area import Area, ForbiddenZone
 from ai.GameDomainObjects import Ball
 
 
-class FieldSide(Enum):
-    POSITIVE = 0
-    NEGATIVE = 1
-
-
 # noinspection PyPep8
 class FieldCircularArc:
     def __init__(self, arc: Dict):
@@ -196,7 +191,8 @@ class Field:
         self.free_kick_avoid_area = Area.pad(self.their_goal_area,
                                              INDIRECT_KICK_OFFSET + KEEPOUT_DISTANCE_FROM_GOAL)
         self.our_goal_forbidden_area = ForbiddenZone.pad(self.our_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
-        self.their_goal_forbidden_area = ForbiddenZone.pad(self.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
+        # Fix Sydney: The autoref is a bit capricious, so I added 3 cm to the defense area
+        self.their_goal_forbidden_area = ForbiddenZone.pad(self.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL + 30)
 
         self.center = Position(0, 0)
 

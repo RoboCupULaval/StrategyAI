@@ -16,6 +16,7 @@ class BallFilter(KalmanFilter):
         self.observable_state = int(np.size(self.observation_model, 0))
 
         self.x = np.zeros(self.state_number)
+
     @property
     def position(self):
         if self.is_active:
@@ -30,7 +31,7 @@ class BallFilter(KalmanFilter):
         self.transition_model[[0, 2], [1, 3]] = dt
 
     def process_covariance(self, dt):
-        sigma_acc_x = 10
+        sigma_acc_x = 100
         sigma_acc_y = sigma_acc_x
         process_covariance = \
             np.array([

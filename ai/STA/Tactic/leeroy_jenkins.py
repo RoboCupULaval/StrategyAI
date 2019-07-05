@@ -3,6 +3,7 @@ from typing import List, Optional
 from Util import Pose
 from Util.ai_command import Idle
 from Util.constant import KickForce
+from ai.Algorithm.evaluation_module import closest_players_to_point
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_kick import GoKick
 from ai.STA.Tactic.tactic import Tactic
@@ -45,5 +46,13 @@ class LeeroyJenkins(Tactic):
         return self.go_kick_tactic.exec()
 
     def _is_close_enough_from_goal(self):
-        return (GameState().field.their_goal_pose - self.game_state.ball_position).norm <= \
-               self.MINIMUM_DISTANCE_FOR_SMALL_KICK
+        if (GameState().field.their_goal_pose - self.game_state.ball_position).norm <= \
+               self.MINIMUM_DISTANCE_FOR_SMALL_KICK:
+            return True
+
+        closest_enemy = closest_players_to_point(self.game_state.field.their_goal, our_team=False)
+        if len(closest_enemy) == 0:
+            return False
+
+        goalkeeper = closest_enemy[0].player
+        return goalkeeper.position not in self.game_state.field.their_goal_area
