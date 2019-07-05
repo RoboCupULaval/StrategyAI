@@ -6,7 +6,6 @@ from typing import List
 import math as m
 import numpy as np
 
-from Debug.debug_command_factory import DebugCommandFactory, BLUE
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle
 from Util.constant import KickForce, ROBOT_RADIUS, REASONABLE_OFFSET
@@ -30,6 +29,8 @@ APPROACH_SPEED = 100
 KICK_DISTANCE = 1000
 KICK_SUCCEED_THRESHOLD = 300
 COMMAND_DELAY = 0.5
+
+RAM_BALL_SPACING = 1000
 
 
 class GoKick3Way(Tactic):
@@ -76,6 +77,7 @@ class GoKick3Way(Tactic):
                 if self.is_ball_going_toward_player() and self._get_distance_from_ball() > 500:
                     self.next_state = self.intercept
                 else:
+                    self.next_state = self.chase_ball
                     if self.player.id not in Config()["COACH"]["working_kicker_ids"]:
                         self.next_state = self.kick
                     else:
@@ -90,6 +92,11 @@ class GoKick3Way(Tactic):
             self.next_state = self.go_behind_ball
 
     def go_behind_ball(self):
+        print("go_behind_ball")
+        if self.player_id not in Config()["COACH"]["working_kicker_ids"] and self._get_distance_from_ball() < 1200:
+            self.next_state = self.kick
+            return self.next_state()
+
         if self.auto_update_target:
             self._find_best_passing_option()
         self.status_flag = Flags.WIP
@@ -120,8 +127,14 @@ class GoKick3Way(Tactic):
             .addChargeKicker().build()
 
     def chase_ball(self):
+        print("chase_ball")
+        if self.player_id not in Config()["COACH"]["working_kicker_ids"] and self._get_distance_from_ball() < 1200:
+            self.next_state = self.kick
+            return self.next_state()
+
         if self.auto_update_target:
             self._find_best_passing_option()
+
         self.status_flag = Flags.WIP
         orientation = (self.target.position - self.game_state.ball_position).angle
         ball_speed = self.game_state.ball.velocity.norm
@@ -151,6 +164,7 @@ class GoKick3Way(Tactic):
             .addChargeKicker().build()
 
     def stop_ball(self):
+        print("stop_ball")
         if self.auto_update_target:
             self._find_best_passing_option()
         self.status_flag = Flags.WIP
@@ -170,6 +184,7 @@ class GoKick3Way(Tactic):
             .addChargeKicker().build()
 
     def wait_for_ball(self):
+        print("wait_for_ball")
         self.check_ball_state()
         orientation = (self.target.position - self.game_state.ball_position).angle
         position_behind = self.get_destination_to_stop_ball(0)
@@ -181,6 +196,11 @@ class GoKick3Way(Tactic):
             .addChargeKicker().build()
 
     def grab_ball(self):
+        print("grab_ball")
+        if self.player_id not in Config()["COACH"]["working_kicker_ids"]:
+            self.next_state = self.kick
+            return self.next_state()
+
         if self.auto_update_target:
             self._find_best_passing_option()
         if not self.is_able_to_grab_ball_directly(0.85):
@@ -214,28 +234,27 @@ class GoKick3Way(Tactic):
             .build()
 
     def kick(self):
+        print("kick")
         if self.auto_update_target:
             self._find_best_passing_option()
-        if not self.is_able_to_grab_ball_directly(0.7):
-            self.logger.debug("============ not is_able_to_grab_ball_directly")
-            self.next_state=self.grab_ball
-            return self.next_state()
-
-        self.check_ball_state()
+        if self.player.id in Config()["COACH"]["working_kicker_ids"]:
+            if not self.is_able_to_grab_ball_directly(0.7):
+                self.next_state=self.grab_ball
+                return self.next_state()
+            self.check_ball_state()
         ball_speed = self.game_state.ball.velocity.norm
         end_speed = ball_speed
         behind_ball = self.game_state.ball_position
         orientation = (self.target.position - self.game_state.ball_position).angle
         if self.player.id not in Config()["COACH"]["working_kicker_ids"]:
-            self.logger.debug("RAM BALL!")
             player_to_ball = normalize(self.game_state.ball_position - self.player.pose.position)
-            self.ram_position = Pose(player_to_ball.unit*1000 + self.game_state.ball_position, orientation)
-            if self._get_distance_from_ball() < ROBOT_RADIUS * 2 + REASONABLE_OFFSET:
-                self.logger.debug("SLOW DOWN!")
-            return CmdBuilder().addMoveTo(self.ram_position,
+            ram_position = Pose(player_to_ball*10+self.game_state.ball_position, orientation)
+            end_speed = 0.01 if self._get_distance_from_ball() < ROBOT_RADIUS * 2 + REASONABLE_OFFSET else 6
+            print("end speed: ", end_speed)
+            return CmdBuilder().addMoveTo(ram_position,
                                           ball_collision=False,
                                           cruise_speed=5,
-                                          end_speed=0.01 if self._get_distance_from_ball() < ROBOT_RADIUS * 2 + REASONABLE_OFFSET else 6).build()
+                                          end_speed=end_speed).build()
         else:
             return CmdBuilder().addMoveTo(Pose(behind_ball, orientation),
                               ball_collision=False,
@@ -245,6 +264,7 @@ class GoKick3Way(Tactic):
                 .addForceDribbler().build()
 
     def validate_kick(self):
+        print("validate_kick")
         if self.game_state.ball.is_moving_fast() and self._get_distance_from_ball() > KICK_SUCCEED_THRESHOLD:
             self.next_state = self.kick
         elif self.kick_last_time - time.time() < VALIDATE_KICK_DELAY:
@@ -332,7 +352,10 @@ class GoKick3Way(Tactic):
 
         dir_ball_to_target = normalize(self.target.position - self.game_state.ball.position)
 
-        position_behind = self.game_state.ball.position - dir_ball_to_target * ball_spacing
+        if self.player_id in Config()["COACH"]["working_kicker_ids"]:
+            position_behind = self.game_state.ball.position - dir_ball_to_target * ball_spacing
+        else:
+            position_behind = self.game_state.ball_position - dir_ball_to_target * RAM_BALL_SPACING
 
         if velocity and self.game_state.ball.velocity.norm > 20:
             position_behind += (self.game_state.ball.velocity - (normalize(self.game_state.ball.velocity) *
@@ -433,8 +456,3 @@ class GoKick3Way(Tactic):
             return Position()
 
         return where_ball_leaves_field
-
-    def debug_cmd(self):
-        return [
-            DebugCommandFactory().line(self.game_state.ball_position, self.ram_position.position, BLUE)
-        ] if self.ram_position is not None else []
