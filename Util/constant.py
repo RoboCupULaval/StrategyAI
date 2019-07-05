@@ -60,12 +60,6 @@ class KickForce(Enum):
     def for_dist(cls, dist, seconds_to_reach=1.0):
         speed = (dist / 1000) / seconds_to_reach
         return speed
-        # if dist < 2000:
-        #     return KickForce.MEDIUM
-        # elif dist < 5000:
-        #     return KickForce.MEDIUM
-        # else:
-        #     return KickForce.HIGH
 
 
 class KickType(Enum):
