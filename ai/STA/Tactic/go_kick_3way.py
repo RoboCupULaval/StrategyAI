@@ -12,7 +12,8 @@ from Util.ai_command import CmdBuilder, Idle, MoveTo
 from Util.geometry import compare_angle, normalize
 from ai.Algorithm.evaluation_module import best_passing_option, player_covered_from_goal
 from ai.GameDomainObjects import Player
-from ai.STA.Tactic.go_kick import MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_TO_PASS
+from ai.STA.Tactic.go_kick import MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_TO_PASS, \
+    MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_FROM_PASS
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
@@ -26,7 +27,7 @@ TARGET_ASSIGNATION_DELAY = 1.0
 GO_BEHIND_SPACING = 250
 GRAB_BALL_SPACING = 120
 APPROACH_SPEED = 100
-KICK_DISTANCE = 130
+KICK_DISTANCE = 90
 KICK_SUCCEED_THRESHOLD = 300
 COMMAND_DELAY = 0.5
 
@@ -36,7 +37,7 @@ class GoKick3Way(Tactic):
                  target: Pose = Pose(),
                  args: List[str] = None,
                  kick_force: KickForce = KickForce.HIGH,
-                 auto_update_target=False,
+                 auto_update_target=True,
                  go_behind_distance=GRAB_BALL_SPACING * 3,
                  forbidden_areas=None,
                  can_kick_in_goal=True):
@@ -78,12 +79,13 @@ class GoKick3Way(Tactic):
                 self.next_state = self.intercept
             else:
                 self.next_state = self.go_behind_ball
-        elif self.is_able_to_grab_ball_directly(0.90) and self._get_distance_from_ball() < KICK_DISTANCE:
+        elif self.is_able_to_grab_ball_directly(0.85) and self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
         else:
             self.next_state = self.go_behind_ball
 
     def go_behind_ball(self):
+        self.logger.info("Go behind")
         if self.auto_update_target:
             self._find_best_passing_option()
         self.status_flag = Flags.WIP
@@ -114,6 +116,7 @@ class GoKick3Way(Tactic):
             .addChargeKicker().build()
 
     def chase_ball(self):
+        self.logger.info("Chase")
         if self.auto_update_target:
             self._find_best_passing_option()
         self.status_flag = Flags.WIP
@@ -145,6 +148,7 @@ class GoKick3Way(Tactic):
             .addChargeKicker().build()
 
     def stop_ball(self):
+        self.logger.info("Stop ball")
         if self.auto_update_target:
             self._find_best_passing_option()
         self.status_flag = Flags.WIP
@@ -175,6 +179,7 @@ class GoKick3Way(Tactic):
             .addChargeKicker().build()
 
     def grab_ball(self):
+        self.logger.info("Grab ball")
         if self.auto_update_target:
             self._find_best_passing_option()
         if not self.is_able_to_grab_ball_directly(0.85):
@@ -208,6 +213,7 @@ class GoKick3Way(Tactic):
             .build()
 
     def kick(self):
+        self.logger.info("Kick")
         if self.auto_update_target:
             self._find_best_passing_option()
         if not self.is_able_to_grab_ball_directly(0.7):
