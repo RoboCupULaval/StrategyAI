@@ -85,7 +85,7 @@ class DefenseWall(Strategy):
                                                                             robots_in_formation=self.robots_in_cover_formation,
                                                                             auto_position=True))
 
-                node_go_kick = self.create_node(role, GoKick3Way(self.game_state, player, target=their_goal))
+                node_go_kick = self.create_node(role, GoKick3Way(self.game_state, player, target=their_goal, auto_update_target=True))
                 node_wait_for_pass = self.create_node(role, ReceivePass(self.game_state, player))
 
                 player_is_receiving_pass = partial(ball_going_toward_player, game_state, player)

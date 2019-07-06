@@ -59,7 +59,6 @@ class Coach(FrameworkProcess):
                 self.fps_sleep()
             self.logger.debug('Referee command detected')
 
-
     def main_loop(self):
         self.game_state.update(self.engine_game_state)
         self.debug_executor.exec()

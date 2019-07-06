@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Dict, Union
 
 from Util import Position, Pose
-from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL, INDIRECT_KICK_OFFSET, ROBOT_RADIUS
+from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL, INDIRECT_KICK_OFFSET, ROBOT_RADIUS, PADDING_DEFENSE_AREA
 from Util.geometry import Line
 from Util.area import Area, ForbiddenZone
 from ai.GameDomainObjects import Ball
@@ -192,7 +192,7 @@ class Field:
                                              INDIRECT_KICK_OFFSET + KEEPOUT_DISTANCE_FROM_GOAL)
         self.our_goal_forbidden_area = ForbiddenZone.pad(self.our_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
         # Fix Sydney: The autoref is a bit capricious, so I added 3 cm to the defense area
-        self.their_goal_forbidden_area = ForbiddenZone.pad(self.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL + 30)
+        self.their_goal_forbidden_area = ForbiddenZone.pad(self.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL + PADDING_DEFENSE_AREA)
 
         self.center = Position(0, 0)
 
