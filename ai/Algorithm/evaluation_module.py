@@ -191,15 +191,15 @@ def best_passing_option(passing_player, passer_can_kick_in_goal=True):
 
     # DO NOT PASS TOWARD OUR GOAL... TOO DANGEROUS
     if receiver is not None:
-        pass_direction = normalize(receiver.position - passing_player.position)
-        if pass_direction.x > 0:
-            inter = intersection_between_lines(passing_player.position,
-                                               passing_player.position + pass_direction,
+        ball_position = GameState().ball.position
+        pass_direction = normalize(receiver.position - ball_position)
+        if pass_direction.x * GameState().field.our_goal.x > 0:  # Ball is going toward our side
+            inter = intersection_between_lines(ball_position,
+                                               ball_position + pass_direction,
                                                GameState().field.our_goal_line.p1,
                                                GameState().field.our_goal_line.p2)
             if abs(inter.y) < (GameState().field.goal_width / 2) * 1.5:
                 receiver = None
-
     return receiver
 
 
