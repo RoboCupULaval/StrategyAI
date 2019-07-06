@@ -6,11 +6,12 @@ from typing import List, Union
 
 import numpy as np
 
+from Debug.debug_command_factory import DebugCommandFactory, MAGENTA, CYAN
 from Util.constant import ROBOT_CENTER_TO_KICKER, BALL_RADIUS, KickForce, ROBOT_RADIUS
 from Util import Pose, Position
 from Util.ai_command import CmdBuilder, Idle, MoveTo
-from Util.geometry import compare_angle, normalize
-from ai.Algorithm.evaluation_module import best_passing_option, player_covered_from_goal
+from Util.geometry import compare_angle, normalize, angle_between_three_points
+from ai.Algorithm.evaluation_module import best_passing_option, player_covered_from_goal, closest_players_to_point
 from ai.GameDomainObjects import Player
 from ai.STA.Tactic.go_kick import MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_TO_PASS, \
     MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_FROM_PASS
@@ -27,7 +28,7 @@ TARGET_ASSIGNATION_DELAY = 1.0
 GO_BEHIND_SPACING = 250
 GRAB_BALL_SPACING = 120
 APPROACH_SPEED = 100
-KICK_DISTANCE = 90
+KICK_DISTANCE = 120
 KICK_SUCCEED_THRESHOLD = 300
 COMMAND_DELAY = 0.5
 
@@ -61,6 +62,14 @@ class GoKick3Way(Tactic):
         self.kick_force = kick_force
         self.go_behind_distance = go_behind_distance
 
+        self.when_kicking_target = None
+        self.when_kicking_ball = None
+        self.when_targeting_target = None
+        self.when_targeting_ball = None
+        self.when_targeting_goalkeeper = None
+
+        self.enable_log_state = False
+
     def initialize(self):
         if self.auto_update_target:
             self._find_best_passing_option()
@@ -79,13 +88,14 @@ class GoKick3Way(Tactic):
                 self.next_state = self.intercept
             else:
                 self.next_state = self.go_behind_ball
-        elif self.is_able_to_grab_ball_directly(0.85) and self._get_distance_from_ball() < KICK_DISTANCE:
+        elif self.is_able_to_grab_ball_directly(m.cos(np.deg2rad(10))) and self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
         else:
             self.next_state = self.go_behind_ball
 
     def go_behind_ball(self):
-        self.logger.info("Go behind")
+        if self.enable_log_state:
+            self.logger.info("Go behind")
         if self.auto_update_target:
             self._find_best_passing_option()
         self.status_flag = Flags.WIP
@@ -116,7 +126,8 @@ class GoKick3Way(Tactic):
             .addChargeKicker().build()
 
     def chase_ball(self):
-        self.logger.info("Chase")
+        if self.enable_log_state:
+            self.logger.info("Chase")
         if self.auto_update_target:
             self._find_best_passing_option()
         self.status_flag = Flags.WIP
@@ -148,7 +159,8 @@ class GoKick3Way(Tactic):
             .addChargeKicker().build()
 
     def stop_ball(self):
-        self.logger.info("Stop ball")
+        if self.enable_log_state:
+            self.logger.info("Stop ball")
         if self.auto_update_target:
             self._find_best_passing_option()
         self.status_flag = Flags.WIP
@@ -168,6 +180,8 @@ class GoKick3Way(Tactic):
             .addChargeKicker().build()
 
     def wait_for_ball(self):
+        if self.enable_log_state:
+            self.logger.info("wait for ball")
         self.check_ball_state()
         orientation = (self.target.position - self.game_state.ball_position).angle
         position_behind = self.get_destination_to_stop_ball(0)
@@ -179,7 +193,8 @@ class GoKick3Way(Tactic):
             .addChargeKicker().build()
 
     def grab_ball(self):
-        self.logger.info("Grab ball")
+        if self.enable_log_state:
+           self.logger.info("Grab ball")
         if self.auto_update_target:
             self._find_best_passing_option()
         if not self.is_able_to_grab_ball_directly(0.85):
@@ -213,7 +228,10 @@ class GoKick3Way(Tactic):
             .build()
 
     def kick(self):
-        self.logger.info("Kick")
+        if self.enable_log_state:
+           self.logger.info("Kick")
+        self.when_kicking_target = self.target.position
+        self.when_kicking_ball = self.game_state.ball_position
         if self.auto_update_target:
             self._find_best_passing_option()
         if not self.is_able_to_grab_ball_directly(0.7):
@@ -289,6 +307,15 @@ class GoKick3Way(Tactic):
 
                     self.target = Pose(scoring_target, 0)
                     self.kick_force = KickForce.HIGH
+                    self.when_targeting_ball = self.game_state.ball_position
+                    self.when_targeting_target = self.target.position
+
+                    closest_enemy = closest_players_to_point(self.game_state.field.their_goal, our_team=False)
+                    if len(closest_enemy) == 0:
+                        self.when_targeting_goalkeeper = None
+                    else:
+                        goalkeeper = closest_enemy[0].player
+                        self.when_targeting_goalkeeper = goalkeeper.position
 
             # Kick in the goal center
             elif tentative_target is None:
@@ -429,3 +456,14 @@ class GoKick3Way(Tactic):
             return Position()
 
         return where_ball_leaves_field
+
+
+    def debug_cmd(self):
+
+        if self.when_kicking_target is None or self.when_targeting_ball is None:
+            return []
+        cmd = [DebugCommandFactory.line(self.when_targeting_target, self.when_targeting_ball, color=CYAN, timeout=10),
+               DebugCommandFactory.line(self.when_kicking_target, self.when_kicking_ball, timeout=10)]
+        if self.when_targeting_goalkeeper is not None:
+            cmd.append(DebugCommandFactory.circle(self.when_targeting_goalkeeper, ROBOT_RADIUS, timeout=10))
+        return cmd

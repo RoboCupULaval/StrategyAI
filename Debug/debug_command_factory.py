@@ -52,7 +52,7 @@ def flip_position(position: Position):
     """
     The AI is side independent, so every position send to the UI-Debug must be flip around the y axis
     """
-    assert isinstance(position, Position)
+    assert isinstance(position, Position), "Should be 'Position'  not {}".format(type(position))
     if not config["COACH"]["on_negative_side"]:
         return position
     return position.flip_x()
