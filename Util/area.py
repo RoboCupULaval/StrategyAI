@@ -107,6 +107,10 @@ class Area:
         return cls.from_limits(area.top, area.bottom, -area.left, -area.right)
 
     @classmethod
+    def flip_y(cls, area):
+        return cls.from_limits(-area.top, -area.bottom, area.left, area.right)
+
+    @classmethod
     def from_4_point(cls, p1, p2, p3, p4):
         top = max(p1.y, p2.y, p3.y, p4.y)
         bot = min(p1.y, p2.y, p3.y, p4.y)

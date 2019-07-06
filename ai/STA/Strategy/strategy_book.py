@@ -5,6 +5,7 @@ from typing import List, Dict, Type
 
 from ai.STA.Strategy.graphless_direct_free_kick import GraphlessDirectFreeKick
 from ai.STA.Strategy.graphless_indirect_free_kick import GraphlessIndirectFreeKick
+from ai.STA.Strategy.offense_kickoff_with_pass import OffenseKickOffWithPass
 from ai.STA.Strategy.prepare_shootout_defense import PrepareShootoutDefense
 from ai.STA.Strategy.prepare_shootout_offense import PrepareShootoutOffense
 from ai.STA.Strategy.shootout_defense import ShootoutDefense
@@ -71,6 +72,7 @@ class StrategyBook:
                          PreparePenaltyDefense,
                          PreparePenaltyOffense,
                          OffenseKickOff,
+                         OffenseKickOffWithPass,
                          DefenseWallNoKick,
                          BallPlacement,
                          TestGoalKeeper,
