@@ -120,18 +120,19 @@ class GoalKeeper(Tactic):
             return self.next_state()
 
         # Move the ball to outside of the penality zone
-        if self.go_kick_tactic is None:
-            self.go_kick_tactic = GoKick(self.game_state,
-                                         self.player,
-                                         auto_update_target=True,
-                                         go_behind_distance=1.2 * GRAB_BALL_SPACING,
-                                         forbidden_areas=self.forbidden_areas)  # make it easier
+        # if self.go_kick_tactic is None:
+        #     self.go_kick_tactic = GoKick(self.game_state,
+        #                                  self.player,
+        #                                  auto_update_target=True,
+        #                                  go_behind_distance=1.2 * GRAB_BALL_SPACING,
+        #                                  forbidden_areas=self.forbidden_areas)  # make it easier
         if not self._is_ball_safe_to_kick():
             self.next_state = self.defense
-            self.go_kick_tactic = None
-            return Idle
-        else:
-            return self.go_kick_tactic.exec()
+        #     self.go_kick_tactic = None
+        #     return Idle
+        # else:
+        #     return self.go_kick_tactic.exec()
+        return Idle
 
     def move_out_from_behind_goal(self):
         if not self._goalkeeper_stuck_behind_goal():
