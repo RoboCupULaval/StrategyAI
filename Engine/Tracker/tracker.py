@@ -35,6 +35,8 @@ class Tracker:
         self.neg_side = True if config['COACH']['on_negative_side'] else False
         self.our_color = config['COACH']['our_color']
 
+        self.last_warning_time = None
+
     def update(self) -> Dict[str, List[Dict[str, Any]]]:
 
         for frame in self.camera_frames:
@@ -66,8 +68,10 @@ class Tracker:
             if closest_ball:
                 closest_ball.update(obs, detection_frame['t_capture'])
             else:
-                self.logger.debug('The tracker is not able to assign some observations to a ball. '
-                                  'Try to increase the maximal number of ball on the field or recalibrate the vision.')
+                if self.last_warning_time is None or time() - self.last_warning_time > 5:
+                    self.last_warning_time = time()
+                    self.logger.debug('The tracker is not able to assign some observations to a ball. '
+                                      'Try to increase the maximal number of ball on the field or recalibrate the vision.')
 
     def predict(self, robot_state: RobotState, dt: float):
 

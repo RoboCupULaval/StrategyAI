@@ -68,7 +68,7 @@ class GoKick3Way(Tactic):
         self.when_targeting_ball = None
         self.when_targeting_goalkeeper = None
 
-        self.enable_log_state = False
+        self.enable_log_state = True
 
     def initialize(self):
         if self.auto_update_target:
@@ -88,7 +88,7 @@ class GoKick3Way(Tactic):
                 self.next_state = self.intercept
             else:
                 self.next_state = self.go_behind_ball
-        elif self.is_able_to_grab_ball_directly(m.cos(np.deg2rad(10))) and self._get_distance_from_ball() < KICK_DISTANCE:
+        elif self.is_able_to_grab_ball_directly(m.cos(np.deg2rad(7))) and self._get_distance_from_ball() < KICK_DISTANCE:
             self.next_state = self.kick
         else:
             self.next_state = self.go_behind_ball
@@ -458,11 +458,11 @@ class GoKick3Way(Tactic):
         return where_ball_leaves_field
 
 
-    # def debug_cmd(self):
-    #     if self.when_kicking_target is None or self.when_targeting_ball is None:
-    #         return []
-    #     cmd = [DebugCommandFactory.line(self.when_targeting_target, self.when_targeting_ball, color=CYAN, timeout=10),
-    #            DebugCommandFactory.line(self.when_kicking_target, self.when_kicking_ball, timeout=10)]
-    #     if self.when_targeting_goalkeeper is not None:
-    #         cmd.append(DebugCommandFactory.circle(self.when_targeting_goalkeeper, ROBOT_RADIUS, timeout=10))
-    #     return cmd
+    def debug_cmd(self):
+        if self.when_kicking_target is None or self.when_targeting_ball is None:
+            return []
+        cmd = [DebugCommandFactory.line(self.when_targeting_target, self.when_targeting_ball, color=CYAN, timeout=10),
+               DebugCommandFactory.line(self.when_kicking_target, self.when_kicking_ball, timeout=10)]
+        if self.when_targeting_goalkeeper is not None:
+            cmd.append(DebugCommandFactory.circle(self.when_targeting_goalkeeper, ROBOT_RADIUS, timeout=10))
+        return cmd
