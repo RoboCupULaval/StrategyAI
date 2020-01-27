@@ -101,7 +101,6 @@ class GoKick(Tactic):
                 self.next_state = self.go_behind_ball
         position_behind_ball = self.get_destination_behind_ball(effective_ball_spacing)
 
-
         if angle_behind > 70 and dist_from_ball < 1000:
             cruise_speed = 1 + ball_speed / 1000
         else:
@@ -246,6 +245,7 @@ class GoKick(Tactic):
         return position_behind
 
     def get_alignment_with_ball_and_target(self):
+        # FIXME This normalize can raise a division by 0
         vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
         alignement_behind = np.dot(vec_target_to_ball.array,
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
