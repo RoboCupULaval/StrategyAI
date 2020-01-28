@@ -9,7 +9,7 @@ install:
     - pip install -r travis/requirements.txt
 
 # Enable the latter options for a super clean project: linting
-script: "pytest tests -v --cov . --cov-report term-missing
+script: "pytest tests -v --cov . --cov-report term-missing"
 
 env:
     - PYTHONPATH=.
