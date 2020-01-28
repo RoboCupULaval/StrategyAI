@@ -4,7 +4,7 @@ from enum import IntEnum
 from Util.constant import IN_PLAY_MIN_DISTANCE
 from ai.Algorithm.IntelligentModule import IntelligentModule
 from ai.Algorithm.evaluation_module import *
-from ai.GameDomainObjects.referee_state import RefereeCommand, RefereeState
+from ai.GameDomainObjects.referee_state import RefereeCommand, RefereeState, Stage
 from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 
@@ -70,6 +70,11 @@ class SimpleAutoPlayState(IntEnum):
     INDIRECT_FREE_DEFENSE = 20
     NOT_ENOUGH_PLAYER = 21
 
+    PREPARE_SHOOTOUT_OFFENSE = 22
+    PREPARE_SHOOTOUT_DEFENSE = 23
+    OFFENSE_SHOOTOUT = 24
+    DEFENSE_SHOOTOUT = 25
+
 
 def our_player_is_closest():
     our_closest_players = closest_players_to_point(GameState().ball_position, our_team=True)
@@ -86,7 +91,6 @@ def no_enemy_around_ball():
     SAFE_DISTANCE = 1000
     their_closest_players = closest_players_to_point(GameState().ball_position, our_team=False)
     return len(their_closest_players) == 0 or their_closest_players[0].distance > SAFE_DISTANCE
-
 
 
 class SimpleAutoPlay(AutoPlay):
@@ -109,6 +113,9 @@ class SimpleAutoPlay(AutoPlay):
 
     KICKOFF_STATE = [SimpleAutoPlayState.OFFENSE_KICKOFF,
                      SimpleAutoPlayState.DEFENSE_KICKOFF]
+
+    SHOOTOUT_STATE = [SimpleAutoPlayState.DEFENSE_SHOOTOUT,
+                      SimpleAutoPlayState.OFFENSE_SHOOTOUT]
 
     ENABLE_DOUBLE_TOUCH_DETECTOR_STATE = [RefereeCommand.DIRECT_FREE_US,
                                           RefereeCommand.INDIRECT_FREE_US,
@@ -145,19 +152,25 @@ class SimpleAutoPlay(AutoPlay):
     def str(self):
         pass
 
+    def _minimum_nb_player(self, ref_state):
+        # In a penalty shootout all robot are removed except one for each team
+        if ref_state.stage == Stage.PENALTY_SHOOTOUT:
+            return 1
+        return self.MINIMUM_NB_PLAYER
+
     def _select_next_state(self, ref_state: RefereeState):
 
         # During the game
         next_state = self._exec_state()
 
         nb_player = len(GameState().our_team.available_players)
-        if nb_player < self.MINIMUM_NB_PLAYER and ref_state.command != RefereeCommand.HALT:
+        if nb_player < self._minimum_nb_player(ref_state) and ref_state.command != RefereeCommand.HALT:
             if self.prev_nb_player is None or nb_player != self.prev_nb_player:
                 self.logger.warning("Not enough player to play. We have {} players and the minimum is {} "
-                                    .format(nb_player, self.MINIMUM_NB_PLAYER))
+                                    .format(nb_player, self._minimum_nb_player(ref_state)))
             next_state = SimpleAutoPlayState.NOT_ENOUGH_PLAYER
         # Number of player change or On command change
-        elif (self.prev_nb_player is not None and self.prev_nb_player < self.MINIMUM_NB_PLAYER <= nb_player) \
+        elif (self.prev_nb_player is not None and self.prev_nb_player < self._minimum_nb_player(ref_state) <= nb_player) \
                 or self.last_ref_state != ref_state.command:
             self.logger.info("Received referee state {}".format(ref_state.command.name))
 
@@ -189,6 +202,12 @@ class SimpleAutoPlay(AutoPlay):
             SimpleAutoPlayState.PREPARE_KICKOFF_DEFENSE: 'PrepareKickOffDefense',
             SimpleAutoPlayState.OFFENSE_KICKOFF: 'OffenseKickOff',
             SimpleAutoPlayState.DEFENSE_KICKOFF: 'PrepareKickOffDefense',
+
+            # Shootout
+            SimpleAutoPlayState.PREPARE_SHOOTOUT_OFFENSE: 'PrepareShootoutOffense',
+            SimpleAutoPlayState.PREPARE_SHOOTOUT_DEFENSE: 'PrepareShootoutDefense',
+            SimpleAutoPlayState.OFFENSE_SHOOTOUT: 'ShootoutOffense',
+            SimpleAutoPlayState.DEFENSE_SHOOTOUT: 'ShootoutDefense',
 
             # Penalty
             SimpleAutoPlayState.PREPARE_PENALTY_OFFENSE: 'PreparePenaltyOffense',
@@ -227,6 +246,7 @@ class SimpleAutoPlay(AutoPlay):
 
             RefereeCommand.FORCE_START: self._decide_between_normal_play(),
             RefereeCommand.NORMAL_START: self._normal_start(),
+            RefereeCommand.NORMAL_START_SHOOTOUT: self._normal_start_shootout(),
 
             RefereeCommand.TIMEOUT_THEM: SimpleAutoPlayState.TIMEOUT,
             RefereeCommand.TIMEOUT_US: SimpleAutoPlayState.TIMEOUT,
@@ -243,6 +263,9 @@ class SimpleAutoPlay(AutoPlay):
 
             RefereeCommand.BALL_PLACEMENT_THEM: SimpleAutoPlayState.STOP,
             RefereeCommand.BALL_PLACEMENT_US: SimpleAutoPlayState.BALL_PLACEMENT_US,
+
+            RefereeCommand.PREPARE_SHOOTOUT_THEM: SimpleAutoPlayState.PREPARE_SHOOTOUT_DEFENSE,
+            RefereeCommand.PREPARE_SHOOTOUT_US: SimpleAutoPlayState.PREPARE_SHOOTOUT_OFFENSE
 
         }.get(ref_cmd, SimpleAutoPlayState.HALT)
 
@@ -272,10 +295,15 @@ class SimpleAutoPlay(AutoPlay):
             return self._decide_between_normal_play()
         elif self.current_state in self.PENALTY_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()
-        elif self.current_state in self.FREE_KICK_STATE and self._is_ball_in_play() and \
-                not GameState().double_touch_checker.is_enabled():
+        elif self.current_state in self.FREE_KICK_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()
         elif self.current_state in self.KICKOFF_STATE and self._is_ball_in_play():
             return self._decide_between_normal_play()
 
         return self.current_state
+
+    def _normal_start_shootout(self):
+        return {
+            RefereeCommand.PREPARE_SHOOTOUT_THEM: SimpleAutoPlayState.DEFENSE_SHOOTOUT,
+            RefereeCommand.PREPARE_SHOOTOUT_US: SimpleAutoPlayState.OFFENSE_SHOOTOUT,
+        }.get(self.last_ref_state, SimpleAutoPlayState.PREPARE_SHOOTOUT_DEFENSE)

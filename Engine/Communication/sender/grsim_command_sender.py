@@ -5,6 +5,8 @@ from Engine.Communication.sender.sender_base_class import Sender
 from Engine.Communication.sender.udp_socket import udp_socket
 
 from Util.constant import KickForce, DribbleState
+from Util.geometry import clamp
+from config.config import Config
 
 __author__ = "Maxime Gagnon-Legault"
 
@@ -32,7 +34,12 @@ class GrSimCommandSender(Sender):
             grsim_command.velnormal = packet.command.y/1000
             grsim_command.velangular = packet.command.orientation
             grsim_command.spinner = packet.dribbler_state != DribbleState.FORCE_STOP
-            grsim_command.kickspeedx = self.translate_kick_force(packet.kick_force)
+
+            if grsim_command.id in Config()["COACH"]["working_kicker_ids"]:
+                grsim_command.kickspeedx = self.translate_kick_force(packet.kick_force)
+            else:
+                grsim_command.kickspeedx = 0
+
             grsim_command.kickspeedz = 0
 
         active_robot_id = {packet.robot_id for packet in packets_frame.packet}
@@ -52,10 +59,13 @@ class GrSimCommandSender(Sender):
         return grsim_packet
 
     @staticmethod
-    def translate_kick_force(kick_force: KickForce) -> int:
-        kick_translation = {KickForce.NONE: 0,
-                            KickForce.LOW: 2,
-                            KickForce.MEDIUM: 4,
-                            KickForce.HIGH: 5}
-        return kick_translation[kick_force]
+    def translate_kick_force(kick_force: [KickForce, float]) -> int:
+        if isinstance(kick_force, float):
+            return int(clamp(1.5*kick_force, 0.5, 7))
+        elif isinstance(kick_force, KickForce):
+            kick_translation = {KickForce.NONE: 0,
+                                KickForce.LOW: 2,
+                                KickForce.MEDIUM: 4,
+                                KickForce.HIGH: 5}
+            return kick_translation[kick_force]
 

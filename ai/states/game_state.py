@@ -4,13 +4,12 @@ import logging
 from multiprocessing.managers import DictProxy
 
 from Util import Position
-from Util.constant import TeamColor
+from Util.constant import TeamColor, FieldSide
 from Util.role_mapper import RoleMapper
 from Util.singleton import Singleton
 from Util.team_color_service import TeamColorService
 from ai.Algorithm.evaluators.double_touch_detector import DoubleTouchDetector
 from ai.GameDomainObjects import Ball, Team, Field
-from ai.GameDomainObjects.field import FieldSide
 
 
 class GameState(metaclass=Singleton):
@@ -58,10 +57,14 @@ class GameState(metaclass=Singleton):
 
     def map_players_for_strategy(self, strategy_class):
         goalie_id = self.last_ref_state.team_info['ours']['goalie'] if self.last_ref_state is not None else None
-        self._role_mapper.map_with_rules(self.our_team.available_players,
-                                         strategy_class.required_roles(),
-                                         strategy_class.optional_roles(),
-                                         goalie_id)
+        try:
+            self._role_mapper.map_with_rules(self.our_team.available_players,
+                                             strategy_class.required_roles(),
+                                             strategy_class.optional_roles(),
+                                             goalie_id)
+        except:
+            self.logger.info(f"Exception raised during mapping of players in strategy {strategy_class}")
+            raise
 
     def get_player_by_role(self, role):
         return self._role_mapper.roles_translation[role]
@@ -101,7 +104,6 @@ class GameState(metaclass=Singleton):
         # Note: The AI is independent from which side it is play on,
         # the engine handle the mirroring of everything
         return FieldSide.POSITIVE
-        # return FieldSide.NEGATIVE if Config()['COACH']['on_negative_side'] else FieldSide.POSITIVE
 
     @property
     def ban_players(self):

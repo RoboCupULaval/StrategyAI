@@ -61,7 +61,7 @@ class RobotFilter(KalmanFilter):
     def process_covariance(self, dt):
         sacc_x = 400 ** 2  # sigma_acc_x
         sacc_y = 400 ** 2  # sigma_acc_y
-        sacc_o = (200 * np.pi/180) ** 2  # sigma_acc_o
+        sacc_o = (400 * np.pi/180) ** 2  # sigma_acc_o
         process_covariance = \
             np.array([
                 [0.25 * dt ** 4 * sacc_x, 0.50 * dt ** 3 * sacc_x,                       0,                       0,                       0,                       0],

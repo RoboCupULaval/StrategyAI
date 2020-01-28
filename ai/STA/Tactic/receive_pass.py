@@ -81,8 +81,10 @@ class ReceivePass(Tactic):
         return CmdBuilder().addMoveTo(Pose(away_position, orientation),
                                       cruise_speed=3,
                                       end_speed=0,
-                                      ball_collision=True)\
+                                      ball_collision=True) \
                            .addChargeKicker().build()
+                           # .addForceDribbler() \
+
 
     def _must_change_state(self, ball: Ball):
         if self.game_state.field.is_outside_field_limit(ball.position):

@@ -54,7 +54,7 @@ class DefenseWall(Strategy):
                                                                             player,
                                                                             robots_in_formation=self.attackers,
                                                                             auto_position=True))
-                node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=their_goal))
+                node_go_kick = self.create_node(role, GoKick3Way(self.game_state, player, auto_update_target=True)) # target=their_goal
                 node_wait_for_pass = self.create_node(role, ReceivePass(self.game_state, player))
 
                 attacker_should_go_kick = partial(self.should_go_kick, player)
@@ -85,7 +85,7 @@ class DefenseWall(Strategy):
                                                                             robots_in_formation=self.robots_in_cover_formation,
                                                                             auto_position=True))
 
-                node_go_kick = self.create_node(role, GoKick(self.game_state, player, target=their_goal))
+                node_go_kick = self.create_node(role, GoKick3Way(self.game_state, player, target=their_goal, auto_update_target=True))
                 node_wait_for_pass = self.create_node(role, ReceivePass(self.game_state, player))
 
                 player_is_receiving_pass = partial(ball_going_toward_player, game_state, player)
@@ -125,6 +125,8 @@ class DefenseWall(Strategy):
                 node_position_pass.connect_to(node_align_to_defense_wall, when=self.game_state.field.is_ball_outside_our_goal_area)
 
                 node_wait_for_pass.connect_to(node_go_kick, when=player_has_received_ball)
+                node_wait_for_pass.connect_to(node_position_pass, when=self.game_state.field.is_ball_in_our_goal_area)
+                node_go_kick.connect_to(node_position_pass, when=self.game_state.field.is_ball_in_our_goal_area)
                 node_go_kick.connect_to(node_align_to_defense_wall, when=player_has_kicked)
                 node_position_pass.connect_to(node_wait_for_pass, when=player_is_receiving_pass)
                 # node_position_pass.connect_to(node_align_to_defense_wall, when=player_is_not_receiving_pass)

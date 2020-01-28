@@ -16,8 +16,9 @@ from ai.STA.Tactic.goalkeeper import GoalKeeper
 from ai.STA.Tactic.position_for_pass import PositionForPass
 from ai.STA.Tactic.receive_pass import ReceivePass
 from ai.STA.Tactic.tactic_constants import Flags
+from config.config import Config
 
-TIME_TO_GET_IN_POSITION = 5
+TIME_TO_GET_IN_POSITION = 2
 
 
 # noinspection PyMethodMayBeStatic,PyMethodMayBeStatic
@@ -29,10 +30,14 @@ class GraphlessFreeKick(GraphlessStrategy):
         self.robots_in_formation = [p for r, p in self.assigned_roles.items() if r != Role.GOALKEEPER]
 
         self.forbidden_areas = [self.game_state.field.free_kick_avoid_area,
-                           self.game_state.field.our_goal_forbidden_area]
+                                self.game_state.field.our_goal_forbidden_area]
 
         initial_position_for_pass_center = {}
+        working_kicker_roles = []
         for role, player in self.assigned_roles.items():
+            if player.id in Config()["COACH"]["working_kicker_ids"]:
+                working_kicker_roles.append(role)
+
             if role == Role.GOALKEEPER:
                 self.roles_to_tactics[role] = GoalKeeper(self.game_state, player)
             else:
@@ -49,9 +54,9 @@ class GraphlessFreeKick(GraphlessStrategy):
         self.closest_role = None
         ball_position = self.game_state.ball_position
         for r, position in initial_position_for_pass_center.items():
-            if self.closest_role is None \
-                or (initial_position_for_pass_center[self.closest_role] -
-                    ball_position).norm > (position - ball_position).norm:
+            if self.closest_role is None or (
+                    (initial_position_for_pass_center[self.closest_role] - ball_position).norm > (position - ball_position).norm and
+                     r in working_kicker_roles):
                 self.closest_role = r
 
         self.ball_start_position = self.game_state.ball.position

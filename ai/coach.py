@@ -11,7 +11,9 @@ from ai.states.game_state import GameState
 from ai.states.play_state import PlayState
 
 from config.config import Config
+
 config = Config()
+
 
 class Coach(FrameworkProcess):
 
@@ -41,6 +43,7 @@ class Coach(FrameworkProcess):
                                             self.play_executor,
                                             self.ui_send_queue,
                                             self.ui_recv_queue)
+        self.engine_queue_full_timeout = None
 
     def wait_until_ready(self):
 
@@ -59,7 +62,6 @@ class Coach(FrameworkProcess):
                 self.fps_sleep()
             self.logger.debug('Referee command detected')
 
-
     def main_loop(self):
         self.game_state.update(self.engine_game_state)
         self.debug_executor.exec()
@@ -67,4 +69,11 @@ class Coach(FrameworkProcess):
         try:
             self.ai_queue.put_nowait(engine_commands)
         except Full:
+            if self.engine_queue_full_timeout is None:
+                self.engine_queue_full_timeout = time()
+            if time() - self.engine_queue_full_timeout > 5:
+                self.logger.critical('The Engine\'s queue was full for too long, the ai will crash.')
+                raise
             self.logger.critical('The Engine\'s queue is full.')
+            return
+        self.engine_queue_full_timeout = None

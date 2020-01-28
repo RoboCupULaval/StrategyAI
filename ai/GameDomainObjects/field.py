@@ -4,15 +4,10 @@ from enum import Enum
 from typing import Dict, Union
 
 from Util import Position, Pose
-from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL, INDIRECT_KICK_OFFSET, ROBOT_RADIUS
+from Util.constant import KEEPOUT_DISTANCE_FROM_GOAL, INDIRECT_KICK_OFFSET, ROBOT_RADIUS, PADDING_DEFENSE_AREA
 from Util.geometry import Line
 from Util.area import Area, ForbiddenZone
 from ai.GameDomainObjects import Ball
-
-
-class FieldSide(Enum):
-    POSITIVE = 0
-    NEGATIVE = 1
 
 
 # noinspection PyPep8
@@ -196,7 +191,8 @@ class Field:
         self.free_kick_avoid_area = Area.pad(self.their_goal_area,
                                              INDIRECT_KICK_OFFSET + KEEPOUT_DISTANCE_FROM_GOAL)
         self.our_goal_forbidden_area = ForbiddenZone.pad(self.our_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
-        self.their_goal_forbidden_area = ForbiddenZone.pad(self.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL)
+        # Fix Sydney: The autoref is a bit capricious, so I added 3 cm to the defense area
+        self.their_goal_forbidden_area = ForbiddenZone.pad(self.their_goal_area, KEEPOUT_DISTANCE_FROM_GOAL + PADDING_DEFENSE_AREA)
 
         self.center = Position(0, 0)
 

@@ -5,6 +5,7 @@ import logging
 
 from Util.role import Role
 from ai.GameDomainObjects import Player
+from config.config import Config
 
 
 class NoRoleAvailable(RuntimeError):
@@ -14,6 +15,15 @@ class NoRoleAvailable(RuntimeError):
 class RoleMapper(object):
 
     LOCKED_ROLES = []
+
+    # Priority order of assignment for robots with nonfunctional kicker
+    BUMPING_ROBOTS_ROLE_ORDER = [
+        Role.SECOND_DEFENCE,
+        Role.FIRST_DEFENCE,
+        Role.MIDDLE,
+        Role.SECOND_ATTACK,
+        Role.FIRST_ATTACK
+    ]
 
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -82,25 +92,54 @@ class RoleMapper(object):
         assert nbr_unique_role == nbr_role, "The same role can not be in the required rules and the optional rules"
 
         prev_assign = self.roles_translation
-        remaining_player = list(available_players.values())
+        remaining_players = list(available_players.values())
 
-        goal_assign = self._map_goalie_with_ref(remaining_player, required_roles, prev_assign, goalie_id)
+        goal_assign = self._map_goalie_with_ref(remaining_players, required_roles, prev_assign, goalie_id)
         remaining_required_roles = [r for r in required_roles if r not in goal_assign]
-        remaining_player = [p for p in remaining_player if p not in goal_assign.values()]
+        remaining_players = [p for p in remaining_players if p not in goal_assign.values()]
 
-        required_assign = self._keep_prev_mapping_otherwise_random(remaining_player,
+        # Assign robots with nonfunctional kicker
+        nonfunctional_kickers_assign = {}
+        working_kicker_ids = Config()["COACH"]["working_kicker_ids"]
+        self.logger.debug(f"Working kickers : {working_kicker_ids}")
+        remaining_functional_kickers = [p for p in remaining_players if p.id in working_kicker_ids]
+        remaining_nonfunctional_kickers = [p for p in remaining_players if p not in remaining_functional_kickers]
+
+        nb_nonfunctional_kickers_to_assign = len(remaining_required_roles) - len(remaining_functional_kickers)
+        assert nb_nonfunctional_kickers_to_assign <= len(remaining_nonfunctional_kickers), \
+            "Not enough player left ({} players) to assign theses roles {}".format(len(remaining_nonfunctional_kickers),
+                                                                                   remaining_required_roles)
+
+        if nb_nonfunctional_kickers_to_assign > 0:
+            role_to_assign_to_nonfunctional_in_order_of_priority = [r for r in self.BUMPING_ROBOTS_ROLE_ORDER if r in remaining_required_roles]
+            role_to_assign_to_nonfunctional_in_order_of_priority = role_to_assign_to_nonfunctional_in_order_of_priority[:nb_nonfunctional_kickers_to_assign]
+            for player, role in zip(remaining_nonfunctional_kickers, role_to_assign_to_nonfunctional_in_order_of_priority):
+                nonfunctional_kickers_assign[role] = player
+                remaining_required_roles.remove(role)
+
+        required_assign = self._keep_prev_mapping_otherwise_random(remaining_functional_kickers,
                                                                    remaining_required_roles,
                                                                    prev_assign,
                                                                    is_required_roles=True)
 
-        remaining_player = [p for p in remaining_player if p not in required_assign.values()]
+        remaining_functional_kickers = [p for p in remaining_functional_kickers if p not in required_assign.values()]
 
-        optional_assign = self._keep_prev_mapping_otherwise_random(remaining_player,
+        nb_nonfunctional_kickers_to_assign = len(optional_roles) - len(remaining_functional_kickers)
+        nb_nonfunctional_kickers_to_assign = min(nb_nonfunctional_kickers_to_assign, len(remaining_nonfunctional_kickers))
+        if nb_nonfunctional_kickers_to_assign > 0:
+            role_to_assign_to_nonfunctional_in_order_of_priority = [r for r in self.BUMPING_ROBOTS_ROLE_ORDER if r in optional_roles]
+            role_to_assign_to_nonfunctional_in_order_of_priority = role_to_assign_to_nonfunctional_in_order_of_priority[:nb_nonfunctional_kickers_to_assign]
+            for player, role in zip(remaining_nonfunctional_kickers, role_to_assign_to_nonfunctional_in_order_of_priority):
+                nonfunctional_kickers_assign[role] = player
+                optional_roles.remove(role)
+
+        optional_assign = self._keep_prev_mapping_otherwise_random(remaining_functional_kickers,
                                                                    optional_roles,
                                                                    prev_assign,
                                                                    is_required_roles=False)
 
-        self.roles_translation = {**goal_assign, **required_assign, **optional_assign}
+        self.roles_translation = {**goal_assign, **required_assign, **optional_assign, **nonfunctional_kickers_assign}
+        self.logger.debug(f"roles translation : {self.roles_translation}")
         return self.roles_translation
 
     def _keep_prev_mapping_otherwise_random(self, remaining_players, roles, prev_assign, is_required_roles):

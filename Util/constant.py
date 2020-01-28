@@ -22,6 +22,7 @@ REASONABLE_OFFSET = 50  # To take into account the camera precision and other th
 # Rules
 KEEPOUT_DISTANCE_FROM_BALL = 500 + ROBOT_RADIUS + REASONABLE_OFFSET
 KEEPOUT_DISTANCE_FROM_GOAL = ROBOT_RADIUS + REASONABLE_OFFSET
+PADDING_DEFENSE_AREA = 100
 
 # Rule 5.2: Minimum movement before a ball is "in play"
 IN_PLAY_MIN_DISTANCE = 50
@@ -44,7 +45,12 @@ class TeamColor(Enum):
     YELLOW = 0
     BLUE = 1
 
-    
+
+class FieldSide(Enum):
+    POSITIVE = 0
+    NEGATIVE = 1
+
+
 class KickForce(Enum):
     NONE = 0
     LOW = 1
@@ -52,13 +58,9 @@ class KickForce(Enum):
     HIGH = 3
 
     @classmethod
-    def for_dist(cls, dist):
-        if dist < 2000:
-            return KickForce.LOW
-        elif dist < 5000:
-            return KickForce.MEDIUM
-        else:
-            return KickForce.HIGH
+    def for_dist(cls, dist, seconds_to_reach=1.0):
+        speed = (dist / 1000) / seconds_to_reach
+        return speed
 
 
 class KickType(Enum):

@@ -15,6 +15,7 @@ from ai.GameDomainObjects import Player
 from ai.STA.Tactic.tactic import Tactic
 from ai.STA.Tactic.tactic_constants import Flags
 from ai.states.game_state import GameState
+from config.config import Config
 
 VALIDATE_KICK_DELAY = 0.5
 TARGET_ASSIGNATION_DELAY = 1.0
@@ -25,7 +26,7 @@ MIN_NB_CONSECUTIVE_DECISIONS_TO_SWITCH_FROM_PASS = 5
 GO_BEHIND_SPACING = 180
 GRAB_BALL_SPACING = 90
 APPROACH_SPEED = 100
-KICK_DISTANCE = 90
+KICK_DISTANCE = 130
 KICK_SUCCEED_THRESHOLD = 300
 COMMAND_DELAY = 0.5
 
@@ -100,7 +101,6 @@ class GoKick(Tactic):
                 self.next_state = self.go_behind_ball
         position_behind_ball = self.get_destination_behind_ball(effective_ball_spacing)
 
-
         if angle_behind > 70 and dist_from_ball < 1000:
             cruise_speed = 1 + ball_speed / 1000
         else:
@@ -141,10 +141,9 @@ class GoKick(Tactic):
         player_to_target = (self.target.position - self.player.pose.position)
         position_behind_ball = self.game_state.ball_position + normalize(player_to_target) * ROBOT_CENTER_TO_KICKER
         required_orientation = (self.target.position - self.game_state.ball_position).angle
-        a = False  # en attente du flag pour savoir si le player peut kick ou pas
-        if a:
+        if self.player.id not in Config()["COACH"]["working_kicker_ids"]:
             player_to_ball = normalize(self.game_state.ball_position - self.player.pose.position)
-            ram_position = Pose(player_to_ball*100+self.game_state.ball_position, orientation)
+            ram_position = Pose(player_to_ball*100+self.game_state.ball_position, required_orientation)
             return CmdBuilder().addMoveTo(ram_position,
                                           ball_collision=False,
                                           cruise_speed=3,
@@ -246,6 +245,7 @@ class GoKick(Tactic):
         return position_behind
 
     def get_alignment_with_ball_and_target(self):
+        # FIXME This normalize can raise a division by 0
         vec_target_to_ball = normalize(self.game_state.ball.position - self.target.position)
         alignement_behind = np.dot(vec_target_to_ball.array,
                                    (normalize(self.player.position - self.game_state.ball_position)).array)
